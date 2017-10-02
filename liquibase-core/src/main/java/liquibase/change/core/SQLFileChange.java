@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import liquibase.change.*;
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
@@ -11,6 +11,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -22,13 +25,21 @@ import liquibase.util.StringUtils;
  * file will likely not be found.
  */
 @DatabaseChange(name = "sqlFile",
-        description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a file. It is useful for complex changes that are not supported through LiquiBase's automated refactoring tags such as stored procedures.\n" +
+        description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a " +
+            "file. It is useful for complex changes that are not supported through Liquibase's automated refactoring " +
+          "tags such as stored procedures.\n" +
                 "\n" +
                 "The sqlFile refactoring finds the file by searching in the following order:\n" +
                 "\n" +
-                "The file is searched for in the classpath. This can be manually set and by default the liquibase startup script adds the current directory when run.\n" +
-                "The file is searched for using the file attribute as a file name. This allows absolute paths to be used or relative paths to the working directory to be used.\n" +
-                "The 'sqlFile' tag can also support multiline statements in the same file. Statements can either be split using a ; at the end of the last line of the SQL or a go on its own on the line between the statements can be used.Multiline SQL statements are also supported and only a ; or go statement will finish a statement, a new line is not enough. Files containing a single statement do not need to use a ; or go.\n" +
+            "The file is searched for in the classpath. This can be manually set and by default the Liquibase " +
+                "startup script adds the current directory when run.\n" +
+                "The file is searched for using the file attribute as a file name. This allows absolute paths to be " +
+                "used or relative paths to the working directory to be used.\n" +
+                "The 'sqlFile' tag can also support multiline statements in the same file. Statements can either be " +
+                "split using a ; at the end of the last line of the SQL or a go on its own on the line between the " +
+                "statements can be used.Multiline SQL statements are also supported and only a ; or go statement " +
+                "will finish a statement, a new line is not enough. Files containing a single statement do not " +
+                "need to use a ; or go.\n" +
                 "\n" +
                 "The sql file can also contain comments of either of the following formats:\n" +
                 "\n" +
@@ -157,7 +168,7 @@ public class SQLFileChange extends AbstractSQLChange {
 
     @Override
     public void setSql(String sql) {
-        if (getChangeSet() != null && getChangeSet().getChangeLogParameters() != null) {
+        if ((getChangeSet() != null) && (getChangeSet().getChangeLogParameters() != null)) {
             sql = getChangeSet().getChangeLogParameters().expandExpressions(sql, getChangeSet().getChangeLog());
         }
         super.setSql(sql);

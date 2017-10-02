@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ObjectUtil {
 
-    private static Map<Class<?>, Method[]> methodCache = new HashMap<Class<?>, Method[]>();
+    private static Map<Class<?>, Method[]> methodCache = new HashMap<>();
 
     public static Object getProperty(Object object, String propertyName) throws IllegalAccessException, InvocationTargetException {
         Method readMethod = getReadMethod(object, propertyName);
@@ -63,7 +63,7 @@ public class ObjectUtil {
         } else if (parameterType.equals(BigInteger.class)) {
             finalValue = new BigInteger(propertyValue);
         } else if (parameterType.equals(BigDecimal.class)) {
-	        finalValue = new BigDecimal(propertyValue);
+            finalValue = new BigDecimal(propertyValue);
         } else if (parameterType.equals(DatabaseFunction.class)) {
             finalValue = new DatabaseFunction(propertyValue);
         } else if (parameterType.equals(SequenceNextValueFunction.class)) {
@@ -75,12 +75,10 @@ public class ObjectUtil {
         }
         try {
             method.invoke(object, finalValue);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call "+method.toString()+" with value of type "+finalValue.getClass().getName());
-        } catch (InvocationTargetException e) {
-            throw new UnexpectedLiquibaseException(e);
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + finalValue.getClass().getName());
         }
     }
 
@@ -91,18 +89,20 @@ public class ObjectUtil {
         }
 
         try {
+            if (propertyValue == null) {
+                setProperty(object, propertyName, null);
+                return;
+            }
             if (!method.getParameterTypes()[0].isAssignableFrom(propertyValue.getClass())) {
                 setProperty(object, propertyName, propertyValue.toString());
                 return;
             }
 
             method.invoke(object, propertyValue);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call "+method.toString()+" with value of type "+propertyValue.getClass().getName());
-        } catch (InvocationTargetException e) {
-            throw new UnexpectedLiquibaseException(e);
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
         }
     }
 
@@ -113,7 +113,8 @@ public class ObjectUtil {
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
-            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && method.getParameterTypes().length == 0) {
+            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && (method
+                .getParameterTypes().length == 0)) {
                 return method;
             }
         }
@@ -125,7 +126,7 @@ public class ObjectUtil {
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
-            if (method.getName().equals(methodName) && method.getParameterTypes().length == 1) {
+            if (method.getName().equals(methodName) && (method.getParameterTypes().length == 1)) {
                 return method;
             }
         }

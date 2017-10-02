@@ -4,11 +4,13 @@ public class ForeignKeyConstraint implements ColumnConstraint {
     private String foreignKeyName;
     private String column;
     private String references;
+    private String referencedTableCatalogName;
+    private String referencedTableSchemaName;
     private String referencedTableName;
     private String referencedColumnNames;
-    private boolean deleteCascade = false;
-    private boolean initiallyDeferred = false;
-    private boolean deferrable = false;
+    private boolean deleteCascade;
+    private boolean initiallyDeferred;
+    private boolean deferrable;
 
     public ForeignKeyConstraint(String foreignKeyName,String references) {
         this.foreignKeyName = foreignKeyName;
@@ -46,6 +48,22 @@ public class ForeignKeyConstraint implements ColumnConstraint {
 
     public String getReferencedTableName() {
         return referencedTableName;
+    }
+
+    public String getReferencedTableCatalogName() {
+        return referencedTableCatalogName;
+    }
+
+    public void setReferencedTableCatalogName(String referencedTableCatalogName) {
+        this.referencedTableCatalogName = referencedTableCatalogName;
+    }
+
+    public String getReferencedTableSchemaName() {
+        return referencedTableSchemaName;
+    }
+
+    public void setReferencedTableSchemaName(String referencedTableSchemaName) {
+        this.referencedTableSchemaName = referencedTableSchemaName;
     }
 
     public String getReferencedColumnNames() {

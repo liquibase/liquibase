@@ -4,12 +4,13 @@ import liquibase.change.Change;
 import liquibase.change.core.DropColumnChange;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
-public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGenerator {
+public class UnexpectedColumnChangeGenerator extends AbstractChangeGenerator implements UnexpectedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Column.class.isAssignableFrom(objectType)) {
@@ -38,6 +39,10 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
 //        if (!shouldModifyColumn(column)) {
 //            continue;
 //        }
+
+        if ((column.getComputed() != null) && column.getComputed()) { //not really a column to drop, probably part of an index or something
+            return null;
+        }
         if (column.getRelation() instanceof View) {
             return null;
         }

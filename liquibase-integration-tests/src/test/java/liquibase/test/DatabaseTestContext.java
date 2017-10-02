@@ -1,28 +1,32 @@
 package liquibase.test;
 
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DB2Database;
-import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.resource.ResourceAccessor;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
+import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.database.MockDatabase;
 
-import java.util.*;
-import java.sql.SQLException;
-import java.sql.Driver;
 import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.*;
 
 public class DatabaseTestContext {
+    public static final String ALT_CATALOG = "LIQUIBASEC";
+    public static final String ALT_SCHEMA = "LIQUIBASEB";
+    public static final String ALT_TABLESPACE = "LIQUIBASE2";
+    private static final String TEST_DATABASES_PROPERTY = "test.databases";
     private static DatabaseTestContext instance = new DatabaseTestContext();
-    
-    private Set<Database> availableDatabases = new HashSet<Database>();
-    private Set<Database> allDatabases;
-    private Set<DatabaseConnection> availableConnections;
-
     private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
+    /* @todo Extract all remaining connection string examples into liquibase.integrationtest.properties, then delete this code block. */
+    /*
             new DatabaseTestURL("Cache","jdbc:Cache://"+AbstractIntegrationTest.getDatabaseServerHostname("Cache")+":1972/liquibase"),
             new DatabaseTestURL("DB2","jdbc:db2://"+AbstractIntegrationTest.getDatabaseServerHostname("DB2")+":50000/liquibas"),
             new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
@@ -38,24 +42,35 @@ public class DatabaseTestContext {
             new DatabaseTestURL("SAPDB","jdbc:sapdb://"+AbstractIntegrationTest.getDatabaseServerHostname("sapdb")+"/liquibas"),
             new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
             new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
+            */
     };
-
-
+    private Set<Database> availableDatabases = new HashSet<Database>();
+    private Set<Database> allDatabases;
+    private Set<DatabaseConnection> availableConnections;
     private Map<String, DatabaseConnection> connectionsByUrl = new HashMap<String, DatabaseConnection>();
     private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
-    public static final String ALT_CATALOG = "LIQUIBASEC";
-    public static final String ALT_SCHEMA = "LIQUIBASEB";
-    public static final String ALT_TABLESPACE = "LIQUIBASE2";
-    private static final String TEST_DATABASES_PROPERTY = "test.databases";
     private ResourceAccessor resourceAccessor;
 
-    private DatabaseConnection openConnection(final String url) throws Exception {
+    public static DatabaseTestContext getInstance() {
+        return instance;
+    }
+
+    private DatabaseConnection openConnection(final String givenUrl,
+        final String username, final String password) throws Exception {
+        // Insert the temp dir path and ensure our replacement ends with /
+        String tempDir = System.getProperty("java.io.tmpdir");
+        if (!tempDir.endsWith(System.getProperty("file.separator")))
+            tempDir += System.getProperty("file.separator");
+
+        String tempUrl = givenUrl.replace("***TEMPDIR***/", tempDir);
+        final String url = tempUrl;
+
         if (connectionsAttempted.containsKey(url)) {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
             if (connection == null) {
                 return null;
             } else if (connection.getUnderlyingConnection().isClosed()){
-                connectionsByUrl.put(url, openDatabaseConnection(url));
+                connectionsByUrl.put(url, openDatabaseConnection(url, username, password));
             }
             return connectionsByUrl.get(url);
         }
@@ -77,7 +92,7 @@ public class DatabaseTestContext {
             }
         }
 
-        DatabaseConnection connection = openDatabaseConnection(url);
+        DatabaseConnection connection = openDatabaseConnection(url, username,password);
         if (connection == null) {
             return null;
         }
@@ -91,18 +106,22 @@ public class DatabaseTestContext {
 
         try {
             if (url.startsWith("jdbc:hsql")) {
-                ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA");
+                String sql = "CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA";
+                LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             } else if (url.startsWith("jdbc:sqlserver")
                     || url.startsWith("jdbc:postgresql")
                     || url.startsWith("jdbc:h2")) {
-                ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA);
+                String sql = "CREATE SCHEMA " + ALT_SCHEMA;
+                LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             }
             if (!databaseConnection.getAutoCommit()) {
                 databaseConnection.commit();
             }
         } catch (SQLException e) {
 //            e.printStackTrace();
-            ; //schema already exists
+            //schema already exists
         } finally {
             try {
                 databaseConnection.rollback();
@@ -127,7 +146,6 @@ public class DatabaseTestContext {
                             ((JdbcConnection) databaseConnection).getUnderlyingConnection().rollback();
                         }
                     } catch (SQLException e) {
-                        ;
                     }
 
 
@@ -142,10 +160,8 @@ public class DatabaseTestContext {
         return databaseConnection;
     }
 
-    public DatabaseConnection openDatabaseConnection(String url) throws Exception {
-        String username = getUsername(url);
-        String password = getPassword(url);
-
+    public DatabaseConnection openDatabaseConnection(String url,
+        String username, String password) throws Exception {
 
         JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
         final Driver driver;
@@ -178,25 +194,6 @@ public class DatabaseTestContext {
         return new JdbcConnection(connection);
     }
 
-    private String getUsername(String url) {
-        if (url.startsWith("jdbc:hsqldb")) {
-            return "sa";
-        }
-        return "lbuser";
-    }
-
-    private String getPassword(String url) {
-        if (url.startsWith("jdbc:hsqldb")) {
-            return "";
-        }
-        return "lbuser";
-    }
-
-    public static DatabaseTestContext getInstance() {
-        return instance;
-    }
-
-
     public DatabaseTestURL[] getTestUrls() {
         return DEFAULT_TEST_DATABASES;
     }
@@ -209,9 +206,8 @@ public class DatabaseTestContext {
 
             List<Database> toRemove = new ArrayList<Database>();
             for (Database database : allDatabases) {
-                if (database instanceof SQLiteDatabase //todo: re-enable sqlite testing
-                        || database instanceof MockDatabase
-                        || database instanceof ExampleCustomDatabase) {
+                if ((database instanceof SQLiteDatabase) //todo: re-enable sqlite testing
+                    || (database instanceof MockDatabase) || (database instanceof ExampleCustomDatabase)) {
                     toRemove.add(database);
                 }
             }
@@ -221,7 +217,7 @@ public class DatabaseTestContext {
     }
 
     public Set<Database> getAvailableDatabases() throws Exception {
-        if (availableDatabases.size() == 0) {
+        if (availableDatabases.isEmpty()) {
             for (DatabaseConnection conn : getAvailableConnections()) {
                     availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
             }
@@ -246,7 +242,8 @@ public class DatabaseTestContext {
 //                if (url.indexOf("jtds") >= 0) {
 //                    continue;
 //                }
-                DatabaseConnection connection = openConnection(adaptTestURLWithConfiguredHost(url));
+                DatabaseConnection connection = openConnection(url.getUrl(), url.getUsername(), url.getPassword());
+
                 if (connection != null) {
                     availableConnections.add(connection);
                 }
@@ -264,17 +261,13 @@ public class DatabaseTestContext {
         return availableConnections;
     }
 
-    protected String adaptTestURLWithConfiguredHost(DatabaseTestURL url) throws Exception {
-        return url.getUrl().replaceAll("localhost", AbstractIntegrationTest.getDatabaseServerHostname(url.getDatabaseManager()));
-    }
-
-    public DatabaseConnection getConnection(String url) throws Exception {
-        return openConnection(url);
+    public DatabaseConnection getConnection(String url, String username, String password) throws Exception {
+        return openConnection(url, username, password);
     }
 
     public String getTestUrl(Database database) throws Exception {
         for (DatabaseTestURL turl : getTestUrls()) {
-            String url=adaptTestURLWithConfiguredHost(turl);
+            String url=turl.getUrl();
             if (database.getDefaultDriver(url) != null) {
                 return url;
             }

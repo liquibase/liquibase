@@ -1,14 +1,15 @@
 package liquibase.sqlgenerator;
 
-import liquibase.sdk.database.MockDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.core.MockSqlStatement;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import static org.junit.Assert.*;
 
 public class SqlGeneratorChainTest {
 

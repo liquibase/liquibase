@@ -1,7 +1,7 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.PreconditionErrorException;
@@ -9,7 +9,6 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.precondition.Precondition;
 
 /**
  * Precondition for specifying the type of database (oracle, mysql, etc.).
@@ -32,7 +31,11 @@ public class DBMSPrecondition extends AbstractPrecondition {
     }
 
     public void setType(String atype) {
-        this.type = atype.toLowerCase();
+        if (atype == null) {
+            this.type = null;
+        } else {
+            this.type = atype.toLowerCase();
+        }
     }
 
 

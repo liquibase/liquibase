@@ -1,56 +1,57 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 
 @DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateTimeType extends LiquibaseDataType {
 
+    public static final int PRACITCALLY_INFINITE_FRACTIONAL_DIGITS = 99;
+
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-        boolean allowFractional = supportsFractionalDigits(database);
-        if (database instanceof DB2Database
-                || database instanceof DerbyDatabase
-                || database instanceof FirebirdDatabase
-                || database instanceof H2Database
-                || database instanceof HsqlDatabase) {
+        int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
+
+        if ((database instanceof DerbyDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
+            H2Database) || (database instanceof HsqlDatabase)) {
             return new DatabaseDataType("TIMESTAMP");
         }
 
+        if (database instanceof DB2Database) {
+            return new DatabaseDataType("TIMESTAMP", getParameters());
+		}
+
         if (database instanceof OracleDatabase) {
+            if (getRawDefinition().toUpperCase().contains("TIME ZONE")) {
+                return new DatabaseDataType(getRawDefinition().replaceFirst("\\(11\\)$", ""));
+            }
             return new DatabaseDataType("TIMESTAMP", getParameters());
         }
 
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
-            if (originalDefinition.equalsIgnoreCase("smalldatetime")
-                    || originalDefinition.equals("[smalldatetime]")) {
+            if (originalDefinition.toLowerCase().startsWith("smalldatetime")
+                    || originalDefinition.toLowerCase().startsWith("[smalldatetime")) {
 
                 return new DatabaseDataType(database.escapeDataTypeName("smalldatetime"));
-            } else if (originalDefinition.equalsIgnoreCase("datetime2")
-                    || originalDefinition.equals("[datetime2]")
+            } else if ("datetime2".equalsIgnoreCase(originalDefinition)
+                    || "[datetime2]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)datetime2\\s*\\(.+")
                     || originalDefinition.matches("\\[datetime2\\]\\s*\\(.+")) {
-
-                try {
-                    if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
-                        return new DatabaseDataType(database.escapeDataTypeName("datetime"));
-                    }
-                } catch (DatabaseException ignore) { } //assuming it is a newer version
 
                 if (parameters.length == 0) {
                     parameters = new Object[] { 7 };
@@ -64,8 +65,8 @@ public class DateTimeType extends LiquibaseDataType {
         if (database instanceof InformixDatabase) {
 
           // From database to changelog
-          if (getAdditionalInformation() == null || getAdditionalInformation().length() == 0) {
-            if (getParameters() != null && getParameters().length > 0) {
+          if ((getAdditionalInformation() == null) || getAdditionalInformation().isEmpty()) {
+            if ((getParameters() != null) && (getParameters().length > 0)) {
 
               String parameter = String.valueOf(getParameters()[0]);
               
@@ -88,7 +89,7 @@ public class DateTimeType extends LiquibaseDataType {
           }
 
           // From changelog to the database
-          if (getAdditionalInformation() != null && getAdditionalInformation().length() > 0) {
+          if ((getAdditionalInformation() != null) && !getAdditionalInformation().isEmpty()) {
             return new DatabaseDataType(originalDefinition);
           }
 
@@ -98,7 +99,7 @@ public class DateTimeType extends LiquibaseDataType {
             String rawDefinition = originalDefinition.toLowerCase();
             Object[] params = getParameters();
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
-                if (params.length == 0 || !allowFractional) {
+                if (params.length == 0 ) {
                     return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
                 } else {
                     Object param = params[0];
@@ -108,7 +109,7 @@ public class DateTimeType extends LiquibaseDataType {
                     return new DatabaseDataType("TIMESTAMP(" + param + ") WITH TIME ZONE");
                 }
             } else {
-                if (params.length == 0 || !allowFractional) {
+                if (params.length == 0 ) {
                     return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
                 } else {
                     Object param = params[0];
@@ -124,7 +125,7 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof MySQLDatabase) {
-            if (getParameters().length == 0 || !allowFractional) {
+            if ((getParameters().length == 0) || (maxFractionalDigits == 0)) {
                 // fast out...
                 return new DatabaseDataType(getName());
             }
@@ -132,8 +133,8 @@ public class DateTimeType extends LiquibaseDataType {
             Object[] params = getParameters();
             Integer precision = Integer.valueOf(params[0].toString());
             if (precision > 6) {
-                LogFactory.getInstance().getLog().warning(
-                        "MySQL does not support a timestamp precision"
+                LogService.getLog(getClass()).warning(
+                        LogType.LOG, "MySQL does not support a timestamp precision"
                                 + " of '" + precision + "' - resetting to"
                                 + " the maximum of '6'");
                 params = new Object[] {6};
@@ -144,61 +145,9 @@ public class DateTimeType extends LiquibaseDataType {
         return new DatabaseDataType(getName());
     }
 
-    protected boolean supportsFractionalDigits(Database database) {
-        if (database.getConnection() == null) {
-            // if no connection is there we cannot do anything...
-            LogFactory.getInstance().getLog().warning(
-                    "No database connection available - specified"
-                            + " DATETIME/TIMESTAMP precision will be tried");
-            return true;
-        }
-
-        try {
-            String minimumVersion = "0";
-            int major = database.getDatabaseMajorVersion();
-            int minor = database.getDatabaseMinorVersion();
-            int patch = 0;
-
-            if (MySQLDatabase.class.isInstance(database)) {
-                patch = ((MySQLDatabase) database).getDatabasePatchVersion();
-
-                // MySQL 5.6.4 introduced fractional support...
-                minimumVersion = "5.6.4";
-            } else if (PostgresDatabase.class.isInstance(database)) {
-                // PostgreSQL 7.2 introduced fractional support...
-                minimumVersion = "7.2";
-            }
-
-            return isMinimumVersion(minimumVersion, major, minor, patch);
-        } catch (DatabaseException x) {
-            LogFactory.getInstance().getLog().warning(
-                    "Unable to determine exact database server version"
-                            + " - specified TIMESTAMP precision"
-                            + " will not be set: ", x);
-            return false;
-        }
-    }
-
-    protected boolean isMinimumVersion(String minimumVersion, int major, int minor, int patch) {
-        String[] parts = minimumVersion.split("\\.", 3);
-        int minMajor = Integer.valueOf(parts[0]);
-        int minMinor = parts.length > 1 ? Integer.valueOf(parts[1]) : 0;
-        int minPatch = parts.length > 2 ? Integer.valueOf(parts[2]) : 0;
-        
-        if (minMajor > major) {
-            return false;
-        }
-
-        if (minMajor == major && minMinor > minor) {
-            return false;
-        }
-
-        return !(minMajor == major && minMinor == minor && minPatch > patch);
-    }
-
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
@@ -226,8 +175,15 @@ public class DateTimeType extends LiquibaseDataType {
         try {
             DateFormat dateTimeFormat = getDateTimeFormat(database);
 
-            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+', 'YYYY\\-MM\\-DD HH24:MI:SS'\\)")) {
+            if ((database instanceof OracleDatabase) && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+'," +
+                " 'YYYY\\-MM\\-DD HH24:MI:SS'\\)")) {
                 dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:s");
+                value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
+            }
+
+            if ((database instanceof HsqlDatabase) && value.matches("TIMESTAMP'\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+(?:\\" +
+                ".\\d+)?'")) {
+                dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:s.S");
                 value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
             }
 
@@ -243,13 +199,21 @@ public class DateTimeType extends LiquibaseDataType {
                 }
             }
 
+            if (value.contains("/") || value.contains("-")) { //maybe a custom format the database expects. Just return it.
+                return value;
+            }
 
             return new DatabaseFunction(value);
         }
     }
 
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.DATE;
+    }
+
     private boolean zeroTime(String stringVal) {
-        return stringVal.replace("-","").replace(":", "").replace(" ","").replace("0","").equals("");
+        return "".equals(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
     }
 
     protected DateFormat getDateTimeFormat(Database database) {
@@ -265,66 +229,4 @@ public class DateTimeType extends LiquibaseDataType {
         }
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     }
-
-    //oracle
-//    @Override
-//    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
-//        if (defaultValue != null) {
-//            if (defaultValue instanceof String) {
-//                if (dataType == Types.DATE || dataType == Types.TIME || dataType == Types.TIMESTAMP) {
-//                    if (((String) defaultValue).indexOf("YYYY-MM-DD HH") > 0) {
-//                        defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('", "").replaceFirst("', 'YYYY-MM-DD HH24:MI:SS'\\)$", "");
-//                    } else if (((String) defaultValue).indexOf("YYYY-MM-DD") > 0) {
-//                        defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('", "").replaceFirst("', 'YYYY-MM-DD'\\)$", "");
-//                    } else {
-//                        defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('", "").replaceFirst("', 'HH24:MI:SS'\\)$", "");
-//                    }
-//                } else if (
-//                        dataType == Types.BIGINT ||
-//                                dataType == Types.NUMERIC ||
-//                                dataType == Types.BIT ||
-//                                dataType == Types.SMALLINT ||
-//                                dataType == Types.DECIMAL ||
-//                                dataType == Types.INTEGER ||
-//                                dataType == Types.TINYINT ||
-//                                dataType == Types.FLOAT ||
-//                                dataType == Types.REAL
-//                        ) {
-//                    /*
-//                         * if dataType is numeric-type then cut "(" , ")" symbols
-//                         * Cause: Column's default value option may be set by both ways:
-//                         * DEFAULT 0
-//                         * DEFAULT (0)
-//                         * */
-//                    defaultValue = ((String) defaultValue).replaceFirst("\\(", "").replaceFirst("\\)", "");
-//                }
-//                defaultValue = ((String) defaultValue).replaceFirst("'\\s*$", "'"); //sometimes oracle adds an extra space after the trailing ' (see http://sourceforge.net/tracker/index.php?func=detail&aid=1824663&group_id=187970&atid=923443).
-//            }
-//        }
-//        return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
-//    }
-
-
-
-
-
-
-
-    //postgres
-//    @Override
-//    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
-//        if (defaultValue != null) {
-//            if (defaultValue instanceof String) {
-//                defaultValue = ((String) defaultValue).replaceAll("'::[\\w\\s]+$", "'");
-//
-//                if (dataType == Types.DATE || dataType == Types.TIME || dataType == Types.TIMESTAMP) {
-//                    //remove trailing time zone info
-//                    defaultValue = ((String) defaultValue).replaceFirst("-\\d+$", "");
-//                }
-//            }
-//        }
-//        return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
-//
-//    }
-
 }

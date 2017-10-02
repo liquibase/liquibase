@@ -9,13 +9,13 @@ import java.util.*;
 public class ChangeLogSerializerFactory {
     private static ChangeLogSerializerFactory instance;
 
-    private Map<String, List<ChangeLogSerializer>> serializers = new HashMap<String, List<ChangeLogSerializer>>();
+    private Map<String, List<ChangeLogSerializer>> serializers = new HashMap<>();
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new ChangeLogSerializerFactory();
     }
 
-    public static ChangeLogSerializerFactory getInstance() {
+    public static synchronized ChangeLogSerializerFactory getInstance() {
         if (instance == null) {
             instance = new ChangeLogSerializerFactory();
         }
@@ -61,7 +61,7 @@ public class ChangeLogSerializerFactory {
         for (String extension : changeLogSerializer.getValidFileExtensions()) {
             List<ChangeLogSerializer> changeLogSerializers = serializers.get(extension);
             if (changeLogSerializers == null) {
-                changeLogSerializers = new ArrayList<ChangeLogSerializer>();
+                changeLogSerializers = new ArrayList<>();
                 serializers.put(extension, changeLogSerializers);
             }
             changeLogSerializers.add(changeLogSerializer);

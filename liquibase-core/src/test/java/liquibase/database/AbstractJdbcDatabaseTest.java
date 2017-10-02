@@ -1,26 +1,19 @@
 package liquibase.database;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import liquibase.change.core.CreateTableChange;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.executor.MockExecutor;
 import liquibase.sql.visitor.AppendSqlVisitor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
-
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Base test class for database-specific tests
@@ -73,23 +66,23 @@ public abstract class AbstractJdbcDatabaseTest {
         database.getDefaultSchemaName();
         database.getDefaultPort();
     }
-    @Test
-    public void isCorrectDatabaseImplementation() throws Exception {
-        assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));
-    }
+//    @Test
+//    public void isCorrectDatabaseImplementation() throws Exception {
+//        assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));
+//    }
 
-    protected DatabaseConnection getMockConnection() throws Exception {
-        DatabaseConnection conn = createMock(DatabaseConnection.class);
-//        DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
-        conn.setAutoCommit(false);
-
-        expectLastCall().anyTimes();
-//        expect(((JdbcConnection) conn).getUnderlyingConnection().getMetaData()).andReturn(metaData).anyTimes();
-        expect(conn.getDatabaseProductName()).andReturn(getProductNameString()).anyTimes();
-        replay(conn);
-//        replay(metaData);
-        return conn;
-    }
+//    protected DatabaseConnection getMockConnection() throws Exception {
+//        DatabaseConnection conn = createMock(DatabaseConnection.class);
+////        DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
+//        conn.setAutoCommit(false);
+//
+//        expectLastCall().anyTimes();
+////        expect(((JdbcConnection) conn).getUnderlyingConnection().getMetaData()).andReturn(metaData).anyTimes();
+//        expect(conn.getDatabaseProductName()).andReturn(getProductNameString()).anyTimes();
+//        replay(conn);
+////        replay(metaData);
+//        return conn;
+//    }
 
     @Test
     public void escapeTableName_noSchema() {

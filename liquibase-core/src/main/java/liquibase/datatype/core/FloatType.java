@@ -1,13 +1,14 @@
 package liquibase.datatype.core;
 
-import java.util.Arrays;
-
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.util.StringUtils;
+
+import java.util.Arrays;
 
 @DataTypeInfo(name="float", aliases = {"java.sql.Types.FLOAT", "java.lang.Float", "real", "java.sql.Types.REAL"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class FloatType  extends LiquibaseDataType {
@@ -32,28 +33,24 @@ public class FloatType  extends LiquibaseDataType {
             }
             return new DatabaseDataType(database.escapeDataTypeName("float"), parameters);
         }
-        if (database instanceof MySQLDatabase || database instanceof DB2Database) {
-            if (originalDefinition.equalsIgnoreCase("REAL")) {
+        if ((database instanceof MySQLDatabase) || (database instanceof DB2Database) || (database instanceof H2Database)) {
+            if ("REAL".equalsIgnoreCase(originalDefinition)) {
                 return new DatabaseDataType("REAL");
             }
         }
-        if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        if ((database instanceof FirebirdDatabase) || (database instanceof InformixDatabase)) {
             return new DatabaseDataType("FLOAT");
+        } else if (database instanceof PostgresDatabase) {
+            if ("real".equalsIgnoreCase(originalDefinition)) {
+                return new DatabaseDataType("REAL");
+            }
         }
         return super.toDatabaseDataType(database);
     }
 
-    //sqlite
-    //        } else if (columnTypeString.equals("REAL") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("float")) {
-    //            type = new FloatType("REAL");
-
-
-
-    //postgres
-    //        } else if (type.toDatabaseDataType().toLowerCase().startsWith("float8")) {
-//            type.setDataTypeName("FLOAT8");
-//        } else if (type.toDatabaseDataType().toLowerCase().startsWith("float4")) {
-//            type.setDataTypeName("FLOAT4");
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
+    }
 
 }

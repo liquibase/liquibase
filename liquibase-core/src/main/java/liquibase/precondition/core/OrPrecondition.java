@@ -1,7 +1,7 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -37,7 +37,7 @@ public class OrPrecondition extends PreconditionLogic {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         boolean onePassed = false;
-        List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
+        List<FailedPrecondition> failures = new ArrayList<>();
         for (Precondition precondition : getNestedPreconditions()) {
             try {
                 precondition.check(database, changeLog, changeSet);

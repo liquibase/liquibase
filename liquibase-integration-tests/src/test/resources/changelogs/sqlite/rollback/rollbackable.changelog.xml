@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
     <preConditions>
             <dbms type="sqlite"/>
     </preConditions>
 
+    <!-- Modified because dropNotNullConstraint and renameColumn are not supported on SQLite -->
     <changeSet id="1" author="nvoxland">
         <createTable tableName="magazine">
             <column name="id" type="int" autoIncrement="true">
@@ -16,22 +17,27 @@
             <column name="title" type="varchar(50)"/>
         </createTable>
     </changeSet>
+    <!-- Modified because dropNotNullConstraint, renameColumn and dropDefaultValue are not supported on SQLite -->
     <changeSet id="2" author="nvoxland">
         <addColumn tableName="magazine">
-            <column name="sku" type="varchar(50)" defaultValue="N/A">
+            <column name="isbn" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
         <createIndex indexName="idx_magazine_sku" tableName="magazine">
-            <column name="sku"/>
+            <column name="isbn"/>
         </createIndex>
     </changeSet>
+    <!-- not supported on SQLite
     <changeSet id="3" author="nvoxland">
         <dropNotNullConstraint tableName="magazine" columnName="title" columnDataType="varchar(50)"/>
     </changeSet>
+    -->
+    <!-- not supported on SQLite
     <changeSet id="4" author="nvoxland">
         <renameColumn tableName="magazine" oldColumnName="sku" newColumnName="isbn" columnDataType="varchar(50)"/>
     </changeSet>
+    -->
     <changeSet id="5" author="nvoxland">
         <renameTable oldTableName="magazine" newTableName="publication"/>
     </changeSet>
@@ -62,10 +68,11 @@
             <column name="pages" type="int"/>
         </addColumn>
     </changeSet>
+    <!-- not supported on SQLite
     <changeSet id="8" author="nvoxland">
         <addNotNullConstraint tableName="publication" columnName="title" columnDataType="varchar(50)" defaultNullValue="-1"/>
     </changeSet>
-
+     -->
     <changeSet id="9" author="nvoxland">
         <createView viewName="publicationView">
             select title, isbn from publication
@@ -89,6 +96,8 @@
         </createTable>
     </changeSet>
 
+    <!-- not supported on SQLite
+
     <changeSet id="12" author="nvoxland">
         <addForeignKeyConstraint
                 baseTableName="article" baseColumnNames="publication_id"
@@ -97,6 +106,7 @@
                 deleteCascade="true"/>
     </changeSet>
 
+-->
 	<!-- Not supported in SQlite -->
 	<!--
     <changeSet id="13" author="nvoxland">
@@ -107,10 +117,11 @@
     </changeSet>
 	-->
 
+    <!-- Rollback of AddDefaultValue is not supported in SQlite (dropDefaultValue is not supported)
     <changeSet id="14" author="nvoxland">
         <addDefaultValue tableName="publication" columnName="isbn" defaultValue="0000-0000"/>
     </changeSet>
-
+    -->
     <changeSet id="15" author="nvoxland">
         <createTable tableName="page">
             <column name="id" type="int">
@@ -120,15 +131,18 @@
             <column name="magazine_id" type="int"/>
         </createTable>
     </changeSet>
+    <!-- not supported on SQLite
 
     <changeSet id="16" author="nvoxland">
         <addPrimaryKey tableName="page" columnNames="id" constraintName="pk_page"/>
     </changeSet>
+-->
+    <!-- not supported on SQLite
 
     <changeSet id="17" author="nvoxland">
         <addUniqueConstraint tableName="publication" columnNames="title" constraintName="uq_publication_title"/>
     </changeSet>
-
+-->
     <changeSet id="20" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="page" columnName="magazine_id" newValue="4"/>
     </changeSet>

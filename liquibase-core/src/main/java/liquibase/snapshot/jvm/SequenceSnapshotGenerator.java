@@ -3,24 +3,25 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotIdService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Snapshot generator for a SEQUENCE object in a JDBC-accessible database
+ */
 public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public SequenceSnapshotGenerator() {
@@ -69,7 +70,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
         for (Map<String, ?> sequenceRow : sequences) {
             String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
-            if ((database.isCaseSensitive() && name.equals(example.getName()) || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {
+            if (((database.isCaseSensitive() && name.equals(example.getName())) || (!database.isCaseSensitive() &&
+                name.equalsIgnoreCase(example.getName())))) {
                 return mapToSequence(sequenceRow, example.getSchema(), database);
             }
         }
@@ -105,11 +107,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
         String valueAsString = value.toString();
         valueAsString = valueAsString.replace("'", "");
-        if (valueAsString.equalsIgnoreCase("true")
-                || valueAsString.equalsIgnoreCase("'true'")
-                || valueAsString.equalsIgnoreCase("y")
-                || valueAsString.equalsIgnoreCase("1")
-                || valueAsString.equalsIgnoreCase("t")) {
+        if ("true".equalsIgnoreCase(valueAsString)
+                || "'true'".equalsIgnoreCase(valueAsString)
+                || "y".equalsIgnoreCase(valueAsString)
+                || "1".equalsIgnoreCase(valueAsString)
+                || "t".equalsIgnoreCase(valueAsString)) {
             return Boolean.TRUE;
         } else {
             return Boolean.FALSE;
@@ -130,8 +132,10 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected String getSelectSequenceSql(Schema schema, Database database) {
         if (database instanceof DB2Database) {
-            if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+            if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM QSYS2.SYSSEQUENCES WHERE SEQSCHEMA = '" + schema.getCatalogName() + "'";
+            } else if (((DB2Database) database).getDataServerType() == DataServerType.DB2Z){
+                return "SELECT NAME AS SEQUENCE_NAME FROM SYSIBM.SYSSEQUENCES WHERE SEQTYPE='S' AND SCHEMA = '" + schema.getCatalogName() + "'";
             } else {
                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
             }
@@ -147,7 +151,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "  sch.SCHEMANAME = '" + new CatalogAndSchema(null, schema.getName()).customize(database).getSchemaName() + "' AND " +
                     "  sch.SCHEMAID = seq.SCHEMAID";
         } else if (database instanceof FirebirdDatabase) {
-            return "SELECT RDB$GENERATOR_NAME AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
+            return "SELECT TRIM(RDB$GENERATOR_NAME) AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
         } else if (database instanceof H2Database) {
             return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
         } else if (database instanceof HsqlDatabase) {
@@ -155,12 +159,50 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof InformixDatabase) {
             return "SELECT tabname AS SEQUENCE_NAME FROM systables t, syssequences s WHERE s.tabid = t.tabid AND t.owner = '" + schema.getName() + "'";
         } else if (database instanceof OracleDatabase) {
-            return "SELECT SEQUENCE_NAME AS SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE, ORDER_FLAG AS IS_ORDERED, LAST_NUMBER as START_VALUE, CACHE_SIZE FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
+            /*
+             * Return an SQL statement that only returns the non-default values so the output changeLog is cleaner
+             * and less polluted with unnecessary values.
+             * The the following pages for the defaults (consistent for all supported releases ATM):
+             * 12cR2: http://docs.oracle.com/database/122/SQLRF/CREATE-SEQUENCE.htm
+             * 12cR1: http://docs.oracle.com/database/121/SQLRF/statements_6017.htm
+             * 11gR2: http://docs.oracle.com/cd/E11882_01/server.112/e41084/statements_6015.htm
+             */
+            return "SELECT sequence_name, \n" +
+                    "CASE WHEN increment_by > 0 \n" +
+                    "     THEN CASE WHEN min_value=1 THEN NULL ELSE min_value END\n" +
+                    "     ELSE CASE WHEN min_value=(-999999999999999999999999999) THEN NULL else min_value END\n" +
+                    "END AS min_value, \n" +
+                    "CASE WHEN increment_by > 0 \n" +
+                    "     THEN CASE WHEN max_value=999999999999999999999999999 THEN NULL ELSE max_value END\n" +
+                    "     ELSE CASE WHEN max_value=last_number THEN NULL else max_value END \n" +
+                    "END  AS max_value, \n" +
+                    "CASE WHEN increment_by = 1 THEN NULL ELSE increment_by END AS increment_by, \n" +
+                    "CASE WHEN cycle_flag = 'N' THEN NULL ELSE cycle_flag END AS will_cycle, \n" +
+                    "CASE WHEN order_flag = 'N' THEN NULL ELSE order_flag END AS is_ordered, \n" +
+                    "LAST_NUMBER as START_VALUE, \n" +
+                    "CASE WHEN cache_size = 20 THEN NULL ELSE cache_size END AS cache_size \n" +
+                    "FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
         } else if (database instanceof PostgresDatabase) {
-            return "SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
-                    "WHERE relkind='S' " +
-                    "AND pg_class.relnamespace = pg_namespace.oid " +
-                    "AND nspname = '" + schema.getName() + "'";
+            return "SELECT c.relname AS SEQUENCE_NAME FROM pg_class c " +
+                    "join pg_namespace on c.relnamespace = pg_namespace.oid "+
+                    "WHERE c.relkind='S' " +
+                    "AND nspname = '" + schema.getName() + "' " +
+                    "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)"
+            ;
+
+
+
+//        select c.relname FROM pg_class c, pg_user u
+//            WHERE c.relowner = u.usesysid and c.relkind = 'S'
+//            AND relnamespace IN (
+//                    SELECT oid
+//                    FROM pg_namespace
+//                    WHERE nspname ='public'
+//            ) and c.oid not in (SELECT d.objid
+//                    FROM   pg_depend    d
+//                    JOIN   pg_attribute a ON a.attrelid = d.refobjid AND a.attnum = d.refobjsubid
+//                    WHERE  d.refobjsubid > 0
+//            );
         } else if (database instanceof MSSQLDatabase) {
             return "SELECT SEQUENCE_NAME, " +
                     "cast(START_VALUE AS BIGINT) AS START_VALUE, " +
@@ -169,7 +211,17 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, " +
                     "CYCLE_OPTION AS WILL_CYCLE " +
                     "FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
-        } else {
+        } else if (database instanceof SybaseASADatabase) {
+        	return "SELECT SEQUENCE_NAME, " +
+                    "START_WITH AS START_VALUE, " +
+                    "MIN_VALUE, " +
+                    "MAX_VALUE, " +
+                    "INCREMENT_BY, " +
+                    "CYCLE AS WILL_CYCLE " +
+                    "FROM SYS.SYSSEQUENCE s " +
+                    "JOIN SYS.SYSUSER u ON s.OWNER = u.USER_ID "+
+                    "WHERE u.USER_NAME = '" + schema.getName() + "'";
+        	} else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
         }
 

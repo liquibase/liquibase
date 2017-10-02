@@ -5,12 +5,10 @@ import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +22,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String constraintName;
+    private Boolean dropIndex;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -69,6 +68,14 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    public Boolean getDropIndex() {
+        return dropIndex;
+    }
+
+    public void setDropIndex(Boolean dropIndex) {
+        this.dropIndex = dropIndex;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
@@ -76,9 +83,11 @@ public class DropPrimaryKeyChange extends AbstractChange {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase(database);
         }
-    	
+
+        DropPrimaryKeyStatement statement = new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
+        statement.setDropIndex(this.dropIndex);
         return new SqlStatement[]{
-                new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
+                statement,
         };
     }
 
@@ -101,7 +110,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     	// Note: The attribute "constraintName" is used to pass the column 
     	// name instead of the constraint name.
 		
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<SqlStatement> statements = new ArrayList<>();
     	
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {

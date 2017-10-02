@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogService;
+import liquibase.logging.Logger;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
@@ -17,12 +19,19 @@ public class ChangeFactory {
 
     private static ChangeFactory instance;
 
-    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
-    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
+    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<>();
+    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
+
+    private Logger log;
 
     private ChangeFactory() {
+      log = LogService.getLog(getClass());
     }
 
+    protected Logger getLogger() {
+      return log;
+    }
+    
     private void init() {
         Class<? extends Change>[] classes;
         classes = ServiceLocator.getInstance().findClasses(Change.class);
@@ -47,7 +56,7 @@ public class ChangeFactory {
     /**
      * Reset the ChangeFactory so it reloads the registry on the next call to @{link #getInstance()}. Mainly used in testing
      */
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 
@@ -62,11 +71,11 @@ public class ChangeFactory {
             ChangeMetaData metaData = getChangeMetaData(instance);
             String name = metaData.getName();
             if (registry.get(name) == null) {
-                registry.put(name, new TreeSet<Class<? extends Change>>(new Comparator<Class<? extends Change>>() {
+                registry.put(name, new TreeSet<>(new Comparator<Class<? extends Change>>() {
                     @Override
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
-                            return -1 * new Integer(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
+                            return -1 * Integer.valueOf(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
                         } catch (Exception e) {
                             throw new UnexpectedLiquibaseException(e);
                         }
@@ -76,7 +85,7 @@ public class ChangeFactory {
             registry.get(name).add(changeClass);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
-		}
+        }
     }
 
     public ChangeMetaData getChangeMetaData(String change) {
@@ -144,7 +153,7 @@ public class ChangeFactory {
     }
 
     public String[] getAllChangeNamespaces() {
-        Set<String> namespaces = new HashSet<String>();
+        Set<String> namespaces = new HashSet<>();
         for (String changeName : getDefinedChanges()) {
             Change change = create(changeName);
             namespaces.add(change.getSerializedObjectNamespace());
@@ -154,7 +163,7 @@ public class ChangeFactory {
     }
 
     public Map<String, Object> getParameters(Change change) {
-        Map<String, Object> returnMap = new HashMap<String, Object>();
+        Map<String, Object> returnMap = new HashMap<>();
         ChangeMetaData changeMetaData = getChangeMetaData(change);
         for (ChangeParameterMetaData param : changeMetaData.getParameters().values()) {
             Object currentValue = param.getCurrentValue(change);
@@ -164,5 +173,10 @@ public class ChangeFactory {
         }
 
         return returnMap;
+    }
+
+    // exposed for test only
+    protected void setLogger(Logger mockLogger) {
+      log = mockLogger;
     }
 }

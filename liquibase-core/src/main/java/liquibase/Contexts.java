@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class Contexts {
 
-    private HashSet<String> contexts = new HashSet<String>();
+    private HashSet<String> contexts = new HashSet<>();
 
     public Contexts() {
     }
@@ -52,6 +52,10 @@ public class Contexts {
     public boolean add(String context) {
         return this.contexts.add(context.toLowerCase());
     }
+    
+    public boolean remove(String context) {
+      return this.contexts.remove(context.toLowerCase());
+    }
 
     @Override
     public String toString() {
@@ -60,7 +64,7 @@ public class Contexts {
 
 
     public boolean isEmpty() {
-        return this.contexts == null || this.contexts.isEmpty();
+        return (this.contexts == null) || this.contexts.isEmpty();
     }
 
     public Set<String> getContexts() {

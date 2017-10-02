@@ -1,7 +1,10 @@
 package org.liquibase.maven.plugins;
 
-import java.util.*;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Some basic tests that validate the setting of properties for the LiquibaseUpdate mojo.
@@ -16,7 +19,7 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
   static {
     DEFAULT_PROPERTIES = new HashMap<String, Object>();
     DEFAULT_PROPERTIES.put("changeLogFile", "org/liquibase/changelog.xml");
-    DEFAULT_PROPERTIES.put("driver", "com.mysql.jdbc.Driver");
+    DEFAULT_PROPERTIES.put("driver", "com.mysql.cj.jdbc.Driver");
     DEFAULT_PROPERTIES.put("url", "jdbc:mysql://localhost/eformat");
     DEFAULT_PROPERTIES.put("username", "root");
     DEFAULT_PROPERTIES.put("password", null);
@@ -38,7 +41,7 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
     checkValues(DEFAULT_PROPERTIES, values);
   }
 
-  public void testOverideAllWithPropertiesFile() throws Exception {
+  public void testOverrideAllWithPropertiesFile() throws Exception {
     // Create the properties file for this test
     Properties props = new Properties();
     props.setProperty("driver", "properties_driver_value");

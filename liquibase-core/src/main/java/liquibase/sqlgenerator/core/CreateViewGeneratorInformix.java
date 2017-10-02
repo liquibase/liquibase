@@ -1,13 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -43,13 +37,13 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
 
     @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String viewName = database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
-    	        
+        String viewName = database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
+
         String createClause = "CREATE VIEW  " + viewName + " AS SELECT * FROM (" + statement.getSelectQuery() + ") AS v";
         
         if (statement.isReplaceIfExists()) {
-        	return new Sql[] {
-    			new UnparsedSql("DROP VIEW IF EXISTS " + viewName),
+            return new Sql[] {
+                new UnparsedSql("DROP VIEW IF EXISTS " + viewName),
                 new UnparsedSql(createClause, new View().setName(viewName).setSchema(statement.getCatalogName(), statement.getViewName()))
             };
         }

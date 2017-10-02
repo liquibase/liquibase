@@ -2,16 +2,20 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.text.*;
-
 import liquibase.Contexts;
 import liquibase.LabelExpression;
-import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
+import liquibase.util.ISODateFormat;
 import org.apache.maven.plugin.MojoFailureException;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
+
 /**
- * Invokes Liquibase rollbacks on a database.
+ * Invokes Liquibase rollbacks the database to the specified using
+ * pointing attributes 'rollbackCount', 'rollbackTag' and/or 'rollbackDate'
  * @author Peter Murray
  * @goal rollback
  */
@@ -35,7 +39,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   protected int rollbackCount;
 
   /**
-   * The date to rollback the database to. The format of the date must match that of the
+   * The date to rollback the database to. The format of the date must match either an ISO date format, or that of the
    * <code>DateFormat.getDateInstance()</code> for the platform the plugin is executing
    * on.
    * @parameter expression="${liquibase.rollbackDate}"
@@ -56,13 +60,13 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   }
 
   protected void checkRequiredRollbackParameters() throws MojoFailureException {
-    if (rollbackCount == -1 && rollbackDate == null && rollbackTag == null) {
+    if ((rollbackCount == -1) && (rollbackDate == null) && (rollbackTag == null)) {
       throw new MojoFailureException("One of the rollback options must be specified, "
                                      + "please specify one of rollbackTag, rollbackCount "
                                      + "or rollbackDate");
     }
 
-    if (rollbackCount!=-1 && rollbackCount <= 0) {
+    if ((rollbackCount != -1) && (rollbackCount <= 0)) {
       throw new MojoFailureException("A rollback count of " + rollbackCount + " is meaningless, please "
                                      + "select a value greater than 0");
     }
@@ -71,17 +75,17 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
                      + " one of rollbackTag, rollbackCount, rollbackDate.";
 
     if (rollbackCount > 0) {
-      if (rollbackDate != null || rollbackTag != null) {
+      if ((rollbackDate != null) || (rollbackTag != null)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.COUNT;
     } else if (rollbackDate != null) {
-      if (rollbackTag != null || rollbackCount > 0) {
+      if ((rollbackTag != null) || (rollbackCount > 0)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.DATE;
     } else if (rollbackTag != null) {
-      if (rollbackCount > 0 || rollbackDate != null) {
+      if ((rollbackCount > 0) || (rollbackDate != null)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.TAG;
@@ -104,15 +108,11 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
         break;
       }
       case DATE: {
-        DateFormat format = DateFormat.getDateInstance();
         try {
-          liquibase.rollback(format.parse(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels));
+          liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels));
         }
         catch (ParseException e) {
           String message = "Error parsing rollbackDate: " + e.getMessage();
-          if (format instanceof SimpleDateFormat) {
-            message += "\nDate must match pattern: " + ((SimpleDateFormat)format).toPattern();
-          }
           throw new LiquibaseException(message, e);
         }
         break;
@@ -125,5 +125,22 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
         throw new IllegalStateException("Unexpected rollback type, " + type);
       }
     }
+  }
+
+  protected Date parseDate(String date) throws ParseException {
+    ISODateFormat isoFormat = new ISODateFormat();
+    try {
+      return isoFormat.parse(date);
+    } catch (ParseException e) {
+      DateFormat format = DateFormat.getDateInstance();
+      try {
+        return format.parse(date);
+      } catch (ParseException e1) {
+        throw new ParseException("Date must match ISODateFormat or STANDARD platform format.\n"+e.getMessage(), 0);
+
+      }
+    }
+
+
   }
 }

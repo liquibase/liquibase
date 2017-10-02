@@ -10,7 +10,6 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.precondition.Precondition;
 
 public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
 
@@ -65,14 +64,18 @@ public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
         } else {
             objectQuotingStrategy = changeSet.getObjectQuotingStrategy();
         }
-        ChangeSet interestedChangeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), null, null, false, objectQuotingStrategy, changeLog);
+        String changeLogFile = getChangeLogFile();
+        if (changeLogFile == null) {
+            changeLogFile = changeLog.getLogicalFilePath();
+        }
+        ChangeSet interestedChangeSet = new ChangeSet(getId(), getAuthor(), false, false, changeLogFile, null, null, false, objectQuotingStrategy, changeLog);
         RanChangeSet ranChangeSet;
         try {
             ranChangeSet = database.getRanChangeSet(interestedChangeSet);
         } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-        if (ranChangeSet == null || ranChangeSet.getExecType() == null || !ranChangeSet.getExecType().ran) {
+        if ((ranChangeSet == null) || (ranChangeSet.getExecType() == null) || !ranChangeSet.getExecType().ran) {
             throw new PreconditionFailedException("Change Set '"+interestedChangeSet.toString(false)+"' has not been run", changeLog, this);
         }
     }

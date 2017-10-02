@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 
 public class LabelExpression {
 
-    private HashSet<String> labels = new HashSet<String>();
-    private String originalString = null;
+    private HashSet<String> labels = new LinkedHashSet<>();
+    private String originalString;
 
     public LabelExpression() {
     }
@@ -73,10 +73,10 @@ public class LabelExpression {
      * Returns true if the passed runtime labels match this label expression
      */
     public boolean matches(Labels runtimeLabels) {
-        if (runtimeLabels == null || runtimeLabels.isEmpty()) {
+        if ((runtimeLabels == null) || runtimeLabels.isEmpty()) {
             return true;
         }
-        if (this.labels.size() == 0) {
+        if (this.labels.isEmpty()) {
             return true;
         }
 
@@ -93,10 +93,10 @@ public class LabelExpression {
             return true;
         }
 
-        if (expression.trim().equals(":TRUE")) {
+        if (":TRUE".equals(expression.trim())) {
             return true;
         }
-        if (expression.trim().equals(":FALSE")) {
+        if (":FALSE".equals(expression.trim())) {
             return false;
         }
 
@@ -143,10 +143,10 @@ public class LabelExpression {
             expression = expression.substring(4);
         }
 
-        if (expression.trim().equals(":TRUE")) {
+        if (":TRUE".equals(expression.trim())) {
             return !notExpression;
         }
-        if (expression.trim().equals(":FALSE")) {
+        if (":FALSE".equals(expression.trim())) {
             return notExpression;
         }
 
@@ -161,7 +161,7 @@ public class LabelExpression {
     }
 
     public boolean isEmpty() {
-        return this.labels == null || this.labels.size() == 0;
+        return (this.labels == null) || this.labels.isEmpty();
     }
 
 }

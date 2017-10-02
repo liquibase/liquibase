@@ -5,7 +5,6 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.structure.core.Sequence;
@@ -44,7 +43,8 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         }
 
         if (statement.getMinValue() != null) {
-            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database instanceof H2Database) {
+            if ((database instanceof FirebirdDatabase) || (database instanceof HsqlDatabase) || (database instanceof
+                H2Database)) {
                 buffer.append(" RESTART WITH ").append(statement.getMinValue());
             } else {
                 buffer.append(" MINVALUE ").append(statement.getMinValue());
@@ -61,7 +61,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if (statement.getCacheSize() != null && database instanceof OracleDatabase) {
+        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase)) {
             if (statement.getCacheSize().equals(BigInteger.ZERO)) {
                 buffer.append(" NOCACHE ");
             } else {
@@ -69,8 +69,8 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if (statement.getWillCycle() != null && database instanceof OracleDatabase) {
-            if (statement.getWillCycle()) {
+        if ((statement.getCycle() != null) && (database instanceof OracleDatabase)) {
+            if (statement.getCycle()) {
                 buffer.append(" CYCLE ");
             } else {
                 buffer.append(" NOCYCLE ");

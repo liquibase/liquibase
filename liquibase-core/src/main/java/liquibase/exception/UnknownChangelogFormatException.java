@@ -1,6 +1,8 @@
 package liquibase.exception;
 
 public class UnknownChangelogFormatException extends LiquibaseException {
+    private static final long serialVersionUID = 2124945695429454207L;
+    
     public UnknownChangelogFormatException() {
     }
 

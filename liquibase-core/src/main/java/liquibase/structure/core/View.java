@@ -1,5 +1,7 @@
 package liquibase.structure.core;
 
+import liquibase.util.StringUtils;
+
 public class View extends Relation {
 
     private boolean containsFullDefinition;
@@ -28,9 +30,13 @@ public class View extends Relation {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if ((o == null) || (getClass() != o.getClass())) return false;
 
         View that = (View) o;
+
+        if ((this.getSchema() != null) && (that.getSchema() != null)) {
+            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+        }
 
         return getName().equalsIgnoreCase(that.getName());
 
@@ -43,16 +49,7 @@ public class View extends Relation {
 
     @Override
     public String toString() {
-        String viewStr = getName() + " (";
-        for (int i = 0; i < getColumns().size(); i++) {
-            if (i > 0) {
-                viewStr += "," + getColumns().get(i);
-            } else {
-                viewStr += getColumns().get(i);
-            }
-        }
-        viewStr += ")";
-        return viewStr;
+        return this.getName();
     }
 
     @Override

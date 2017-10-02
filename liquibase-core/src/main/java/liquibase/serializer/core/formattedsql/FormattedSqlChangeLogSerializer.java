@@ -13,9 +13,12 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
@@ -58,7 +61,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     protected Database getTargetDatabase(ChangeSet changeSet) {
         String filePath = changeSet.getFilePath();
         if (filePath == null) {
-            throw new UnexpectedLiquibaseException("No changeset file path set. Cannot determine target database type");
+            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
         }
         Matcher matcher = fileNamePatter.matcher(filePath);
         if (!matcher.matches()) {

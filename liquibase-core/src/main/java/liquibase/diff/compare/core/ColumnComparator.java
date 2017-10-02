@@ -1,5 +1,7 @@
 package liquibase.diff.compare.core;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -33,7 +35,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Column && databaseObject2 instanceof Column)) {
+        if (!((databaseObject1 instanceof Column) && (databaseObject2 instanceof Column))) {
             return false;
         }
 
@@ -45,7 +47,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn.getRelation(), otherColumn.getRelation(), accordingTo)) {
+        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn.getRelation(), otherColumn.getRelation(), chain.getSchemaComparisons(), accordingTo)) {
             return false;
         }
 
@@ -57,10 +59,23 @@ public class ColumnComparator implements DatabaseObjectComparator {
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {
         exclude.add("name");
         exclude.add("type");
+        exclude.add("autoIncrementInformation");
+
+        if (!LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDiffColumnOrder()) {
+            exclude.add("order");
+        }
+
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         differences.compare("type", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+
+        boolean autoIncrement1 = ((Column) databaseObject1).isAutoIncrement();
+        boolean autoIncrement2 = ((Column) databaseObject2).isAutoIncrement();
+
+        if (autoIncrement1 != autoIncrement2) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc value.
+            differences.addDifference("autoIncrement", autoIncrement1, autoIncrement2);
+        }
 
         return differences;
     }

@@ -5,10 +5,13 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -16,15 +19,30 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DB2Database extends AbstractJdbcDatabase {
 
-    private Boolean isZOS;
+    private static final Set<String> systemTablesAndViews;
+
+    static {
+      systemTablesAndViews = new HashSet<String>();
+      systemTablesAndViews.add("SYSCHKCST");
+      systemTablesAndViews.add("SYSCST");
+      systemTablesAndViews.add("SYSCSTCOL");
+      systemTablesAndViews.add("SYSCSTDEP");
+      systemTablesAndViews.add("SYSKEYCST");
+      systemTablesAndViews.add("SYSREFCST");
+    }
+
+    private DataServerType dataServerType;
 
     public DB2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
+        super.unquotedObjectsAreUppercased=true;
     }
 
     @Override
@@ -82,9 +100,13 @@ public class DB2Database extends AbstractJdbcDatabase {
         }
 
 
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+        if (getConnection() == null) {
             return null;
         }
+        if (getConnection() instanceof OfflineConnection) {
+            return ((OfflineConnection) getConnection()).getSchema();
+        }
+
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -101,19 +123,10 @@ public class DB2Database extends AbstractJdbcDatabase {
         } catch (Exception e) {
             throw new RuntimeException("Could not determine current schema", e);
         } finally {
-            JdbcUtils.closeResultSet(rs);
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtils.close(rs, stmt);
         }
 
         return defaultSchemaName;
-    }
-
-    @Override
-    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName == null) {
-            return null;
-        }
-        return objectName.toUpperCase();
     }
 
     @Override
@@ -161,24 +174,25 @@ public class DB2Database extends AbstractJdbcDatabase {
         }
     }
 
-
     @Override
     public boolean supportsTablespaces() {
         return true;
     }
 
     @Override
-    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
-        return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
-    }
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+        schema = schema.customize(this);
+        String definition = ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
 
+        return "FULL_DEFINITION: " + definition;
+    }
 
     @Override
     public java.util.Date parseDate(String dateAsString) throws DateParseException {
         try {
             if (dateAsString.indexOf(' ') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
-            } else if (dateAsString.indexOf('.') > 0 && dateAsString.indexOf('-') > 0) {
+            } else if ((dateAsString.indexOf('.') > 0) && (dateAsString.indexOf('-') > 0)) {
                 return new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSSSSS").parse(dateAsString);
 
             } else {
@@ -210,15 +224,11 @@ public class DB2Database extends AbstractJdbcDatabase {
         return pkName;
     }
 
-
-    @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        // does not support the schema name for the index -
-        return super.escapeIndexName(null, null, indexName);
-    }
-
     @Override
     public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
+        if ((rawCatalogName != null) && (rawSchemaName == null)) {
+            rawSchemaName = rawCatalogName;
+        }
         return new CatalogAndSchema(rawSchemaName, null).customize(this);
     }
 
@@ -237,19 +247,86 @@ public class DB2Database extends AbstractJdbcDatabase {
         return true;
     }
 
-    public boolean isZOS() {
-        if (this.isZOS == null) {
-            if (getConnection() != null && getConnection() instanceof JdbcConnection) {
+    /**
+     * Determine the DB2 data server type. This replaces the isZOS() and
+     * isAS400() methods, which was based on DatabaseMetaData
+     * getDatabaseProductName(), which does not work correctly for some DB2
+     * types.
+     *
+     * @see <a href="http://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/com.ibm.db2z10.doc.java/src/tpc/imjcc_c0053013.html">ibm.com</a>
+     * @return the data server type
+     */
+    public DataServerType getDataServerType() {
+        if (this.dataServerType == null) {
+            DatabaseConnection databaseConnection = getConnection();
+            if ((databaseConnection != null) && (databaseConnection instanceof JdbcConnection)) {
                 try {
-                    this.isZOS = getConnection().getDatabaseProductName().toLowerCase().contains("zos");
+                    String databaseProductVersion = databaseConnection.getDatabaseProductVersion();
+                    String databaseProductName = databaseConnection.getDatabaseProductName();
+                    if (databaseProductVersion.startsWith("SQL")) {
+                        this.dataServerType = DataServerType.DB2LUW;
+                    } else if (databaseProductVersion.startsWith("QSQ") || databaseProductName.startsWith("DB2 UDB for AS/400")) {
+                        this.dataServerType = DataServerType.DB2I;
+                    } else if (databaseProductVersion.startsWith("DSN")) {
+                        this.dataServerType = DataServerType.DB2Z;
+                    }
                 } catch (DatabaseException e) {
-                    this.isZOS = false;
+                    this.dataServerType = DataServerType.DB2LUW;
                 }
             } else {
-                this.isZOS = false;
+                this.dataServerType = DataServerType.DB2LUW;
             }
         }
-        return this.isZOS;
+        return this.dataServerType;
     }
 
+    public boolean isZOS() {
+        return getDataServerType() == DataServerType.DB2Z;
+    }
+
+    public boolean isAS400() {
+       return getDataServerType() == DataServerType.DB2I;
+    }
+
+    @Override
+    public boolean isSystemObject(DatabaseObject example) {
+        if ((example instanceof Index) && (example.getName() != null) && example.getName().matches("SQL\\d+")) {
+            return true;
+        }
+        return super.isSystemObject(example);
+    }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        // According to
+        // https://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000859.html
+        return 12;
+    }
+
+    @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return 6;
+    }
+
+    public enum DataServerType {
+        /**
+         * DB2 on Linux, Unix and Windows
+         */
+        DB2LUW,
+
+        /**
+         * DB2 on IBM iSeries
+         */
+        DB2I,
+
+        /**
+         * DB2 on IBM zSeries
+         */
+        DB2Z
+    }
+
+    @Override
+    public Set<String> getSystemViews() {
+        return systemTablesAndViews;
+    }
 }

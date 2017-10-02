@@ -33,7 +33,8 @@ public class DBDocTask extends BaseLiquibaseTask {
                 liquibase.generateDocumentation(outputDirectory.toString());
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Liquibase encountered an error while creating database documentation. " + e.toString(), e);
+            throw new BuildException("Liquibase encountered an error while creating database documentation. " + e
+            .toString(), e);
         }
     }
 
@@ -54,16 +55,16 @@ public class DBDocTask extends BaseLiquibaseTask {
         return changeLog;
     }
 
+    public void setChangeLogFile(String changeLog) {
+        this.changeLog = changeLog;
+    }
+
     public FileResource getOutputDirectory() {
         return outputDirectory;
     }
 
     public void setOutputDirectory(FileResource outputDirectory) {
         this.outputDirectory = outputDirectory;
-    }
-
-    public void setChangeLogFile(String changeLog) {
-        this.changeLog = changeLog;
     }
 
     public void setContexts(String contexts) {

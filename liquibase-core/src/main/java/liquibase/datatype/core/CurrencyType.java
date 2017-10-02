@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -12,17 +13,23 @@ import liquibase.util.StringUtils;
 public class CurrencyType  extends LiquibaseDataType {
 
     @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
+    }
+
+    @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if (originalDefinition.equalsIgnoreCase("smallmoney")
-                    || originalDefinition.equals("[smallmoney]")) {
+            if (originalDefinition.toLowerCase().startsWith("smallmoney")
+                    || originalDefinition.toLowerCase().startsWith("[smallmoney]")) {
 
                 return new DatabaseDataType(database.escapeDataTypeName("smallmoney"));
             }
             return new DatabaseDataType(database.escapeDataTypeName("money"));
         }
-        if (database instanceof InformixDatabase || database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        if ((database instanceof InformixDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
+            SybaseDatabase)) {
             return new DatabaseDataType("MONEY");
         }
         if (database instanceof OracleDatabase) {

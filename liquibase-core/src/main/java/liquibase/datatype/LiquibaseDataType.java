@@ -1,5 +1,6 @@
 package liquibase.datatype;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -23,7 +24,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     private int minParameters;
     private int maxParameters;
 
-    private List<Object> parameters = new ArrayList<Object>();
+    private List<Object> parameters = new ArrayList<>();
     private String additionalInformation;
     private String rawDefinition;
 
@@ -77,6 +78,11 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return maxParameters;
     }
 
+    /**
+     * Returns an array with the parameters to the data type, e.g. NUMBER(10, 2) would return
+     * an array with the items 10 and 2.
+     * @return An array with the parameters. May contain 0 items.
+     */
     public Object[] getParameters() {
         return parameters.toArray();
     }
@@ -132,7 +138,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
      * Returns the value object in a format to include in SQL. Quote if necessary.
      */
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return functionToSql((DatabaseFunction) value, database);
@@ -143,7 +149,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     protected String functionToSql(DatabaseFunction function, Database database) {
-        return function == null ? null : database.generateDatabaseFunctionValue(function);
+        return (function == null) ? null : database.generateDatabaseFunctionValue(function);
     }
 
     protected String numberToSql(Number number, Database database) {
@@ -157,7 +163,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     protected String otherToSql(Object value, Database database) {
-        return value == null ? null : value.toString();
+        return (value == null) ? null : value.toString();
     }
 
     public Object sqlToObject(String value, Database database) {
@@ -167,7 +173,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     @Override
     public String toString() {
         String returnString = getName();
-        if (parameters != null && parameters.size() > 0 && maxParameters > 0) {
+        if ((parameters != null) && !parameters.isEmpty() && (maxParameters > 0)) {
             returnString += "(";
             for (Object param : parameters) {
                 if (returnString == null) {
@@ -176,10 +182,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
                 returnString += param.toString()+",";
             }
             returnString = returnString.replaceFirst(",$", "");
-
-//            if (getUnit() != null) {
-//                returnString+=" " + getUnit();
-//            }
 
             returnString += ")";
         }
@@ -193,7 +195,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 
     @Override
     public boolean equals(final Object o) {
-        return o instanceof LiquibaseDataType && toString().equals(o.toString());
+        return (o instanceof LiquibaseDataType) && toString().equals(o.toString());
     }
 
     @Override
@@ -201,6 +203,14 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return toString().hashCode();
     }
 
+    /**
+     * Determines if the given function name refers to the function that returns the current
+     * time and date for a specific DBMS. Also returns true if the name returns the Liquibase wildcard
+     * CURRENT_DATE_TIME_PLACE_HOLDER, which will later be translated into the appropriate function.
+     * @param string The database function name to test
+     * @param database A database object to test against
+     * @return see above
+     */
     protected boolean isCurrentDateTimeFunction(String string, Database database) {
         return string.toLowerCase().startsWith("current_timestamp")
                 || string.toLowerCase().startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
@@ -218,5 +228,10 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return value.replaceFirst("\\.0+$", "");
     }
 
+    /**
+     * Returns one of the four basic data types for use in LoadData: BOOLEAN, NUMERIC, DATE or STRING
+     * @return one of the above Strings
+     */
+    public abstract LoadDataChange.LOAD_DATA_TYPE getLoadTypeName();
 
 }

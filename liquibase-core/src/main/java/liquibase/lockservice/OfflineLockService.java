@@ -8,7 +8,7 @@ import liquibase.exception.LockException;
 public class OfflineLockService implements LockService {
 
     private Database database;
-    private boolean hasChangeLogLock = false;
+    private boolean hasChangeLogLock;
 
     @Override
     public int getPriority() {
@@ -17,7 +17,7 @@ public class OfflineLockService implements LockService {
 
     @Override
     public boolean supports(Database database) {
-        return database.getConnection() != null && database.getConnection() instanceof OfflineConnection;
+        return (database.getConnection() != null) && (database.getConnection() instanceof OfflineConnection);
     }
 
     @Override

@@ -4,7 +4,8 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 
 import java.sql.*;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class JdbcConnection implements DatabaseConnection {
         try {
             database.addReservedWords(Arrays.asList(this.getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
         } catch (SQLException e) {
-            LogFactory.getLogger().info("Error fetching reserved words list from JDBC driver", e);
+            LogService.getLog(getClass()).info(LogType.LOG, "Error fetching reserved words list from JDBC driver", e);
         }
 
 
@@ -427,12 +428,36 @@ public class JdbcConnection implements DatabaseConnection {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof JdbcConnection && this.getUnderlyingConnection().equals(((JdbcConnection) obj).getUnderlyingConnection());
+        if (!(obj instanceof JdbcConnection)) {
+            return false;
+        }
+        Connection underlyingConnection = this.getUnderlyingConnection();
+        if (underlyingConnection == null) {
+            return ((JdbcConnection) obj).getUnderlyingConnection() == null;
+        }
+
+        return underlyingConnection.equals(((JdbcConnection) obj).getUnderlyingConnection());
 
     }
 
     @Override
     public int hashCode() {
-        return this.getUnderlyingConnection().hashCode();
+        Connection underlyingConnection = this.getUnderlyingConnection();
+        try {
+            if ((underlyingConnection == null) || underlyingConnection.isClosed()) {
+                return super.hashCode();
+            }
+        } catch (SQLException e) {
+            return super.hashCode();
+        }
+        return underlyingConnection.hashCode();
+    }
+
+    public boolean supportsBatchUpdates() throws DatabaseException {
+        try {
+            return getUnderlyingConnection().getMetaData().supportsBatchUpdates();
+        } catch (SQLException e) {
+            throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
+        }
     }
 }

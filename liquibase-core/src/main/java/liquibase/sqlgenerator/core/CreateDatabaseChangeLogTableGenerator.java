@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -42,14 +41,15 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("COMMENTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))
                 .addColumn("TAG", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))
                 .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription(charTypeName + "(20)", database))
-                .addColumn("CONTEXTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))
-                .addColumn("LABELS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database));
+                .addColumn("CONTEXTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "("+getContextsSize()+")", database))
+                .addColumn("LABELS", DataTypeFactory.getInstance().fromDescription(charTypeName + "("+getLabelsSize()+")", database))
+                .addColumn("DEPLOYMENT_ID", DataTypeFactory.getInstance().fromDescription(charTypeName+"(10)", database));
 
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
     }
 
     protected String getCharTypeName(Database database) {
-        if (database instanceof MSSQLDatabase && ((MSSQLDatabase) database).sendsStringParametersAsUnicode()) {
+        if ((database instanceof MSSQLDatabase) && ((MSSQLDatabase) database).sendsStringParametersAsUnicode()) {
             return "nvarchar";
         }
         return "varchar";
@@ -57,15 +57,17 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
 
     protected String getDateTimeTypeString(Database database) {
         if (database instanceof MSSQLDatabase) {
-            try {
-                if (database.getDatabaseMajorVersion() >= 10) { // 2008 or later
                     return "datetime2(3)";
-                }
-            } catch (DatabaseException e) {
-                // ignore
-            }
         }
         return "datetime";
+    }
+
+    protected String getLabelsSize() {
+        return "255";
+    }
+
+    protected String getContextsSize() {
+        return "255";
     }
 
     protected String getIdColumnSize() {

@@ -3,7 +3,6 @@ package liquibase.diff.output;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.statement.UniqueConstraint;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -16,7 +15,8 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
 
     private FilterType filterType;
 
-    private List<Filter> filters = new ArrayList<Filter>();
+    private List<Filter> filters = new ArrayList<>();
+    private boolean catalogOrSchemaFilter;
 
     public StandardObjectChangeFilter(FilterType type, String filter) {
         this.filterType = type;
@@ -32,13 +32,14 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
         for (String subfilter : filter.split("\\s*,\\s*")) {
             String[] split = subfilter.split(":");
             if (split.length == 1) {
-                filters.add(new Filter(null, Pattern.compile(split[0]), filterType));
+                filters.add(new Filter(null, Pattern.compile(split[0])));
             } else {
                 String className = StringUtils.upperCaseFirst(split[0]);
                 className = "liquibase.structure.core."+className;
                 try {
                     Class<DatabaseObject> clazz = (Class<DatabaseObject>) Class.forName(className);
-                    filters.add(new Filter(clazz, Pattern.compile(split[1]), filterType));
+                    filters.add(new Filter(clazz, Pattern.compile(split[1])));
+                    catalogOrSchemaFilter |= "Catalog".equals(className) || "Schema".equals(className);
                 } catch (ClassNotFoundException e) {
                     throw new UnexpectedLiquibaseException(e);
                 }
@@ -48,24 +49,24 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
 
     @Override
     public boolean includeMissing(DatabaseObject object, Database referenceDatabase, Database comparisionDatabase) {
-        return include(object, referenceDatabase, comparisionDatabase);
+        return include(object);
     }
 
     @Override
     public boolean includeUnexpected(DatabaseObject object, Database referenceDatabase, Database comparisionDatabase) {
-        return include(object, referenceDatabase, comparisionDatabase);
+        return include(object);
     }
 
     @Override
     public boolean includeChanged(DatabaseObject object, ObjectDifferences differences, Database referenceDatabase, Database comparisionDatabase) {
-        return include(object, referenceDatabase, comparisionDatabase);
+        return include(object);
     }
 
-    protected boolean include(DatabaseObject object, Database referenceDatabase, Database comparisionDatabase) {
-        if (filters.size() == 0) {
+    @Override
+    public boolean include(DatabaseObject object) {
+        if (filters.isEmpty()) {
             return true;
         }
-
         for (Filter filter : filters) {
             if (filter.matches(object)) {
                 if (filterType == FilterType.INCLUDE) {
@@ -76,19 +77,24 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                 }
             }
         }
-        return filterType == FilterType.EXCLUDE;
+        // Assumes that if no filter is specified for a catalog or schema all should be accepted.
+        return (filterType == FilterType.EXCLUDE) || (((object instanceof Catalog) || (object instanceof Schema)) &&
+            !catalogOrSchemaFilter);
+    }
+
+    public enum FilterType {
+        INCLUDE,
+        EXCLUDE,
     }
 
     protected static class Filter {
 
-        private final FilterType filterType;
         private Class<DatabaseObject> objectType;
         private Pattern nameMatcher;
 
-        public Filter(Class<DatabaseObject> objectType, Pattern nameMatcher, FilterType filterType) {
+        public Filter(Class<DatabaseObject> objectType, Pattern nameMatcher) {
             this.objectType = objectType;
             this.nameMatcher = nameMatcher;
-            this.filterType = filterType;
         }
 
         protected boolean matches(DatabaseObject object) {
@@ -97,11 +103,11 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
             }
 
             Boolean matches = null;
-            if (objectType != null && !objectType.isAssignableFrom(object.getClass())) {
+            if ((objectType != null) && !objectType.isAssignableFrom(object.getClass())) {
                 matches = false;
             }
             if (matches == null) {
-                matches = nameMatcher.matcher(object.getName()).matches();
+                matches = (object.getName() != null) && nameMatcher.matcher(object.getName()).matches();
             }
 
             if (!matches) {
@@ -117,16 +123,14 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                 if (object instanceof PrimaryKey) {
                     return matches(((PrimaryKey) object).getTable());
                 }
+                if (object instanceof UniqueConstraint) {
+                    return matches(((UniqueConstraint) object).getTable());
+                }
                 if (object instanceof Data) {
                     return matches(((Data) object).getTable());
                 }
             }
             return matches;
         }
-    }
-
-    public static enum FilterType {
-        INCLUDE,
-        EXCLUDE,
     }
 }

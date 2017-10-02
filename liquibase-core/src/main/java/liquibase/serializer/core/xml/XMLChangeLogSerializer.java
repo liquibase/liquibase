@@ -1,9 +1,12 @@
 package liquibase.serializer.core.xml;
 
-import liquibase.change.*;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
@@ -15,13 +18,11 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
-
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.*;
 import java.util.*;
 
@@ -29,9 +30,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     private Document currentChangeLogFileDOM;
 
+    private static final String XML_VERSION = "1.1";
+
     public XMLChangeLogSerializer() {
         try {
             this.currentChangeLogFileDOM = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            this.currentChangeLogFileDOM.setXmlVersion(XML_VERSION);
         } catch (ParserConfigurationException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -79,20 +83,21 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         documentBuilder.setEntityResolver(new LiquibaseEntityResolver(this));
 
         Document doc = documentBuilder.newDocument();
+        doc.setXmlVersion(XML_VERSION);
         Element changeLogElement = doc.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, "databaseChangeLog");
 
         changeLogElement.setAttribute("xmlns", LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE);
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
-        Map<String, String> shortNameByNamespace = new HashMap<String, String>();
-        Map<String, String> urlByNamespace = new HashMap<String, String>();
+        Map<String, String> shortNameByNamespace = new HashMap<>();
+        Map<String, String> urlByNamespace = new HashMap<>();
 
         for (NamespaceDetails details : NamespaceDetailsFactory.getInstance().getNamespaceDetails()) {
             for (String namespace : details.getNamespaces()) {
                 if (details.supports(this, namespace)){
                     String shortName = details.getShortName(namespace);
                     String url = details.getSchemaUrl(namespace);
-                    if (shortName != null && url != null) {
+                    if ((shortName != null) && (url != null)) {
                         shortNameByNamespace.put(namespace, shortName);
                         urlByNamespace.put(namespace, url);
                     }
@@ -101,7 +106,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
 
         for (Map.Entry<String, String> entry : shortNameByNamespace.entrySet()) {
-            if (!entry.getValue().equals("")) {
+            if (!"".equals(entry.getValue())) {
                 changeLogElement.setAttribute("xmlns:"+entry.getValue(), entry.getKey());
             }
         }
@@ -109,7 +114,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         String schemaLocationAttribute = "";
         for (Map.Entry<String, String> entry : urlByNamespace.entrySet()) {
-            if (!entry.getValue().equals("")) {
+            if (!"".equals(entry.getValue())) {
                 schemaLocationAttribute += entry.getKey()+" "+entry.getValue()+" ";
             }
         }
@@ -129,8 +134,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
         FileInputStream in = new FileInputStream(changeLogFile);
-        String existingChangeLog = StreamUtil.getStreamContents(in);
-        in.close();
+        String existingChangeLog;
+        try {
+            existingChangeLog = StreamUtil.getStreamContents(in);
+        } finally {
+            in.close();
+        }
 
         FileOutputStream out = new FileOutputStream(changeLogFile);
 
@@ -140,7 +149,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             } else {
                 existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), out);
             }
             out.flush();
         } finally {
@@ -154,7 +163,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         String nodeName = object.getSerializedObjectName();
 
         NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
-        if (details != null && !details.getShortName(namespace).equals("")) {
+        if ((details != null) && !"".equals(details.getShortName(namespace))) {
             nodeName = details.getShortName(namespace)+":"+nodeName;
         }
         Element node = currentChangeLogFileDOM.createElementNS(namespace, nodeName);
@@ -209,7 +218,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private String qualifyName(String objectName, String objectNamespace, String parentNamespace) {
-        if (objectNamespace != null && !objectNamespace.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE) && !objectNamespace.equals(parentNamespace)) {
+        if ((objectNamespace != null) && !objectNamespace.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE)
+            && !objectNamespace.equals(parentNamespace)) {
             NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, objectNamespace);
             return details.getShortName(objectNamespace) + ":" + objectName;
         } else {
@@ -277,7 +287,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             element.setAttribute("remarks", columnConfig.getRemarks());
         }
 
-        if (columnConfig.isAutoIncrement() != null && columnConfig.isAutoIncrement()) {
+        if ((columnConfig.isAutoIncrement() != null) && columnConfig.isAutoIncrement()) {
             element.setAttribute("autoIncrement", "true");
         }
 
@@ -351,7 +361,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             buffer.append(StringUtils.repeat(" ", indent));
         }
         buffer.append("<").append(node.getNodeName());
-        SortedMap<String, String> attributeMap = new TreeMap<String, String>();
+        SortedMap<String, String> attributeMap = new TreeMap<>();
         NamedNodeMap attributes = node.getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
             Node attribute = attributes.item(i);
@@ -361,7 +371,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         for (Map.Entry entry : attributeMap.entrySet()) {
             String value = (String) entry.getValue();
             if (value != null) {
-                if (indent >= 0 && !firstAttribute && attributeMap.size() > 2) {
+                if ((indent >= 0) && !firstAttribute && (attributeMap.size() > 2)) {
                     buffer.append("\n").append(StringUtils.repeat(" ", indent)).append("        ");
                 } else {
                     buffer.append(" ");
@@ -392,7 +402,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         }
 
-        if (!sawChildren && textContent.equals("")) {
+        if (!sawChildren && "".equals(textContent)) {
             buffer.replace(buffer.length()-1, buffer.length(), "/>");
         } else {
             buffer.append("</").append(node.getNodeName()).append(">");

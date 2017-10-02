@@ -15,13 +15,12 @@ import java.sql.Statement;
 import java.util.*;
 
 class ResultSetCache {
-    private final static int FETCH_SIZE = 1000;
-    private Map<String, Integer> timesSingleQueried = new HashMap<String, Integer>();
-    private Map<String, Boolean> didBulkQuery = new HashMap<String, Boolean>();
+    private Map<String, Integer> timesSingleQueried = new HashMap<>();
+    private Map<String, Boolean> didBulkQuery = new HashMap<>();
 
-    private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<String, Map<String, List<CachedRow>>>();
+    private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<>();
 
-    private Map<String, Object> info = new HashMap<String, Object>();
+    private Map<String, Object> info = new HashMap<>();
 
     public List<CachedRow> get(ResultSetExtractor resultSetExtractor) throws DatabaseException {
         try {
@@ -31,7 +30,7 @@ class ResultSetCache {
 
             Map<String, List<CachedRow>> cache = cacheBySchema.get(schemaKey);
             if (cache == null) {
-                cache = new HashMap<String, List<CachedRow>>();
+                cache = new HashMap<>();
                 cacheBySchema.put(schemaKey, cache);
             }
 
@@ -40,7 +39,7 @@ class ResultSetCache {
             }
 
             if (didBulkQuery.containsKey(schemaKey) && didBulkQuery.get(schemaKey)) {
-                return new ArrayList<CachedRow>();
+                return new ArrayList<>();
             }
 
             List<CachedRow> results;
@@ -49,7 +48,8 @@ class ResultSetCache {
                 results = resultSetExtractor.bulkFetch();
                 didBulkQuery.put(schemaKey, true);
             } else {
-                cache = new HashMap<String, List<CachedRow>>(); //don't store results in real cache to prevent confusion if later fetching all items.
+                // Don't store results in real cache to prevent confusion if later fetching all items.
+                cache = new HashMap<>();
                 Integer previousCount = timesSingleQueried.get(schemaKey);
                 if (previousCount == null) {
                     previousCount = 0;
@@ -69,7 +69,7 @@ class ResultSetCache {
 
             List<CachedRow> returnList = cache.get(wantedKey);
             if (returnList == null) {
-                returnList = new ArrayList<CachedRow>();
+                returnList = new ArrayList<>();
             }
             return returnList;
 
@@ -85,6 +85,14 @@ class ResultSetCache {
 
     public void putInfo(String key, Object value) {
         info.put(key, value);
+    }
+
+    private int getTimesSingleQueried(String schemaKey) {
+        Integer integer = timesSingleQueried.get(schemaKey);
+        if (integer == null) {
+            return 0;
+        }
+        return integer;
     }
 
     public static class RowData {
@@ -118,13 +126,13 @@ class ResultSetCache {
         private String[] permute(String[] params, int fromIndex) {
             String[] nullVersion = Arrays.copyOf(params, params.length);
             nullVersion[fromIndex] = null;
-            if (params.length == fromIndex + 1) {
+            if (params.length == (fromIndex + 1)) {
                 return new String[]{
                         createKey(database, params),
                         createKey(database, nullVersion)
                 };
             } else {
-                List<String> permutations = new ArrayList<String>();
+                List<String> permutations = new ArrayList<>();
 
                 Collections.addAll(permutations, permute(params, fromIndex + 1));
                 Collections.addAll(permutations, permute(nullVersion, fromIndex + 1));
@@ -139,7 +147,7 @@ class ResultSetCache {
             } else if (database.supportsCatalogs() && database.supportsSchemas()) {
                 return (catalog + "." + schema).toLowerCase();
             } else {
-                if (catalog == null && schema != null) {
+                if ((catalog == null) && (schema != null)) {
                     return schema.toLowerCase();
                 } else {
                     if (catalog == null) {
@@ -179,9 +187,10 @@ class ResultSetCache {
             return executeAndExtract(sql, database, false);
         }
 
-        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint) throws DatabaseException, SQLException {
+        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint)
+                throws DatabaseException, SQLException {
             if (sql == null) {
-                return new ArrayList<CachedRow>();
+                return new ArrayList<>();
             }
             Statement statement = null;
             ResultSet resultSet = null;
@@ -189,7 +198,7 @@ class ResultSetCache {
                 JdbcConnection connection = (JdbcConnection) database.getConnection();
                 statement = connection.createStatement();
                 resultSet = statement.executeQuery(sql);
-                resultSet.setFetchSize(FETCH_SIZE);
+                resultSet.setFetchSize(database.getFetchSize());
                 return extract(resultSet, informixTrimHint);
             } finally {
                 JdbcUtils.close(resultSet, statement);
@@ -201,10 +210,10 @@ class ResultSetCache {
         }
 
         public boolean equals(Object expectedValue, Object foundValue, boolean equalIfEitherNull) {
-            if (expectedValue == null && foundValue == null) {
+            if ((expectedValue == null) && (foundValue == null)) {
                 return true;
             }
-            if (expectedValue == null || foundValue == null) {
+            if ((expectedValue == null) || (foundValue == null)) {
                 return equalIfEitherNull;
             }
 
@@ -224,16 +233,17 @@ class ResultSetCache {
             return extract(resultSet, false);
         }
 
-        protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint) throws SQLException {
-            resultSet.setFetchSize(FETCH_SIZE);
+        protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint)
+                throws SQLException {
+            resultSet.setFetchSize(database.getFetchSize());
             List<Map> result;
-            List<CachedRow> returnList = new ArrayList<CachedRow>();
+            List<CachedRow> returnList = new ArrayList<>();
             try {
                 result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
-                        if (value != null && value instanceof String) {
+                        if ((value != null) && (value instanceof String)) {
 
                             // Don't trim for informix database,
                             // We need to discern the space in front of an index name,
@@ -243,7 +253,7 @@ class ResultSetCache {
                                 value = ((String) value).trim(); // Trim the value normally
                             } else {
                                 boolean startsWithSpace = false;
-                                if (database instanceof InformixDatabase && ((String) value).matches("^ .*$")) {
+                                if ((database instanceof InformixDatabase) && ((String) value).matches("^ .*$")) {
                                     startsWithSpace = true; // Set the flag if the value started with a space
                                 }
                                 value = ((String) value).trim(); // Trim the value normally
@@ -265,14 +275,6 @@ class ResultSetCache {
             }
             return returnList;
         }
-    }
-
-    private int getTimesSingleQueried(String schemaKey) {
-        Integer integer = timesSingleQueried.get(schemaKey);
-        if (integer == null) {
-            return 0;
-        }
-        return integer;
     }
 
     public abstract static class SingleResultSetExtractor extends ResultSetExtractor {

@@ -6,7 +6,10 @@ import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class ChangeLogParserFactory {
 
@@ -16,11 +19,11 @@ public class ChangeLogParserFactory {
     private Comparator<ChangeLogParser> changelogParserComparator;
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new ChangeLogParserFactory();
     }
 
-    public static ChangeLogParserFactory getInstance() {
+    public static synchronized ChangeLogParserFactory getInstance() {
         if (instance == null) {
              instance = new ChangeLogParserFactory();
         }
@@ -43,7 +46,7 @@ public class ChangeLogParserFactory {
             }
         };
 
-        parsers = new ArrayList<ChangeLogParser>();
+        parsers = new ArrayList<>();
         try {
             classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
 

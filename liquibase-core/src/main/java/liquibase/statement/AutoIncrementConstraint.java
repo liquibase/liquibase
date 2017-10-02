@@ -15,10 +15,10 @@ public class AutoIncrementConstraint implements ColumnConstraint {
     }
 
     public AutoIncrementConstraint(
-    		String columnName, BigInteger startWith, BigInteger incrementBy) {
-    	this(columnName);
-    	setStartWith(startWith);
-    	setIncrementBy(incrementBy);
+            String columnName, BigInteger startWith, BigInteger incrementBy) {
+        this(columnName);
+        setStartWith(startWith);
+        setIncrementBy(incrementBy);
     }
 
     public String getColumnName() {
@@ -31,20 +31,20 @@ public class AutoIncrementConstraint implements ColumnConstraint {
     }
 
     public BigInteger getStartWith() {
-    	return startWith;
+        return startWith;
     }
     
     public AutoIncrementConstraint setStartWith(BigInteger startWith) {
-    	this.startWith = startWith;
-    	return this;
+        this.startWith = startWith;
+        return this;
     }
     
     public BigInteger getIncrementBy() {
-    	return incrementBy;
+        return incrementBy;
     }
     
     public AutoIncrementConstraint setIncrementBy(BigInteger incrementBy) {
-    	this.incrementBy = incrementBy;
-    	return this;
+        this.incrementBy = incrementBy;
+        return this;
     }
 }

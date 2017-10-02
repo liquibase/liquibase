@@ -5,11 +5,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.ReflectionSerializer;
 import liquibase.util.StringUtils;
-
-import java.util.Set;
 
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.
@@ -17,10 +13,13 @@ import java.util.Set;
 public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     private Boolean nullable;
+    private String notNullConstraintName;
     private Boolean primaryKey;
     private String primaryKeyName;
     private String primaryKeyTablespace;
     private String references;
+    private String referencedTableCatalogName;
+    private String referencedTableSchemaName;
     private String referencedTableName;
     private String referencedColumnNames;
     private Boolean unique;
@@ -56,6 +55,17 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * Returns the name to use for the NOT NULL constraint. Returns null if not specified
+     */
+    public String getNotNullConstraintName() {
+        return notNullConstraintName;
+    }
+
+    public ConstraintsConfig setNotNullConstraintName(String notNullConstraintName) {
+        this.notNullConstraintName = notNullConstraintName;
+        return this;
+    }
 
     /**
      * Returns true if the column should be part of the primary key. Returns null if unspecified
@@ -252,13 +262,29 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
      * Returns the tablespace to use for the defined primary key. Returns null if not specified.
      */
     public String getPrimaryKeyTablespace() {
-		return primaryKeyTablespace;
-	}
+        return primaryKeyTablespace;
+    }
 
-	public ConstraintsConfig setPrimaryKeyTablespace(String primaryKeyTablespace) {
-		this.primaryKeyTablespace = primaryKeyTablespace;
+    public ConstraintsConfig setPrimaryKeyTablespace(String primaryKeyTablespace) {
+        this.primaryKeyTablespace = primaryKeyTablespace;
         return this;
-	}
+    }
+
+    public String getReferencedTableCatalogName() {
+        return referencedTableCatalogName;
+    }
+
+    public void setReferencedTableCatalogName(String referencedTableCatalogName) {
+        this.referencedTableCatalogName = referencedTableCatalogName;
+    }
+
+    public String getReferencedTableSchemaName() {
+        return referencedTableSchemaName;
+    }
+
+    public void setReferencedTableSchemaName(String referencedTableSchemaName) {
+        this.referencedTableSchemaName = referencedTableSchemaName;
+    }
 
     public String getReferencedTableName() {
         return referencedTableName;
@@ -278,12 +304,12 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     private Boolean parseBoolean(String value) {
         value = StringUtils.trimToNull(value);
-        if (value == null || value.equalsIgnoreCase("null")) {
+        if ((value == null) || "null".equalsIgnoreCase(value)) {
             return null;
         } else {
-            if (value.equalsIgnoreCase("true") || value.equals("1")) {
+            if ("true".equalsIgnoreCase(value) || "1".equals(value)) {
                 return true;
-            } else if (value.equalsIgnoreCase("false") || value.equals("0")) {
+            } else if ("false".equalsIgnoreCase(value) || "0".equals(value)) {
                 return false;
             } else {
                 throw new UnexpectedLiquibaseException("Unparsable boolean value: "+value);

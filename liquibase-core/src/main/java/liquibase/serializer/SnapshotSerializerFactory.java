@@ -9,13 +9,13 @@ import java.util.*;
 public class SnapshotSerializerFactory {
     private static SnapshotSerializerFactory instance;
 
-    private Map<String, List<SnapshotSerializer>> serializers = new HashMap<String, List<SnapshotSerializer>>();
+    private Map<String, List<SnapshotSerializer>> serializers = new HashMap<>();
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SnapshotSerializerFactory();
     }
 
-    public static SnapshotSerializerFactory getInstance() {
+    public static synchronized SnapshotSerializerFactory getInstance() {
         if (instance == null) {
             instance = new SnapshotSerializerFactory();
         }
@@ -61,7 +61,7 @@ public class SnapshotSerializerFactory {
         for (String extension : snapshotSerializer.getValidFileExtensions()) {
             List<SnapshotSerializer> snapshotSerializers = serializers.get(extension);
             if (snapshotSerializers == null) {
-                snapshotSerializers = new ArrayList<SnapshotSerializer>();
+                snapshotSerializers = new ArrayList<>();
                 serializers.put(extension, snapshotSerializers);
             }
             snapshotSerializers.add(snapshotSerializer);

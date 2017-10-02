@@ -3,9 +3,10 @@ package liquibase.diff.compare.core;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
-import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
@@ -30,6 +31,12 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null) &&
+            !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(),
+                databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
+            return false;
+        }
+
         if (databaseObject1.getClass().isAssignableFrom(databaseObject2.getClass()) || databaseObject2.getClass().isAssignableFrom(databaseObject1.getClass())) {
             return nameMatches(databaseObject1, databaseObject2, accordingTo);
         }
@@ -40,7 +47,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
     @Override
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {
 
-        Set<String> attributes = new HashSet<String>();
+        Set<String> attributes = new HashSet<>();
         attributes.addAll(databaseObject1.getAttributes());
         attributes.addAll(databaseObject2.getAttributes());
 
@@ -60,7 +67,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
             attribute2 = undoCollection(attribute2, attribute1);
 
             ObjectDifferences.CompareFunction compareFunction;
-            if (attribute1 instanceof DatabaseObject || attribute2 instanceof DatabaseObject) {
+            if ((attribute1 instanceof DatabaseObject) || (attribute2 instanceof DatabaseObject)) {
                 Class<? extends DatabaseObject> type;
                 if (attribute1 != null) {
                     type = (Class<? extends DatabaseObject>) attribute1.getClass();
@@ -68,14 +75,15 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
                     type = (Class<? extends DatabaseObject>) attribute2.getClass();
                 }
                 compareFunction = new ObjectDifferences.DatabaseObjectNameCompareFunction(type, accordingTo);
-            } else if (attribute1 instanceof DataType || attribute2 instanceof DataType) {
+            } else if ((attribute1 instanceof DataType) || (attribute2 instanceof DataType)) {
                 compareFunction = new ObjectDifferences.ToStringCompareFunction(false);
-            } else if (attribute1 instanceof Column.AutoIncrementInformation || attribute2 instanceof Column.AutoIncrementInformation) {
+            } else if ((attribute1 instanceof Column.AutoIncrementInformation) || (attribute2 instanceof Column
+                .AutoIncrementInformation)) {
                 compareFunction = new ObjectDifferences.ToStringCompareFunction(false);
-            } else if (attribute1 instanceof Collection || attribute2 instanceof Collection) {
-                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction(accordingTo));
+            } else if ((attribute1 instanceof Collection) || (attribute2 instanceof Collection)) {
+                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction(chain.getSchemaComparisons(), accordingTo));
             } else {
-                compareFunction = new ObjectDifferences.StandardCompareFunction(accordingTo);
+                compareFunction = new ObjectDifferences.StandardCompareFunction(chain.getSchemaComparisons(), accordingTo);
             }
             differences.compare(attribute, databaseObject1, databaseObject2, compareFunction);
 
@@ -90,8 +98,10 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
      * Otherwise, return the original collection.
      */
     protected Object undoCollection(Object potentialCollection, Object otherObject) {
-        if (potentialCollection != null && otherObject != null && potentialCollection instanceof Collection && !(otherObject instanceof Collection)) {
-            if (((Collection) potentialCollection).size() == 1 && ((Collection) potentialCollection).iterator().next().getClass().equals(otherObject.getClass())) {
+        if ((potentialCollection != null) && (otherObject != null) && (potentialCollection instanceof Collection) &&
+            !(otherObject instanceof Collection)) {
+            if ((((Collection) potentialCollection).size() == 1) && ((Collection) potentialCollection).iterator()
+                .next().getClass().equals(otherObject.getClass())) {
                 potentialCollection = ((Collection) potentialCollection).iterator().next();
             }
         }
@@ -103,10 +113,10 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
         String object1Name = accordingTo.correctObjectName(databaseObject1.getName(), databaseObject1.getClass());
         String object2Name = accordingTo.correctObjectName(databaseObject2.getName(), databaseObject2.getClass());
 
-        if (object1Name == null && object2Name == null) {
+        if ((object1Name == null) && (object2Name == null)) {
             return true;
         }
-        if (object1Name == null || object2Name == null) {
+        if ((object1Name == null) || (object2Name == null)) {
             return false;
         }
         if (accordingTo.isCaseSensitive()) {

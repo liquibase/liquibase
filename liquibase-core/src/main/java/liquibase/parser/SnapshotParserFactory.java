@@ -19,11 +19,11 @@ public class SnapshotParserFactory {
     private Comparator<SnapshotParser> snapshotParserComparator;
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SnapshotParserFactory();
     }
 
-    public static SnapshotParserFactory getInstance() {
+    public static synchronized SnapshotParserFactory getInstance() {
         if (instance == null) {
              instance = new SnapshotParserFactory();
         }
@@ -46,7 +46,7 @@ public class SnapshotParserFactory {
             }
         };
 
-        parsers = new ArrayList<SnapshotParser>();
+        parsers = new ArrayList<>();
         try {
             classes = ServiceLocator.getInstance().findClasses(SnapshotParser.class);
 

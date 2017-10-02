@@ -2,13 +2,13 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameTableStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatement> {
 
@@ -40,7 +40,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " RENAME " + database.escapeObjectName(statement.getNewTableName(), Table.class);
         } else if ((database instanceof DerbyDatabase) || (database instanceof InformixDatabase)) {
             sql = "RENAME TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " TO " + database.escapeObjectName(statement.getNewTableName(), Table.class);
-        } else if (database instanceof HsqlDatabase || database instanceof H2Database) {
+        } else if ((database instanceof HsqlDatabase) || (database instanceof H2Database)) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " RENAME TO " + database.escapeObjectName(statement.getNewTableName(), Table.class);
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " RENAME TO " + database.escapeObjectName(statement.getNewTableName(), Table.class);

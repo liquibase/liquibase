@@ -17,6 +17,9 @@ public class DatabaseDataType {
     }
     
     public DatabaseDataType(String name, Object... parameters) {
+        if (parameters == null) {
+            parameters = new Object[0];
+        }
         this.type = name;
 
         String[] stringParams = new String[parameters.length];
@@ -37,7 +40,8 @@ public class DatabaseDataType {
      * @return Whether the type is serial
      */
     public boolean isAutoIncrement() {
-        return type.equalsIgnoreCase("serial") || type.equalsIgnoreCase("bigserial");
+        return "serial".equalsIgnoreCase(type) || "bigserial".equalsIgnoreCase(type) || "smallserial"
+            .equalsIgnoreCase(type);
     }
 
     public String toSql() {

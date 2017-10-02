@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class IntrospectionContext {
     private final Class<?> targetClass;
-    private final Map<String, PropertyDescriptor> descriptors = new HashMap<String, PropertyDescriptor>();
+    private final Map<String, PropertyDescriptor> descriptors = new HashMap<>();
 
     public IntrospectionContext(Class<?> targetClass) {
         if (targetClass == null) {

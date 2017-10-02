@@ -40,19 +40,19 @@ public abstract class NumberUtils {
             return number;
         } else if (targetClass.equals(Byte.class)) {
             long value = number.longValue();
-            if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+            if ((value < Byte.MIN_VALUE) || (value > Byte.MAX_VALUE)) {
                 raiseOverflowException(number, targetClass);
             }
             return number.byteValue();
         } else if (targetClass.equals(Short.class)) {
             long value = number.longValue();
-            if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+            if ((value < Short.MIN_VALUE) || (value > Short.MAX_VALUE)) {
                 raiseOverflowException(number, targetClass);
             }
             return number.shortValue();
         } else if (targetClass.equals(Integer.class)) {
             long value = number.longValue();
-            if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+            if ((value < Integer.MIN_VALUE) || (value > Integer.MAX_VALUE)) {
                 raiseOverflowException(number, targetClass);
             }
             return number.intValue();
@@ -184,7 +184,7 @@ public abstract class NumberUtils {
         } else if (value.startsWith("#", index)) {
             index++;
             radix = 16;
-        } else if (value.startsWith("0", index) && value.length() > 1 + index) {
+        } else if (value.startsWith("0", index) && (value.length() > (1 + index))) {
 			index++;
 			radix = 8;
 		}

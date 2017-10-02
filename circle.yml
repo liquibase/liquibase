@@ -1,0 +1,42 @@
+machine:
+  java:
+    version: openjdk8
+  services:
+    - mysql
+    - postgresql
+  environment:
+    _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+
+dependencies:
+  override:
+    - sudo apt-get install -y rpm
+
+compile:
+  override:
+    - cp -vf liquibase-integration-tests/src/test/resources/liquibase/liquibase.integrationtest.circleci.properties liquibase-integration-tests/src/test/resources/liquibase/liquibase.integrationtest.local.properties
+    - mvn compile -B
+
+test:
+  override:
+    # We may get into trouble if we try to do integration tests that need RDBMS servers running with more than
+    # one server, so we might have to split up our integration tests for these in the future.
+    # There seems to be a memory leak that gets worse the higher the default liquibase.defaultlogger.level is.
+    - mvn -B -Psonar clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=$SONARQUBE_TOKEN
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+    - cp liquibase-core/target/liquibase*-bin.zip $CIRCLE_ARTIFACTS
+    - cp liquibase-core/target/liquibase*-bin.tar.gz $CIRCLE_ARTIFACTS
+    - cp liquibase-core/target/liquibase*-SNAPSHOT.jar $CIRCLE_ARTIFACTS
+    - cp liquibase-rpm/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm $CIRCLE_ARTIFACTS
+    - cp liquibase-debian/target/*.deb $CIRCLE_ARTIFACTS
+
+database:
+  override:
+    - mkdir -p /home/ubuntu/ts_liquibase2
+    - sudo chown postgres.postgres /home/ubuntu/ts_liquibase2
+    - psql postgres -f liquibase-integration-tests/setup/postgresql/create_dbs_for_integration_tests.sql --variable="path_for_tablespace='/home/ubuntu/ts_liquibase2'"
+    - mysql --verbose -u ubuntu mysql < liquibase-integration-tests/setup/mysql/create_dbs_for_integration_tests.sql
+

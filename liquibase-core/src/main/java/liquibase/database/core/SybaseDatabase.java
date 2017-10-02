@@ -3,14 +3,15 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 
@@ -24,12 +25,7 @@ import java.util.Set;
  */
 public class SybaseDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
-    protected Set<String> systemTablesAndViews = new HashSet<String>();
-
-    @Override
-    public String getShortName() {
-        return "sybase";
-    }
+    protected Set<String> systemTablesAndViews = new HashSet<>();
 
     public SybaseDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
@@ -59,6 +55,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         super.quotingStartCharacter ="[";
         super.quotingEndCharacter="]";
 
+    }
+
+    @Override
+    public String getShortName() {
+        return "sybase";
     }
 
 /*    public void setConnection(Connection connection) {
@@ -123,8 +124,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:sybase")) {
-            return "com.sybase.jdbc3.jdbc.SybDriver";
+        if (url.startsWith("jdbc:xsybase")) {
+            return "com.sybase.jdbc4.jdbc.SybDriver";
         } else if (url.startsWith("jdbc:jtds:sybase")) {
             return "net.sourceforge.jtds.jdbc.Driver";
         }
@@ -206,11 +207,13 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
-        if (example.getSchema() != null && example.getSchema().getName() != null) {
-            if (example instanceof Table && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+        if ((example.getSchema() != null) && (example.getSchema().getName() != null)) {
+            if ((example instanceof Table) && ("sys".equals(example.getSchema().getName()) || "sybfi".equals(example
+                .getSchema().getName()))) {
                 return true;
             }
-            if (example instanceof View && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+            if ((example instanceof View) && ("sys".equals(example.getSchema().getName()) || "sybfi".equals(example
+                .getSchema().getName()))) {
                 return true;
             }
         }
@@ -223,18 +226,9 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getConnectionSchemaName() {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
-            return null;
-        }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
-        } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
-        }
-        return null;
+    protected SqlStatement getConnectionSchemaNameCallStatement() {
+        return new RawSqlStatement("select user_name()");
     }
-
 
     @Override
     public boolean supportsRestrictForeignKeys() {
@@ -266,11 +260,14 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 	 */
 	@Override
     public int getDatabaseMajorVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            return -1;
+        }
         try {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogFactory.getLogger()
-        		.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+        	LogService.getLog(getClass())
+        		.warning(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
@@ -281,11 +278,15 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 	 */
 	@Override
     public int getDatabaseMinorVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            return -1;
+        }
+
         try {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogFactory.getLogger()
-    			.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+        	LogService.getLog(getClass())
+    			.warning(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
@@ -307,11 +308,12 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        String name = super.escapeObjectName(catalogName, schemaName, objectName, objectType);
-        if (name != null) {
-            name = name.replaceFirst("\\.", ".."); //use .. between schemaName and object name
-        }
-        return name;
+    public boolean requiresExplicitNullForColumns() {
+        /* SAP Adaptive Server Enterprise and, by extension, SQL Anywhere in ASE compatiblity mode have the
+         * strange requirement of setting the nullability of a column to NOT NULL if neither NULL nor
+         * NOT NULL are specified. See:
+         * http://dcx.sap.com/index.html#sqla170/en/html/819378356ce21014a17f8d51529119ee.html
+         */
+        return true;
     }
 }

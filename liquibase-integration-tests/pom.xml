@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>liquibase-integration-tests</artifactId>
-    <name>Liquibase Integration Tests</name>
 
     <parent>
         <artifactId>liquibase-parent</artifactId>
         <groupId>org.liquibase</groupId>
-        <version>3.4.3-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>3.6.0-SNAPSHOT</version>
     </parent>
+
+
+    <artifactId>liquibase-integration-tests</artifactId>
+    <name>Liquibase Integration Tests</name>
 
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymockclassextension</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
@@ -32,44 +29,15 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
+            <artifactId>spring-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
 
-        <!--<dependency>-->
-        <!--<groupId>org.liquibase.ext</groupId>-->
-        <!--<artifactId>modify-column</artifactId>-->
-        <!--<version>2.0-SNAPSHOT</version>-->
-        <!--</dependency>-->
-        <!-- sample extensions -->
-        <!-- JDBC drivers -->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-verifier</artifactId>
@@ -92,32 +60,76 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Main artifacts to be tested -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JDBC drivers -->
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.firebirdsql.jdbc</groupId>
+            <artifactId>jaybird-jdk17</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+        </dependency>
+
     </dependencies>
-    <profiles>
-        <profile>
-            <id>oracle</id>
-            <dependencies>
-                <dependency>
-                    <groupId>oracle</groupId>
-                    <artifactId>oracle-ojdbc6</artifactId>
-                    <version>12.1.0.1</version>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>buildServer</id>
-            <activation>
-                <property>
-                    <name>env.liquibase.buildserver</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <!--<properties>-->
-            <!--<liquibase.excludedTests>**/MavenIntegrationTest.java</liquibase.excludedTests>-->
-            <!--</properties>-->
-        </profile>
-    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -126,13 +138,51 @@
                     <systemProperties>
                         <property>
                             <name>liquibase.defaultlogger.level</name>
-                            <value>debug</value>
+                            <value>WARNING</value>
                         </property>
                     </systemProperties>
                     <excludes>
                         <exclude>**/*.java</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe-plugin.version}</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                    <skipITs>${skipITs}</skipITs>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <systemPropertyVariables>
+                        <jacoco-agent.destfile>${jacoco.it.execution.data.file}</jacoco-agent.destfile>
+                    </systemPropertyVariables>
+                    <systemProperties>
+                        <property>
+                            <name>liquibase.defaultlogger.level</name>
+                            <value>WARNING</value>
+                        </property>
+                    </systemProperties>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*IntegrationTest.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/IT*.java</include>
+                        <include>**/*IT.java</include>
+                        <include>**/*ITCase.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -165,5 +215,73 @@
         </testResources>
     </build>
 
+    <profiles>
+        <profile>
+            <!-- The Oracle RDBMS JDBC driver is only available under a proprietary license from the Oracle
+                     Maven repository. You have to register and accept a license agreement to gain access. The procedure
+                     is described at
+                     http://docs.oracle.com/middleware/1213/core/MAVEN/config_maven_repo.htm#MAVEN9012
+            -->
+            <id>oracle</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.oracle.jdbc</groupId>
+                    <artifactId>ojdbc8</artifactId>
+                    <version>12.2.0.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <!-- IBM DB2 drivers are not available at all in Maven repositories (due to their proprietary nature
+                     and IBM not having a Maven repository that would contain these artifacts. The only way to get
+                     these drivers is to extract the file db2jcc4.jar from a licensed software installation and
+                     manually install them in your local (per-user) maven repository like this (you will need to replace
+                     the path to the JAR and the actual version number of the JDBC driver!):
+
+                     mvn install:install-file -DlocalRepositoryPath=lib -DcreateChecksum=true -Dpackaging=jar \
+                            -Dfile=d:\IBM\SQLLIB\java\db2jcc4.jar -DgroupId=com.ibm.db2.jcc -DartifactId=db2jcc4 \
+                            -Dversion=4.22.29
+
+                     After that, adjust the driver version number in the following <dependency> tag.
+             -->
+            <id>db2</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ibm.db2.jcc</groupId>
+                    <artifactId>db2jcc4</artifactId>
+                    <version>4.22.29</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <!-- SAP (formerly: Sybase) j/Connect drivers are not available at all in Maven repositories (due to their
+            proprietary nature
+                     and IBM not having a Maven repository that would contain these artifacts. The only way to get
+                     these drivers is to extract the file jconn4.jar from a licensed software installation and
+                     manually install them in your local (per-user) maven repository like this (you will need to replace
+                     the path to the JAR and the actual version number of the JDBC driver!):
+
+                     mvn install:install-file -DlocalRepositoryPath=lib -DcreateChecksum=true -Dpackaging=jar \
+                            -Dfile=D:\sap\jConnect-16_0\classes\jconn4.jar -DgroupId=com.sybase.jdbc4.utils \
+                            -DartifactId=jconnect -Dversion=16.0.SP02.PL05
+
+                    One possible download source is the "SAP Store" at https://store.sap.com where you can search for the
+                    term "SCN ADAPTIVE SERVER ENTERPRISE SDK" and "buy" it as "trial" software for € 0.00.
+
+                     After that, adjust the driver version number in the following <dependency> tag.
+             -->
+            <id>sap-jconnect</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.sybase.jdbc4.utils</groupId>
+                    <artifactId>jconnect</artifactId>
+                    <version>16.0.SP02.PL05</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+    </profiles>
 
 </project>

@@ -30,29 +30,29 @@ public class ChangeFactoryTest {
         ChangeFactory.reset();
     }
 
-	@Test
-	public void supportStatement() throws Exception {
-		CreateSequenceStatement statement = new CreateSequenceStatement(null, null, "seq_my_table");
-		MSSQLDatabase database10 = new MSSQLDatabase() {
+    @Test
+    public void supportStatement() throws Exception {
+        CreateSequenceStatement statement = new CreateSequenceStatement(null, null, "seq_my_table");
+        MSSQLDatabase database10 = new MSSQLDatabase() {
             @Override
             public int getDatabaseMajorVersion() throws DatabaseException {
-                return 10;
+                return SQL_SERVER_2008_MAJOR_VERSION;
             }
-		};
+        };
 
         MSSQLDatabase database11 = new MSSQLDatabase() {
             @Override
             public int getDatabaseMajorVersion() throws DatabaseException {
-                return 11;
+                return SQL_SERVER_2012_MAJOR_VERSION;
             }
         };
 
         ChangeFactory.getInstance(); //make sure there is no problem with SqlGeneratorFactory.generatorsByKey cache
-		assertFalse("unsupported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database10));
+        assertFalse("unsupported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database10));
         assertTrue("supported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database11));
-	}
+    }
 
-	@Test
+    @Test
     public void constructor() {
         ChangeFactory instance = ChangeFactory.getInstance();
         assertTrue(instance.getRegistry().containsKey("createTable"));
@@ -186,7 +186,7 @@ public class ChangeFactoryTest {
         assertTrue(change instanceof CreateTableChange);
 
     }
-
+    
     @LiquibaseService(skip = true)
     public static class Priority5Change extends CreateTableChange {
         @Override
@@ -225,7 +225,7 @@ public class ChangeFactoryTest {
 
     @LiquibaseService(skip = true)
     public static class SometimesExceptionThrowingChange extends CreateTableChange {
-        private static int timesCalled = 0;
+        private static int timesCalled;
         public SometimesExceptionThrowingChange() {
             if (timesCalled > 1) {
                 throw new RuntimeException("I throw exceptions");

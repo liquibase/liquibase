@@ -1,12 +1,13 @@
 package liquibase.database.core;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import junit.framework.TestCase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.structure.core.Table;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class HsqlDatabaseTest extends TestCase {
     public void testGetDefaultDriver() {

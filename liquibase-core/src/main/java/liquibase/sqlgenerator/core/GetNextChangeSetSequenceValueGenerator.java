@@ -18,6 +18,8 @@ public class GetNextChangeSetSequenceValueGenerator extends AbstractSqlGenerator
 
     @Override
     public Sql[] generateSql(GetNextChangeSetSequenceValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return SqlGeneratorFactory.getInstance().generateSql(new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("MAX(ORDEREXECUTED)", true)), database);
+			String quotedColumnName = database.escapeColumnName(null, null, null, "ORDEREXECUTED");
+			return SqlGeneratorFactory.getInstance()
+					.generateSql(new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("MAX("+quotedColumnName+")", true)), database);
     }
 }

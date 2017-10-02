@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Warnings {
 
-    private List<String> messages = new ArrayList<String>();
+    private List<String> messages = new ArrayList<>();
 
     public Warnings addWarning(String warning) {
         messages.add(warning);
@@ -24,6 +24,6 @@ public class Warnings {
     }
 
     public boolean hasWarnings() {
-        return messages.size() > 0;
+        return !messages.isEmpty();
     }
 }

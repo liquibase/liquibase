@@ -1,9 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
@@ -12,8 +8,10 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.util.StringUtils;
-
 import org.apache.maven.plugin.MojoExecutionException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 /**
  * Generates SQL that marks all unapplied changes as applied.
@@ -100,8 +98,8 @@ public class LiquibaseGenerateChangeLogMojo extends
 
         getLog().info("Generating Change Log from database " + database.toString());
         try {
-            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true);
-            if (diffExcludeObjects != null && diffIncludeObjects != null) {
+            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true, null);
+            if ((diffExcludeObjects != null) && (diffIncludeObjects != null)) {
                 throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
             }
             if (diffExcludeObjects != null) {
@@ -115,13 +113,10 @@ public class LiquibaseGenerateChangeLogMojo extends
                     StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), diffOutputControl);
             getLog().info("Output written to Change Log file, " + outputChangeLogFile);
         }
-        catch (IOException e) {
+        catch (IOException | ParserConfigurationException e) {
             throw new LiquibaseException(e);
         }
-        catch (ParserConfigurationException e) {
-            throw new LiquibaseException(e);
-        }
-	}
+    }
 
 	@Override
 	protected void printSettings(String indent) {

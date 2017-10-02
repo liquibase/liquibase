@@ -46,7 +46,8 @@ public class DropSequenceChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{new DropSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())};
+        DropSequenceStatement statement = new DropSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName());
+        return new SqlStatement[]{statement};
     }
 
     @Override

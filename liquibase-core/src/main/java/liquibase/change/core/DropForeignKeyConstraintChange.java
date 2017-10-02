@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropForeignKeyConstraintStatement;
@@ -57,11 +56,6 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-        if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase();
-    	} 
-    	
         return new SqlStatement[]{
                 new DropForeignKeyConstraintStatement(
                         getBaseTableCatalogName(),
@@ -78,13 +72,6 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }
-    }
-
-    private SqlStatement[] generateStatementsForSQLiteDatabase() {
-    	// SQLite does not support foreign keys until now.
-		// See for more information: http://www.sqlite.org/omitted.html
-		// Therefore this is an empty operation...
-		return new SqlStatement[]{};
     }
 
     @Override

@@ -26,8 +26,8 @@ public class ForeignKey extends AbstractDatabaseObject{
         if (foreignKeyTable != null) {
             setForeignKeyTable(new Table(foreignKeyCatalog, foreignKeySchema, foreignKeyTable));
         }
-        if (baseTableColumns != null && baseTableColumns.length > 0 && baseTableColumns[0] != null) {
-            setForeignKeyColumns(Arrays.asList(baseTableColumns));
+        if ((baseTableColumns != null) && (baseTableColumns.length > 0) && (baseTableColumns[0] != null)) {
+            setForeignKeyColumns(new ArrayList<>(Arrays.asList(baseTableColumns)));
         }
 
     }
@@ -35,7 +35,7 @@ public class ForeignKey extends AbstractDatabaseObject{
     @Override
     public DatabaseObject[] getContainingObjects() {
 
-        List<Column> objects = new ArrayList<Column>();
+        List<Column> objects = new ArrayList<>();
         if (getPrimaryKeyColumns() != null) {
             for (Column column : getPrimaryKeyColumns()) {
                 objects.add(column);
@@ -74,18 +74,22 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("primaryKeyColumns", List.class);
     }
 
-    public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
-        this.getAttribute("primaryKeyColumns", List.class).add(primaryKeyColumn);
-        primaryKeyColumn.setRelation(getPrimaryKeyTable());
-
-        return this;
-    }
-
     public ForeignKey setPrimaryKeyColumns(List<Column> primaryKeyColumns) {
         this.setAttribute("primaryKeyColumns", primaryKeyColumns);
         for (Column column : getPrimaryKeyColumns()) {
-            column.setRelation(getPrimaryKeyTable());
+            if (column.getAttribute("relation", Object.class) == null) {
+                column.setRelation(getPrimaryKeyTable());
+            }
         }
+        return this;
+    }
+
+    public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
+        this.getAttribute("primaryKeyColumns", List.class).add(primaryKeyColumn);
+        if (primaryKeyColumn.getAttribute("relation", Object.class) == null) {
+            primaryKeyColumn.setRelation(getPrimaryKeyTable());
+        }
+
         return this;
     }
 
@@ -102,17 +106,23 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("foreignKeyColumns", List.class);
     }
 
-    public void addForeignKeyColumn(Column foreignKeyColumn) {
-        foreignKeyColumn.setRelation(getForeignKeyTable());
-        getAttribute("foreignKeyColumns", List.class).add(foreignKeyColumn);
-    }
-
     public ForeignKey setForeignKeyColumns(List<Column> foreignKeyColumns) {
         this.setAttribute("foreignKeyColumns", foreignKeyColumns);
 
         for (Column column : getForeignKeyColumns()) {
-            column.setRelation(getForeignKeyTable());
+            if (column.getAttribute("relation", Object.class) == null) {
+                column.setRelation(getForeignKeyTable());
+            }
         }
+
+        return this;
+    }
+
+    public ForeignKey addForeignKeyColumn(Column foreignKeyColumn) {
+        if (foreignKeyColumn.getAttribute("relation", Object.class) == null) {
+            foreignKeyColumn.setRelation(getForeignKeyTable());
+        }
+        getAttribute("foreignKeyColumns", List.class).add(foreignKeyColumn);
 
         return this;
     }
@@ -137,7 +147,7 @@ public class ForeignKey extends AbstractDatabaseObject{
                 return obj.getName();
             }
         };
-        return getName() + "(" + getForeignKeyTable() + "." + StringUtils.join(getForeignKeyColumns(), ", ", columnFormatter) + " -> " + getPrimaryKeyTable() + "." + StringUtils.join(getPrimaryKeyColumns(), ", ", columnFormatter) + ")";
+        return getName() + "(" + getForeignKeyTable() + "[" + StringUtils.join(getForeignKeyColumns(), ", ", columnFormatter) + "] -> " + getPrimaryKeyTable() + "[" + StringUtils.join(getPrimaryKeyColumns(), ", ", columnFormatter) + "])";
     }
 
 
@@ -160,17 +170,12 @@ public class ForeignKey extends AbstractDatabaseObject{
         return this;
     }
 
-    public ForeignKey setUpdateRule(ForeignKeyConstraintType rule) {
-        this.setAttribute("updateRule", rule);
-        return this;
-    }
-
     public ForeignKeyConstraintType getUpdateRule() {
         return getAttribute("updateRule", ForeignKeyConstraintType.class);
     }
 
-    public ForeignKey setDeleteRule(ForeignKeyConstraintType rule) {
-        this.setAttribute("deleteRule", rule);
+    public ForeignKey setUpdateRule(ForeignKeyConstraintType rule) {
+        this.setAttribute("updateRule", rule);
         return this;
     }
 
@@ -178,12 +183,22 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("deleteRule", ForeignKeyConstraintType.class);
     }
 
+    public ForeignKey setDeleteRule(ForeignKeyConstraintType rule) {
+        this.setAttribute("deleteRule", rule);
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if ((o == null) || (getClass() != o.getClass())) return false;
 
         ForeignKey that = (ForeignKey) o;
+
+        if ((this.getSchema() != null) && (that.getSchema() != null)) {
+            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+        }
+
 
         if (getForeignKeyColumns() == null) {
             return this.getName().equalsIgnoreCase(that.getName());
@@ -196,10 +211,12 @@ public class ForeignKey extends AbstractDatabaseObject{
             }
         };
 
-        return (StringUtils.join(getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(that.getForeignKeyColumns(), ",", formatter))
-                && (getForeignKeyTable() != null && that.getForeignKeyTable() != null && getForeignKeyTable().equals(that.getForeignKeyTable()))
-                && (StringUtils.join(getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(that.getPrimaryKeyColumns(), ",", formatter)))
-                && (getPrimaryKeyTable() != null && that.getPrimaryKeyTable() != null && getPrimaryKeyTable().equals(that.getPrimaryKeyTable())));
+        return (StringUtils.join(getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(that
+            .getForeignKeyColumns(), ",", formatter)) && ((getForeignKeyTable() != null) && (that.getForeignKeyTable
+            () != null) && getForeignKeyTable().equals(that.getForeignKeyTable())) && (StringUtils.join
+            (getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(that.getPrimaryKeyColumns(),
+            ",", formatter))) && ((getPrimaryKeyTable() != null) && (that.getPrimaryKeyTable() != null) &&
+            getPrimaryKeyTable().equals(that.getPrimaryKeyTable())));
     }
 
     @Override
@@ -216,15 +233,15 @@ public class ForeignKey extends AbstractDatabaseObject{
             result = getPrimaryKeyTable().hashCode();
         }
         if (getPrimaryKeyColumns() != null) {
-            result = 31 * result + StringUtils.join(getPrimaryKeyColumns(), ",", formatter).toUpperCase().hashCode();
+            result = (31 * result) + StringUtils.join(getPrimaryKeyColumns(), ",", formatter).toUpperCase().hashCode();
         }
 
         if (getForeignKeyTable() != null) {
-            result = 31 * result + getForeignKeyTable().hashCode();
+            result = (31 * result) + getForeignKeyTable().hashCode();
         }
 
         if (getForeignKeyColumns() != null) {
-            result = 31 * result + StringUtils.join(getForeignKeyColumns(), ",", formatter).toUpperCase().hashCode();
+            result = (31 * result) + StringUtils.join(getForeignKeyColumns(), ",", formatter).toUpperCase().hashCode();
         }
 
         return result;
@@ -242,25 +259,25 @@ public class ForeignKey extends AbstractDatabaseObject{
 
         ForeignKey o = (ForeignKey) other;
         int returnValue = 0;
-        if (this.getForeignKeyTable() != null && o.getForeignKeyTable() != null) {
+        if ((this.getForeignKeyTable() != null) && (o.getForeignKeyTable() != null)) {
             returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
         }
-        if (returnValue == 0 && this.getForeignKeyColumns() != null && o.getForeignKeyColumns() != null) {
+        if ((returnValue == 0) && (this.getForeignKeyColumns() != null) && (o.getForeignKeyColumns() != null)) {
             returnValue = StringUtils.join(this.getForeignKeyColumns(), ",", formatter).compareToIgnoreCase(StringUtils.join(o.getForeignKeyColumns(), ",", formatter));
         }
-        if (returnValue == 0 && this.getName() != null && o.getName() != null) {
+        if ((returnValue == 0) && (this.getName() != null) && (o.getName() != null)) {
             returnValue = this.getName().compareToIgnoreCase(o.getName());
         }
-        if (returnValue == 0 && this.getPrimaryKeyTable() != null && o.getPrimaryKeyTable() != null) {
+        if ((returnValue == 0) && (this.getPrimaryKeyTable() != null) && (o.getPrimaryKeyTable() != null)) {
             returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
         }
 
-        if (returnValue == 0 && this.getPrimaryKeyColumns() != null && o.getPrimaryKeyColumns() != null) {
+        if ((returnValue == 0) && (this.getPrimaryKeyColumns() != null) && (o.getPrimaryKeyColumns() != null)) {
             returnValue = StringUtils.join(this.getPrimaryKeyColumns(), ",", formatter).compareToIgnoreCase(StringUtils.join(o.getPrimaryKeyColumns(), ",", formatter));
         }
-        if (returnValue == 0 && this.getUpdateRule() != null && o.getUpdateRule() != null)
+        if ((returnValue == 0) && (this.getUpdateRule() != null) && (o.getUpdateRule() != null))
             returnValue = this.getUpdateRule().compareTo(o.getUpdateRule());
-        if (returnValue == 0 && this.getDeleteRule() != null && o.getDeleteRule() != null)
+        if ((returnValue == 0) && (this.getDeleteRule() != null) && (o.getDeleteRule() != null))
             returnValue = this.getDeleteRule().compareTo(o.getDeleteRule());
         return returnValue;
     }

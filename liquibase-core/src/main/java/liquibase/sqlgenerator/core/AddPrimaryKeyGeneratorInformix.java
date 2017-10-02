@@ -32,7 +32,7 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
         // Using auto-generated names of the form <constraint_type><tabid>_<constraintid> can cause collisions
         // See here: http://www-01.ibm.com/support/docview.wss?uid=swg21156047
         String constraintName = statement.getConstraintName();
-        if (constraintName != null && !constraintName.matches("[urcn][0-9]+_[0-9]+")) {
+        if ((constraintName != null) && !constraintName.matches("[urcn][0-9]+_[0-9]+")) {
             sql.append(" CONSTRAINT ");
             sql.append(database.escapeConstraintName(constraintName));
         }

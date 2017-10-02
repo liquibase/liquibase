@@ -1,7 +1,9 @@
 package liquibase.resource;
 
+import liquibase.exception.UnexpectedLiquibaseException;
+
 import java.io.*;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -13,12 +15,15 @@ import java.util.zip.GZIPInputStream;
 public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
     private File baseDirectory;
+    private boolean readyForInit;
 
     /**
      * Creates with no base directory. All files will be resolved exactly as they are given.
      */
     public FileSystemResourceAccessor() {
         baseDirectory = null;
+        readyForInit = true;
+        init();
     }
 
     /**
@@ -27,8 +32,34 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     public FileSystemResourceAccessor(String base) {
         baseDirectory = new File(base);
         if (!baseDirectory.isDirectory()) {
-            throw new IllegalArgumentException(base+" must be a directory");
+            throw new IllegalArgumentException(base + " must be a directory");
         }
+        readyForInit = true;
+        init();
+    }
+
+    @Override
+    protected void init() {
+        if (readyForInit) {
+            super.init();
+        }
+    }
+
+    @Override
+    protected void addRootPath(URL path) {
+        try {
+            File pathAsFile = new File(path.toURI());
+
+            for (File fileSystemRoot : File.listRoots()) {
+                if (pathAsFile.equals(fileSystemRoot)) { //don't include root
+                    return;
+                }
+            }
+        } catch (URISyntaxException e) {
+            //add like normal
+        }
+
+        super.addRootPath(path);
     }
 
     @Override
@@ -39,7 +70,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         InputStream fileStream = null;
         if (absoluteFile.isAbsolute()) {
             try {
-                fileStream =  openStream(absoluteFile);
+                fileStream = openStream(absoluteFile);
             } catch (FileNotFoundException e) {
                 //will try relative
             }
@@ -54,7 +85,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
 
 
-        Set<InputStream> returnSet = new HashSet<InputStream>();
+        Set<InputStream> returnSet = new HashSet<>();
         returnSet.add(fileStream);
         return returnSet;
     }
@@ -67,29 +98,79 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
     }
 
+
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        File absoluteFile = new File(path);
-        File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
+        File finalDir;
 
-        if (absoluteFile.exists() && absoluteFile.isDirectory()) {
-            Set<String> returnSet = new HashSet<String>();
-            getContents(absoluteFile, recursive, includeFiles, includeDirectories, path, returnSet);
-            return returnSet;
-        } else if (relativeFile.exists() && relativeFile.isDirectory()) {
-            Set<String> returnSet = new HashSet<String>();
-            getContents(relativeFile, recursive, includeFiles, includeDirectories, path, returnSet);
-            return returnSet;
+        if (relativeTo == null) {
+            finalDir = new File(this.baseDirectory, path);
+        } else {
+            finalDir = new File(this.baseDirectory, relativeTo);
+            finalDir = new File(finalDir.getParentFile(), path);
+        }
+
+        if (finalDir.exists() && finalDir.isDirectory()) {
+            Set<String> returnSet = new HashSet<>();
+            getContents(finalDir, recursive, includeFiles, includeDirectories, path, returnSet);
+
+            SortedSet<String> rootPaths = new TreeSet<>(new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    int i = -1 * ((Integer) o1.length()).compareTo(o2.length());
+                    if (i == 0) {
+                        i = o1.compareTo(o2);
+                    }
+                    return i;
+                }
+            });
+
+            for (String rootPath : getRootPaths()) {
+                rootPaths.add(rootPath.replaceFirst("^file:/", "").replace("\\", "/"));
+            }
+
+            Set<String> finalReturnSet = new LinkedHashSet<>();
+            for (String returnPath : returnSet) {
+                returnPath = returnPath.replace("\\", "/");
+                for (String rootPath : rootPaths) {
+                    if (returnPath.startsWith(rootPath)) {
+                        returnPath = returnPath.substring(rootPath.length());
+                        break;
+                    }
+                }
+                finalReturnSet.add(returnPath);
+            }
+            return finalReturnSet;
         }
 
         return null;
     }
 
     @Override
+    protected String convertToPath(String string) {
+        if (this.baseDirectory == null) {
+            return string;
+        } else {
+            try {
+                return "file:" + new File(string).getCanonicalPath().substring(this.baseDirectory.getCanonicalPath().length());
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+
+    }
+
+    @Override
     public ClassLoader toClassLoader() {
         try {
-            return new URLClassLoader(new URL[]{new URL("file://" + baseDirectory)});
-        } catch (MalformedURLException e) {
+            URL url;
+            if (baseDirectory == null) {
+                url = new File("/").toURI().toURL();
+            } else {
+                url = baseDirectory.toURI().toURL();
+            }
+            return new URLClassLoader(new URL[]{url});
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -100,7 +181,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         if (dir == null) {
             dir = new File(".");
         }
-        return getClass().getName()+"("+ dir.getAbsolutePath() +")";
+        return getClass().getName() + "(" + dir.getAbsolutePath() + ")";
     }
 
 }

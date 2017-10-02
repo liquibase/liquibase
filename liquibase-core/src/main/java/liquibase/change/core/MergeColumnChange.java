@@ -5,10 +5,10 @@ import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -114,7 +114,7 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
@@ -160,8 +160,8 @@ public class MergeColumnChange extends AbstractChange {
     			}
     			@Override
                 public boolean createThisIndex(Index index) {
-    				return !(index.getColumns().contains(getColumn1Name()) ||
-    						index.getColumns().contains(getColumn2Name()));
+    				return !(index.getColumnNames().contains(getColumn1Name()) ||
+    						index.getColumnNames().contains(getColumn2Name()));
     			}
     		};
         	

@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -30,7 +31,8 @@ public class SmallIntType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase) {
+        if ((database instanceof DB2Database) || (database instanceof DerbyDatabase) || (database instanceof
+            FirebirdDatabase) || (database instanceof InformixDatabase)) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
 
@@ -38,12 +40,19 @@ public class SmallIntType extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 5);
         }
 
+	if (database instanceof PostgresDatabase) {
+            if (isAutoIncrement()) {
+                return new DatabaseDataType("SMALLSERIAL");
+            } else {
+		return new DatabaseDataType("SMALLINT");
+	    }
+        }
         return super.toDatabaseDataType(database);
     }
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
         if (value instanceof DatabaseFunction) {
@@ -57,4 +66,8 @@ public class SmallIntType extends LiquibaseDataType {
         }
     }
 
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
+    }
 }
