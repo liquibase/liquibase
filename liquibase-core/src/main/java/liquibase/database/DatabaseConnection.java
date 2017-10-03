@@ -39,4 +39,6 @@ public interface DatabaseConnection {
     boolean isClosed() throws DatabaseException;
 
     void attached(Database database);
+
+    String getSchema();
 }
