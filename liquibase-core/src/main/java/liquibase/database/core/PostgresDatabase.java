@@ -144,8 +144,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             statement.executeUpdate(ALTER_SEARCH_PATH_QUERY);
             log.info("Default schema: %s has been added to search paths successfully!");
         } catch (SQLException | DatabaseException exception) {
-            log.warning(String.format("Default schema:%s wasn't added to search path due to " +
-                    "exception during execution of SQL statement:%s", defaultSchemaName, ALTER_SEARCH_PATH_QUERY), exception);
+            log.warning(String.format("Schema:%s wasn't added to search path due to " +
+                    "exception during execution of SQL statement:%s", databaseConnection.getSchema(), ALTER_SEARCH_PATH_QUERY), exception);
         }
     }
 
@@ -162,8 +162,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 }
             }
         } catch (SQLException | DatabaseException exception) {
-            log.warning(String.format("Default schema:%s wasn't added to search path due to " +
-                    "exception during execution of SQL statement:%s", defaultSchemaName, SHOW_SEARCH_PATH_QUERY), exception);
+            log.warning(String.format("Statement:%s couldn't be executed due to exception", SHOW_SEARCH_PATH_QUERY), exception);
             return null;
         }
         return searchPaths;
