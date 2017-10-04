@@ -402,7 +402,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "i.NAME AS INDEX_NAME, " +
                                 "3 AS TYPE, " +
                                 "k.COLNAME AS COLUMN_NAME, " +
-                                "k.COLNO AS ORDINAL_POSITION, " +
+                                "k.COLSEQ AS ORDINAL_POSITION, " +
                                 "CASE UNIQUERULE WHEN 'D' then 1 else 0 end as NON_UNIQUE, " +
                                 "k.ORDERING AS ORDER, " +
                                 "i.CREATOR AS INDEX_QUALIFIER " +
