@@ -7,11 +7,9 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.logging.Logger;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
@@ -156,7 +154,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     private List<String> getAllSearchPaths(JdbcConnection databaseConnection) {
         final String SHOW_SEARCH_PATH_QUERY = "SHOW search_path";
-        final List<String> searchPaths = new ArrayList<>();
+        final List<String> searchPaths = new ArrayList<String>();
         Statement statement = null;
         ResultSet  resultSet = null;
         try  {
