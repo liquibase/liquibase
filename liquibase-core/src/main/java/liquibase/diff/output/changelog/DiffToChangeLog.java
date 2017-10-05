@@ -48,7 +48,7 @@ public class DiffToChangeLog {
     private String changeSetPath;
     private DiffResult diffResult;
     private DiffOutputControl diffOutputControl;
-
+    private boolean tryDbaDependencies=true;
 
     private static Set<Class> loggedOrderFor = new HashSet<Class>();
 
@@ -315,6 +315,42 @@ public class DiffToChangeLog {
         return new ArrayList<DatabaseObject>(objects);
     }
 
+    private List<Map<String, ?>> queryForDependencies(Executor executor, List<String> schemas) 
+        throws DatabaseException {
+        List<Map<String, ?>> rs = null;
+        try {
+            if (tryDbaDependencies) {
+                rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                            @Override
+                            public String toString(String obj) {
+                                return "OWNER='" + obj + "'";
+                            }
+                        }
+                    ) + ")"));
+            }
+            else {
+                rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                                @Override
+                                public String toString(String obj) {
+                                    return "REFERENCED_OWNER='" + obj + "'";
+                                }
+                            }
+                ) + ")"));
+            }
+        }
+        catch (DatabaseException dbe) {
+            tryDbaDependencies = false;
+            rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                            @Override
+                            public String toString(String obj) {
+                                return "REFERENCED_OWNER='" + obj + "'";
+                            }
+                        }
+                 ) + ")"));
+        }
+        return rs;
+    }
+
     /**
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
@@ -343,16 +379,22 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof OracleDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
-                        @Override
-                        public String toString(String obj) {
-                            return "OWNER='" + obj + "'";
-                        }
-                    }
-            ) + ")"));
+            List<Map<String, ?>> rs = queryForDependencies(executor, schemas); 
             for (Map<String, ?> row : rs) {
-                String tabName = StringUtils.trimToNull((String) row.get("OWNER")) + "." + StringUtils.trimToNull((String) row.get("NAME"));
-                String bName = StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
+                String tabName = null;
+                if (tryDbaDependencies) {
+                    tabName = 
+                        StringUtils.trimToNull((String) row.get("OWNER")) + "." + 
+                        StringUtils.trimToNull((String) row.get("NAME"));
+                }
+                else {
+                    tabName = 
+                        StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." + 
+                        StringUtils.trimToNull((String) row.get("NAME"));
+                }
+                String bName = 
+                    StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." + 
+                    StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
 
                 graph.add(bName, tabName);
             }
