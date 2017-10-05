@@ -26,6 +26,7 @@ public class JdbcConnection implements DatabaseConnection {
     public JdbcConnection(java.sql.Connection connection, String schema) {
         this.con = connection;
         this.schema = schema;
+        attachSchemaToConnection();
     }
 
     @Override
@@ -40,6 +41,17 @@ public class JdbcConnection implements DatabaseConnection {
     public String getSchema() {
         return schema;
     }
+
+    private String attachSchemaToConnection() {
+        try {
+            this.con.setSchema(this.schema);
+        }catch (SQLException sqlException) {
+            LogFactory.getInstance().getLog().severe(String.format("Error during set up schema:%s to connection", schema), sqlException);
+        }
+
+        return schema;
+    }
+
 
     @Override
     public String getDatabaseProductName() throws DatabaseException {
