@@ -644,7 +644,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return execType;
     }
 
-    public void rollback(Database database) throws RollbackFailedException {
+    public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
@@ -664,13 +664,20 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         continue;
                     }
+                    if (listener != null) {
+                        listener.willRun(change, this, changeLog, database);
+                    }
                     ValidationErrors errors = change.validate(database);
                     if (errors.hasErrors()) {
                         throw new RollbackFailedException("Rollback statement failed validation: "+errors.toString());
                     }
+                    //
                     SqlStatement[] changeStatements = change.generateStatements(database);
                     if (changeStatements != null) {
                         statements.addAll(Arrays.asList(changeStatements));
+                    }
+                    if (listener != null) {
+                        listener.ran(change, this, changeLog, database);
                     }
                 }
                 if (!statements.isEmpty()) {
