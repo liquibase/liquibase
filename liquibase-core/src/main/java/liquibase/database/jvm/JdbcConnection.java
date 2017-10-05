@@ -37,7 +37,6 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
-    @Override
     public String getSchema() {
         return schema;
     }

@@ -124,14 +124,15 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (!(databaseConnection instanceof JdbcConnection)) {
             return;
         }
-        if (databaseConnection.getSchema() == null || databaseConnection.getSchema().isEmpty()) {
+        String schema = ((JdbcConnection) databaseConnection).getSchema();
+        if (schema == null || schema.isEmpty()) {
             return;
         }
         final List<String> searchPaths = getAllSearchPaths((JdbcConnection) databaseConnection);
-        if (searchPaths == null/*in case of failure*/ || searchPaths.contains(databaseConnection.getSchema())) {
+        if (searchPaths == null/*in case of failure*/ || searchPaths.contains(schema)) {
             return;
         }
-        searchPaths.add(databaseConnection.getSchema());
+        searchPaths.add(schema);
         String dbName;
         try {
             dbName = databaseConnection.getCatalog();
@@ -140,20 +141,27 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             return;
         }
         final String ALTER_SEARCH_PATH_QUERY = buildAlterSearchPathQuery(dbName, searchPaths);
-        try (Statement statement = ((JdbcConnection) databaseConnection).createStatement())  {
+        Statement statement = null;
+        try {
+            statement = ((JdbcConnection) databaseConnection).createStatement();
             statement.executeUpdate(ALTER_SEARCH_PATH_QUERY);
             log.info("Default schema: %s has been added to search paths successfully!");
         } catch (SQLException | DatabaseException exception) {
             log.warning(String.format("Schema:%s wasn't added to search path due to " +
-                    "exception during execution of SQL statement:%s", databaseConnection.getSchema(), ALTER_SEARCH_PATH_QUERY), exception);
+                    "exception during execution of SQL statement:%s", schema, ALTER_SEARCH_PATH_QUERY), exception);
+        } finally {
+            JdbcUtils.closeStatement(statement);
         }
     }
 
     private List<String> getAllSearchPaths(JdbcConnection databaseConnection) {
         final String SHOW_SEARCH_PATH_QUERY = "SHOW search_path";
         final List<String> searchPaths = new ArrayList<>();
-        try (Statement statement = databaseConnection.createStatement();
-             ResultSet  resultSet = statement.executeQuery(SHOW_SEARCH_PATH_QUERY)) {
+        Statement statement = null;
+        ResultSet  resultSet = null;
+        try  {
+            statement = databaseConnection.createStatement();
+             resultSet = statement.executeQuery(SHOW_SEARCH_PATH_QUERY);
             if (resultSet.next()) {
                 String searchPath = resultSet.getString(1);
                 List<String> schemas = Arrays.asList(searchPath.split(","));
@@ -164,6 +172,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         } catch (SQLException | DatabaseException exception) {
             log.warning(String.format("Statement:%s couldn't be executed due to exception", SHOW_SEARCH_PATH_QUERY), exception);
             return null;
+        } finally {
+            JdbcUtils.close(resultSet,statement);
         }
         return searchPaths;
     }
@@ -182,9 +192,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
      */
     private void logWarnIfStoreDateColumnNotSupported(final DatabaseConnection databaseConnection) {
         if (databaseConnection instanceof JdbcConnection) {
-            try (Statement statement =((JdbcConnection) databaseConnection).createStatement();
-                 ResultSet resultSet = statement.executeQuery("select setting from pg_settings where name = 'edb_redwood_date'")) {
-
+            Statement statement = null;
+            ResultSet resultSet = null;
+            final String SELECT_SETTING_QUERY = "select setting from pg_settings where name = 'edb_redwood_date'";
+            try {
+                statement =((JdbcConnection) databaseConnection).createStatement();
+                resultSet = statement.executeQuery(SELECT_SETTING_QUERY);
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if (setting != null && setting.equals("on")) {
@@ -193,7 +206,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                     }
                 }
             } catch (Exception e) {
-                log.info("Cannot check pg_settings", e);
+                log.info(String.format("Cannot check pg_settings due to exception during execution statement:%s", SELECT_SETTING_QUERY), e);
+            } finally {
+                JdbcUtils.close(resultSet,statement);
             }
         }
     }
@@ -259,7 +274,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     * Note: This may make postgres support more case sensitive than normally is, but needs to be left in for backwards compatibility.
     * Method is public so a subclass extension can override it to always return false.
     */
-    protected boolean hasMixedCase(String tableName) {
+    private boolean hasMixedCase(String tableName) {
         if (tableName == null) {
             return false;
         }
@@ -269,43 +284,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isReservedWord(String tableName) {
         return reservedWords.contains(tableName.toUpperCase());
-    }
-
-    /*
-     * Get the current search paths
-     */
-    private List<String> getSearchPaths() {
-        List<String> searchPaths = null;
-
-        try {
-            DatabaseConnection con = getConnection();
-
-            if (con != null) {
-                String searchPathResult = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
-
-                if (searchPathResult != null) {
-                    String dirtySearchPaths[] = searchPathResult.split("\\,");
-                    searchPaths = new ArrayList<String>();
-                    for (String searchPath : dirtySearchPaths) {
-                        searchPath = searchPath.trim();
-
-                        // Ensure there is consistency ..
-                        if (searchPath.equals("\"$user\"")) {
-                            searchPath = "$user";
-                        }
-
-                        searchPaths.add(searchPath);
-                    }
-                }
-
-            }
-        } catch (Exception e) {
-            // TODO: Something?
-            e.printStackTrace();
-            LogFactory.getLogger().severe("Failed to get default catalog name from postgres", e);
-        }
-
-        return searchPaths;
     }
 
     @Override

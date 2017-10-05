@@ -40,5 +40,4 @@ public interface DatabaseConnection {
 
     void attached(Database database);
 
-    String getSchema();
 }
