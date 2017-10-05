@@ -35,7 +35,10 @@ public class View extends Relation {
         View that = (View) o;
 
         if (this.getSchema() != null && that.getSchema() != null) {
-            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasEqual = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            if (!schemasEqual) {
+                return false;
+            }
         }
 
         return getName().equalsIgnoreCase(that.getName());

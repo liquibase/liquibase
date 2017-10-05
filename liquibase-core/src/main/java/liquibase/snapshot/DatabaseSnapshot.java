@@ -20,12 +20,15 @@ import liquibase.structure.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
+
+    public static final String ALL_CATALOGS_STRING_SCRATCH_KEY = "DatabaseSnapshot.allCatalogsString";
 
     private final DatabaseObject[] originalExamples;
     private HashSet<String> serializableFields;
@@ -69,6 +72,17 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                     catalogs.add(((Schema) object).getCatalog());
                 }
             }
+
+            this.setScratchData("DatabaseSnapshot.allCatalogs", catalogs);
+
+            if (catalogs.size() > 1) {
+                List<String> quotedCatalogs = new ArrayList<String>();
+                for (Catalog catalog : catalogs) {
+                    quotedCatalogs.add("'" + catalog.getName() + "'");
+                }
+                this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", ").toUpperCase());
+            }
+
 
             for (Catalog catalog : catalogs) {
                 this.snapshotControl.addType(catalog.getClass(), database);
@@ -322,6 +336,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 return fieldValue;
             }
 
+//            System.out.println("replaceObject "+fieldValue);
             if (isWrongSchema(((DatabaseObject) fieldValue))) {
                 DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue, schemaComparisons);
                 if (savedFieldValue == null) {

@@ -62,7 +62,10 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
         StoredDatabaseLogic that = (StoredDatabaseLogic) obj;
 
         if (this.getSchema() != null && that.getSchema() != null) {
-            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasEqual = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            if (!schemasEqual) {
+                return false;
+            }
         }
 
         return getName().equalsIgnoreCase(that.getName());

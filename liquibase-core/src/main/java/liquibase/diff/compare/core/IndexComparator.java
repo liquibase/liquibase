@@ -9,6 +9,7 @@ import liquibase.structure.core.Index;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -30,7 +31,7 @@ public class IndexComparator implements DatabaseObjectComparator {
             hashes.add(databaseObject.getName().toLowerCase());
         }
 
-        Table table = ((Index) databaseObject).getTable();
+        Relation table = ((Index) databaseObject).getTable();
         if (table != null) {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }

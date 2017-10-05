@@ -100,18 +100,14 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             return procedureText;
         }
 
-        String fixedText = procedureText;
-        while (fixedText.length() > 0) {
-            String lastChar = fixedText.substring(fixedText.length() - 1);
-            if (lastChar.equals(" ") || lastChar.equals("\n") || lastChar.equals("\r") || lastChar.equals("\t")) {
-                fixedText = fixedText.substring(0, fixedText.length() - 1);
-            } else {
-                break;
-            }
-        }
         endDelimiter = endDelimiter.replace("\\r", "\r").replace("\\n", "\n");
-        if (fixedText.endsWith(endDelimiter)) {
-            return fixedText.substring(0, fixedText.length() - endDelimiter.length());
+        // DVONE-5036
+        String endCommentsTrimmedText = StringUtils.stripSqlCommentsAndWhitespacesFromTheEnd(procedureText);
+        // Note: need to trim the delimiter since the return of the above call trims whitespaces, and to match
+        // we have to trim the endDelimiter as well.
+        String trimmedDelimiter = StringUtils.trimRight(endDelimiter);
+        if (endCommentsTrimmedText.endsWith(trimmedDelimiter)) {
+            return endCommentsTrimmedText.substring(0, endCommentsTrimmedText.length() - trimmedDelimiter.length());
         } else {
             return procedureText;
         }

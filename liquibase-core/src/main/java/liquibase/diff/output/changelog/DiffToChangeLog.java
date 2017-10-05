@@ -48,7 +48,7 @@ public class DiffToChangeLog {
     private String changeSetPath;
     private DiffResult diffResult;
     private DiffOutputControl diffOutputControl;
-
+    private boolean tryDbaDependencies=true;
 
     private static Set<Class> loggedOrderFor = new HashSet<Class>();
 
@@ -315,6 +315,42 @@ public class DiffToChangeLog {
         return new ArrayList<DatabaseObject>(objects);
     }
 
+    private List<Map<String, ?>> queryForDependencies(Executor executor, List<String> schemas) 
+        throws DatabaseException {
+        List<Map<String, ?>> rs = null;
+        try {
+            if (tryDbaDependencies) {
+                rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                            @Override
+                            public String toString(String obj) {
+                                return "OWNER='" + obj + "'";
+                            }
+                        }
+                    ) + ")"));
+            }
+            else {
+                rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                                @Override
+                                public String toString(String obj) {
+                                    return "REFERENCED_OWNER='" + obj + "'";
+                                }
+                            }
+                ) + ")"));
+            }
+        }
+        catch (DatabaseException dbe) {
+            tryDbaDependencies = false;
+            rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                            @Override
+                            public String toString(String obj) {
+                                return "REFERENCED_OWNER='" + obj + "'";
+                            }
+                        }
+                 ) + ")"));
+        }
+        return rs;
+    }
+
     /**
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
@@ -343,16 +379,22 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof OracleDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
-                        @Override
-                        public String toString(String obj) {
-                            return "OWNER='" + obj + "'";
-                        }
-                    }
-            ) + ")"));
+            List<Map<String, ?>> rs = queryForDependencies(executor, schemas); 
             for (Map<String, ?> row : rs) {
-                String tabName = StringUtils.trimToNull((String) row.get("OWNER")) + "." + StringUtils.trimToNull((String) row.get("NAME"));
-                String bName = StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
+                String tabName = null;
+                if (tryDbaDependencies) {
+                    tabName = 
+                        StringUtils.trimToNull((String) row.get("OWNER")) + "." + 
+                        StringUtils.trimToNull((String) row.get("NAME"));
+                }
+                else {
+                    tabName = 
+                        StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." + 
+                        StringUtils.trimToNull((String) row.get("NAME"));
+                }
+                String bName = 
+                    StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." + 
+                    StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
 
                 graph.add(bName, tabName);
             }
@@ -436,6 +478,9 @@ public class DiffToChangeLog {
                     return "SCHEMA_NAME(SCHEMA_ID)='" + obj + "'";
                 }
             });
+
+            //get non-clustered indexes -> unique clustered indexes on views dependencies
+            sql += " UNION select object_schema_name(c.object_id) as referencing_schema_name, c.name as referencing_name, object_schema_name(nc.object_id) as referenced_schema_name, nc.name as referenced_name from sys.indexes c join sys.indexes nc on c.object_id=nc.object_id JOIN sys.objects o ON c.object_id = o.object_id where  c.index_id != nc.index_id and c.type_desc='CLUSTERED' and c.is_unique='true' and (not(nc.type_desc='CLUSTERED') OR nc.is_unique='false') AND o.type_desc='VIEW' AND o.name='AR_DETAIL_OPEN'";
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
