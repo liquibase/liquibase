@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
     private static final Logger log = LogFactory.getInstance().getLog();
-    private static final String PRODUCT_NAME = "PostgreSQL";
+    public static final String PRODUCT_NAME = "PostgreSQL";
 
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
