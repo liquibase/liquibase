@@ -274,7 +274,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     * Note: This may make postgres support more case sensitive than normally is, but needs to be left in for backwards compatibility.
     * Method is public so a subclass extension can override it to always return false.
     */
-    private boolean hasMixedCase(String tableName) {
+    protected boolean hasMixedCase(String tableName) {
         if (tableName == null) {
             return false;
         }
