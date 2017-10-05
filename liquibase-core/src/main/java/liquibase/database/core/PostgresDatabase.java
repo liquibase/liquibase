@@ -29,9 +29,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private static final Logger log = LogFactory.getInstance().getLog();
     private static final String PRODUCT_NAME = "PostgreSQL";
 
-    private Set<String> systemTablesAndViews = new HashSet<>();
+    private Set<String> systemTablesAndViews = new HashSet<String>();
 
-    private Set<String> reservedWords = new HashSet<>();
+    private Set<String> reservedWords = new HashSet<String>();
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
