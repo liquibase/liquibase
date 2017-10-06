@@ -417,7 +417,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " AND i.NAME='" + database.escapeStringForDatabase(indexName) + "'";
                         }
 
-                        sql += "ORDER BY i.NAME, k.COLNO";
+                        sql += "ORDER BY i.NAME, k.COLSEQ";
 
                         returnList.addAll(executeAndExtract(sql, database));
                     } else {

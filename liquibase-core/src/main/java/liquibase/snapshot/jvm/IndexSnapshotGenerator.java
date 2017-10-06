@@ -183,9 +183,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         foundIndexes.put(indexName, index);
                     }
-                    String ascOrDesc = row.getString("ASC_OR_DESC");
-                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
+
+                    if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                        String columnName = getDb2ZosOrderedColumnName(row.getString("COLUMN_NAME"), row.getString("ORDER"));
+                        index.addColumn(new Column().setName(columnName, true).setRelation(index.getTable()));
+                    } else {
+                        String ascOrDesc = row.getString("ASC_OR_DESC");
+                        Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                        index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
+                    }
                 }
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
