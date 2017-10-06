@@ -343,8 +343,17 @@ public class DiffToChangeLog {
             }
         }
         catch (DatabaseException dbe) {
+            //
+            // If our exception is for something other than a missing table/view
+            // then we just re-throw the exception
+            // else if we can't see USER_DEPENDENCIES then we also re-throw
+            //   to stop the recursion
+            //
             String message = dbe.getMessage();
             if (! message.contains("ORA-00942: table or view does not exist")) {
+              throw new DatabaseException(dbe);
+            }
+            else if (! tryDbaDependencies) {
               throw new DatabaseException(dbe);
             }
             logger.warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
