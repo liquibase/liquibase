@@ -644,6 +644,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return execType;
     }
 
+    public void rollback(Database database) throws RollbackFailedException {
+      rollback(database, null);
+    }
+
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
