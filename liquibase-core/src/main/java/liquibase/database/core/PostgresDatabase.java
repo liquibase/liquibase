@@ -144,9 +144,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             statement = ((JdbcConnection) databaseConnection).createStatement();
             statement.executeUpdate(ALTER_SEARCH_PATH_QUERY);
             log.info("Default schema: %s has been added to search paths successfully!");
-        } catch (SQLException | DatabaseException exception) {
-            log.warning(String.format("Schema:%s wasn't added to search path due to " +
-                    "exception during execution of SQL statement:%s", schema, ALTER_SEARCH_PATH_QUERY), exception);
+        } catch (SQLException  sqlException) {
+            log.severe(String.format("Schema:%s wasn't added to search path due to " +
+                    "sqlException during execution of SQL statement:%s", schema, ALTER_SEARCH_PATH_QUERY), sqlException);
+        } catch (DatabaseException databaseException) {
+            log.severe(String.format("Schema:%s wasn't added to search path due to " +
+                    "databaseException during execution of SQL statement:%s", schema, ALTER_SEARCH_PATH_QUERY), databaseException);
         } finally {
             JdbcUtils.closeStatement(statement);
         }
@@ -167,8 +170,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                     searchPaths.add(schema.trim());
                 }
             }
-        } catch (SQLException | DatabaseException exception) {
-            log.warning(String.format("Statement:%s couldn't be executed due to exception", SHOW_SEARCH_PATH_QUERY), exception);
+        } catch (SQLException sqlException) {
+            log.warning(String.format("Statement:%s couldn't be executed due to sqlException", SHOW_SEARCH_PATH_QUERY), sqlException);
+            return null;
+        } catch (DatabaseException databaseException) {
+            log.warning(String.format("Statement:%s couldn't be executed due to databaseException", SHOW_SEARCH_PATH_QUERY), databaseException);
             return null;
         } finally {
             JdbcUtils.close(resultSet,statement);
