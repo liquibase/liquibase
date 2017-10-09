@@ -42,14 +42,15 @@ public class JdbcConnection implements DatabaseConnection {
         return schema;
     }
 
-    private String attachSchemaToConnection() {
+    private void attachSchemaToConnection() {
+        if (this.schema==null || schema.isEmpty()) {
+            return;
+        }
         try {
             this.con.setSchema(this.schema);
         }catch (SQLException sqlException) {
             LogFactory.getInstance().getLog().severe(String.format("Error during set up schema:%s to connection", schema), sqlException);
         }
-
-        return schema;
     }
 
 
