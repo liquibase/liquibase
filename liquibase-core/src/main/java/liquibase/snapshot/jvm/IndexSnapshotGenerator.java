@@ -473,20 +473,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         return database instanceof MSSQLDatabase;
     }
 
-    private String getDb2ZosOrderedColumnName(String columnName, String order){
+    private String getDb2ZosOrderedColumnName(String columnName, String order) {
         if (order != null) {
-            switch (order) {
-                case "A":
-                    columnName += " ASC";
-                    break;
-                case "D":
-                    columnName += " DESC";
-                    break;
-                case "R":
-                    columnName += " RANDOM";
-                    break;
-                default:
-                    break;
+            if ("A".equals(order)) {
+                columnName += " ASC";
+            } else if ("D".equals(order)) {
+                columnName += " DESC";
+            } else if ("R".equals(order)) {
+                columnName += " RANDOM";
             }
         }
         return columnName;

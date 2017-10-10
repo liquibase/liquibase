@@ -272,14 +272,23 @@ public class JdbcExecutor extends AbstractExecutor {
         for (Sql sql : sqls) {
             try {
                 if (sql instanceof CallableSql) {
-                    try (CallableStatement call = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(sql.toSql());
-                         ResultSet resultSet = call.executeQuery()) {
+                    CallableStatement call = null;
+                    ResultSet resultSet = null;
+                    try {
+                        call = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(sql.toSql());
+                        resultSet = call.executeQuery();
                         checkCallStatus(resultSet, ((CallableSql) sql).getExpectedStatus());
+                    } finally {
+                        JdbcUtils.close(resultSet, call);
                     }
                 } else {
-                    try (Statement stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement()) {
+                    Statement stmt = null;
+                    try {
+                        stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
                         stmt.execute(sql.toSql());
                         con.commit();
+                    } finally {
+                        JdbcUtils.closeStatement(stmt);
                     }
                 }
             } catch (Exception e) {
