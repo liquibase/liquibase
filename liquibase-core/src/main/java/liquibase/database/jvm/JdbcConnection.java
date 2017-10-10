@@ -48,7 +48,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
         try {
             this.con.setSchema(this.schema);
-        }catch (SQLException sqlException) {
+        }catch (SQLException | AbstractMethodError/*AbstractMethodError in case when JDBC driver for a version of Java <= 6 */ sqlException ) {
             LogFactory.getInstance().getLog().severe(String.format("Error during set up schema:%s to connection", schema), sqlException);
         }
     }
