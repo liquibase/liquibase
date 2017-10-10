@@ -630,6 +630,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private void setFieldValue(Field field, String value) throws IllegalAccessException {
         if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
             field.set(this, Boolean.valueOf(value));
+        } else if (field.getType().equals(File.class)) {
+            field.set(this, new File(value));
         } else {
             field.set(this, value);
         }
