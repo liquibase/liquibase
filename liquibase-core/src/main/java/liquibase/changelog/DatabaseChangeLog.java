@@ -354,10 +354,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             
                 String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
-                Comparator<?> resourceComparator = null;
+                Comparator<String> resourceComparator = null;
                 if (resourceComparatorDef != null) {
                     try {
-                        resourceComparator = (Comparator<?>) Class.forName(resourceComparatorDef).newInstance();
+                        resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).newInstance();
                     } catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
                         //take default comparator
                         LogService.getLog(getClass()).info(LogType.LOG, "no resourceComparator defined - taking default " +
@@ -370,7 +370,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 .class));
                 String path = node.getChildValue(null, "path", String.class);
                 includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter, node
-                .getChildValue(null, "errorIfMissingOrEmpty", true), getStandardChangeLogComparator(),
+                .getChildValue(null, "errorIfMissingOrEmpty", true), resourceComparator,
                 resourceAccessor, includeContexts);
                 break;
             }
