@@ -211,7 +211,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (jdbcType == DatabaseMetaData.importedKeyNoAction) {
                 return ForeignKeyConstraintType.importedKeyNoAction;
             } else if (jdbcType == DatabaseMetaData.importedKeyRestrict) {
-                return ForeignKeyConstraintType.importedKeyRestrict;
+                if (database instanceof MSSQLDatabase) {
+                    //mssql doesn't support restrict. Not sure why it comes back with this type sometimes
+                    return ForeignKeyConstraintType.importedKeyNoAction;
+                } else {
+                    return ForeignKeyConstraintType.importedKeyRestrict;
+                }
             } else if (jdbcType == DatabaseMetaData.importedKeySetDefault) {
                 return ForeignKeyConstraintType.importedKeySetDefault;
             } else if (jdbcType == DatabaseMetaData.importedKeySetNull) {
