@@ -1,15 +1,20 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.ValidationErrors;
 import liquibase.logging.Logger;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
@@ -18,13 +23,13 @@ import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.*;
 
 /**
  * Encapsulates PostgreSQL database support.
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
-    private static final Logger log = LogFactory.getInstance().getLog();
     public static final String PRODUCT_NAME = "PostgreSQL";
 
     private Set<String> systemTablesAndViews = new HashSet<String>();
@@ -107,115 +112,51 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public void setConnection(DatabaseConnection databaseConnection) {
-        setDefaultSchemaNameToSearchPathIfNeeded(databaseConnection);
-        super.setConnection(databaseConnection);
-        logWarnIfStoreDateColumnNotSupported(databaseConnection);
-    }
+    public void setConnection(DatabaseConnection conn) {
+        super.setConnection(conn);
 
-    /**
-     * This method adds defaultSchema to searchPath array if needed
-     *
-     * @param databaseConnection - this expected JDBC connection that will be used to execute queries
-     */
-    private void setDefaultSchemaNameToSearchPathIfNeeded(final DatabaseConnection databaseConnection) {
-        if (!(databaseConnection instanceof JdbcConnection)) {
-            return;
-        }
-        String schema = ((JdbcConnection) databaseConnection).getSchema();
-        if (schema == null || schema.isEmpty()) {
-            return;
-        }
-        final List<String> searchPaths = getAllSearchPaths((JdbcConnection) databaseConnection);
-        if (searchPaths == null/*in case of failure*/ || searchPaths.contains(schema)) {
-            return;
-        }
-        searchPaths.add(schema);
-        String dbName;
-        try {
-            dbName = databaseConnection.getCatalog();
-        } catch (DatabaseException databaseException) {
-            log.warning(("Couldn't get name from DatabaseConnection due to exception"), databaseException);
-            return;
-        }
-        final String ALTER_SEARCH_PATH_QUERY = buildAlterSearchPathQuery(dbName, searchPaths);
-        Statement statement = null;
-        try {
-            statement = ((JdbcConnection) databaseConnection).createStatement();
-            statement.executeUpdate(ALTER_SEARCH_PATH_QUERY);
-            log.info("Default schema: %s has been added to search paths successfully!");
-        } catch (SQLException  sqlException) {
-            log.severe(String.format("Schema:%s wasn't added to search path due to " +
-                    "sqlException during execution of SQL statement:%s", schema, ALTER_SEARCH_PATH_QUERY), sqlException);
-        } catch (DatabaseException databaseException) {
-            log.severe(String.format("Schema:%s wasn't added to search path due to " +
-                    "databaseException during execution of SQL statement:%s", schema, ALTER_SEARCH_PATH_QUERY), databaseException);
-        } finally {
-            JdbcUtils.closeStatement(statement);
-        }
-    }
+        Logger log = LogFactory.getInstance().getLog();
 
-    private List<String> getAllSearchPaths(JdbcConnection databaseConnection) {
-        final String SHOW_SEARCH_PATH_QUERY = "SHOW search_path";
-        final List<String> searchPaths = new ArrayList<String>();
-        Statement statement = null;
-        ResultSet  resultSet = null;
-        try  {
-            statement = databaseConnection.createStatement();
-             resultSet = statement.executeQuery(SHOW_SEARCH_PATH_QUERY);
-            if (resultSet.next()) {
-                String searchPath = resultSet.getString(1);
-                List<String> schemas = Arrays.asList(searchPath.split(","));
-                for (String schema: schemas) {
-                    searchPaths.add(schema.trim());
-                }
-            }
-        } catch (SQLException sqlException) {
-            log.warning(String.format("Statement:%s couldn't be executed due to sqlException", SHOW_SEARCH_PATH_QUERY), sqlException);
-            return null;
-        } catch (DatabaseException databaseException) {
-            log.warning(String.format("Statement:%s couldn't be executed due to databaseException", SHOW_SEARCH_PATH_QUERY), databaseException);
-            return null;
-        } finally {
-            JdbcUtils.close(resultSet,statement);
-        }
-        return searchPaths;
-    }
-
-    private String buildAlterSearchPathQuery(String dbName, List<String> searchPaths) {
-        return new StringBuilder().append(" ALTER DATABASE ").
-                     append(dbName).
-                     append(" SET ").
-                     append(" search_path TO ").
-                     append(StringUtils.join(searchPaths, ",")).toString();
-    }
-
-    /**
-     * In this method we log.warn If edb_redwood_date is set to TRUE. Specific to PostgreSQL
-     * @param databaseConnection - jdbc connection that will use in order to execute statement
-     */
-    private void logWarnIfStoreDateColumnNotSupported(final DatabaseConnection databaseConnection) {
-        if (databaseConnection instanceof JdbcConnection) {
+        if (conn instanceof JdbcConnection) {
             Statement statement = null;
             ResultSet resultSet = null;
-            final String SELECT_SETTING_QUERY = "select setting from pg_settings where name = 'edb_redwood_date'";
             try {
-                statement =((JdbcConnection) databaseConnection).createStatement();
-                resultSet = statement.executeQuery(SELECT_SETTING_QUERY);
+                statement = ((JdbcConnection) conn).createStatement();
+                resultSet = statement.executeQuery("select setting from pg_settings where name = 'edb_redwood_date'");
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if (setting != null && setting.equals("on")) {
-                        log.warning("EnterpriseDB "+databaseConnection.getURL()+
-                                " does not store DATE columns. Auto-converts them to TIMESTAMPs. (edb_redwood_date=true)");
+                        log.warning("EnterpriseDB "+conn.getURL()+" does not store DATE columns. Auto-converts them to TIMESTAMPs. (edb_redwood_date=true)");
                     }
                 }
             } catch (Exception e) {
-                log.info(String.format("Cannot check pg_settings due to exception during execution statement:%s", SELECT_SETTING_QUERY), e);
+                log.info("Cannot check pg_settings", e);
             } finally {
-                JdbcUtils.close(resultSet,statement);
+                JdbcUtils.close(resultSet, statement);
             }
         }
+
     }
+
+    //    public void dropDatabaseObjects(String schema) throws DatabaseException {
+//        try {
+//            if (schema == null) {
+//                schema = getConnectionUsername();
+//            }
+//            new Executor(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
+//
+//            getConnection().commit();
+//
+//            changeLogTableExists = false;
+//            changeLogLockTableExists = false;
+//            changeLogCreateAttempted = false;
+//            changeLogLockCreateAttempted = false;
+//
+//        } catch (SQLException e) {
+//            throw new DatabaseException(e);
+//        }
+//    }
+
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
@@ -290,9 +231,60 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return reservedWords.contains(tableName.toUpperCase());
     }
 
+    /*
+     * Get the current search paths
+     */
+    private List<String> getSearchPaths() {
+        List<String> searchPaths = null;
+
+        try {
+            DatabaseConnection con = getConnection();
+
+            if (con != null) {
+                String searchPathResult = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
+
+                if (searchPathResult != null) {
+                    String dirtySearchPaths[] = searchPathResult.split("\\,");
+                    searchPaths = new ArrayList<String>();
+                    for (String searchPath : dirtySearchPaths) {
+                        searchPath = searchPath.trim();
+
+                        // Ensure there is consistency ..
+                        if (searchPath.equals("\"$user\"")) {
+                            searchPath = "$user";
+                        }
+
+                        searchPaths.add(searchPath);
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            // TODO: Something?
+            e.printStackTrace();
+            LogFactory.getLogger().severe("Failed to get default catalog name from postgres", e);
+        }
+
+        return searchPaths;
+    }
+
     @Override
     protected SqlStatement getConnectionSchemaNameCallStatement() {
         return new RawCallStatement("select current_schema()");
     }
 
+    private boolean catalogExists(String catalogName) throws DatabaseException {
+        return catalogName != null && runExistsQuery(
+                "select count(*) from information_schema.schemata where catalog_name='" + catalogName + "'");
+    }
+
+    private boolean schemaExists(String schemaName) throws DatabaseException {
+        return schemaName != null && runExistsQuery("select count(*) from information_schema.schemata where schema_name='" + schemaName + "'");
+    }
+
+    private boolean runExistsQuery(String query) throws DatabaseException {
+        Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
+
+        return count != null && count > 0;
+    }
 }
