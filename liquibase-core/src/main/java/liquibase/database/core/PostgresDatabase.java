@@ -1,6 +1,6 @@
 package liquibase.database.core;
 
-import liquibase.changelog.column.ColumnChangeLog;
+import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
@@ -187,14 +187,19 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    /**
+     * This has special case logic to handle NOT quoting column names if they are 
+     * of type 'LiquibaseColumn' - columns in the DATABASECHANGELOG or DATABASECHANGELOGLOCK
+     * tables.
+     */
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.LEGACY && hasMixedCase(objectName)) {
             return "\"" + objectName + "\"";
-        } else if (objectType !=null && objectType.isAssignableFrom(ColumnChangeLog.class)) {
-            return (objectName!=null && !objectName.isEmpty())?objectName.trim():objectName;
+        } else if (objectType != null && objectType.isAssignableFrom(LiquibaseColumn.class)) {
+            return (objectName != null && !objectName.isEmpty()) ? objectName.trim() : objectName;
         }
-
+    
         return super.escapeObjectName(objectName, objectType);
     }
 

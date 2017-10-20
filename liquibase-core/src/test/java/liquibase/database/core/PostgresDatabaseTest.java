@@ -1,6 +1,6 @@
 package liquibase.database.core;
 
-import liquibase.changelog.column.ColumnChangeLog;
+import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
@@ -100,7 +100,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
 
         final String COLUMN_AUTHOR = "AUTHOR"; //one column from changeLog table should be enough for test
 
-        String result = database.escapeObjectName(COLUMN_AUTHOR, ColumnChangeLog.class);
+        String result = database.escapeObjectName(COLUMN_AUTHOR, LiquibaseColumn.class);
         assertEquals(COLUMN_AUTHOR, result);
     }
 
