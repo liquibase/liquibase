@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -102,15 +103,17 @@ public class LiquibaseGenerateChangeLogMojo extends
             if ((diffExcludeObjects != null) && (diffIncludeObjects != null)) {
                 throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
             }
+            ObjectChangeFilter objectChangeFilter = null;
             if (diffExcludeObjects != null) {
-                diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, diffExcludeObjects));
+                objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, diffExcludeObjects);
             }
             if (diffIncludeObjects != null) {
-                diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects));
+                objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects);
             }
+            diffOutputControl.setObjectChangeFilter(objectChangeFilter);
 
             CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes),
-                    StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), diffOutputControl);
+                    StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), diffOutputControl, objectChangeFilter);
             getLog().info("Output written to Change Log file, " + outputChangeLogFile);
         }
         catch (IOException | ParserConfigurationException e) {

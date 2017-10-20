@@ -959,7 +959,7 @@ public class Main {
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
                         StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor),
                         StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory),
-                        diffOutputControl);
+                        diffOutputControl, objectChangeFilter);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
