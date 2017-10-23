@@ -24,6 +24,7 @@ class DataTypeFactoryTest extends Specification {
         liquibaseString                                | database               | databaseString                                 | expectedType  | expectedAutoIncrement
         "int"                                          | new MockDatabase()     | "INT"                                          | IntType       | false
         "varchar(255)"                                 | new MockDatabase()     | "VARCHAR(255)"                                 | VarcharType   | false
+        " varchar(255) "                               | new MockDatabase()     | "VARCHAR(255)"                                 | VarcharType   | false
         "int{autoIncrement:true}"                      | new MockDatabase()     | "INT"                                          | IntType       | true
         "int{autoIncrement:false}"                     | new MockDatabase()     | "INT"                                          | IntType       | false
         "int{}"                                        | new MockDatabase()     | "INT"                                          | IntType       | false
