@@ -171,7 +171,7 @@ public class DataTypeFactory {
         } else {
             // Heuristic: from what we now have left of the data type name, everything after the first space
             // is counted as additional information.
-            String[] splitTypeName = dataTypeName.split("\\s+", 2);
+            String[] splitTypeName = dataTypeName.trim().split("\\s+", 2);
             dataTypeName = splitTypeName[0];
             if (splitTypeName.length > 1) {
                 additionalInfo = splitTypeName[1];
