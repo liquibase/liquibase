@@ -1153,7 +1153,7 @@ public class SystemUtils {
         if (JAVA_VERSION_TRIMMED == null) {
             return 0f;
         }
-        String str = JAVA_VERSION_TRIMMED.substring(0, 3);
+        String str = JAVA_VERSION_TRIMMED.length() < 2 ? JAVA_VERSION_TRIMMED : JAVA_VERSION_TRIMMED.substring(0, 3);
         if (JAVA_VERSION_TRIMMED.length() >= 5) {
             str = str + JAVA_VERSION_TRIMMED.substring(4, 5);
         }
@@ -1183,7 +1183,7 @@ public class SystemUtils {
             return 0;
         }
         String str = JAVA_VERSION_TRIMMED.substring(0, 1);
-        str = str + JAVA_VERSION_TRIMMED.substring(2, 3);
+        str = str + (JAVA_VERSION_TRIMMED.length() < 3 ? "0" : JAVA_VERSION_TRIMMED.substring(2, 3));
         if (JAVA_VERSION_TRIMMED.length() >= 5) {
             str = str + JAVA_VERSION_TRIMMED.substring(4, 5);
         } else {
