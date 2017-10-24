@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -264,6 +265,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                     throw new IOException("File does not exist: " + path);
                 }
                 procedureText = StreamUtil.getStreamContents(stream, encoding);
+                if (getChangeSet() != null) {
+                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+                    if (parameters != null) {
+                        procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
+                    }
+                }
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
