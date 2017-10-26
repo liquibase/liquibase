@@ -279,7 +279,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
 
-                if (dataType.equalsIgnoreCase("NCLOB") || dataType.equalsIgnoreCase("BLOB") || dataType.equalsIgnoreCase("CLOB")) {
+                boolean isTimeStampDataType = dataType.toUpperCase().contains("TIMESTAMP");
+
+                if (isTimeStampDataType || dataType.equalsIgnoreCase("NCLOB") || dataType.equalsIgnoreCase("BLOB") || dataType.equalsIgnoreCase("CLOB")) {
                     type.setColumnSize(null);
                 } else if (dataType.equalsIgnoreCase("NVARCHAR") || dataType.equalsIgnoreCase("NCHAR")) {
                     type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
