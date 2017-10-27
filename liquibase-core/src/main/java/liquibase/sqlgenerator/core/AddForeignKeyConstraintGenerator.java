@@ -36,7 +36,6 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         validationErrors.checkRequiredField("constraintName", addForeignKeyConstraintStatement.getConstraintName());
 
         validationErrors.checkDisallowedField("onDelete", addForeignKeyConstraintStatement.getOnDelete(), database, SybaseDatabase.class);
-        validationErrors.checkDisallowedField("onUpdate", addForeignKeyConstraintStatement.getOnUpdate(), database, DB2Database.class);
 
         return validationErrors;
     }
@@ -64,8 +63,10 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             } else if ((database instanceof MSSQLDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
                 //don't use
 		    } else if (database instanceof InformixDatabase) {
-			    //TODO don't know if correct
-		    } else {
+                //TODO don't know if correct
+            } else if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                //don't use
+            } else {
 			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());
 		    }
 	    }
