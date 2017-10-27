@@ -25,10 +25,9 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -222,38 +221,48 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     /**
-     * Waits for the process to complete and kills it if the process is not finished after the specified <code>timeoutInMillis</code>
+     * Waits for the process to complete and kills it if the process is not finished after the specified <code>timeoutInMillis</code>.
+     * <p>
+     * Creates a scheduled task to destroy the process in given timeout milliseconds.
+     * This killer task will be cancelled if the process returns before the timeout value.
      *
      * @param process
-     * @param timeoutInMillis
+     * @param timeoutInMillis waits for specified timeoutInMillis before destroying the process.
+     *                        It will wait indefinitely if timeoutInMillis is 0.
      */
-    private int waitForOrKill(final Process process, long timeoutInMillis) throws ExecutionException, TimeoutException {
-        Integer ret = null;
-        FutureTask<Integer> waitForFinishTask = waitForInDifferentThread(process);
-        try {
-            ret = waitForFinishTask.get(timeoutInMillis, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ignore) {
-            // just loop again and try to get the value
-        } catch (ExecutionException e) {
-            // oops! something wrong, lets throw it back
-            throw e;
-        } catch (TimeoutException e) {
-            // timed out, bail out
-            process.destroy();
-            String timeoutStr = timeout != null ? timeout : timeoutInMillis + " ms";
-            throw new TimeoutException("Process timed out (" + timeoutStr + ")");
+    private int waitForOrKill(final Process process, final long timeoutInMillis) throws ExecutionException, TimeoutException {
+        int ret = -1;
+        final AtomicBoolean timedOut = new AtomicBoolean(false);
+        Timer timer = new Timer();
+        if (timeoutInMillis > 0) {
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    // timed out
+                    timedOut.set(true);
+                    process.destroy();
+                }
+            }, timeoutInMillis);
+        }
+
+        boolean stop = false;
+        while (!stop) {
+            try {
+                ret = process.waitFor();
+                stop = true;
+                // if process already returned, then cancel the killer task if it is still running
+                timer.cancel();
+                // check if we timed out or not
+                if (timedOut.get()) {
+                    String timeoutStr = timeout != null ? timeout : timeoutInMillis + " ms";
+                    throw new TimeoutException("Process timed out (" + timeoutStr + ")");
+                }
+            } catch (InterruptedException ignore) {
+                // check again
+            }
         }
 
         return ret;
-    }
-
-    private FutureTask<Integer> waitForInDifferentThread(final Process process) {
-        return new FutureTask<Integer>(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return process.waitFor();
-            }
-        });
     }
 
     /**
