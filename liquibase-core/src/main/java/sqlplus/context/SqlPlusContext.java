@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
  */
 public class SqlPlusContext {
     private boolean sqlplus = false;
+    //manual mode unavailable in Linux OS
     private boolean manual = false;
     private SqlPlusConnection sqlPlusConnection;
     private static SqlPlusContext INSTANCE = new SqlPlusContext();

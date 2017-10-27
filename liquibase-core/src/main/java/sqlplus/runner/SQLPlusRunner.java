@@ -6,22 +6,31 @@ import liquibase.exception.SqlPlusException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
-import org.apache.tools.ant.taskdefs.StreamPumper;
 import sqlplus.context.SqlPlusContext;
+import sqlplus.stolen.StreamPumper;
 
 import java.io.*;
 
 
 /**
  * @author gette
+ *         For supporting independent execution of Liquiplus without Ant
+ *         moving StreamPumper from ant to sqlplus.stolen
+ * @see sqlplus.stolen.StreamPumper
  */
 public class SQLPlusRunner {
     private static Logger log = LogFactory.getLogger();
 
+    //Adding Linux support
+    private static final String OSName = System.getProperty("os.name").toLowerCase();
+    private static final String WIN_COMMAND = "cmd.exe /c sqlplus ";
+    private static final String LINUX_COMMAND = "sh sqlplus ";
+
     public static void run(String pathToFile) throws SqlPlusException {
         log.debug("SQLPlusRunner has been initialized.");
         try {
-            if (SqlPlusContext.getInstance().isManual()) {
+            //adding condition which protects from crashing on Linux OS when using manual mode
+            if (SqlPlusContext.getInstance().isManual() && !System.getProperty("os.name").contains("linux")) {
                 Process notepad = new ProcessBuilder("notepad", pathToFile).start();
                 notepad.waitFor();
                 notepad.destroy();
@@ -36,12 +45,20 @@ public class SQLPlusRunner {
     }
 
     public static void executeSQLPlus(String pathToFile) throws IOException, SqlPlusException, InterruptedException {
+
         try {
             int err = 0;
             log.debug("Launching SQLPLUS.");
+            String command = null;
+            if (OSName.contains("win"))
+                command = WIN_COMMAND.concat(SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
+            if (OSName.contains("linux"))
+                command = LINUX_COMMAND.concat(SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
 
-            log.debug("Command:" + "cmd.exe /c sqlplus " + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
-            Process sqlplus = Runtime.getRuntime().exec("cmd.exe /c sqlplus " + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
+            if (command == null)
+                throw new SqlPlusException("Command is undefined!");
+
+            Process sqlplus = Runtime.getRuntime().exec(command);
 
             OutputStream os = new ByteArrayOutputStream(4096);
             StreamPumper inputPumper = new StreamPumper(sqlplus.getInputStream(), os);
@@ -57,7 +74,7 @@ public class SQLPlusRunner {
             if (err == 0) {
                 log.sqlplus("SQLPlusRunner. Successful Execution");
             } else {
-                throw new SqlPlusException("Something went wrong with SQLPLUS. ORA-00" + err);
+                throw new SqlPlusException("SQLPLUSERROR. Something went wrong: ORA-00" + err);
             }
         } catch (IOException e) {
             throw new SqlPlusException(e);
@@ -76,19 +93,9 @@ public class SQLPlusRunner {
             sqlplus = sqlplus.concat(statement.toString() + System.getProperty("line.separator") + "/" + System.getProperty("line.separator"));
         }
         sqlplus = sqlplus.concat(SqlPlusContext.getInstance().getConnection().getExitSQL());
-
-//        String fileName = changeSet.getId().concat(changeSet.getAuthor()).concat(".sql");
-//        boolean flag = true;
-//        while (flag) {
-//            int i = 0;
-//            if (Files.exists(Paths.get(System.getProperty("user.dir") + "/" + fileName))) {
-//                i++;
-//                fileName = fileName.replace(".sql", "_" + i + ".sql");
-//            }
-//            flag = false;
-//        }
-        writeToFile(System.getProperty("user.dir") + "\\changeSet.sql", sqlplus);
-        return System.getProperty("user.dir") + "\\changeSet.sql";
+        String pathToFile = System.getProperty("user.dir") + "/changeSet.sql";
+        writeToFile(pathToFile, sqlplus);
+        return pathToFile;
     }
 
     public static void writeToFile(String filename, String content) {
