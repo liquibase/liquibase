@@ -24,8 +24,12 @@ public class SqlPlusConnection {
 
     }
 
-    public String getConnectionAsString() {
+    public String getConnectionAsDescription() {
         return username + "/" + password + "@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=" + url.split("@")[1].split(":")[0] + ")(Port=" + url.split("@")[1].split(":")[1] + "))(CONNECT_DATA=(SID=" + url.split("@")[1].split(":")[2] + ")))";
+    }
+
+    public String getConnectionAsString() {
+        return username + "/" + password + "@//" + url.split("@")[1].split(":")[0] + ":" + url.split("@")[1].split(":")[1] + "/" + url.split("@")[1].split(":")[2];
     }
 
     public String getInitSQL() {
@@ -36,13 +40,13 @@ public class SqlPlusConnection {
         return exitSQL;
     }
 
-    public StringBuilder readFile(String resource){
+    public StringBuilder readFile(String resource) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(resource)));
         StringBuilder SQL = new StringBuilder();
         String line;
         try {
             while ((line = reader.readLine()) != null) {
-                SQL.append(line+System.getProperty("line.separator"));
+                SQL.append(line + System.getProperty("line.separator"));
             }
             reader.close();
         } catch (IOException e) {

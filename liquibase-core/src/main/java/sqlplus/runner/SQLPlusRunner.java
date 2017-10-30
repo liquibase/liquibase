@@ -10,7 +10,6 @@ import sqlplus.context.SqlPlusContext;
 import sqlplus.stolen.StreamPumper;
 
 import java.io.*;
-import java.util.Properties;
 
 
 /**
@@ -22,16 +21,14 @@ import java.util.Properties;
 public class SQLPlusRunner {
     private static Logger log = LogFactory.getLogger();
 
-    //Adding Linux support
     private static final String OSName = System.getProperty("os.name").toLowerCase();
-    private static final String WIN_COMMAND = "cmd.exe /c sqlplus ";
-    private static final String LINUX_COMMAND = "sh sqlplus ";
+    private static final String SQLPLUS = "sqlplus ";
 
     public static void run(String pathToFile) throws SqlPlusException {
         log.debug("SQLPlusRunner has been initialized.");
         try {
             //adding condition which protects from crashing on Linux OS when using manual mode
-            if (SqlPlusContext.getInstance().isManual() && !System.getProperty("os.name").contains("linux")) {
+            if (SqlPlusContext.getInstance().isManual() && OSName.contains("win")) {
                 Process notepad = new ProcessBuilder("notepad", pathToFile).start();
                 notepad.waitFor();
                 notepad.destroy();
@@ -50,11 +47,8 @@ public class SQLPlusRunner {
         try {
             int err = 0;
             log.debug("Launching SQLPLUS.");
-            String command = null;
-            if (OSName.contains("win"))
-                command = WIN_COMMAND.concat(SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
-            if (OSName.contains("linux"))
-                command = LINUX_COMMAND.concat(SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
+            String command = SQLPLUS + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile;
+            log.debug("EXECUTING: " + command);
 
             if (command == null)
                 throw new SqlPlusException("Command is undefined!");

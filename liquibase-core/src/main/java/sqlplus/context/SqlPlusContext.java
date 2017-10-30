@@ -18,9 +18,9 @@ public class SqlPlusContext {
         return INSTANCE;
     }
 
-    public void setBooleanFieldValue(String fieldName) throws NoSuchFieldException, IllegalAccessException {
+    public void setBooleanFieldValue(String fieldName, Boolean value) throws NoSuchFieldException, IllegalAccessException {
         Field field = getClass().getDeclaredField(fieldName);
-        field.setBoolean(this, true);
+        field.setBoolean(this, value);
     }
 
     public Boolean isSqlplus(){

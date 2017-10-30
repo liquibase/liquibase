@@ -11,4 +11,9 @@ set sqlprompt "  >  "
 WHENEVER OSERROR EXIT SQL.SQLCODE rollback
 WHENEVER SQLERROR EXIT SQL.SQLCODE rollback
 
+set define off
+
 set echo on
+
+alter session set "_add_col_optim_enabled"=false
+/

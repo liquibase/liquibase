@@ -232,15 +232,17 @@ public class Main {
         }
     }
 
-    public void parseProperties() throws IOException {
+    private void parseProperties() throws IOException, NoSuchFieldException, IllegalAccessException {
         String sqlplusProperties = System.getProperty("user.dir") + "/sqlplus.properties";
         Properties properties = new Properties();
         if (new File(sqlplusProperties).exists()) {
             properties.load(new FileInputStream(new File(sqlplusProperties)));
-            if (!properties.getProperty("use.sqlplus").isEmpty())
-                sqlplus = properties.getProperty("use.sqlplus").equals("true");
-            if (!properties.getProperty("manual").isEmpty())
-                manual = properties.getProperty("manual").equals("true");
+            if (properties.getProperty("use.sqlplus") != null) {
+                SqlPlusContext.getInstance().setBooleanFieldValue("sqlplus", properties.getProperty("use.sqlplus").equals("true"));
+            }
+            if (properties.getProperty("manual") != null) {
+                SqlPlusContext.getInstance().setBooleanFieldValue("manual", properties.getProperty("manual").equals("true"));
+            }
         }
     }
 
@@ -773,10 +775,8 @@ public class Main {
                 try {
                     Field field = getClass().getDeclaredField(attributeName);
                     if (field.getType().equals(Boolean.class)) {
-                        if (attributeName.equals("sqlplus") || attributeName.equals("manual")) {
-                            field.set(this, true);
-                            SqlPlusContext.getInstance().setBooleanFieldValue(attributeName);
-                        }
+                        if (attributeName.equals("sqlplus") || attributeName.equals("manual"))
+                            SqlPlusContext.getInstance().setBooleanFieldValue(attributeName, true);
                         field.set(this, Boolean.valueOf(value));
                     } else {
                         field.set(this, value);
