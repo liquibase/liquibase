@@ -6,10 +6,11 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.ExecuteSqlCommand;
 import liquibase.command.SnapshotCommand;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.sqlplus.SqlPlusConnection;
 import liquibase.diff.compare.CompareControl;
@@ -30,7 +31,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.changelog.visitor.ChangeExecListener;
 import sqlplus.context.SqlPlusContext;
 
 import java.io.*;
@@ -140,6 +140,9 @@ public class Main {
                 main.printHelp(Arrays.asList(e.getMessage()), System.err);
                 throw e;
             }
+            //If we didn't get manual or sqlplus from args then we should check if sqlplus.properties exists
+            if (!main.manual && !main.sqlplus)
+                main.parseProperties();
 
             File propertiesFile = new File(main.defaultsFile);
             String localDefaultsPathName = main.defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1");
@@ -226,6 +229,18 @@ public class Main {
             return "";
         } else {
             return "\n\nFor more information, use the --logLevel flag";
+        }
+    }
+
+    public void parseProperties() throws IOException {
+        String sqlplusProperties = System.getProperty("user.dir") + "/sqlplus.properties";
+        Properties properties = new Properties();
+        if (new File(sqlplusProperties).exists()) {
+            properties.load(new FileInputStream(new File(sqlplusProperties)));
+            if (!properties.getProperty("use.sqlplus").isEmpty())
+                sqlplus = properties.getProperty("use.sqlplus").equals("true");
+            if (!properties.getProperty("manual").isEmpty())
+                manual = properties.getProperty("manual").equals("true");
         }
     }
 
@@ -740,7 +755,7 @@ public class Main {
                 String[] splitArg = splitArg(arg);
 
                 String attributeName = splitArg[0];
-                String value = splitArg.length>1 ? splitArg[1] : null;
+                String value = splitArg.length > 1 ? splitArg[1] : null;
 
                 if (StringUtils.trimToEmpty(value).equalsIgnoreCase("PROMPT")) {
                     Console c = System.console();

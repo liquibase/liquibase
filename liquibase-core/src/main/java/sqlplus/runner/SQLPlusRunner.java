@@ -10,6 +10,7 @@ import sqlplus.context.SqlPlusContext;
 import sqlplus.stolen.StreamPumper;
 
 import java.io.*;
+import java.util.Properties;
 
 
 /**
