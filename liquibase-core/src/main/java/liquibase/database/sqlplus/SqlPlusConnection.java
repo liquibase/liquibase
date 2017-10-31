@@ -46,7 +46,7 @@ public class SqlPlusConnection {
         String line;
         try {
             while ((line = reader.readLine()) != null) {
-                SQL.append(line + System.getProperty("line.separator"));
+                SQL.append(line).append(System.getProperty("line.separator"));
             }
             reader.close();
         } catch (IOException e) {

@@ -10,6 +10,7 @@ import sqlplus.context.SqlPlusContext;
 import sqlplus.stolen.StreamPumper;
 
 import java.io.*;
+import java.util.Map;
 
 
 /**
@@ -43,17 +44,15 @@ public class SQLPlusRunner {
     }
 
     public static void executeSQLPlus(String pathToFile) throws IOException, SqlPlusException, InterruptedException {
-
         try {
             int err = 0;
             log.debug("Launching SQLPLUS.");
-            String command = SQLPLUS + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile;
-            log.debug("EXECUTING: " + command);
 
-            if (command == null)
-                throw new SqlPlusException("Command is undefined!");
+            ProcessBuilder pb = new ProcessBuilder(SQLPLUS, SqlPlusContext.getInstance().getConnection().getConnectionAsString(), "@" + pathToFile);
+            Map<String, String> env = pb.environment();
+            env.put("NLS_LANG", "AMERICAN_AMERICA.AL32UTF8");
 
-            Process sqlplus = Runtime.getRuntime().exec(command);
+            Process sqlplus = pb.start();
 
             OutputStream os = new ByteArrayOutputStream(4096);
             StreamPumper inputPumper = new StreamPumper(sqlplus.getInputStream(), os);
@@ -82,7 +81,6 @@ public class SQLPlusRunner {
 
     public static String makeChangeSetFile(Change change, Database database) {
         SqlStatement[] statements = change.generateStatements(database);
-
         String sqlplus = SqlPlusContext.getInstance().getConnection().getInitSQL();
         for (SqlStatement statement : statements) {
             sqlplus = sqlplus.concat(statement.toString() + System.getProperty("line.separator") + "/" + System.getProperty("line.separator"));
@@ -94,21 +92,17 @@ public class SQLPlusRunner {
     }
 
     public static void writeToFile(String filename, String content) {
-        FileWriter fw = null;
-        BufferedWriter bw = null;
+        OutputStreamWriter osw = null;
         try {
-            fw = new FileWriter(filename);
-            bw = new BufferedWriter(fw);
-            bw.write(content);
+            osw = new OutputStreamWriter(new FileOutputStream(filename),"UTF-8");
+            osw.write(content);
+            osw.flush();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             try {
-                if (bw != null)
-                    bw.close();
-
-                if (fw != null)
-                    fw.close();
+                if (osw != null)
+                    osw.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
