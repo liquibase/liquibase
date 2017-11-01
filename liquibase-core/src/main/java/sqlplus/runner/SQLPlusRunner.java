@@ -7,7 +7,6 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import sqlplus.context.SqlPlusContext;
-import sqlplus.stolen.StreamPumper;
 
 import java.io.*;
 import java.util.Map;
@@ -17,7 +16,6 @@ import java.util.Map;
  * @author gette
  *         For supporting independent execution of Liquiplus without Ant
  *         moving StreamPumper from ant to sqlplus.stolen
- * @see sqlplus.stolen.StreamPumper
  */
 public class SQLPlusRunner {
     private static Logger log = LogFactory.getLogger();
@@ -47,6 +45,7 @@ public class SQLPlusRunner {
         try {
             int err = 0;
             log.debug("Launching SQLPLUS.");
+            log.debug("EXECUTING: " + SQLPLUS + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
 
             ProcessBuilder pb = new ProcessBuilder(SQLPLUS, SqlPlusContext.getInstance().getConnection().getConnectionAsString(), "@" + pathToFile);
             Map<String, String> env = pb.environment();
@@ -54,14 +53,14 @@ public class SQLPlusRunner {
 
             Process sqlplus = pb.start();
 
-            OutputStream os = new ByteArrayOutputStream(4096);
-            StreamPumper inputPumper = new StreamPumper(sqlplus.getInputStream(), os);
-            inputPumper.run();
-            // Wait for everything to finish
+            StreamPumper inputPumper = new StreamPumper(sqlplus.getInputStream());
+            StreamPumper errorPumper = new StreamPumper(sqlplus.getErrorStream());
+            inputPumper.start();
+            errorPumper.start();
             sqlplus.waitFor();
-            log.sqlplus(os.toString());
+            inputPumper.join();
+            errorPumper.join();
             sqlplus.destroy();
-
 
             // check its exit value
             err = sqlplus.exitValue();
@@ -85,6 +84,7 @@ public class SQLPlusRunner {
         for (SqlStatement statement : statements) {
             sqlplus = sqlplus.concat(statement.toString() + System.getProperty("line.separator") + "/" + System.getProperty("line.separator"));
         }
+
         sqlplus = sqlplus.concat(SqlPlusContext.getInstance().getConnection().getExitSQL());
         String pathToFile = System.getProperty("user.dir") + "/changeSet.sql";
         writeToFile(pathToFile, sqlplus);
@@ -94,7 +94,7 @@ public class SQLPlusRunner {
     public static void writeToFile(String filename, String content) {
         OutputStreamWriter osw = null;
         try {
-            osw = new OutputStreamWriter(new FileOutputStream(filename),"UTF-8");
+            osw = new OutputStreamWriter(new FileOutputStream(filename), "UTF-8");
             osw.write(content);
             osw.flush();
         } catch (IOException e) {
@@ -108,4 +108,46 @@ public class SQLPlusRunner {
             }
         }
     }
+
+    static class StreamPumper extends Thread {
+        private BufferedReader din;
+        private boolean endOfStream = false;
+        private static final int SLEEP_TIME = 5;
+
+        public StreamPumper(InputStream is) {
+            this.din = new BufferedReader(new InputStreamReader(is));
+        }
+
+        public void pumpStream() throws IOException {
+
+            if (!endOfStream) {
+                String line = din.readLine();
+
+                if (line != null) {
+                    System.out.println(line);
+                    log.sqlplus(line);
+                } else {
+                    endOfStream = true;
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                try {
+                    while (!endOfStream) {
+                        pumpStream();
+                        sleep(SLEEP_TIME);
+                    }
+                } catch (InterruptedException ie) {
+                    //ignore
+                }
+                din.close();
+            } catch (IOException ioe) {
+                // ignore
+            }
+        }
+    }
 }
+

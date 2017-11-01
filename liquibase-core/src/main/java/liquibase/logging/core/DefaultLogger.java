@@ -47,7 +47,7 @@ public class DefaultLogger extends AbstractLogger {
             try {
                 if (!log.exists()) {
                     if (!log.createNewFile()) {
-                        throw new RuntimeException("Could not create logFile "+log.getAbsolutePath());
+                        throw new RuntimeException("Could not create logFile " + log.getAbsolutePath());
                     }
                 }
                 err = new PrintStream(log);
@@ -56,24 +56,25 @@ public class DefaultLogger extends AbstractLogger {
             }
         }
     }
+
     @Override
-    public void sqlplus(String message){
-        if (getLogLevel().compareTo(LogLevel.SQLPLUS) <=0){
-            print(LogLevel.SQLPLUS, message);
+    public void sqlplus(String message) {
+        if (getLogLevel().compareTo(LogLevel.SQLPLUS) <= 0) {
+            printSQLPLUS(message);
         }
     }
 
     @Override
-    public void sqlplus(String message, Throwable e){
-        if (getLogLevel().compareTo(LogLevel.SQLPLUS) <=0){
-            print(LogLevel.SQLPLUS, message);
+    public void sqlplus(String message, Throwable e) {
+        if (getLogLevel().compareTo(LogLevel.SQLPLUS) <= 0) {
+            printSQLPLUS(message);
             e.printStackTrace(err);
         }
     }
 
     @Override
     public void severe(String message) {
-        if (getLogLevel().compareTo(LogLevel.SEVERE) <=0) {
+        if (getLogLevel().compareTo(LogLevel.SEVERE) <= 0) {
             print(LogLevel.SEVERE, message);
         }
     }
@@ -86,9 +87,17 @@ public class DefaultLogger extends AbstractLogger {
         err.println(logLevel + " " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + ": " + name + ": " + buildMessage(message));
     }
 
+    protected void printSQLPLUS(String message) {
+        if (StringUtils.trimToNull(message) == null) {
+            return;
+        }
+
+        err.println(message);
+    }
+
     @Override
     public void severe(String message, Throwable e) {
-        if (getLogLevel().compareTo(LogLevel.SEVERE) <=0) {
+        if (getLogLevel().compareTo(LogLevel.SEVERE) <= 0) {
             print(LogLevel.SEVERE, message);
             e.printStackTrace(err);
         }
@@ -96,14 +105,14 @@ public class DefaultLogger extends AbstractLogger {
 
     @Override
     public void warning(String message) {
-        if (getLogLevel().compareTo(LogLevel.WARNING) <=0) {
+        if (getLogLevel().compareTo(LogLevel.WARNING) <= 0) {
             print(LogLevel.WARNING, message);
         }
     }
 
     @Override
     public void warning(String message, Throwable e) {
-        if (getLogLevel().compareTo(LogLevel.WARNING) <=0) {
+        if (getLogLevel().compareTo(LogLevel.WARNING) <= 0) {
             print(LogLevel.WARNING, message);
             e.printStackTrace(err);
         }
@@ -111,14 +120,14 @@ public class DefaultLogger extends AbstractLogger {
 
     @Override
     public void info(String message) {
-        if (getLogLevel().compareTo(LogLevel.INFO) <=0) {
+        if (getLogLevel().compareTo(LogLevel.INFO) <= 0) {
             print(LogLevel.INFO, message);
         }
     }
 
     @Override
     public void info(String message, Throwable e) {
-        if (getLogLevel().compareTo(LogLevel.INFO) <=0) {
+        if (getLogLevel().compareTo(LogLevel.INFO) <= 0) {
             print(LogLevel.INFO, message);
             e.printStackTrace(err);
         }
@@ -126,14 +135,14 @@ public class DefaultLogger extends AbstractLogger {
 
     @Override
     public void debug(String message) {
-        if (getLogLevel().compareTo(LogLevel.DEBUG) <=0) {
+        if (getLogLevel().compareTo(LogLevel.DEBUG) <= 0) {
             print(LogLevel.DEBUG, message);
         }
     }
 
     @Override
     public void debug(String message, Throwable e) {
-        if (getLogLevel().compareTo(LogLevel.DEBUG) <=0) {
+        if (getLogLevel().compareTo(LogLevel.DEBUG) <= 0) {
             print(LogLevel.DEBUG, message);
             e.printStackTrace(err);
         }

@@ -24,12 +24,28 @@ public class SqlPlusConnection {
 
     }
 
-    public String getConnectionAsDescription() {
-        return username + "/" + password + "@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=" + url.split("@")[1].split(":")[0] + ")(Port=" + url.split("@")[1].split(":")[1] + "))(CONNECT_DATA=(SID=" + url.split("@")[1].split(":")[2] + ")))";
-    }
+    /*
+    Oracle JDBC Thin using a Service Name:
 
+    jdbc:oracle:thin:@//<host>:<port>/<service_name>
+
+    Oracle JDBC Thin using an SID:
+
+    jdbc:oracle:thin:@<host>:<port>:<SID>
+
+    Oracle JDBC Thin using a TNSName:
+
+    jdbc:oracle:thin:@<TNSName>
+
+ */
     public String getConnectionAsString() {
-        return username + "/" + password + "@//" + url.split("@")[1].split(":")[0] + ":" + url.split("@")[1].split(":")[1] + "/" + url.split("@")[1].split(":")[2];
+        String conn = url.split("@")[1];
+        if (conn.startsWith("//"))
+            return username + "/" + password + "@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=" + conn.split(":")[0].replaceFirst("//", "") + ")(Port=" + conn.split(":")[1].split("/")[0] + "))(CONNECT_DATA=(SERVICE_NAME=" + conn.split(":")[1].split("/")[1] + ")))";
+        else if (conn.split(":").length > 2)
+            return username + "/" + password + "@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=" + conn.split(":")[0] + ")(Port=" + conn.split(":")[1] + "))(CONNECT_DATA=(SID=" + conn.split(":")[2] + ")))";
+        else
+            return username + "/" + password + "@" + conn;
     }
 
     public String getInitSQL() {
