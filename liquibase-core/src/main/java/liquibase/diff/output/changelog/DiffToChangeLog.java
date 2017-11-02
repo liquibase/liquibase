@@ -163,15 +163,15 @@ public class DiffToChangeLog {
             created = new SimpleDateFormat("yyyy-MM-dd HH:mmZ").format(new Date());
         }
 
-        List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(ChangedObjectChangeGenerator.class);
+        List<ChangeSet> updateChangeSets = new ArrayList<ChangeSet>();
 
         for (Class<? extends DatabaseObject> type : types) {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
                     Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-                    addToChangeSets(changes, changeSets, quotingStrategy, created);
+                    addToChangeSets(changes, updateChangeSets, quotingStrategy, created);
                 }
             }
         }
@@ -201,12 +201,16 @@ public class DiffToChangeLog {
             }
         }
 
+        List<ChangeSet> createChangeSets = new ArrayList<ChangeSet>();
+
         for (DatabaseObject object : sortMissingObjects(missingObjects, diffResult.getReferenceSnapshot().getDatabase())) {
             ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
 
             Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-            addToChangeSets(changes, changeSets, quotingStrategy, created);
+            addToChangeSets(changes, createChangeSets, quotingStrategy, created);
         }
+
+        List<ChangeSet> deleteChangeSets = new ArrayList<ChangeSet>();
 
         types = getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
@@ -214,10 +218,15 @@ public class DiffToChangeLog {
             for (DatabaseObject object : sortUnexpectedObjects(diffResult.getUnexpectedObjects(type, comparator), diffResult.getReferenceSnapshot().getDatabase())) {
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-                    addToChangeSets(changes, changeSets, quotingStrategy, created);
+                    addToChangeSets(changes, deleteChangeSets, quotingStrategy, created);
                 }
             }
         }
+
+        List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+        changeSets.addAll(createChangeSets);
+        changeSets.addAll(deleteChangeSets);
+        changeSets.addAll(updateChangeSets);
         return changeSets;
     }
 
