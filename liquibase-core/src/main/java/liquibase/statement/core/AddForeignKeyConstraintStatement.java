@@ -20,11 +20,14 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
     private boolean deferrable;
     private boolean initiallyDeferred;
+    private boolean validate = true;//only Oracle PL/SQL feature
 
     private String onDelete;
     private String onUpdate;
 
-    public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName, String baseTableName, ColumnConfig[] baseColumns, String referencedTableCatalogName, String referencedTableSchemaName, String referencedTableName, ColumnConfig[] referencedColumns) {
+    public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName,
+                                            String baseTableName, ColumnConfig[] baseColumns, String referencedTableCatalogName,
+                                            String referencedTableSchemaName, String referencedTableName, ColumnConfig[] referencedColumns) {
         this.baseTableCatalogName = baseTableCatalogName;
         this.baseTableSchemaName = baseTableSchemaName;
         this.baseTableName = baseTableName;
@@ -124,6 +127,25 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
     public AddForeignKeyConstraintStatement setOnDelete(String deleteRule) {
         this.onDelete = deleteRule;
+        return this;
+    }
+
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines the state of a constraint on a column in a table
+     * @return true if ENABLE VALIDATE(by default), otherwise false if ENABLE NOVALIDATE
+     */
+    public boolean isValidate() {
+        return validate;
+    }
+
+    /**
+     *
+     * @param validate - if validate set to FALSE then 'ENABLE NOVALIDATE' mode. It means the constraint would be enabled
+     *        without validating the constraint logic for the old existing data. Only the fresh new data would comply
+     *        with the constraint logic. THE DEFAULT STATE FOR THE Foreign Key IS 'ENABLE VALIDATE' MODE !
+     */
+    public AddForeignKeyConstraintStatement setValidate(boolean validate) {
+        this.validate = validate;
         return this;
     }
 }

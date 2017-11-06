@@ -470,6 +470,7 @@
             <xsd:attribute name="forIndexSchemaName" type="xsd:string" />
             <xsd:attribute name="forIndexName" type="xsd:string" />
 			<xsd:attribute name="clustered" type="booleanExp" />
+			<xsd:attribute name="validate" type="booleanExp" />
 			<xsd:anyAttribute namespace="##other" processContents="lax" />
         </xsd:complexType>
 	</xsd:element>
@@ -629,6 +630,7 @@
 		<xsd:attribute name="onDelete" type="fkCascadeActionOptions" />
 		<xsd:attribute name="onUpdate" type="fkCascadeActionOptions" />
         <xsd:attribute name="referencesUniqueColumn" type="booleanExp" />
+		<xsd:attribute name="validate" type="booleanExp" />
     </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="addNotNullConstraintAttrib">

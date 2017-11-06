@@ -5,6 +5,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
@@ -172,7 +173,10 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 } else {
                     throw new RuntimeException("Unknown deferrability result: " + deferrability);
                 }
-
+                if (database instanceof OracleDatabase) {
+                    foreignKey.setValidate(!"NOT VALIDATED".equals(
+                            cleanNameFromDatabase(row.getString("CONSTRAINT_VALIDATE").trim(), database)));
+                }
                 if (database.createsIndexesForForeignKeys()) {
                     Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
                     exampleIndex.getColumns().addAll(foreignKey.getForeignKeyColumns());

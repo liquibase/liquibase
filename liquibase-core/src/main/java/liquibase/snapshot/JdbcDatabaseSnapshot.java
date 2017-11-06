@@ -143,7 +143,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "  decode (f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,  " +
                                 "  f.constraint_name as fk_name,  " +
                                 "  p.constraint_name as pk_name,  " +
-                                "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability  " +
+                                "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,  " +
+                                "  f.validated as fk_validate " +
                                 "FROM " +
                                 "all_cons_columns pc " +
                                 "INNER JOIN all_constraints p " +

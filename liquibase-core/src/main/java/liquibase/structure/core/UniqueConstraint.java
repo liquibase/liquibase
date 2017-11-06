@@ -98,6 +98,15 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         return this;
     }
 
+	public boolean isValidate() {
+		return getAttribute("validate", true);
+	}
+
+	public UniqueConstraint setValidate(boolean validate) {
+		this.setAttribute("validate", validate);
+		return this;
+	}
+
 	public boolean isInitiallyDeferred() {
 		return getAttribute("initiallyDeferred", Boolean.class);
 	}

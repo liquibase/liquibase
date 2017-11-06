@@ -44,7 +44,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     @Override
     public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-        String sql = null;
+        String sql;
         if (statement.getConstraintName() == null) {
             sql = String.format("ALTER TABLE %s ADD UNIQUE" + (statement.isClustered() ? " CLUSTERED " : " ") + "(%s)"
                     , database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
@@ -68,7 +68,11 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             if (statement.isDisabled()) {
                 sql += " DISABLE";
             }
+            if (database instanceof OracleDatabase) {
+                sql +=!statement.isValidate()?" ENABLE NOVALIDATE ":"";
+            }
         }
+
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {

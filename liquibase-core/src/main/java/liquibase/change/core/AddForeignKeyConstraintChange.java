@@ -35,6 +35,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     private Boolean deferrable;
     private Boolean initiallyDeferred;
+    private Boolean validate;
 
     private String onUpdate;
     private String onDelete;
@@ -149,6 +150,24 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return initiallyDeferred;
     }
 
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines the state of a constraint on a column in a table
+     * @return true if ENABLE VALIDATE(by default), otherwise false if ENABLE NOVALIDATE
+     */
+    @DatabaseChangeProperty(description = "Is the foreign key has 'NOT VALIDATED'")
+    public Boolean getValidate() {
+        return validate;
+    }
+
+    /**
+     *
+     * @param validate - if validate set to FALSE then 'ENABLE NOVALIDATE' mode. It means the constraint would be enabled
+     *        without validating the constraint logic for the old existing data. Only the fresh new data would comply
+     *        with the constraint logic. THE DEFAULT STATE FOR THE Foreign Key IS 'ENABLE VALIDATE' MODE !
+     */
+    public void setValidate(Boolean validate) {
+        this.validate = validate;
+    }
     public void setInitiallyDeferred(Boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
     }
@@ -230,6 +249,11 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             initiallyDeferred = getInitiallyDeferred();
         }
 
+        boolean validate = true;
+        if (getValidate() != null) {
+            validate = getValidate();
+        }
+
         return new SqlStatement[]{
                 new AddForeignKeyConstraintStatement(getConstraintName(),
                         getBaseTableCatalogName(),
@@ -244,6 +268,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         .setInitiallyDeferred(initiallyDeferred)
                         .setOnUpdate(getOnUpdate())
                         .setOnDelete(getOnDelete())
+                        .setValidate(validate)
         };
     }
 

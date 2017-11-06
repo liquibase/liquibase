@@ -150,8 +150,8 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getName() + "(" + getForeignKeyTable() + "[" + StringUtils.join(getForeignKeyColumns(), ", ", columnFormatter) + "] -> " + getPrimaryKeyTable() + "[" + StringUtils.join(getPrimaryKeyColumns(), ", ", columnFormatter) + "])";
     }
 
-
     public boolean isDeferrable() {
+
         return getAttribute("deferrable", false);
     }
 
@@ -169,6 +169,16 @@ public class ForeignKey extends AbstractDatabaseObject{
         this.setAttribute("initiallyDeferred", initiallyDeferred);
         return this;
     }
+
+    public boolean isValidate() {
+        return getAttribute("validate", true);
+    }
+
+    public ForeignKey setValidate(boolean validate) {
+        this.setAttribute("validate", validate);
+        return this;
+    }
+
 
     public ForeignKey setUpdateRule(ForeignKeyConstraintType rule) {
         this.setAttribute("updateRule", rule);

@@ -25,6 +25,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
     private Boolean clustered;
+    private Boolean validate;
 
     private String forIndexName;
     private String forIndexSchemaName;
@@ -110,6 +111,25 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.disabled = disabled;
     }
 
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines the state of a constraint on a column in a table
+     * @return true if ENABLE VALIDATE(by default), otherwise false if ENABLE NOVALIDATE
+     */
+    @DatabaseChangeProperty(description = "Is the foreign key has 'NOT VALIDATED'")
+    public Boolean getValidate() {
+        return validate;
+    }
+
+    /**
+     *
+     * @param validate - if validate set to FALSE then 'ENABLE NOVALIDATE' mode. It means the constraint would be enabled
+     *        without validating the constraint logic for the old existing data. Only the fresh new data would comply
+     *        with the constraint logic. THE DEFAULT STATE FOR THE Unique Constraint IS 'ENABLE VALIDATE' MODE !
+     */
+    public void setValidate(Boolean validate) {
+        this.validate = validate;
+    }
+
     public Boolean getClustered() {
         return clustered;
     }
@@ -169,12 +189,18 @@ public class AddUniqueConstraintChange extends AbstractChange {
             clustered = getClustered();
         }
 
+        boolean validate = true;
+        if (getValidate() != null) {
+            validate = getValidate();
+        }
+
         AddUniqueConstraintStatement statement = createAddUniqueConstraintStatement();
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
                         .setDisabled(disabled)
-                        .setClustered(clustered);
+                        .setClustered(clustered)
+                        .setValidate(validate);
 
         statement.setForIndexName(getForIndexName());
         statement.setForIndexSchemaName(getForIndexSchemaName());

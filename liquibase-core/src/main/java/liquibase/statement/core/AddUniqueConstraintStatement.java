@@ -17,6 +17,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private boolean initiallyDeferred;
     private boolean disabled;
     private boolean clustered;
+    private boolean validate = true;//only Oracle PL/SQL feature
 
     private String forIndexName;
     private String forIndexSchemaName;
@@ -125,5 +126,24 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
     public void setForIndexCatalogName(String forIndexCatalogName) {
         this.forIndexCatalogName = forIndexCatalogName;
+    }
+
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines the state of a constraint on a column in a table
+     * @return true if ENABLE VALIDATE(by default), otherwise false if ENABLE NOVALIDATE
+     */
+    public boolean isValidate() {
+        return validate;
+    }
+
+    /**
+     *
+     * @param validate - if validate set to FALSE then 'ENABLE NOVALIDATE' mode. It means the constraint would be enabled
+     *        without validating the constraint logic for the old existing data. Only the fresh new data would comply
+     *        with the constraint logic. THE DEFAULT STATE FOR THE Unique Constraint IS 'ENABLE VALIDATE' MODE !
+     */
+    public AddUniqueConstraintStatement setValidate(boolean validate) {
+        this.validate = validate;
+        return this;
     }
 }
