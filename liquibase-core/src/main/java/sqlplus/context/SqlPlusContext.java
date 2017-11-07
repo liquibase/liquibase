@@ -6,6 +6,8 @@ import java.lang.reflect.Field;
 
 /**
  * @author gette
+ * In this singleton we are storing execution flags and connection line for sqlplus
+ * @see SqlPlusConnection
  */
 public class SqlPlusContext {
     private boolean sqlplus = false;
@@ -23,11 +25,11 @@ public class SqlPlusContext {
         field.setBoolean(this, value);
     }
 
-    public Boolean isSqlplus(){
+    public Boolean isSqlplus() {
         return sqlplus;
     }
 
-    public Boolean isManual(){
+    public Boolean isManual() {
         return manual;
     }
 

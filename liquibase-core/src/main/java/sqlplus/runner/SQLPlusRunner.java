@@ -14,8 +14,6 @@ import java.util.Map;
 
 /**
  * @author gette
- *         For supporting independent execution of Liquiplus without Ant
- *         moving StreamPumper from ant to sqlplus.stolen
  */
 public class SQLPlusRunner {
     private static Logger log = LogFactory.getLogger();
@@ -23,12 +21,19 @@ public class SQLPlusRunner {
     private static final String OSName = System.getProperty("os.name").toLowerCase();
     private static final String SQLPLUS = "sqlplus ";
 
+    /**
+     * Executing SQL*Plus via command line (supports bash and cmd)
+     * Manual mode is available only in WinOS family
+     * Because we are using light version of Notepad++
+     * @param pathToFile
+     * @throws SqlPlusException
+     */
     public static void run(String pathToFile) throws SqlPlusException {
         log.debug("SQLPlusRunner has been initialized.");
         try {
             //adding condition which protects from crashing on Linux OS when using manual mode
             if (SqlPlusContext.getInstance().isManual() && OSName.contains("win")) {
-                Process notepad = new ProcessBuilder("notepad", pathToFile).start();
+                Process notepad = new ProcessBuilder(System.getProperty("user.dir") + "/npp/notepad++.exe", "-nosession","-notabbar", pathToFile).start();
                 notepad.waitFor();
                 notepad.destroy();
             }
@@ -41,6 +46,13 @@ public class SQLPlusRunner {
         }
     }
 
+    /**
+     * Building command and executing SQL*Plus
+     * @param pathToFile sql-file which need to be proceed
+     * @throws IOException
+     * @throws SqlPlusException
+     * @throws InterruptedException
+     */
     public static void executeSQLPlus(String pathToFile) throws IOException, SqlPlusException, InterruptedException {
         try {
             int err = 0;
@@ -78,6 +90,13 @@ public class SQLPlusRunner {
         }
     }
 
+    /**
+     * Using default method from Change and generating statements
+     * Then packing these statements into file
+     * @param change standard liquibase Change-object
+     * @param database standard liquibase Database-object
+     * @return
+     */
     public static String makeChangeSetFile(Change change, Database database) {
         SqlStatement[] statements = change.generateStatements(database);
         String sqlplus = SqlPlusContext.getInstance().getConnection().getInitSQL();
@@ -109,6 +128,9 @@ public class SQLPlusRunner {
         }
     }
 
+    /**
+     * Using ant StreamPumper for real-time output of SQL*Plus execution
+     */
     static class StreamPumper extends Thread {
         private BufferedReader din;
         private boolean endOfStream = false;

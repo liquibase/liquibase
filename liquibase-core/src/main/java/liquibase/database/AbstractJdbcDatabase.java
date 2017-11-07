@@ -1256,7 +1256,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         if (SqlPlusContext.getInstance().isSqlplus()) {
-            //Катим ченджсет одним скриптом
+            //Writing specific changeset to file and then executing via SQL*Plus
             String pathToTempFile = SQLPlusRunner.makeChangeSetFile(change, this);
             try {
                 SQLPlusRunner.run(pathToTempFile);
