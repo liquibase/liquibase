@@ -30,7 +30,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
 
         if (createViewStatement.isReplaceIfExists()) {
-            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, DB2Database.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, DB2Database.class, Db2zDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
         }
 
         return validationErrors;
@@ -77,10 +77,6 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                     viewDefinition.replace("CREATE", "CREATE OR REPLACE");
                 }
             }
-        }
-        if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
-            viewDefinition.replaceIfExists("OR", "");
-            viewDefinition.replaceIfExists("REPLACE", "");
         }
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
         return sql.toArray(new Sql[sql.size()]);

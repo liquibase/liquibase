@@ -6,10 +6,10 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.DB2Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
@@ -250,7 +250,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         String endDelimiter = ";";
         if (database instanceof OracleDatabase) {
             endDelimiter = "\n/";
-        } else if (database instanceof DB2Database) {
+        } else if (database instanceof AbstractDb2Database) {
             endDelimiter = "";
         }
 

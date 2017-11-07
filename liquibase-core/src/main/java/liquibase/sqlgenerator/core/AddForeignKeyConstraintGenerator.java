@@ -64,7 +64,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
                 //don't use
 		    } else if (database instanceof InformixDatabase) {
                 //TODO don't know if correct
-            } else if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+            } else if (database instanceof Db2zDatabase) {
                 //don't use
             } else {
 			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());

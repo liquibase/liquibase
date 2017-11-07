@@ -4,6 +4,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -109,7 +110,7 @@ public class JdbcExecutor extends AbstractExecutor {
             return;
         }
         if (sql instanceof CompoundStatement) {
-            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+            if (database instanceof Db2zDatabase) {
                 executeDb2ZosComplexStatement(sql);
                 return;
             }

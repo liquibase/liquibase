@@ -1,7 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
@@ -17,8 +18,12 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 			String whereClause) {
         StringBuffer recordCheckSql = new StringBuffer();
 
-        recordCheckSql.append("BEGIN ATOMIC\n");
-        recordCheckSql.append("\tDECLARE v_reccount INTEGER;\n");
+		if (database instanceof Db2zDatabase) {
+			recordCheckSql.append("BEGIN\n");
+		} else {
+			recordCheckSql.append("BEGIN ATOMIC\n");
+		}
+		recordCheckSql.append("\tDECLARE v_reccount INTEGER;\n");
         recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
 
         recordCheckSql.append(whereClause);
@@ -31,7 +36,7 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 	
 	@Override
 	public boolean supports(InsertOrUpdateStatement statement, Database database) {
-		return database instanceof DB2Database;
+		return database instanceof AbstractDb2Database;
 	}
 	
 	@Override

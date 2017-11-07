@@ -30,7 +30,7 @@ public class SmallIntType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        if (database instanceof AbstractDb2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
 

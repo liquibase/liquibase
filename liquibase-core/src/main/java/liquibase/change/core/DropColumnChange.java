@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -41,7 +42,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
 
     @Override
     public boolean supports(Database database) {
-        return database instanceof SQLiteDatabase || !(database instanceof DB2Database && ((DB2Database) database).isZOS()) && super.supports(database);
+        return database instanceof SQLiteDatabase || !(database instanceof Db2zDatabase) && super.supports(database);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.H2Database;
@@ -28,7 +28,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
                 || database instanceof HsqlDatabase
                 || database instanceof H2Database
                 || database instanceof DerbyDatabase
-                || database instanceof DB2Database
+                || database instanceof AbstractDb2Database
                 || database instanceof FirebirdDatabase
                 || database instanceof SybaseDatabase
                 || database instanceof SybaseASADatabase

@@ -1,7 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.HsqlDatabase;
@@ -26,7 +26,7 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-        if (database instanceof DB2Database || database instanceof FirebirdDatabase) {
+        if (database instanceof AbstractDb2Database || database instanceof FirebirdDatabase) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
@@ -102,7 +102,7 @@ public class BooleanType extends LiquibaseDataType {
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
         }
-        return database instanceof DB2Database
+        return database instanceof AbstractDb2Database
                 || database instanceof FirebirdDatabase
                 || database instanceof MSSQLDatabase
                 || database instanceof MySQLDatabase
