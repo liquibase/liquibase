@@ -303,6 +303,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                 if (getDeferrable() != null) {
                     result.assertCorrect(getDeferrable().equals(snapshot.isDeferrable()), "Initially deferred incorrect");
                 }
+                if (getValidate() != null) {
+                    result.assertCorrect(getValidate().equals(snapshot.isValidate()), "validate incorrect");
+                }
             }
 
             return result;

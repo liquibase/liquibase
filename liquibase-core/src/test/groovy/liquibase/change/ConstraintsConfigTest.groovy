@@ -170,6 +170,37 @@ public class ConstraintsConfigTest extends Specification {
         thrown(UnexpectedLiquibaseException)
     }
 
+    def setValidate() {
+        expect:
+        assert new ConstraintsConfig().setValidate(true).isValidate()
+        assert !new ConstraintsConfig().setValidate(false).isValidate()
+    }
+
+    def setValidate_string() {
+        expect:
+        assert new ConstraintsConfig().setValidate("true").isValidate()
+        assert new ConstraintsConfig().setValidate("TRUE").isValidate()
+        assert new ConstraintsConfig().setValidate("1").isValidate()
+
+        assert !new ConstraintsConfig().setValidate("false").isValidate()
+        assert !new ConstraintsConfig().setValidate("FALSE").isValidate()
+        assert !new ConstraintsConfig().setValidate("0").isValidate()
+
+        new ConstraintsConfig().setValidate("").isValidate() == null
+        new ConstraintsConfig().setValidate("null").isValidate() == null
+        new ConstraintsConfig().setValidate("NULL").isValidate() == null
+        def constraint = new ConstraintsConfig().setValidate((String) null)
+        constraint.isValidate() == null
+    }
+
+    def setValidate_badString() {
+        when:
+        new ConstraintsConfig().setValidate("bad val")
+
+        then:
+        thrown(UnexpectedLiquibaseException)
+    }
+
     def setPrimaryKeyName() {
         expect:
         new ConstraintsConfig().setPrimaryKeyName("xyz").getPrimaryKeyName() == "xyz"

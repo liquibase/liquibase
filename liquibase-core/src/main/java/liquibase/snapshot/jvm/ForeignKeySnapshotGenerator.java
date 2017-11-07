@@ -173,10 +173,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 } else {
                     throw new RuntimeException("Unknown deferrability result: " + deferrability);
                 }
-                if (database instanceof OracleDatabase) {
-                    foreignKey.setValidate(!"NOT VALIDATED".equals(
-                            cleanNameFromDatabase(row.getString("CONSTRAINT_VALIDATE").trim(), database)));
-                }
+                setValidateOptionIfAvailable(database, foreignKey, row);
                 if (database.createsIndexesForForeignKeys()) {
                     Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
                     exampleIndex.getColumns().addAll(foreignKey.getForeignKeyColumns());
@@ -189,6 +186,24 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             return foreignKey;
         } catch (Exception e) {
             throw new DatabaseException(e);
+        }
+    }
+
+    /**
+     * Method to map 'validate' option for FK. This thing works only for ORACLE
+     *
+     * @param database - DB where FK will be created
+     * @param foreignKey - FK object to persist validate option
+     * @param cachedRow - it's a cache-map to get metadata about FK
+     */
+    private void setValidateOptionIfAvailable(Database database, ForeignKey foreignKey, CachedRow cachedRow) {
+        if (!(database instanceof OracleDatabase)) {
+            return;
+        }
+        final String constraintValidate = cachedRow.getString("FK_VALIDATE");
+        final String NOVALIDATE = "NOT VALIDATED";
+        if (constraintValidate!=null && !constraintValidate.isEmpty()) {
+            foreignKey.setValidate(!NOVALIDATE.equals(cleanNameFromDatabase(constraintValidate.trim(), database)));
         }
     }
 

@@ -60,13 +60,28 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
             }
-            if (database instanceof OracleDatabase) {
-                constraint.setValidate(!"NOT VALIDATED".equals(cleanNameFromDatabase
-                        (col.get("CONSTRAINT_VALIDATE").toString().trim(), database)));
-            }
+            setValidateOptionIfAvailable(database, constraint, col);
         }
 
         return constraint;
+    }
+
+    /**
+     * Method to map 'validate' option for UC. This thing works only for ORACLE
+     *
+     * @param database - DB where UC will be created
+     * @param uniqueConstraint - UC object to persist validate option
+     * @param columnsMetadata - it's a cache-map to get metadata about UC
+     */
+    private void setValidateOptionIfAvailable(Database database, UniqueConstraint uniqueConstraint, Map<String, ?> columnsMetadata) {
+        if (!(database instanceof OracleDatabase)) {
+            return;
+        }
+        final Object constraintValidate = columnsMetadata.get("CONSTRAINT_VALIDATE");
+        final String NOVALIDATE = "NOT VALIDATED";
+        if (constraintValidate!=null && !constraintValidate.toString().trim().isEmpty()) {
+            uniqueConstraint.setValidate(!NOVALIDATE.equals(cleanNameFromDatabase(NOVALIDATE.trim(), database)));
+        }
     }
 
     @Override

@@ -372,6 +372,9 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (constraints.isDeferrable() != null) {
                 constraintsElement.setAttribute("deferrable", constraints.isDeferrable().toString());
             }
+            if (constraints.isValidate() != null) {
+                constraintsElement.setAttribute("validate", constraints.isValidate().toString());
+            }
             if (constraints.isDeleteCascade() != null) {
                 constraintsElement.setAttribute("deleteCascade", constraints.isDeleteCascade().toString());
             }
