@@ -170,10 +170,20 @@ public class ForeignKey extends AbstractDatabaseObject{
         return this;
     }
 
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines the state of a constraint on a column in a table
+     * @return true if ENABLE VALIDATE(by default), otherwise false if ENABLE NOVALIDATE
+     */
     public boolean isValidate() {
         return getAttribute("validate", true);
     }
 
+    /**
+     *
+     * @param validate - if validate set to FALSE then 'ENABLE NOVALIDATE' mode. It means the constraint would be enabled
+     *        without validating the constraint logic for the old existing data. Only the fresh new data would comply
+     *        with the constraint logic. THE DEFAULT STATE FOR THE Unique Constraint IS 'ENABLE VALIDATE' MODE !
+     */
     public ForeignKey setValidate(boolean validate) {
         this.setAttribute("validate", validate);
         return this;

@@ -115,7 +115,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
      * In Oracle PL/SQL, the VALIDATE keyword defines the state of a constraint on a column in a table
      * @return true if ENABLE VALIDATE(by default), otherwise false if ENABLE NOVALIDATE
      */
-    @DatabaseChangeProperty(description = "Is the foreign key has 'NOT VALIDATED'")
+    @DatabaseChangeProperty(description = "Is the unique constraint has 'NOT VALIDATED'")
     public Boolean getValidate() {
         return validate;
     }

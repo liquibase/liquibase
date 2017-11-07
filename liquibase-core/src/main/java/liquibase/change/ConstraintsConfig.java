@@ -341,8 +341,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
     @Override
-    public void
-    load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         throw new RuntimeException("TODO");
     }
 }
