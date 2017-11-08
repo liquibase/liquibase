@@ -16,7 +16,7 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 	@Override
 	public boolean supports(SetTableRemarksStatement statement, Database database) {
 		return database instanceof MySQLDatabase || database instanceof OracleDatabase || database instanceof PostgresDatabase
-				|| database instanceof DB2Database || database instanceof MSSQLDatabase || database instanceof H2Database
+				|| database instanceof AbstractDb2Database || database instanceof MSSQLDatabase || database instanceof H2Database
 				|| database instanceof SybaseASADatabase;
 	}
 

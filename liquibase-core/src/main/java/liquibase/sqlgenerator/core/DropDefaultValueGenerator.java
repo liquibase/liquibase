@@ -80,7 +80,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         	 * If the column is "NOT NULL" it has to be added behind the datatype.
         	 */
         	sql = "ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + ")";
-        } else if (database instanceof DB2Database) {
+        } else if (database instanceof AbstractDb2Database) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT NULL";

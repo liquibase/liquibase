@@ -1,10 +1,31 @@
 package liquibase.snapshot;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.core.*;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -13,13 +34,6 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -97,14 +111,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
                     if (database instanceof DB2Database) {
-                        String sql;
-                        if (((DB2Database) database).isZOS()) {
-                            sql = getDB2ZOSSql(jdbcSchemaName, tableName);
-                        } else {
-                            sql = getDB2Sql(jdbcSchemaName, tableName);
-                        }
-
-                        return executeAndExtract(sql, database);
+                        return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
+                    } else if (database instanceof Db2zDatabase) {
+                       return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, tableName), database);
                     } else {
                         if (tableName == null) {
                             for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
@@ -172,17 +181,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return executeAndExtract(sql, database);
                     } else if (database instanceof DB2Database) {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
-                        String sql;
-                        if (((DB2Database) database).isZOS()) {
-                            sql = getDB2ZOSSql(jdbcSchemaName, null);
-                        } else {
-                            sql = getDB2Sql(jdbcSchemaName, null);
-                        }
-
-                        return executeAndExtract(sql, database);
+                        return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
+                    } else if (database instanceof Db2zDatabase) {
+                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                        return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, null), database);
                     } else if (database instanceof MSSQLDatabase) {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
@@ -280,7 +284,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    if (database instanceof DB2Database || database instanceof MSSQLDatabase) {
+                    if (database instanceof AbstractDb2Database || database instanceof MSSQLDatabase) {
                         return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
                     } else {
                         return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
@@ -396,7 +400,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         returnList.addAll(executeAndExtract(sql, database));
 
-                    } else if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                    } else if (database instanceof Db2zDatabase) {
                         String sql = "SELECT i.CREATOR AS TABLE_SCHEM, " +
                                 "i.TBNAME AS TABLE_NAME, " +
                                 "i.NAME AS INDEX_NAME, " +
@@ -455,21 +459,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             });
 
-            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
-                filterDB2ZosGeneratedIndexes(indexes);
-            }
+//            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+//                filterDB2ZosGeneratedIndexes(indexes);
+//            }
             return indexes;
         }
 
-        private void filterDB2ZosGeneratedIndexes(List<CachedRow> indexes) throws SQLException {
-            Iterator<CachedRow> iterator = indexes.iterator();
-            while (iterator.hasNext()) {
-                String nextElement = iterator.next().getString("INDEX_NAME");
-                if (nextElement != null && nextElement.contains("_#_")) {
-                    iterator.remove();
-                }
-            }
-        }
+//        private void filterDB2ZosGeneratedIndexes(List<CachedRow> indexes) throws SQLException {
+//            Iterator<CachedRow> iterator = indexes.iterator();
+//            while (iterator.hasNext()) {
+//                String nextElement = iterator.next().getString("INDEX_NAME");
+//                if (nextElement != null && nextElement.contains("_#_")) {
+//                    iterator.remove();
+//                }
+//            }
+//        }
 
         protected void warnAboutDbaRecycleBin() {
             if (!warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
@@ -754,20 +758,20 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return rows;
                 }
             });
-            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
-                filterDB2ZosGeneratedColumns(columns);
-            }
+//            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+//                filterDB2ZosGeneratedColumns(columns);
+//            }
             return columns;
         }
 
-        private void filterDB2ZosGeneratedColumns(List<CachedRow> columns) throws SQLException {
-            Iterator<CachedRow> iterator = columns.iterator();
-            while (iterator.hasNext()) {
-                if ((iterator.next().getString("COLUMN_NAME")).startsWith("DB2_GENERATED")) {
-                    iterator.remove();
-                }
-            }
-        }
+//        private void filterDB2ZosGeneratedColumns(List<CachedRow> columns) throws SQLException {
+//            Iterator<CachedRow> iterator = columns.iterator();
+//            while (iterator.hasNext()) {
+//                if ((iterator.next().getString("COLUMN_NAME")).startsWith("DB2_GENERATED")) {
+//                    iterator.remove();
+//                }
+//            }
+//        }
 
         public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
@@ -805,7 +809,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryOracle(catalogAndSchema, table);
                     } else if (database instanceof MSSQLDatabase) {
                         return queryMssql(catalogAndSchema, table);
-                    } else if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                    } else if (database instanceof Db2zDatabase) {
                         return queryDb2Zos(catalogAndSchema, table);
                     }
 
@@ -822,7 +826,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryOracle(catalogAndSchema, null);
                     } else if (database instanceof MSSQLDatabase) {
                         return queryMssql(catalogAndSchema, null);
-                    } else if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                    } else if (database instanceof Db2zDatabase) {
                         return queryDb2Zos(catalogAndSchema, null);
                     }
 
@@ -1033,7 +1037,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         String sql = mssqlSql(catalogAndSchema, tableName);
                         pkInfo = executeAndExtract(sql, database);
                     } else {
-                        if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                        if (database instanceof Db2zDatabase) {
                             String sql = "SELECT 'NULL' AS TABLE_CAT," +
                                     " SYSTAB.TBCREATOR AS TABLE_SCHEM, " +
                                     "SYSTAB.TBNAME AS TABLE_NAME, " +
@@ -1050,7 +1054,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "AND SYSTAB.CONSTNAME=COLUSE.CONSTNAME " +
                                     "ORDER BY COLUSE.COLNAME";
                             try {
-                                return pkInfo = executeAndExtract(sql, database);
+                                return executeAndExtract(sql, database);
                             } catch (DatabaseException e) {
                                 throw new SQLException(e);
                             }
@@ -1303,14 +1307,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 sql += " and table_name = '" + tableName + "'";
                             }
                             // DB2 z/OS
-                        } else if ((((DB2Database) database).isZOS())) {
-                            sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
-                                    + "where k.constname = t.constname "
-                                    + "and k.TBCREATOR = t.TBCREATOR "
-                                    + "and t.TBCREATOR = '" + jdbcSchemaName + "' ";
-                            if (tableName != null) {
-                                sql += " and t.tbname = '" + tableName + "'";
-                            }
                         }
                         // here we are on DB2 UDB
                         else {
@@ -1321,6 +1317,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             if (tableName != null) {
                                 sql += " and t.tabname = '" + tableName + "'";
                             }
+                        }
+                    } else if (database instanceof Db2zDatabase) {
+                        sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
+                                + "where k.constname = t.constname "
+                                + "and k.TBCREATOR = t.TBCREATOR "
+                                + "and t.TBCREATOR = '" + jdbcSchemaName + "' ";
+                        if (tableName != null) {
+                            sql += " and t.tbname = '" + tableName + "'";
                         }
                     } else if (database instanceof FirebirdDatabase) {
                         sql = "SELECT RDB$INDICES.RDB$INDEX_NAME AS CONSTRAINT_NAME, RDB$INDICES.RDB$RELATION_NAME AS TABLE_NAME FROM RDB$INDICES "

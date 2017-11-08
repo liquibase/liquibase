@@ -5,6 +5,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
@@ -154,7 +155,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
 
                 // DB2 on z/OS doesn't support ON UPDATE
-                if (!(database instanceof DB2Database && ((DB2Database) database).isZOS())) {
+                if (!(database instanceof Db2zDatabase)) {
                     ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(row.getInt("UPDATE_RULE"), database);
                     foreignKey.setUpdateRule(updateRule);
                 }

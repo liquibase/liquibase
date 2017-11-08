@@ -164,7 +164,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         continue;
                     }
 
-                    if (database instanceof DB2Database && "SYSIBM".equals(row.getString("INDEX_QUALIFIER"))) {
+                    if (database instanceof AbstractDb2Database && "SYSIBM".equals(row.getString("INDEX_QUALIFIER"))) {
                         continue;
                     }
 
@@ -184,7 +184,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         foundIndexes.put(indexName, index);
                     }
 
-                    if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                    if (database instanceof Db2zDatabase) {
                         String columnName = getDb2ZosOrderedColumnName(row.getString("COLUMN_NAME"), row.getString("ORDER"));
                         index.addColumn(new Column().setName(columnName, true).setRelation(index.getTable()));
                     } else {
@@ -368,7 +368,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                             returnIndex.getColumns().add(null);
                         }
                         if (definition == null) {
-                            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                            if (database instanceof Db2zDatabase) {
                                 columnName = getDb2ZosOrderedColumnName(columnName, row.getString("ORDER"));
                                 returnIndex.getColumns().set(position - 1, new Column().setName(columnName, true).setRelation(returnIndex.getTable()));
                             } else {

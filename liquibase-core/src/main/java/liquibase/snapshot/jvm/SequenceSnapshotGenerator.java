@@ -55,7 +55,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         Database database = snapshot.getDatabase();
         List<Map<String, ?>> sequences;
-        if ((database instanceof DB2Database && ((DB2Database) database).isZOS())) {
+        if (database instanceof Db2zDatabase) {
             sequences = ExecutorService.getInstance()
                     .getExecutor(database)
                     .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
@@ -146,20 +146,17 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM QSYS2.SYSSEQUENCES WHERE SEQSCHEMA = '" + schema.getCatalogName() + "'";
             }
-
-            if (((DB2Database) database).isZOS()) {
-                return "SELECT NAME AS SEQUENCE_NAME, " +
-                        "START AS START_VALUE, " +
-                        "MINVALUE AS MIN_VALUE, " +
-                        "MAXVALUE AS MAX_VALUE, " +
-                        "CACHE AS CACHE_SIZE, " +
-                        "INCREMENT AS INCREMENT_BY, " +
-                        "CYCLE AS WILL_CYCLE, " +
-                        "ORDER AS IS_ORDERED " +
-                        "FROM SYSIBM.SYSSEQUENCES WHERE SEQTYPE = 'S' AND SCHEMA = '" + schema.getCatalogName() + "'";
-            }
-
             return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
+        } else if (database instanceof Db2zDatabase) {
+            return "SELECT NAME AS SEQUENCE_NAME, " +
+                    "START AS START_VALUE, " +
+                    "MINVALUE AS MIN_VALUE, " +
+                    "MAXVALUE AS MAX_VALUE, " +
+                    "CACHE AS CACHE_SIZE, " +
+                    "INCREMENT AS INCREMENT_BY, " +
+                    "CYCLE AS WILL_CYCLE, " +
+                    "ORDER AS IS_ORDERED " +
+                    "FROM SYSIBM.SYSSEQUENCES WHERE SEQTYPE = 'S' AND SCHEMA = '" + schema.getCatalogName() + "'";
         } else if (database instanceof DerbyDatabase) {
             return "SELECT " +
                     "  seq.SEQUENCENAME AS SEQUENCE_NAME " +

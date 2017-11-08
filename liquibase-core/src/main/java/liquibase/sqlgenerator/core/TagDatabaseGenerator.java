@@ -108,7 +108,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             if (database instanceof OracleDatabase) {
                 selectClause = "SELECT * FROM (SELECT";
                 endClause = ") where rownum=1)";
-            } else if (database instanceof DB2Database) {
+            } else if (database instanceof AbstractDb2Database) {
                 endClause = " FETCH FIRST 1 ROWS ONLY)";
             }
 

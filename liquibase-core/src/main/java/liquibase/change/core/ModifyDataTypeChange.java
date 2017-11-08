@@ -5,6 +5,7 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
@@ -20,6 +21,11 @@ public class ModifyDataTypeChange extends AbstractChange {
     private String newDataType;
 
     @Override
+    public boolean supports(Database database) {
+        return !(database instanceof Db2zDatabase) && super.supports(database);
+    }
+
+    @Override
     public String getConfirmationMessage() {
         return tableName+"."+columnName+" datatype was changed to "+newDataType;
     }
@@ -27,7 +33,7 @@ public class ModifyDataTypeChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         ModifyDataTypeStatement modifyDataTypeStatement = new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType());
-        if (database instanceof DB2Database && !((DB2Database) database).isZOS()) {
+        if (database instanceof DB2Database) {
             return new SqlStatement[] {
                     modifyDataTypeStatement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
