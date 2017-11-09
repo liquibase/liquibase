@@ -95,7 +95,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
      */
     protected String getPreDataTypeString(Database database) {
         if (database instanceof DerbyDatabase
-                || database instanceof DB2Database) {
+                || database instanceof AbstractDb2Database) {
             return " SET DATA TYPE ";
         } else if (database instanceof SybaseASADatabase
                 || database instanceof SybaseDatabase
