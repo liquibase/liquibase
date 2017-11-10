@@ -184,14 +184,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         foundIndexes.put(indexName, index);
                     }
 
+                    String ascOrDesc;
                     if (database instanceof Db2zDatabase) {
-                        String columnName = getDb2ZosOrderedColumnName(row.getString("COLUMN_NAME"), row.getString("ORDER"));
-                        index.addColumn(new Column().setName(columnName, true).setRelation(index.getTable()));
+                        ascOrDesc = row.getString("ORDER");
                     } else {
-                        String ascOrDesc = row.getString("ASC_OR_DESC");
-                        Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                        index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
+                        ascOrDesc = row.getString("ASC_OR_DESC");
                     }
+                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
                 }
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
@@ -368,14 +368,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                             returnIndex.getColumns().add(null);
                         }
                         if (definition == null) {
+                            String ascOrDesc;
                             if (database instanceof Db2zDatabase) {
-                                columnName = getDb2ZosOrderedColumnName(columnName, row.getString("ORDER"));
-                                returnIndex.getColumns().set(position - 1, new Column().setName(columnName, true).setRelation(returnIndex.getTable()));
+                                ascOrDesc =  row.getString("ORDER");
                             } else {
-                                String ascOrDesc = row.getString("ASC_OR_DESC");
-                                Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                                returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                                ascOrDesc = row.getString("ASC_OR_DESC");
                             }
+                            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                            returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
                         } else {
                             returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
                         }
@@ -472,20 +472,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     protected boolean addToViews(Database database) {
         return database instanceof MSSQLDatabase;
     }
-
-    private String getDb2ZosOrderedColumnName(String columnName, String order) {
-        if (order != null) {
-            if ("A".equals(order)) {
-                columnName += " ASC";
-            } else if ("D".equals(order)) {
-                columnName += " DESC";
-            } else if ("R".equals(order)) {
-                columnName += " RANDOM";
-            }
-        }
-        return columnName;
-    }
-
 
     //METHOD FROM SQLIteDatabaseSnapshotGenerator
     //    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
