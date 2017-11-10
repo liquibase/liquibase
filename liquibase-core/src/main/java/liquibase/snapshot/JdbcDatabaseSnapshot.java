@@ -459,21 +459,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             });
 
-//            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
-//                filterDB2ZosGeneratedIndexes(indexes);
-//            }
             return indexes;
         }
-
-//        private void filterDB2ZosGeneratedIndexes(List<CachedRow> indexes) throws SQLException {
-//            Iterator<CachedRow> iterator = indexes.iterator();
-//            while (iterator.hasNext()) {
-//                String nextElement = iterator.next().getString("INDEX_NAME");
-//                if (nextElement != null && nextElement.contains("_#_")) {
-//                    iterator.remove();
-//                }
-//            }
-//        }
 
         protected void warnAboutDbaRecycleBin() {
             if (!warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
@@ -758,20 +745,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return rows;
                 }
             });
-//            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
-//                filterDB2ZosGeneratedColumns(columns);
-//            }
             return columns;
         }
-
-//        private void filterDB2ZosGeneratedColumns(List<CachedRow> columns) throws SQLException {
-//            Iterator<CachedRow> iterator = columns.iterator();
-//            while (iterator.hasNext()) {
-//                if ((iterator.next().getString("COLUMN_NAME")).startsWith("DB2_GENERATED")) {
-//                    iterator.remove();
-//                }
-//            }
-//        }
 
         public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {

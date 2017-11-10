@@ -19,6 +19,7 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
         StringBuffer recordCheckSql = new StringBuffer();
 
 		if (database instanceof Db2zDatabase) {
+			recordCheckSql.append("CREATE PROCEDURE insertOrUpdateDb2Z()\n");
 			recordCheckSql.append("BEGIN\n");
 		} else {
 			recordCheckSql.append("BEGIN ATOMIC\n");
@@ -43,7 +44,11 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 	protected String getPostUpdateStatements(Database database) {
         StringBuffer endStatements = new StringBuffer();
         endStatements.append("END IF;\n");
-        endStatements.append("END\n");
+        endStatements.append("END;\n");
+		if (database instanceof Db2zDatabase) {
+			endStatements.append("CALL insertOrUpdateDb2Z();\n");
+			endStatements.append("DROP PROCEDURE insertOrUpdateDb2Z;\n");
+		}
         return endStatements.toString();
 	}
 
