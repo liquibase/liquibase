@@ -20,7 +20,7 @@ public class DoubleType  extends LiquibaseDataType {
                 return new DatabaseDataType("DOUBLE");
             }
         }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof HsqlDatabase) {
+        if (database instanceof AbstractDb2Database || database instanceof DerbyDatabase || database instanceof HsqlDatabase) {
             return new DatabaseDataType("DOUBLE");
         }
         if (database instanceof OracleDatabase) {

@@ -164,7 +164,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         continue;
                     }
 
-                    if (database instanceof DB2Database && "SYSIBM".equals(row.getString("INDEX_QUALIFIER"))) {
+                    if (database instanceof AbstractDb2Database && "SYSIBM".equals(row.getString("INDEX_QUALIFIER"))) {
                         continue;
                     }
 
@@ -183,7 +183,13 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         foundIndexes.put(indexName, index);
                     }
-                    String ascOrDesc = row.getString("ASC_OR_DESC");
+
+                    String ascOrDesc;
+                    if (database instanceof Db2zDatabase) {
+                        ascOrDesc = row.getString("ORDER");
+                    } else {
+                        ascOrDesc = row.getString("ASC_OR_DESC");
+                    }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
                     index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
                 }
@@ -362,7 +368,12 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                             returnIndex.getColumns().add(null);
                         }
                         if (definition == null) {
-                            String ascOrDesc = row.getString("ASC_OR_DESC");
+                            String ascOrDesc;
+                            if (database instanceof Db2zDatabase) {
+                                ascOrDesc =  row.getString("ORDER");
+                            } else {
+                                ascOrDesc = row.getString("ASC_OR_DESC");
+                            }
                             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
                             returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
                         } else {
@@ -461,7 +472,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     protected boolean addToViews(Database database) {
         return database instanceof MSSQLDatabase;
     }
-
 
     //METHOD FROM SQLIteDatabaseSnapshotGenerator
     //    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {

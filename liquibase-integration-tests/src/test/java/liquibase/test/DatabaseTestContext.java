@@ -1,7 +1,7 @@
 package liquibase.test;
 
 import liquibase.database.*;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.sdk.database.MockDatabase;
@@ -107,7 +107,7 @@ public class DatabaseTestContext {
             try {
                 databaseConnection.rollback();
             } catch (DatabaseException e) {
-                if (database instanceof DB2Database) {
+                if (database instanceof AbstractDb2Database) {
 //                    expected, there is a problem with it
                 } else {
                     throw e;

@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -231,6 +232,12 @@ public class CreateViewChange extends AbstractChange {
 					throw new IOException("File does not exist: " + path);
 				}
 				selectQuery = StreamUtil.getStreamContents(stream, encoding);
+				if (getChangeSet() != null) {
+					ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+					if (parameters != null) {
+						selectQuery = parameters.expandExpressions(selectQuery, getChangeSet().getChangeLog());
+					}
+				}
 			} catch (IOException e) {
 				throw new UnexpectedLiquibaseException(e);
 			}

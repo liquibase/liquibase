@@ -90,7 +90,7 @@ public class TimeType  extends LiquibaseDataType {
             return value;
         }
 
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"TIME\"\\('", "").replaceFirst("'\\)", "");
         }
         if (database instanceof DerbyDatabase) {
@@ -116,7 +116,7 @@ public class TimeType  extends LiquibaseDataType {
     }
 
     protected DateFormat getTimeFormat(Database database) {
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             return new SimpleDateFormat("HH.mm.ss");
         }
         return new SimpleDateFormat("HH:mm:ss");

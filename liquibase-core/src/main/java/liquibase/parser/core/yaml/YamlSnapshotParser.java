@@ -4,6 +4,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.OfflineConnection;
 import liquibase.exception.LiquibaseParseException;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.core.ParsedNode;
@@ -53,6 +54,8 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
             String shortName = (String) ((Map) rootList.get("database")).get("shortName");
 
             Database database = DatabaseFactory.getInstance().getDatabase(shortName).getClass().newInstance();
+            database.setConnection(new OfflineConnection("offline:" + shortName, null));
+
             DatabaseSnapshot snapshot = new RestoredDatabaseSnapshot(database);
             ParsedNode snapshotNode = new ParsedNode(null, "snapshot");
             snapshotNode.setValue(rootList);

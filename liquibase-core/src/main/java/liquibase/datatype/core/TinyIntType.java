@@ -27,7 +27,7 @@ public class TinyIntType  extends LiquibaseDataType {
             return new DatabaseDataType(database.escapeDataTypeName("tinyint"));
         }
         if (database instanceof DerbyDatabase || database instanceof PostgresDatabase || database instanceof FirebirdDatabase
-                || database instanceof DB2Database) {
+                || database instanceof AbstractDb2Database) {
             return new DatabaseDataType("SMALLINT");
         }
         if (database instanceof MySQLDatabase) {

@@ -1,7 +1,7 @@
 package liquibase.util;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -225,7 +225,7 @@ public class SqlUtil {
         } else if (liquibaseDataType instanceof NVarcharType || typeId == Types.NVARCHAR) {
             return stringVal;
         } else if (typeId == Types.OTHER) {
-            if (database instanceof DB2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
+            if (database instanceof AbstractDb2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
                 return new BigDecimal(stringVal);
             }
             return new DatabaseFunction(stringVal);
