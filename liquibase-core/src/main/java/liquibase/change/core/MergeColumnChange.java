@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
@@ -31,7 +32,7 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public boolean supports(Database database) {
-        return super.supports(database) && !(database instanceof DerbyDatabase);
+        return super.supports(database) && !(database instanceof DerbyDatabase) && !(database instanceof Db2zDatabase);
     }
 
     public String getCatalogName() {

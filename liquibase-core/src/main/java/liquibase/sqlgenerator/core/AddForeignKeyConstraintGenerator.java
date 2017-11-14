@@ -63,8 +63,10 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             } else if ((database instanceof MSSQLDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
                 //don't use
 		    } else if (database instanceof InformixDatabase) {
-			    //TODO don't know if correct
-		    } else {
+                //TODO don't know if correct
+            } else if (database instanceof Db2zDatabase) {
+                //don't use
+            } else {
 			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());
 		    }
 	    }

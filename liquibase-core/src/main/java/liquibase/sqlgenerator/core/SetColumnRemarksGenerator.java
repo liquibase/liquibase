@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -24,7 +24,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 
     @Override
     public boolean supports(SetColumnRemarksStatement statement, Database database) {
-        return database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database || database instanceof MSSQLDatabase || database instanceof H2Database
+        return database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof AbstractDb2Database || database instanceof MSSQLDatabase || database instanceof H2Database
         		|| database instanceof SybaseASADatabase;
     }
 

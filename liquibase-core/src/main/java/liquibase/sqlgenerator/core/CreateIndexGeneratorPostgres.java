@@ -6,7 +6,7 @@ import java.util.List;
 
 import liquibase.change.AddColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -77,7 +77,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 	    if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
 		    if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
 			    buffer.append(" ON ").append(statement.getTablespace());
-		    } else if (database instanceof DB2Database || database instanceof InformixDatabase) {
+		    } else if (database instanceof AbstractDb2Database || database instanceof InformixDatabase) {
 			    buffer.append(" IN ").append(statement.getTablespace());
 		    } else {
 			    buffer.append(" TABLESPACE ").append(statement.getTablespace());

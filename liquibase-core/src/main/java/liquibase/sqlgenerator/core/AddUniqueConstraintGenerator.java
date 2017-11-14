@@ -5,7 +5,6 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Column;
@@ -73,7 +72,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON " + statement.getTablespace();
-            } else if (database instanceof DB2Database
+            } else if (database instanceof AbstractDb2Database
                     || database instanceof SybaseASADatabase
                     || database instanceof InformixDatabase) {
                 ; //not supported

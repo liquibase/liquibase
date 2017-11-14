@@ -17,7 +17,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
         return !(database instanceof DerbyDatabase
                 || database instanceof HsqlDatabase
                 || database instanceof H2Database
-                || database instanceof DB2Database
+                || database instanceof AbstractDb2Database
                 || database instanceof FirebirdDatabase
                 || database instanceof InformixDatabase
                 || database instanceof SybaseASADatabase);

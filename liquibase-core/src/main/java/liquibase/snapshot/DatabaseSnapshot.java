@@ -191,8 +191,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             map.put("productName", database.getDatabaseProductName());
             map.put("url", database.getConnection().getURL());
             try {
-                map.put("majorVersion", database.getDatabaseMajorVersion());
-                map.put("minorVersion", database.getDatabaseMinorVersion());
+                map.put("majorVersion", String.valueOf(database.getDatabaseMajorVersion()));
+                map.put("minorVersion", String.valueOf(database.getDatabaseMinorVersion()));
                 map.put("productVersion", database.getDatabaseProductVersion());
                 map.put("user", database.getConnection().getConnectionUserName());
             } catch (DatabaseException e) {
@@ -307,7 +307,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             if (field.equals("columns") && (object.getClass() == PrimaryKey.class || object.getClass() == Index.class || object.getClass() == UniqueConstraint.class)) {
                 if (fieldValue != null && ((Collection) fieldValue).size() > 0) {
                     String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
-                    if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC")) {
+                    if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC") || columnName.endsWith(" RANDOM")) {
                         continue;
                     }
                 }

@@ -94,6 +94,7 @@ public class OfflineConnection implements DatabaseConnection {
                 try {
                     SnapshotParser parser = SnapshotParserFactory.getInstance().getParser(snapshotFile, resourceAccessor);
                     this.snapshot = parser.parse(snapshotFile, resourceAccessor);
+                    this.productVersion = this.snapshot.getDatabase().getDatabaseProductVersion();
                     this.snapshot.getDatabase().setConnection(this);
 
                     for (Catalog catalog : this.snapshot.get(Catalog.class)) {

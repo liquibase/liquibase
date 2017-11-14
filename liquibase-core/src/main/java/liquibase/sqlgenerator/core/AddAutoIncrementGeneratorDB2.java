@@ -1,11 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -20,7 +17,7 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
 
     @Override
     public boolean supports(AddAutoIncrementStatement statement, Database database) {
-        return database instanceof DB2Database;
+        return database instanceof AbstractDb2Database;
     }
 
     @Override

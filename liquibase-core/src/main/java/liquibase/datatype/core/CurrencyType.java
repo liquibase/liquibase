@@ -29,7 +29,7 @@ public class CurrencyType  extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 15, 2);
         }
 
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             return new DatabaseDataType("DECIMAL", 19,4);
         }
         if (database instanceof FirebirdDatabase) {

@@ -58,7 +58,7 @@ public class XMLType extends LiquibaseDataType {
             } catch (DatabaseException ignore) { } // assuming it is a newer version
 
             return new DatabaseDataType("XML");
-        } else if (database instanceof DB2Database) {
+        } else if (database instanceof AbstractDb2Database) {
             return new DatabaseDataType("XML");
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("XMLTYPE");

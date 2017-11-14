@@ -6,7 +6,7 @@ import java.math.BigInteger;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
@@ -369,7 +369,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementDB2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
-    		if (database instanceof DB2Database) {
+    		if (database instanceof AbstractDb2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
@@ -387,7 +387,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementStartWithDB2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
-    		if (database instanceof DB2Database) {
+    		if (database instanceof AbstractDb2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
@@ -405,7 +405,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementStartWithIncrementByDB2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
-    		if (database instanceof DB2Database) {
+    		if (database instanceof AbstractDb2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,

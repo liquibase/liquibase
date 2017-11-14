@@ -35,7 +35,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
     public Warnings warn(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         Warnings warnings = super.warn(createIndexStatement, database, sqlGeneratorChain);
-        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase || database instanceof DB2Database || database instanceof PostgresDatabase || database instanceof MockDatabase)) {
+        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase || database instanceof AbstractDb2Database || database instanceof PostgresDatabase || database instanceof MockDatabase)) {
             if (createIndexStatement.isClustered() != null && createIndexStatement.isClustered()) {
                 warnings.addWarning("Creating clustered index not supported with "+database);
             }
@@ -118,14 +118,14 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	    if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
 		    if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
 			    buffer.append(" ON ").append(statement.getTablespace());
-		    } else if (database instanceof DB2Database || database instanceof InformixDatabase) {
+		    } else if (database instanceof AbstractDb2Database || database instanceof InformixDatabase) {
 			    buffer.append(" IN ").append(statement.getTablespace());
 		    } else {
 			    buffer.append(" TABLESPACE ").append(statement.getTablespace());
 		    }
 	    }
 
-        if (database instanceof DB2Database && statement.isClustered() != null && statement.isClustered()){
+        if (database instanceof AbstractDb2Database && statement.isClustered() != null && statement.isClustered()){
             buffer.append(" CLUSTER");
         }
 

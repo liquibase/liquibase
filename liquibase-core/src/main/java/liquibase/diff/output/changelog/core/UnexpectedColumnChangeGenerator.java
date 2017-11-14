@@ -3,6 +3,8 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.DropColumnChange;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -48,6 +50,10 @@ public class UnexpectedColumnChangeGenerator extends AbstractChangeGenerator imp
         }
 
         if (column.getRelation().getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
+            return null;
+        }
+
+        if (comparisonDatabase instanceof Db2zDatabase) { //Db2 zOS column drop is handled by table change
             return null;
         }
 
