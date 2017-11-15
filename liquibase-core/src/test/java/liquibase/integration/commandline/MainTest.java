@@ -603,6 +603,7 @@ public class MainTest {
                 "--changeLogFile=FILE",
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
+                "--databaseChangeLogTablespaceName=MYTABLES",
                 "tag", "TagHere"
         };
 
@@ -616,6 +617,7 @@ public class MainTest {
         assertEquals("Command line option --changeLogFile is parsed correctly", "FILE", cli.changeLogFile);
         assertEquals("Command line option --classpath is parsed correctly", "CLASSPATH;CLASSPATH2", cli.classpath);
         assertEquals("Command line option --contexts is parsed correctly", "CONTEXT1,CONTEXT2", cli.contexts);
+        assertEquals("Command line option --databaseChangeLogTablespaceName is parsed correctly", "MYTABLES", cli.databaseChangeLogTablespaceName);
         assertEquals("Main command 'tag' is parsed correctly", "tag", cli.command);
         assertEquals("Command parameter 'TagHere' is parsed correctly", "TagHere", cli.commandParams.iterator().next());
     }
