@@ -196,7 +196,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
     /**
-     * Returns if a foreign key defined for this column should be "initially deferred"c. Returns null if not specified.
+     * Returns if a foreign key defined for this column should be "initially deferred". Returns null if not specified.
      */
     public Boolean isInitiallyDeferred() {
         return initiallyDeferred;
@@ -233,26 +233,26 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
     /**
-     * Set the validate parameter based on the passed string.
+     * Set the shouldValidate field based on the passed string.
      * Sets true if the passed string is 1 or true or TRUE.
      * Sets false if the passed string is 0 or false or FALSE.
      * Sets null if the passed string is null or "null" or "NULL".
-     * Throws an {@link UnexpectedLiquibaseException} if a validate value is passed
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
      */
-    public ConstraintsConfig setValidate(String validate) {
+    public ConstraintsConfig setShouldValidate(String validate) {
         this.validate = parseBoolean(validate);
-
         return this;
     }
 
     /**
-     * Returns if a foreign key defined for this column should validate. Returns null if not specified.
+     * Returns whether a foreign key defined for this column should validate. 
+     * Returns null if not setShouldValidate has not been called.
      */
-    public Boolean isValidate() {
+    public Boolean shouldValidate() {
         return validate;
     }
 
-    public ConstraintsConfig setValidate(Boolean validate) {
+    public ConstraintsConfig setShouldValidate(Boolean validate) {
         this.validate = validate;
         return this;
     }

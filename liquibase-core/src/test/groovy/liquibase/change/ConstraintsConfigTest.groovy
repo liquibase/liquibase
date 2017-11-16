@@ -170,32 +170,32 @@ public class ConstraintsConfigTest extends Specification {
         thrown(UnexpectedLiquibaseException)
     }
 
-    def setValidate() {
+    def setShouldValidate() {
         expect:
-        assert new ConstraintsConfig().setValidate(true).isValidate()
-        assert !new ConstraintsConfig().setValidate(false).isValidate()
+        assert new ConstraintsConfig().setShouldValidate(true).shouldValidate()
+        assert !new ConstraintsConfig().setShouldValidate(false).shouldValidate()
     }
 
-    def setValidate_string() {
+    def setShouldValidate_string() {
         expect:
-        assert new ConstraintsConfig().setValidate("true").isValidate()
-        assert new ConstraintsConfig().setValidate("TRUE").isValidate()
-        assert new ConstraintsConfig().setValidate("1").isValidate()
+        assert new ConstraintsConfig().setShouldValidate("true").shouldValidate()
+        assert new ConstraintsConfig().setShouldValidate("TRUE").shouldValidate()
+        assert new ConstraintsConfig().setShouldValidate("1").shouldValidate()
 
-        assert !new ConstraintsConfig().setValidate("false").isValidate()
-        assert !new ConstraintsConfig().setValidate("FALSE").isValidate()
-        assert !new ConstraintsConfig().setValidate("0").isValidate()
+        assert !new ConstraintsConfig().setShouldValidate("false").shouldValidate()
+        assert !new ConstraintsConfig().setShouldValidate("FALSE").shouldValidate()
+        assert !new ConstraintsConfig().setShouldValidate("0").shouldValidate()
 
-        new ConstraintsConfig().setValidate("").isValidate() == null
-        new ConstraintsConfig().setValidate("null").isValidate() == null
-        new ConstraintsConfig().setValidate("NULL").isValidate() == null
-        def constraint = new ConstraintsConfig().setValidate((String) null)
-        constraint.isValidate() == null
+        new ConstraintsConfig().setShouldValidate("").shouldValidate() == null
+        new ConstraintsConfig().setShouldValidate("null").shouldValidate() == null
+        new ConstraintsConfig().setShouldValidate("NULL").shouldValidate() == null
+        def constraint = new ConstraintsConfig().setShouldValidate((String) null)
+        constraint.shouldValidate() == null
     }
 
-    def setValidate_badString() {
+    def setShouldValidate_badString() {
         when:
-        new ConstraintsConfig().setValidate("bad val")
+        new ConstraintsConfig().setShouldValidate("bad val")
 
         then:
         thrown(UnexpectedLiquibaseException)

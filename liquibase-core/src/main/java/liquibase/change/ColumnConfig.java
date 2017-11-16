@@ -882,7 +882,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));
         constraints.setInitiallyDeferred(constraintsNode.getChildValue(null, "initiallyDeferred", Boolean.class));
         constraints.setDeferrable(constraintsNode.getChildValue(null, "deferrable", Boolean.class));
-        constraints.setValidate(constraintsNode.getChildValue(null, "validate", Boolean.class));
+        constraints.setShouldValidate(constraintsNode.getChildValue(null, "validate", Boolean.class));
         setConstraints(constraints);
 
     }

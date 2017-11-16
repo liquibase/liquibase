@@ -92,7 +92,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         }
 
         if (database instanceof OracleDatabase) {
-            sb.append(!statement.isValidate()?" ENABLE NOVALIDATE ":"");
+            sb.append(!statement.shouldValidate() ? " ENABLE NOVALIDATE " : "");
         }
 
 	    if (database instanceof InformixDatabase) {

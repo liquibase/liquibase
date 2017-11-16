@@ -69,7 +69,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
                 sql += " DISABLE";
             }
             if (database instanceof OracleDatabase) {
-                sql +=!statement.isValidate()?" ENABLE NOVALIDATE ":"";
+                sql += !statement.shouldValidate() ? " ENABLE NOVALIDATE " : "";
             }
         }
 

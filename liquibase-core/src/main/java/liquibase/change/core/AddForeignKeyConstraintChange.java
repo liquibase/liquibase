@@ -35,7 +35,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     private Boolean deferrable;
     private Boolean initiallyDeferred;
-    private Boolean validate;
+    private Boolean shouldValidate;
 
     private String onUpdate;
     private String onDelete;
@@ -151,23 +151,27 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     /**
-     * In Oracle PL/SQL, the VALIDATE keyword defines the state of a constraint on a column in a table
-     * @return true if ENABLE VALIDATE(by default), otherwise false if ENABLE NOVALIDATE
+     * In Oracle PL/SQL, the VALIDATE keyword defines whether a foreign key constraint on a column in a table
+     * should be checked if it refers to a valid row or not.
+     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    @DatabaseChangeProperty(description = "Is the foreign key has 'NOT VALIDATED'")
+    @DatabaseChangeProperty(description = "This is true if the foreign key has 'ENABLE VALIDATE' set, or false if the foreign key has 'ENABLE NOVALIDATE' set.")
     public Boolean getValidate() {
-        return validate;
+        return shouldValidate;
     }
 
     /**
      *
-     * @param validate - if validate set to FALSE then 'ENABLE NOVALIDATE' mode. It means the constraint would be enabled
-     *        without validating the constraint logic for the old existing data. Only the fresh new data would comply
-     *        with the constraint logic. THE DEFAULT STATE FOR THE Foreign Key IS 'ENABLE VALIDATE' MODE !
+     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+     * check will be done to ensure old data has valid foreign keys - only new data would be checked
+     * to see if it complies with the constraint logic. The default state for foreign keys is to
+     * have 'ENABLE VALIDATE' set.
      */
-    public void setValidate(Boolean validate) {
-        this.validate = validate;
+    public void setValidate(Boolean shouldValidate) {
+        this.shouldValidate = shouldValidate;
     }
+    
     public void setInitiallyDeferred(Boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
     }
@@ -249,9 +253,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             initiallyDeferred = getInitiallyDeferred();
         }
 
-        boolean validate = true;
+        boolean shouldValidate = true;
         if (getValidate() != null) {
-            validate = getValidate();
+            shouldValidate = getValidate();
         }
 
         return new SqlStatement[]{
@@ -268,7 +272,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         .setInitiallyDeferred(initiallyDeferred)
                         .setOnUpdate(getOnUpdate())
                         .setOnDelete(getOnDelete())
-                        .setValidate(validate)
+                        .setShouldValidate(shouldValidate)
         };
     }
 
@@ -304,7 +308,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                     result.assertCorrect(getDeferrable().equals(snapshot.isDeferrable()), "Initially deferred incorrect");
                 }
                 if (getValidate() != null) {
-                    result.assertCorrect(getValidate().equals(snapshot.isValidate()), "validate incorrect");
+                    result.assertCorrect(getValidate().equals(snapshot.shouldValidate()), "validate incorrect");
                 }
             }
 
