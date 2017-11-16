@@ -4,6 +4,7 @@ public abstract class AbstractSqlStatement implements SqlStatement {
 
     private boolean continueOnError = false;
 
+
     @Override
     public boolean skipOnUnsupported() {
         return false;
@@ -17,4 +18,5 @@ public abstract class AbstractSqlStatement implements SqlStatement {
     public void setContinueOnError(boolean continueOnError) {
         this.continueOnError = continueOnError;
     }
+
 }

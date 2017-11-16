@@ -100,6 +100,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
 
         change.setDeferrable(fk.isDeferrable());
         change.setInitiallyDeferred(fk.isInitiallyDeferred());
+        change.setValidate(fk.shouldValidate());
         change.setOnUpdate(fk.getUpdateRule());
         change.setOnDelete(fk.getDeleteRule());
 

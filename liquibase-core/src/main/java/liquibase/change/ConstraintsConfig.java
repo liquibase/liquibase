@@ -28,6 +28,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     private String foreignKeyName;
     private Boolean initiallyDeferred;
     private Boolean deferrable;
+    private Boolean validate;
 
     /**
      * Returns if the column should be nullable. Returns null if unspecified.
@@ -182,7 +183,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-
     /**
      * Returns the name to use for the columns foreign key constraint. Returns null if not specified.
      */
@@ -196,7 +196,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
     /**
-     * Returns if a foreign key defined for this column should be "initially deferred"c. Returns null if not specified.
+     * Returns if a foreign key defined for this column should be "initially deferred". Returns null if not specified.
      */
     public Boolean isInitiallyDeferred() {
         return initiallyDeferred;
@@ -220,7 +220,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-
     /**
      * Returns if a foreign key defined for this column should deferrable. Returns null if not specified.
      */
@@ -230,6 +229,31 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     public ConstraintsConfig setDeferrable(Boolean deferrable) {
         this.deferrable = deferrable;
+        return this;
+    }
+
+    /**
+     * Set the shouldValidate field based on the passed string.
+     * Sets true if the passed string is 1 or true or TRUE.
+     * Sets false if the passed string is 0 or false or FALSE.
+     * Sets null if the passed string is null or "null" or "NULL".
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
+     */
+    public ConstraintsConfig setShouldValidate(String validate) {
+        this.validate = parseBoolean(validate);
+        return this;
+    }
+
+    /**
+     * Returns whether a foreign key defined for this column should validate. 
+     * Returns null if not setShouldValidate has not been called.
+     */
+    public Boolean shouldValidate() {
+        return validate;
+    }
+
+    public ConstraintsConfig setShouldValidate(Boolean validate) {
+        this.validate = validate;
         return this;
     }
 

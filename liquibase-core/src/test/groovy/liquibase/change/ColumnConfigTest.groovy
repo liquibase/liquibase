@@ -455,7 +455,7 @@ public class ColumnConfigTest extends Specification {
         def column = new ColumnConfig()
 
         def testValue = "value for ${field}"
-        if (field in ["unique", "deferrable", "nullable", "deleteCascade", "initiallyDeferred", "primaryKey"]) {
+        if (field in ["unique", "deferrable", "nullable", "deleteCascade", "initiallyDeferred", "primaryKey", "validate"]) {
             testValue = "true"
         }
         constraintNode.addChild(null, field, testValue)

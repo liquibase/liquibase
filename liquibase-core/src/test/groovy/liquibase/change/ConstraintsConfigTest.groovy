@@ -170,6 +170,37 @@ public class ConstraintsConfigTest extends Specification {
         thrown(UnexpectedLiquibaseException)
     }
 
+    def setShouldValidate() {
+        expect:
+        assert new ConstraintsConfig().setShouldValidate(true).shouldValidate()
+        assert !new ConstraintsConfig().setShouldValidate(false).shouldValidate()
+    }
+
+    def setShouldValidate_string() {
+        expect:
+        assert new ConstraintsConfig().setShouldValidate("true").shouldValidate()
+        assert new ConstraintsConfig().setShouldValidate("TRUE").shouldValidate()
+        assert new ConstraintsConfig().setShouldValidate("1").shouldValidate()
+
+        assert !new ConstraintsConfig().setShouldValidate("false").shouldValidate()
+        assert !new ConstraintsConfig().setShouldValidate("FALSE").shouldValidate()
+        assert !new ConstraintsConfig().setShouldValidate("0").shouldValidate()
+
+        new ConstraintsConfig().setShouldValidate("").shouldValidate() == null
+        new ConstraintsConfig().setShouldValidate("null").shouldValidate() == null
+        new ConstraintsConfig().setShouldValidate("NULL").shouldValidate() == null
+        def constraint = new ConstraintsConfig().setShouldValidate((String) null)
+        constraint.shouldValidate() == null
+    }
+
+    def setShouldValidate_badString() {
+        when:
+        new ConstraintsConfig().setShouldValidate("bad val")
+
+        then:
+        thrown(UnexpectedLiquibaseException)
+    }
+
     def setPrimaryKeyName() {
         expect:
         new ConstraintsConfig().setPrimaryKeyName("xyz").getPrimaryKeyName() == "xyz"
