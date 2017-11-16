@@ -34,7 +34,7 @@ public class NumberType extends LiquibaseDataType {
             }
             return new DatabaseDataType(database.escapeDataTypeName("numeric"), parameters);
         } else if (database instanceof MySQLDatabase
-                || database instanceof DB2Database
+                || database instanceof AbstractDb2Database
                 || database instanceof HsqlDatabase
                 || database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase

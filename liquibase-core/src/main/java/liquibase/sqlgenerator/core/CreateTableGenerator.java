@@ -34,23 +34,23 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
     @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
-    	if (database instanceof InformixDatabase) {
-    		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
-    		return gen.generateSql(statement, database, sqlGeneratorChain);
-    	}
+
+        if (database instanceof InformixDatabase) {
+            AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
+            return gen.generateSql(statement, database, sqlGeneratorChain);
+        }
 
         List<Sql> additionalSql = new ArrayList<Sql>();
-    	
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
-        
+
         boolean isSinglePrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
-            && statement.getPrimaryKeyConstraint().getColumns().size() == 1;
-        
+                && statement.getPrimaryKeyConstraint().getColumns().size() == 1;
+
         boolean isPrimaryKeyAutoIncrement = false;
-        
+
         Iterator<String> columnIterator = statement.getColumns().iterator();
         List<String> primaryKeyColumns = new LinkedList<String>();
 
@@ -61,102 +61,120 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
             buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column, true));
 
-            buffer.append(" ").append(columnType);
+                buffer.append(" ").append(columnType);
 
-            AutoIncrementConstraint autoIncrementConstraint = null;
-            
-            for (AutoIncrementConstraint currentAutoIncrementConstraint : statement.getAutoIncrementConstraints()) {
-                if (column.equals(currentAutoIncrementConstraint.getColumnName())) {
-                    autoIncrementConstraint = currentAutoIncrementConstraint;
-                    break;
-                }
-            }
+                AutoIncrementConstraint autoIncrementConstraint = null;
 
-            boolean isAutoIncrementColumn = autoIncrementConstraint != null;
-            boolean isPrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
-                    && statement.getPrimaryKeyConstraint().getColumns().contains(column);
-            isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement
-                    || isPrimaryKeyColumn && isAutoIncrementColumn;
-            
-            if (isPrimaryKeyColumn) {
-            	primaryKeyColumns.add(column);
-            }
-            
-            if ((database instanceof SQLiteDatabase) &&
-                    isSinglePrimaryKeyColumn &&
-                    isPrimaryKeyColumn &&
-                    isAutoIncrementColumn) {
-                String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
-                if (pkName == null) {
-                    pkName = database.generatePrimaryKeyName(statement.getTableName());
-                }
-                if (pkName != null) {
-                    buffer.append(" CONSTRAINT ");
-                    buffer.append(database.escapeConstraintName(pkName));
-                }
-                buffer.append(" PRIMARY KEY");
-            }
-
-            // for the serial data type in postgres, there should be no default value
-            if (!columnType.isAutoIncrement() && statement.getDefaultValue(column) != null) {
-                Object defaultValue = statement.getDefaultValue(column);
-                if (database instanceof MSSQLDatabase) {
-                    String constraintName = statement.getDefaultValueConstraintName(column);
-                    if (constraintName == null) {
-                        constraintName = ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column);
+                for (AutoIncrementConstraint currentAutoIncrementConstraint : statement.getAutoIncrementConstraints()) {
+                    if (column.equals(currentAutoIncrementConstraint.getColumnName())) {
+                        autoIncrementConstraint = currentAutoIncrementConstraint;
+                        break;
                     }
-                    buffer.append(" CONSTRAINT ").append(database.escapeObjectName(constraintName, ForeignKey.class));
                 }
-                if (database instanceof OracleDatabase && statement.getDefaultValue(column).toString().startsWith("GENERATED ALWAYS ")) {
-                    buffer.append(" ");
-                } else {
-                    buffer.append(" DEFAULT ");
-                }
-                if (defaultValue instanceof SequenceNextValueFunction) {
-                    buffer.append(database.generateDatabaseFunctionValue((SequenceNextValueFunction) defaultValue));
-                } else {
-                    buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
-                }
-            }
 
-            if (isAutoIncrementColumn) {
-                // TODO: check if database supports auto increment on non primary key column
-                if (database.supportsAutoIncrement()) {
-                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
-                
-                    if (!"".equals(autoIncrementClause)) {
-                        buffer.append(" ").append(autoIncrementClause);
+                boolean isAutoIncrementColumn = autoIncrementConstraint != null;
+                boolean isPrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
+                        && statement.getPrimaryKeyConstraint().getColumns().contains(column);
+                isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement
+                        || isPrimaryKeyColumn && isAutoIncrementColumn;
+
+                if (isPrimaryKeyColumn) {
+                    primaryKeyColumns.add(column);
+                }
+
+                if ((database instanceof SQLiteDatabase) &&
+                        isSinglePrimaryKeyColumn &&
+                        isPrimaryKeyColumn &&
+                        isAutoIncrementColumn) {
+                    String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
+                    if (pkName == null) {
+                        pkName = database.generatePrimaryKeyName(statement.getTableName());
+                    }
+                    if (pkName != null) {
+                        buffer.append(" CONSTRAINT ");
+                        buffer.append(database.escapeConstraintName(pkName));
+                    }
+                    buffer.append(" PRIMARY KEY");
+                }
+
+                // for the serial data type in postgres, there should be no default value
+                if (!columnType.isAutoIncrement() && statement.getDefaultValue(column) != null) {
+                    Object defaultValue = statement.getDefaultValue(column);
+                    if (database instanceof MSSQLDatabase) {
+                        String constraintName = statement.getDefaultValueConstraintName(column);
+                        if (constraintName == null) {
+                            constraintName = ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column);
+                        }
+                        buffer.append(" CONSTRAINT ").append(database.escapeObjectName(constraintName, ForeignKey.class));
                     }
 
-                    if( autoIncrementConstraint.getStartWith() != null ){
-	                    if (database instanceof PostgresDatabase) {
-	                        String sequenceName = statement.getTableName()+"_"+column+"_seq";
-	                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
-	                    }else if(database instanceof MySQLDatabase){
-	                    	mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
-	                    }
+                    if (database instanceof OracleDatabase && statement.getDefaultValue(column).toString().startsWith("GENERATED ALWAYS ")) {
+                        buffer.append(" ");
+                    } else if (database instanceof Db2zDatabase && statement.getDefaultValue(column).toString().contains("CURRENT TIMESTAMP")
+                            || statement.getDefaultValue(column).toString().contains("IDENTITY GENERATED BY DEFAULT")) {
+                        buffer.append(" ");
+                    } else {
+                        buffer.append(" DEFAULT ");
                     }
+
+                    if (defaultValue instanceof SequenceNextValueFunction) {
+                        buffer.append(database.generateDatabaseFunctionValue((SequenceNextValueFunction) defaultValue));
+                    } else if (database instanceof Db2zDatabase) {
+                        if (statement.getDefaultValue(column).toString().contains("CURRENT TIMESTAMP")) {
+                            buffer.append("");
+                        }
+                        if (statement.getDefaultValue(column).toString().contains("IDENTITY GENERATED BY DEFAULT")) {
+                            buffer.append("GENERATED BY DEFAULT AS IDENTITY");
+                        }
+                        if (statement.getDefaultValue(column).toString().contains("CURRENT USER")) {
+                            buffer.append("SESSION_USER ");
+                        }
+                        if (statement.getDefaultValue(column).toString().contains("CURRENT SQLID")) {
+                            buffer.append("CURRENT SQLID ");
+                        }
+                    } else {
+                        buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
+                    }
+                }
+
+                if (isAutoIncrementColumn) {
+                    // TODO: check if database supports auto increment on non primary key column
+                    if (database.supportsAutoIncrement()) {
+                        String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+
+                        if (!"".equals(autoIncrementClause)) {
+                            buffer.append(" ").append(autoIncrementClause);
+                        }
+
+                        if (autoIncrementConstraint.getStartWith() != null) {
+                            if (database instanceof PostgresDatabase) {
+                                String sequenceName = statement.getTableName() + "_" + column + "_seq";
+                                additionalSql.add(new UnparsedSql("alter sequence " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName) + " start with " + autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+                            } else if (database instanceof MySQLDatabase) {
+                                mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
+                            }
+                        }
+                    } else {
+                        LogFactory.getLogger().warning(database.getShortName() + " does not support autoincrement columns as requested for " + (database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    }
+                }
+
+                if (statement.getNotNullColumns().contains(column)) {
+                    buffer.append(" NOT NULL");
                 } else {
-                    LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().toLowerCase().contains("timestamp"))) {
+                        buffer.append(" NULL");
+                    }
                 }
-            }
 
-            if (statement.getNotNullColumns().contains(column)) {
-                buffer.append(" NOT NULL");
-            } else {
-                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().toLowerCase().contains("timestamp"))) {
-                    buffer.append(" NULL");
+                if (database instanceof InformixDatabase && isSinglePrimaryKeyColumn && isPrimaryKeyColumn) {
+                    //buffer.append(" PRIMARY KEY");
                 }
-            }
 
-            if (database instanceof InformixDatabase && isSinglePrimaryKeyColumn && isPrimaryKeyColumn) {
-                //buffer.append(" PRIMARY KEY");
-            }
+                if (database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null) {
+                    buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
 
-            if(database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null){
-                buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
-
-            }
+                }
 
             if (columnIterator.hasNext()) {
                 buffer.append(", ");
@@ -165,12 +183,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         buffer.append(",");
 
-        if (!( (database instanceof SQLiteDatabase) &&
+        if (!((database instanceof SQLiteDatabase) &&
                 isSinglePrimaryKeyColumn &&
                 isPrimaryKeyAutoIncrement) &&
 
                 !((database instanceof InformixDatabase) &&
-                isSinglePrimaryKeyColumn
+                        isSinglePrimaryKeyColumn
                 )) {
             // ...skip this code block for sqlite if a single column primary key
             // with an autoincrement constraint exists.
@@ -195,7 +213,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(")");
                 // Setting up table space for PK's index if it exist
                 if ((database instanceof OracleDatabase || database instanceof PostgresDatabase) &&
-                    statement.getPrimaryKeyConstraint().getTablespace() != null) {
+                        statement.getPrimaryKeyConstraint().getTablespace() != null) {
                     buffer.append(" USING INDEX TABLESPACE ");
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
                 }
@@ -215,14 +233,14 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
-                    referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) +"."+referencesString;
+                    referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) + "." + referencesString;
                 }
                 buffer.append(referencesString);
             } else {
                 buffer.append(database.escapeObjectName(fkConstraint.getReferencedTableCatalogName(), fkConstraint.getReferencedTableSchemaName(), fkConstraint.getReferencedTableName(), Table.class))
-                    .append("(")
-                    .append(database.escapeColumnNameList(fkConstraint.getReferencedColumnNames()))
-                    .append(")");
+                        .append("(")
+                        .append(database.escapeColumnNameList(fkConstraint.getReferencedColumnNames()))
+                        .append(")");
 
             }
 
@@ -266,11 +284,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 //    }
 
 
-        String sql = buffer.toString().replaceFirst(",\\s*$", "")+")";
+        String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
-        if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
-        	LogFactory.getLogger().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
-        	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
+        if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null) {
+            LogFactory.getLogger().info("[MySQL] Using last startWith statement (" + mysqlTableOptionStartWith.toString() + ") as table option.");
+            sql += " " + ((MySQLDatabase) database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 
 
@@ -287,15 +305,15 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         if (statement.getTablespace() != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
                 sql += " ON " + statement.getTablespace();
-            } else if (database instanceof DB2Database || database instanceof InformixDatabase) {
+            } else if (database instanceof AbstractDb2Database || database instanceof InformixDatabase) {
                 sql += " IN " + statement.getTablespace();
             } else {
                 sql += " TABLESPACE " + statement.getTablespace();
             }
         }
 
-        if( database instanceof MySQLDatabase && statement.getRemarks() != null) {
-            sql += " COMMENT='"+database.escapeStringForDatabase(statement.getRemarks())+"' ";
+        if (database instanceof MySQLDatabase && statement.getRemarks() != null) {
+            sql += " COMMENT='" + database.escapeStringForDatabase(statement.getRemarks()) + "' ";
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
         return additionalSql.toArray(new Sql[additionalSql.size()]);

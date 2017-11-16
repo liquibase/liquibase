@@ -26,7 +26,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnG
                 || database instanceof HsqlDatabase
                 || database instanceof H2Database
                 || database instanceof DerbyDatabase
-                || database instanceof DB2Database
+                || database instanceof AbstractDb2Database
                 || database instanceof FirebirdDatabase
                 || database instanceof SybaseASADatabase
                 || database instanceof SybaseDatabase

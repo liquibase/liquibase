@@ -2,7 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
@@ -19,7 +20,6 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
     @Override
@@ -84,10 +84,11 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 procedureText = procedureText + ";";
             }
         }
-
+        if (database instanceof Db2zDatabase & procedureText.toLowerCase().contains("replace")) {
+            procedureText = procedureText.replace("OR REPLACE", "");
+            procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
+        }
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
-
-
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
     }
@@ -100,18 +101,14 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             return procedureText;
         }
 
-        String fixedText = procedureText;
-        while (fixedText.length() > 0) {
-            String lastChar = fixedText.substring(fixedText.length() - 1);
-            if (lastChar.equals(" ") || lastChar.equals("\n") || lastChar.equals("\r") || lastChar.equals("\t")) {
-                fixedText = fixedText.substring(0, fixedText.length() - 1);
-            } else {
-                break;
-            }
-        }
         endDelimiter = endDelimiter.replace("\\r", "\r").replace("\\n", "\n");
-        if (fixedText.endsWith(endDelimiter)) {
-            return fixedText.substring(0, fixedText.length() - endDelimiter.length());
+        // DVONE-5036
+        String endCommentsTrimmedText = StringUtils.stripSqlCommentsAndWhitespacesFromTheEnd(procedureText);
+        // Note: need to trim the delimiter since the return of the above call trims whitespaces, and to match
+        // we have to trim the endDelimiter as well.
+        String trimmedDelimiter = StringUtils.trimRight(endDelimiter);
+        if (endCommentsTrimmedText.endsWith(trimmedDelimiter)) {
+            return endCommentsTrimmedText.substring(0, endCommentsTrimmedText.length() - trimmedDelimiter.length());
         } else {
             return procedureText;
         }
@@ -126,7 +123,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             if (database instanceof OracleDatabase) {
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
                 sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(defaultSchema, Schema.class)));
-            } else if (database instanceof DB2Database) {
+            } else if (database instanceof AbstractDb2Database) {
                 sql.add(0, new UnparsedSql("SET CURRENT SCHEMA " + schemaName));
                 sql.add(new UnparsedSql("SET CURRENT SCHEMA " + defaultSchema));
             }

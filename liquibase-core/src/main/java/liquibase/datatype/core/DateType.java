@@ -51,7 +51,7 @@ public class DateType extends LiquibaseDataType {
 
     @Override
     public Object sqlToObject(String value, Database database) {
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"DATE\"\\('", "").replaceFirst("'\\)", "");
         }
         if (database instanceof DerbyDatabase) {

@@ -23,9 +23,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -333,6 +331,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().startsWith("USLOG$")) { //for update materialized view
                 return true;
+            } else if (example.getName().startsWith("SYS_FBA")) { //for Flashback tables 
+                return true;
             }
         }
 
@@ -402,6 +402,24 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return 0;
         }
         return super.getDataTypeMaxParameters(dataTypeName);
+    }
+
+    public String getSystemTableWhereClause(String tableNameColumn) {
+        List<String> clauses = new ArrayList<String>(Arrays.asList("BIN$",
+                "AQ$",
+                "DR$",
+                "SYS_IOT_OVER",
+                "MLOG$_",
+                "RUPD$_",
+                "WM$_",
+                "ISEQ$$_",
+                "USLOG$",
+                "SYS_FBA"));
+
+        for (int i = 0;i<clauses.size(); i++) {
+            clauses.set(i, tableNameColumn+" NOT LIKE '"+clauses.get(i)+"%'");
+            }
+        return "("+StringUtils.join(clauses, " AND ")+")";
     }
 
     @Override

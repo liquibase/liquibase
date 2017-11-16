@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.changelog.filter.IgnoreChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.filter.ShouldRunChangeSetFilter;
 import liquibase.database.Database;
@@ -292,7 +293,8 @@ public class LiquibaseTest {
         assertListsEqual(new Class[] {ShouldRunChangeSetFilter.class,
                 ContextChangeSetFilter.class,
                 LabelChangeSetFilter.class,
-                DbmsChangeSetFilter.class},
+                DbmsChangeSetFilter.class,
+                IgnoreChangeSetFilter.class},
                 iterator.getChangeSetFilters(), new Assert.AssertFunction() {
             @Override
             public void check(String message, Object expected, Object actual) {

@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -57,9 +58,9 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
                         .addNewColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId())
-                        .setWhereClause(database.escapeObjectName("ID", Column.class) + " = ? " +
-                                "AND " + database.escapeObjectName("AUTHOR", Column.class) + " = ? " +
-                                "AND " + database.escapeObjectName("FILENAME", Column.class) + " = ?")
+                        .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
+                                "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
+                                "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
 
                 if (tag != null) {

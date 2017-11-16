@@ -12,8 +12,6 @@ public class Table extends Relation {
 
     public Table() {
         setAttribute("outgoingForeignKeys", new ArrayList<ForeignKey>());
-        setAttribute("indexes", new ArrayList<Index>());
-        setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
     }
 
     public Table(String catalogName, String schemaName, String tableName) {
@@ -33,14 +31,6 @@ public class Table extends Relation {
         return getAttribute("outgoingForeignKeys", List.class);
     }
 
-    public List<Index> getIndexes() {
-        return getAttribute("indexes", List.class);
-    }
-
-    public List<UniqueConstraint> getUniqueConstraints() {
-        return getAttribute("uniqueConstraints", List.class);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -49,7 +39,10 @@ public class Table extends Relation {
         Table that = (Table) o;
 
         if (this.getSchema() != null && that.getSchema() != null) {
-            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasTheSame = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            if (!schemasTheSame) {
+                return false;
+            }
         }
 
         return getName().equalsIgnoreCase(that.getName());

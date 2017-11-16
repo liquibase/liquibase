@@ -1,5 +1,6 @@
 package liquibase.structure.core;
 
+import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
@@ -60,7 +61,7 @@ public class DatabaseObjectFactory {
             Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
             for (Class<? extends DatabaseObject> clazz : classes) {
                 try {
-                    if (clazz.newInstance().snapshotByDefault()) {
+                    if (!clazz.equals(LiquibaseColumn.class) && clazz.newInstance().snapshotByDefault()) {
                         set.add(clazz);
                     }
                 } catch (Exception e) {

@@ -367,4 +367,141 @@ public class StringUtils {
         return string;
     }
 
+    /**
+     * Trims {@link Character#isWhitespace(char) whitespace} characters from the
+     * end of specified <code>string</code>
+     * @param string String to trim
+     * @return new String without the whitespace at the end
+     */
+    public static String trimRight(String string) {
+        int i = string.length()-1;
+        while (i >= 0 && Character.isWhitespace(string.charAt(i))) {
+            i--;
+        }
+        return string.substring(0,i+1);
+    }
+
+    /**
+     *
+     * @param sqlString
+     * @return the last block comment from a Sql string if any
+     */
+    public static String getLastBlockComment(String sqlString) {
+        if (isEmpty(sqlString) || sqlString.length() < 4) {
+            return null;
+        }
+        StringBuilder reversedSqlStringBuilder = new StringBuilder(sqlString).reverse();
+        String reversedString = reversedSqlStringBuilder.toString();
+        int idxClosingLastChar = -1, idxOpeningFirstChar = -1;
+        for (int i = 0; i < reversedString.length(); i++) {
+            if (idxClosingLastChar < 0) {
+                // we have not found the start of the pair (reversed) yet)
+                char c = reversedString.charAt(i);
+                if (c == '/') {
+                    // check the second one
+                    char s = reversedString.charAt(i + 1);
+                    if (s == '*') {
+                        idxClosingLastChar = i;
+                    }
+                } else if (!Character.isWhitespace(c)){
+                    // does not look like it ends with block comment, return null
+                    return null;
+                }
+            } else {
+                // look for closing pair (reversed)
+                char c = reversedString.charAt(i);
+                if (c == '/') {
+                    // check the previous one
+                    char s = reversedString.charAt(i - 1);
+                    char e = reversedString.charAt(i + 1);
+                    // if it was not escaped
+                    if (s == '*' && e != '\\') {
+                        idxOpeningFirstChar = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // reverse the index to get the start of the last comment block
+        int idxOfLastBlockComment = sqlString.length() - (idxOpeningFirstChar + 1);
+
+        return sqlString.substring(idxOfLastBlockComment);
+    }
+
+    /**
+     *
+     * @param sqlString
+     * @return the last line comment from a Sql string if any
+     */
+    public static String getLastLineComment(String sqlString) {
+        if (isEmpty(sqlString) || sqlString.length() < 2) {
+            return null;
+        }
+        boolean startOfNewLine = false;
+        int idxOfDoubleDash = -1;
+        for (int i = 0; i < sqlString.length(); i++) {
+            char c = sqlString.charAt(i);
+            // we have not found the start of the line comment yet
+            if (c == '-') {
+                // check the next one
+                char s = sqlString.charAt(i + 1);
+                if (s == '-') {
+                    if (idxOfDoubleDash < 0) {
+                        idxOfDoubleDash = i;
+                    }
+                    startOfNewLine = false;
+                }
+            } else if (!Character.isWhitespace(c)) {
+                if (startOfNewLine) {
+                    // new line started and we found some other character, reset the index,
+                    idxOfDoubleDash = -1;
+                }
+            } else if (c == '\r' || c == '\n') {
+                // new line found
+                startOfNewLine = true;
+            }
+
+        }
+        if (idxOfDoubleDash < 0) {
+            return null;
+        }
+        return sqlString.substring(idxOfDoubleDash);
+    }
+
+    /**
+     * Strips the comments and whitespaces from the end of given sql string.
+     * @param sqlString
+     * @return
+     */
+    public static String stripSqlCommentsAndWhitespacesFromTheEnd(String sqlString) {
+        if (isEmpty(sqlString)) {
+            return sqlString;
+        }
+        StringBuilder str = new StringBuilder(sqlString);
+        boolean strModified = true;
+        while (strModified) {
+            strModified = false;
+            // first check for last block comment
+            // since line comments could be inside block comments, we want to
+            // remove them first.
+            String lastBlockComment = getLastBlockComment(str.toString());
+            if (isNotEmpty(lastBlockComment)) {
+                str.setLength(str.length() - lastBlockComment.length());
+                // we just modified the end of the string,
+                // do another loop to check for next block or line comments
+                strModified = true;
+            }
+            // now check for the line comments
+            String lastLineComment = getLastLineComment(str.toString());
+            if (isNotEmpty(lastLineComment)) {
+                str.setLength(str.length() - lastLineComment.length());
+                // we just modified the end of the string,
+                // do another loop to check for next block or line comments
+                strModified = true;
+            }
+        }
+        return trimRight(str.toString());
+    }
+
 }

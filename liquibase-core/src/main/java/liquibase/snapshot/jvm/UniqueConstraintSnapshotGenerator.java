@@ -35,7 +35,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
-        Table table = exampleConstraint.getTable();
+        Relation table = exampleConstraint.getTable();
 
         List<Map<String, ?>> metadata = listColumns(exampleConstraint, database, snapshot);
 
@@ -107,7 +107,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
-        Table table = example.getTable();
+        Relation table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
 
@@ -250,6 +250,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             + "and t.tabschema = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
                             + "order by colseq";
                 }
+            } else if (database instanceof Db2zDatabase) {
+                sql = "select k.colname as column_name from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
+                        + "where k.constname = t.constname "
+                        + "and k.TBCREATOR = t.TBCREATOR "
+                        + "and t.type = 'U'"
+                        + "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' "
+                        + "and t.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
+                        + "order by colseq";
             } else if (database instanceof DerbyDatabase) {
                 sql = "SELECT cg.descriptor as descriptor, t.tablename "
                         + "FROM sys.sysconglomerates cg "

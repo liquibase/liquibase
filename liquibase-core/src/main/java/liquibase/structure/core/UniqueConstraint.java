@@ -55,11 +55,11 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         return getTable().getSchema();
     }
 
-	public Table getTable() {
-		return getAttribute("table", Table.class);
+	public Relation getTable() {
+		return getAttribute("table", Relation.class);
 	}
 
-	public UniqueConstraint setTable(Table table) {
+	public UniqueConstraint setTable(Relation table) {
 		this.setAttribute("table", table);
         return this;
     }
