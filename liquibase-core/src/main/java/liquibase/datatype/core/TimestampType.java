@@ -44,7 +44,7 @@ public class TimestampType extends DateTimeType {
                 && (database instanceof PostgresDatabase
                 || database instanceof OracleDatabase)
                 || database instanceof HsqlDatabase){
-            DatabaseDataType type = new DatabaseDataType("TIMESTAMP");
+            DatabaseDataType type = new DatabaseDataType("TIMESTAMP", getParameters());
             type.addAdditionalInformation(this.getAdditionalInformation());
             return type;
         }
