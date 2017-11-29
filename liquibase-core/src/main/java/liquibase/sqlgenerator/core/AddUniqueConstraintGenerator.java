@@ -67,9 +67,6 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             if (statement.isDisabled()) {
                 sql += " DISABLE";
             }
-            if (database instanceof OracleDatabase) {
-                sql += !statement.shouldValidate() ? " ENABLE NOVALIDATE " : "";
-            }
         }
 
 
@@ -87,6 +84,10 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
 
         if (statement.getForIndexName() != null) {
             sql += " USING INDEX " + database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
+        }
+
+        if (database instanceof OracleDatabase) {
+            sql += !statement.shouldValidate() ? " ENABLE NOVALIDATE " : "";
         }
 
         return new Sql[]{

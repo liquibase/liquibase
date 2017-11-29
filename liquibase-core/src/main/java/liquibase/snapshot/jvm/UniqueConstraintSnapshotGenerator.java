@@ -78,9 +78,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             return;
         }
         final Object constraintValidate = columnsMetadata.get("CONSTRAINT_VALIDATE");
-        final String NOVALIDATE = "NOT VALIDATED";
+        final String VALIDATE = "VALIDATED";
         if (constraintValidate!=null && !constraintValidate.toString().trim().isEmpty()) {
-            uniqueConstraint.setShouldValidate(!NOVALIDATE.equals(cleanNameFromDatabase(NOVALIDATE.trim(), database)));
+            uniqueConstraint.setShouldValidate(VALIDATE.equals(cleanNameFromDatabase(constraintValidate.toString().trim(), database)));
         }
     }
 

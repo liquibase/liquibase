@@ -18,6 +18,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setAttribute("deferrable", false);
         setAttribute("initiallyDeferred", false);
         setAttribute("disabled", false);
+		setAttribute("validate", true);
     }
 
     public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, Column... columns) {

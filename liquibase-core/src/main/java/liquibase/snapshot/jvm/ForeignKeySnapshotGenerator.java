@@ -205,9 +205,9 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             return;
         }
         final String constraintValidate = cachedRow.getString("FK_VALIDATE");
-        final String NOVALIDATE = "NOT VALIDATED";
+        final String VALIDATE = "VALIDATED";
         if (constraintValidate!=null && !constraintValidate.isEmpty()) {
-            foreignKey.setShouldValidate(!NOVALIDATE.equals(cleanNameFromDatabase(constraintValidate.trim(), database)));
+            foreignKey.setShouldValidate(VALIDATE.equals(cleanNameFromDatabase(constraintValidate.trim(), database)));
         }
     }
 
