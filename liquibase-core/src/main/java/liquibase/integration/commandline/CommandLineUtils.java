@@ -92,7 +92,7 @@ public class CommandLineUtils {
                     liquibaseCatalogName = liquibaseSchemaName;
                 }
             }
-            
+
             defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
             defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
 
@@ -110,7 +110,7 @@ public class CommandLineUtils {
                     database.setDatabaseChangeLogLockTableName(databaseChangeLogTableName+"LOCK");
                 }
             }
-            
+
             //Todo: move to database object methods in 4.0
             initializeDatabase(username, defaultCatalogName, defaultSchemaName, database);
 
@@ -130,9 +130,9 @@ public class CommandLineUtils {
 
     /**
      * Executes RawSqlStatements particular to each database engine to set the default schema for the given Database
-     *  
+     *
      * @param username            The username used for the connection. Used with MSSQL databases
-     * @param defaultCatalogName  Catalog name and schema name are similar concepts. Used if defaultCatalogName is null. 
+     * @param defaultCatalogName  Catalog name and schema name are similar concepts. Used if defaultCatalogName is null.
      * @param defaultSchemaName   Catalog name and schema name are similar concepts. Catalog is used with Oracle, DB2 and MySQL, and takes
      *                             precedence over the schema name.
      * @param database            Which Database object is affected by the initialization.
@@ -146,22 +146,7 @@ public class CommandLineUtils {
                     schema = defaultSchemaName;
                 }
                 ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+database.escapeObjectName(schema, Schema.class)));
-            } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
-boolean sql2005OrLater = true;
-                    try {
-                        sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
-                    } catch (DatabaseException e) {
-                        // Assume SQL Server 2005 or later
-                    }
-                    if (sql2005OrLater && username != null) {
-                        ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
-                                "IF USER_NAME() <> N'dbo'\r\n" +
-                                "BEGIN\r\n" +
-                                "	DECLARE @sql [nvarchar](MAX)\r\n" +
-                                "	SELECT @sql = N'ALTER USER ' + QUOTENAME(USER_NAME()) + N' WITH DEFAULT_SCHEMA = " + database.escapeStringForDatabase(database.escapeObjectName(username, DatabaseObject.class)) + "'\r\n" +
-                                "	EXEC sp_executesql @sql\r\n" +
-                                "END"));
-                    }            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
                     ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
             } else if (database instanceof DB2Database) {
                 String schema = defaultCatalogName;
