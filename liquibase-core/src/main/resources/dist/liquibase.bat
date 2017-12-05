@@ -8,8 +8,11 @@ set LIQUIBASE_HOME="%~dp0"
 
 set CP=.
 for /R %LIQUIBASE_HOME% %%f in (liquibase*.jar) do set CP=!CP!;%%f
-set CP=!CP!;%LIQUIBASE_HOME%\lib
 for /R %LIQUIBASE_HOME%\lib %%f in (*.jar) do set CP=!CP!;%%f
+rem remove quotes around LIQUIBASE_HOME
+set LIQUIBASE_HOME=%LIQUIBASE_HOME:"=%
+rem add the lib directory itself to the classpath
+set CP=!CP!;!LIQUIBASE_HOME!lib
 
 rem get command line args into a variable
 set CMD_LINE_ARGS=%1
