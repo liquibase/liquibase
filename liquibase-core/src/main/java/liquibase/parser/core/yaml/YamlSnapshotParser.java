@@ -12,6 +12,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.RestoredDatabaseSnapshot;
 import liquibase.util.StreamUtil;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,7 +22,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
     @Override
     public DatabaseSnapshot parse(String path, ResourceAccessor resourceAccessor) throws LiquibaseParseException {
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new SafeConstructor());
 
         try (
             InputStream stream = StreamUtil.singleInputStream(path, resourceAccessor);
@@ -67,7 +68,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
                 stream, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()
             );
         ) {
-            parsedYaml = yaml.loadAs(inputStreamReader, Map.class);
+            parsedYaml = (Map) yaml.load(inputStreamReader);
         } catch (Exception e) {
             throw new LiquibaseParseException("Syntax error in " + getSupportedFileExtensions()[0] + ": " + e.getMessage(), e);
         }
