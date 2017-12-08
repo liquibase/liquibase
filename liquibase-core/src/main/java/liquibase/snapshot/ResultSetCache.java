@@ -40,7 +40,7 @@ class ResultSetCache {
             }
 
             //Return empty array if we already queried for the schema and got no data
-            if ((didBulkQuery.containsKey(schemaKey) && didBulkQuery.get(schemaKey)) || (resultSetExtractor.bulkReturnsAllSchemas() && didBulkQuery.size() > 0)) {
+            if ((didBulkQuery.containsKey(schemaKey) && didBulkQuery.get(schemaKey)) || (resultSetExtractor.bulkContainsSchema(schemaKey) && didBulkQuery.size() > 0)) {
                 return new ArrayList<CachedRow>();
             }
 
@@ -49,7 +49,7 @@ class ResultSetCache {
             if (resultSetExtractor.shouldBulkSelect(schemaKey, this)) {
 
                 //remove any existing single fetches that may be duplicated
-                if (resultSetExtractor.bulkReturnsAllSchemas()) {
+                if (resultSetExtractor.bulkContainsSchema(schemaKey)) {
                     for (Map cachedValue : cacheBySchema.values()) {
                         cachedValue.clear();
                     }
@@ -72,7 +72,7 @@ class ResultSetCache {
 
             for (CachedRow row : results) {
                 for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
-                    if (bulkQueried && resultSetExtractor.bulkReturnsAllSchemas()) {
+                    if (bulkQueried && resultSetExtractor.bulkContainsSchema(schemaKey)) {
                         String rowSchema = resultSetExtractor.getSchemaKey(row).toLowerCase();
                         cache = cacheBySchema.get(rowSchema);
                         if (cache == null) {
@@ -220,7 +220,7 @@ class ResultSetCache {
             this.database = database;
         }
 
-        public abstract boolean bulkReturnsAllSchemas();
+        public abstract boolean bulkContainsSchema(String schemaKey);
 
         public String getSchemaKey(CachedRow row) {
             throw new UnexpectedLiquibaseException("Not Implemented");
