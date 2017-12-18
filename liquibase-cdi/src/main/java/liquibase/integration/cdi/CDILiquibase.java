@@ -12,7 +12,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.cdi.annotations.LiquibaseType;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
@@ -72,17 +73,14 @@ import java.util.Map;
 @ApplicationScoped
 public class CDILiquibase implements Extension {
 
-    private Logger log = LogFactory.getInstance().getLog(CDILiquibase.class.getName());
-
+    @Inject
+    @LiquibaseType
+    ResourceAccessor resourceAccessor;
+    private Logger log = LogService.getLog(CDILiquibase.class);
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
-
     @Inject @LiquibaseType
     private DataSource dataSource;
-
-    @Inject @LiquibaseType
-    ResourceAccessor resourceAccessor;
-
     private boolean initialized;
     private boolean updateSuccessful;
 
@@ -96,19 +94,19 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
-        log.info("Booting DB-Manul " + LiquibaseUtil.getBuildVersion());
+        log.info(LogType.LOG, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();
         } catch (Exception e) {
-            log.warning("Cannot find hostname: " + e.getMessage());
-            log.debug("", e);
+            log.warning(LogType.LOG, "Cannot find hostname: " + e.getMessage());
+            log.debug(LogType.LOG, "", e);
             return;
         }
 
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            log.info(String.format("Liquibase did not run on %s because %s was set to false.",
+            log.info(LogType.LOG, String.format("Liquibase did not run on %s because %s was set to false.",
                     hostName,
                     liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
             ));

@@ -8,7 +8,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtils;
@@ -269,7 +270,7 @@ public class H2Database extends AbstractJdbcDatabase {
                         this.connectionSchemaName = schemaName;
                     }
                 } catch (SQLException e) {
-                    LogFactory.getInstance().getLog().info("Could not read current schema name: "+e.getMessage());
+                    LogService.getLog(getClass()).info(LogType.LOG, "Could not read current schema name: "+e.getMessage());
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }

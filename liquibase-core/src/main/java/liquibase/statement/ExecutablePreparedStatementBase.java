@@ -6,7 +6,8 @@ import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
@@ -27,7 +28,7 @@ import static java.util.ResourceBundle.getBundle;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-    private static final Logger LOG = LogFactory.getInstance().getLog();
+    private static final Logger LOG = LogService.getLog(ExecutablePreparedStatementBase.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
@@ -54,6 +55,15 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         this.resourceAccessor = resourceAccessor;
     }
 
+    private static InputStream createStream(InputStream in) {
+        return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
+    }
+
+    private static Reader createReader(InputStream in, String encoding) {
+        return new BufferedReader((StringUtils.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
+            UtfBomAwareReader(in, encoding));
+    }
+
     @Override
     public void execute(PreparedStatementFactory factory) throws DatabaseException {
 
@@ -61,8 +71,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
 
         String sql = generateSql(cols);
-        LOG.sql(sql);
-        LOG.debug("Number of columns = " + cols.size());
+        LOG.info(LogType.WRITE_SQL, sql);
+        LOG.debug(LogType.LOG, "Number of columns = " + cols.size());
 
         // create prepared statement
         PreparedStatement stmt = factory.create(sql);
@@ -96,7 +106,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             throws SQLException, DatabaseException {
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
-            LOG.debug("Applying column parameter = " + i + " for column " + col.getName());
+            LOG.debug(LogType.LOG, "Applying column parameter = " + i + " for column " + col.getName());
             applyColumnParameter(stmt, i, col);
             i++;
         }
@@ -115,13 +125,13 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
         if (col.getValue() != null) {
-            LOG.debug("value is string = " + col.getValue());
+            LOG.debug(LogType.LOG, "value is string = " + col.getValue());
             stmt.setString(i, col.getValue());
         } else if (col.getValueBoolean() != null) {
-            LOG.debug("value is boolean = " + col.getValueBoolean());
+            LOG.debug(LogType.LOG, "value is boolean = " + col.getValueBoolean());
             stmt.setBoolean(i, col.getValueBoolean());
         } else if (col.getValueNumeric() != null) {
-            LOG.debug("value is numeric = " + col.getValueNumeric());
+            LOG.debug(LogType.LOG, "value is numeric = " + col.getValueNumeric());
             Number number = col.getValueNumeric();
             if (number instanceof ColumnConfig.ValueNumeric) {
                 ColumnConfig.ValueNumeric valueNumeric = (ColumnConfig.ValueNumeric) number;
@@ -145,19 +155,19 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                                 coreBundle.getString("jdbc.bind.parameter.unknown.numeric.value.type"),
                                 col.getName(),
                                 col.getValueNumeric().toString(),
-                                col.getValueNumeric().getClass().getTypeName()
+                            col.getValueNumeric().getClass().getName()
                         )
                 );
             }
         } else if (col.getValueDate() != null) {
-            LOG.debug("value is date = " + col.getValueDate());
+            LOG.debug(LogType.LOG, "value is date = " + col.getValueDate());
             if (col.getValueDate() instanceof Timestamp) {
                 stmt.setTimestamp(i, (Timestamp) col.getValueDate());
             } else {
                 stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
             }
         } else if (col.getValueBlobFile() != null) {
-            LOG.debug("value is blob = " + col.getValueBlobFile());
+            LOG.debug(LogType.LOG, "value is blob = " + col.getValueBlobFile());
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
                 if (lob.length <= Integer.MAX_VALUE) {
@@ -170,7 +180,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             }
         } else if (col.getValueClobFile() != null) {
             try {
-                LOG.debug("value is clob = " + col.getValueClobFile());
+                LOG.debug(LogType.LOG, "value is clob = " + col.getValueClobFile());
                 LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
                 if (lob.length <= Integer.MAX_VALUE) {
                     stmt.setCharacterStream(i, lob.content, (int) lob.length);
@@ -182,18 +192,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             }
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
-            LOG.debug("value is explicit null");
+            LOG.debug(LogType.LOG, "value is explicit null");
             stmt.setNull(i, java.sql.Types.NULL);
-        }
-    }
-
-    private class LOBContent<T> {
-        private final T content;
-        private final long length;
-
-        LOBContent(T content, long length) {
-            this.content = content;
-            this.length = length;
         }
     }
 
@@ -236,10 +236,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    private static InputStream createStream(InputStream in) {
-        return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
-    }
-
     private LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
             throws IOException, DatabaseException {
         InputStream in = getResourceAsStream(valueLobFile);
@@ -278,11 +274,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 closeables.add(in);
             }
         }
-    }
-
-    private static Reader createReader(InputStream in, String encoding) {
-        return new BufferedReader((StringUtils.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
-            UtfBomAwareReader(in, encoding));
     }
 
     private InputStream getResourceAsStream(String valueLobFile) throws IOException {
@@ -334,7 +325,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return p;
     }
 
-
     @Override
     public boolean skipOnUnsupported() {
         return false;
@@ -354,6 +344,16 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     public List<ColumnConfig> getColumns() {
         return columns;
+    }
+
+    private class LOBContent<T> {
+        private final T content;
+        private final long length;
+
+        LOBContent(T content, long length) {
+            this.content = content;
+            this.length = length;
+        }
     }
 
 }

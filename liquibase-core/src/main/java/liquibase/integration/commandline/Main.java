@@ -1,5 +1,11 @@
 package liquibase.integration.commandline;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.filter.AbstractMatcherFilter;
+import ch.qos.logback.core.spi.FilterReply;
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -20,9 +26,11 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.LogLevel;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+import liquibase.logging.core.DefaultLoggerConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -34,6 +42,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.xml.XMLResourceBundle;
 import liquibase.util.xml.XmlResourceBundleControl;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -55,10 +64,13 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class Main {
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
-    private static final Logger LOG = LogFactory.getInstance().getLog();
+    private static final Logger LOG = LogService.getLog(Main.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static XMLResourceBundle commandLineHelpBundle = ((XMLResourceBundle) getBundle
             ("liquibase/i18n/liquibase-commandline-helptext", new XmlResourceBundleControl()));
+
+    private static ConsoleLogFilter consoleLogFilter = new ConsoleLogFilter();
+
     protected ClassLoader classLoader;
     protected String driver;
     protected String username;
@@ -104,45 +116,43 @@ public class Main {
     protected Map<String, Object> changeLogParameters = new HashMap<>();
     protected String outputFile;
 
-    private static void printMsgNoLog(String msg) {
-        System.out.println(msg);
-    }
-
-    private static void printErrNoLog(String msg) {
-        System.err.println(msg);
-    }
-
     public static void main(String[] args) {
         int errorLevel = 0;
         try {
             errorLevel = run(args);
-        } catch (LiquibaseException|CommandLineParsingException ignored) {
+        } catch (LiquibaseException | CommandLineParsingException ignored) {
             System.exit(-1);
         }
         System.exit(errorLevel);
     }
 
     public static int run(String[] args) throws CommandLineParsingException, LiquibaseException {
+        setupLogging();
+
+        Logger log = LogService.getLog(Main.class);
+        boolean outputLoggingEnabled = false;
+
         try {
             GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration
                     (GlobalConfiguration.class);
 
             if (!globalConfiguration.getShouldRun()) {
-                printErrNoLog(
+                log.warning(LogType.USER_MESSAGE, (
                         String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
                                 LiquibaseConfiguration.getInstance().describeValueLookupLogic(
-                                        globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))));
+                                        globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)))));
                 return 0;
             }
 
+
             Main main = new Main();
-            printMsgNoLog(CommandLineUtils.getBanner());
+            log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
 
             if ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0])) {
                 main.printHelp(System.out);
                 return 0;
             } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
-                printMsgNoLog(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
+                log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
                         StreamUtil.getLineSeparator()));
                 return 0;
             }
@@ -150,7 +160,7 @@ public class Main {
             try {
                 main.parseOptions(args);
             } catch (CommandLineParsingException e) {
-                printErrNoLog(coreBundle.getString("how.to.display.help"));
+                log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
                 throw e;
             }
 
@@ -165,11 +175,11 @@ public class Main {
             main.doMigration();
 
             if (COMMANDS.UPDATE.equals(main.command)) {
-                printMsgNoLog(coreBundle.getString("update.successful"));
+                log.info(LogType.USER_MESSAGE, coreBundle.getString("update.successful"));
             } else if (main.command.startsWith(COMMANDS.ROLLBACK) && !main.command.endsWith("SQL")) {
-                printMsgNoLog(coreBundle.getString("rollback.successful"));
+                log.info(LogType.USER_MESSAGE, coreBundle.getString("rollback.successful"));
             } else if (!main.command.endsWith("SQL")) {
-                printMsgNoLog(String.format(coreBundle.getString("command.successful"), main.command));
+                log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("command.successful"), main.command));
             }
         } catch (Exception e) {
             String message = e.getMessage();
@@ -185,10 +195,8 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
-                    printErrNoLog(
-                            String.format(coreBundle.getString("unexpected.error"), message) + '\n');
-                    LogFactory.getInstance().getLog().severe(message, e);
-                    printErrNoLog(generateLogLevelWarningMessage());
+                    log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)), e);
+                    log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
                 }
             } catch (Exception e1) {
                 e1.printStackTrace();
@@ -198,8 +206,29 @@ public class Main {
         return 0;
     }
 
-    private static String generateLogLevelWarningMessage() {
-        if ((LOG != null) && (LOG.getLogLevel() != null) && (LOG.getLogLevel().equals(LogLevel.OFF))) {
+    protected static void setupLogging() {
+        LogLevel defaultLogLevel = (LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class)).getLogLevel();
+
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.toLevel(defaultLogLevel.name()));
+
+        Iterator<Appender<ILoggingEvent>> appenderIterator = root.iteratorForAppenders();
+        while (appenderIterator.hasNext()) {
+            Appender<ILoggingEvent> next = appenderIterator.next();
+            if (next instanceof ConsoleAppender) {
+                ((ConsoleAppender) next).addFilter(consoleLogFilter);
+            }
+        }
+
+        for (String target : new String[] {"System.out", "System.err"}) {
+            CommandLineOutputAppender appender = new CommandLineOutputAppender(LoggerFactory.getILoggerFactory(), target);
+            root.addAppender(appender);
+            appender.start();
+        }
+    }
+
+    private static String generateLogLevelWarningMessage(boolean outputLoggingEnabled) {
+        if (outputLoggingEnabled) {
             return "";
         } else {
             return "\n\n" + coreBundle.getString("for.more.information.use.loglevel.flag");
@@ -320,7 +349,7 @@ public class Main {
 
     private static void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
         URL jarUrl = new URL("jar:" + classPathFile.toURI().toURL() + "!/WEB-INF/classes/");
-        LOG.info("adding '" + jarUrl + "' to classpath");
+        LOG.info(LogType.LOG, "adding '" + jarUrl + "' to classpath");
         urls.add(jarUrl);
 
         try (
@@ -333,7 +362,7 @@ public class Main {
                         && entry.getName().toLowerCase().endsWith(".jar")) {
                     File jar = extract(warZip, entry);
                     URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
-                    LOG.info("adding '" + newUrl + "' to classpath");
+                    LOG.info(LogType.LOG, "adding '" + newUrl + "' to classpath");
                     urls.add(newUrl);
                     jar.deleteOnExit();
                 }
@@ -422,7 +451,7 @@ public class Main {
                     i++;
                 }
             }
-    
+
             // Sometimes, commas are still escaped as \, at this point, fix it:
             arg = arg.replace("\\,", ",");
             fixedArgs.add(arg);
@@ -433,6 +462,7 @@ public class Main {
 
     /**
      * After parsing, checks if the given combination of main command and can be executed.
+     *
      * @return an empty List if successful, or a list of error messages
      */
     protected List<String> checkSetup() {
@@ -532,13 +562,12 @@ public class Main {
 
     private void checkForMalformedCommandParameters(final List<String> messages) {
         // SONAR should not complain about local constants
-        @SuppressWarnings("squid:S00117")
-        final int CHANGESET_MINIMUM_IDENTIFIER_PARTS = 3;
+        @SuppressWarnings("squid:S00117") final int CHANGESET_MINIMUM_IDENTIFIER_PARTS = 3;
 
         if (commandParams.isEmpty()) {
             return;
         }
-        
+
         if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
             for (final String param : commandParams) {
                 if ((param != null) && !param.startsWith("-")) {
@@ -550,7 +579,7 @@ public class Main {
                 }
             }
         } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
-            ().contains("data")) {
+                ().contains("data")) {
             messages.add(String.format(coreBundle.getString("including.data.diffchangelog.has.no.effect"),
                     OPTIONS.DIFF_TYPES, COMMANDS.GENERATE_CHANGELOG
             ));
@@ -560,8 +589,9 @@ public class Main {
     /**
      * Reads various execution parameters from an InputStream and sets our internal state according to the values
      * found.
+     *
      * @param propertiesInputStream an InputStream from a Java properties file
-     * @throws IOException if there is a problem reading the InputStream
+     * @throws IOException                 if there is a problem reading the InputStream
      * @throws CommandLineParsingException if an invalid property is encountered
      */
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException,
@@ -599,8 +629,8 @@ public class Main {
                             String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
                     );
                 } else {
-                    LogFactory.getInstance().getLog().warning(
-                            String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
+                    LogService.getLog(getClass()).warning(
+                            LogType.LOG, String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
                     );
                 }
             } catch (Exception e) {
@@ -626,6 +656,7 @@ public class Main {
 
     /**
      * Parses the command line options. If an invalid argument is given, a CommandLineParsingException is thrown.
+     *
      * @param paramArgs the arguments to parse
      * @throws CommandLineParsingException thrown if an invalid argument is passed
      */
@@ -679,8 +710,7 @@ public class Main {
      */
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
         // SONAR should not complain about local constants:
-        @SuppressWarnings("squid:S00117")
-        final String PROMPT_FOR_VALUE = "PROMPT";
+        @SuppressWarnings("squid:S00117") final String PROMPT_FOR_VALUE = "PROMPT";
 
         String[] splitArg = splitArg(arg);
 
@@ -710,9 +740,9 @@ public class Main {
             } else {
                 field.set(this, value);
             }
-        } catch (IllegalAccessException|NoSuchFieldException e) {
+        } catch (IllegalAccessException | NoSuchFieldException e) {
             throw new CommandLineParsingException(
-                String.format(coreBundle.getString("option.unknown"), attributeName)
+                    String.format(coreBundle.getString("option.unknown"), attributeName)
             );
         }
     }
@@ -772,7 +802,7 @@ public class Main {
                                 File jar = extract(earZip, entry);
                                 URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
                                 urls.add(newUrl);
-                                LOG.debug(String.format(coreBundle.getString("adding.to.classpath"), newUrl));
+                                LOG.debug(LogType.LOG, String.format(coreBundle.getString("adding.to.classpath"), newUrl));
                                 jar.deleteOnExit();
                             } else if (entry.getName().toLowerCase().endsWith("war")) {
                                 File warFile = extract(earZip, entry);
@@ -790,7 +820,7 @@ public class Main {
                     } catch (MalformedURLException e) {
                         throw new CommandLineParsingException(e);
                     }
-                    LOG.debug(String.format(coreBundle.getString("adding.to.classpath"), newUrl));
+                    LOG.debug(LogType.LOG, String.format(coreBundle.getString("adding.to.classpath"), newUrl));
                     urls.add(newUrl);
                 }
             }
@@ -824,11 +854,11 @@ public class Main {
         }
 
         try {
-            if (null != logFile) {
-                LogFactory.getInstance().getLog().setLogLevel(logLevel, logFile);
-            } else {
-                LogFactory.getInstance().getLog().setLogLevel(logLevel);
-            }
+//            if (null != logFile) {
+//                LogService.getLog(getClass()).setLogLevel(logLevel, logFile);
+//            } else {
+//                LogService.getLog(getClass()).setLogLevel(logLevel);
+//            }
         } catch (IllegalArgumentException e) {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
@@ -846,7 +876,7 @@ public class Main {
         try {
 
             boolean includeCatalog = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_CATALOG, "false"));
-            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "true"));
+            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "false"));
             String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
             String includeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
 
@@ -855,7 +885,7 @@ public class Main {
                         String.format(coreBundle.getString("cannot.specify.both"),
                                 OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
-            
+
             ObjectChangeFilter objectChangeFilter = null;
             boolean includeSchema = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_SCHEMA, "false"));
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
@@ -865,17 +895,17 @@ public class Main {
                     defaultCatalogName, defaultSchemaName,
                     referenceDefaultCatalogName, referenceDefaultSchemaName,
                     database);
-    
+
             CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
             DiffOutputControl diffOutputControl = new DiffOutputControl(
-               includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
-               
+                    includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
+
             if (excludeObjects != null) {
                 objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
                         excludeObjects);
                 diffOutputControl.setObjectChangeFilter(objectChangeFilter);
             }
-            
+
             if (includeObjects != null) {
                 objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE,
                         includeObjects);
@@ -924,7 +954,7 @@ public class Main {
                         );
                     }
                 }
-    
+
                 CatalogAndSchema[] finalTargetSchemas = computedSchemas.finalTargetSchemas;
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
                         StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor),
@@ -994,17 +1024,17 @@ public class Main {
             } else if (COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.forceReleaseLock();
-                printErrNoLog(String.format(
+                LogService.getLog(getClass()).info(LogType.USER_MESSAGE, String.format(
                         coreBundle.getString("successfully.released.database.change.log.locks"),
-                                liquibase.getDatabase().getConnection().getConnectionUserName() +
+                        liquibase.getDatabase().getConnection().getConnectionUserName() +
                                 "@" + liquibase.getDatabase().getConnection().getURL()
                         )
                 );
                 return;
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
-                LogFactory.getInstance().getLog().info(
-                        String.format(
+                LogService.getLog(getClass()).info(
+                        LogType.LOG, String.format(
                                 coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
                                         .getConnection().getConnectionUserName() + "@" +
                                         liquibase.getDatabase().getConnection().getURL()
@@ -1015,15 +1045,15 @@ public class Main {
                 String tag = commandParams.iterator().next();
                 boolean exists = liquibase.tagExists(tag);
                 if (exists) {
-                    LogFactory.getInstance().getLog().info(
-                            String.format(coreBundle.getString("tag.exists"), tag,
+                    LogService.getLog(getClass()).info(
+                            LogType.LOG, String.format(coreBundle.getString("tag.exists"), tag,
                                     liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
                                             liquibase.getDatabase().getConnection().getURL()
                             )
                     );
                 } else {
-                    LogFactory.getInstance().getLog().info(
-                            String.format(coreBundle.getString("tag.does.not.exist"), tag,
+                    LogService.getLog(getClass()).info(
+                            LogType.LOG, String.format(coreBundle.getString("tag.does.not.exist"), tag,
                                     liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
                                             liquibase.getDatabase().getConnection().getURL()
                             )
@@ -1038,7 +1068,7 @@ public class Main {
                         OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName())
                 );
 
-                printErrNoLog(dropAllCommand.execute().print());
+                LogService.getLog(getClass()).info(LogType.USER_MESSAGE, dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
                 boolean runVerbose = false;
@@ -1064,7 +1094,7 @@ public class Main {
                     e.printDescriptiveError(System.err);
                     return;
                 }
-                printErrNoLog(coreBundle.getString("no.validation.errors.found"));
+                LogService.getLog(getClass()).info(LogType.USER_MESSAGE, coreBundle.getString("no.validation.errors.found"));
                 return;
             } else if (COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(command)) {
                 liquibase.clearCheckSums();
@@ -1072,7 +1102,7 @@ public class Main {
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
                 CheckSum checkSum = null;
                 checkSum = liquibase.calculateCheckSum(commandParams.iterator().next());
-                printMsgNoLog(checkSum.toString());
+                LogService.getLog(getClass()).info(LogType.USER_MESSAGE, checkSum.toString());
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
@@ -1206,7 +1236,7 @@ public class Main {
                 database.rollback();
                 database.close();
             } catch (DatabaseException e) {
-                LogFactory.getInstance().getLog().warning(coreBundle.getString("problem.closing.connection"), e);
+                LogService.getLog(getClass()).warning(LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
             }
         }
     }
@@ -1291,7 +1321,7 @@ public class Main {
                 fileOut = new FileOutputStream(outputFile, false);
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
-                LogFactory.getInstance().getLog().severe(String.format(
+                LogService.getLog(getClass()).severe(LogType.LOG, String.format(
                         coreBundle.getString("could.not.create.output.file"),
                         outputFile));
                 throw e;
@@ -1387,4 +1417,17 @@ public class Main {
         private static final String VERSION = "version";
     }
 
+    private static class ConsoleLogFilter extends AbstractMatcherFilter {
+
+        private boolean outputLogs = false;
+
+        @Override
+        public FilterReply decide(Object event) {
+            if (outputLogs) {
+                return FilterReply.ACCEPT;
+            } else {
+                return FilterReply.DENY;
+            }
+        }
+    }
 }

@@ -9,7 +9,7 @@
  -->
 	<entry key="commandline-helptext">
 		<![CDATA[
-Anwendung: java -jar dbmanul.jar [options] [command]
+Anwendung: java -jar liquibase.jar [options] [command]
 
 Die wichtigsten Hauptbefehle:
  update                         Wendet ChangeLog-Dateien an, um die Struktur
@@ -225,12 +225,12 @@ Optionale Parameter für Vergleichsoperationen:
                                             (Standard: true)
  --includeSchema=<true|false>               Gibt in den erzeugten ChangeSets
                                             immer den Schemanamen an
-                                            (Standard: true)
+                                            (Standard: false)
  --includeTablespace=<true|false>           Gibt in den erzeugten ChangeSets
                                             immer die Tablespaces (physikalische
                                             Speicherorte von Tabellen, Indizes
                                             etc.) an
-                                            (Standard: true)
+                                            (Standard: false)
  --referenceDriver=<jdbc.driver.ClassName>  Java-Klassenname für den JDBC-
                                             Treiber beim Zugriff auf die
                                             Referenz-DB
@@ -260,7 +260,7 @@ Standardoptionen aus den Dateien "liquibase.properties" und
 existieren.
 
 Die vollständige Dokumentation befindet sich auf:
-http://www.dbmanul.org
+http://www.liquibase.org
 ]]>
 	</entry>
 </properties>

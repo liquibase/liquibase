@@ -1,140 +1,97 @@
 package liquibase.logging;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.servicelocator.PrioritizedService;
-
 /**
- * Interface for all logger implementations in this software. The hierarchy of log levels is:
- * (finest) DEBUG < SQL < INFO < WARNING < SEVERE (coarsest)
+ * Interface to class that does the actual logging.
+ * Instances will be created by {@link LoggerFactory} to know the class to log against.
+ *
+ * All log methods take a {@link LogType} to describe the type of message being logged.
+ *
+ * The hierarchy of log levels is:
+ * (finest) DEBUG < INFO < WARN < ERROR (coarsest)
  */
-public interface Logger extends PrioritizedService {
+public interface Logger {
 
     /**
-     * Set the identifier for the logger. LogFactory might use that name to find a logger for a specific purpose.
-     * @param name Identifier for the purpose of the logger.
-     */
-    void setName(String name);
-
-    /**
-     * Returns the currently set log level
-     * @return the current logging level
-     */
-    LogLevel getLogLevel();
-
-    /**
-     * Changes the current log level
-     * @param level the new disired log level
-     */
-    void setLogLevel(LogLevel level);
-
-    /**
-     * Changes the current log level
-     * @param level the new disired log level
-     */
-    void setLogLevel(String level);
-
-    /**
-     * Opens a new log file and chooses a new log level at the same time. Typically used to initialize the Logger.
-     * @param logLevel desired log level
-     * @param logFile
-     */
-    void setLogLevel(String logLevel, String logFile);
-
-    /**
-     * Informs the logger that work on a new, possible different, DatabaseChangeLog has begun. Might be useful for
-     * visualizing the DatabaseChangeLog/ChangeSet hierarchy in the log files.
-     * @param databaseChangeLog the new DatabaseChangeLog
-     */
-    void setChangeLog(DatabaseChangeLog databaseChangeLog);
-
-    /**
-     * Informs the logger that work on a new, possible different, ChangeSet has begun. Might be useful for
-     * visualizing the DatabaseChangeLog/ChangeSet hierarchy in the log files.
-     * @param changeSet the new ChangeSet
-     */
-    void setChangeSet(ChangeSet changeSet);
-
-    /**
-     * Closes the current log output file.
-     */
-    void closeLogFile();
-
-    /**
-     * Log a severe event.
-     * @param message the text message describing the event
-     * @see LogLevel
+     * Log an error that occurred, using the {@link LogType#LOG} type.
      */
     void severe(String message);
 
     /**
-     * Log a severe event together with data from an error/exception
-     * @param message the text message describing the event
-     * @param e the error/exception that occured
-     * @see LogLevel
+     * Log an error together with data from an error/exception, using the {@link LogType#LOG} type.
      */
     void severe(String message, Throwable e);
 
     /**
-     * Log a event the user should be warned about
-     * @param message the text message describing the event
-     * @see LogLevel
+     * Log an error that occurred.
+     */
+    void severe(LogType target, String message);
+
+    /**
+     * Log an error together with data from an error/exception
+     */
+    void severe(LogType target, String message, Throwable e);
+
+    /**
+     * Log a event the user should be warned about, using the {@link LogType#LOG} type.
      */
     void warning(String message);
 
     /**
-     * Log a event the user should be warned about together with data from an error/exception
-     * @param message the text message describing the event
-     * @param e the error/exception that occured
-     * @see LogLevel
+     * Log a event the user should be warned about together with data from an error/exception, using the {@link LogType#LOG} type.
      */
     void warning(String message, Throwable e);
 
     /**
-     * Logs a general event that might be useful for the user
-     * @param message the text message describing the event
-     * @see LogLevel
+     * Log a event the user should be warned about
+     */
+    void warning(LogType target, String message);
+
+    /**
+     * Log a event the user should be warned about together with data from an error/exception
+     */
+    void warning(LogType target, String message, Throwable e);
+
+
+
+    /**
+     * Logs a general event that might be useful for the user, using the {@link LogType#LOG} type.
      */
     void info(String message);
 
     /**
-     * Logs a general event that might be useful for the user together with data from an error/exception
-     * @param message the text message describing the event
-     * @param e the error/exception that occured
-     * @see LogLevel
+     * Logs a general event that might be useful for the user together with data from an error/exception, using the {@link LogType#LOG} type.
      */
     void info(String message, Throwable e);
 
     /**
-     * Logs a native SQL statement sent to a database instance
-     *
-     * @param message the text message describing the event
-     * @see LogLevel
+     * Logs a general event that might be useful for the user.
      */
-    void sql(String message);
+    void info(LogType logType, String message);
 
     /**
-     * Logs a native SQL statement sent to a database instance together with data from an error/exception
-     *
-     * @param message the text message describing the event
-     * @param e       the error/exception that occured
-     * @see LogLevel
+     * Logs a general event that might be useful for the user together with data from an error/exception
      */
-    void sql(String message, Throwable e);
+    void info(LogType target, String message, Throwable e);
+
 
     /**
-     * Logs a debugging event to aid in troubleshooting
-     * @param message the text message describing the event
-     * @see LogLevel
+     * Logs a debugging event to aid in troubleshooting, using the {@link LogType#LOG} type.
      */
     void debug(String message);
 
     /**
-     * Logs a debugging event to aid in troubleshooting together with data from an error/exception
-     * @param message the text message describing the event
-     * @param e the error/exception that occured
-     * @see LogLevel
+     * Logs a debugging event to aid in troubleshooting together with data from an error/exception, using the {@link LogType#LOG} type.
      */
     void debug(String message, Throwable e);
+
+    /**
+     * Logs a debugging event to aid in troubleshooting
+     */
+    void debug(LogType target, String message);
+
+    /**
+     * Logs a debugging event to aid in troubleshooting together with data from an error/exception
+     */
+    void debug(LogType target, String message, Throwable e);
 
 }

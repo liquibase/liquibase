@@ -14,7 +14,7 @@ public class MockResourceAccessor implements ResourceAccessor {
     private Map<String, String> contentByFileName;
 
     public MockResourceAccessor() {
-        this(new HashMap<>());
+        this(new HashMap<String, String>());
     }
 
     public MockResourceAccessor(Map<String, String> contentByFileName) {

@@ -10,7 +10,8 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -28,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
-    private static final Logger LOGGER = new LogFactory().getLog("DatabaseSnapshot");
+    private static final Logger LOGGER = LogService.getLog(DatabaseSnapshot.class);
     private final DatabaseObject[] originalExamples;
     private HashSet<String> serializableFields;
     private SnapshotControl snapshotControl;
@@ -43,7 +44,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private CompareControl.SchemaComparison[] schemaComparisons;
 
     private Map<String, Object> metadata = new HashMap<>();
-    
+
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;
         allFound = new DatabaseObjectCollection(database);
@@ -82,7 +83,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                     include(catalog);
                 }
             }
-            
+
             for (DatabaseObject obj : examples) {
                 this.snapshotControl.addType(obj.getClass(), database);
 
@@ -245,13 +246,13 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
 
         if ((example instanceof Schema) && (example.getName() == null) && ((((Schema) example).getCatalog() == null)
-            || (((Schema) example).getCatalogName() == null))) {
+                || (((Schema) example).getCatalogName() == null))) {
             CatalogAndSchema catalogAndSchema = ((Schema) example).toCatalogAndSchema().customize(database);
             example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
         }
 
         if (!snapshotControl.shouldInclude(example)) {
-            LOGGER.debug("Excluding " + example);
+            LOGGER.debug(LogType.LOG, "Excluding " + example);
             return example;
         }
 
@@ -282,11 +283,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
             if (example instanceof Schema) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    LogFactory.getInstance().getLog().warning("Did not find schema '" + example + "' to snapshot");
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Did not find schema '" + example + "' to snapshot");
             }
             if (example instanceof Catalog) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    LogFactory.getInstance().getLog().warning("Did not find catalog '" + example + "' to snapshot");
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Did not find catalog '" + example + "' to snapshot");
             }
 
         } else {
@@ -310,7 +311,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         for (String field : new HashSet<>(object.getAttributes())) {
             Object fieldValue = object.getAttribute(field, Object.class);
             if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index
-                .class) || (object.getClass() == UniqueConstraint.class))) {
+                    .class) || (object.getClass() == UniqueConstraint.class))) {
                 if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
                     String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
                     if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC")) {
@@ -321,7 +322,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
                 if (((object instanceof UniqueConstraint) || (object instanceof PrimaryKey) || (object instanceof
-                    ForeignKey)) && "backingIndex".equals(field)) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
+                        ForeignKey)) && "backingIndex".equals(field)) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
                     object.setAttribute(field, null);
                 }
             } else if (fieldValue != newFieldValue) {
@@ -385,7 +386,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             while (fieldValueIterator.hasNext()) {
                 Object obj = fieldValueIterator.next();
                 if ((fieldValue instanceof DatabaseObject) && !snapshotControl.shouldInclude(((DatabaseObject)
-                    fieldValue).getClass())) {
+                        fieldValue).getClass())) {
                     return fieldValue;
                 }
 
@@ -548,7 +549,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                             object.setAttribute(attr, allObjects.get(value));
                         }
                     } else if ((value instanceof Collection) && !((Collection) value).isEmpty() && allObjects
-                        .containsKey(((Collection) value).iterator().next())) {
+                            .containsKey(((Collection) value).iterator().next())) {
                         List newList = new ArrayList();
                         for (String element : (Collection<String>) value) {
                             newList.add(allObjects.get(element));
@@ -561,7 +562,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                     } else {
                         if ((value != null) && ObjectUtil.hasProperty(object, attr)) {
                             if ((value instanceof byte[]) && ObjectUtil.getPropertyType(object, attr).equals(String
-                                .class)) {
+                                    .class)) {
                                 value = new String((byte[]) value, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
                             }
                             object.setAttribute(attr, null);
@@ -605,6 +606,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     /**
      * Used to get and store misc data that should be scoped to the snapshot. Helpful for caching snapshot results.
+     *
      * @deprecated Will be removed with 4.0
      */
     public Object getScratchData(String key) {

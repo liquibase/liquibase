@@ -16,7 +16,8 @@ import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
@@ -69,19 +70,12 @@ import static java.util.ResourceBundle.getBundle;
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
         since = "1.7")
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    private static final Logger LOG = LogFactory.getInstance().getLog();
-
-    @SuppressWarnings("HardCodedStringLiteral")
-    public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP
-    }
-
     /**
      * CSV Lines starting with that sign(s) will be treated as comments by default
      */
     public static final String DEFAULT_COMMENT_PATTERN = "#";
-
+    private static final Logger LOG = LogService.getLog(LoadDataChange.class);
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private String catalogName;
     private String schemaName;
     private String tableName;
@@ -91,8 +85,24 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String encoding;
     private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
     private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
-
     private List<LoadDataColumnConfig> columns = new ArrayList<>();
+
+    /**
+     * Transform a value read from a CSV file into a string to be written into the database if the column type
+     * is not known.
+     *
+     * @param value the value to transform
+     * @return if the value is empty or the string "NULL" (case-insensitive), return the empty string.
+     * If not, the value "toString()" representation (trimmed of spaces left and right) is returned.
+     */
+    protected static String getValueToWrite(Object value) {
+        if ((value == null) || "NULL".equalsIgnoreCase(value.toString())) {
+            return "";
+        } else {
+            return value.toString().trim();
+        }
+    }
+
     // TODO: We can currently do this for INSERT operations, but not yet for UPDATE operations, so loadUpdateDataChange
     // will overwrite this flag for now.
     protected boolean hasPreparedStatementsImplemented() {
@@ -493,7 +503,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                 .getFailOnError()) {
-                LOG.info("Change set " + getChangeSet().toString(false) +
+                LOG.info(LogType.LOG, "Change set " + getChangeSet().toString(false) +
                          " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {
@@ -515,12 +525,25 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
      * no data type of.
      * @param columns a list of LoadDataColumnConfigs to process
      */
+    @SuppressWarnings("CommentedOutCodeLine")
     private void retrieveMissingColumnLoadTypes(List<LoadDataColumnConfig> columns, Database database) throws
             DatabaseException {
+        boolean matched = false;
+
         // If no column is missing type information, we are already done.
-        if (columns.stream().noneMatch(c -> c.getType() == null)) {
+        for (LoadDataColumnConfig c : columns) {
+            if (c.getType() == null) {
+                matched = true;
+            }
+        }
+        if (!matched) {
             return;
         }
+        /* The above is the JDK7 version of:
+           if (columns.stream().noneMatch(c -> c.getType() == null)) {
+            return;
+        }
+        */
 
         // Snapshot the database table
         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(getCatalogName(), getSchemaName());
@@ -536,7 +559,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new DatabaseException(e);
         }
         if (snapshotOfTable == null) {
-            LOG.warning(String.format(
+            LOG.warning(LogType.LOG, String.format(
                     coreBundle.getString("could.not.snapshot.table.to.get.the.missing.column.type.information"),
                     database.escapeTableName(
                             targetTable.getSchema().getCatalogName(),
@@ -548,7 +571,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
         // Save the columns of the database table in a lookup table
         Map<String, Column> tableColumns = new HashMap<>();
-        snapshotOfTable.getColumns().forEach(c -> tableColumns.put(c.getName(), c));
+        for (Column c : snapshotOfTable.getColumns()) {
+            tableColumns.put(c.getName(), c);
+        }
+        /* The above is the JDK7 version of:
+            snapshotOfTable.getColumns().forEach(c -> tableColumns.put(c.getName(), c));
+        */
 
         // Normalise the LoadDataColumnConfig column names to the database
         Map<String, LoadDataColumnConfig> columnConfigs = new HashMap<>();
@@ -560,23 +588,23 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         columnConfigs.entrySet().stream()
                 .filter(entry -> entry.getValue().getType() == null)
                 .forEach(entry -> {
-                    LoadDataColumnConfig columnConfig = entry.getValue();
-                    DataType dataType = tableColumns.get(entry.getKey()).getType();
-                    if (dataType == null) {
-                        LOG.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
-                                columnConfig.toString(), snapshotOfTable.toString() ));
-                        columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
-                    } else {
-                        LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance()
-                                .fromDescription(dataType.toString(), database);
-                        if (liquibaseDataType != null) {
-                            columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
-                        } else {
-                            LOG.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
-                                    columnConfig.toString(), snapshotOfTable.toString(), liquibaseDataType.toString()));
-                        }
-                    }
+            LoadDataColumnConfig columnConfig = entry.getValue();
+            DataType dataType = tableColumns.get(entry.getKey()).getType();
+            if (dataType == null) {
+                LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.find.load.data.type"),
+                    columnConfig.toString(), snapshotOfTable.toString()));
+                columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
+            } else {
+                LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance()
+                    .fromDescription(dataType.toString(), database);
+                if (liquibaseDataType != null) {
+                    columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
+                } else {
+                    LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.convert.load.data.type"),
+                        columnConfig.toString(), snapshotOfTable.toString(), liquibaseDataType.toString()));
                 }
+            }
+        }
         );
     }
 
@@ -598,21 +626,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             i++;
         }
         return result;
-    }
-
-    /**
-     * Transform a value read from a CSV file into a string to be written into the database if the column type
-     * is not known.
-     * @param value the value to transform
-     * @return if the value is empty or the string "NULL" (case-insensitive), return the empty string.
-     * If not, the value "toString()" representation (trimmed of spaces left and right) is returned.
-     */
-    protected static String getValueToWrite(Object value) {
-        if ((value == null) || "NULL".equalsIgnoreCase(value.toString())) {
-            return "";
-        } else {
-            return value.toString().trim();
-        }
     }
 
     private boolean isLineCommented(String[] line) {
@@ -727,5 +740,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @SuppressWarnings("HardCodedStringLiteral")
+    public enum LOAD_DATA_TYPE {
+        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP
     }
 }

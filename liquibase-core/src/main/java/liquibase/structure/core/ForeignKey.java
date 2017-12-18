@@ -11,8 +11,8 @@ import java.util.List;
 public class ForeignKey extends AbstractDatabaseObject{
 
     public ForeignKey() {
-        setForeignKeyColumns(new ArrayList<>());
-        setPrimaryKeyColumns(new ArrayList<>());
+        setForeignKeyColumns(new ArrayList<Column>());
+        setPrimaryKeyColumns(new ArrayList<Column>());
     }
 
     public ForeignKey(String name) {
@@ -74,15 +74,6 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("primaryKeyColumns", List.class);
     }
 
-    public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
-        this.getAttribute("primaryKeyColumns", List.class).add(primaryKeyColumn);
-        if (primaryKeyColumn.getAttribute("relation", Object.class) == null) {
-            primaryKeyColumn.setRelation(getPrimaryKeyTable());
-        }
-
-        return this;
-    }
-
     public ForeignKey setPrimaryKeyColumns(List<Column> primaryKeyColumns) {
         this.setAttribute("primaryKeyColumns", primaryKeyColumns);
         for (Column column : getPrimaryKeyColumns()) {
@@ -90,6 +81,15 @@ public class ForeignKey extends AbstractDatabaseObject{
                 column.setRelation(getPrimaryKeyTable());
             }
         }
+        return this;
+    }
+
+    public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
+        this.getAttribute("primaryKeyColumns", List.class).add(primaryKeyColumn);
+        if (primaryKeyColumn.getAttribute("relation", Object.class) == null) {
+            primaryKeyColumn.setRelation(getPrimaryKeyTable());
+        }
+
         return this;
     }
 
@@ -106,15 +106,6 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("foreignKeyColumns", List.class);
     }
 
-    public ForeignKey addForeignKeyColumn(Column foreignKeyColumn) {
-        if (foreignKeyColumn.getAttribute("relation", Object.class) == null) {
-            foreignKeyColumn.setRelation(getForeignKeyTable());
-        }
-        getAttribute("foreignKeyColumns", List.class).add(foreignKeyColumn);
-
-        return this;
-    }
-
     public ForeignKey setForeignKeyColumns(List<Column> foreignKeyColumns) {
         this.setAttribute("foreignKeyColumns", foreignKeyColumns);
 
@@ -123,6 +114,15 @@ public class ForeignKey extends AbstractDatabaseObject{
                 column.setRelation(getForeignKeyTable());
             }
         }
+
+        return this;
+    }
+
+    public ForeignKey addForeignKeyColumn(Column foreignKeyColumn) {
+        if (foreignKeyColumn.getAttribute("relation", Object.class) == null) {
+            foreignKeyColumn.setRelation(getForeignKeyTable());
+        }
+        getAttribute("foreignKeyColumns", List.class).add(foreignKeyColumn);
 
         return this;
     }
@@ -170,22 +170,22 @@ public class ForeignKey extends AbstractDatabaseObject{
         return this;
     }
 
+    public ForeignKeyConstraintType getUpdateRule() {
+        return getAttribute("updateRule", ForeignKeyConstraintType.class);
+    }
+
     public ForeignKey setUpdateRule(ForeignKeyConstraintType rule) {
         this.setAttribute("updateRule", rule);
         return this;
     }
 
-    public ForeignKeyConstraintType getUpdateRule() {
-        return getAttribute("updateRule", ForeignKeyConstraintType.class);
+    public ForeignKeyConstraintType getDeleteRule() {
+        return getAttribute("deleteRule", ForeignKeyConstraintType.class);
     }
 
     public ForeignKey setDeleteRule(ForeignKeyConstraintType rule) {
         this.setAttribute("deleteRule", rule);
         return this;
-    }
-
-    public ForeignKeyConstraintType getDeleteRule() {
-        return getAttribute("deleteRule", ForeignKeyConstraintType.class);
     }
 
     @Override

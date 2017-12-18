@@ -6,7 +6,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.dbdoc.*;
-import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -25,21 +24,17 @@ import java.util.*;
 
 public class DBDocVisitor implements ChangeSetVisitor {
 
+    private static final int MAX_RECENT_CHANGE = 50;
     private Database database;
-
     private SortedSet<ChangeLogInfo> changeLogs;
     private Map<DatabaseObject, List<Change>> changesByObject;
     private Map<String, List<Change>> changesByAuthor;
-
     private Map<DatabaseObject, List<Change>> changesToRunByObject;
     private Map<String, List<Change>> changesToRunByAuthor;
     private List<Change> changesToRun;
     private List<Change> recentChanges;
-
     private String rootChangeLogName;
     private DatabaseChangeLog rootChangeLog;
-
-    private static final int MAX_RECENT_CHANGE = 50;
 
     public DBDocVisitor(Database database) {
         this.database = database;
@@ -71,10 +66,10 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         if (!changesByAuthor.containsKey(changeSet.getAuthor())) {
-            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
+            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
         }
         if (!changesToRunByAuthor.containsKey(changeSet.getAuthor())) {
-            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
+            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
         }
 
         boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN) || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
@@ -100,12 +95,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
                 for (DatabaseObject dbObject : affectedDatabaseObjects) {
                     if (toRun) {
                         if (!changesToRunByObject.containsKey(dbObject)) {
-                            changesToRunByObject.put(dbObject, new ArrayList<>());
+                            changesToRunByObject.put(dbObject, new ArrayList<Change>());
                         }
                         changesToRunByObject.get(dbObject).add(change);
                     } else {
                        if (!changesByObject.containsKey(dbObject)) {
-                           changesByObject.put(dbObject, new ArrayList<>());
+                           changesByObject.put(dbObject, new ArrayList<Change>());
                        }
                        changesByObject.get(dbObject).add(change);
                     }
@@ -114,7 +109,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, LiquibaseException, DatabaseHistoryException {
+    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException,
+        LiquibaseException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);

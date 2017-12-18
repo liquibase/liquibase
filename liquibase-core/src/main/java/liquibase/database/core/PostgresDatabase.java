@@ -6,6 +6,8 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
@@ -30,7 +32,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
-    private static final Logger LOG = LogFactory.getInstance().getLog();
+    private static final Logger LOG = LogService.getLog(PostgresDatabase.class);
 
     private Set<String> systemTablesAndViews = new HashSet<>();
 
@@ -113,11 +115,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             (minorVersion < MINIMUM_DBMS_MINOR_VERSION))) {
             LogFactory.getInstance().getLog().warning(
                     String.format("Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
-                                    "older than %d.%d. Unfortunately, this is not supported, and this connection " +
-                                    "cannot be " +
-                                    "used. Sorry.",
+                                    "older than %d.%d. This means that you might encounter strange behaviour and incorrect error messages.",
                     majorVersion, minorVersion, majorVersion, minorVersion));
-            return false;
+            return true;
         }
 
         return true;
@@ -166,13 +166,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if ((setting != null) && "on".equals(setting)) {
-                        LOG.warning("EnterpriseDB " + conn.getURL() + " does not store DATE columns. Auto-converts " +
+                        LOG.warning(LogType.LOG, "EnterpriseDB " + conn.getURL() + " does not store DATE columns. Instead, it auto-converts " +
                                 "them " +
                                 "to TIMESTAMPs. (edb_redwood_date=true)");
                     }
                 }
             } catch (SQLException | DatabaseException e) {
-                LOG.info("Cannot check pg_settings", e);
+                LOG.info(LogType.LOG, "Cannot check pg_settings", e);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
@@ -284,8 +284,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             major = getDatabaseMajorVersion();
             minor = getDatabaseMinorVersion();
         } catch (DatabaseException x) {
-            LogFactory.getInstance().getLog().warning(
-                    "Unable to determine exact database server version"
+            LogService.getLog(getClass()).warning(
+                    LogType.LOG, "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;

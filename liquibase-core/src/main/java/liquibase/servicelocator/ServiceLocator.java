@@ -2,9 +2,8 @@ package liquibase.servicelocator;
 
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-import liquibase.logging.core.TreeStyleLogger;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.osgi.OSGiPackageScanClassResolver;
 import liquibase.osgi.OSGiResourceAccessor;
 import liquibase.osgi.OSGiUtil;
@@ -44,7 +43,7 @@ public class ServiceLocator {
                     instance = new ServiceLocator();
                 }
             } catch (Throwable e1) {
-                LogFactory.getInstance().getLog().severe("Cannot build ServiceLocator", e1);
+                LogService.getLog(ServiceLocator.class).severe(LogType.LOG, "Cannot build ServiceLocator", e1);
             }
         }
     }
@@ -53,7 +52,6 @@ public class ServiceLocator {
 
     private Map<Class, List<Class>> classesBySuperclass;
     private List<String> packagesToScan;
-    private Logger logger = new TreeStyleLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
     private PackageScanClassResolver classResolver;
 
     protected ServiceLocator() {
@@ -84,9 +82,13 @@ public class ServiceLocator {
         instance = newInstance;
     }
 
+    public static synchronized void reset() {
+        instance = new ServiceLocator();
+    }
+
     protected PackageScanClassResolver defaultClassLoader(){
         if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
-            logger.debug("Using WebSphere Specific Class Resolver");
+            LogService.getLog(getClass()).debug(LogType.LOG, "Using WebSphere Specific Class Resolver");
             return new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
         } else {
             return new DefaultPackageScanClassResolver();
@@ -189,7 +191,7 @@ public class ServiceLocator {
     }
 
     public <T> Class<? extends T>[] findClasses(Class<T> requiredInterface) throws ServiceNotFoundException {
-        logger.debug("ServiceLocator.findClasses for "+requiredInterface.getName());
+        LogService.getLog(getClass()).debug(LogType.LOG, "ServiceLocator.findClasses for "+requiredInterface.getName());
 
             try {
                 Class.forName(requiredInterface.getName());
@@ -215,7 +217,7 @@ public class ServiceLocator {
     }
 
     private List<Class> findClassesImpl(Class requiredInterface) throws Exception {
-        logger.debug("ServiceLocator finding classes matching interface " + requiredInterface.getName());
+        LogService.getLog(getClass()).debug(LogType.LOG, "ServiceLocator finding classes matching interface " + requiredInterface.getName());
 
         List<Class> classes = new ArrayList<>();
 
@@ -226,36 +228,27 @@ public class ServiceLocator {
                 continue;
             }
 
-            if (clazz.getName().contains("$"))
-                continue; // Not usable as a service class.
-
-            if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && Modifier.isPublic(clazz.getModifiers())) {
+            if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && !clazz.isAnonymousClass() &&!clazz.isSynthetic() && Modifier.isPublic(clazz.getModifiers())) {
                 try {
                     clazz.getConstructor();
-                    logger.debug(clazz.getName() + " matches "+requiredInterface.getName());
+                    LogService.getLog(getClass()).debug(LogType.LOG, clazz.getName() + " matches "+requiredInterface.getName());
 
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    logger.info("Can not use "+clazz+" as a DB-Manul service because it does not have a no-argument constructor" );
+                    LogService.getLog(getClass()).info(LogType.LOG, "Can not use " + clazz + " as a Liquibase service because it does not have a " +
+                        "no-argument constructor");
                 } catch (NoClassDefFoundError e) {
-                    String message = "Can not use " + clazz + " as a DB-Manul service because " + e.getMessage().replace("/", ".") + " is not in the classpath";
+                    String message = "Can not use " + clazz + " as a Liquibase service because " + e.getMessage()
+                        .replace("/", ".") + " is not in the classpath";
                     if (e.getMessage().startsWith("org/yaml/snakeyaml")) {
-                        logger.info(message);
+                        LogService.getLog(getClass()).info(LogType.LOG, message);
                     } else {
-                        logger.warning(message);
+                        LogService.getLog(getClass()).warning(LogType.LOG, message);
                     }
                 }
             }
         }
 
         return classes;
-    }
-
-    public static synchronized void reset() {
-        instance = new ServiceLocator();
-    }
-
-    protected Logger getLogger() {
-        return logger;
     }
 }

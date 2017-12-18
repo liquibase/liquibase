@@ -13,6 +13,7 @@
 	<packaging>jar</packaging>
 	<name>DB-Manul Core</name>
 
+
 	<properties>
 		<bundle.namespace>dbmanul.*</bundle.namespace>
 		<project.version>${project.version}-SNP</project.version>
@@ -132,7 +133,17 @@
 			<scope>test</scope>
 		</dependency>
 
-	</dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+    </dependencies>
 
 	<build>
 		<finalName>dbmanul-${project.version}</finalName>

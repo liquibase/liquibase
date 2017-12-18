@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -25,7 +25,7 @@ public class ChangeFactory {
     private Logger log;
 
     private ChangeFactory() {
-      log = LogFactory.getInstance().getLog();
+      log = LogService.getLog(getClass());
     }
 
     protected Logger getLogger() {

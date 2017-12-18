@@ -9,7 +9,8 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseIncapableOfOperation;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.util.StringUtils;
 import liquibase.util.grammar.ParseException;
 
@@ -104,7 +105,7 @@ public class TimestampType extends DateTimeType {
             }
             int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
             if (maxFractionalDigits < fractionalDigits) {
-                LogFactory.getInstance().getLog().warning(String.format(
+                LogService.getLog(getClass()).warning(LogType.LOG, String.format(
                         "A timestamp datatype with %d fractional digits was requested, but the DBMS %s only supports " +
                                 "%d digits. Because of this, the number of digits was reduced to %d.",
                         fractionalDigits, database.getDatabaseProductName(), maxFractionalDigits, maxFractionalDigits)

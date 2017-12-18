@@ -9,7 +9,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -38,8 +39,8 @@ import static java.util.ResourceBundle.getBundle;
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     public static final String PRODUCT_NAME = "oracle";
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
     protected final int LONG_IDENTIFIERS_LEGNTH = 128;
     protected final int ORACLE_12C_MAJOR_VERSION = 12;
@@ -107,7 +108,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
                 } catch (SQLException e) {
                     //noinspection HardCodedStringLiteral
-                    LogFactory.getInstance().getLog().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
+                    LogService.getLog(getClass()).info(LogType.LOG, "Could get sql keywords on OracleDatabase: " + e.getMessage());
                     //can not get keywords. Continue on
                 }
                 try {
@@ -116,8 +117,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     method.invoke(sqlConn, true);
                 } catch (Exception e) {
                     //noinspection HardCodedStringLiteral
-                    LogFactory.getInstance().getLog().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
-                    ; //cannot set it. That is OK
+                    LogService.getLog(getClass()).info(LogType.LOG, "Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+
+                    //cannot set it. That is OK
                 }
 
                 Statement statement = null;
@@ -142,7 +144,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     @SuppressWarnings("HardCodedStringLiteral") String message = "Cannot read from v$parameter: "+e.getMessage();
 
                     //noinspection HardCodedStringLiteral
-                    LogFactory.getInstance().getLog().info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
+                    LogService.getLog(getClass()).info(LogType.LOG, "Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }
@@ -245,7 +247,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
             //noinspection HardCodedStringLiteral
-            LogFactory.getInstance().getLog().info("Error getting default schema", e);
+            LogService.getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
         }
         return null;
     }
@@ -361,12 +363,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 }
 
                 if (filteredInOriginalQuery) {
-                    if ((example instanceof PrimaryKey) || (example instanceof Index) || (example instanceof
-                        liquibase.statement.UniqueConstraint)) { //some objects don't get renamed back and so are already filtered in the metadata queries
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return !((example instanceof PrimaryKey) || (example instanceof Index) || (example instanceof
+                        liquibase.statement.UniqueConstraint));
                 } else {
                     return true;
                 }
@@ -526,7 +524,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         DatabaseConnection connection = getConnection();
         if ((connection == null) || (connection instanceof OfflineConnection)) {
             //noinspection HardCodedStringLiteral
-            LogFactory.getInstance().getLog().info("Cannot validate offline database");
+            LogService.getLog(getClass()).info(LogType.LOG, "Cannot validate offline database");
             return errors;
         }
 
@@ -542,7 +540,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
         // HardCodedStringLiteral
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral
-        return "DB-Manul needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where " +
+        return "Liquibase needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where " +
         "constraints are deleted and restored. Since Oracle doesn't properly restore the original table names " +
         "referenced in the constraint, we use the information from the DBA_RECYCLEBIN to automatically correct this" +
         " issue.\n" +
@@ -573,7 +571,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 } else {
                     //noinspection HardCodedStringLiteral
-                    LogFactory.getInstance().getLog().warning("Cannot check dba_recyclebin access", e);
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Cannot check dba_recyclebin access", e);
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {

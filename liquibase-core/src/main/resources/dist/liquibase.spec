@@ -1,21 +1,21 @@
 # Settings
-%define packagedby "Andreas Buschka <andreas.buschka@dbmanul.org>"
+%define packagedby "Nathan Voxland <nathan@voxland.net>"
 # Enable / Disable sub-packages
-%define mysql        1
+%define mysql        0
 %define oracle       0
-%define postgresql   1
-%define mssql        1
-%define sqlite       1
+%define postgresql   0
+%define mssql        0
+%define sqlite       0
 # Liquibase Package
-%define lqver        0.1.0
+%define lqver        3.6.0
 %define buildnum     1
 ## MySQL Jar
 %define mysqljar     mysql-connector-java-6.0.6.jar
 %define gpl2license  gpl-2.0.txt
 ## Oracle Files
 %define oraLicense   oracle-license.txt 
-%define orajarjdbc   ojdbc8-12.2.0.1.jar
-%define orajarucp    ucp-12.2.0.1.jar
+%define orajarjdbc   ojdbc8-12.1.0.2.jar
+%define orajarucp    ucp-12.1.0.2.jar
 %define orajari18n   orai18n.jar
 ## Postgresql
 %define pgsqljar     postgresql-42.1.1.jar
@@ -27,8 +27,8 @@
 %define sqlitejar    sqlite-jdbc-3.6.20.1.jar
 %define apache2license apache2license.txt
 
-Name: dbmanul
-Summary: DB-Manul - a DBMS change management system based on Liquibase
+Name: liquibase
+Summary: Liquibase Database Refactoring Tool
 Version: %{lqver}
 Release: %{buildnum}%{?dist}
 License: Apache 2.0
@@ -55,8 +55,10 @@ Vendor: LiquiBase (http://www.liquibase.org)
 Provides: liquibase = %{version}-%{release}
 
 %description
-DB-Manul is an open source (Apache 2.0 License), database-independent library for tracking,
-managing and applying database changes.
+LiquiBase is an open source (Apache 2.0 License), database-independent library for tracking,
+managing and applying database changes. It is built on a simple premise: All 
+database changes are stored in a human readable yet trackable form and checked 
+into source control.
 
 %if %{mysql}
 %package mysql
@@ -192,7 +194,6 @@ EOF
 %if %{oracle}
 %exclude %{_libdir}/%{name}/lib/%{oraLicense}
 %exclude %{_libdir}/%{name}/lib/%{orajarjdbc}
-%exclude %{_libdir}/%{name}/lib/%{orajarucp}
 %exclude %{_libdir}/%{name}/lib/%{orajari18n}
 %endif
 
@@ -251,7 +252,9 @@ EOF
 %post
 
 %changelog
-* Thu Jun 25 2017 Andreas Buschka <andreas.buschka@dbmanul.org>
-- Updated for DB-Manul fork, updated JDBC libraries and URLs.
+* Thu Jul 13 2017 Andreas Buschka <kontakt@andreas-buschka.de>
+- Updated JDBC libraries and URLs.
 * Mon Jan 25 2010 William Lovins <rpmbuild@icainformatics.com> - 1.9.5-1
 - initial public version of spec
+
+

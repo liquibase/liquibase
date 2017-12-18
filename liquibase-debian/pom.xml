@@ -150,7 +150,7 @@
                                 <data>
                                     <type>link</type>
                                     <linkName>/usr/bin/dbmanul</linkName>
-                                    <linkTarget>../lib/dbmanul-${project.version}/dbmanul</linkTarget>  
+                                    <linkTarget>../lib/dbmanul-${project.version}/dbmanul</linkTarget>
                                     <symlink>true</symlink>
                                 </data>
 			    
@@ -167,11 +167,10 @@
                                     </mapper>
                                 </data>
                                 <!-- Now, add bash auto-completion file to make life easier
-                                when udbmanulbase in command line mode
+                                when using dbmanul in command line mode
                                 /etc/bash_completion.d/
                                 -->
                                 <data>
-                                    <!--<src>${project.build.directory}/ddbmanulbase</src>-->
                                     <src>src/main/resources/dbmanul.sh</src>
                                     <type>file</type>
                                     <mapper>

@@ -9,7 +9,7 @@
  -->
     <entry key="commandline-helptext">
         <![CDATA[
-Usage: java -jar dbmanul.jar [options] [command]
+Usage: java -jar liquibase.jar [options] [command]
 
 Standard Commands:
  update                         Updates database to current version
@@ -97,7 +97,7 @@ Required Parameters:
  --changeLogFile=<path and filename>        Migration file
  --username=<value>                         Database username
  --password=<value>                         Database password. If values
-                                            is PROMPT, DB-Manul will
+                                            is PROMPT, Liquibase will
                                             prompt for a password
  --url=<value>                              Database URL
 
@@ -131,15 +131,15 @@ Optional Parameters:
                                             liquibase tables
  --liquibaseSchemaName=<name>               The name of the schema with the
                                             liquibase tables
- --databaseChangeLogTableName=<name>        The name of the DB-Manul ChangeLog
+ --databaseChangeLogTableName=<name>        The name of the Liquibase ChangeLog
                                             table (default: DATABASECHANGELOG)
- --databaseChangeLogLockTableName=<name>    The name of the DB-Manul ChangeLog
+ --databaseChangeLogLockTableName=<name>    The name of the Liquibase ChangeLog
                                             Lock table
                                             (default: DATABASECHANGELOGLOCK)
  --liquibaseSchemaName=<name>               The name of the schema with the
                                             liquibase tables
  --includeSystemClasspath=<true|false>      Include the system classpath
-                                            in the DB-Manul classpath
+                                            in the Liquibase classpath
                                             (default: true)
  --overwriteOutputFile=true                 Force overwriting generated
                                             changelog/SQL files
@@ -169,7 +169,7 @@ Optional Parameters:
 Required Diff Parameters:
  --referenceUsername=<value>                Reference Database username
  --referencePassword=<value>                Reference Database password. If
-                                            value is PROMPT, DB-Manul will
+                                            value is PROMPT, Liquibase will
                                             prompt for a password
  --referenceUrl=<value>                     Reference Database URL
 
@@ -189,13 +189,13 @@ Optional Diff Parameters:
                                             instead of the real names.
  --includeCatalog=<true|false>              If true, the catalog will be
                                             included in generated changeSets
-                                            Defaults to true
+                                            Defaults to false
  --includeSchema=<true|false>               If true, the schema will be
                                             included in generated changeSets
-                                            Defaults to true
+                                            Defaults to false
  --includeTablespace=<true|false>           If true, the tablespace of tables
                                             and indexes will be included.
-                                            Defaults to true
+                                            Defaults to false
  --referenceDriver=<jdbc.driver.ClassName>  Reference database driver class name
  --dataOutputDirectory=DIR                  Output data as CSV in the given
                                             directory
@@ -218,7 +218,7 @@ Default value for parameters can be stored in a file called
 'liquibase.properties' that is read from the current working directory.
 
 Full documentation is available at
-http://www.dbmanul.org
+http://www.liquibase.org
 ]]>
     </entry>
 </properties>

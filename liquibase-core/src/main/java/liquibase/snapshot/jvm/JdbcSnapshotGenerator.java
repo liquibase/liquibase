@@ -7,7 +7,8 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGenerator;
@@ -106,7 +107,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (this.statusListeners == null) {
             return;
         }
-        LogFactory.getInstance().getLog().debug(message);
+        LogService.getLog(getClass()).debug(LogType.LOG, message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }

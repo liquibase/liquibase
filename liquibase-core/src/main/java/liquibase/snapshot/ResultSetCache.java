@@ -61,7 +61,7 @@ class ResultSetCache {
             for (CachedRow row : results) {
                 for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
                     if (!cache.containsKey(rowKey)) {
-                        cache.put(rowKey, new ArrayList<>());
+                        cache.put(rowKey, new ArrayList<CachedRow>());
                     }
                     cache.get(rowKey).add(row);
                 }
@@ -85,6 +85,14 @@ class ResultSetCache {
 
     public void putInfo(String key, Object value) {
         info.put(key, value);
+    }
+
+    private int getTimesSingleQueried(String schemaKey) {
+        Integer integer = timesSingleQueried.get(schemaKey);
+        if (integer == null) {
+            return 0;
+        }
+        return integer;
     }
 
     public static class RowData {
@@ -267,14 +275,6 @@ class ResultSetCache {
             }
             return returnList;
         }
-    }
-
-    private int getTimesSingleQueried(String schemaKey) {
-        Integer integer = timesSingleQueried.get(schemaKey);
-        if (integer == null) {
-            return 0;
-        }
-        return integer;
     }
 
     public abstract static class SingleResultSetExtractor extends ResultSetExtractor {

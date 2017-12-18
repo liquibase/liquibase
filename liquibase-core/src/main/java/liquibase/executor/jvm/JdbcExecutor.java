@@ -7,7 +7,8 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
@@ -31,7 +32,7 @@ import java.util.Map;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
-    private Logger log = LogFactory.getInstance().getLog();
+    private Logger log = LogService.getLog(getClass());
 
     @Override
     public boolean updatesDatabase() {
@@ -100,7 +101,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void execute(final SqlStatement sql) throws DatabaseException {
-        execute(sql, new ArrayList<>());
+        execute(sql, new ArrayList<SqlVisitor>());
     }
 
     @Override
@@ -115,7 +116,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
-        return query(sql, rse, new ArrayList<>());
+        return query(sql, rse, new ArrayList<SqlVisitor>());
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -221,7 +222,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                log.sql(sqlToExecute[0]);
+                log.debug(LogType.WRITE_SQL, sqlToExecute[0]);
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -257,7 +258,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        LogFactory.getInstance().getLog().debug(message);
+        LogService.getLog(getClass()).debug(LogType.LOG, message);
     }
 
     private class ExecuteStatementCallback implements StatementCallback {
@@ -279,7 +280,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.sql(String.format("%s", statement));
+                log.info(LogType.WRITE_SQL, String.format("%s", statement));
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -333,7 +334,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                log.sql(sqlToExecute[0]);
+                log.info(LogType.READ_SQL, sqlToExecute[0]);
 
                 rs = stmt.executeQuery(sqlToExecute[0]);
                 ResultSet rsToUse = rs;

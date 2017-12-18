@@ -2,8 +2,8 @@ package liquibase.integration.cdi;
 
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,8 +54,8 @@ public class SchemesCDIConfigBuilderTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        log = LogFactory.getInstance().getLog(SchemesCDIConfigBuilder.class.getName());
-        log.setLogLevel(LogLevel.WARNING); // you can change it to INFO or DEBUG level if you want to see them
+        log = LogService.getLog(SchemesCDIConfigBuilder.class);
+//        log.setLogLevel(LogLevel.WARNING); // you can change it to INFO or DEBUG level if you want to see them
 
         Class c1 = SchemesCDIConfigBuilder.class;
         final Field modifiersField = Field.class.getDeclaredField("modifiers");
@@ -193,7 +193,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(e.getMessage(), e);
+            log.warning(LogType.LOG, e.getMessage(), e);
         } finally {
             executors.shutdown();
         }
@@ -222,7 +222,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(e.getMessage(), e);
+            log.warning(LogType.LOG, e.getMessage(), e);
         } finally {
             executors.shutdown();
         }

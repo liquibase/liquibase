@@ -65,7 +65,6 @@
             <artifactId>dbmanul-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.dbmanul</groupId>
             <artifactId>dbmanul-core</artifactId>

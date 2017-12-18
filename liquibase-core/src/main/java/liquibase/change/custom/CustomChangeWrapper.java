@@ -22,7 +22,8 @@ import java.util.*;
  * @see liquibase.change.custom.CustomTaskChange
  */
 @DatabaseChange(name="customChange",
-        description = "Although DB-Manul tries to provide a wide range of database refactorings, there are times you may want to create your own custom refactoring class.\n" +
+    description = "Although Liquibase tries to provide a wide range of database refactorings, there are times you may" +
+        " want to create your own custom refactoring class.\n" +
                 "\n" +
                 "To create your own custom refactoring, simply create a class that implements the liquibase.change.custom.CustomSqlChange or liquibase.change.custom.CustomTaskChange interface and use the <custom> tag in your change set.\n" +
                 "\n" +

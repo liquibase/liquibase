@@ -136,7 +136,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
       try {
         return format.parse(date);
       } catch (ParseException e1) {
-        throw new ParseException("Date must match ISODateFormat or standard platform format.\n"+e.getMessage(), 0);
+        throw new ParseException("Date must match ISODateFormat or STANDARD platform format.\n"+e.getMessage(), 0);
 
       }
     }

@@ -9,7 +9,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.integration.ant.logging.AntTaskLogFactory;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
@@ -57,14 +57,14 @@ public abstract class BaseLiquibaseTask extends Task {
 
     @Override
     public void init() throws BuildException {
-        LogFactory.setInstance(new AntTaskLogFactory(this));
+        LogService.setLoggerFactory(new AntTaskLogFactory(this));
         classpath = new Path(getProject());
     }
 
     @Override
     public final void execute() throws BuildException {
         super.execute();
-        log(coreBundle.getString("starting.db.manul"), Project.MSG_INFO);
+        log(coreBundle.getString("starting.liquibase"), Project.MSG_INFO);
         classLoader = getProject().createClassLoader(classpath);
         classLoader.setParent(this.getClass().getClassLoader());
         classLoader.setThreadContextLoader();
@@ -86,7 +86,7 @@ public abstract class BaseLiquibaseTask extends Task {
                 executeWithLiquibaseClassloader();
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to initialize DB-Manul. " + e.toString(), e);
+            throw new BuildException("Unable to initialize Liquibase. " + e.toString(), e);
         } finally {
             closeDatabase(database);
             classLoader.resetThreadContextLoader();
@@ -127,7 +127,8 @@ public abstract class BaseLiquibaseTask extends Task {
         LiquibaseConfiguration configuration = LiquibaseConfiguration.getInstance();
         GlobalConfiguration globalConfiguration = configuration.getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            log("DB-Manul did not run because " + configuration.describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
+            log("Liquibase did not run because " + configuration.describeValueLookupLogic(globalConfiguration
+                .getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
             return false;
         }
         return true;
@@ -590,25 +591,6 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     /**
-     * @deprecated No longer needed. This method has no replacement.
-     * @return Log level.
-     */
-    @Deprecated
-    public String getLogLevel() {
-        return LogFactory.getInstance().getLog().getLogLevel().name();
-    }
-
-    /**
-     * @deprecated Use the ant logging flags (-debug, -verbose, -quiet) instead of this method to control logging
-     * output. This will no longer change log levels.
-     * @param level Log level to set.
-     */
-    @Deprecated
-    public void setLogLevel(String level) {
-        LogFactory.getInstance().getLog().setLogLevel(level);
-    }
-
-    /**
      * Redirector of logs from java.util.logging to ANT's logging
      */
     @Deprecated
@@ -631,7 +613,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = LogFactory.getInstance().getLog();
+            Logger logger = LogService.getLog(getClass());
         }
 
 

@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
+
     public static void setDefaultValue(ColumnConfig columnConfig, Column column, Database database) {
         LiquibaseDataType dataType = DataTypeFactory.getInstance().from(column.getType(), database);
 
@@ -49,7 +50,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 if (database instanceof InformixDatabase) {
                     if (dataType instanceof DateTimeType) {
                         if ((dataType.getAdditionalInformation() == null) || dataType.getAdditionalInformation()
-                            .isEmpty()) {
+                                .isEmpty()) {
                             if ((dataType.getParameters() != null) && (dataType.getParameters().length > 0)) {
 
                                 String parameter = String.valueOf(dataType.getParameters()[0]);
@@ -153,26 +154,30 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             // In MySQL, the primary key must be specified at creation for an autoincrement column
             if ((pkColumnList != null) && pkColumnList.contains(column.getName())) {
                 if ((referenceDatabase instanceof MSSQLDatabase) && (primaryKey.getBackingIndex() != null) &&
-                    (primaryKey.getBackingIndex().getClustered() != null) && !primaryKey.getBackingIndex()
-                    .getClustered()) {
+                        (primaryKey.getBackingIndex().getClustered() != null) && !primaryKey.getBackingIndex()
+                        .getClustered()) {
                     // have to handle PK as a separate statement
                 } else if ((referenceDatabase instanceof PostgresDatabase) && (primaryKey.getBackingIndex() != null)
-                    && (primaryKey.getBackingIndex().getClustered() != null) && primaryKey.getBackingIndex()
-                    .getClustered()) {
+                        && (primaryKey.getBackingIndex().getClustered() != null) && primaryKey.getBackingIndex()
+                        .getClustered()) {
                     // have to handle PK as a separate statement
                 } else {
                     constraintsConfig = new ConstraintsConfig();
-                    constraintsConfig.setPrimaryKey(true);
-                    constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
+                    if (shouldAddPrimarykeyToConstraints(missingObject, control, referenceDatabase, comparisonDatabase)) {
+                        constraintsConfig.setPrimaryKey(true);
+                        constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
 
-                    // MySQL sets some primary key names as PRIMARY which is invalid
-                    if ((comparisonDatabase instanceof MySQLDatabase) && "PRIMARY".equals(primaryKey.getName())) {
-                        constraintsConfig.setPrimaryKeyName(null);
+                        // MySQL sets some primary key names as PRIMARY which is invalid
+                        if ((comparisonDatabase instanceof MySQLDatabase) && "PRIMARY".equals(primaryKey.getName())) {
+                            constraintsConfig.setPrimaryKeyName(null);
+                        } else {
+                            constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                        }
+                        control.setAlreadyHandledMissing(primaryKey);
+                        control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
                     } else {
-                        constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                        constraintsConfig.setNullable(false);
                     }
-                    control.setAlreadyHandledMissing(primaryKey);
-                    control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
                 }
             } else if ((column.isNullable() != null) && !column.isNullable()) {
                 constraintsConfig = new ConstraintsConfig();
@@ -207,7 +212,6 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         // In SQLite, we must specify the PRIMARY KEY at table creation time
 
 
-
         return new Change[]{
                 change
         };
@@ -215,5 +219,9 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
     protected CreateTableChange createCreateTableChange() {
         return new CreateTableChange();
+    }
+
+    public boolean shouldAddPrimarykeyToConstraints(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase) {
+        return true;
     }
 }

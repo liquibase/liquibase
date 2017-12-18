@@ -13,7 +13,8 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -34,7 +35,7 @@ import java.util.List;
  */
 @DatabaseChange(name = "executeCommand",
         description = "Executes a system command. Because this refactoring doesn't generate SQL like most, using " +
-                "DB-Manul commands such as migrateSQL may not work as expected. Therefore, if at all possible use " +
+            "Liquibase commands such as migrateSQL may not work as expected. Therefore, if at all possible use " +
                 "refactorings that generate SQL.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
@@ -100,7 +101,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                LogFactory.getInstance().getLog().info("Not executing on os " + currentOS + " when " + os + " was " +
+                LogService.getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
         }
@@ -188,8 +189,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         String infoStreamOut = inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
                 (GlobalConfiguration.class).getOutputEncoding());
 
-        LogFactory.getInstance().getLog().severe(errorStreamOut);
-        LogFactory.getInstance().getLog().info(infoStreamOut);
+        LogService.getLog(getClass()).severe(LogType.LOG, errorStreamOut);
+        LogService.getLog(getClass()).info(LogType.LOG, infoStreamOut);
 
         throwExceptionIfError(returnCode);
     }

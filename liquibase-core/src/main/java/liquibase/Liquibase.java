@@ -28,7 +28,8 @@ import liquibase.executor.LoggingExecutor;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
@@ -57,12 +58,11 @@ import java.util.*;
  */
 public class Liquibase {
 
+    private static final Logger LOG = LogService.getLog(Liquibase.class);
     protected Database database;
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
     private ResourceAccessor resourceAccessor;
-    private static final Logger LOG = LogFactory.getInstance().getLog();
-
     private ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
     private ChangeLogSyncListener changeLogSyncListener;
@@ -93,7 +93,7 @@ public class Liquibase {
      */
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) {
         if (changeLogFile != null) {
-            // Convert to standard / if using absolute path on windows:
+            // Convert to STANDARD / if using absolute path on windows:
             this.changeLogFile = changeLogFile.replace('\\', '/');
         }
 
@@ -109,7 +109,7 @@ public class Liquibase {
             this.changeLogFile = changeLog.getPhysicalFilePath();
         }
         if (this.changeLogFile != null) {
-            // Convert to standard "/" if using an absolute path on Windows:
+            // Convert to STANDARD "/" if using an absolute path on Windows:
             changeLogFile = changeLogFile.replace('\\', '/');
         }
         this.resourceAccessor = resourceAccessor;
@@ -207,7 +207,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -312,7 +312,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -357,7 +357,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -556,7 +556,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Error releasing lock", e);
+                LOG.severe(LogType.LOG, "Error releasing lock", e);
             }
             resetServices();
         }
@@ -606,8 +606,8 @@ public class Liquibase {
                 "Error executing rollback script. ChangeSets will still be marked as rolled back: " + e.getMessage(),
                 e
             );
-            LogFactory.getInstance().getLog().severe(ex.getMessage());
-            LOG.severe("Error executing rollback script", ex);
+            LogService.getLog(getClass()).severe(LogType.LOG, ex.getMessage());
+            LOG.severe(LogType.LOG, "Error executing rollback script", ex);
             if (changeExecListener != null) {
                 changeExecListener.runFailed(null, databaseChangeLog, database, ex);
             }
@@ -718,7 +718,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
         resetServices();
@@ -807,7 +807,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
         resetServices();
@@ -884,7 +884,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -955,7 +955,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -1095,7 +1095,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             ExecutorService.getInstance().setExecutor(database, oldTemplate);
             resetServices();
@@ -1160,7 +1160,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
     }
@@ -1177,7 +1177,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
     }
@@ -1426,7 +1426,7 @@ public class Liquibase {
      * Sets checksums to null so they will be repopulated next run
      */
     public void clearCheckSums() throws LiquibaseException {
-        LOG.info("Clearing database change log checksums");
+        LOG.info(LogType.LOG, "Clearing database change log checksums");
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
@@ -1445,7 +1445,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
         resetServices();
@@ -1466,7 +1466,7 @@ public class Liquibase {
 
     public CheckSum calculateCheckSum(final String filename, final String id, final String author)
         throws LiquibaseException {
-        LOG.info(String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
+        LOG.info(LogType.LOG, String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
         final ChangeLogParameters changeLogParameters = this.getChangeLogParameters();
         final ResourceAccessor resourceAccessor = this.getResourceAccessor();
         final DatabaseChangeLog changeLog =
@@ -1497,7 +1497,7 @@ public class Liquibase {
 
     public void generateDocumentation(String outputDirectory, Contexts contexts,
                                       LabelExpression labelExpression) throws LiquibaseException {
-        LOG.info("Generating Database Documentation");
+        LOG.info(LogType.LOG, "Generating Database Documentation");
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -1522,7 +1522,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe("Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
     }
@@ -1571,6 +1571,7 @@ public class Liquibase {
                                   PrintStream outputStream, ChangeLogSerializer changeLogSerializer,
                                   Class<? extends DatabaseObject>... snapshotTypes)
         throws DatabaseException, IOException, ParserConfigurationException {
+
         Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
         if ((snapshotTypes != null) && (snapshotTypes.length > 0)) {
             finalCompareTypes = new HashSet<>(Arrays.asList(snapshotTypes));

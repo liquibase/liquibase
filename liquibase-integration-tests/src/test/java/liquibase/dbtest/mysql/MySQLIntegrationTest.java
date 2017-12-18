@@ -5,7 +5,8 @@ import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -94,7 +95,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
                                                                                                          ")"));
         } catch (DatabaseException e) {
             if (e.getCause() instanceof SQLSyntaxErrorException) {
-                LogFactory.getInstance().getLog().warning("MySQL returned DatabaseException", e);
+                LogService.getLog(getClass()).warning(LogType.LOG, "MySQL returned DatabaseException", e);
                 assumeTrue("MySQL seems to run in strict mode (no datetime literals with 0000-00-00 allowed). " + "Cannot run this test", false);
                 
             } else {

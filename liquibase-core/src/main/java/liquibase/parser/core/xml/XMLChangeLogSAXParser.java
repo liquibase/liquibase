@@ -2,7 +2,8 @@ package liquibase.parser.core.xml;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomStripperInputStream;
@@ -58,19 +59,19 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             xmlReader.setErrorHandler(new ErrorHandler() {
                 @Override
                 public void warning(SAXParseException exception) throws SAXException {
-                    LogFactory.getInstance().getLog().warning(exception.getMessage());
+                    LogService.getLog(getClass()).warning(LogType.LOG, exception.getMessage());
                     throw exception;
                 }
 
                 @Override
                 public void error(SAXParseException exception) throws SAXException {
-                    LogFactory.getInstance().getLog().severe(exception.getMessage());
+                    LogService.getLog(getClass()).severe(LogType.LOG, exception.getMessage());
                     throw exception;
                 }
 
                 @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
-                    LogFactory.getInstance().getLog().severe(exception.getMessage());
+                    LogService.getLog(getClass()).severe(LogType.LOG, exception.getMessage());
                     throw exception;
                 }
             });

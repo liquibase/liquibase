@@ -8,7 +8,8 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sdk.database.MockDatabase;
 
@@ -62,7 +63,7 @@ public class DatabaseTestContext {
             tempDir += System.getProperty("file.separator");
 
         String tempUrl = givenUrl.replace("***TEMPDIR***/", tempDir);
-        String url = tempUrl;
+        final String url = tempUrl;
 
         if (connectionsAttempted.containsKey(url)) {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
@@ -106,13 +107,13 @@ public class DatabaseTestContext {
         try {
             if (url.startsWith("jdbc:hsql")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA";
-                LogFactory.getInstance().getLog().sql(sql);
+                LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             } else if (url.startsWith("jdbc:sqlserver")
                     || url.startsWith("jdbc:postgresql")
                     || url.startsWith("jdbc:h2")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA;
-                LogFactory.getInstance().getLog().sql(sql);
+                LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             }
             if (!databaseConnection.getAutoCommit()) {

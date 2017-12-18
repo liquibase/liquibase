@@ -111,7 +111,7 @@ public class MavenUtils {
 //      }
 //      urls.add(fileURL);
 //    } else {
-//      log.warn("Artifact with no actual file, '" + artifact.getGroupId()
+//      log.warning("Artifact with no actual file, '" + artifact.getGroupId()
 //               + ":" + artifact.getArtifactId() + "'");
 //    }
   }

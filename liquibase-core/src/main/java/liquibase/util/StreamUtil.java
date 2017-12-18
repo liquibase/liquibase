@@ -3,7 +3,8 @@ package liquibase.util;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 
@@ -189,7 +190,7 @@ public class StreamUtil {
         if (streams.size() != 1) {
             if ((streams.size() > 1) && (path != null) && path.startsWith("liquibase/parser/core/xml/") && path
                 .endsWith(".xsd")) {
-                LogFactory.getInstance().getLog().debug("Found " + streams.size() + " files that match " + path+", but choosing one at random.");
+                LogService.getLog(StreamUtil.class).debug(LogType.LOG, "Found " + streams.size() + " files that match " + path+", but choosing one at random.");
                 InputStream returnStream = null;
                 for (InputStream stream : streams) {
                     if (returnStream == null) {

@@ -154,6 +154,8 @@ public interface Database extends PrioritizedService {
      */
     String getConcatSql(String... values);
 
+    void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
+
     /**
      * Drops all objects in a specified schema.
      * @param schema schema (catalog+)schema to drop
@@ -327,6 +329,15 @@ public interface Database extends PrioritizedService {
     boolean isCaseSensitive();
 
     boolean isReservedWord(String string);
+
+    /**
+     * Returns a new CatalogAndSchema adjusted for this database. Examples of adjustments include:
+     * fixes for case issues,
+     * replacing null schema or catalog names with the default values
+     * removing set schema or catalog names if they are not supported
+     * @deprecated use {@link liquibase.CatalogAndSchema#standardize(Database)}
+     */
+    CatalogAndSchema correctSchema(CatalogAndSchema schema);
 
     /**
      * Fix the object name to the format the database expects, handling changes in case, etc.

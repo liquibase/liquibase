@@ -22,11 +22,11 @@
 				<artifactId>dbmanul-maven-plugin</artifactId>
 				<version>${project.version}</version>
 				<dependencies>
-					<dependency>
-						<groupId>org.hsqldb</groupId>
-						<artifactId>hsqldb</artifactId>
-						<version>${hsqldb.version}</version>
-					</dependency>
+                    <dependency>
+                        <groupId>org.hsqldb</groupId>
+                        <artifactId>hsqldb</artifactId>
+                        <version>${hsqldb.version}</version>
+                    </dependency>
 				</dependencies>
 				<configuration>
 					<changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>

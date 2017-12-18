@@ -16,8 +16,11 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
+import liquibase.logging.LoggerContext;
+import liquibase.logging.LoggerFactory;
+import liquibase.logging.core.NoOpLoggerContext;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
@@ -70,10 +73,20 @@ public class LiquibaseTest {
         when(mockChangeLogParserFactory.getParser(anyString(), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLogParser);
         when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLog);
 
-        LogFactory.setInstance(new LogFactory() {
+        LogService.setLoggerFactory(new LoggerFactory() {
             @Override
-            public Logger getLog(String name) {
+            public Logger getLog(Class clazz) {
                 return mockLogger;
+            }
+
+            @Override
+            public LoggerContext pushContext(String key, Object object) {
+                return new NoOpLoggerContext();
+            }
+
+            @Override
+            public void close() {
+
             }
         });
     }
@@ -84,12 +97,10 @@ public class LiquibaseTest {
         Mockito.reset(mockDatabase, mockLockServiceFactory, mockLockService, mockChangeLogParserFactory, mockChangeLogParser, mockChangeLog, mockChangeLogIterator);
         LockServiceFactory.reset();
         ChangeLogParserFactory.reset();
-        LogFactory.reset();
     }
 
     @Test
     public void testConstructor() throws Exception {
-        LogFactory.reset(); //going to test log setup
         MockResourceAccessor resourceAccessor = this.mockResourceAccessor;
         MockDatabase database = new MockDatabase();
 
@@ -139,7 +150,8 @@ public class LiquibaseTest {
             when(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(databaseConnection)).thenReturn(database);
 
             Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, databaseConnection);
-            assertSame("DB-Manul constructor passing connection did not find the correct database implementation", database, liquibase.getDatabase());
+            assertSame("Liquibase constructor passing connection did not find the correct database implementation",
+                database, liquibase.getDatabase());
 
         } finally {
             DatabaseFactory.reset();
@@ -257,14 +269,13 @@ public class LiquibaseTest {
     private static class LiquibaseDelegate extends Liquibase {
 
         /**
-         * If using a single parameter, store in here
-         */
-        protected Object objectToVerify;
-
-        /**
          * If using multiple parameters, store them here
          */
         protected final Map<String, Object> objectsToVerify = new HashMap<>();
+        /**
+         * If using a single parameter, store in here
+         */
+        protected Object objectToVerify;
 
         private LiquibaseDelegate() throws LiquibaseException {
             super("com/example/test.xml", new MockResourceAccessor(), mock(Database.class));

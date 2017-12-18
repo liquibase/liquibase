@@ -9,7 +9,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -114,7 +115,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : allColumnsMetadataRs) {
                     treeSet.put(row.getInt("ORDINAL_POSITION"), row);
                 }
-                Logger log = LogFactory.getInstance().getLog();
+                Logger log = LogService.getLog(getClass());
 
                 // Now we can iterate through the sorted list and repair if needed.
                 int currentOrdinal = 0;
@@ -123,7 +124,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     int rsOrdinal = row.getInt("ORDINAL_POSITION");
                     if (rsOrdinal != currentOrdinal) {
                         log.debug(
-                                String.format(
+                                LogType.LOG, String.format(
                                         "Repairing ORDINAL_POSITION with gaps for table=%s, column name=%s, " +
                                                 "bad ordinal=%d, new ordinal=%d",
                                         relation.getName(),
@@ -171,7 +172,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     snapshot.setScratchData("autoIncrementColumns", autoIncrementColumns);
                 } catch (DatabaseException e) {
-                    LogFactory.getInstance().getLog().info("Could not read identity information", e);
+                    LogService.getLog(getClass()).info(LogType.LOG, "Could not read identity information", e);
                 }
             }
             if ((column.getRelation() != null) && (column.getSchema() != null)) {
@@ -223,7 +224,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (nullable == DatabaseMetaData.columnNullable) {
                 column.setNullable(true);
             } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-                LogFactory.getInstance().getLog().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
+                LogService.getLog(getClass()).info(LogType.LOG, "Unknown nullable state for column " + column.toString() + ". Assuming nullable");
                 column.setNullable(true);
             }
         }
@@ -246,7 +247,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         } else if ("NO".equals(isAutoincrement)) {
                             column.setAutoIncrementInformation(null);
                         } else if ("".equals(isAutoincrement)) {
-                            LogFactory.getInstance().getLog().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                            LogService.getLog(getClass()).info(LogType.LOG, "Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                             column.setAutoIncrementInformation(null);
                         } else {
                             throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
@@ -256,16 +257,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         String selectStatement;
                         if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                            LogFactory.getInstance().getLog().debug("rawCatalogName : <" + rawCatalogName + ">");
-                            LogFactory.getInstance().getLog().debug("rawSchemaName : <" + rawSchemaName + ">");
-                            LogFactory.getInstance().getLog().debug("rawTableName : <" + rawTableName + ">");
-                            LogFactory.getInstance().getLog().debug("raw selectStatement : <" + selectStatement + ">");
+                            LogService.getLog(getClass()).debug(LogType.LOG, "rawCatalogName : <" + rawCatalogName + ">");
+                            LogService.getLog(getClass()).debug(LogType.LOG, "rawSchemaName : <" + rawSchemaName + ">");
+                            LogService.getLog(getClass()).debug(LogType.LOG, "rawTableName : <" + rawTableName + ">");
+                            LogService.getLog(getClass()).debug(LogType.LOG, "raw selectStatement : <" + selectStatement + ">");
 
 
                         } else {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                         }
-                        LogFactory.getInstance().getLog().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                        LogService.getLog(getClass()).debug(LogType.LOG, "Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                         Statement statement = null;
                         ResultSet columnSelectRS = null;
@@ -371,7 +372,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 enumClause = enumClause.replaceFirst(", $", "");
                 return new DataType(columnTypeName + "(" + enumClause + ")");
             } catch (DatabaseException e) {
-                LogFactory.getInstance().getLog().warning("Error fetching enum values", e);
+                LogService.getLog(getClass()).warning(LogType.LOG, "Error fetching enum values", e);
             }
         }
 
@@ -435,7 +436,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
          */
         int jdbcType = columnMetadataResultSet.getInt("DATA_TYPE");
 
-        if ((jdbcType == Types.TIMESTAMP) || (jdbcType == Types.TIMESTAMP_WITH_TIMEZONE)) {
+        // Java 8 compatibility notes: When upgrading this project to JDK8 and beyond, also execute this if-branch
+        // if jdbcType is TIMESTAMP_WITH_TIMEZONE (does not exist yet in JDK7)
+        if (jdbcType == Types.TIMESTAMP) {
 
             if (decimalDigits == null) {
                 type.setColumnSize(null);

@@ -49,6 +49,9 @@ public class DatabaseObjectComparatorFactory {
         instance = new DatabaseObjectComparatorFactory();
     }
 
+    public static synchronized void resetAll() {
+        instance = null;
+    }
 
     public void register(DatabaseObjectComparator generator) {
         comparators.add(generator);
@@ -88,11 +91,6 @@ public class DatabaseObjectComparatorFactory {
         validComparatorsByClassAndDatabase.put(key, validComparators);
 
         return validComparators;
-    }
-
-
-    public static synchronized void resetAll() {
-        instance = null;
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, CompareControl.SchemaComparison[] schemaComparisons, Database accordingTo) {
@@ -167,7 +165,8 @@ public class DatabaseObjectComparatorFactory {
     }
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
-        return createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo).findDifferences(object1, object2, accordingTo, compareControl, new HashSet<>());
+        return createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo)
+            .findDifferences(object1, object2, accordingTo, compareControl, new HashSet<String>());
 
     }
 

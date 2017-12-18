@@ -10,17 +10,17 @@
 
     <faq id="build-1">
       <question>
-        What is needed to build DB-Manul debian package ?
+        What is needed to build Liquibase debian package ?
       </question>
       <answer>
-        <p>To build it you only need dbmanul-debian sources and a proper maven
+        <p>To build it you only need liquibase-debian sources and a proper maven
             install. Then, to build the debian package : </p>
 
         <source>mvn clean install</source>
 
         <p>You will get your ready to use debian package in target directory,
-            to test its contents and what and how the deb will be deployed, run:
-            <source>dpkg -c target/dbmanul-debian_${version}_all.deb</source>
+            to test its contents and what and how the deb will be deployed, run :
+            <source>dpkg -c target/liquibase-debian_${version}_all.deb</source>
         </p>
       </answer>
     </faq>
@@ -34,13 +34,13 @@
 
     <faq id="how-install">
       <question>
-        How to install DB-Manul the debian way ?
+        How to install liquibase the debian way ?
       </question>
       <answer>
         <p>Just : 
-            <source>sudo dpkg -i target/dbmanul-debian_${version}_all.deb</source>
+            <source>sudo dpkg -i target/liquibase-debian_${version}_all.deb</source>
         </p>
-        <p>Then to test, just type dbmanul (or make it autocomplete by your bash).</p>
+        <p>Then to test, just type liquibase (or make it autocomplete by your bash).</p>
       </answer>
       
       <question>
@@ -55,38 +55,38 @@
     </faq>
     <faq id="how-remove">
       <question>
-        How to remove DB-Manul?
+        How to remove liquibase ?
       </question>
       <answer>
         <p>Just : 
-            <source>sudo apt-get remove dbmanul</source>
+            <source>sudo apt-get remove liquibase</source>
         </p>
       </answer>
     </faq>
     <faq id="how-upgrade-downgrade">
       <question>
-        How to upgrade or downgrade DB-Manul?
+        How to upgrade or downgrade liquibase ?
       </question>
       <answer>
         <p>Just : 
-            <source>sudo dpkg -i target/dbmanul-debian_${version}_all.deb</source>
+            <source>sudo dpkg -i target/liquibase-debian_${version}_all.deb</source>
         </p>
       </answer>
     </faq>
     <faq id="bash-auto-complete">
       <question>
-        Can DB-Manul commands be autocompleted from bash ?
+        Can liquibase commands be autocompleted from bash ?
       </question>
       <answer>
         <p>Yes, a basic auto-complete bash ahs been created to make shell interactions
-            with DB-Manul much nicer. Still some efforts have to be made
+            with liquibase much nicer. Still some efforts have to be made
             to make code completion smater : <b>for now available options are listed without taking care
             of the options that have already provided : you must master the options you put in your
             command line, but bash completes them for you, so you don't have
             to copy/paste them.</b>
         </p>
         <p>Bash auto-completion has to be enhanced, it's a good start,
-            shell gurus and DB-Manul lovers are welcome to make it even better.</p>
+            shell gurus and liquibase lovers are welcome to make it even better.</p>
       </answer>
     </faq>
 

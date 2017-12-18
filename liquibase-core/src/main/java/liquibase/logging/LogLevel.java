@@ -6,15 +6,14 @@ package liquibase.logging;
  * OFF < SEVERE < WARNING < INFO < DEBUG
  */
 public enum LogLevel {
+
+
     /**
      * Very detailed information about every internal step this program takes. Normally only activated during
      * troubleshooting.
      */
     DEBUG,
-    /*
-     * A native SQL statement sent to a database instance
-     */
-    SQL,
+
     /**
      * Regular message of a successful completion of a working unit, or output of configuration
      * information that is expected to be essential for troubleshooting.

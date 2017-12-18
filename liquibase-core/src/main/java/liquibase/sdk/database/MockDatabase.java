@@ -75,6 +75,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
+    public void setCanCacheLiquibaseTableInfo(final boolean canCacheLiquibaseTableInfo) {
+        //
+    }
+
+    @Override
     public boolean requiresUsername() {
         return false;
     }
@@ -602,6 +607,11 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public boolean isReservedWord(final String string) {
         return false;
+    }
+
+    @Override
+    public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
+        return schema.standardize(this);
     }
 
     @Override
