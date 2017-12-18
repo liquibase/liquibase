@@ -39,10 +39,6 @@
         </developer>
     </developers>
 
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
-
     <modules>
         <module>liquibase-core</module>
         <module>liquibase-maven-plugin</module>
@@ -488,6 +484,9 @@
                                     <requireJavaVersion>
                                         <version>${jdk.version}</version>
                                     </requireJavaVersion>
+                                    <requireMavenVersion>
+                                        <version>3.0</version>
+                                    </requireMavenVersion>
                                     <!-- Avoid the M.A.D. Gadget vulnerability in certain Apache commons-collections versions -->
                                     <bannedDependencies>
                                         <excludes>
