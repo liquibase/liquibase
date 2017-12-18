@@ -5,7 +5,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
@@ -113,9 +112,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
         if ((majorVersion < MINIMUM_DBMS_MAJOR_VERSION) || ((majorVersion == MINIMUM_DBMS_MAJOR_VERSION) &&
             (minorVersion < MINIMUM_DBMS_MINOR_VERSION))) {
-            LogFactory.getInstance().getLog().warning(
-                    String.format("Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
-                                    "older than %d.%d. This means that you might encounter strange behaviour and incorrect error messages.",
+            LOG.warning(
+                String.format(
+                    "Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
+                        "older than %d.%d. This means that you might encounter strange behaviour and " +
+                        "incorrect error messages.",
                     majorVersion, minorVersion, majorVersion, minorVersion));
             return true;
         }
