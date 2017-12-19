@@ -26,8 +26,8 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
 import liquibase.logging.LogLevel;
+import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLoggerConfiguration;
@@ -126,7 +126,7 @@ public class Main {
         System.exit(errorLevel);
     }
 
-    public static int run(String[] args) throws CommandLineParsingException, LiquibaseException {
+    public static int run(String[] args) throws LiquibaseException {
         setupLogging();
 
         Logger log = LogService.getLog(Main.class);
@@ -222,7 +222,9 @@ public class Main {
 
         for (String target : new String[] {"System.out", "System.err"}) {
             CommandLineOutputAppender appender = new CommandLineOutputAppender(LoggerFactory.getILoggerFactory(), target);
+            appender.setLayout(new TreeStyleLayout());
             root.addAppender(appender);
+
             appender.start();
         }
     }
