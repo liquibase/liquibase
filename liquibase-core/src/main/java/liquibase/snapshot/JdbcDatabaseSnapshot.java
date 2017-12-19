@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
@@ -91,7 +92,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                public boolean bulkReturnsAllSchemas() {
+                public boolean bulkContainsSchema(String schemaKey) {
                     return database instanceof OracleDatabase;
                 }
 
@@ -310,7 +311,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                public boolean bulkReturnsAllSchemas() {
+                public boolean bulkContainsSchema(String schemaKey) {
                     return getAllCatalogsStringScratchData() != null && database instanceof OracleDatabase;
                 }
 
@@ -505,10 +506,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
                 }
 
-                @Override
-                public boolean bulkReturnsAllSchemas() {
-                    return database instanceof OracleDatabase;
-                }
+				@Override
+				public boolean bulkContainsSchema(String schemaKey) {
+					String catalogs = getAllCatalogsStringScratchData();
+					return catalogs != null && schemaKey != null
+                            && catalogs.contains("'" + schemaKey.toUpperCase() + "'")
+							&& database instanceof OracleDatabase;
+				}
 
                 @Override
                 public String getSchemaKey(CachedRow row) {
@@ -768,7 +772,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                public boolean bulkReturnsAllSchemas() {
+                public boolean bulkContainsSchema(String schemaKey) {
                     return database instanceof OracleDatabase;
                 }
 
@@ -896,7 +900,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                public boolean bulkReturnsAllSchemas() {
+                public boolean bulkContainsSchema(String schemaKey) {
                     return database instanceof OracleDatabase;
                 }
 
@@ -971,7 +975,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                public boolean bulkReturnsAllSchemas() {
+                public boolean bulkContainsSchema(String schemaKey) {
                     return database instanceof OracleDatabase;
                 }
 
@@ -1182,7 +1186,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                public boolean bulkReturnsAllSchemas() {
+                public boolean bulkContainsSchema(String schemaKey) {
                     return database instanceof OracleDatabase;
                 }
 
