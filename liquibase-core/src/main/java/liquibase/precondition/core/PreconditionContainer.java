@@ -1,5 +1,6 @@
 package liquibase.precondition.core;
 
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -173,7 +174,8 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         String ranOn = String.valueOf(changeLog);
         if (changeSet != null) {
             ranOn = String.valueOf(changeSet);
@@ -186,20 +188,20 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             // 2. FAIL: the preConditions should fail if there are any
             // 3. IGNORE: act as if preConditions don't exist
             boolean testPrecondition = false;
-                if (executor.updatesDatabase()) {
+            if (executor.updatesDatabase()) {
+                testPrecondition = true;
+            } else {
+                if (this.getOnSqlOutput().equals(PreconditionContainer.OnSqlOutputOption.TEST)) {
                     testPrecondition = true;
-                } else {
-                    if (this.getOnSqlOutput().equals(PreconditionContainer.OnSqlOutputOption.TEST)) {
-                        testPrecondition = true;
-                    } else if (this.getOnSqlOutput().equals(PreconditionContainer.OnSqlOutputOption.FAIL)) {
-                        throw new PreconditionFailedException("Unexpected precondition in updateSQL mode with onUpdateSQL value: "+this.getOnSqlOutput(), changeLog, this);
-                    } else if (this.getOnSqlOutput().equals(PreconditionContainer.OnSqlOutputOption.IGNORE)) {
-                        testPrecondition = false;
-                    }
+                } else if (this.getOnSqlOutput().equals(PreconditionContainer.OnSqlOutputOption.FAIL)) {
+                    throw new PreconditionFailedException("Unexpected precondition in updateSQL mode with onUpdateSQL value: "+this.getOnSqlOutput(), changeLog, this);
+                } else if (this.getOnSqlOutput().equals(PreconditionContainer.OnSqlOutputOption.IGNORE)) {
+                    testPrecondition = false;
                 }
+            }
 
             if (testPrecondition) {
-                super.check(database, changeLog, changeSet);
+                super.check(database, changeLog, changeSet, changeExecListener);
             }
         } catch (PreconditionFailedException e) {
             StringBuffer message = new StringBuffer();
@@ -214,6 +216,9 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
             if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
                 LogFactory.getLogger().info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
+                if (changeExecListener != null) {
+                    changeExecListener.preconditionFailed(e, FailOption.WARN);
+                }
             } else {
                 if (getOnFailMessage() == null) {
                     throw e;
@@ -234,6 +239,9 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 throw e;
             } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
                 LogFactory.getLogger().warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                if (changeExecListener != null) {
+                    changeExecListener.preconditionErrored(e, ErrorOption.WARN);
+                }
             } else {
                 if (getOnErrorMessage() == null) {
                     throw e;

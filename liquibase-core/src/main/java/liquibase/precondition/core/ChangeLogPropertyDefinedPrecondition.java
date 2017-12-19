@@ -1,5 +1,6 @@
 package liquibase.precondition.core;
 
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
@@ -53,7 +54,8 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         ChangeLogParameters changeLogParameters = changeLog.getChangeLogParameters();
         if (changeLogParameters == null) {
             throw new PreconditionFailedException("No Changelog properties were set", changeLog, this);

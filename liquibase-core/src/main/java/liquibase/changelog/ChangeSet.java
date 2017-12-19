@@ -506,7 +506,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
             try {
                 if (preconditions != null) {
-                    preconditions.check(database, databaseChangeLog, this);
+                    preconditions.check(database, databaseChangeLog, this, listener);
                 }
             } catch (PreconditionFailedException e) {
                 if (listener != null) {

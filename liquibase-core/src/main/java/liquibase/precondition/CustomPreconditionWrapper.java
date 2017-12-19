@@ -2,6 +2,7 @@ package liquibase.precondition;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
@@ -58,7 +59,8 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     }
     
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
         try {
 //            System.out.println(classLoader.toString());

@@ -123,7 +123,7 @@ public class ValidatingVisitorPreConditionsTest {
         boolean failedExceptionThrown = false;
         boolean errorExceptionThrown = false;
         try {
-            preCondition.check(mssqlDb, changeLog, changeSet1);
+            preCondition.check(mssqlDb, changeLog, changeSet1, null);
         } catch (PreconditionFailedException ex) {
             failedExceptionThrown = true;
         } catch (PreconditionErrorException ex) {
