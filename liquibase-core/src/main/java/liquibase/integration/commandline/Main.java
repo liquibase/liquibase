@@ -120,7 +120,7 @@ public class Main {
         int errorLevel = 0;
         try {
             errorLevel = run(args);
-        } catch (LiquibaseException | CommandLineParsingException ignored) {
+        } catch (LiquibaseException e) {
             System.exit(-1);
         }
         System.exit(errorLevel);
