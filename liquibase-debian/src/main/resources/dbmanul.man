@@ -1,27 +1,27 @@
 .\"Created with GNOME Manpages Editor Wizard
 .\"http://sourceforge.net/projects/gmanedit2
-.TH liquibase 1 "August 3, 2013" "" "Liquibase"
+.TH dbmanul 1 "August 3, 2013" "" "DB-Manul"
 
 .SH NAME
-liquibase \- Open source library for tracking, managing and applying database changes
+dbmanul \- A change management system for databases
 
 .SH SYNOPSIS
-.B liquibase
+.B dbmanul
 .RI [ options ]  [command]
 
 .br
 
 .SH DESCRIPTION
-This manual page explains how to use liquibase command line tool.
+This manual page explains how to use dbmanul command line tool.
 
-For maven integration, see <http://www.liquibase.org/documentation/maven/index.html>
+For maven integration, see <http://www.dbmanul.org/documentation/maven/index.html>
 
-For ant integration, see <http://www.liquibase.org/documentation/ant/index.html>
+For ant integration, see <http://www.dbmanul.org/documentation/ant/index.html>
 
-.B liquibase
+.B dbmanul
 program.
 .PP
-\fBliquibase\fP is for...
+\fBdbmanul\fP is for...
 
 
 

@@ -1,7 +1,7 @@
 #! /bin/sh
 
-if [ ! -n "${LIQUIBASE_HOME+x}" ]; then
-  # echo "LIQUIBASE_HOME is not set."
+if [ ! -n "${DBMANUL_HOME+x}" ]; then
+  # echo "DBMANUL_HOME is not set."
 
   ## resolve links - $0 may be a symlink
   PRG="$0"
@@ -16,31 +16,31 @@ if [ ! -n "${LIQUIBASE_HOME+x}" ]; then
   done
 
 
-  LIQUIBASE_HOME=`dirname "$PRG"`
+  DBMANUL_HOME=`dirname "$PRG"`
 
   # make it fully qualified
-  LIQUIBASE_HOME=`cd "$LIQUIBASE_HOME" && pwd`
-  # echo "Liquibase Home: $LIQUIBASE_HOME"
+  DBMANUL_HOME=`cd "$DBMANUL_HOME" && pwd`
+  # echo "DB-Manul Home: $DBMANUL_HOME"
 fi
 
  
 # build classpath from all jars in lib
 if [ -f /usr/bin/cygpath ]; then
   CP=.
-  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
+  for i in "$DBMANUL_HOME"/dbmanul*.jar; do
     i=`cygpath --windows "$i"`
     CP="$CP;$i"
   done
-  for i in "$LIQUIBASE_HOME"/lib/*.jar; do
+  for i in "$DBMANUL_HOME"/lib/*.jar; do
     i=`cygpath --windows "$i"`
     CP="$CP;$i"
   done
 else
   CP=.
-  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
+  for i in "$DBMANUL_HOME"/dbmanul*.jar; do
     CP="$CP":"$i"
   done
-  for i in "$LIQUIBASE_HOME"/lib/*.jar; do
+  for i in "$DBMANUL_HOME"/lib/*.jar; do
     CP="$CP":"$i"
   done
 fi
@@ -48,6 +48,6 @@ fi
 # add any JVM options here
 JAVA_OPTS=
 
-java -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main ${1+"$@"}
+java -cp "$CP" $JAVA_OPTS dbmanul.integration.commandline.Main ${1+"$@"}
 
 
