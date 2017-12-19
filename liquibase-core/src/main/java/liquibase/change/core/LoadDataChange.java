@@ -85,6 +85,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String encoding;
     private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
     private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
+
     private List<LoadDataColumnConfig> columns = new ArrayList<>();
 
     /**
@@ -525,25 +526,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
      * no data type of.
      * @param columns a list of LoadDataColumnConfigs to process
      */
-    @SuppressWarnings("CommentedOutCodeLine")
     private void retrieveMissingColumnLoadTypes(List<LoadDataColumnConfig> columns, Database database) throws
             DatabaseException {
-        boolean matched = false;
-
         // If no column is missing type information, we are already done.
-        for (LoadDataColumnConfig c : columns) {
-            if (c.getType() == null) {
-                matched = true;
-            }
-        }
-        if (!matched) {
+        if (columns.stream().noneMatch(c -> c.getType() == null)) {
             return;
         }
-        /* The above is the JDK7 version of:
-           if (columns.stream().noneMatch(c -> c.getType() == null)) {
-            return;
-        }
-        */
 
         // Snapshot the database table
         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(getCatalogName(), getSchemaName());
@@ -571,12 +559,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
         // Save the columns of the database table in a lookup table
         Map<String, Column> tableColumns = new HashMap<>();
-        for (Column c : snapshotOfTable.getColumns()) {
-            tableColumns.put(c.getName(), c);
-        }
-        /* The above is the JDK7 version of:
-            snapshotOfTable.getColumns().forEach(c -> tableColumns.put(c.getName(), c));
-        */
+        snapshotOfTable.getColumns().forEach(c -> tableColumns.put(c.getName(), c));
 
         // Normalise the LoadDataColumnConfig column names to the database
         Map<String, LoadDataColumnConfig> columnConfigs = new HashMap<>();

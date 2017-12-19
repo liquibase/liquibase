@@ -22,7 +22,7 @@ INHERIT
   CONNECTION LIMIT -1
 PASSWORD 'lbuser';
 
-COMMENT ON ROLE lbuser IS 'Integration test user for Liquibase';
+COMMENT ON ROLE lbuser IS 'Integration test user for DB-Manul (based on Liquibase)';
 
 CREATE DATABASE liquibase
 WITH

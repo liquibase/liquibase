@@ -26,13 +26,16 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     private static final int MAX_RECENT_CHANGE = 50;
     private Database database;
+
     private SortedSet<ChangeLogInfo> changeLogs;
     private Map<DatabaseObject, List<Change>> changesByObject;
     private Map<String, List<Change>> changesByAuthor;
+
     private Map<DatabaseObject, List<Change>> changesToRunByObject;
     private Map<String, List<Change>> changesToRunByAuthor;
     private List<Change> changesToRun;
     private List<Change> recentChanges;
+
     private String rootChangeLogName;
     private DatabaseChangeLog rootChangeLog;
 
@@ -66,10 +69,10 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         if (!changesByAuthor.containsKey(changeSet.getAuthor())) {
-            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
+            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
         }
         if (!changesToRunByAuthor.containsKey(changeSet.getAuthor())) {
-            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
+            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
         }
 
         boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN) || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
@@ -95,12 +98,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
                 for (DatabaseObject dbObject : affectedDatabaseObjects) {
                     if (toRun) {
                         if (!changesToRunByObject.containsKey(dbObject)) {
-                            changesToRunByObject.put(dbObject, new ArrayList<Change>());
+                            changesToRunByObject.put(dbObject, new ArrayList<>());
                         }
                         changesToRunByObject.get(dbObject).add(change);
                     } else {
                        if (!changesByObject.containsKey(dbObject)) {
-                           changesByObject.put(dbObject, new ArrayList<Change>());
+                           changesByObject.put(dbObject, new ArrayList<>());
                        }
                        changesByObject.get(dbObject).add(change);
                     }

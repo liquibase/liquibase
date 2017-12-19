@@ -1,5 +1,5 @@
 /**
- * Although Liquibase tries to provide a wide range of database refactorings, there are times you may want to create
+ * Although DB-Manul tries to provide a wide range of database refactorings, there are times you may want to create
  * your own custom refactoring class.<p>
  * <p>
  * To create your own custom refactoring, simply create a class that implements the

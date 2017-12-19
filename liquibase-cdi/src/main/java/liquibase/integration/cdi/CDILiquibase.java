@@ -79,6 +79,7 @@ public class CDILiquibase implements Extension {
     private Logger log = LogService.getLog(CDILiquibase.class);
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
+
     @Inject @LiquibaseType
     private DataSource dataSource;
     private boolean initialized;
@@ -94,7 +95,7 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
-        log.info(LogType.LOG, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
+        log.info(LogType.LOG, "Booting DB-Manul " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();

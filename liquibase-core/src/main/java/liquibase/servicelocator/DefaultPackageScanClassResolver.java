@@ -25,10 +25,10 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     protected final transient Logger log = LogService.getLog(getClass());
     private Set<ClassLoader> classLoaders;
     private Set<PackageScanFilter> scanFilters;
-    private Map<String, Set<Class>> allClassesByPackage = new HashMap<String, Set<Class>>();
-    private Set<String> loadedPackages = new HashSet<String>();
+    private Map<String, Set<Class>> allClassesByPackage = new HashMap<>();
+    private Set<String> loadedPackages = new HashSet<>();
 
-    private Map<String, Set<String>> classFilesByLocation = new HashMap<String, Set<String>>();
+    private Map<String, Set<String>> classFilesByLocation = new HashMap<>();
 
     @Override
     public void addClassLoader(ClassLoader classLoader) {
@@ -43,7 +43,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     @Override
     public void addFilter(PackageScanFilter filter) {
         if (scanFilters == null) {
-            scanFilters = new LinkedHashSet<PackageScanFilter>();
+            scanFilters = new LinkedHashSet<>();
         }
         scanFilters.add(filter);
     }
@@ -58,7 +58,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     @Override
     public Set<ClassLoader> getClassLoaders() {
         if (classLoaders == null) {
-            classLoaders = new HashSet<ClassLoader>();
+            classLoaders = new HashSet<>();
             ClassLoader ccl = Thread.currentThread().getContextClassLoader();
             if (ccl != null) {
                 log.debug(LogType.LOG, "The thread context class loader: " + ccl + "  is used to load the class");
@@ -84,7 +84,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         log.debug(LogType.LOG, "Searching for implementations of " + parent.getName() + " in packages: " + Arrays.asList(packageNames));
 
         PackageScanFilter test = getCompositeFilter(new AssignableToPackageScanFilter(parent));
-        Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
+        Set<Class<?>> classes = new LinkedHashSet<>();
         for (String pkg : packageNames) {
             find(test, pkg, classes);
         }
@@ -101,7 +101,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             return Collections.EMPTY_SET;
         }
 
-        Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
+        Set<Class<?>> classes = new LinkedHashSet<>();
         for (String pkg : packageNames) {
             find(filter, pkg, classes);
         }
@@ -274,7 +274,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         packageName = packageName.replace("/", ".");
 
         if (!this.allClassesByPackage.containsKey(packageName)) {
-            this.allClassesByPackage.put(packageName, new HashSet<Class>());
+            this.allClassesByPackage.put(packageName, new HashSet<>());
         }
 
         this.allClassesByPackage.get(packageName).add(type);
@@ -288,7 +288,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
     // We can override this method to support the custom ResourceLocator
 
-    protected URL customResourceLocator(URL url) throws IOException {
+    protected URL customResourceLocator(URL url) {
         // Do nothing here
         return url;
     }
@@ -339,7 +339,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     private void loadImplementationsInDirectory(String parent, File location, ClassLoader classLoader) {
         Set<String> classFiles = classFilesByLocation.get(location.toString());
         if (classFiles == null) {
-            classFiles = new HashSet<String>();
+            classFiles = new HashSet<>();
 
             File[] files = location.listFiles();
             StringBuilder builder = null;
@@ -414,12 +414,12 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         Set<String> classFiles = classFilesByLocation.get(parentFileName);
 
         if (classFiles == null) {
-            classFiles = new HashSet<String>();
+            classFiles = new HashSet<>();
             classFilesByLocation.put(parentFileName, classFiles);
 
             Set<String> grandparentClassFiles = classFilesByLocation.get(grandparentFileName);
             if (grandparentClassFiles == null) {
-                grandparentClassFiles = new HashSet<String>();
+                grandparentClassFiles = new HashSet<>();
                 classFilesByLocation.put(grandparentFileName, grandparentClassFiles);
             }
             JarInputStream jarStream;

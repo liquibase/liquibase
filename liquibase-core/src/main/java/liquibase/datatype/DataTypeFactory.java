@@ -71,7 +71,7 @@ public class DataTypeFactory {
             for (String name : names) {
                 name = name.toLowerCase();
                 if (registry.get(name) == null) {
-                    registry.put(name, new ArrayList<Class<? extends LiquibaseDataType>>());
+                    registry.put(name, new ArrayList<>());
                 }
                 List<Class<? extends LiquibaseDataType>> classes = registry.get(name);
                 classes.add(dataTypeClass);

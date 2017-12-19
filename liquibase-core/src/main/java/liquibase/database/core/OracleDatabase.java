@@ -363,7 +363,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 }
 
                 if (filteredInOriginalQuery) {
-                    return !((example instanceof PrimaryKey) || (example instanceof Index) || (example instanceof
+                    return (!(example instanceof PrimaryKey)) && (!(example instanceof Index)) && (!(example instanceof
                         liquibase.statement.UniqueConstraint));
                 } else {
                     return true;
@@ -540,7 +540,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
         // HardCodedStringLiteral
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral
-        return "Liquibase needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where " +
+        return "DB-Manul needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where " +
         "constraints are deleted and restored. Since Oracle doesn't properly restore the original table names " +
         "referenced in the constraint, we use the information from the DBA_RECYCLEBIN to automatically correct this" +
         " issue.\n" +

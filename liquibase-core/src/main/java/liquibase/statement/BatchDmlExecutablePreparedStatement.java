@@ -13,6 +13,7 @@ import liquibase.resource.ResourceAccessor;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,8 +32,7 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
             Database database, String catalogName, String schemaName, String tableName,
             List<LoadDataColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor,
             List<ExecutablePreparedStatementBase> statements) {
-        super(database, catalogName, schemaName, tableName, new ArrayList<ColumnConfig>(columns), changeSet,
-            resourceAccessor);
+        super(database, catalogName, schemaName, tableName, new ArrayList<>(columns), changeSet, resourceAccessor);
         this.collectedStatements = new ArrayList<>(statements);
     }
 
@@ -63,10 +63,7 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
     @Override
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
         int updateCounts[] = stmt.executeBatch();
-        long sumUpdateCounts = 0;
-        for (int updateCount : updateCounts) {
-            sumUpdateCounts = updateCount;
-        }
+        long sumUpdateCounts = Arrays.stream(updateCounts).summaryStatistics().getSum();
         LOG.info(LogType.LOG, String.format("Executing JDBC DML batch was successful. %d operations were executed, %d individual UPDATE events were confirmed by the database.",
                 updateCounts.length, sumUpdateCounts));
     }

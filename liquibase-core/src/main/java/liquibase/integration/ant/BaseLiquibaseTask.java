@@ -64,7 +64,7 @@ public abstract class BaseLiquibaseTask extends Task {
     @Override
     public final void execute() throws BuildException {
         super.execute();
-        log(coreBundle.getString("starting.liquibase"), Project.MSG_INFO);
+        log(coreBundle.getString("starting.db.manul"), Project.MSG_INFO);
         classLoader = getProject().createClassLoader(classpath);
         classLoader.setParent(this.getClass().getClassLoader());
         classLoader.setThreadContextLoader();
@@ -86,7 +86,7 @@ public abstract class BaseLiquibaseTask extends Task {
                 executeWithLiquibaseClassloader();
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to initialize Liquibase. " + e.toString(), e);
+            throw new BuildException("Unable to initialize DB-Manul. " + e.toString(), e);
         } finally {
             closeDatabase(database);
             classLoader.resetThreadContextLoader();
@@ -127,7 +127,7 @@ public abstract class BaseLiquibaseTask extends Task {
         LiquibaseConfiguration configuration = LiquibaseConfiguration.getInstance();
         GlobalConfiguration globalConfiguration = configuration.getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            log("Liquibase did not run because " + configuration.describeValueLookupLogic(globalConfiguration
+            log("DB-Manul did not run because " + configuration.describeValueLookupLogic(globalConfiguration
                 .getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
             return false;
         }
@@ -436,7 +436,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * {@link #getLiquibase()} instead.
      */
     @Deprecated
-    protected Liquibase createLiquibase() throws Exception {
+    protected Liquibase createLiquibase() {
         return this.liquibase;
     }
 
@@ -450,7 +450,7 @@ public abstract class BaseLiquibaseTask extends Task {
                                             String password,
                                             String defaultCatalogName,
                                             String defaultSchemaName,
-                                            String databaseClass) throws Exception {
+                                            String databaseClass) {
         return createDatabaseFromType(databaseType);
     }
 

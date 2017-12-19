@@ -9,7 +9,7 @@
  -->
 	<entry key="commandline-helptext">
 		<![CDATA[
-Anwendung: java -jar liquibase.jar [options] [command]
+Anwendung: java -jar dbmanul.jar [options] [command]
 
 Die wichtigsten Hauptbefehle:
  update                         Wendet ChangeLog-Dateien an, um die Struktur
@@ -260,7 +260,7 @@ Standardoptionen aus den Dateien "liquibase.properties" und
 existieren.
 
 Die vollständige Dokumentation befindet sich auf:
-http://www.liquibase.org
+http://www.dbmanul.org
 ]]>
 	</entry>
 </properties>
