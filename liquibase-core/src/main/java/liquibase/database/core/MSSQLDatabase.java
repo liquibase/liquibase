@@ -21,6 +21,7 @@ import liquibase.util.StringUtils;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final int SQL_SERVER_2016_MAJOR_VERSION = 13;
     public static final int SQL_SERVER_2017_MAJOR_VERSION = 14;
     protected static final int MSSQL_DEFAULT_TCP_PORT = 1433;
-    private static Pattern CREATE_VIEW_AS_PATTERN =
+    private static final Pattern CREATE_VIEW_AS_PATTERN =
         Pattern.compile(
             "(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL
@@ -120,7 +121,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             if (isAzureDb()) {
                 return false;
             }
-            if (this.getDatabaseMajorVersion() >= 11) {
+            if (this.getDatabaseMajorVersion() >= SQL_SERVER_2012_MAJOR_VERSION) {
                 return true;
             }
         } catch (DatabaseException e) {
@@ -138,8 +139,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         if (isRealSqlServerConnection && (majorVersion <= SQL_SERVER_2008_MAJOR_VERSION)) {
             LogService.getLog(getClass()).warning(
-                    LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your software is older than " +
-                 "SQL Server 2008. Unfortunately, this is not supported, and this connection cannot be used.",
+                LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your " +
+                        "software is older than SQL Server 2008. Unfortunately, this is not supported, and this " +
+                        "connection cannot be used.",
                  majorVersion));
             return false;
         }
@@ -362,7 +364,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 } else if (getConnection() instanceof OfflineConnection) {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
-            } catch (Exception e) {
+            } catch (DatabaseException e) {
                 LogService.getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from MSSQL", e);
             }
         }
@@ -501,7 +503,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     sendsStringParametersAsUnicode =
                         ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
                 }
-            } catch (Exception e) {
+            } catch (SQLException | DatabaseException e) {
                 LogService.getLog(getClass()).warning(
                         LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
@@ -514,17 +516,23 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return "Azure".equalsIgnoreCase(getEngineEdition());
     }
 
+    /**
+     * Determines the capabilities ("Edition") of the SQL Server database. Possible values are currently
+     * "Personal", "Standard", "Enterprise" (Developer Edition is also reported as Enterprise), "Express" or "Azure".
+     *
+     * @return one of the strings above
+     */
     public String getEngineEdition() {
         try {
             if (getConnection() instanceof JdbcConnection) {
                 String sql = "SELECT CASE ServerProperty('EngineEdition')\n" +
-                        "         WHEN 1 THEN 'Personal'\n" +
-                        "         WHEN 2 THEN 'Standard'\n" +
-                        "         WHEN 3 THEN 'Enterprise'\n" +
-                        "         WHEN 4 THEN 'Express'\n" +
-                        "         WHEN 5 THEN 'Azure'\n" +
-                        "         ELSE 'Unknown'\n" +
-                        "       END";
+                    "         WHEN 1 THEN 'Personal'\n" +
+                    "         WHEN 2 THEN 'Standard'\n" +
+                    "         WHEN 3 THEN 'Enterprise'\n" +
+                    "         WHEN 4 THEN 'Express'\n" +
+                    "         WHEN 5 THEN 'Azure'\n" +
+                    "         ELSE 'Unknown'\n" +
+                    "       END";
                 return ExecutorService.getInstance().getExecutor(this)
                     .queryForObject(new RawSqlStatement(sql), String.class);
             }
