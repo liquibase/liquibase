@@ -50,15 +50,4 @@ public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTe
         }
     }
 
-//    @Override
-//    //Mssql has problems with insert data in autoincrement tables. Because diff detects the id of that inserts and when it is ran the diff
-//    //it tries to insert values in identity columns that isn't allowed in mssql
-//    @Test(expected = MigrationFailedException.class)
-//    public void testRerunDiffChangeLog() throws Exception {
-//        if (getDatabase() == null) {
-//            throw new MigrationFailedException();
-//        }
-//        super.testRerunDiffChangeLog();
-//    }
-
 }
