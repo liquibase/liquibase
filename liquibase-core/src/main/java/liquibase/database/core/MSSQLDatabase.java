@@ -478,6 +478,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 + dataTypeString.substring(indexOfLeftParen);
     }
 
+    /**
+     * Determines if the SQL Server instance assigns Unicode data types (e.g. nvarchar) to strings.
+     *
+     * @return true if the SQL Server instance uses Unicode types by default, false if not.
+     */
     public boolean sendsStringParametersAsUnicode() {
         if (sendsStringParametersAsUnicode == null) {
             try {
@@ -505,13 +510,17 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 }
             } catch (SQLException | DatabaseException e) {
                 LogService.getLog(getClass()).warning(
-                        LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                    LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
         return (sendsStringParametersAsUnicode == null) ? true : sendsStringParametersAsUnicode;
     }
 
+    /**
+     * Returns true if the connected MS SQL instance is a Microsoft Cloud ("Azure")-hosted instance of MSSQL.
+     * @return true if instance runs in Microsoft Azure, false otherwise
+     */
     public boolean isAzureDb() {
         return "Azure".equalsIgnoreCase(getEngineEdition());
     }
