@@ -47,17 +47,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     protected Set<String> systemTablesAndViews = new HashSet<>();
     private Boolean sendsStringParametersAsUnicode;
 
-    @Override
-    public void setDefaultSchemaName(String schemaName) {
-        if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
-            throw new RuntimeException(String.format(
-                "Cannot use default schema name %s on Microsoft SQL Server because the login " +
-                    "schema of the current user (%s) is different and MSSQL does not support " +
-                    "setting the default schema per session.", schemaName, getConnectionSchemaName()));
-        }
-        super.setDefaultSchemaName(schemaName);
-    }
-
     public MSSQLDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
 
@@ -93,6 +82,17 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         // JDBC Driver version 6.2.0 does not seem to return this keyword, which causes an integration test to fail.
         addReservedWords(Arrays.asList("KEY"));
+    }
+
+    @Override
+    public void setDefaultSchemaName(String schemaName) {
+        if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
+            throw new RuntimeException(String.format(
+                "Cannot use default schema name %s on Microsoft SQL Server because the login " +
+                    "schema of the current user (%s) is different and MSSQL does not support " +
+                    "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+        }
+        super.setDefaultSchemaName(schemaName);
     }
 
     @Override

@@ -153,7 +153,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void addReservedWords(Collection<String> words) {
+    public final void addReservedWords(Collection<String> words) {
         reservedWords.addAll(words);
     }
 
@@ -804,10 +804,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         schema = schema.customize(this);
         if ("information_schema".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
-        } else if (getSystemViews().contains(viewName)) {
-            return true;
-        }
-        return false;
+        } else return getSystemViews().contains(viewName);
     }
 
     @Override
@@ -1236,7 +1233,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
+    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws
+        IOException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
