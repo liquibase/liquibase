@@ -156,25 +156,10 @@ public class CommandLineUtils {
                     schema = defaultSchemaName;
                 }
                 ExecutorService.getInstance().getExecutor(database).execute(
-                        new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
-                                database.escapeObjectName(schema, Schema.class)))
-                ;
-            } else if ((database instanceof MSSQLDatabase) && (defaultSchemaName != null)) {
-                if (username != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
-                            "IF USER_NAME() <> N'dbo'\r\n" +
-                                    "BEGIN\r\n" +
-                                    "	DECLARE @sql [nvarchar](MAX)\r\n" +
-                                    "	SELECT @sql = N'ALTER USER ' + QUOTENAME(USER_NAME()) + N' WITH " +
-                                    "DEFAULT_SCHEMA" +
-                                    " = " + database.escapeStringForDatabase(database.escapeObjectName(username,
-                                    DatabaseObject.class)) + "'\r\n" +
-                                    "	EXEC sp_executesql @sql\r\n" +
-                                    "END"));
-                }
-            } else if ((database instanceof PostgresDatabase) && (defaultSchemaName != null)) {
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO "
-                        + database.escapeObjectName(defaultSchemaName, Schema.class)));
+                    new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
+                        database.escapeObjectName(schema, Schema.class)));
+            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
             } else if (database instanceof DB2Database) {
                 String schema = defaultCatalogName;
                 if (schema == null) {
