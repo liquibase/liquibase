@@ -82,6 +82,7 @@ public abstract class AbstractIntegrationTest {
     private String objectQuotingStrategyChangeLog;
     private Database database;
     private String jdbcUrl;
+    private String defaultSchemaName;
 
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
@@ -139,9 +140,9 @@ public abstract class AbstractIntegrationTest {
                 return null;
 
             DatabaseTestURL testUrl = new DatabaseTestURL(databaseManager, url,
-                    // These may be set to null if not defined as properties.
-                    integrationTestProperties.getProperty("integration.test." + databaseManager + ".username"),
-                    integrationTestProperties.getProperty("integration.test." + databaseManager + ".password")
+                // These may be set to null if not defined as properties.
+                integrationTestProperties.getProperty("integration.test." + databaseManager + ".username"),
+                integrationTestProperties.getProperty("integration.test." + databaseManager + ".password")
             );
             return testUrl;
         } catch (IOException e) {
@@ -182,12 +183,16 @@ public abstract class AbstractIntegrationTest {
                 database.rollback();
             }
 
+            // If we should test with a custom defaultSchemaName:
+            if (getDefaultSchemaName() != null && getDefaultSchemaName().length() > 0) {
+                database.setDefaultSchemaName(getDefaultSchemaName());
+            }
+
             SnapshotGeneratorFactory.resetAll();
             ExecutorService.getInstance().reset();
 
             LockServiceFactory.getInstance().resetAll();
             LockServiceFactory.getInstance().getLockService(database).init();
-
 
             ChangeLogHistoryServiceFactory.getInstance().resetAll();
         }
@@ -316,7 +321,7 @@ public abstract class AbstractIntegrationTest {
         return createLiquibase(changeLogFile, fileOpener);
     }
 
-    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws LiquibaseException {
+    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) {
         ExecutorService.getInstance().clearExecutor(database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
@@ -1101,5 +1106,13 @@ public abstract class AbstractIntegrationTest {
 
     protected void setJdbcUrl(String jdbcUrl) {
         this.jdbcUrl = jdbcUrl;
+    }
+
+    public String getDefaultSchemaName() {
+        return defaultSchemaName;
+    }
+
+    public void setDefaultSchemaName(String defaultSchemaName) {
+        this.defaultSchemaName = defaultSchemaName;
     }
 }
