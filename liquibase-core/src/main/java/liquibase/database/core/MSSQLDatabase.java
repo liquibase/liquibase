@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -78,6 +79,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         super.quotingStartCharacter = "[";
         super.quotingEndCharacter = "]";
         super.quotingEndReplacement = "]]";
+
+        // JDBC Driver version 6.2.0 does not seem to return this keyword, which causes an integration test to fail.
+        addReservedWords(Arrays.asList("KEY"));
     }
 
     @Override
@@ -271,7 +275,13 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
-        return Relation.class.isAssignableFrom(type);
+        if (View.class.isAssignableFrom(type)) {
+            // Microsoft SQL Server does not allow a catalog name in the CREATE ... VIEW statement:
+            // https://docs.microsoft.com/en-gb/sql/t-sql/statements/create-view-transact-sql
+            return false;
+        } else {
+            return Relation.class.isAssignableFrom(type);
+        }
     }
 
     @Override
@@ -315,14 +325,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String escapeObjectName(String catalogName, String schemaName, String objectName,
                                    Class<? extends DatabaseObject> objectType) {
-        if (View.class.isAssignableFrom(objectType)) {
-            // SQLServer does not support specifying the database name as a prefix to the object name
-            String name = this.escapeObjectName(objectName, objectType);
-            if (schemaName != null) {
-                name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
-            }
-            return name;
-        } else if (Index.class.isAssignableFrom(objectType)) {
+        if (Index.class.isAssignableFrom(objectType)) {
             return super.escapeObjectName(objectName, objectType);
         }
 
