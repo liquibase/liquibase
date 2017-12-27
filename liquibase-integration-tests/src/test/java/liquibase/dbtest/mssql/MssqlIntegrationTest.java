@@ -22,7 +22,7 @@ import static org.junit.Assume.assumeNotNull;
 public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
     public MssqlIntegrationTest() throws Exception {
-        super("Mssql", DatabaseFactory.getInstance().getDatabase("mssql"));
+        super("mssql", DatabaseFactory.getInstance().getDatabase("mssql"));
     }
 
     @Override
