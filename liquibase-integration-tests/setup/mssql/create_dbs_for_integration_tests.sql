@@ -9,6 +9,34 @@
  * WARNING: You will probably want to adjust the path for the data files in the following script.
  */
 
+USE [master]
+GO
+
+/* Tear down everything before creating the objects */
+IF EXISTS(SELECT name
+          FROM master.sys.databases
+          WHERE name = N'liquibase')
+  BEGIN
+    ALTER DATABASE [liquibase] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE [liquibase];
+  END
+GO
+
+IF EXISTS(SELECT name
+          FROM master.sys.databases
+          WHERE name = N'liquibasec')
+  BEGIN
+    ALTER DATABASE [liquibasec] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE [liquibasec];
+  END
+GO
+
+IF EXISTS(SELECT name
+          FROM master.sys.syslogins
+          WHERE syslogins.name = N'lbuser')
+  DROP LOGIN [lbuser]
+GO
+
 CREATE DATABASE [liquibase]
  ON  PRIMARY 
 ( NAME = N'liquibase', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibase.mdf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
@@ -28,24 +56,75 @@ GO
 ALTER DATABASE [liquibase] ADD FILE ( NAME = N'liquibase2', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibase2.ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [liquibase2]
 GO
 
-USE [master]
-GO
-
-CREATE LOGIN [lbuser] WITH PASSWORD=N'lbuser', DEFAULT_DATABASE=[liquibase], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
-GO
-USE [liquibase]
-GO
-CREATE USER [lbuser] FOR LOGIN [lbuser]
-GO
-USE [liquibase]
-GO
-ALTER ROLE [db_owner] ADD MEMBER [lbuser]
-GO
-
-USE [liquibase]
-GO
 CREATE SCHEMA [lbcat2] AUTHORIZATION [dbo]
 GO
+
+/* Create a role for the liquibase database that will allow members to create and modify objects on the default (dbo)
+ * and the additional (lbcat2) schema.
+ */
+CREATE ROLE [Application_Schema_Installation] AUTHORIZATION [dbo]
+GO
+
+GRANT ALTER ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+GRANT CREATE SEQUENCE ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+GRANT CONTROL ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+GRANT SELECT ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+GRANT DELETE ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+GRANT INSERT ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+GRANT SELECT ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+GRANT UPDATE ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+GRANT REFERENCES ON SCHEMA ::[dbo] TO [Application_Schema_Installation]
+GO
+
+GRANT ALTER ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+GRANT CREATE SEQUENCE ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+GRANT CONTROL ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+GRANT SELECT ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+GRANT DELETE ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+GRANT INSERT ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+GRANT SELECT ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+GRANT UPDATE ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+GRANT REFERENCES ON SCHEMA ::[lbcat2] TO [Application_Schema_Installation]
+GO
+
+/* Allow members of this role to create tables and views. */
+GRANT CREATE TABLE TO [Application_Schema_Installation]
+GO
+GRANT CREATE VIEW TO [Application_Schema_Installation]
+GO
+
+USE [master]
+GO
+CREATE LOGIN [lbuser] WITH PASSWORD=N'lbuser', DEFAULT_DATABASE=[liquibase], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+GO
+
+USE [liquibase]
+GO
+
+CREATE USER [lbuser] FOR LOGIN [lbuser]
+GO
+
+--ensure role membership is correct
+EXEC sp_addrolemember N'Application_Schema_Installation', N'lbuser'
+GO
+--Allow user to connect to database
+GRANT CONNECT TO [lbuser]
 
 USE [master]
 GO
@@ -68,6 +147,7 @@ GO
 
 CREATE USER [lbuser] FOR LOGIN [lbuser]
 GO
+GRANT CONNECT TO [lbuser]
 
-ALTER ROLE [db_owner] ADD MEMBER [lbuser]
-GO
+USE [master]
+-- DONE.
