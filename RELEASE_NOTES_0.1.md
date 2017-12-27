@@ -234,10 +234,14 @@ adverse effects in old software versions.
   https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
   (commit cf667c6945a5902c54030146ca6929541b7d10f1)
 
-- Because DB-Manul is based on JDK 8, you must upgrade your JDBC driver to version 6.1.0.jre8 or newer.
+- Because DB-Manul is based on JDK 8, you must upgrade your JDBC driver to version 6.2.0.jre8 or newer.
 
 - Consistent with the behaviour on other RDBMS, DB-Manul will now only escape Microsoft SQL Server object names
   (e.g. `myTableWithAnÜUmlaut` -> `[myTableWithAnÜUmlaut]` only when quoting is necessary)
+
+- Since Microsoft SQL Server does not seem to allow setting the default schema name (command line parameter
+  `--defaultSchemaName`) on a session basis, it is not possible to use a `--defaultSchemaName` that is different from
+  the user's default login schema.
 
 ### MySQL and MariaDB
 
@@ -269,7 +273,7 @@ adverse effects in old software versions.
 
 - Because DB-Manul is based on JDK 8, you must upgrade your PostgreSQL JDBC driver to version 42.1.1 or newer.
 - PostgreSQL versions below 9.2 are desupported by postgresql.org (https://www.postgresql.org/support/versioning/).
-  DB-Manul will refuse to connect to versions below 9.2.
+  DB-Manul will warn you of possible incompatibilities if trying to connect to versions below 9.2.
 
 ### Apache Derby
 

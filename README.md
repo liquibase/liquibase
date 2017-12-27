@@ -17,7 +17,7 @@ For a current list of changes, fixes and improvements, please see:
 Current status summary
 ======================
 
-Last updated: July 9th, 2017
+Last updated: December 27th, 2017
 
 **PLEASE NOTE THAT THE FORK, IN GENERAL, SHOULD BE CONSIDERED UNSTABLE FOR THE MOMENT.**
     A lot of work is currently being done to get all integration tests (OSS + commercial RDBMSs) green; manual testing of features like CDI, RPM/Debian packaging, Spring integration etc. comes after that.   
