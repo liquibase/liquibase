@@ -8,6 +8,7 @@ request number (pr#) to maximise its usefulness. Thank you.
 [pr#] | [merge status] [description]
 (2nd line):            [if not going to be merged: reason]
 =======================================================================================================================
+730     MERGED         Fix includeAll on WebSphere and Weblogic
 728     MERGED         [MSSQL] With additional logic: Prevent using a defaultSchemaName that is different from the
                        login default schema since MSSQL does not support setting it on a session level basis.
 727-687 TODO
