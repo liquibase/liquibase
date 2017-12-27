@@ -8,13 +8,14 @@ import org.junit.Test;
 
 import java.util.Date;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeNotNull;
 
 /**
- *
+ * Template for different Microsoft SQL integration tests (regular, case-sensitive etc.)
  * @author lujop
  */
-public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTest{
+public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTest {
 
     public AbstractMssqlIntegrationTest(String changelogDir, Database dbms) throws Exception {
         super(changelogDir, dbms);
@@ -29,6 +30,19 @@ public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTe
     @Override
     protected boolean shouldRollBack() {
         return false;
+    }
+
+    @Test
+    public void impossibleDefaultSchema() {
+        Exception caughtException = null;
+        try {
+            getDatabase().setDefaultSchemaName("lbuser");
+        } catch (Exception ex) {
+            caughtException = ex;
+        }
+        assertNotNull("Must not allow using a defaultSchemaName that is different from the DB user's login schema.",
+            caughtException);
+
     }
 
     @Test
@@ -49,16 +63,5 @@ public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTe
             throw e;
         }
     }
-
-//    @Override
-//    //Mssql has problems with insert data in autoincrement tables. Because diff detects the id of that inserts and when it is ran the diff
-//    //it tries to insert values in identity columns that isn't allowed in mssql
-//    @Test(expected = MigrationFailedException.class)
-//    public void testRerunDiffChangeLog() throws Exception {
-//        if (getDatabase() == null) {
-//            throw new MigrationFailedException();
-//        }
-//        super.testRerunDiffChangeLog();
-//    }
 
 }

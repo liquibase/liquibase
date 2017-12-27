@@ -239,9 +239,6 @@ public class DatabaseTestContext {
         if (availableConnections == null) {
             availableConnections = new HashSet<DatabaseConnection>();
             for (DatabaseTestURL url : getTestUrls()) {
-//                if (url.indexOf("jtds") >= 0) {
-//                    continue;
-//                }
                 DatabaseConnection connection = openConnection(url.getUrl(), url.getUsername(), url.getPassword());
 
                 if (connection != null) {
