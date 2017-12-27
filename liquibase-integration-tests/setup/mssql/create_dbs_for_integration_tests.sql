@@ -37,13 +37,15 @@ IF EXISTS(SELECT name
   DROP LOGIN [lbuser]
 GO
 
-CREATE DATABASE [liquibase]
- ON  PRIMARY 
-( NAME = N'liquibase', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibase.mdf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
- LOG ON 
-( NAME = N'liquibase_log', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibase_log.ldf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
-GO
+DECLARE @dataPath varchar(256);
+DECLARE @logPath varchar(256);
+SET @dataPath=(SELECT CAST(serverproperty('InstanceDefaultDataPath') AS varchar(256)));
+SET @logPath=(SELECT CAST(serverproperty('InstanceDefaultLogPath') AS varchar(256)));
 
+DECLARE @createSql varchar(2000);
+SET @createSql = (SELECT 'CREATE DATABASE [liquibase] ON PRIMARY (NAME = N''liquibase'', FILENAME = ''' + @dataPath + 'liquibase.mdf'' , SIZE = 8192KB , FILEGROWTH = 65536KB ) LOG ON ( NAME = N''liquibase_log'', FILENAME = ''' + @logPath + 'liquibase_log.ldf'' , SIZE = 8192KB , FILEGROWTH = 65536KB )');
+EXECUTE(@createSql);
+GO
 ALTER DATABASE [liquibase] SET COMPATIBILITY_LEVEL = 100
 GO
 
@@ -53,7 +55,15 @@ IF NOT EXISTS (SELECT name FROM sys.filegroups WHERE is_default=1 AND name = N'P
 GO
 ALTER DATABASE [liquibase] ADD FILEGROUP [liquibase2]
 GO
-ALTER DATABASE [liquibase] ADD FILE ( NAME = N'liquibase2', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibase2.ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [liquibase2]
+
+DECLARE @dataPath varchar(256);
+DECLARE @logPath varchar(256);
+SET @dataPath=(SELECT CAST(serverproperty('InstanceDefaultDataPath') AS varchar(256)));
+SET @logPath=(SELECT CAST(serverproperty('InstanceDefaultLogPath') AS varchar(256)));
+
+DECLARE @createSql varchar(2000);
+SET @createSql = (SELECT 'ALTER DATABASE [liquibase] ADD FILE ( NAME = N''liquibase2'', FILENAME = N''' + @dataPath + 'liquibase2.ndf'' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [liquibase2]');
+EXECUTE(@createSql);
 GO
 
 CREATE SCHEMA [lbcat2] AUTHORIZATION [dbo]
@@ -132,11 +142,14 @@ GRANT CONNECT TO [lbuser]
 USE [master]
 GO
 
-CREATE DATABASE [liquibasec]
- ON  PRIMARY
-( NAME = N'liquibasec', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibasec.mdf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
- LOG ON
-( NAME = N'liquibasec_log', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibasec_log.ldf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
+DECLARE @dataPath varchar(256);
+DECLARE @logPath varchar(256);
+SET @dataPath=(SELECT CAST(serverproperty('InstanceDefaultDataPath') AS varchar(256)));
+SET @logPath=(SELECT CAST(serverproperty('InstanceDefaultLogPath') AS varchar(256)));
+
+DECLARE @createSql varchar(2000);
+SET @createSql=(SELECT 'CREATE DATABASE [liquibasec] ON PRIMARY(NAME = N''liquibasec'', FILENAME = N''' + @dataPath + 'liquibasec.mdf'' , SIZE = 8192KB , FILEGROWTH = 65536KB ) LOG ON (NAME = N''liquibasec_log'', FILENAME = N''' + @logPath + 'liquibasec_log.ldf'' , SIZE = 8192KB , FILEGROWTH = 65536KB )');
+EXECUTE(@createSql);
 GO
 
 ALTER DATABASE [liquibasec] SET COMPATIBILITY_LEVEL = 100
