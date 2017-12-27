@@ -117,6 +117,9 @@ GO
 USE [liquibase]
 GO
 
+CREATE SCHEMA [lbuser] AUTHORIZATION [dbo]
+GO
+
 CREATE USER [lbuser] FOR LOGIN [lbuser]
 GO
 
