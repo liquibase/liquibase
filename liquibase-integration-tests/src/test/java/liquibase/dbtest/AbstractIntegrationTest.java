@@ -168,7 +168,6 @@ public abstract class AbstractIntegrationTest {
     /**
      * Reset database connection and internal objects before each test.
      * CAUTION! Does not wipe the schemas - if you want that, you must call {@link #clearDatabase()} .
-     *
      */
     @Before
     public void setUp() throws Exception {
