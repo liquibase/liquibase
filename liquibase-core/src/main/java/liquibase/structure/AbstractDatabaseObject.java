@@ -72,11 +72,13 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T getAttribute(String attribute, Class<T> type) {
         return (T) attributes.get(attribute);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T getAttribute(String attribute, T defaultValue) {
         T value = (T) attributes.get(attribute);
         if (value == null) {
