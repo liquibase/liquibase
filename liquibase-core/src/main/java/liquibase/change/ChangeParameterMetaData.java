@@ -369,7 +369,7 @@ public class ChangeParameterMetaData {
             }
         }
 
-        Map standardExamples = new HashMap();
+        Map<String, String> standardExamples = new HashMap<>();
         standardExamples.put("tableName", "person");
         standardExamples.put("schemaName", "public");
         standardExamples.put("tableSchemaName", "public");
