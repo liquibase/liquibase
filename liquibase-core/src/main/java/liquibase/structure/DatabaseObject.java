@@ -39,12 +39,50 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
 
     boolean snapshotByDefault();
 
+    /**
+     * Returns the name of all attributes currently stored for this {@link DatabaseObject}.
+     *
+     * @return the Set of all attribute names
+     */
     Set<String> getAttributes();
 
+    /**
+     * Retrieves the value of a {@link DatabaseObject}'s attributes and cast it into the desired type.
+     * @param attribute case-sensitive name of the attribute for which the value will be retrieved
+     * @param type class compatible with the desired type T of the return value
+     * @param <T> the desired type of the value
+     * @return <ul>
+     *     <li>if the attribute name exists, and the current value can be cast into the desired class, then the
+     *     value is returned in the desired form. Note that null is a valid value, too.</li>
+     *     <li>if the attribute name does not exist, null is returned.</li>
+     *     <li>if the attribute has a value, but that value cannot be cast into the desired class, a
+     *     {@link RuntimeException} will occur.</li>
+     *     </ul>
+     */
     <T> T getAttribute(String attribute, Class<T> type);
 
+    /**
+     * Retrieves the value of a {@link DatabaseObject}'s attributes and cast it into the desired type.
+     * @param attribute case-sensitive name of the attribute for which the value will be retrieved
+     * @param defaultValue the value to be returned if no value (not even null) is stored for the attribute name in the
+     *                     object.
+     * @param <T> the desired type of the value
+     * @return <ul>
+     *     <li>if the attribute name exists, and the current value can be cast into a type compatible with T, then
+     *     value is returned in the desired form. Note that null is a valid value, too.</li>
+     *     <li>if the attribute name does not exist, defaultValue is returned.</li>
+     *     <li>if the attribute has a value, but that value cannot be cast into a type compatible with T, a
+     *     {@link RuntimeException} will occur.</li>
+     *     </ul>
+     */
     <T> T getAttribute(String attribute, T defaultValue);
 
+    /**
+     * Sets a given attribute for this object to the specified value.
+     * @param attribute case-sensitive name of the attribute
+     * @param value value to be set
+     * @return a reference to the same object
+     */
     DatabaseObject setAttribute(String attribute, Object value);
 
 }
