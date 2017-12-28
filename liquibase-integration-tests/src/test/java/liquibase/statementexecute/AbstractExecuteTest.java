@@ -71,7 +71,7 @@ public abstract class AbstractExecuteTest {
     }
 
     protected void assertCorrect(String[] expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
-        assertNotNull(statementUnderTest);
+        assertNotNull("SqlStatement to test is NOT null.", statementUnderTest);
 
         test(expectedSql, includeDatabases, null);
     }
