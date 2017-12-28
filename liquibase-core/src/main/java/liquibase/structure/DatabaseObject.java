@@ -33,7 +33,14 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
 
     String getName();
 
-    <T> T setName(String name);
+    /**
+     * Sets the name for the database object.
+     *
+     * @param name the new name for the database object
+     * @return a reference to the same object (implementing classes are expected to return a reference to the same
+     * object).
+     */
+    DatabaseObject setName(String name);
 
     Schema getSchema();
 
