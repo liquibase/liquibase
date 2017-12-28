@@ -59,7 +59,7 @@ public class Contexts {
 
     @Override
     public String toString() {
-        return StringUtils.join(new TreeSet(this.contexts),",");
+        return StringUtils.join(new TreeSet<String>(this.contexts), ",");
     }
 
 
