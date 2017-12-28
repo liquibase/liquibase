@@ -91,7 +91,10 @@ public class ChangeLogParameters {
     }
 
     public void set(String paramter, Object value) {
-        // TODO: this was a bug. Muliple created parameters have been created, but the corresponding method in #findParameter() is only catching the first one. So here we should eliminate duplicate entries
+        /*
+         * TODO: this was a bug. Muliple created parameters have been created, but the corresponding method in
+         * #findParameter() is only catching the first one. So here we should eliminate duplicate entries
+         */
         ChangeLogParameter param = findParameter(paramter, null);
         if (param == null) {
             // okay add it
@@ -99,22 +102,29 @@ public class ChangeLogParameters {
         }
     }
 
-    public void set(String key, String value, String contexts, String labels, String databases, boolean globalParam, DatabaseChangeLog changeLog) {
+    public void set(String key, String value, String contexts, String labels, String databases, boolean globalParam,
+                    DatabaseChangeLog changeLog) {
         set(key, value, new ContextExpression(contexts), new Labels(labels), databases, globalParam, changeLog);
     }
-    
-    public void set(String key, String value, ContextExpression contexts, Labels labels, String databases, boolean globalParam, DatabaseChangeLog changeLog) {
-        // TODO: this was a bug. Muliple created parameters have been created, but the corresponding method in #findParameter() is only catching the first one. So here we should eliminate duplicate entries
-        if (globalParam == true) {
+
+    public void set(String key, String value, ContextExpression contexts, Labels labels, String databases,
+                    boolean globalParam, DatabaseChangeLog changeLog) {
+        /**
+         * TODO: this was a bug. Muliple created parameters have been created, but the corresponding method in
+         * #findParameter() is only catching the first one. So here we should eliminate duplicate entries
+         **/
+        if (globalParam) {
             // if it is global param ignore additional adds
             ChangeLogParameter param = findParameter(key, null);
             if (param == null) {
                 // okay add it
-                changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
+                changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam,
+                    changeLog));
             }
         } else {
             //this is a non-global param, just add it
-            changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
+            changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam,
+                changeLog));
         }
     }
 
@@ -122,8 +132,8 @@ public class ChangeLogParameters {
      * Return the value of a parameter
      *
      * @param key Name of the parameter
-     * @return The parameter value or null if not found. (Note that null can also be return if it is the parameter value. For
-     *         strict parameter existence use {@link #hasValue(String)))
+     * @return The parameter value or null if not found. (Note that null can also be return if it is the parameter
+     * value. For strict parameter existence use {@link #hasValue(String, DatabaseChangeLog)}
      */
     public Object getValue(String key, DatabaseChangeLog changeLog) {
         ChangeLogParameter parameter = findParameter(key, changeLog);
@@ -141,7 +151,8 @@ public class ChangeLogParameters {
         }
         
         if (found.size() == 1) {
-            // this case is typically a global param, but could also be a unique non-global param in one specific changelog
+            // this case is typically a global param, but could also be a unique non-global param in one specific
+            // changelog
             result = found.get(0);
         } else if (found.size() > 1) {
             for (ChangeLogParameter changeLogParameter : found) {
@@ -170,6 +181,44 @@ public class ChangeLogParameters {
         return currentLabelExpression;
     }
 
+    protected static class ExpressionExpander {
+        private boolean enableEscaping;
+        private ChangeLogParameters changeLogParameters;
+        private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
+
+        public ExpressionExpander(ChangeLogParameters changeLogParameters) {
+            this.changeLogParameters = changeLogParameters;
+            this.enableEscaping = LiquibaseConfiguration.getInstance()
+                .getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping();
+        }
+
+        public String expandExpressions(String text, DatabaseChangeLog changeLog) {
+            if (text == null) {
+                return null;
+            }
+            Matcher matcher = EXPRESSION_PATTERN.matcher(text);
+            String originalText = text;
+            while (matcher.find()) {
+                String expressionString = originalText.substring(matcher.start(), matcher.end());
+                String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
+
+                Object value = (enableEscaping && valueTolookup.startsWith(":")) ? null : changeLogParameters
+                    .getValue(valueTolookup, changeLog);
+
+                if (value != null) {
+                    text = text.replace(expressionString, value.toString());
+                }
+            }
+
+            // replace all escaped expressions with its literal
+            if (enableEscaping) {
+                text = text.replaceAll("\\$\\{:(.+?)}", "\\$\\{$1}");
+            }
+
+            return text;
+        }
+    }
+
     public class ChangeLogParameter {
         private String key;
         private Object value;
@@ -185,15 +234,20 @@ public class ChangeLogParameters {
             this.value = value;
         }
 
-        public ChangeLogParameter(String key, Object value, String validContexts, String labels, String validDatabases, boolean globalParam, DatabaseChangeLog changeLog) {
-            this(key, value, new ContextExpression(validContexts), new Labels(labels), StringUtils.splitAndTrim(validDatabases, ","), globalParam, changeLog);
+        public ChangeLogParameter(String key, Object value, String validContexts, String labels, String validDatabases,
+                                  boolean globalParam, DatabaseChangeLog changeLog) {
+            this(key, value, new ContextExpression(validContexts), new Labels(labels),
+                StringUtils.splitAndTrim(validDatabases, ","), globalParam, changeLog);
         }
 
-        private ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, String validDatabases, boolean globalParam, DatabaseChangeLog changeLog) {
-            this(key, value, validContexts, labels, StringUtils.splitAndTrim(validDatabases, ","), globalParam, changeLog);
+        private ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels,
+                                   String validDatabases, boolean globalParam, DatabaseChangeLog changeLog) {
+            this(key, value, validContexts, labels, StringUtils.splitAndTrim(validDatabases, ","),
+                globalParam, changeLog);
         }
 
-        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, List<String> validDatabases, boolean globalParam, DatabaseChangeLog changeLog) {
+        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels,
+                                  List<String> validDatabases, boolean globalParam, DatabaseChangeLog changeLog) {
             this.key = key;
             this.value = value;
             this.validContexts = validContexts;
@@ -229,10 +283,12 @@ public class ChangeLogParameters {
         }
 
         public boolean isValid() {
-            boolean isValid = (validContexts == null) || validContexts.matches(ChangeLogParameters.this.currentContexts);
+            boolean isValid = (validContexts == null)
+                || validContexts.matches(ChangeLogParameters.this.currentContexts);
 
             if (isValid) {
-                isValid = (labels == null) || (currentLabelExpression == null) || currentLabelExpression.matches(labels);
+                isValid = (labels == null) || (currentLabelExpression == null)
+                    || currentLabelExpression.matches(labels);
             }
 
             if (isValid) {
@@ -248,43 +304,6 @@ public class ChangeLogParameters {
 
         public DatabaseChangeLog getChangeLog() {
             return changeLog;
-        }
-    }
-
-    protected static class ExpressionExpander {
-        private boolean enableEscaping;
-        private ChangeLogParameters changeLogParameters;
-        private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
-
-        public ExpressionExpander(ChangeLogParameters changeLogParameters) {
-            this.changeLogParameters = changeLogParameters;
-            this.enableEscaping = LiquibaseConfiguration.getInstance().getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping();
-        }
-
-        public String expandExpressions(String text, DatabaseChangeLog changeLog) {
-            if (text == null) {
-                return null;
-            }
-            Matcher matcher = EXPRESSION_PATTERN.matcher(text);
-            String originalText = text;
-            while (matcher.find()) {
-                String expressionString = originalText.substring(matcher.start(), matcher.end());
-                String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
-
-                Object value = (enableEscaping && valueTolookup.startsWith(":")) ? null : changeLogParameters
-                    .getValue(valueTolookup, changeLog);
-
-                if (value != null) {
-                    text = text.replace(expressionString, value.toString());
-                }
-            }
-            
-            // replace all escaped expressions with its literal
-            if (enableEscaping) {
-                text = text.replaceAll("\\$\\{:(.+?)}", "\\$\\{$1}");
-            }
-            
-            return text;
         }
     }
 }

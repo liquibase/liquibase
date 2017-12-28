@@ -465,7 +465,7 @@ public class StringClauses {
             return "";
         }
 
-        List finalList = new ArrayList(clauses.values());
+        List finalList = new ArrayList<>(clauses.values());
         ListIterator iterator = finalList.listIterator();
         while (iterator.hasNext()) {
             Object next = iterator.next();
@@ -555,7 +555,7 @@ public class StringClauses {
         private ListIterator<String> keyIterator;
 
         public ClauseIterator(LinkedHashMap<String, Object> clauses) {
-            this.keyIterator = new ArrayList(clauses.keySet()).listIterator();
+            this.keyIterator = new ArrayList<String>(clauses.keySet()).listIterator();
             this.clauses = clauses;
         }
 

@@ -232,7 +232,9 @@
 							<goal>javadoc</goal>
 						</goals>
 						<configuration>
-							<sourcepath>../liquibase-core/src/main/java</sourcepath>
+							<sourcepath>
+								../liquibase-core/src/main/java;../liquibase-core/target/generated-sources/javacc
+							</sourcepath>
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
@@ -282,7 +284,9 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>${maven-assembly-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>distro</id>
@@ -294,10 +298,10 @@
 							<descriptors>
 								<descriptor>src/main/resources/assembly/bin.xml</descriptor>
 							</descriptors>
+							<tarLongFileMode>posix</tarLongFileMode>
 						</configuration>
 					</execution>
 				</executions>
-				<version>2.3</version>
 			</plugin>
 
 			<plugin>

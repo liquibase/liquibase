@@ -66,7 +66,7 @@ public class LabelExpression {
         if (originalString != null) {
             return originalString;
         }
-        return "(" + StringUtils.join(new TreeSet(this.labels), "), (") + ")";
+        return "(" + StringUtils.join(new TreeSet<>(this.labels), "), (") + ")";
     }
 
     /**

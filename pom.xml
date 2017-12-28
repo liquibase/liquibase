@@ -106,6 +106,7 @@
         <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
         <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
+        <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
         <org.codehaus.groovy.version>2.4.11</org.codehaus.groovy.version>
         <org.spockframework.version>1.1-groovy-2.4</org.spockframework.version>
         <system-rules.version>1.16.0</system-rules.version>
@@ -420,7 +421,10 @@
                         <optimize>true</optimize>
                         <debug>true</debug>
                         <encoding>${project.build.sourceEncoding}</encoding>
-                        <!-- <compilerArgument>-Xlint:deprecation</compilerArgument> -->
+                        <compilerArguments>
+                            <Xlint:deprecation/>
+                            <Xlint:unchecked/>
+                        </compilerArguments>
                     </configuration>
                 </plugin>
 

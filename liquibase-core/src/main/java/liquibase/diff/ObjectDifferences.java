@@ -102,7 +102,7 @@ public class ObjectDifferences {
     }
 
     public interface CompareFunction {
-        public boolean areEqual(Object referenceValue, Object compareToValue);
+        boolean areEqual(Object referenceValue, Object compareToValue);
     }
 
     public static class StandardCompareFunction implements CompareFunction {
@@ -344,17 +344,14 @@ public class ObjectDifferences {
                 return false;
             }
 
-            Iterator referenceIterator = ((Collection) referenceValue).iterator();
-            List unmatchedCompareToValues = new ArrayList(((Collection) compareToValue));
 
             if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
                 return false;
             }
 
-            while (referenceIterator.hasNext()) {
-                Object referenceObj = referenceIterator.next();
-
+            for (Object referenceObj : ((Collection) referenceValue)) {
                 Object foundMatch = null;
+                List<Object> unmatchedCompareToValues = new ArrayList<>(((Collection<?>) compareToValue));
                 for (Object compareObj : unmatchedCompareToValues) {
                     if (compareFunction.areEqual(referenceObj, compareObj)) {
                         foundMatch = compareObj;

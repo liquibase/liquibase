@@ -9,6 +9,6 @@
  * If your change can be rolled back, implement the {@link liquibase.change.custom.CustomSqlRollback} interface as
  * well.<p>
  * <p>
- * For a sample custom change class, see {@link liquibase.change.custom.ExampleCustomSqlChange } .
+ * For a sample custom change class, see liquibase.change.custom.ExampleCustomSqlChange in the test sources.
  */
 package liquibase.change.custom;

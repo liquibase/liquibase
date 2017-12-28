@@ -18,10 +18,11 @@ public interface ChangeLogParser extends LiquibaseParser {
      * @param changeLogParameters parameters given by the end user that should be applied while parsing the changelog
      *  (i.e. replacement of ${placeholders} inside the changelogs with user-defined content)
      * @param resourceAccessor a Java resource accessor
-     * @return
-     * @throws ChangeLogParseException
+     * @return the parsed ChangeLog in object form
+     * @throws ChangeLogParseException if an error occurs during parsing of the ChangeLog
      */
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException;
+    DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+                            ResourceAccessor resourceAccessor) throws ChangeLogParseException;
     
     /**
      * Checks if the file format is supported by an implementing ChangeLogParser and returns true if that is the case.

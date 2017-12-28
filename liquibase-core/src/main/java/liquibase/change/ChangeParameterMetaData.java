@@ -334,7 +334,8 @@ public class ChangeParameterMetaData {
      * existing Column object, the "name" parameter needs to be set to the column's name.
      * In the addColumn's "tableName" parameter, this method would return "column.table.name".
      * <p></p>
-     * The values of the chain correspond to the {@link liquibase.structure.DatabaseObject#getObjectTypeName()} and {@link liquibase.structure.DatabaseObject#getAttributes()}
+     * The values of the chain correspond to the {@link liquibase.structure.DatabaseObject#getObjectTypeName()} and
+     * {@link liquibase.structure.DatabaseObject#getAttributes()}
      * <p></p>
      * This method is used by integrations that want to generate Change instances or configurations pre-filled with
      * data required to apply to an existing database object.
@@ -344,9 +345,10 @@ public class ChangeParameterMetaData {
     }
 
     /**
-     * Return the {@link LiquibaseSerializable.SerializationType} to use when serializing this object.
+     * Return the {@link liquibase.serializer.LiquibaseSerializable.SerializationType}
+     * to use when serializing this object.
      */
-    public LiquibaseSerializable.SerializationType getSerializationType() {
+    public liquibase.serializer.LiquibaseSerializable.SerializationType getSerializationType() {
         return serializationType;
     }
 
@@ -367,7 +369,7 @@ public class ChangeParameterMetaData {
             }
         }
 
-        Map standardExamples = new HashMap();
+        Map<String, String> standardExamples = new HashMap<>();
         standardExamples.put("tableName", "person");
         standardExamples.put("schemaName", "public");
         standardExamples.put("tableSchemaName", "public");
