@@ -35,7 +35,6 @@ public class Schema extends AbstractDatabaseObject {
         return getAttribute("name", String.class);
     }
 
-
     @Override
     public Schema setName(String name) {
         setAttribute("name", name);
@@ -123,8 +122,9 @@ public class Schema extends AbstractDatabaseObject {
         return getAttribute("objects", Map.class);
     }
 
-    public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {
-        Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) getObjects().get(type);
+    public <T extends DatabaseObject> List<T> getDatabaseObjects(Class<T> type) {
+        Set<T> databaseObjects =
+            (Set<T>) getObjects().get(type);
         if (databaseObjects == null) {
             return new ArrayList<>();
         }
