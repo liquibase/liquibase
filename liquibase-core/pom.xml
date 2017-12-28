@@ -294,6 +294,7 @@
 							<descriptors>
 								<descriptor>src/main/resources/assembly/bin.xml</descriptor>
 							</descriptors>
+							<tarLongFileMode>posix</tarLongFileMode>
 						</configuration>
 					</execution>
 				</executions>
