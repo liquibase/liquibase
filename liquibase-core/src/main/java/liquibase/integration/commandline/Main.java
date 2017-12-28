@@ -420,6 +420,13 @@ public class Main {
         return tempFile;
     }
 
+    /**
+     * Search for both liquibase.properties (or whatever the name of the current
+     * defaultsFile is) and the "local" variant liquibase.local.properties. The contents of the local
+     * variant overwrite parameters with the same name in the regular properties file.
+     *
+     * @throws CommandLineParsingException if an error occurs during parsing
+     */
     protected void parseDefaultPropertyFiles() throws CommandLineParsingException {
         File[] potentialPropertyFiles = new File[2];
 
@@ -441,18 +448,31 @@ public class Main {
         }
     }
 
+    /**
+     * Open a property file that is embedded as a Java resource and parse it.
+     * @param potentialPropertyFile location and file name of the property file
+     * @throws IOException if the file cannot be opened
+     * @throws CommandLineParsingException if an error occurs during parsing
+     */
     private void parseDefaultPropertyFileFromResource(File potentialPropertyFile) throws IOException,
-            CommandLineParsingException {
+        CommandLineParsingException {
         try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream
-                (potentialPropertyFile.getAbsolutePath())) {
+            (potentialPropertyFile.getAbsolutePath())) {
             if (resourceAsStream != null) {
                 parsePropertiesFile(resourceAsStream);
             }
         }
     }
 
+    /**
+     * Open a regular property file (not embedded in a resource - use {@link #parseDefaultPropertyFileFromResource}
+     * for that) and parse it.
+     * @param potentialPropertyFile path and file name to the the property file
+     * @throws IOException if the file cannot be opened
+     * @throws CommandLineParsingException if an error occurs during parsing
+     */
     private void parseDefaultPropertyFileFromFile(File potentialPropertyFile) throws IOException,
-            CommandLineParsingException {
+        CommandLineParsingException {
         try (FileInputStream stream = new FileInputStream(potentialPropertyFile)) {
             parsePropertiesFile(stream);
         }
@@ -676,8 +696,8 @@ public class Main {
                         LogType.LOG, String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
                     );
                 }
-            } catch (Exception e) {
-                throw new CommandLineParsingException(
+            } catch (IllegalAccessException e) {
+                throw new UnexpectedLiquibaseException (
                     String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
                 );
             }
@@ -1072,7 +1092,7 @@ public class Main {
                 changeExecListenerClass, changeExecListenerPropertiesFile);
             liquibase.setChangeExecListener(listener);
 
-            liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
+            database.setCurrentDateTimeFunction(currentDateTimeFunction);
             for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
