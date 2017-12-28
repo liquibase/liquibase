@@ -57,7 +57,7 @@ public interface SqlGenerator<T extends SqlStatement> extends PrioritizedService
 
     /**
      * Does this generator support the given statement/database combination? Do not validate the statement with this
-     * method, only return if it <i>can</i> suppot it.
+     * method, only return if it <i>can</i> support it.
      */
     boolean supports(T statement, Database database);
 
