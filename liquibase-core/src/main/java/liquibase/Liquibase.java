@@ -154,17 +154,6 @@ public class Liquibase {
     }
 
     /**
-     * Use this function to override the current date/time function used to insert dates into the database.
-     * Especially useful when using an unsupported database.
-     *
-     * @deprecated Should call {@link Database#setCurrentDateTimeFunction(String)} directly
-     */
-    @Deprecated
-    public void setCurrentDateTimeFunction(String currentDateTimeFunction) {
-        this.database.setCurrentDateTimeFunction(currentDateTimeFunction);
-    }
-
-    /**
      * Convience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
      */
     public void update(String contexts) throws LiquibaseException {
