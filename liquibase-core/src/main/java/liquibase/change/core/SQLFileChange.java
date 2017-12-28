@@ -110,6 +110,7 @@ public class SQLFileChange extends AbstractSQLChange {
         }
     }
 
+    @Override
     public InputStream openSqlStream() throws IOException {
         if (path == null) {
             return null;
@@ -117,7 +118,8 @@ public class SQLFileChange extends AbstractSQLChange {
 
         InputStream inputStream = null;
         try {
-            inputStream = StreamUtil.openStream(path, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            inputStream = StreamUtil.openStream(path, isRelativeToChangelogFile(),
+                getChangeSet(), getResourceAccessor());
         } catch (IOException e) {
             throw new IOException("Unable to read file '" + path + "'", e);
         }
