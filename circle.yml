@@ -21,7 +21,7 @@ test:
     # We may get into trouble if we try to do integration tests that need RDBMS servers running with more than
     # one server, so we might have to split up our integration tests for these in the future.
     # There seems to be a memory leak that gets worse the higher the default liquibase.defaultlogger.level is.
-    - mvn -B -Psonar clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=$SONARQUBE_TOKEN
+    - mvn -B -Psonar clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${CIRCLE_BRANCH}
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} $CIRCLE_TEST_REPORTS/junit/ \;
