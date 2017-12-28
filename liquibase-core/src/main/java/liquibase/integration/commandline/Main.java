@@ -214,7 +214,7 @@ public class Main {
                         (String.format(coreBundle.getString("unexpected.error"), message)), e);
                     log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
                 }
-            } catch (Exception e1) {
+            } catch (IllegalFormatException e1) {
                 e1.printStackTrace();
             }
             throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
@@ -869,7 +869,7 @@ public class Main {
                 if (classpathEntry.endsWith(FILE_SUFFIXES.WAR_FILE_SUFFIX)) {
                     try {
                         addWarFileClasspathEntries(classPathFile, urls);
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         throw new CommandLineParsingException(e);
                     }
                 } else if (classpathEntry.endsWith(FILE_SUFFIXES.FILE_SUFFIX_EAR)) {
@@ -889,7 +889,7 @@ public class Main {
                                 addWarFileClasspathEntries(warFile, urls);
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         throw new CommandLineParsingException(e);
                     }
 
@@ -939,12 +939,12 @@ public class Main {
         }
 
         try {
-//            if (null != logFile) {
-//                LogService.getLog(getClass()).setLogLevel(logLevel, logFile);
-//            } else {
-//                LogService.getLog(getClass()).setLogLevel(logLevel);
-//            }
-        } catch (IllegalArgumentException e) {
+            if (null != logFile) {
+                // TODO: Make command line parameter "logFile" work with the new logging system
+                throw new UnexpectedLiquibaseException("TODO: Make command line parameter \"logFile\" work with the " +
+                    "new logging system");
+            }
+        } catch (UnexpectedLiquibaseException e) {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
 
@@ -960,8 +960,6 @@ public class Main {
             this.databaseChangeLogLockTableName);
         try {
 
-            boolean includeCatalog = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_CATALOG, "false"));
-            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "false"));
             String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
             String includeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
 
@@ -982,6 +980,8 @@ public class Main {
                 database);
 
             CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
+            boolean includeCatalog = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_CATALOG, "false"));
+            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "false"));
             DiffOutputControl diffOutputControl = new DiffOutputControl(
                 includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
 
@@ -1524,7 +1524,8 @@ public class Main {
 
     private static class ConsoleLogFilter extends AbstractMatcherFilter {
 
-        private boolean outputLogs; // default ist false.
+        // default ist false.
+        private boolean outputLogs;
 
         @Override
         public FilterReply decide(Object event) {
