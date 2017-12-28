@@ -420,7 +420,10 @@
                         <optimize>true</optimize>
                         <debug>true</debug>
                         <encoding>${project.build.sourceEncoding}</encoding>
-                        <!-- <compilerArgument>-Xlint:deprecation</compilerArgument> -->
+                        <compilerArguments>
+                            <Xlint:deprecation/>
+                            <Xlint:unchecked/>
+                        </compilerArguments>
                     </configuration>
                 </plugin>
 

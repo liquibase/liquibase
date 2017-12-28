@@ -9,6 +9,7 @@ import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -19,10 +20,10 @@ import java.io.InputStream;
  * Represents a Change for custom SQL stored in a File.
  * <p/>
  * To create an instance call the constructor as normal and then call
+ * {@link AbstractSQLChange#setResourceAccessor(ResourceAccessor)} before calling setPath, otherwise the
+ * file will likely not be found.
  *
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
- * @link{#setResourceAccesssor(ResourceAccessor)} before calling setPath otherwise the
- * file will likely not be found.
  */
 @DatabaseChange(name = "sqlFile",
         description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a " +
@@ -61,7 +62,8 @@ public class SQLFileChange extends AbstractSQLChange {
         return false;
     }
 
-    @DatabaseChangeProperty(description = "The file path of the SQL file to load", requiredForDatabase = "all", exampleValue = "my/path/file.sql")
+    @DatabaseChangeProperty(description = "The file path of the SQL file to load", requiredForDatabase = "all",
+        exampleValue = "my/path/file.sql")
     public String getPath() {
         return path;
     }

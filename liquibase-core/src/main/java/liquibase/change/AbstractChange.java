@@ -31,6 +31,7 @@ import java.util.*;
  */
 public abstract class AbstractChange implements Change {
 
+    protected static final String NODENAME_COLUMN = "column";
     private ResourceAccessor resourceAccessor;
 
     private ChangeSet changeSet;
@@ -177,10 +178,11 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Create the {@link ChangeParameterMetaData} "serializationType" value. Uses the value on the
-     * DatabaseChangeProperty annotation or returns {@link SerializationType}.NAMED_FIELD as a default.
+     * DatabaseChangeProperty annotation or returns
+     * {@link liquibase.serializer.LiquibaseSerializable.SerializationType#NAMED_FIELD} as a default.
      */
     @SuppressWarnings("UnusedParameters")
-    protected SerializationType createSerializationTypeMetaData(
+    protected liquibase.serializer.LiquibaseSerializable.SerializationType createSerializationTypeMetaData(
         String parameterName, DatabaseChangeProperty changePropertyAnnotation
     ) {
         if (changePropertyAnnotation == null) {
@@ -599,7 +601,7 @@ public abstract class AbstractChange implements Change {
                             List<ParsedNode> columnNodes = new ArrayList<>(
                                 parsedNode.getChildren(null, param.getParameterName())
                             );
-                            columnNodes.addAll(parsedNode.getChildren(null, "column"));
+                            columnNodes.addAll(parsedNode.getChildren(null, NODENAME_COLUMN));
 
                             Object nodeValue = parsedNode.getValue();
                             if (nodeValue instanceof ParsedNode) {
@@ -613,8 +615,8 @@ public abstract class AbstractChange implements Change {
                             }
 
                             for (ParsedNode child : columnNodes) {
-                                if ("column".equals(child.getName()) || "columns".equals(child.getName())) {
-                                    List<ParsedNode> columnChildren = child.getChildren(null, "column");
+                                if (NODENAME_COLUMN.equals(child.getName()) || "columns".equals(child.getName())) {
+                                    List<ParsedNode> columnChildren = child.getChildren(null, NODENAME_COLUMN);
                                     if ((columnChildren != null) && !columnChildren.isEmpty()) {
                                         for (ParsedNode columnChild : columnChildren) {
                                             ColumnConfig columnConfig = createEmptyColumnConfig(collectionType);

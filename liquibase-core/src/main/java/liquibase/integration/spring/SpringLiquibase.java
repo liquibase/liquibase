@@ -44,8 +44,9 @@ import java.util.jar.Manifest;
  * Example Configuration:
  * <p/>
  * <p/>
- * This Spring configuration example will cause liquibase to run automatically when the Spring context is initialized. It will load
- * <code>db-changelog.xml</code> from the classpath and apply it against <code>myDataSource</code>.
+ * This Spring configuration example will cause liquibase to run automatically when the Spring context is
+ * initialized. It will load <code>db-changelog.xml</code> from the classpath and apply it against
+ * <code>myDataSource</code>.
  * <p/>
  * <p/>
  *
@@ -160,7 +161,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 						connection.rollback();
 					}
 					connection.close();
-				} catch (Exception e) {
+                } catch (SQLException e) {
 					log.warning(LogType.LOG, "problem closing connection", e);
 				}
 			}
@@ -170,8 +171,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	/**
 	 * The DataSource that liquibase will use to perform the migration.
-	 *
-	 * @return
 	 */
 	public DataSource getDataSource() {
 		return dataSource;
@@ -186,8 +185,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	/**
 	 * Returns a Resource that is able to resolve to a file or classpath resource.
-	 *
-	 * @return
 	 */
 	public String getChangeLog() {
 		return changeLog;
@@ -239,7 +236,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-        ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
+        ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance()
+            .getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
             LogService.getLog(getClass()).info(LogType.LOG, "DB-Manul did not run because " + LiquibaseConfiguration
@@ -278,12 +276,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
             try (
                 FileOutputStream fileOutputStream = new FileOutputStream(rollbackFile);
-                Writer output = new OutputStreamWriter(fileOutputStream, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())
+                Writer output = new OutputStreamWriter(fileOutputStream, LiquibaseConfiguration.getInstance()
+                    .getConfiguration(GlobalConfiguration.class).getOutputEncoding())
 
             ) {
 
                 if (tag != null) {
-                    liquibase.futureRollbackSQL(tag, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                    liquibase.futureRollbackSQL(tag, new Contexts(getContexts()),
+                        new LabelExpression(getLabels()), output);
                 } else {
                     liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabels()), output);
                 }
@@ -330,7 +330,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         DatabaseConnection liquibaseConnection;
         if (c == null) {
-            log.warning(LogType.LOG, "Null connection returned by liquibase datasource. Using offline unknown database");
+            log.warning(LogType.LOG,
+                "Null connection returned by liquibase datasource. Using offline unknown database");
             liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
 
         } else {
@@ -357,8 +358,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     /**
      * Gets the Spring-name of this instance.
-     *
-     * @return
      */
     public String getBeanName() {
         return beanName;
@@ -424,7 +423,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 }
 
                 if (liquibasePackages.isEmpty()) {
-                    LogService.getLog(getClass()).warning(LogType.LOG, "No Liquibase-Packages entry found in MANIFEST.MF. " +
+                    LogService.getLog(getClass()).warning(LogType.LOG,
+                        "No Liquibase-Packages entry found in MANIFEST.MF. " +
                         "Using fallback of entire 'liquibase' package");
                     liquibasePackages.add("liquibase");
                 }
@@ -469,15 +469,16 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             if (path == null) {
                 return null;
             }
-            Set<InputStream> returnSet = new HashSet<>();
             Resource[] resources = getResources(adjustClasspath(path));
 
             if ((resources == null) || (resources.length == 0)) {
                 return null;
             }
+
+            Set<InputStream> returnSet = new HashSet<>();
             for (Resource resource : resources) {
-                LogService.getLog(getClass()).debug(LogType.LOG, "Opening " + resource.getURL().toExternalForm() + " as " +
-                    path);
+                LogService.getLog(getClass()).debug(LogType.LOG, "Opening "
+                    + resource.getURL().toExternalForm() + " as " + path);
                 URLConnection connection = resource.getURL().openConnection();
                 connection.setUseCaches(false);
                 returnSet.add(connection.getInputStream());

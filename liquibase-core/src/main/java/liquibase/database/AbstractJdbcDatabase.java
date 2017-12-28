@@ -309,8 +309,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Overwrite this method to get the default schema name for the connection.
      * If you only need to change the statement that obtains the current schema then override
-     *  @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
-     * @return
+     * @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
      */
     protected String getConnectionSchemaName() {
         if (connection == null) {
@@ -335,7 +334,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Override this method to change the statement.
      * Only override this if getConnectionSchemaName is left unchanges or is using this method.
      * @see AbstractJdbcDatabase#getConnectionSchemaName()
-     * @return
      */
     protected SqlStatement getConnectionSchemaNameCallStatement(){
         return new RawCallStatement("call current_schema");
@@ -452,7 +450,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     /***
      * Returns true if the String conforms to an ISO 8601 date, e.g. 2016-12-31
      * @param isoDate
-     * @return
      */
     protected boolean isDateOnly(final String isoDate) {
         return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}$");
@@ -464,7 +461,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * The "T" may be replaced by a space.
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * @param isoDate
-     * @return
      */
     protected boolean isDateTime(final String isoDate) {
         return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$");
@@ -477,7 +473,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * The "T" may be replaced by a space.
      * @param isoDate
-     * @return
      */
     protected boolean isTimestamp(final String isoDate) {
         return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$");
@@ -488,7 +483,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * e.g. 18:43:59
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * @param isoDate
-     * @return
      */
     protected boolean isTimeOnly(final String isoDate) {
         return isoDate.matches("^\\d{2}:\\d{2}:\\d{2}$");

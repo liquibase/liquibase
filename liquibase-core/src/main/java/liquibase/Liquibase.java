@@ -82,8 +82,8 @@ public class Liquibase {
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
      *
-     * @See DatabaseConnection
-     * @See Database
+     * @see DatabaseConnection
+     * @see Database
      * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database)
      * @see ResourceAccessor
      */
@@ -95,7 +95,7 @@ public class Liquibase {
     /**
      * Creates a Liquibase instance. The changeLogFile parameter must be a path that can be resolved by the passed
      * ResourceAccessor. If windows style path separators are used for the changeLogFile, they will be standardized to
-     * unix style for better cross-system compatib.
+     * unix style for better cross-system compatibility.
      *
      * @see DatabaseConnection
      * @see Database

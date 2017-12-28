@@ -43,7 +43,6 @@ public class DeleteStatement extends AbstractSqlStatement {
 
     /**
      * @deprecated use {@link #getWhere()}
-     * @return
      */
     public String getWhereClause() {
         return getWhere();

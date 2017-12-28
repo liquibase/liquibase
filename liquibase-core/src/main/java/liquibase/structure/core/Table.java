@@ -31,8 +31,6 @@ public class Table extends Relation {
 
     /**
      * Returns the list of all outgoing FOREIGN KEYS from this table
-     *
-     * @return
      */
     public List<ForeignKey> getOutgoingForeignKeys() {
         List<ForeignKey> fkList = getAttribute("outgoingForeignKeys", List.class);

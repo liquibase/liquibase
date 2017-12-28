@@ -47,7 +47,7 @@
     <files>
         <file>
             <source>${project.build.directory}/${project.build.finalName}.jar</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
             <destName>dbmanul.jar</destName>
             <fileMode>0644</fileMode>
         </file>

@@ -101,8 +101,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     /**
-     * Return the name of the custom class set in {@link #setClass(String)}
-     * @return
+     * Returns the name of the custom class set in {@link #setClass(String)}
      */
     @DatabaseChangeProperty(description = "Name class that implements the custom change.")
     public String getClassName() {

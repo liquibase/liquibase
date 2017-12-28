@@ -91,7 +91,7 @@ public class DataTypeFactory {
      * data type (e.g. varchar(255) )
      * @param dataTypeDefinition
      * @param database
-     * @return
+     * @return the corresponding Liquibase data type in object form
      */
     public LiquibaseDataType fromDescription(String dataTypeDefinition, Database database) {
         String dataTypeName = dataTypeDefinition;

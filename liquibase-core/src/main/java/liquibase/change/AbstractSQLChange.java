@@ -58,7 +58,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     /**
      * {@inheritDoc}
      * @param database
-     * @return
+     * @return always true (in AbstractSQLChange)
      */
     @Override
     public boolean supports(Database database) {

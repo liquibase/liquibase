@@ -11,10 +11,10 @@ import liquibase.structure.DatabaseObject;
  */
 public interface SnapshotGenerator {
 
-    final int PRIORITY_NONE = -1;
-    final int PRIORITY_DEFAULT = 1;
-    final int PRIORITY_DATABASE = 5;
-    final int PRIORITY_ADDITIONAL = 50;
+    int PRIORITY_NONE = -1;
+    int PRIORITY_DEFAULT = 1;
+    int PRIORITY_DATABASE = 5;
+    int PRIORITY_ADDITIONAL = 50;
 
     /**
      * Inquire if this SnapshotGenerator is capable of snapshotting objects of type
@@ -39,17 +39,21 @@ public interface SnapshotGenerator {
      * @throws DatabaseException If an operation on the database fails
      * @throws InvalidExampleException If, for some reason, we cannot work on the example object (ambiguous naming etc.)
      */
-    <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException;
+    <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain)
+        throws DatabaseException, InvalidExampleException;
 
     /**
      * When snapshotting a certain object type (e.g. a table), different types of objects might be discovered in the
-     * process. For example, snapshotting a
-     * @return
+     * process.
+     * (TODO: Which ones? Needs a more precise description.)
+     * @return an array of classes that this SnapshotGenerator might return upon snapshotting a given
+     * DatabaseObject type.
      */
     Class<? extends DatabaseObject>[] addsTo();
 
     /**
-     * Returns classes (and superclasses) that this SnapshotGenerator replaces. Return null or empty array to not affect the SnapshotGeneratorChain.
+     * Returns classes (and superclasses) that this SnapshotGenerator replaces. Return null or empty array to not
+     * affect the SnapshotGeneratorChain.
      */
     Class<? extends SnapshotGenerator>[] replaces();
 }

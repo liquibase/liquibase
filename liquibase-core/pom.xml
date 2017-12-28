@@ -232,7 +232,9 @@
 							<goal>javadoc</goal>
 						</goals>
 						<configuration>
-							<sourcepath>../liquibase-core/src/main/java</sourcepath>
+							<sourcepath>
+								../liquibase-core/src/main/java;../liquibase-core/target/generated-sources/javacc
+							</sourcepath>
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>

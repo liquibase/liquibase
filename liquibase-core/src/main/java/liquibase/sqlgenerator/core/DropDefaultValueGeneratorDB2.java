@@ -53,67 +53,98 @@ public class DropDefaultValueGeneratorDB2 extends DropDefaultValueGenerator {
      * @param statement
      * @param database
      * @param sqlGeneratorChain
-     * @return
+     * @return a String array of one or more SQL statements
      */
     @Override
-    public Sql[] generateSql(DropDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(DropDefaultValueStatement statement, Database database,
+                             SqlGeneratorChain sqlGeneratorChain) {
         // Generate SQL based on the flavour of DB2:
         DB2Database db = ((DB2Database)database);
         String sql;
 
         switch (db.getDataServerType()) {
-            case DB2I: // DB2 on IBM iSeries
-                // same as...
-            case DB2Z: // DB2 on IBM zSeries
-                // We cannot prevent the situation on these systems due to the lack of SQL PL. We can only
-                // issue a warning (in the DrioDefaultValueChange validator) and pray for the best.
-                String escapedTableName = database.escapeTableName(
-                        statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-                sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN " +
-                        database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(),
-                                statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
+            // DB2 on IBM iSeries works in the same way as DB2 on IBM zSeries
+            case DB2I:
+            case DB2Z:
+                sql = generateSqlForDb2iOrDb2z(statement, database);
                 break;
-            case DB2LUW: // LUW == Linux/Unix/Windows
-                // According to
-                // https://www.ibm.com/support/knowledgecenter/SSEPGG_9.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0001038.html ,
-                // we can query SYSCAT.COLUMNS.DEFAULT for the value we are looking for.
-                String tabSchema = database.correctObjectName(
-                        new CatalogAndSchema(statement.getCatalogName(),
-                                statement.getSchemaName()).customize(database).getSchemaName(),
-                        Schema.class);
-                if (tabSchema != null)
-                    tabSchema = tabSchema.replaceAll("'", "''");
+            // LUW == Linux/Unix/Windows
+            case DB2LUW:
+                sql = getSqlStatementForDb2Luw(statement, database);
 
-                sql = String.format("BEGIN\n" +
-                                "  DECLARE v_default CLOB;\n" +
-                                "\n" +
-                                "  SELECT C.default INTO v_default FROM syscat.columns C\n" +
-                                "  WHERE tabname='%s'\n" +
-                                "        AND colname='%s'\n" +
-                                "        AND tabschema='%s';\n" +
-                                "\n" +
-                                "  IF v_default IS NOT NULL THEN\n" +
-                                "    IF v_default <> 'NULL' THEN\n" +
-                                "      EXECUTE IMMEDIATE 'ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT';\n" +
-                                "    END IF;\n" +
-                                "  END IF;\n" +
-                                "END\n",
-                        database.correctObjectName(statement.getTableName(), Table.class).replaceAll("'", "''"),
-                        database.correctObjectName(statement.getColumnName(), Column.class).replaceAll("'", "''"),
-                        tabSchema,
-                        database.escapeTableName(
-                                statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()
-                        ).replaceAll("'", "''"),
-                        database.escapeObjectName(statement.getColumnName(), Column.class).replaceAll("'", "''")
-                );
                 break;
             default:
-                throw new UnexpectedLiquibaseException("We do not know how to generate the SQL-PL code for this flavour of IBM DB2. Sorry.");
+                throw new UnexpectedLiquibaseException(
+                    "We do not know how to generate the SQL-PL code for this flavour of IBM DB2. Sorry.");
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql, getAffectedColumn(statement))
+        return new Sql[]{
+            new UnparsedSql(sql, getAffectedColumn(statement))
         };
+    }
+
+    /**
+     * Generate the DROP DEFAULT VALUE statement for the LUW (Linux, Unix, Windows) variant of DB2.
+     *
+     * @param statement the statement definition in object form
+     * @param database  the database object for the DB2 database
+     * @return the generated SQL statement.
+     */
+    private String getSqlStatementForDb2Luw(DropDefaultValueStatement statement, Database database) {
+        String sql;
+        String tabSchema = database.correctObjectName(
+            new CatalogAndSchema(statement.getCatalogName(),
+                statement.getSchemaName()).customize(database).getSchemaName(),
+            Schema.class);
+        if (tabSchema != null) {
+            tabSchema = tabSchema.replaceAll("'", "''");
+        }
+
+        // According to
+        // https://www.ibm.com/support/knowledgecenter/SSEPGG_9.5.0/com.ibm.db2.luw.sql.ref.doc/doc/r0001038.html,
+        // we can query SYSCAT.COLUMNS.DEFAULT for the value we are looking for.
+        sql = String.format("BEGIN\n" +
+                "  DECLARE v_default CLOB;\n" +
+                "\n" +
+                "  SELECT C.default INTO v_default FROM syscat.columns C\n" +
+                "  WHERE tabname='%s'\n" +
+                "        AND colname='%s'\n" +
+                "        AND tabschema='%s';\n" +
+                "\n" +
+                "  IF v_default IS NOT NULL THEN\n" +
+                "    IF v_default <> 'NULL' THEN\n" +
+                "      EXECUTE IMMEDIATE 'ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT';\n" +
+                "    END IF;\n" +
+                "  END IF;\n" +
+                "END\n",
+            database.correctObjectName(statement.getTableName(), Table.class).replaceAll("'", "''"),
+            database.correctObjectName(statement.getColumnName(), Column.class).replaceAll("'", "''"),
+            tabSchema,
+            database.escapeTableName(
+                statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()
+            ).replaceAll("'", "''"),
+            database.escapeObjectName(statement.getColumnName(), Column.class).replaceAll("'", "''")
+        );
+        return sql;
+    }
+
+    /**
+     * Generate the DROP DEFAULT VALUE statement for the DB2I and DB2Z variants of DB2.
+     *
+     * @param statement the statement definition in object form
+     * @param database  the database object for the DB2 database
+     * @return the generated SQL statement.
+     */
+    private String generateSqlForDb2iOrDb2z(DropDefaultValueStatement statement, Database database) {
+        // We cannot prevent the situation on these systems due to the lack of SQL PL. We can only
+        // issue a warning (in the DrioDefaultValueChange validator) and pray for the best.
+        String sql;
+        String escapedTableName = database.escapeTableName(
+            statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+        sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN " +
+            database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(),
+                statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
+        return sql;
     }
 
 }
