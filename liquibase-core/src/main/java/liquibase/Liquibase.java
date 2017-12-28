@@ -52,6 +52,8 @@ import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
 
+import static java.util.ResourceBundle.getBundle;
+
 /**
  * Primary facade class for interacting with Liquibase.
  * The built in command line, Ant, Maven and other ways of running Liquibase are wrappers around methods in this class.
@@ -59,6 +61,13 @@ import java.util.*;
 public class Liquibase {
 
     private static final Logger LOG = LogService.getLog(Liquibase.class);
+    protected static final int CHANGESET_ID_NUM_PARTS = 3;
+    protected static final int CHANGESET_ID_AUTHOR_PART = 2;
+    protected static final int CHANGESET_ID_CHANGESET_PART = 1;
+    protected static final int CHANGESET_ID_CHANGELOG_PART = 0;
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
+
     protected Database database;
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
@@ -197,7 +206,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
             resetServices();
         }
@@ -302,7 +311,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
             resetServices();
         }
@@ -347,7 +356,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
             resetServices();
         }
@@ -633,7 +642,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        /* We have no other choice than to save the current Executer here. */
+        /* We have no other choice than to save the current Executor here. */
         @SuppressWarnings("squid:S1941")
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(
@@ -708,7 +717,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
         resetServices();
@@ -797,7 +806,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
         resetServices();
@@ -874,7 +883,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
             resetServices();
         }
@@ -945,7 +954,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
             resetServices();
         }
@@ -1085,7 +1094,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
             ExecutorService.getInstance().setExecutor(database, oldTemplate);
             resetServices();
@@ -1150,7 +1159,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
     }
@@ -1167,7 +1176,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
     }
@@ -1435,7 +1444,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
         resetServices();
@@ -1446,23 +1455,24 @@ public class Liquibase {
             throw new LiquibaseException(new IllegalArgumentException("changeSetIdentifier"));
         }
         final List<String> parts = StringUtils.splitAndTrim(changeSetIdentifier, "::");
-        if ((parts == null) || (parts.size() < 3)) {
+        if ((parts == null) || (parts.size() < CHANGESET_ID_NUM_PARTS)) {
             throw new LiquibaseException(
                 new IllegalArgumentException("Invalid changeSet identifier: " + changeSetIdentifier)
             );
         }
-        return this.calculateCheckSum(parts.get(0), parts.get(1), parts.get(2));
+        return this.calculateCheckSum(parts.get(CHANGESET_ID_CHANGELOG_PART),
+            parts.get(CHANGESET_ID_CHANGESET_PART), parts.get(CHANGESET_ID_AUTHOR_PART));
     }
 
     public CheckSum calculateCheckSum(final String filename, final String id, final String author)
         throws LiquibaseException {
         LOG.info(LogType.LOG, String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
-        final ChangeLogParameters changeLogParameters = this.getChangeLogParameters();
+        final ChangeLogParameters clParameters = this.getChangeLogParameters();
         final ResourceAccessor resourceAccessor = this.getResourceAccessor();
         final DatabaseChangeLog changeLog =
             ChangeLogParserFactory.getInstance().getParser(
                 this.changeLogFile, resourceAccessor
-            ).parse(this.changeLogFile, changeLogParameters, resourceAccessor);
+            ).parse(this.changeLogFile, clParameters, resourceAccessor);
 
         // TODO: validate?
 
@@ -1512,7 +1522,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.severe(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
         }
     }
