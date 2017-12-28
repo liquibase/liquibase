@@ -62,13 +62,21 @@ public class Schema extends AbstractDatabaseObject {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if ((o == null) || (getClass() != o.getClass())) return false;
+        // object identity
+        if (this == o) {
+            return true;
+        }
 
-        Schema schema = (Schema) o;
+        // other object null or of different class
+        if ((o == null) || (getClass() != o.getClass())) {
+            return false;
+        }
+        Schema otherSchema = (Schema) o;
 
-        if ((getCatalog() != null) ? !getCatalog().equals(schema.getCatalog()) : (schema.getCatalog() != null)) return false;
-        return (getName() != null) ? getName().equalsIgnoreCase(schema.getName()) : (schema.getName() == null);
+        // catalog or name different?
+        return (
+            (Objects.equals(getCatalog(), otherSchema.getCatalog())) &&
+                (StringUtils.equalsIgnoreCaseAndEmpty(getName(), otherSchema.getName())));
     }
 
     @Override
