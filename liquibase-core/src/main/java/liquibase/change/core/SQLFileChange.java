@@ -62,8 +62,8 @@ public class SQLFileChange extends AbstractSQLChange {
         return false;
     }
 
-    @DatabaseChangeProperty(description = "The file path of the SQL file to load", requiredForDatabase = "all",
-        exampleValue = "my/path/file.sql")
+    @DatabaseChangeProperty(description = "The file path of the SQL file to load",
+        exampleValue = "my/path/file.sql", requiredForDatabase = "all")
     public String getPath() {
         return path;
     }
