@@ -73,12 +73,12 @@ public interface SqlGenerator<T extends SqlStatement> extends PrioritizedService
      * object, not a null value.
      * Liquibase will inspect the ValidationErrors result before attempting to call generateSql.
      */
-    ValidationErrors validate(T statement, Database database, SqlGeneratorChain sqlGeneratorChain);
+    ValidationErrors validate(T statement, Database database, SqlGeneratorChain<T> sqlGeneratorChain);
 
-    Warnings warn(T statementType, Database database, SqlGeneratorChain sqlGeneratorChain);
+    Warnings warn(T statementType, Database database, SqlGeneratorChain<T> sqlGeneratorChain);
 
     /**
      * Generate the actual Sql for the given statement and database.
      */
-    Sql[] generateSql(T statement, Database database, SqlGeneratorChain sqlGeneratorChain);
+    Sql[] generateSql(T statement, Database database, SqlGeneratorChain<T> sqlGeneratorChain);
 }
