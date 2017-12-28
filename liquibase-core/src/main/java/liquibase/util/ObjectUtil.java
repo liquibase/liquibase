@@ -13,19 +13,46 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Various methods that make it easier to read and write object properties using the propertyName, instead of having
+ * to look up the correct reader/writer methods manually first. All methods in this class are static by nature.
+ */
 public class ObjectUtil {
 
+    /**
+     * Cache for the methods of classes that we have been queried about so far.
+     */
     private static Map<Class<?>, Method[]> methodCache = new HashMap<>();
 
-    public static Object getProperty(Object object, String propertyName) throws IllegalAccessException, InvocationTargetException {
+    /**
+     * For a given object, try to find the appropriate reader method and return the value, if set
+     * for the object. If the property is currently not set for the object, an
+     * {@link UnexpectedLiquibaseException} run-time exception occurs.
+     *
+     * @param object       the object to examine
+     * @param propertyName the property name for which the value should be read
+     * @return the stored value
+     * @throws IllegalAccessException    if access to the value is denied (e.g. by a {@link SecurityManager} )
+     * @throws InvocationTargetException if the appropriate read method can be called, but throws an Exception
+     */
+    public static Object getProperty(Object object, String propertyName)
+        throws IllegalAccessException, InvocationTargetException {
         Method readMethod = getReadMethod(object, propertyName);
         if (readMethod == null) {
-            throw new UnexpectedLiquibaseException("Property '" + propertyName + "' not found on object type " + object.getClass().getName());
+            throw new UnexpectedLiquibaseException("Property '" + propertyName
+                + "' not found on object type " + object.getClass().getName());
         }
 
         return readMethod.invoke(object);
     }
 
+    /**
+     * Tried to determine the appropriate reader method for a given propertyName of a given object and, if found,
+     * returns the class of its return type.
+     * @param object the object to examine
+     * @param propertyName the property name whose reading method should be searched
+     * @return the class name of the return type if the reading method is found, null if it is not found.
+     */
     public static Class getPropertyType(Object object, String propertyName) {
         Method readMethod = getReadMethod(object, propertyName);
         if (readMethod == null) {
@@ -34,22 +61,51 @@ public class ObjectUtil {
         return readMethod.getReturnType();
     }
 
+    /**
+     * Examines the given object's class and returns true if reader and writer methods both exist for the
+     * given property name.
+     * @param object the object for which the class should be examined
+     * @param propertyName the property name to search
+     * @return true if both reader and writer methods exist
+     */
     public static boolean hasProperty(Object object, String propertyName) {
         return hasReadProperty(object, propertyName) && hasWriteProperty(object, propertyName);
     }
 
+    /**
+     * Examines the given object's class and returns true if a reader method exists for the
+     * given property name.
+     * @param object the object for which the class should be examined
+     * @param propertyName the property name to search
+     * @return true if a reader method exists
+     */
     public static boolean hasReadProperty(Object object, String propertyName) {
         return getReadMethod(object, propertyName) != null;
     }
 
+    /**
+     * Examines the given object's class and returns true if a writer method exists for the
+     * given property name.
+     * @param object the object for which the class should be examined
+     * @param propertyName the property name to search
+     * @return true if a writer method exists
+     */
     public static boolean hasWriteProperty(Object object, String propertyName) {
         return getWriteMethod(object, propertyName) != null;
     }
 
+    /**
+     * Tries to guess the "real" data type of propertyValue by the given propertyName, then sets the
+     * selected property of the given object to that value.
+     * @param object the object whose property should be set
+     * @param propertyName name of the property to set
+     * @param propertyValue new value of the property, as String
+     */
     public static void setProperty(Object object, String propertyName, String propertyValue) {
         Method method = getWriteMethod(object, propertyName);
         if (method == null) {
-            throw new UnexpectedLiquibaseException("Property '" + propertyName + "' not found on object type " + object.getClass().getName());
+            throw new UnexpectedLiquibaseException("Property '" + propertyName
+                + "' not found on object type " + object.getClass().getName());
         }
 
         Class<?> parameterType = method.getParameterTypes()[0];
@@ -78,14 +134,23 @@ public class ObjectUtil {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + finalValue.getClass().getName());
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString()
+                + " with value of type " + finalValue.getClass().getName());
         }
     }
 
+    /**
+     * Sets the selected property of the given object to propertyValue. A run-time exception will occur if the
+     * type of value is incompatible with the reader/writer method signatures of the given propertyName.
+     * @param object the object whose property should be set
+     * @param propertyName name of the property to set
+     * @param propertyValue new value of the property
+     */
     public static void setProperty(Object object, String propertyName, Object propertyValue) {
         Method method = getWriteMethod(object, propertyName);
         if (method == null) {
-            throw new UnexpectedLiquibaseException("Property '" + propertyName + "' not found on object type " + object.getClass().getName());
+            throw new UnexpectedLiquibaseException("Property '" + propertyName
+                + "' not found on object type " + object.getClass().getName());
         }
 
         try {
@@ -102,13 +167,22 @@ public class ObjectUtil {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type "
+                + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
         }
     }
 
+    /**
+     * Tries to find the Java method to read a given propertyName for the given object.
+     * @param object the object whose class will be examined
+     * @param propertyName the property name for which the read method should be searched
+     * @return the {@link Method} if found, null in all other cases.
+     */
     private static Method getReadMethod(Object object, String propertyName) {
-        String getMethodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
-        String isMethodName = "is" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
+        String getMethodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
+            + propertyName.substring(1);
+        String isMethodName = "is" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH)
+            + propertyName.substring(1);
 
         Method[] methods = getMethods(object);
 
@@ -121,8 +195,15 @@ public class ObjectUtil {
         return null;
     }
 
+    /**
+     * Tries to find the Java method to write a new value for a given propertyName to the given object.
+     * @param object the object whose class will be examined
+     * @param propertyName the property name for which the write method is to be searched
+     * @return the {@link Method} if found, null in all other cases.
+     */
     private static Method getWriteMethod(Object object, String propertyName) {
-        String methodName = "set" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
+        String methodName = "set"
+            + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
@@ -133,6 +214,12 @@ public class ObjectUtil {
         return null;
     }
 
+    /**
+     * Determines the class of a given object and returns an array of that class's methods. The information might come
+     * from a cache.
+     * @param object the object to examine
+     * @return a list of methods belonging to the class of the object
+     */
     private static Method[] getMethods(Object object) {
         Method[] methods = methodCache.get(object.getClass());
 
