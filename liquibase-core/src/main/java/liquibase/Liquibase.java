@@ -1561,13 +1561,15 @@ public class Liquibase {
         this.ignoreClasspathPrefix = ignoreClasspathPrefix;
     }
 
-    public void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
+    @SafeVarargs
+    public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                   PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes)
         throws DatabaseException, IOException, ParserConfigurationException {
         generateChangeLog(catalogAndSchema, changeLogWriter, outputStream, null, snapshotTypes);
     }
 
-    public void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
+    @SafeVarargs
+    public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
                                   PrintStream outputStream, ChangeLogSerializer changeLogSerializer,
                                   Class<? extends DatabaseObject>... snapshotTypes)
         throws DatabaseException, IOException, ParserConfigurationException {

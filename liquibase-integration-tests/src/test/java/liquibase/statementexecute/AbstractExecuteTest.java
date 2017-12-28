@@ -66,17 +66,21 @@ public abstract class AbstractExecuteTest {
         assertCorrect(expectedSql);
     }
 
-    protected void assertCorrect(String expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
+    @SafeVarargs
+    protected final void assertCorrect(String expectedSql, Class<? extends Database>... includeDatabases) throws
+        Exception {
         assertCorrect(new String[]{expectedSql}, includeDatabases);
     }
 
-    protected void assertCorrect(String[] expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
+    @SafeVarargs
+    protected final void assertCorrect(String[] expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
         assertNotNull("SqlStatement to test is NOT null.", statementUnderTest);
 
         test(expectedSql, includeDatabases, null);
     }
 
-    public void testOnAllExcept(String expectedSql, Class<? extends Database>... excludedDatabases) throws Exception {
+    @SafeVarargs
+    public final void testOnAllExcept(String expectedSql, Class<? extends Database>... excludedDatabases) throws Exception {
         test(expectedSql, null, excludedDatabases);
     }
 
