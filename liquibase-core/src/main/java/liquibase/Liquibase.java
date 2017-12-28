@@ -548,7 +548,7 @@ public class Liquibase {
                     new RuntimeEnvironment(database, contexts, labelExpression)
                 );
             } else {
-                executeRollbackScript(rollbackScript, contexts, labelExpression);
+                executeRollbackScript(rollbackScript);
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
         } finally {
@@ -578,7 +578,7 @@ public class Liquibase {
         }, new RuntimeEnvironment(database, contexts, labelExpression));
     }
 
-    protected void executeRollbackScript(String rollbackScript, Contexts contexts, LabelExpression labelExpression)
+    protected void executeRollbackScript(String rollbackScript)
         throws LiquibaseException {
         final Executor executor = ExecutorService.getInstance().getExecutor(database);
         String rollbackScriptContents;
@@ -710,7 +710,7 @@ public class Liquibase {
                 logIterator.run(new RollbackVisitor(database, changeExecListener),
                     new RuntimeEnvironment(database, contexts, labelExpression));
             } else {
-                executeRollbackScript(rollbackScript, contexts, labelExpression);
+                executeRollbackScript(rollbackScript);
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
         } finally {
@@ -799,7 +799,7 @@ public class Liquibase {
                 logIterator.run(new RollbackVisitor(database, changeExecListener),
                     new RuntimeEnvironment(database, contexts, labelExpression));
             } else {
-                executeRollbackScript(rollbackScript, contexts, labelExpression);
+                executeRollbackScript(rollbackScript);
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
         } finally {
