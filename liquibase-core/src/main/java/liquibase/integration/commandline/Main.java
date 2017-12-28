@@ -166,7 +166,8 @@ public class Main {
                 main.printHelp(System.out);
                 return 0;
             } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
-                log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
+                log.info(LogType.USER_MESSAGE,
+                    String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
                     StreamUtil.getLineSeparator()));
                 return 0;
             }
@@ -209,7 +210,8 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
-                    log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)), e);
+                    log.severe(LogType.USER_MESSAGE,
+                        (String.format(coreBundle.getString("unexpected.error"), message)), e);
                     log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
                 }
             } catch (Exception e1) {
@@ -224,9 +226,11 @@ public class Main {
      * Set up the logging to the STDOUT/STDERR console streams.
      */
     protected static void setupLogging() {
-        LogLevel defaultLogLevel = (LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class)).getLogLevel();
+        LogLevel defaultLogLevel =
+            (LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class)).getLogLevel();
 
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        ch.qos.logback.classic.Logger root =
+            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.toLevel(defaultLogLevel.name()));
 
         Iterator<Appender<ILoggingEvent>> appenderIterator = root.iteratorForAppenders();
@@ -238,7 +242,8 @@ public class Main {
         }
 
         for (String target : new String[] {"System.out", "System.err"}) {
-            CommandLineOutputAppender appender = new CommandLineOutputAppender(LoggerFactory.getILoggerFactory(), target);
+            CommandLineOutputAppender appender =
+                new CommandLineOutputAppender(LoggerFactory.getILoggerFactory(), target);
             appender.setLayout(new TreeStyleLayout());
             root.addAppender(appender);
 
@@ -876,7 +881,8 @@ public class Main {
                                 File jar = extract(earZip, entry);
                                 URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
                                 urls.add(newUrl);
-                                LOG.debug(LogType.LOG, String.format(coreBundle.getString("adding.to.classpath"), newUrl));
+                                LOG.debug(LogType.LOG,
+                                    String.format(coreBundle.getString("adding.to.classpath"), newUrl));
                                 jar.deleteOnExit();
                             } else if (entry.getName().toLowerCase().endsWith("war")) {
                                 File warFile = extract(earZip, entry);
@@ -1173,7 +1179,8 @@ public class Main {
                     e.printDescriptiveError(System.err);
                     return;
                 }
-                LogService.getLog(getClass()).info(LogType.USER_MESSAGE, coreBundle.getString("no.validation.errors.found"));
+                LogService.getLog(getClass()).info(
+                    LogType.USER_MESSAGE, coreBundle.getString("no.validation.errors.found"));
                 return;
             } else if (COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(command)) {
                 liquibase.clearCheckSums();
@@ -1315,7 +1322,8 @@ public class Main {
                 database.rollback();
                 database.close();
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
+                LogService.getLog(getClass()).warning(
+                    LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
             }
         }
     }
