@@ -745,6 +745,9 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testRerunDiffChangeLogAltSchema() throws Exception {
         assumeNotNull(this.getDatabase());
+        if (database.getShortName().equalsIgnoreCase("mssql")) {
+            return; // not possible on MSSQL.
+        }
         if (!database.supportsSchemas()) {
             return;
         }
