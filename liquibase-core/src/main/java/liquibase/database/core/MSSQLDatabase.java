@@ -30,30 +30,31 @@ import java.util.regex.Pattern;
  */
 public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
+
     public static final class MSSQL_SERVER_VERSIONS {
-        private MSSQL_SERVER_VERSIONS() {
-            throw new IllegalStateException("this class is not expected to be instantiated.");
-        }
         public static final int MSSQL2008 = 10;
         public static final int MSSQL2012 = 11;
         public static final int MSSQL2014 = 12;
         public static final int MSSQL2016 = 13;
         public static final int MSSQL2017 = 14;
+
+        private MSSQL_SERVER_VERSIONS() {
+            throw new IllegalStateException("this class is not expected to be instantiated.");
+        }
     }
 
     private HashMap<String, Integer> defaultDataTypeParameters = new HashMap<>();
-    @Override
-    public Integer getDefaultScaleForNativeDataType(String nativeDataType) {
-        return defaultDataTypeParameters.get(nativeDataType.toLowerCase());
-    }
 
     protected static final int MSSQL_DEFAULT_TCP_PORT = 1433;
+
     private static final Pattern CREATE_VIEW_AS_PATTERN =
         Pattern.compile(
             "(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL
         );
+
     protected Set<String> systemTablesAndViews = new HashSet<>();
+
     private Boolean sendsStringParametersAsUnicode;
 
     // "Magic numbers" are ok here because we populate a lot of self-explaining metadata.
@@ -112,6 +113,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public Integer getDefaultScaleForNativeDataType(String nativeDataType) {
+        return defaultDataTypeParameters.get(nativeDataType.toLowerCase());
+    }
+
+    @Override
     public void setDefaultSchemaName(String schemaName) {
         if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
             throw new RuntimeException(String.format(
@@ -167,7 +173,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 return true;
             }
         } catch (DatabaseException e) {
-            return false;
+            throw new UnexpectedLiquibaseException(e);
         }
         return false;
     }
