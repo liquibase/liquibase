@@ -73,6 +73,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
     @Test
     public void dataTypesTest() throws Exception {
         assumeNotNull(this.getDatabase());
+        clearDatabase();
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.types.xml");
         liquibase.update((String) null);
@@ -128,6 +129,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
     @Test
     public void dataTypeParamsTest() throws Exception {
         assumeNotNull(this.getDatabase());
+        clearDatabase();
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.type.params.xml");
         liquibase.update((String) null);
