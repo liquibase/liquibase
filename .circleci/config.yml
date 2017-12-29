@@ -58,7 +58,7 @@ jobs:
 
           # Configure the SQL Server test database:
           # Disable for now because some SQL Server integration tests need to be fixed
-          #/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Liquibase01#' -i liquibase-integration-tests/setup/mssql/create_dbs_for_integration_tests.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Liquibase01#' -i liquibase-integration-tests/setup/mssql/create_dbs_for_integration_tests.sql
       - run:
           name: Build and test everything.
           command: mvn -B -Psonar --fail-at-end clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${CIRCLE_BRANCH}
