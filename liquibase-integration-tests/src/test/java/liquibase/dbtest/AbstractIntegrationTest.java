@@ -236,26 +236,25 @@ public abstract class AbstractIntegrationTest {
                     emptyTestSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database);
                 }
             }
-            if (database.supportsCatalogs()) {
-                /*
-                 * There is a special treatment for identifiers in the case when (a) the RDBMS does NOT support
-                 * schemas AND (b) the RDBMS DOES support catalogs AND (c) someone uses "schemaName=..." in a
-                 * Liquibase ChangeSet. In this case, AbstractJdbcDatabase.escapeObjectName assumes the author
-                 * was intending to write "catalog=..." and transparently rewrites the expression.
-                 * For us, this means that we have to wipe both ALT_SCHEMA and ALT_CATALOG to be sure we
-                 * are doing a thorough cleanup.
-                 */
-                CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[]{
-                    new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
-                    new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
-                    new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
-                    new CatalogAndSchema(null, "LBCAT2"),
-                    new CatalogAndSchema("lbcat2", database.getDefaultSchemaName()),
-                    new CatalogAndSchema(null, "lbcat2")
-                };
-                for (CatalogAndSchema location : alternativeLocations) {
-                    emptyTestSchema(location.getCatalogName(), null, database);
-                }
+
+            /*
+             * There is a special treatment for identifiers in the case when (a) the RDBMS does NOT support
+             * schemas AND (b) the RDBMS DOES support catalogs AND (c) someone uses "schemaName=..." in a
+             * Liquibase ChangeSet. In this case, AbstractJdbcDatabase.escapeObjectName assumes the author
+             * was intending to write "catalog=..." and transparently rewrites the expression.
+             * For us, this means that we have to wipe both ALT_SCHEMA and ALT_CATALOG to be sure we
+             * are doing a thorough cleanup.
+             */
+            CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[]{
+                new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
+                new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
+                new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
+                new CatalogAndSchema(null, "LBCAT2"),
+                new CatalogAndSchema("lbcat2", database.getDefaultSchemaName()),
+                new CatalogAndSchema(null, "lbcat2")
+            };
+            for (CatalogAndSchema location : alternativeLocations) {
+                emptyTestSchema(location.getCatalogName(), location.getSchemaName(), database);
             }
 
             database.commit();
