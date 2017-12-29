@@ -79,6 +79,7 @@ jobs:
               cp liquibase-core/target/dbmanul*-SNAPSHOT.jar ${CIRCLE_ARTIFACTS}
               cp liquibase-rpm/target/rpm/dbmanul/RPMS/noarch/dbmanul-*.noarch.rpm ${CIRCLE_ARTIFACTS}
               cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
+          when: always
 
       - store_test_results:
           path: /home/circleci/circle_test_reports
