@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 @DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateTimeType extends LiquibaseDataType {
 
-    public static final int PRACITCALLY_INFINITE_FRACTIONAL_DIGITS = 99;
+    protected static final int MSSQL_TYPE_DATETIME2_DEFAULT_PRECISION = 7;
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -44,19 +44,17 @@ public class DateTimeType extends LiquibaseDataType {
 
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
-            if (originalDefinition.toLowerCase().startsWith("smalldatetime")
-                    || originalDefinition.toLowerCase().startsWith("[smalldatetime")) {
-
+            if (originalDefinition.matches("(?i)^\\[?smalldatetime.*")) {
                 return new DatabaseDataType(database.escapeDataTypeName("smalldatetime"));
             } else if ("datetime2".equalsIgnoreCase(originalDefinition)
                     || "[datetime2]".equals(originalDefinition)
-                    || originalDefinition.matches("(?i)datetime2\\s*\\(.+")
-                    || originalDefinition.matches("\\[datetime2\\]\\s*\\(.+")) {
+                    || originalDefinition.matches("(?i)\\[?datetime2\\]?\\s*\\(.+")
+                    ) {
 
-                if (parameters.length == 0) {
-                    parameters = new Object[] { 7 };
-                } else if (parameters.length > 1) {
-                    parameters = new Object[] {parameters[1]};
+                // If the scale for datetime2 is the database default anyway, omit it.
+                if ( (parameters.length >= 1) &&
+                    (Integer.parseInt(parameters[0].toString()) == (database.getDefaultScaleForNativeDataType("datetime2"))) ) {
+                    parameters = new Object[0];
                 }
                 return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
             }

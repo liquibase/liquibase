@@ -127,6 +127,14 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
 
     @Test
+    /**
+     * When snapshotting an MSSQL database, size information is included for
+     * XML, SMALLMONEY, HIERARCHYID, DATETIME2, IMAGE, and DATETIMEOFFSET even when the default precisions (if
+     * applicable at all) are used. Default sizes/precisions should not be transferred into resulting ChangeLogs/
+     * snapshots.
+     *
+     * Reference: https://liquibase.jira.com/browse/CORE-1515
+     */
     public void dataTypeParamsTest() throws Exception {
         assumeNotNull(this.getDatabase());
         clearDatabase();
@@ -144,7 +152,6 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                 String expectedType = column.getName().split("_")[0];
 
                 String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType(), new MSSQLDatabase()).toDatabaseDataType(getDatabase()).toString();
-
                 assertFalse("Parameter found in " + table.getName() + "." + column.getName(), foundTypeDefinition.contains("("));
             }
         }

@@ -54,14 +54,18 @@ class DataTypeFactoryTest extends Specification {
         "[date]"                                       | new MSSQLDatabase()    | "date"                                         | DateType      | false
         "datetime"                                     | new MSSQLDatabase()    | "datetime"                                     | DateTimeType  | false
         "[datetime]"                                   | new MSSQLDatabase()    | "datetime"                                     | DateTimeType  | false
-        "datetime2"                                    | new MSSQLDatabase()    | "datetime2(7)"                                 | DateTimeType  | false
-        "[datetime2]"                                  | new MSSQLDatabase()    | "datetime2(7)"                                 | DateTimeType  | false
+        "datetime2"                                    | new MSSQLDatabase()    | "datetime2"                                    | DateTimeType  | false
+        "[datetime2]"                                  | new MSSQLDatabase()    | "datetime2"                                    | DateTimeType  | false
         "datetime2(6)"                                 | new MSSQLDatabase()    | "datetime2(6)"                                 | DateTimeType  | false
         "[datetime2](6)"                               | new MSSQLDatabase()    | "datetime2(6)"                                 | DateTimeType  | false
-        "datetimeoffset"                               | new MSSQLDatabase()    | "datetimeoffset(7)"                            | DateTimeType  | false
-        "[datetimeoffset]"                             | new MSSQLDatabase()    | "datetimeoffset(7)"                            | DateTimeType  | false
-        "datetimeoffset(6)"                            | new MSSQLDatabase()    | "datetimeoffset(6)"                            | DateTimeType  | false
-        "[datetimeoffset](6)"                          | new MSSQLDatabase()    | "datetimeoffset(6)"                            | DateTimeType  | false
+        "datetime2(7)"                                 | new MSSQLDatabase()    | "datetime2"                                    | DateTimeType  | false
+        "[datetime2](7)"                               | new MSSQLDatabase()    | "datetime2"                                    | DateTimeType  | false
+        "datetimeoffset"                               | new MSSQLDatabase()    | "datetimeoffset"                               | UnknownType   | false
+        "[datetimeoffset]"                             | new MSSQLDatabase()    | "datetimeoffset"                               | UnknownType   | false
+        "datetimeoffset(6)"                            | new MSSQLDatabase()    | "datetimeoffset(6)"                            | UnknownType   | false
+        "[datetimeoffset](6)"                          | new MSSQLDatabase()    | "datetimeoffset(6)"                            | UnknownType   | false
+        "datetimeoffset(7)"                            | new MSSQLDatabase()    | "datetimeoffset"                               | UnknownType   | false
+        "[datetimeoffset](7)"                          | new MSSQLDatabase()    | "datetimeoffset"                               | UnknownType   | false
         "decimal"                                      | new MSSQLDatabase()    | "decimal(18, 0)"                               | DecimalType   | false
         "[decimal]"                                    | new MSSQLDatabase()    | "decimal(18, 0)"                               | DecimalType   | false
         "decimal(19)"                                  | new MSSQLDatabase()    | "decimal(19, 0)"                               | DecimalType   | false
@@ -120,10 +124,12 @@ class DataTypeFactoryTest extends Specification {
         "sql_variant(5, 6)"                            | new MSSQLDatabase()    | "sql_variant"                                  | UnknownType   | false
         "text"                                         | new MSSQLDatabase()    | "varchar (max)"                                | ClobType      | false
         "[text]"                                       | new MSSQLDatabase()    | "varchar (max)"                                | ClobType      | false
-        "time"                                         | new MSSQLDatabase()    | "time(7)"                                      | TimeType      | false
-        "[time]"                                       | new MSSQLDatabase()    | "time(7)"                                      | TimeType      | false
+        "time"                                         | new MSSQLDatabase()    | "time"                                         | TimeType      | false
+        "[time]"                                       | new MSSQLDatabase()    | "time"                                         | TimeType      | false
         "time(6)"                                      | new MSSQLDatabase()    | "time(6)"                                      | TimeType      | false
         "[time](6)"                                    | new MSSQLDatabase()    | "time(6)"                                      | TimeType      | false
+        "time(7)"                                      | new MSSQLDatabase()    | "time"                                         | TimeType      | false
+        "[time](7)"                                    | new MSSQLDatabase()    | "time"                                         | TimeType      | false
         "timestamp"                                    | new MSSQLDatabase()    | "datetime"                                     | TimestampType | false
         "tinyint"                                      | new MSSQLDatabase()    | "tinyint"                                      | TinyIntType   | false
         "[tinyint]"                                    | new MSSQLDatabase()    | "tinyint"                                      | TinyIntType   | false

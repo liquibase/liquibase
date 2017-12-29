@@ -12,10 +12,11 @@ import liquibase.util.StringUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 
 @DataTypeInfo(name="time", aliases = {"java.sql.Types.TIME", "java.sql.Time", "timetz"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class TimeType  extends LiquibaseDataType {
+
+    protected static final int MSSQL_TYPE_TIME_DEFAULT_PRECISION = 7;
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -25,10 +26,11 @@ public class TimeType  extends LiquibaseDataType {
         }
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
-            if (parameters.length == 0) {
-                parameters = new Object[] { 7 };
-            } else if (parameters.length > 2) {
-                parameters = Arrays.copyOfRange(parameters, 0, 2);
+
+            // If the scale for time is the database default anyway, omit it.
+            if ( (parameters.length >= 1) &&
+                (Integer.parseInt(parameters[0].toString()) == (database.getDefaultScaleForNativeDataType("time"))) ) {
+                parameters = new Object[0];
             }
             return new DatabaseDataType(database.escapeDataTypeName("time"), parameters);
         }

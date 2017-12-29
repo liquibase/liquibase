@@ -1,6 +1,8 @@
 package liquibase.datatype.core
 
 import liquibase.database.core.*
+import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.sdk.database.MockDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -28,5 +30,18 @@ class DoubleTypeTest extends Specification {
         [22]   | new PostgresDatabase() | "DOUBLE PRECISION"
         [22]   | new InformixDatabase() | "DOUBLE PRECISION"
         []     | new OracleDatabase()   | "FLOAT(24)"
+    }
+
+    def "too many parameters"() {
+        when:
+        def type = new DoubleType()
+        type.addParameter(47)
+        type.addParameter(11)
+        type.addParameter(42)
+        type.validate(new MockDatabase())
+
+        then:
+        thrown UnexpectedLiquibaseException
+
     }
 }

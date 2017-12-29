@@ -86,6 +86,13 @@ public interface Database extends PrioritizedService {
 
     String getDefaultSchemaName();
 
+    /**
+     * Returns the default precision for a given native data type, e.g. "datetime2" for Microsoft SQL Server.
+     * @param nativeDataType the name of the native data type (case-insensitive).
+     * @return The default precision of the native data type, or null if the type is unknown to this database.
+     */
+    Integer getDefaultScaleForNativeDataType(String nativeDataType);
+
     void setDefaultSchemaName(String schemaName) throws DatabaseException;
 
     Integer getDefaultPort();

@@ -10,7 +10,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.InternalDatabase;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.*;
+import liquibase.exception.ValidationErrors;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
@@ -18,7 +18,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -41,6 +40,12 @@ public class MockDatabase implements Database, InternalDatabase {
     private String defaultSchemaName;
     private boolean caseSensitive;
 
+
+    @Override
+    public Integer getDefaultScaleForNativeDataType(String nativeDataType) {
+        // Nothing special to do for the mock database.
+        return null;
+    }
 
     @Override
     public int getPriority() {
@@ -90,7 +95,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean isCorrectDatabaseImplementation(final DatabaseConnection conn) throws DatabaseException {
+    public boolean isCorrectDatabaseImplementation(final DatabaseConnection conn) {
         return false;
     }
 
@@ -117,12 +122,12 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean isAutoCommit() throws DatabaseException {
+    public boolean isAutoCommit() {
         return false;
     }
 
     @Override
-    public void setAutoCommit(final boolean b) throws DatabaseException {
+    public void setAutoCommit(final boolean b) {
 
     }
 
@@ -146,18 +151,18 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String getDatabaseProductVersion() throws DatabaseException {
+    public String getDatabaseProductVersion() {
         return null;
     }
 
 
     @Override
-    public int getDatabaseMajorVersion() throws DatabaseException {
+    public int getDatabaseMajorVersion() {
         return 0;
     }
 
     @Override
-    public int getDatabaseMinorVersion() throws DatabaseException {
+    public int getDatabaseMinorVersion() {
         return 0;
     }
 
@@ -166,15 +171,15 @@ public class MockDatabase implements Database, InternalDatabase {
         return "mock";
     }
 
-    public String getDriverName() throws DatabaseException {
+    public String getDriverName() {
         return null;
     }
 
-    public String getConnectionURL() throws DatabaseException {
+    public String getConnectionURL() {
         return null;
     }
 
-    public String getConnectionUsername() throws DatabaseException {
+    public String getConnectionUsername() {
         return null;
     }
 
@@ -184,7 +189,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void setDefaultCatalogName(final String catalogName) throws DatabaseException {
+    public void setDefaultCatalogName(final String catalogName) {
         this.defaultCatalogName = catalogName;
     }
 
@@ -194,7 +199,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void setDefaultSchemaName(final String schemaName) throws DatabaseException {
+    public void setDefaultSchemaName(final String schemaName) {
         this.defaultSchemaName = schemaName;
     }
 
@@ -306,27 +311,27 @@ public class MockDatabase implements Database, InternalDatabase {
         return null;
     }
 
-    public boolean acquireLock(final Liquibase liquibase) throws LockException {
+    public boolean acquireLock(final Liquibase liquibase) {
         return false;
     }
 
-    public void releaseLock() throws LockException {
+    public void releaseLock() {
     }
 
-    public DatabaseChangeLogLock[] listLocks() throws LockException {
+    public DatabaseChangeLogLock[] listLocks() {
         return new DatabaseChangeLogLock[0];
     }
 
     @Override
-    public void dropDatabaseObjects(final CatalogAndSchema schema) throws DatabaseException {
+    public void dropDatabaseObjects(final CatalogAndSchema schema) {
     }
 
     @Override
-    public void tag(final String tagString) throws DatabaseException {
+    public void tag(final String tagString) {
     }
 
     @Override
-    public boolean doesTagExist(final String tag) throws DatabaseException {
+    public boolean doesTagExist(final String tag) {
         return false;
     }
 
@@ -347,11 +352,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String getViewDefinition(final CatalogAndSchema schema, final String name) throws DatabaseException {
+    public String getViewDefinition(final CatalogAndSchema schema, final String name) {
         return null;
     }
 
-    public String getDatabaseProductName(final DatabaseConnection conn) throws DatabaseException {
+    public String getDatabaseProductName(final DatabaseConnection conn) {
         return "Mock Database";
     }
 
@@ -398,11 +403,11 @@ public class MockDatabase implements Database, InternalDatabase {
         }
     }
 
-    public String convertRequestedSchemaToSchema(final String requestedSchema) throws DatabaseException {
+    public String convertRequestedSchemaToSchema(final String requestedSchema) {
         return requestedSchema;
     }
 
-    public String convertRequestedSchemaToCatalog(final String requestedSchema) throws DatabaseException {
+    public String convertRequestedSchemaToCatalog(final String requestedSchema) {
         return null;
     }
 
@@ -438,36 +443,36 @@ public class MockDatabase implements Database, InternalDatabase {
         return escapeTableName(catalogName, schemaName, viewName);
     }
 
-    public boolean acquireLock() throws LockException {
+    public boolean acquireLock() {
         return false;
     }
 
     @Override
-    public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
+    public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) {
         return null;
     }
 
     @Override
-    public RanChangeSet getRanChangeSet(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
+    public RanChangeSet getRanChangeSet(final ChangeSet changeSet) {
         return null;
     }
 
     @Override
-    public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
+    public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) {
     }
 
     @Override
-    public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
+    public List<RanChangeSet> getRanChangeSetList() {
         return null;
     }
 
     @Override
-    public Date getRanDate(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
+    public Date getRanDate(final ChangeSet changeSet) {
         return null;
     }
 
     @Override
-    public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
+    public void removeRanStatus(final ChangeSet changeSet) {
     }
 
     @Override
@@ -478,7 +483,7 @@ public class MockDatabase implements Database, InternalDatabase {
     public void rollback() {
     }
 
-    public SqlStatement getSelectChangeLogLockSQL() throws DatabaseException {
+    public SqlStatement getSelectChangeLogLockSQL() {
         return null;
     }
 
@@ -488,7 +493,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void close() throws DatabaseException {
+    public void close() {
     }
 
     @Override
@@ -502,7 +507,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean isSafeToRunUpdate() throws DatabaseException {
+    public boolean isSafeToRunUpdate() {
         return true;
     }
 
@@ -517,27 +522,27 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+    public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) {
     }
 
     @Override
-    public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+    public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) {
     }
 
     @Override
-    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
+    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) {
     }
 
     @Override
-    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) {
     }
 
     @Override
-    public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+    public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) {
     }
     
     @Override
-    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
+    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) {
     }
 
     @Override
@@ -571,7 +576,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public Date parseDate(final String dateAsString) throws DateParseException {
+    public Date parseDate(final String dateAsString) {
         return new Date();
     }
 
@@ -591,16 +596,16 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean disableForeignKeyChecks() throws DatabaseException {
+    public boolean disableForeignKeyChecks() {
         return false;
     }
 
     @Override
-    public void enableForeignKeyChecks() throws DatabaseException {
+    public void enableForeignKeyChecks() {
 
     }
 
-    public void updateChecksum(final ChangeSet changeSet) throws DatabaseException {
+    public void updateChecksum(final ChangeSet changeSet) {
 
     }
 
@@ -772,7 +777,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean supportsBatchUpdates() throws DatabaseException {
+    public boolean supportsBatchUpdates() {
         return false;
     }
 

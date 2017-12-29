@@ -316,12 +316,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
      * {@link DatabaseMetaData}.getColumns() method. Depending on Database, additional columns might be present.
      *
      * @param columnMetadataResultSet the result from the JDBC getColumns() call for the column
-     * @param column                  basic definition of the column
+     * @param column                  logical definition of the column (object form)
      * @param database                the database from which the column originates
      * @return a DataType object with detailed information about the type
      * @throws SQLException If an error occurs during processing (mostly caused by Exceptions in JDBC calls)
      */
-    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException, DatabaseException {
+    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database)
+        throws SQLException, DatabaseException {
 
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
 
@@ -337,7 +338,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
             } else if ("time".equalsIgnoreCase(columnTypeName)) {
-                columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
+                    columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
             }
         }

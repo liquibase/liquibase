@@ -299,6 +299,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    public Integer getDefaultScaleForNativeDataType(String nativeDataType) {
+        // Default implementation does not return anything; this is up to the concrete implementation.
+        return null;
+    }
+
+    @Override
     public void setDefaultSchemaName(final String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
         if (!supportsSchemas()) {
