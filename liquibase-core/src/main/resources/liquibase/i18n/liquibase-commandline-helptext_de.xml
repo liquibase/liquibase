@@ -161,6 +161,10 @@ Optionale Parameter:
                                             die die Sperre auf die Historien-
                                             tabelle verwaltet, an. (Standard:
                                             (DATABASECHANGELOGLOCK)
+ --databaseChangeLogTablespaceName=<name>   Name des Tablespaces, in dem die
+                                            Tabellen DATABASECHANGELOG und
+                                            -LOCK erstellt werden (falls sie
+                                            noch nicht vorhanden sind)
  --includeSystemClasspath=<true|false>      Berücksichtigt den Standard-Java-
                                             Classpath des Systems für die
                                             Ausführung (Standardwert: true)
