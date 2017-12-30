@@ -69,7 +69,6 @@ public class SqlUtil {
         if (type.getDataTypeId() != null) {
             typeId = type.getDataTypeId();
         }
-        String typeName = type.getTypeName();
 
         LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().from(type, database);
 
@@ -97,7 +96,8 @@ public class SqlUtil {
             } else if ((liquibaseDataType instanceof DateTimeType) || (typeId == Types.TIMESTAMP)) {
                 maybeDate = DataTypeFactory.getInstance().fromDescription(
                 "datetime", database).sqlToObject(stringVal, database);
-            } else if (!stringVal.matches("\\d+\\.?\\d*")) { //not just a number
+            } else if (!stringVal.matches("\\d+\\.?\\d*")) {
+                //not just a number
                 return new DatabaseFunction(stringVal);
             }
             if (maybeDate != null) {
@@ -120,7 +120,8 @@ public class SqlUtil {
         } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
             return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
         }
-    
+
+        String typeName = type.getTypeName();
         try (Scanner scanner = new Scanner(stringVal.trim())) {
             if (typeId == Types.ARRAY) {
                 return new DatabaseFunction(stringVal);
@@ -271,6 +272,8 @@ public class SqlUtil {
             } else if ((liquibaseDataType instanceof VarcharType) || (typeId == Types.VARCHAR)) {
                 return stringVal;
             } else if ((database instanceof MySQLDatabase) && typeName.toLowerCase().startsWith("enum")) {
+                return stringVal;
+            } else if ((database instanceof MSSQLDatabase) && typeName.toLowerCase().startsWith("datetimeoffset")) {
                 return stringVal;
             } else {
                 if ("".equals(stringVal)) {

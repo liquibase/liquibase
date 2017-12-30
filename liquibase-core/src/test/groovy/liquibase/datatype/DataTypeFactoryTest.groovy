@@ -21,15 +21,15 @@ class DataTypeFactoryTest extends Specification {
         expectedAutoIncrement == autoIncrement
 
         where:
-        liquibaseString                                      | database              | databaseString                                       | expectedType  | expectedAutoIncrement
-        "int"                                                | new MockDatabase()    | "INT"                                                | IntType       | false
-        "varchar(255)"                                       | new MockDatabase()    | "VARCHAR(255)"                                       | VarcharType   | false
-        "int{autoIncrement:true}"                            | new MockDatabase()    | "INT"                                                | IntType       | true
-        "int{autoIncrement:false}"                           | new MockDatabase()    | "INT"                                                | IntType       | false
-        "int{}"                                              | new MockDatabase()    | "INT"                                                | IntType       | false
-        "character varying(256)"                             | new MockDatabase()    | "VARCHAR(256)"                                       | VarcharType   | false
-        "serial8"                                            | new MockDatabase()    | "BIGINT"                                             | BigIntType    | true
-        "int4"                                               | new MockDatabase()    | "INT"                                                | IntType       | false
+        liquibaseString                                | database               | databaseString                                 | expectedType  | expectedAutoIncrement
+        "int"                                          | new MockDatabase()     | "INT"                                          | IntType       | false
+        "varchar(255)"                                 | new MockDatabase()     | "VARCHAR(255)"                                 | VarcharType   | false
+        "int{autoIncrement:true}"                      | new MockDatabase()     | "INT"                                          | IntType       | true
+        "int{autoIncrement:false}"                     | new MockDatabase()     | "INT"                                          | IntType       | false
+        "int{}"                                        | new MockDatabase()     | "INT"                                          | IntType       | false
+        "character varying(256)"                       | new MockDatabase()     | "VARCHAR(256)"                                 | VarcharType   | false
+        "serial8"                                      | new MockDatabase()     | "BIGINT"                                       | BigIntType    | true
+        "int4"                                         | new MockDatabase()     | "INT"                                          | IntType       | false
         "serial4"                                      | new MockDatabase()     | "INT"                                          | IntType       | true
         "xml"                                          | new MockDatabase()     | "XML"                                          | XMLType       | false
         "real"                                         | new DB2Database()      | "REAL"                                         | FloatType     | false
@@ -54,10 +54,18 @@ class DataTypeFactoryTest extends Specification {
         "[date]"                                       | new MSSQLDatabase()    | "date"                                         | DateType      | false
         "datetime"                                     | new MSSQLDatabase()    | "datetime"                                     | DateTimeType  | false
         "[datetime]"                                   | new MSSQLDatabase()    | "datetime"                                     | DateTimeType  | false
-        "datetime2"                                    | new MSSQLDatabase()    | "datetime2(7)"                                 | DateTimeType  | false
-        "[datetime2]"                                  | new MSSQLDatabase()    | "datetime2(7)"                                 | DateTimeType  | false
+        "datetime2"                                    | new MSSQLDatabase()    | "datetime2"                                    | DateTimeType  | false
+        "[datetime2]"                                  | new MSSQLDatabase()    | "datetime2"                                    | DateTimeType  | false
         "datetime2(6)"                                 | new MSSQLDatabase()    | "datetime2(6)"                                 | DateTimeType  | false
         "[datetime2](6)"                               | new MSSQLDatabase()    | "datetime2(6)"                                 | DateTimeType  | false
+        "datetime2(7)"                                 | new MSSQLDatabase()    | "datetime2"                                    | DateTimeType  | false
+        "[datetime2](7)"                               | new MSSQLDatabase()    | "datetime2"                                    | DateTimeType  | false
+        "datetimeoffset"                               | new MSSQLDatabase()    | "datetimeoffset"                               | UnknownType   | false
+        "[datetimeoffset]"                             | new MSSQLDatabase()    | "datetimeoffset"                               | UnknownType   | false
+        "datetimeoffset(6)"                            | new MSSQLDatabase()    | "datetimeoffset(6)"                            | UnknownType   | false
+        "[datetimeoffset](6)"                          | new MSSQLDatabase()    | "datetimeoffset(6)"                            | UnknownType   | false
+        "datetimeoffset(7)"                            | new MSSQLDatabase()    | "datetimeoffset"                               | UnknownType   | false
+        "[datetimeoffset](7)"                          | new MSSQLDatabase()    | "datetimeoffset"                               | UnknownType   | false
         "decimal"                                      | new MSSQLDatabase()    | "decimal(18, 0)"                               | DecimalType   | false
         "[decimal]"                                    | new MSSQLDatabase()    | "decimal(18, 0)"                               | DecimalType   | false
         "decimal(19)"                                  | new MSSQLDatabase()    | "decimal(19, 0)"                               | DecimalType   | false
@@ -116,10 +124,12 @@ class DataTypeFactoryTest extends Specification {
         "sql_variant(5, 6)"                            | new MSSQLDatabase()    | "sql_variant"                                  | UnknownType   | false
         "text"                                         | new MSSQLDatabase()    | "varchar (max)"                                | ClobType      | false
         "[text]"                                       | new MSSQLDatabase()    | "varchar (max)"                                | ClobType      | false
-        "time"                                         | new MSSQLDatabase()    | "time(7)"                                      | TimeType      | false
-        "[time]"                                       | new MSSQLDatabase()    | "time(7)"                                      | TimeType      | false
+        "time"                                         | new MSSQLDatabase()    | "time"                                         | TimeType      | false
+        "[time]"                                       | new MSSQLDatabase()    | "time"                                         | TimeType      | false
         "time(6)"                                      | new MSSQLDatabase()    | "time(6)"                                      | TimeType      | false
         "[time](6)"                                    | new MSSQLDatabase()    | "time(6)"                                      | TimeType      | false
+        "time(7)"                                      | new MSSQLDatabase()    | "time"                                         | TimeType      | false
+        "[time](7)"                                    | new MSSQLDatabase()    | "time"                                         | TimeType      | false
         "timestamp"                                    | new MSSQLDatabase()    | "datetime"                                     | TimestampType | false
         "tinyint"                                      | new MSSQLDatabase()    | "tinyint"                                      | TinyIntType   | false
         "[tinyint]"                                    | new MSSQLDatabase()    | "tinyint"                                      | TinyIntType   | false
@@ -184,20 +194,20 @@ class DataTypeFactoryTest extends Specification {
         "TINYINT"                                      | new MySQLDatabase()    | "TINYINT"                                      | TinyIntType   | false
         "TINYINT UNSIGNED"                             | new MySQLDatabase()    | "TINYINT UNSIGNED"                             | TinyIntType   | false
         "TINYINT(1) UNSIGNED"                          | new MySQLDatabase()    | "TINYINT(1) UNSIGNED"                          | TinyIntType   | false
-        "SMALLINT"                                           | new MySQLDatabase()   | "SMALLINT"                                           | SmallIntType  | false
-        "SMALLINT UNSIGNED"                                  | new MySQLDatabase()   | "SMALLINT UNSIGNED"                                  | SmallIntType  | false
-        "MEDIUMINT"                                          | new MySQLDatabase()   | "MEDIUMINT"                                          | MediumIntType | false
-        "MEDIUMINT UNSIGNED"                                 | new MySQLDatabase()   | "MEDIUMINT UNSIGNED"                                 | MediumIntType | false
-        "BIGINT"                                             | new MySQLDatabase()   | "BIGINT"                                             | BigIntType    | false
-        "BIGINT UNSIGNED"                                    | new MySQLDatabase()   | "BIGINT UNSIGNED"                                    | BigIntType    | false
-        "BINARY(16)"                                         | new MySQLDatabase()   | "BINARY(16)"                                         | BlobType      | false
-        "tinyblob"                                           | new MySQLDatabase()   | "TINYBLOB"                                           | BlobType      | false
-        "tinytext"                                           | new MySQLDatabase()   | "TINYTEXT"                                           | ClobType      | false
-        "mediumblob"                                         | new MySQLDatabase()   | "MEDIUMBLOB"                                         | BlobType      | false
-        "mediumtext"                                         | new MySQLDatabase()   | "MEDIUMTEXT"                                         | ClobType      | false
-        "real"                                               | new MySQLDatabase()   | "REAL"                                               | FloatType     | false
-        "nclob"                                              | new OracleDatabase()  | "NCLOB"                                              | ClobType      | false
-        "xml"                                                | new OracleDatabase()  | "XMLTYPE"                                            | XMLType       | false
+        "SMALLINT"                                     | new MySQLDatabase()    | "SMALLINT"                                     | SmallIntType  | false
+        "SMALLINT UNSIGNED"                            | new MySQLDatabase()    | "SMALLINT UNSIGNED"                            | SmallIntType  | false
+        "MEDIUMINT"                                    | new MySQLDatabase()    | "MEDIUMINT"                                    | MediumIntType | false
+        "MEDIUMINT UNSIGNED"                           | new MySQLDatabase()    | "MEDIUMINT UNSIGNED"                           | MediumIntType | false
+        "BIGINT"                                       | new MySQLDatabase()    | "BIGINT"                                       | BigIntType    | false
+        "BIGINT UNSIGNED"                              | new MySQLDatabase()    | "BIGINT UNSIGNED"                              | BigIntType    | false
+        "BINARY(16)"                                   | new MySQLDatabase()    | "BINARY(16)"                                   | BlobType      | false
+        "tinyblob"                                     | new MySQLDatabase()    | "TINYBLOB"                                     | BlobType      | false
+        "tinytext"                                     | new MySQLDatabase()    | "TINYTEXT"                                     | ClobType      | false
+        "mediumblob"                                   | new MySQLDatabase()    | "MEDIUMBLOB"                                   | BlobType      | false
+        "mediumtext"                                   | new MySQLDatabase()    | "MEDIUMTEXT"                                   | ClobType      | false
+        "real"                                         | new MySQLDatabase()    | "REAL"                                         | FloatType     | false
+        "nclob"                                        | new OracleDatabase()   | "NCLOB"                                        | ClobType      | false
+        "xml"                                          | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "xmltype"                                      | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "xml"                                          | new PostgresDatabase() | "XML"                                          | XMLType       | false
         "BINARY(16)"                                   | new H2Database()       | "BINARY(16)"                                   | BlobType      | false

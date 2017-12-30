@@ -234,7 +234,9 @@ adverse effects in old software versions.
   https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
   (commit cf667c6945a5902c54030146ca6929541b7d10f1)
 
-- Because DB-Manul is based on JDK 8, you must upgrade your JDBC driver to version 6.2.0.jre8 or newer.
+- Because DB-Manul is based on JDK 8, you must upgrade your JDBC driver to version 6.2.2.jre8 or newer. Between 6.1.8
+  and 6.2.2, Microsoft also fixed a bug that could cause data to be corrupted during batched JDBC inserts, so 6.2.2
+  is the absolute minimum driver version you should use.  
 
 - Consistent with the behaviour on other RDBMS, DB-Manul will now only escape Microsoft SQL Server object names
   (e.g. `myTableWithAnÜUmlaut` -> `[myTableWithAnÜUmlaut]` only when quoting is necessary)

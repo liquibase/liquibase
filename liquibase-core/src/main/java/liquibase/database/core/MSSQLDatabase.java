@@ -22,10 +22,7 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -33,20 +30,35 @@ import java.util.regex.Pattern;
  */
 public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
-    public static final int SQL_SERVER_2008_MAJOR_VERSION = 10;
-    public static final int SQL_SERVER_2012_MAJOR_VERSION = 11;
-    public static final int SQL_SERVER_2014_MAJOR_VERSION = 12;
-    public static final int SQL_SERVER_2016_MAJOR_VERSION = 13;
-    public static final int SQL_SERVER_2017_MAJOR_VERSION = 14;
+
+    public static final class MSSQL_SERVER_VERSIONS {
+        public static final int MSSQL2008 = 10;
+        public static final int MSSQL2012 = 11;
+        public static final int MSSQL2014 = 12;
+        public static final int MSSQL2016 = 13;
+        public static final int MSSQL2017 = 14;
+
+        private MSSQL_SERVER_VERSIONS() {
+            throw new IllegalStateException("this class is not expected to be instantiated.");
+        }
+    }
+
+    private HashMap<String, Integer> defaultDataTypeParameters = new HashMap<>();
+
     protected static final int MSSQL_DEFAULT_TCP_PORT = 1433;
+
     private static final Pattern CREATE_VIEW_AS_PATTERN =
         Pattern.compile(
             "(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*",
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL
         );
+
     protected Set<String> systemTablesAndViews = new HashSet<>();
+
     private Boolean sendsStringParametersAsUnicode;
 
+    // "Magic numbers" are ok here because we populate a lot of self-explaining metadata.
+    @SuppressWarnings("squid:S109")
     public MSSQLDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
 
@@ -80,8 +92,29 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         super.quotingEndCharacter = "]";
         super.quotingEndReplacement = "]]";
 
+        // Information obtained from:
+        // https://docs.microsoft.com/en-us/sql/t-sql/data-types/precision-scale-and-length-transact-sql
+        defaultDataTypeParameters.put("datetime", 3);
+        defaultDataTypeParameters.put("datetime2", 7);
+        defaultDataTypeParameters.put("datetimeoffset", 7);
+        defaultDataTypeParameters.put("time", 7);
+        defaultDataTypeParameters.put("decimal", 0);
+        defaultDataTypeParameters.put("numeric", 0);
+        defaultDataTypeParameters.put("bigint", 0);
+        defaultDataTypeParameters.put("int", 0);
+        defaultDataTypeParameters.put("smallint", 0);
+        defaultDataTypeParameters.put("tinyint", 0);
+        defaultDataTypeParameters.put("money", 4);
+        defaultDataTypeParameters.put("smallmoney", 0);
+
+
         // JDBC Driver version 6.2.0 does not seem to return this keyword, which causes an integration test to fail.
         addReservedWords(Arrays.asList("KEY"));
+    }
+
+    @Override
+    public Integer getDefaultScaleForNativeDataType(String nativeDataType) {
+        return defaultDataTypeParameters.get(nativeDataType.toLowerCase());
     }
 
     @Override
@@ -136,11 +169,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             if (isAzureDb()) {
                 return false;
             }
-            if (this.getDatabaseMajorVersion() >= SQL_SERVER_2012_MAJOR_VERSION) {
+            if (this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012) {
                 return true;
             }
         } catch (DatabaseException e) {
-            return false;
+            throw new UnexpectedLiquibaseException(e);
         }
         return false;
     }
@@ -152,7 +185,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         boolean isRealSqlServerConnection = PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
                 || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
 
-        if (isRealSqlServerConnection && (majorVersion <= SQL_SERVER_2008_MAJOR_VERSION)) {
+        if (isRealSqlServerConnection && (majorVersion <= MSSQL_SERVER_VERSIONS.MSSQL2008)) {
             LogService.getLog(getClass()).warning(
                 LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your " +
                         "software is older than SQL Server 2008. Unfortunately, this is not supported, and this " +

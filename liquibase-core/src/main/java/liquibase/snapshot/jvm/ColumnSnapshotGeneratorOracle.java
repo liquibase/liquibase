@@ -8,8 +8,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
-import java.sql.SQLException;
-
 /**
  * Oracle Database-specific parts of ColumnSnapshotGenerator
  */
@@ -29,7 +27,7 @@ public class ColumnSnapshotGeneratorOracle extends ColumnSnapshotGenerator {
     }
 
     @Override
-    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
+    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) {
 
         String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
         dataType = dataType.replace("VARCHAR2", "VARCHAR");

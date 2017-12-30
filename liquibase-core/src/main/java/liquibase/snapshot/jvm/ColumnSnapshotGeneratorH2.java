@@ -2,14 +2,11 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
-import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.SnapshotGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
-
-import java.sql.SQLException;
 
 public class ColumnSnapshotGeneratorH2 extends ColumnSnapshotGenerator {
     @Override
@@ -28,7 +25,7 @@ public class ColumnSnapshotGeneratorH2 extends ColumnSnapshotGenerator {
 
 
     @Override
-    protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+    protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) {
         Object defaultValue = super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
         if ((defaultValue != null) && (defaultValue instanceof DatabaseFunction) && ((DatabaseFunction) defaultValue)
             .getValue().startsWith("NEXT VALUE FOR ")) {

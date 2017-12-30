@@ -29,21 +29,25 @@ public class ObjectUtil {
      * for the object. If the property is currently not set for the object, an
      * {@link UnexpectedLiquibaseException} run-time exception occurs.
      *
-     * @param object       the object to examine
-     * @param propertyName the property name for which the value should be read
-     * @return the stored value
-     * @throws IllegalAccessException    if access to the value is denied (e.g. by a {@link SecurityManager} )
-     * @throws InvocationTargetException if the appropriate read method can be called, but throws an Exception
+     * @param object                        the object to examine
+     * @param propertyName                  the property name for which the value should be read
+     * @return                              the stored value
      */
     public static Object getProperty(Object object, String propertyName)
-        throws IllegalAccessException, InvocationTargetException {
+        throws UnexpectedLiquibaseException {
         Method readMethod = getReadMethod(object, propertyName);
         if (readMethod == null) {
-            throw new UnexpectedLiquibaseException("Property '" + propertyName
-                + "' not found on object type " + object.getClass().getName());
+            throw new UnexpectedLiquibaseException(
+                String.format("Property [%s] was not found for object type [%s]", propertyName,
+                    object.getClass().getName()
+                ));
         }
 
-        return readMethod.invoke(object);
+        try {
+            return readMethod.invoke(object);
+        } catch (IllegalAccessException|InvocationTargetException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     /**
@@ -97,15 +101,17 @@ public class ObjectUtil {
     /**
      * Tries to guess the "real" data type of propertyValue by the given propertyName, then sets the
      * selected property of the given object to that value.
-     * @param object the object whose property should be set
-     * @param propertyName name of the property to set
-     * @param propertyValue new value of the property, as String
+     * @param object                        the object whose property should be set
+     * @param propertyName                  name of the property to set
+     * @param propertyValue                 new value of the property, as String
      */
-    public static void setProperty(Object object, String propertyName, String propertyValue) {
+    public static void setProperty(Object object, String propertyName, String propertyValue)  {
         Method method = getWriteMethod(object, propertyName);
         if (method == null) {
-            throw new UnexpectedLiquibaseException("Property '" + propertyName
-                + "' not found on object type " + object.getClass().getName());
+            throw new UnexpectedLiquibaseException (
+                String.format("Property [%s] was not found for object type [%s]", propertyName,
+                    object.getClass().getName()
+                ));
         }
 
         Class<?> parameterType = method.getParameterTypes()[0];
@@ -142,15 +148,17 @@ public class ObjectUtil {
     /**
      * Sets the selected property of the given object to propertyValue. A run-time exception will occur if the
      * type of value is incompatible with the reader/writer method signatures of the given propertyName.
-     * @param object the object whose property should be set
-     * @param propertyName name of the property to set
-     * @param propertyValue new value of the property
+     * @param object                        the object whose property should be set
+     * @param propertyName                  name of the property to set
+     * @param propertyValue                 new value of the property
      */
     public static void setProperty(Object object, String propertyName, Object propertyValue) {
         Method method = getWriteMethod(object, propertyName);
         if (method == null) {
-            throw new UnexpectedLiquibaseException("Property '" + propertyName
-                + "' not found on object type " + object.getClass().getName());
+            throw new UnexpectedLiquibaseException (
+                String.format("Property [%s] was not found for object type [%s]", propertyName,
+                    object.getClass().getName()
+                ));
         }
 
         try {
