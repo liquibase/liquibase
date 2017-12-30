@@ -178,6 +178,10 @@ public abstract class AbstractIntegrationTest {
         org.junit.Assume.assumeTrue(database != null);
 
         if (database != null) {
+            if (database.supportsTablespaces()) {
+                // Use the opportunity to test if the DATABASECHANGELOG table is placed in the correct tablespace
+                database.setLiquibaseTablespaceName(DatabaseTestContext.ALT_TABLESPACE);
+            }
             if (!database.getConnection().getAutoCommit()) {
                 database.rollback();
             }
