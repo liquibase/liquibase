@@ -1120,4 +1120,21 @@
         </preConditions>
     </changeSet>
 
+    <!-- To prevent the error described in CORE-3138 SQLAnywhere: AddAutoIncrement-Statement is wrong -->
+    <changeSet id="add_auto_increment_on_indexed_column" author="abuschka">
+        <createTable tableName="core_3138">
+            <column name="some_trivial_column" type="varchar(255)" />
+            <column name="soon_our_auto_increment_col" type="int" />
+        </createTable>
+        <insert tableName="core_3138" >
+            <column name="some_trivial_column">some_value</column>
+            <column name="soon_our_auto_increment_col">42</column>
+        </insert>
+        <createIndex tableName="core_3138" indexName="idx_core_3138" unique="true">
+            <column name="some_trivial_column" />
+            <column name="soon_our_auto_increment_col" />
+        </createIndex>
+        <addAutoIncrement tableName="core_3138" columnName="soon_our_auto_increment_col" columnDataType="int"/>
+    </changeSet>
+
 </databaseChangeLog>
