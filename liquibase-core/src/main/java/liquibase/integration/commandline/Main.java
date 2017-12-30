@@ -84,6 +84,7 @@ public class Main {
     protected String liquibaseSchemaName;
     protected String databaseChangeLogTableName;
     protected String databaseChangeLogLockTableName;
+    protected String databaseChangeLogTablespaceName;
     protected String defaultCatalogName;
     protected String changeLogFile;
     protected String overwriteOutputFile;
@@ -958,6 +959,7 @@ public class Main {
             this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
             this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
             this.databaseChangeLogLockTableName);
+        database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
         try {
 
             String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
