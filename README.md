@@ -17,7 +17,7 @@ For a current list of changes, fixes and improvements, please see:
 Current status summary
 ======================
 
-Last updated: December 27th, 2017
+Last updated: December 30th, 2017
 
 **PLEASE NOTE THAT THE FORK, IN GENERAL, SHOULD BE CONSIDERED UNSTABLE FOR THE MOMENT.**
     A lot of work is currently being done to get all integration tests (OSS + commercial RDBMSs) green; manual testing of features like CDI, RPM/Debian packaging, Spring integration etc. comes after that.   
@@ -42,14 +42,12 @@ Database support:
 - MySQL (tested: 5.7.18, with InnoDB)
 - Oracle Database (tested: 12.1.0.2 and 12.2.0.1)
 - PostgreSQL (tested: 9.6)
+- Microsoft SQL Server (MSSQL) (tested: 2016, 2017, Express & Developer Editions)
 
 **Somewhat working** (work in progress):
 - Firebird (a problem in snapshotting causes duplicate indexes to be generated to FOREIGN KEY constraints). 
   Regular change sets (forward migration) seems to work fine.
  as deferrable, which is a functionality not present in MySQL/MariaDB AFAIK).
-- Microsoft SQL Server (MSSQL) (tested: 2016, Express)
-  - Problems with default values and DATE/DATETIME etc. columns
-  - Tests running on multiple schemas simultaneously fail
 - SAP SQL Anywhere 17 (formerly known as Sybase AS Anywhere)
   - Basic functionality is working
   - Currently failing tests: 

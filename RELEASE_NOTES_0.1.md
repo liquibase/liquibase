@@ -54,6 +54,11 @@ bug list (https://dbmanul.atlassian.net).
   
 - When verifying a ForeignKeyConstraintExists pre-condition, a missing foreign key name was not recognized as an error
   during the validation phase. Thanks to Olivier Vermeulen for the bug fix (a61d73772bc04f219faebe712a62432baf8fc523).
+
+#### Security
+
+- CVE-2017-5929 might affect this software, so the Logback-library was upgraded from version 1.1.7 to 1.2.3
+  (2078f0abf3010d18f290e58854c5e7c155d07b60) 
   
 #### Crashes and Java exceptions:
 - A NullPointerException that could arise when using the Oracle Database BFILE type or the MySQL TIMESTAMP type
@@ -76,6 +81,10 @@ bug list (https://dbmanul.atlassian.net).
   
 - A bug in the snapshotter where the snapshotting task could crash due to a NullPointerException was fixed by 
   GitHub user "syjust" (1df8d796d12b7c4403bf3af52d2904aef3c1ac7d)
+  
+- A bug when running changesets from inside a Java EE application in an Oracle Weblogic application server would file
+  when the includeAll-tag is used and the changelog files were inside a compressed archive. Thanks to GitHub user
+  "Pazus" (1033e66a775378e15ae57a1683b117b8312e48c5)   
   
 ### Database-specific bug fixes
 
@@ -111,6 +120,11 @@ bug list (https://dbmanul.atlassian.net).
   commit cabacfe3593324f5223e53496d80c894f48abfa2.
 - The quotingStrategy attribute did not work on SQL Server, as well as the `--outputDefaultSchema` command line
   option. Thanks to Pavel Vojtechovsky for the bug fix (edff877eeec5b0c053c9ca7e1c094c7614b923a8)
+- In earlier versions, an ALTER USER ... SET DEFAULT_SCHEMA was used whenever a changeset migration was started from
+  the command line. Since this change was permanent (effect lasted after finishing the run), this was an incorrect
+  behaviour. Thanks for GitHub user "gitfool" for the bugfix (9f3e13ab2b13945ab31b3ac7eaf823d936a790fc). Note that,
+  as a side effect, it is not possible anymore to run with a `--defaultSchema` setting where the schema name differs
+  from the login schema name of the database user. 
 
 #### MySQL / MariaDB
  - [CORE-3040] - onlyUpdate="true" flag generates empty statements for MySQL DB. Thanks to Luciano Boschi

@@ -49,3 +49,5 @@ to maximise its usefulness. Thank you.
 [CORE-1852]        none           6a379a7a9aaf0ceffe6762b9bcc95c29d3be4615 checksum depends on line endings and
                                                                            startCommentSymbol
 [CORE-1775]        none           e87c24f02b8a4b0e8bda59f7a8582c4069a077d2 Informix error when creating primary key
+[CORE-1515]        none           266d4eb3e86be2a62cc08f6a5d9b798e0d3929ce Fix regression of "default precision" should
+                                                                           not be returned in MSSQL-snapshots
