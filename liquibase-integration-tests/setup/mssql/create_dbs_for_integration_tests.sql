@@ -46,6 +46,11 @@ DECLARE @createSql varchar(2000);
 SET @createSql = (SELECT 'CREATE DATABASE [liquibase] ON PRIMARY (NAME = N''liquibase'', FILENAME = ''' + @dataPath + 'liquibase.mdf'' , SIZE = 8192KB , FILEGROWTH = 65536KB ) LOG ON ( NAME = N''liquibase_log'', FILENAME = ''' + @logPath + 'liquibase_log.ldf'' , SIZE = 8192KB , FILEGROWTH = 65536KB )');
 EXECUTE(@createSql);
 GO
+
+/* By default, we set the compatibility level to the oldest version we are officially supporting. Note that there
+ * are differences in behaviour, e.g. with implicit conversions of date and time values. See
+ * https://docs.microsoft.com/en-us/sql/t-sql/functions/cast-and-convert-transact-sql for details.
+ */
 ALTER DATABASE [liquibase] SET COMPATIBILITY_LEVEL = 100
 GO
 
