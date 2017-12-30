@@ -14,6 +14,8 @@ request number (pr#) to maximise its usefulness. Thank you.
                        login default schema since MSSQL does not support setting it on a session level basis.
 727     (missing)
 726     REJECTED       [CORE-3140] PR is only usuable with MSSQL 2005 (too old to support it properly, sorry)
+725     TODO           (need to understand the class loader mechnism better to understand the change)
+724     MERGED         [CORE-3138]: correct AddAutoIncrement for SQLAnywhere
 727-687 TODO
 686     MERGED         Prevent liquibase.exception.DatabaseException
 685     MERGED         [CORE-3079] Make includeObjects and excludeObjects affect which objects are snapshotted

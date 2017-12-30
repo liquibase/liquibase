@@ -148,7 +148,8 @@ bug list (https://dbmanul.atlassian.net).
 - In the operation `<dropUniqueConstraint>`, wrong sql in the form `ALTER TABLE ... DROP UNIOQUE (null)` was 
   generated (c133369a5b6f0530d3cdd862a5bac3edbfd69319)
 - [CORE-3009] Wrong SQL was generated for the dropDefaultValue operation, fixed by Andreas Pohl (968bd791c91f6caa36271346ce66537260d9fbc9 )
-
+- [CORE-3138] Incorrect SQL was generated for the AddAutoIncrement change in SQLAnywhere, fixd by Andreas Pohl
+  (1a437d9bc52cb0a8512203f755be1b3e62e77469)
 
 New features / enhancements
 ---------------------------
