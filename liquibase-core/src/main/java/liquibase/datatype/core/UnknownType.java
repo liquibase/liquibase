@@ -16,6 +16,8 @@ import java.util.Arrays;
  */
 public class UnknownType extends LiquibaseDataType {
 
+    private boolean autoIncrement;
+
     public UnknownType() {
         super("UNKNOWN", 0, 2);
     }
@@ -27,8 +29,6 @@ public class UnknownType extends LiquibaseDataType {
     public UnknownType(String name, int minParameters, int maxParameters) {
         super(name, minParameters, maxParameters);
     }
-
-    private boolean autoIncrement;
 
     public boolean isAutoIncrement() {
         return autoIncrement;

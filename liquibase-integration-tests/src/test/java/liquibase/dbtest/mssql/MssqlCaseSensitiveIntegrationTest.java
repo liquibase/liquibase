@@ -1,7 +1,9 @@
 package liquibase.dbtest.mssql;
 
 import liquibase.database.DatabaseFactory;
+import org.junit.Ignore;
 
+@Ignore
 public class MssqlCaseSensitiveIntegrationTest extends AbstractMssqlIntegrationTest {
 
     public MssqlCaseSensitiveIntegrationTest() throws Exception {

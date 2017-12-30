@@ -27,6 +27,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * A DBMS that effectively does nothing, but it is useful for tests where everything should work in the same way
+ * for all databases.
+ */
+// Most of the methods here are empty because this is, after all, a Database that is supposed not to do much.
+@SuppressWarnings("squid:S1186")
 public class MockDatabase implements Database, InternalDatabase {
 
     private static final int FETCH_SIZE = 1000;
@@ -380,12 +386,14 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String escapeColumnName(final String catalogName, final String schemaName, final String tableName, final String columnName) {
+    public String escapeColumnName(final String catalogName, final String schemaName, final String tableName,
+                                   final String columnName) {
         return columnName;
     }
 
     @Override
-    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions) {
+    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName,
+                                   boolean quoteNamesThatMayBeFunctions) {
         return columnName;
     }
 
@@ -517,12 +525,14 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String escapeObjectName(final String catalogName, final String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(final String catalogName, final String schemaName, final String objectName,
+                                   final Class<? extends DatabaseObject> objectType) {
         return catalogName +"."+schemaName+"."+objectName;
     }
 
     @Override
-    public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) {
+    public void executeStatements(final Change change, final DatabaseChangeLog changeLog,
+                                  final List<SqlVisitor> sqlVisitors) {
     }
 
     @Override
@@ -590,8 +600,8 @@ public class MockDatabase implements Database, InternalDatabase {
 
     }
 
-        @Override
-        public boolean supportsForeignKeyDisable() {
+    @Override
+    public boolean supportsForeignKeyDisable() {
         return false;
     }
 
@@ -628,11 +638,13 @@ public class MockDatabase implements Database, InternalDatabase {
             return null;
         }
         String finalName = name.toLowerCase();
-        finalName = finalName.substring(0, finalName.length()-1)+finalName.substring(finalName.length()-1, finalName.length()).toUpperCase();
+        finalName = finalName.substring(0, finalName.length()-1)
+            + finalName.substring(finalName.length()-1, finalName.length()).toUpperCase();
         return finalName;
     }
 
-    public String correctObjectName(final String name, final Class<? extends DatabaseObject> objectType, final boolean quoteCorrectedName) {
+    public String correctObjectName(final String name, final Class<? extends DatabaseObject> objectType,
+                                    final boolean quoteCorrectedName) {
         return correctObjectName(name, objectType);
     }
 
