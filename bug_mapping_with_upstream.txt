@@ -8,6 +8,7 @@ to maximise its usefulness. Thank you.
 
 [Liquibase bug id] [DB-Manul bug] [if fixed, commit#]                      [short bug description]
 =====================================================================================================================
+[CORE-3138]        none           1a437d9bc52cb0a8512203f755be1b3e62e77469 correct AddAutoIncrement for SQLAnywhere
 [CORE-3079]        none           e14e982bb01b35ec4eae51580ee33b131142edb3 Make includeObjects and excludeObjects
                                                                            affect which objects are snapshotted
 [CORE-3076]        none           eaf994fed9e54a3388928aeaaa5f867ebd0c4833 SUM is not reserved word for HsqlDB
@@ -51,3 +52,5 @@ to maximise its usefulness. Thank you.
 [CORE-1775]        none           e87c24f02b8a4b0e8bda59f7a8582c4069a077d2 Informix error when creating primary key
 [CORE-1515]        none           266d4eb3e86be2a62cc08f6a5d9b798e0d3929ce Fix regression of "default precision" should
                                                                            not be returned in MSSQL-snapshots
+[CORE-1225]        none           (partly fixed)                           support placing metadata tables in different
+                                                                           tablespaces.

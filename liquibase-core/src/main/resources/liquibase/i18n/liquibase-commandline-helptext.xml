@@ -136,6 +136,10 @@ Optional Parameters:
  --databaseChangeLogLockTableName=<name>    The name of the DB-Manul ChangeLog
                                             Lock table
                                             (default: DATABASECHANGELOGLOCK)
+ --databaseChangeLogTablespaceName=<name>   name of the tablespace where the
+                                            DATABASECHANGELOG and -LOCK tables
+                                            will be created (if they do not
+                                            exist yet)
  --liquibaseSchemaName=<name>               The name of the schema with the
                                             liquibase tables
  --includeSystemClasspath=<true|false>      Include the system classpath

@@ -157,6 +157,9 @@ New features / enhancements
 ### All supported databases:
 - When diffing database objects, the filters includeObjects and excludeObjects are now applied to the list of objects
   that are compared. ([CORE-3079], fixed by Mårten Svantesson)
+- You can now state the option --databaseChangeLogTablespaceName to specify the tablespace in which the
+  DATABASECHANGELOG/DATABASECHANGELOGLOCK tables are created (if they do not exist yet). Command line support
+  was contributed by Kenny Moens (aac7c852319552d813aa4b5ca558bd4b234f2e66)  
 
 #### Logging
 
