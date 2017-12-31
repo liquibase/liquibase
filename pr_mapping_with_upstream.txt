@@ -17,7 +17,9 @@ request number (pr#) to maximise its usefulness. Thank you.
 725     TODO           (need to understand the class loader mechnism better to understand the change)
 724     MERGED         [CORE-3138]: correct AddAutoIncrement for SQLAnywhere
 723     MERGED         [CORE-1225]: add --databaseChangeLogTablespaceName as command line option
-727-687 TODO
+722     (missing)
+721     MERGED         [CORE-3115]: Added trim() in the DataTypeFactory.java
+720-687 TODO
 686     MERGED         Prevent liquibase.exception.DatabaseException
 685     MERGED         [CORE-3079] Make includeObjects and excludeObjects affect which objects are snapshotted
 684     MERGED         [CORE-3076] HsqlDB: add SUM to keywords
