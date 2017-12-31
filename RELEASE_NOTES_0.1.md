@@ -61,6 +61,9 @@ bug list (https://dbmanul.atlassian.net).
   (2078f0abf3010d18f290e58854c5e7c155d07b60) 
   
 #### Crashes and Java exceptions:
+- [CORE-3115]: Spaces between the quote character and a data type name " like this " could cause an exception
+   due to an unknown LiquibaseDataType. Fixed by Per Abich (b83cee394e9392079f09f69d91f6abf3b9f8c0da)
+   
 - A NullPointerException that could arise when using the Oracle Database BFILE type or the MySQL TIMESTAMP type
   was fixed thanks to "yuxiaobin" (0ea5040caf0175fc36fcaf5b2d375903c777c5eb).
 

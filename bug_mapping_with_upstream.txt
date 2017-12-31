@@ -9,6 +9,7 @@ to maximise its usefulness. Thank you.
 [Liquibase bug id] [DB-Manul bug] [if fixed, commit#]                      [short bug description]
 =====================================================================================================================
 [CORE-3138]        none           1a437d9bc52cb0a8512203f755be1b3e62e77469 correct AddAutoIncrement for SQLAnywhere
+[CORE-3115]        none           b83cee394e9392079f09f69d91f6abf3b9f8c0da Added trim() in the DataTypeFactory.java
 [CORE-3079]        none           e14e982bb01b35ec4eae51580ee33b131142edb3 Make includeObjects and excludeObjects
                                                                            affect which objects are snapshotted
 [CORE-3076]        none           eaf994fed9e54a3388928aeaaa5f867ebd0c4833 SUM is not reserved word for HsqlDB
