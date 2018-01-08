@@ -64,7 +64,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         Set<String> returnSet = new HashSet<String>();
 
-        if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:"))) {
+        if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:") || path.startsWith("wsjar:file:") || path.startsWith("zip:"))) {
             fileUrls = new Vector<URL>(Arrays.asList(new URL(path))).elements();
         }
 
