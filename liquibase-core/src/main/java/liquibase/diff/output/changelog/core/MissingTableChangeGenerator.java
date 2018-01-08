@@ -22,10 +22,13 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -119,6 +122,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
         PrimaryKey primaryKey = missingTable.getPrimaryKey();
         List<String> pkColumnList = ((primaryKey != null) ? primaryKey.getColumnNamesAsList() : null);
+        Map<Column, UniqueConstraint> singleUniqueConstraints = getSingleColumnUniqueConstraints(missingTable);
 
         CreateTableChange change = createCreateTableChange();
         change.setTableName(missingTable.getName());
@@ -184,6 +188,20 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 constraintsConfig.setNullable(false);
             }
 
+            if (referenceDatabase instanceof MySQLDatabase) {
+                UniqueConstraint uniqueConstraint = singleUniqueConstraints.get(column);
+                if (uniqueConstraint != null) {
+                    if (!control.alreadyHandledMissing(uniqueConstraint, referenceDatabase)) {
+                        if (constraintsConfig == null) {
+                            constraintsConfig = new ConstraintsConfig();
+                        }
+                        constraintsConfig.setUnique(true);
+                        control.setAlreadyHandledMissing(uniqueConstraint);
+                        control.setAlreadyHandledMissing(uniqueConstraint.getBackingIndex());
+                    }
+                }
+            }
+
             if (constraintsConfig != null) {
                 columnConfig.setConstraints(constraintsConfig);
             }
@@ -215,6 +233,17 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         return new Change[]{
                 change
         };
+    }
+
+    private Map<Column, UniqueConstraint> getSingleColumnUniqueConstraints(Table missingTable) {
+        Map<Column, UniqueConstraint> map = new HashMap<>();
+        List<UniqueConstraint> constraints = missingTable.getUniqueConstraints() == null ? null : missingTable.getUniqueConstraints();
+        for (UniqueConstraint constraint : constraints) {
+            if (constraint.getColumns().size() == 1) {
+                map.put(constraint.getColumns().get(0), constraint);
+            }
+        }
+        return map;
     }
 
     protected CreateTableChange createCreateTableChange() {
