@@ -396,7 +396,7 @@
 		<xsd:attribute name="maxValue" type="xsd:string" />
 		<xsd:attribute name="minValue" type="xsd:string" />
 		<xsd:attribute name="ordered" type="booleanExp" />
-        <xsd:attribute name="cacheSize" type="xsd:nonNegativeInteger" />
+    <xsd:attribute name="cacheSize" type="xsd:string" />
 		<xsd:attribute name="cycle" type="booleanExp">
 			<xsd:annotation>
 				<xsd:documentation>
