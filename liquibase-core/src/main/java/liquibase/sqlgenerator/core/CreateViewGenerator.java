@@ -109,10 +109,22 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         }
 
         //
+        // ASSERT:  We have a DB2 database
         // DB2 must be version >= 10.5
         //
-        if (getMajorVersion(database) >= 10 && getMinorVersion(database) >= 5) {
-            return true;
+        int majorVersion = getMajorVersion(database);
+        if (majorVersion < 10) {
+            return false;
+        }
+
+        //
+        // ASSERT:  We have a version >= 10
+        // If it is > 10 then we return true
+        // If it is == 10 then we check the minor version
+        //
+        int minorVersion = getMinorVersion(database);
+        if (majorVersion > 10 || minorVersion >= 5) {
+          return true;
         }
         return false;
     }
