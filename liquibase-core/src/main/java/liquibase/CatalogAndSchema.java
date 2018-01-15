@@ -1,6 +1,7 @@
 package liquibase;
 
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -42,9 +43,12 @@ public class CatalogAndSchema {
         if (catalogAndSchema.getCatalogName() == null) {
             catalogMatches = (thisCatalogAndSchema.getCatalogName() == null);
         } else {
-            catalogMatches = catalogAndSchema.getCatalogName().equalsIgnoreCase(thisCatalogAndSchema.getCatalogName());
+            if (accordingTo.isCaseSensitive()) {
+                catalogMatches = catalogAndSchema.getCatalogName().equals(thisCatalogAndSchema.getCatalogName());
+            } else {
+                catalogMatches = catalogAndSchema.getCatalogName().equalsIgnoreCase(thisCatalogAndSchema.getCatalogName());
+            }
         }
-
         if (!catalogMatches) {
             return false;
         }
@@ -53,6 +57,9 @@ public class CatalogAndSchema {
             if (catalogAndSchema.getSchemaName() == null) {
                 return thisCatalogAndSchema.getSchemaName() == null;
             } else {
+                if (accordingTo.isCaseSensitive()) {
+                    return catalogAndSchema.getSchemaName().equals(thisCatalogAndSchema.getSchemaName());
+                }
                 return catalogAndSchema.getSchemaName().equalsIgnoreCase(thisCatalogAndSchema.getSchemaName());
             }
         } else {
@@ -89,16 +96,30 @@ public class CatalogAndSchema {
             schemaName = catalogName;
         }
 
-        if (catalogName != null && catalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
-            catalogName = null;
-        }
+        if (accordingTo.isCaseSensitive()) {
+            if (catalogName != null && catalogName.equals(accordingTo.getDefaultCatalogName())) {
+                catalogName = null;
+            }
 
-        if (schemaName != null && schemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
-            schemaName = null;
+            if (schemaName != null && schemaName.equals(accordingTo.getDefaultSchemaName())) {
+                schemaName = null;
+            }
+        } else {
+            if (catalogName != null && catalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
+                catalogName = null;
+            }
+
+            if (schemaName != null && schemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
+                schemaName = null;
+            }
         }
 
         if (!accordingTo.supportsSchemas() && catalogName != null && schemaName != null && !catalogName.equals(schemaName)) {
             schemaName = null;
+        }
+
+        if (accordingTo instanceof DB2Database) {
+            return new CatalogAndSchema(catalogName, schemaName);
         }
 
         if (accordingTo instanceof PostgresDatabase) {

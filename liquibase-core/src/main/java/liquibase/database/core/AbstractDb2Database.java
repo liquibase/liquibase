@@ -26,6 +26,7 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
         super.unquotedObjectsAreUppercased=true;
+        super.setCaseSensitive(true);
     }
 
     @Override
