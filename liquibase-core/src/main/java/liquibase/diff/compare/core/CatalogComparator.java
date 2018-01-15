@@ -2,6 +2,7 @@ package liquibase.diff.compare.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
@@ -58,7 +59,7 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return otherSchema.getCatalogName() == null;
         }
 
-        if (accordingTo.isCaseSensitive()) {
+        if (accordingTo instanceof DB2Database) {
             if (StringUtils.trimToEmpty(object1Name).equals(StringUtils.trimToEmpty(object2Name))){
                 return true;
             }

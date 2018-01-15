@@ -43,7 +43,7 @@ public class CatalogAndSchema {
         if (catalogAndSchema.getCatalogName() == null) {
             catalogMatches = (thisCatalogAndSchema.getCatalogName() == null);
         } else {
-            if (accordingTo.isCaseSensitive()) {
+            if (accordingTo instanceof DB2Database) {
                 catalogMatches = catalogAndSchema.getCatalogName().equals(thisCatalogAndSchema.getCatalogName());
             } else {
                 catalogMatches = catalogAndSchema.getCatalogName().equalsIgnoreCase(thisCatalogAndSchema.getCatalogName());
@@ -57,7 +57,7 @@ public class CatalogAndSchema {
             if (catalogAndSchema.getSchemaName() == null) {
                 return thisCatalogAndSchema.getSchemaName() == null;
             } else {
-                if (accordingTo.isCaseSensitive()) {
+                if (accordingTo instanceof DB2Database) {
                     return catalogAndSchema.getSchemaName().equals(thisCatalogAndSchema.getSchemaName());
                 }
                 return catalogAndSchema.getSchemaName().equalsIgnoreCase(thisCatalogAndSchema.getSchemaName());
@@ -96,7 +96,7 @@ public class CatalogAndSchema {
             schemaName = catalogName;
         }
 
-        if (accordingTo.isCaseSensitive()) {
+        if (accordingTo instanceof DB2Database) {
             if (catalogName != null && catalogName.equals(accordingTo.getDefaultCatalogName())) {
                 catalogName = null;
             }
