@@ -401,9 +401,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         returnList.addAll(executeAndExtract(sql, database));
                     } else if (database instanceof MSSQLDatabase) {
+                    	String tableCat = "original_db_name()";
+
+                    	if (9 <= database.getDatabaseMajorVersion()) {
+                        	tableCat = "db_name()";
+                        }
                         //fetch additional index info
                         String sql = "SELECT " +
-                                "original_db_name() as TABLE_CAT, " +
+                                tableCat + " as TABLE_CAT, " +
                                 "object_schema_name(i.object_id) as TABLE_SCHEM, " +
                                 "object_name(i.object_id) as TABLE_NAME, " +
                                 "CASE is_unique WHEN 1 then 0 else 1 end as NON_UNIQUE, " +
@@ -620,7 +625,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 protected List<CachedRow> mssqlQuery(boolean bulk) throws DatabaseException, SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    String sql = "select original_db_name() AS TABLE_CAT, " +
+                    String tableCat = "original_db_name()";
+                    
+                    if (9 <= database.getDatabaseMajorVersion()) {
+                    	tableCat = "db_name()";
+                    }
+                    
+                    String sql = "select " + tableCat +" AS TABLE_CAT, " +
                             "object_schema_name(c.object_id) AS TABLE_SCHEM, " +
                             "object_name(c.object_id) AS TABLE_NAME, " +
                             "c.name AS COLUMN_NAME, " +
