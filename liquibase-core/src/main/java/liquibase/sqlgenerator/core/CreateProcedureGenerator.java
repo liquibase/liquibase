@@ -20,7 +20,6 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
     @Override
@@ -29,7 +28,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         validationErrors.checkRequiredField("procedureText", statement.getProcedureText());
         if (statement.getReplaceIfExists() != null) {
             if (database instanceof MSSQLDatabase) {
-                if (statement.getReplaceIfExists() && statement.getProcedureName() == null) {
+                if (statement.getReplaceIfExists() && (statement.getProcedureName() == null)) {
                     validationErrors.addError("procedureName is required if replaceIfExists = true");
                 }
             } else {
@@ -42,16 +41,17 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
     @Override
     public Sql[] generateSql(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Sql> sql = new ArrayList<>();
 
         String schemaName = statement.getSchemaName();
-        if (schemaName == null && LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getAlwaysOverrideStoredLogicSchema()) {
+        if ((schemaName == null) && LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+            .getAlwaysOverrideStoredLogicSchema()) {
             schemaName = database.getDefaultSchemaName();
         }
 
         String procedureText = addSchemaToText(statement.getProcedureText(), schemaName, "PROCEDURE", database);
 
-        if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
+        if ((statement.getReplaceIfExists() != null) && statement.getReplaceIfExists()) {
             String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
             if (schemaName != null) {
                 fullyQualifiedName = database.escapeObjectName(schemaName, Schema.class) + "." + fullyQualifiedName;
@@ -61,7 +61,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";
-            while (next != null && !(next.toString().equalsIgnoreCase("create") || next.toString().equalsIgnoreCase("alter")) && clauseIterator.hasNext()) {
+            while ((next != null) && !("create".equalsIgnoreCase(next.toString()) || "alter".equalsIgnoreCase(next
+                .toString())) && clauseIterator.hasNext()) {
                 next = clauseIterator.nextNonWhitespace();
             }
             clauseIterator.replace("ALTER");
@@ -71,13 +72,14 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
 
-        if (database instanceof MSSQLDatabase && procedureText.toLowerCase().contains("merge") && !procedureText.endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
+        if ((database instanceof MSSQLDatabase) && procedureText.toLowerCase().contains("merge") && !procedureText
+            .endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
             StringClauses parsed = SqlParser.parse(procedureText);
             StringClauses.ClauseIterator clauseIterator = parsed.getClauseIterator();
             boolean reallyMerge = false;
             while (clauseIterator.hasNext()) {
                 Object clause = clauseIterator.nextNonWhitespace();
-                if (((String) clause).equalsIgnoreCase("merge")) {
+                if ("merge".equalsIgnoreCase((String) clause)) {
                     reallyMerge = true;
                 }
             }
@@ -102,9 +104,9 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         }
 
         String fixedText = procedureText;
-        while (fixedText.length() > 0) {
+        while (!fixedText.isEmpty()) {
             String lastChar = fixedText.substring(fixedText.length() - 1);
-            if (lastChar.equals(" ") || lastChar.equals("\n") || lastChar.equals("\r") || lastChar.equals("\t")) {
+            if (" ".equals(lastChar) || "\n".equals(lastChar) || "\r".equals(lastChar) || "\t".equals(lastChar)) {
                 fixedText = fixedText.substring(0, fixedText.length() - 1);
             } else {
                 break;
@@ -145,13 +147,13 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";
-            while (next != null && !next.toString().equalsIgnoreCase(keywordBeforeName) && clauseIterator.hasNext()) {
-                if (!keywordBeforeName.equalsIgnoreCase("PACKAGE") && ((String) next).equalsIgnoreCase("PACKAGE")) {
+            while ((next != null) && !next.toString().equalsIgnoreCase(keywordBeforeName) && clauseIterator.hasNext()) {
+                if (!"PACKAGE".equalsIgnoreCase(keywordBeforeName) && "PACKAGE".equalsIgnoreCase((String) next)) {
                     return procedureText;
                 }
                 next = clauseIterator.nextNonWhitespace();
             }
-            if (next != null && clauseIterator.hasNext()) {
+            if ((next != null) && clauseIterator.hasNext()) {
                 Object procNameClause = clauseIterator.nextNonWhitespace();
                 if (procNameClause instanceof String) {
                     String[] nameParts = ((String) procNameClause).split("\\.");

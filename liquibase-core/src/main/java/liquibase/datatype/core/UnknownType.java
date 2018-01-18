@@ -1,16 +1,14 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 public class UnknownType extends LiquibaseDataType {
 
@@ -39,7 +37,7 @@ public class UnknownType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         int dataTypeMaxParameters;
-        if (getName().equalsIgnoreCase("enum") || getName().equalsIgnoreCase("set")) {
+        if ("enum".equalsIgnoreCase(getName()) || "set".equalsIgnoreCase(getName())) {
             dataTypeMaxParameters = Integer.MAX_VALUE;
         } else {
             dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
@@ -47,17 +45,19 @@ public class UnknownType extends LiquibaseDataType {
         Object[] parameters = getParameters();
 
         if (database instanceof OracleDatabase) {
-            if (getName().equalsIgnoreCase("LONG")
-                    || getName().equalsIgnoreCase("BFILE")
-                    || getName().equalsIgnoreCase("ROWID")
-                    || getName().equalsIgnoreCase("ANYDATA")
-                    || getName().equalsIgnoreCase("SDO_GEOMETRY")
+            if ("LONG".equalsIgnoreCase(getName())
+                    || "BFILE".equalsIgnoreCase(getName())
+                    || "ROWID".equalsIgnoreCase(getName())
+                    || "ANYDATA".equalsIgnoreCase(getName())
+                    || "SDO_GEOMETRY".equalsIgnoreCase(getName())
                     ) {
                 parameters = new Object[0];
+            } else if ("RAW".equalsIgnoreCase(getName())) {
+                return new DatabaseDataType(getName(), parameters);
             } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
                 return new DatabaseDataType(getName().replaceAll("\\(\\d+\\)", ""));
-            } else if (((OracleDatabase) database).getUserDefinedTypes().contains(getName().toUpperCase())) {
-                return new DatabaseDataType(getName().toUpperCase()); //user defined tye
+            } else { //probably a user defined type. Can't call getUserDefinedTypes() to know for sure, since that returns all types including system types.
+                return new DatabaseDataType(getName().toUpperCase());
             }
         }
 
@@ -82,5 +82,10 @@ public class UnknownType extends LiquibaseDataType {
         } else {
             return "'"+super.objectToSql(value, database)+"'";
         }
+    }
+
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.STRING;
     }
 }

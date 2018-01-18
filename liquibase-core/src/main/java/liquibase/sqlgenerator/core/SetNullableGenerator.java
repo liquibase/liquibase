@@ -9,21 +9,20 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatement> {
 
     @Override
     public boolean supports(SetNullableStatement statement, Database database) {
-        return !(database instanceof FirebirdDatabase ||
-                database instanceof SQLiteDatabase);
+        return !((database instanceof FirebirdDatabase) || (database instanceof SQLiteDatabase));
     }
 
     @Override
@@ -33,12 +32,14 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
 
-        if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof InformixDatabase || database instanceof H2Database) {
+        if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof
+            InformixDatabase) || (database instanceof H2Database)) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
         }
 
         try {
-            if ((database instanceof DB2Database) && (database.getDatabaseMajorVersion() > 0 && database.getDatabaseMajorVersion() < 9)) {
+            if ((database instanceof DB2Database) && ((database.getDatabaseMajorVersion() > 0) && (database
+                .getDatabaseMajorVersion() < 9))) {
                 validationErrors.addError("DB2 versions less than 9 do not support modifying null constraints");
             }
         } catch (DatabaseException ignore) {
@@ -58,9 +59,10 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             nullableString = " NOT NULL";
         }
 
-        if (database instanceof OracleDatabase && statement.getConstraintName() != null) {
+        if ((database instanceof OracleDatabase) && (statement.getConstraintName() != null)) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
-        } else if (database instanceof OracleDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
+        } else if ((database instanceof OracleDatabase) || (database instanceof SybaseDatabase) || (database
+            instanceof SybaseASADatabase)) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + nullableString;
         } else if (database instanceof MSSQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString;
@@ -68,7 +70,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString;
         } else if (database instanceof DerbyDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + nullableString;
-        } else if (database instanceof HsqlDatabase || database instanceof H2Database) {
+        } else if ((database instanceof HsqlDatabase) || (database instanceof H2Database)) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET"+nullableString;
         } else if (database instanceof InformixDatabase) {
             // Informix simply omits the null for nullables
@@ -80,7 +82,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
         }
 
-        List<Sql> returnList = new ArrayList<Sql>();
+        List<Sql> returnList = new ArrayList<>();
         returnList.add(new UnparsedSql(sql, getAffectedColumn(statement)));
 
         if (database instanceof DB2Database) {

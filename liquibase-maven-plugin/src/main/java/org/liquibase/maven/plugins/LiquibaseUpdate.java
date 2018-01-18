@@ -2,8 +2,8 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
-import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 
 /**
  * Applies the DatabaseChangeLogs to the database. Useful as part of the build

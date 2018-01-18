@@ -19,7 +19,7 @@ public class DropAllTask extends BaseLiquibaseTask {
         try {
             if (StringUtils.trimToNull(schemas) != null) {
                 List<String> schemaNames = StringUtils.splitAndTrim(this.schemas, ",");
-                List<CatalogAndSchema> schemas = new ArrayList<CatalogAndSchema>();
+                List<CatalogAndSchema> schemas = new ArrayList<>();
                 for (String name : schemaNames) {
                     schemas.add(new CatalogAndSchema(catalog,  name));
                 }

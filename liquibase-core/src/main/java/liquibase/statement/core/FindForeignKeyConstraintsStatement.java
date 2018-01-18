@@ -14,7 +14,8 @@ public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
     private String baseTableSchemaName;
     private String baseTableName;
 
-    public FindForeignKeyConstraintsStatement(String baseTableCatalogName, String baseTableSchemaName, String baseTableName) {
+    public FindForeignKeyConstraintsStatement(String baseTableCatalogName, String baseTableSchemaName,
+                                              String baseTableName) {
         this.baseTableCatalogName = baseTableCatalogName;
         this.baseTableSchemaName = baseTableSchemaName;
         this.baseTableName = baseTableName;

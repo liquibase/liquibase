@@ -8,7 +8,8 @@ import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.StringUtils;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 public class StringSnapshotSerializer implements SnapshotSerializer {
@@ -30,7 +31,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
             StringBuffer buffer = new StringBuffer();
             buffer.append("[");
 
-            SortedSet<String> values = new TreeSet<String>();
+            SortedSet<String> values = new TreeSet<>();
             for (String field : objectToSerialize.getSerializableFields()) {
                 Object value = objectToSerialize.getSerializableFieldValue(field);
 
@@ -46,7 +47,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
                             values.add(indent(indent) + field + "=" + serializeObject((Object[]) value, indent + 1));
                         } else {
                             String valueString = value.toString();
-                            if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
+                            if ((value instanceof Double) || (value instanceof Float)) { //java 6 adds additional zeros to the end of doubles and floats
                                 if (valueString.contains(".")) {
                                     valueString = valueString.replaceFirst("0*$","");
                                 }
@@ -57,7 +58,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
                 }
             }
 
-            if (values.size() > 0) {
+            if (!values.isEmpty()) {
                 buffer.append("\n");
                 buffer.append(StringUtils.join(values, "\n"));
                 buffer.append("\n");
@@ -96,7 +97,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
     }
 
     private String serializeObject(Collection collection, int indent) {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "[]";
         }
 
@@ -116,7 +117,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
     }
 
     private String serializeObject(Map collection, int indent) {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "[]";
         }
 

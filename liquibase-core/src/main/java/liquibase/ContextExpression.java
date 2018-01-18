@@ -3,7 +3,6 @@ package liquibase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtils;
 
-import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,8 +12,8 @@ import java.util.regex.Pattern;
  */
 public class ContextExpression {
 
-    private HashSet<String> contexts = new HashSet<String>();
-    private String originalString = null;
+    private HashSet<String> contexts = new HashSet<>();
+    private String originalString;
 
     public ContextExpression() {
     }
@@ -74,10 +73,10 @@ public class ContextExpression {
      * Returns true if the passed runtime contexts match this context expression
      */
     public boolean matches(Contexts runtimeContexts) {
-        if (runtimeContexts == null || runtimeContexts.isEmpty()) {
+        if ((runtimeContexts == null) || runtimeContexts.isEmpty()) {
             return true;
         }
-        if (this.contexts.size() == 0) {
+        if (this.contexts.isEmpty()) {
             return true;
         }
 
@@ -94,10 +93,10 @@ public class ContextExpression {
             return true;
         }
 
-        if (expression.trim().equals(":TRUE")) {
+        if (":TRUE".equals(expression.trim())) {
             return true;
         }
-        if (expression.trim().equals(":FALSE")) {
+        if (":FALSE".equals(expression.trim())) {
             return false;
         }
 
@@ -160,14 +159,14 @@ public class ContextExpression {
     }
 
     public boolean isEmpty() {
-        return this.contexts == null || this.contexts.size() == 0;
+        return (this.contexts == null) || this.contexts.isEmpty();
     }
 
     public static boolean matchesAll(Collection<ContextExpression> expressions, Contexts contexts) {
-        if (expressions == null || expressions.isEmpty()) {
+        if ((expressions == null) || expressions.isEmpty()) {
             return true;
         }
-        if (contexts == null || contexts.isEmpty()) {
+        if ((contexts == null) || contexts.isEmpty()) {
             return true;
         }
         for (ContextExpression expression : expressions) {

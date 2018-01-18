@@ -4,12 +4,13 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 public class DatabaseObjectComparatorChain {
     private CompareControl.SchemaComparison[] schemaComparisons;
     private List<DatabaseObjectComparator> comparators;
-    private int nextIndex = 0; //this class is used often enough that the overhead of an iterator adds up to a significant percentage of the execution time
+    private int nextIndex; //this class is used often enough that the overhead of an iterator adds up to a significant percentage of the execution time
 
     public DatabaseObjectComparatorChain(List<DatabaseObjectComparator> comparators, CompareControl.SchemaComparison[] schemaComparisons) {
         this.comparators = comparators;
@@ -25,14 +26,14 @@ public class DatabaseObjectComparatorChain {
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
-        if (object1 == null && object2 == null) {
+        if ((object1 == null) && (object2 == null)) {
             return true;
         }
-        if (object1 == null && object2 != null) {
+        if ((object1 == null) && (object2 != null)) {
             return false;
         }
 
-        if (object1 != null && object2 == null) {
+        if ((object1 != null) && (object2 == null)) {
             return false;
         }
 
@@ -78,14 +79,14 @@ public class DatabaseObjectComparatorChain {
     }
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl, Set<String> exclude) {
-        if (object1 == null && object2 == null) {
+        if ((object1 == null) && (object2 == null)) {
             return new ObjectDifferences(compareControl);
         }
-        if (object1 == null && object2 != null) {
+        if ((object1 == null) && (object2 != null)) {
             return new ObjectDifferences(compareControl).addDifference("Reference value was null", "this", null, null);
         }
 
-        if (object1 != null && object2 == null) {
+        if ((object1 != null) && (object2 == null)) {
             return new ObjectDifferences(compareControl).addDifference("Compared value was null", "this", null, null);
         }
 

@@ -143,7 +143,7 @@ public class RanChangeSet {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if ((o == null) || (getClass() != o.getClass())) {
             return false;
         }
 
@@ -157,8 +157,8 @@ public class RanChangeSet {
     public int hashCode() {
         int result;
         result = changeLog.hashCode();
-        result = 29 * result + id.hashCode();
-        result = 29 * result + author.hashCode();
+        result = (29 * result) + id.hashCode();
+        result = (29 * result) + author.hashCode();
         return result;
     }
 

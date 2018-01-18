@@ -8,7 +8,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -76,11 +75,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
 
   @Override
   protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
-        try {
-            String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
-            return new Liquibase(changeLog, fo, db);
-        } catch (LiquibaseException ex) {
-            throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(), ex);
-        }
+      String changeLog = (changeLogFile == null) ? "" : changeLogFile.trim();
+      return new Liquibase(changeLog, fo, db);
   }
 }

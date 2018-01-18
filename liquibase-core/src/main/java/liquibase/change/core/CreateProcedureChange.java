@@ -5,15 +5,12 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.DB2Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.StreamUtil;
@@ -22,13 +19,19 @@ import liquibase.util.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
-@DatabaseChange(name = "createProcedure",
-        description = "Defines the definition for a stored procedure. This command is better to use for creating procedures than the raw sql command because it will not attempt to strip comments or break up lines.\n\nOften times it is best to use the CREATE OR REPLACE syntax along with setting runOnChange='true' on the enclosing changeSet tag. That way if you need to make a change to your procedure you can simply change your existing code rather than creating a new REPLACE PROCEDURE call. The advantage to this approach is that it keeps your change log smaller and allows you to more easily see what has changed in your procedure code through your source control system's diff command.",
-        priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(
+    name = "createProcedure",
+    description = "Defines the definition for a stored procedure. This command is better to use for creating " +
+        "procedures than the raw sql command because it will not attempt to strip comments or break up lines.\n\n" +
+        "Often times it is best to use the CREATE OR REPLACE syntax along with setting runOnChange='true' on the " +
+        "enclosing changeSet tag. That way if you need to make a change to your procedure you can simply change your " +
+        "existing code rather than creating a new REPLACE PROCEDURE call. The advantage to this approach is that it " +
+        "keeps your change log smaller and allows you to more easily see what has changed in your procedure code " +
+        "through your source control system's diff command.",
+    priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange {
     private String comments;
     private String catalogName;
@@ -39,7 +42,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
     private String path;
     private Boolean relativeToChangelogFile;
-    private String encoding = null;
+    private String encoding;
     private Boolean replaceIfExists;
 
     @Override
@@ -86,7 +89,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.encoding = encoding;
     }
 
-    @DatabaseChangeProperty(description = "File containing the procedure text. Either this attribute or a nested procedure text is required.", exampleValue = "com/example/my-logic.sql")
+    @DatabaseChangeProperty(
+        description = "File containing the procedure text. Either this attribute or a nested procedure text is " +
+            "required.",
+        exampleValue = "com/example/my-logic.sql"
+    )
     public String getPath() {
         return path;
     }
@@ -103,13 +110,13 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-
-    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE,
-            exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
-                    "    IS\n" +
-                    "    BEGIN\n" +
-                    "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
-                    "    END;")
+    @DatabaseChangeProperty(
+        exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
+                "    IS\n" +
+                "    BEGIN\n" +
+                "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
+                "    END;",
+        serializationType = SerializationType.DIRECT_VALUE)
     /**
      * @deprecated Use getProcedureText() instead
      */
@@ -120,6 +127,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     /**
      * @deprecated Use setProcedureText() instead
      */
+    @Deprecated
     public void setProcedureBody(String procedureText) {
         this.procedureText = procedureText;
     }
@@ -133,7 +141,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureText = procedureText;
     }
 
-    @DatabaseChangeProperty(since = "3.1", exampleValue = "h2, oracle")
+    @DatabaseChangeProperty(
+        exampleValue = "h2, oracle",
+        since = "3.1"
+    )
     public String getDbms() {
         return dbms;
     }
@@ -161,27 +172,31 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors validate = new ValidationErrors(); //not falling back to default because of path/procedureText option group. Need to specify everything
-        if (StringUtils.trimToNull(getProcedureText()) != null && StringUtils.trimToNull(getPath()) != null) {
-            validate.addError("Cannot specify both 'path' and a nested procedure text in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
+        // Not falling back to default because of path/procedureText option group. Need to specify everything.
+        ValidationErrors validate = new ValidationErrors();
+        if ((StringUtils.trimToNull(getProcedureText()) != null) && (StringUtils.trimToNull(getPath()) != null)) {
+            validate.addError(
+                "Cannot specify both 'path' and a nested procedure text in " +
+                    ChangeFactory.getInstance().getChangeMetaData(this).getName()
+            );
         }
 
-        if (StringUtils.trimToNull(getProcedureText()) == null && StringUtils.trimToNull(getPath()) == null) {
-            validate.addError("Cannot specify either 'path' or a nested procedure text in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
+        if ((StringUtils.trimToNull(getProcedureText()) == null) && (StringUtils.trimToNull(getPath()) == null)) {
+            validate.addError(
+                "Cannot specify either 'path' or a nested procedure text in " +
+                    ChangeFactory.getInstance().getChangeMetaData(this).getName()
+            );
         }
 
-        if (this.getReplaceIfExists() != null && (DatabaseList.definitionMatches(getDbms(), database, true))) {
+        if ((this.getReplaceIfExists() != null) && (DatabaseList.definitionMatches(getDbms(), database, true))) {
             if (database instanceof MSSQLDatabase) {
-                if (this.getReplaceIfExists() && this.getProcedureName() == null) {
+                if (this.getReplaceIfExists() && (this.getProcedureName() == null)) {
                     validate.addError("procedureName is required if replaceIfExists = true");
                 }
             } else {
                 validate.checkDisallowedField("replaceIfExists", this.getReplaceIfExists(), database);
             }
-
         }
-
-
         return validate;
     }
 
@@ -193,7 +208,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         try {
             return StreamUtil.openStream(getPath(), isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
         } catch (IOException e) {
-            throw new IOException("<" + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
+            throw new IOException(
+                "<" + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " path=" +
+                path +
+                "> -Unable to read file",
+                e
+            );
         }
     }
 
@@ -217,20 +237,24 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
         try {
             String procedureText = this.procedureText;
-            if (stream == null && procedureText == null) {
+            if ((stream == null) && (procedureText == null)) {
                 procedureText = "";
             }
 
-            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String encoding =
+                LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
             if (procedureText != null) {
                 try {
                     stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
                 } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError(encoding+" is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+                    throw new AssertionError(encoding +
+                        " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                        "the Charset class"
+                    );
                 }
             }
 
-            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
+            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream));
 
             return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
         } finally {
@@ -238,6 +262,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 try {
                     stream.close();
                 } catch (IOException ignore) {
+                    // Do nothing
                 }
             }
         }
@@ -272,7 +297,14 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {
-        CreateProcedureStatement statement = new CreateProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), logicText, endDelimiter);
+        CreateProcedureStatement statement =
+            new CreateProcedureStatement(
+                getCatalogName(),
+                getSchemaName(),
+                getProcedureName(),
+                logicText,
+                endDelimiter
+            );
         statement.setReplaceIfExists(getReplaceIfExists());
         return new SqlStatement[]{
                 statement,
@@ -295,13 +327,17 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @Override
-    protected Map<String, Object> createExampleValueMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+    protected Map<String, Object> createExampleValueMetaData(
+        String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
 
-        if (parameterName.equals("procedureText") || parameterName.equals("procedureBody")) {
+        if ("procedureText".equals(parameterName) || "procedureBody".equals(parameterName)) {
             Map<String, Object> returnMap = super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
-            returnMap.put(new HsqlDatabase().getShortName(), "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
+            returnMap.put(
+                new HsqlDatabase().getShortName(),
+                "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
                     "   MODIFIES SQL DATA\n" +
-                    "   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)");
+                    "   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)"
+            );
 
             return returnMap;
         } else {

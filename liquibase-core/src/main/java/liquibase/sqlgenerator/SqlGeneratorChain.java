@@ -31,7 +31,7 @@ public class SqlGeneratorChain {
     }
 
     public Warnings warn(SqlStatement statement, Database database) {
-        if (sqlGenerators == null || !sqlGenerators.hasNext()) {
+        if ((sqlGenerators == null) || !sqlGenerators.hasNext()) {
             return new Warnings();
         }
 
@@ -39,7 +39,7 @@ public class SqlGeneratorChain {
     }
 
     public ValidationErrors validate(SqlStatement statement, Database database) {
-        if (sqlGenerators == null || !sqlGenerators.hasNext()) {
+        if ((sqlGenerators == null) || !sqlGenerators.hasNext()) {
             return new ValidationErrors();
         }
 

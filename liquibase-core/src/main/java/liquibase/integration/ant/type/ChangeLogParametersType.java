@@ -18,8 +18,8 @@ public class ChangeLogParametersType extends DataType {
 
     public ChangeLogParametersType(Project project) {
         setProject(project);
-        propertySets = new LinkedList<PropertySet>();
-        parameters = new LinkedList<Property>();
+        propertySets = new LinkedList<>();
+        parameters = new LinkedList<>();
     }
 
     public void applyParameters(Liquibase liquibase) {

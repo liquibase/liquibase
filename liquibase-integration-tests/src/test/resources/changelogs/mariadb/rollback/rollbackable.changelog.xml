@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <preConditions>
+            <dbms type="mariadb"/>
+    </preConditions>
+
+    <changeSet id="1" author="nvoxland">
+        <createTable tableName="magazine">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="nvoxland">
+        <addColumn tableName="magazine">
+            <column name="sku" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <createIndex indexName="idx_magazine_sku" tableName="magazine">
+            <column name="sku"/>
+        </createIndex>
+    </changeSet>
+    <changeSet id="3" author="nvoxland">
+        <dropNotNullConstraint tableName="magazine" columnName="title" columnDataType="varchar(50)"/>
+    </changeSet>
+    <changeSet id="4" author="nvoxland">
+        <renameColumn tableName="magazine" oldColumnName="sku" newColumnName="isbn" columnDataType="varchar(50)"/>
+    </changeSet>
+    <changeSet id="5" author="nvoxland">
+        <renameTable oldTableName="magazine" newTableName="publication"/>
+    </changeSet>
+
+    <changeSet id="6" author="nvoxland">
+        <comment>
+            Refactorings that can't be automatically rolled back can be custom rolled back with a "rollback" tag.
+        </comment>
+        <insert tableName="publication">
+            <column name="title" value="Refactoring Times"/>
+            <column name="isbn" value="12981-512712-512"/>
+        </insert>
+        <insert tableName="publication">
+            <column name="title" value="Databases Today"/>
+            <column name="isbn" value="51235-632-6232623"/>
+        </insert>
+        <insert tableName="publication">
+            <column name="title" value="Newsweek"/>
+            <column name="isbn" value="623-6623-332262"/>
+        </insert>
+        <rollback>
+            delete from publication;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="7" author="nvoxland">
+        <addColumn tableName="publication">
+            <column name="pages" type="int"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="8" author="nvoxland">
+        <addNotNullConstraint tableName="publication" columnName="title" columnDataType="varchar(50)" defaultNullValue="-1"/>
+    </changeSet>
+
+    <changeSet id="9" author="nvoxland">
+        <createView viewName="publicationView">
+            select title, isbn from publication
+        </createView>
+    </changeSet>
+
+    <changeSet id="10" author="nvoxland">
+        <renameView oldViewName="publicationView" newViewName="v_publication"/>
+    </changeSet>
+
+        <changeSet id="11" author="nvoxland">
+        <createTable tableName="article">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)"/>
+            <column name="publication_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="12" author="nvoxland">
+        <addForeignKeyConstraint
+                baseTableName="article" baseColumnNames="publication_id"
+                constraintName="fk_article_publication"
+                referencedTableName="publication" referencedColumnNames="id"
+                deleteCascade="true"/>
+    </changeSet>
+
+    <changeSet id="13" author="nvoxland">
+        <addLookupTable
+            existingTableName="publication" existingColumnName="isbn"
+            newTableName="isbn" newColumnName="code"
+            newColumnDataType="varchar(50)"/>
+    </changeSet>
+
+    <changeSet id="14" author="nvoxland">
+        <addDefaultValue tableName="publication" columnName="isbn" defaultValue="0000-0000"/>
+    </changeSet>
+
+    <changeSet id="15" author="nvoxland">
+        <createTable tableName="page">
+            <column name="id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text" type="text"/>
+            <column name="magazine_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="16" author="nvoxland">
+        <addPrimaryKey tableName="page" columnNames="id" constraintName="pk_page"/>
+    </changeSet>
+
+    <changeSet id="17" author="nvoxland">
+        <addUniqueConstraint tableName="publication" columnNames="title" constraintName="uq_publication_title"/>
+    </changeSet>
+
+    <changeSet id="20" author="nvoxland">
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="page" columnName="magazine_id" newValue="4"/>
+    </changeSet>
+    <changeSet id="21" author="nvoxland">
+        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+    </changeSet>
+
+    <include file="changelogs/common/rollback.tests.changelog.xml"/>
+    
+</databaseChangeLog>

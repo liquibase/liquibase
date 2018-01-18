@@ -2,7 +2,7 @@ package liquibase.statement;
 
 public abstract class AbstractSqlStatement implements SqlStatement {
 
-    private boolean continueOnError = false;
+    private boolean continueOnError;
 
     @Override
     public boolean skipOnUnsupported() {

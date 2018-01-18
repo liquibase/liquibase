@@ -3,12 +3,12 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.structure.core.Relation;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
 import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
@@ -28,7 +28,6 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
-        validationErrors.checkRequiredField("selectQuery", createViewStatement.getSelectQuery());
 
         if (createViewStatement.isReplaceIfExists()) {
             validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, DB2Database.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
@@ -44,7 +43,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
         }
 
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Sql> sql = new ArrayList<>();
 
         StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery(), true, true);
 
@@ -63,7 +62,8 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         if (statement.isReplaceIfExists()) {
             if (database instanceof FirebirdDatabase) {
                 viewDefinition.replaceIfExists("CREATE", "RECREATE");
-            } else if (database instanceof SybaseASADatabase && statement.getSelectQuery().toLowerCase().startsWith("create view")) {
+            } else if ((database instanceof SybaseASADatabase) && statement.getSelectQuery().toLowerCase().startsWith
+                ("create view")) {
                 // Sybase ASA saves view definitions with header.
             } else if (database instanceof MSSQLDatabase) {
                 //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view

@@ -26,13 +26,13 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         validationErrors.checkRequiredField("columnNames", addPrimaryKeyStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
 
-        if (!(database instanceof MSSQLDatabase || database instanceof MockDatabase)) {
-            if (addPrimaryKeyStatement.isClustered() != null && !addPrimaryKeyStatement.isClustered()) {
+        if (!((database instanceof MSSQLDatabase) || (database instanceof MockDatabase))) {
+            if ((addPrimaryKeyStatement.isClustered() != null) && !addPrimaryKeyStatement.isClustered()) {
                 validationErrors.checkDisallowedField("clustered", addPrimaryKeyStatement.isClustered(), database);
             }
         }
 
-        if (!(database instanceof OracleDatabase || database instanceof DB2Database)) {
+        if (!((database instanceof OracleDatabase) || (database instanceof DB2Database))) {
             validationErrors.checkDisallowedField("forIndexName", addPrimaryKeyStatement.getForIndexName(), database);
         }
 
@@ -42,11 +42,12 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
     @Override
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
-        if (statement.getConstraintName() == null  || database instanceof MySQLDatabase || database instanceof SybaseASADatabase) {
+        if ((statement.getConstraintName() == null) || (database instanceof MySQLDatabase) || (database instanceof
+            SybaseASADatabase)) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())+" PRIMARY KEY";
-            if (database instanceof MSSQLDatabase && statement.isClustered() != null) {
+            if ((database instanceof MSSQLDatabase) && (statement.isClustered() != null)) {
                 if (statement.isClustered()) {
                     sql += " CLUSTERED";
                 } else {
@@ -56,21 +57,22 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             sql += " (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         }
 
-        if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
+        if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON "+statement.getTablespace();
-            } else if (database instanceof DB2Database || database instanceof SybaseASADatabase) {
+            } else if ((database instanceof DB2Database) || (database instanceof SybaseASADatabase)) {
                 ; //not supported
             } else {
                 sql += " USING INDEX TABLESPACE "+statement.getTablespace();
             }
         }
 
-        if (database instanceof OracleDatabase && statement.getForIndexName() != null) {
+        if ((database instanceof OracleDatabase) && (statement.getForIndexName() != null)) {
             sql += " USING INDEX "+database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
         }
 
-        if (database instanceof PostgresDatabase && statement.isClustered() != null && statement.isClustered() && statement.getConstraintName() != null) {
+        if ((database instanceof PostgresDatabase) && (statement.isClustered() != null) && statement.isClustered() &&
+            (statement.getConstraintName() != null)) {
             return new Sql[] {
                     new UnparsedSql(sql, getAffectedPrimaryKey(statement)),
                     new UnparsedSql("CLUSTER "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())+" USING "+database.escapeObjectName(statement.getConstraintName(), PrimaryKey.class))

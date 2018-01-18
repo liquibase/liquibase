@@ -1,28 +1,29 @@
 package liquibase.parser.core.xml;
 
-import java.io.InputStream;
-
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+
+import java.io.InputStream;
 
 public class ContextClassLoaderXsdStreamResolver extends XsdStreamResolver {
 
-	private static final Logger LOGGER = new LogFactory().getLog("ContextClassLoaderXsdStreamResolver");
+    private static final Logger LOGGER = LogService.getLog(ContextClassLoaderXsdStreamResolver.class);
 
-	@Override
-	public InputStream getResourceAsStream(String xsdFile) {
-		LOGGER.debug("Trying to load resource from context classloader");
+    @Override
+    public InputStream getResourceAsStream(String xsdFile) {
+        LOGGER.debug(LogType.LOG, "Trying to load resource from context classloader");
 
-		if (Thread.currentThread().getContextClassLoader() == null) {
-			LOGGER.debug("Failed to load resource from context classloader");
-			return getSuccessorValue(xsdFile);
-		}
+        if (Thread.currentThread().getContextClassLoader() == null) {
+            LOGGER.debug(LogType.LOG, "Failed to load resource from context classloader");
+            return getSuccessorValue(xsdFile);
+        }
 
-		InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(xsdFile);
-		if(resourceAsStream == null){
-			LOGGER.debug("Failed to load resource from context classloader");
-			return getSuccessorValue(xsdFile);
-		}
-		return resourceAsStream;
-	}
+        InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(xsdFile);
+        if(resourceAsStream == null){
+            LOGGER.debug(LogType.LOG, "Failed to load resource from context classloader");
+            return getSuccessorValue(xsdFile);
+        }
+        return resourceAsStream;
+    }
 }

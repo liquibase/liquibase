@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -13,7 +13,8 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -33,14 +34,16 @@ import java.util.List;
  * Executes a given shell executable.
  */
 @DatabaseChange(name = "executeCommand",
-        description = "Executes a system command. Because this refactoring doesn't generate SQL like most, using LiquiBase commands such as migrateSQL may not work as expected. Therefore, if at all possible use refactorings that generate SQL.",
+        description = "Executes a system command. Because this refactoring doesn't generate SQL like most, using " +
+            "Liquibase commands such as migrateSQL may not work as expected. Therefore, if at all possible use " +
+                "refactorings that generate SQL.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
 
+    protected List<String> finalCommandArray;
     private String executable;
     private List<String> os;
-    private List<String> args = new ArrayList<String>();
-    protected List<String> finalCommandArray;
+    private List<String> args = new ArrayList<>();
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -52,7 +55,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return true;
     }
 
-    @DatabaseChangeProperty(description = "Name of the executable to run", exampleValue = "mysqldump", requiredForDatabase = "all")
+    @DatabaseChangeProperty(description = "Name of the executable to run",
+            exampleValue = "mysqldump", requiredForDatabase = "all")
     public String getExecutable() {
         return executable;
     }
@@ -69,13 +73,14 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return Collections.unmodifiableList(args);
     }
 
-    public void setOs(String os) {
-        this.os = StringUtils.splitAndTrim(os, ",");
-    }
-
-    @DatabaseChangeProperty(description = "List of operating systems on which to execute the command (taken from the os.name Java system property)", exampleValue = "Windows 7")
+    @DatabaseChangeProperty(description = "List of operating systems on which to execute the command " +
+            "(taken from the os.name Java system property)", exampleValue = "Windows 7")
     public List<String> getOs() {
         return os;
+    }
+
+    public void setOs(String os) {
+        this.os = StringUtils.splitAndTrim(os, ",");
     }
 
     @Override
@@ -92,11 +97,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(final Database database) {
         boolean shouldRun = true;
-        if (os != null && os.size() > 0) {
+        if ((os != null) && (!os.isEmpty())) {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                LogFactory.getLogger().info("Not executing on os " + currentOS + " when " + os + " was specified");
+                LogService.getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
+                        "specified");
             }
         }
 
@@ -107,7 +113,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             nonExecutedMode = true;
         }
 
-        this.finalCommandArray = createFinalCommandArray(database);
+        this.finalCommandArray = createFinalCommandArray();
 
         if (shouldRun && !nonExecutedMode) {
 
@@ -118,9 +124,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 public Sql[] generate(Database database) {
 
                     try {
-                      executeCommand(database);
+                        executeCommand();
                     } catch (Exception e) {
-                      throw new UnexpectedLiquibaseException("Error executing command: " + e.getLocalizedMessage(), e);
+                        throw new UnexpectedLiquibaseException("Error executing command: " + e.getLocalizedMessage(),
+                                e);
                     }
 
                     return null;
@@ -145,18 +152,18 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     }
 
-    protected List<String> createFinalCommandArray(Database database) {
-        List<String> commandArray = new ArrayList<String>();
+    protected List<String> createFinalCommandArray() {
+        List<String> commandArray = new ArrayList<>();
         commandArray.add(getExecutable());
         commandArray.addAll(getArgs());
         return commandArray;
     }
 
-    protected void executeCommand(Database database) throws Exception {
+    protected void executeCommand() throws Exception {
         ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         ByteArrayOutputStream inputStream = new ByteArrayOutputStream();
 
-        ProcessBuilder pb = createProcessBuilder(database);
+        ProcessBuilder pb = createProcessBuilder();
         Process p = pb.start();
         int returnCode = 0;
         try {
@@ -173,18 +180,28 @@ public class ExecuteShellCommandChange extends AbstractChange {
             outputGobbler.finish();
 
         } catch (InterruptedException e) {
-            ;
+            // Restore thread interrupt status
+            Thread.currentThread().interrupt();
         }
 
-        LogFactory.getLogger().severe(errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-        LogFactory.getLogger().info(inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+        String errorStreamOut = errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
+                (GlobalConfiguration.class).getOutputEncoding());
+        String infoStreamOut = inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
+                (GlobalConfiguration.class).getOutputEncoding());
 
+        LogService.getLog(getClass()).severe(LogType.LOG, errorStreamOut);
+        LogService.getLog(getClass()).info(LogType.LOG, infoStreamOut);
+
+        throwExceptionIfError(returnCode);
+    }
+
+    protected void throwExceptionIfError(int returnCode) {
         if (returnCode != 0) {
             throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
         }
     }
 
-    protected ProcessBuilder createProcessBuilder(Database database) {
+    protected ProcessBuilder createProcessBuilder() {
         ProcessBuilder pb = new ProcessBuilder(finalCommandArray);
         pb.redirectErrorStream(true);
         return pb;
@@ -205,7 +222,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     @Override
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws
+            ParsedNodeException {
         ParsedNode argsNode = parsedNode.getChild(null, "args");
         if (argsNode == null) {
             argsNode = parsedNode;
@@ -216,18 +234,25 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
         String passedValue = StringUtils.trimToNull(parsedNode.getChildValue(null, "os", String.class));
         if (passedValue == null) {
-            this.os = new ArrayList<String>();
+            this.os = new ArrayList<>();
         } else {
-            List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os", String.class)), ",");
-            if (os.size() == 1 && os.get(0).equals("")) {
+            List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os",
+                    String.class)), ",");
+            if ((os.size() == 1) && ("".equals(os.get(0)))) {
                 this.os = null;
-            } else  if (os.size() > 0) {
+            } else if (!os.isEmpty()) {
                 this.os = os;
             }
         }
     }
 
+    @Override
+    public String toString() {
+        return "external process '" + getExecutable() + "' " + getArgs();
+    }
+
     private class StreamGobbler extends Thread {
+        private static final int THREAD_SLEEP_MILLIS = 100;
         private final OutputStream outputStream;
         private InputStream processStream;
 
@@ -236,6 +261,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             this.outputStream = outputStream;
         }
 
+        @Override
         public void run() {
             try {
                 BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream);
@@ -244,8 +270,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
                         StreamUtil.copy(bufferedInputStream, outputStream);
                     }
                     try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ignore) {
+                        Thread.sleep(THREAD_SLEEP_MILLIS);
+                    } catch (InterruptedException e) {
+                        // Restore thread interrupt status
+                        Thread.currentThread().interrupt();
                     }
                 }
             } catch (IOException ioe) {
@@ -254,21 +282,16 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
 
         public void finish() {
-            InputStream processStream = this.processStream;
+            InputStream procStream = this.processStream;
             this.processStream = null;
 
             try {
-                StreamUtil.copy(processStream, outputStream);
+                StreamUtil.copy(procStream, outputStream);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         }
 
-    }
-    
-    @Override
-    public String toString() {
-      return "external process '" + getExecutable() + "' " + getArgs(); 
     }
 }

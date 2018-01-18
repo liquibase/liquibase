@@ -39,7 +39,7 @@ public class PendingSQLWriter extends HTMLWriter {
         ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
         try {
-            if (changesToRun.size() == 0) {
+            if (changesToRun.isEmpty()) {
                 fileWriter.append("<b>NONE</b>");
             }
 

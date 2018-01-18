@@ -1,11 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.structure.core.Schema;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.InformixDatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -25,35 +22,35 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
 
     @Override
     public ValidationErrors validate(
-    		AddAutoIncrementStatement addAutoIncrementStatement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
+            AddAutoIncrementStatement addAutoIncrementStatement,
+            Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = super.validate(
-        	addAutoIncrementStatement, database, sqlGeneratorChain);
+            addAutoIncrementStatement, database, sqlGeneratorChain);
 
         validationErrors.checkRequiredField(
-        	"columnDataType", addAutoIncrementStatement.getColumnDataType());
+            "columnDataType", addAutoIncrementStatement.getColumnDataType());
 
         return validationErrors;
     }
 
     @Override
     public Sql[] generateSql(
-    		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
+            AddAutoIncrementStatement statement,
+            Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{
             new UnparsedSql(
-            	"ALTER TABLE "
-            		+ database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
-            		+ " MODIFY "
-            		+ database.escapeColumnName(
+                "ALTER TABLE "
+                    + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+                    + " MODIFY "
+                    + database.escapeColumnName(
                         statement.getCatalogName(),
-            			statement.getSchemaName(),
-            			statement.getTableName(),
-            			statement.getColumnName())
-            		+ " "
-            		+ DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}", database).toDatabaseDataType(database),
+                        statement.getSchemaName(),
+                        statement.getTableName(),
+                        statement.getColumnName())
+                    + " "
+                    + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}", database).toDatabaseDataType(database),
                 getAffectedColumn(statement))
         };
     }

@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -37,41 +36,23 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         if (database instanceof MSSQLDatabase) {
-            boolean sql2005OrLater = true;
-            try {
-                sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
-            } catch (DatabaseException e) {
-                // Assume SQL Server 2005 or later
-            }
-            if (sql2005OrLater) {
-                // SQL Server 2005 or later
-                sql =
-                        "DECLARE @sql [nvarchar](MAX)\r\n" +
-                        "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
-                        "FROM [sys].[columns] AS [c] " +
-                        "INNER JOIN [sys].[default_constraints] AS [df] " +
-                        "ON [df].[object_id] = [c].[default_object_id] " +
-                        "WHERE [c].[object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
-                        "AND [c].[name] = N'" + database.escapeStringForDatabase(statement.getColumnName()) +  "'\r\n" +
-                        "EXEC sp_executesql @sql";
-            } else {
-                // SQL Server 2000
-                sql =
-                        "DECLARE @sql [nvarchar](4000)\r\n" +
-                        "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
-                        "FROM [dbo].[syscolumns] AS [c] " +
-                        "INNER JOIN [dbo].[sysobjects] AS [df] " +
-                        "ON [df].[id] = [c].[cdefault] " +
-                        "WHERE [c].[id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
-                        "AND [c].[name] = N'" + database.escapeStringForDatabase(statement.getColumnName()) +  "'\r\n" +
-                        "EXEC sp_executesql @sql";
-            }
+            sql =
+                    "DECLARE @sql [nvarchar](MAX)\r\n" +
+                    "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
+                    "FROM [sys].[columns] AS [c] " +
+                    "INNER JOIN [sys].[default_constraints] AS [df] " +
+                    "ON [df].[object_id] = [c].[default_object_id] " +
+                    "WHERE [c].[object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
+                    "AND [c].[name] = N'" + database.escapeStringForDatabase(statement.getColumnName()) +  "'\r\n" +
+                    "EXEC sp_executesql @sql";
         } else if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + escapedTableName + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT NULL";
-        } else if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        } else if (database instanceof SybaseDatabase) {
              sql = "ALTER TABLE " + escapedTableName + " REPLACE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT NULL";
+        } else if (database instanceof SybaseASADatabase) {
+            sql = "ALTER TABLE " + escapedTableName + " ALTER " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT NULL";
         } else if (database instanceof DerbyDatabase) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " WITH DEFAULT NULL";
         } else if (database instanceof InformixDatabase) {
@@ -80,8 +61,6 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         	 * If the column is "NOT NULL" it has to be added behind the datatype.
         	 */
         	sql = "ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + ")";
-        } else if (database instanceof DB2Database) {
-            sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT NULL";
         }

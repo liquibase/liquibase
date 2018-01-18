@@ -40,7 +40,7 @@ public class UnexpectedColumnChangeGenerator extends AbstractChangeGenerator imp
 //            continue;
 //        }
 
-        if (column.getComputed() != null && column.getComputed()) { //not really a column to drop, probably part of an index or something
+        if ((column.getComputed() != null) && column.getComputed()) { //not really a column to drop, probably part of an index or something
             return null;
         }
         if (column.getRelation() instanceof View) {

@@ -15,10 +15,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.math.BigInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class XMLChangeLogSerializerTest {
     @Test
@@ -36,13 +33,13 @@ public class XMLChangeLogSerializerTest {
         NamedNodeMap attributes = node.getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
             Node attribute = attributes.item(i);
-            if (attribute.getNodeName().equals("schemaName")) {
+            if ("schemaName".equals(attribute.getNodeName())) {
                 assertEquals("SCHEMA_NAME", attribute.getNodeValue());
-            } else if (attribute.getNodeName().equals("tableName")) {
+            } else if ("tableName".equals(attribute.getNodeName())) {
                 assertEquals("TABLE_NAME", attribute.getNodeValue());
-            } else if (attribute.getNodeName().equals("columnName")) {
+            } else if ("columnName".equals(attribute.getNodeName())) {
                 assertEquals("COLUMN_NAME", attribute.getNodeValue());
-            } else if (attribute.getNodeName().equals("columnDataType")) {
+            } else if ("columnDataType".equals(attribute.getNodeName())) {
                 assertEquals("DATATYPE(255)", attribute.getNodeValue());
             } else {
                 fail("unexpected attribute " + attribute.getNodeName());

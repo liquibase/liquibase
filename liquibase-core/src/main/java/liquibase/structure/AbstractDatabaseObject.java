@@ -11,15 +11,13 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
 
     private String snapshotId;
 
@@ -49,7 +47,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     @Override
     public int compareTo(Object o) {
         AbstractDatabaseObject that = (AbstractDatabaseObject) o;
-        if (this.getSchema() != null && that.getSchema() != null) {
+        if ((this.getSchema() != null) && (that.getSchema() != null)) {
             int compare = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
             if (compare != 0) {
                 return compare;
@@ -105,14 +103,14 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public Set<String> getSerializableFields() {
-        TreeSet<String> fields = new TreeSet<String>(attributes.keySet());
+        TreeSet<String> fields = new TreeSet<>(attributes.keySet());
         fields.add("snapshotId");
         return fields;
     }
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        if (field.equals("snapshotId")) {
+        if ("snapshotId".equals(field)) {
             return snapshotId;
         }
         if (!attributes.containsKey(field)) {
@@ -150,20 +148,21 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode child : parsedNode.getChildren()) {
             String name = child.getName();
-            if (name.equals("snapshotId")) {
+            if ("snapshotId".equals(name)) {
                 this.snapshotId = child.getValue(String.class);
                 continue;
             }
 
             Class propertyType = ObjectUtil.getPropertyType(this, name);
-            if (propertyType != null && Collection.class.isAssignableFrom(propertyType) && !(child.getValue() instanceof Collection)) {
+            if ((propertyType != null) && Collection.class.isAssignableFrom(propertyType) && !(child.getValue()
+                instanceof Collection)) {
                 if (this.attributes.get(name) == null) {
                     this.setAttribute(name, new ArrayList<Column>());
                 }
                 this.getAttribute(name, List.class).add(child.getValue());
             } else {
                 Object childValue = child.getValue();
-                if (childValue != null && childValue instanceof String) {
+                if ((childValue != null) && (childValue instanceof String)) {
                     Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) childValue);
                     if (matcher.matches()) {
                         String stringValue = matcher.group(1);

@@ -287,7 +287,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        assert e.message.startsWith("Syntax error in yaml")
+        assert e.message.startsWith("Syntax error in file liquibase/parser/core/yaml/malformedChangeLog.yaml")
     }
 
     def "elements that don't correspond to anything in liquibase are ignored"() throws Exception {

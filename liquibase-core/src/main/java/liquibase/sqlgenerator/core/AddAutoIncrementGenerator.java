@@ -2,15 +2,15 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncrementStatement> {
 
@@ -31,9 +31,9 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
 
     @Override
     public ValidationErrors validate(
-    		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
+            AddAutoIncrementStatement statement,
+            Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -46,9 +46,9 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
 
     @Override
     public Sql[] generateSql(
-    		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
+            AddAutoIncrementStatement statement,
+            Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         String sql = "ALTER TABLE "
             + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
             + " MODIFY "

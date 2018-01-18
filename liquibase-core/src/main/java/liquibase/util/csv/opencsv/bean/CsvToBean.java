@@ -32,7 +32,7 @@ import java.util.*;
  * @param <T> - class to convert the objects to.
  */
 public class CsvToBean<T> extends AbstractCSVToBean {
-   private Map<Class<?>, PropertyEditor> editorMap = null;
+   private Map<Class<?>, PropertyEditor> editorMap;
 
    /**
     * Default constructor.
@@ -90,7 +90,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
       }
 
       try {
-         List<T> list = new ArrayList<T>();
+         List<T> list = new ArrayList<>();
          while (null != (line = csv.readNext())) {
             lineProcessed++;
             processLine(mapper, filter, line, list);
@@ -102,7 +102,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
    }
 
    private void processLine(MappingStrategy<T> mapper, CsvToBeanFilter filter, String[] line, List<T> list) throws IllegalAccessException, InvocationTargetException, InstantiationException, IntrospectionException {
-      if (filter == null || filter.allowLine(line)) {
+      if ((filter == null) || filter.allowLine(line)) {
          T obj = processLine(mapper, line);
          list.add(obj);
       }
@@ -149,7 +149,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
 
    private PropertyEditor getPropertyEditorValue(Class<?> cls) {
       if (editorMap == null) {
-         editorMap = new HashMap<Class<?>, PropertyEditor>();
+         editorMap = new HashMap<>();
       }
 
       PropertyEditor editor = editorMap.get(cls);

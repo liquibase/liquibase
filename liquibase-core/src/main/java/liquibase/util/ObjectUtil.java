@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ObjectUtil {
 
-    private static Map<Class<?>, Method[]> methodCache = new HashMap<Class<?>, Method[]>();
+    private static Map<Class<?>, Method[]> methodCache = new HashMap<>();
 
     public static Object getProperty(Object object, String propertyName) throws IllegalAccessException, InvocationTargetException {
         Method readMethod = getReadMethod(object, propertyName);
@@ -75,12 +75,10 @@ public class ObjectUtil {
         }
         try {
             method.invoke(object, finalValue);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + finalValue.getClass().getName());
-        } catch (InvocationTargetException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
     }
 
@@ -101,12 +99,10 @@ public class ObjectUtil {
             }
 
             method.invoke(object, propertyValue);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
-        } catch (InvocationTargetException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
     }
 
@@ -117,7 +113,8 @@ public class ObjectUtil {
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
-            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && method.getParameterTypes().length == 0) {
+            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && (method
+                .getParameterTypes().length == 0)) {
                 return method;
             }
         }
@@ -129,7 +126,7 @@ public class ObjectUtil {
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
-            if (method.getName().equals(methodName) && method.getParameterTypes().length == 1) {
+            if (method.getName().equals(methodName) && (method.getParameterTypes().length == 1)) {
                 return method;
             }
         }

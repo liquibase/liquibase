@@ -1,14 +1,5 @@
 package liquibase.change;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.TreeSet;
-
 import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
@@ -21,6 +12,10 @@ import liquibase.statement.core.CreateSequenceStatement;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.TreeSet;
+
+import static org.junit.Assert.*;
 
 public class ChangeFactoryTest {
 
@@ -35,29 +30,29 @@ public class ChangeFactoryTest {
         ChangeFactory.reset();
     }
 
-	@Test
-	public void supportStatement() throws Exception {
-		CreateSequenceStatement statement = new CreateSequenceStatement(null, null, "seq_my_table");
-		MSSQLDatabase database10 = new MSSQLDatabase() {
+    @Test
+    public void supportStatement() throws Exception {
+        CreateSequenceStatement statement = new CreateSequenceStatement(null, null, "seq_my_table");
+        MSSQLDatabase database10 = new MSSQLDatabase() {
             @Override
             public int getDatabaseMajorVersion() throws DatabaseException {
-                return 10;
+                return SQL_SERVER_2008_MAJOR_VERSION;
             }
-		};
+        };
 
         MSSQLDatabase database11 = new MSSQLDatabase() {
             @Override
             public int getDatabaseMajorVersion() throws DatabaseException {
-                return 11;
+                return SQL_SERVER_2012_MAJOR_VERSION;
             }
         };
 
         ChangeFactory.getInstance(); //make sure there is no problem with SqlGeneratorFactory.generatorsByKey cache
-		assertFalse("unsupported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database10));
+        assertFalse("unsupported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database10));
         assertTrue("supported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database11));
-	}
+    }
 
-	@Test
+    @Test
     public void constructor() {
         ChangeFactory instance = ChangeFactory.getInstance();
         assertTrue(instance.getRegistry().containsKey("createTable"));
@@ -230,7 +225,7 @@ public class ChangeFactoryTest {
 
     @LiquibaseService(skip = true)
     public static class SometimesExceptionThrowingChange extends CreateTableChange {
-        private static int timesCalled = 0;
+        private static int timesCalled;
         public SometimesExceptionThrowingChange() {
             if (timesCalled > 1) {
                 throw new RuntimeException("I throw exceptions");

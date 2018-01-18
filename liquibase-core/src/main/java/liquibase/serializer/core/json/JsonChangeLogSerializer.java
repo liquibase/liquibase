@@ -6,8 +6,11 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import liquibase.util.StringUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.List;
 
 public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
 

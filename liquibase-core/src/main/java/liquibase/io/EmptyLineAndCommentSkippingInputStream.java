@@ -33,20 +33,24 @@ public class EmptyLineAndCommentSkippingInputStream extends BufferedInputStream 
     @Override
     public synchronized int read() throws IOException {
         int read = super.read();
+
+        // skip comment
+        if (commentSkipEnabled && (read == this.commentLineStartsWith.toCharArray()[0])) {
+            while ((((read = super.read())) != '\n') && (read != '\r') && (read > 0)) {
+                ;//keep looking
+            }
+        }
+
         if (read < 0) {
             return read;
         }
         if (read == '\r') {
             return this.read();
-        } else if (read == '\n') {
+        }
+        if (read == '\n') {
             if (lastRead == '\n') {
                 return this.read();
             }
-        } else if (commentSkipEnabled && read == this.commentLineStartsWith.toCharArray()[0]) {
-            while ((read = super.read()) != '\n' && read != '\r' && read > 0) {
-                ;//keep looking
-            }
-            read = this.read(); //read past newline
         }
 
         if (read == '\n') {

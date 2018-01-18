@@ -160,7 +160,7 @@ public class AddLookupTableChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
 
         String newTableCatalogName = getNewTableCatalogName();
         String newTableSchemaName = getNewTableSchemaName();

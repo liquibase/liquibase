@@ -1,6 +1,5 @@
 package liquibase.diff.compare.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -10,7 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.Set;
 
 public class SchemaComparator implements DatabaseObjectComparator {
     @Override
@@ -28,7 +27,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Schema && databaseObject2 instanceof Schema)) {
+        if (!((databaseObject1 instanceof Schema) && (databaseObject2 instanceof Schema))) {
             return false;
         }
 
@@ -69,7 +68,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
         }
 
         //check with schemaComparisons
-        if (chain.getSchemaComparisons() != null && chain.getSchemaComparisons().length > 0) {
+        if ((chain.getSchemaComparisons() != null) && (chain.getSchemaComparisons().length > 0)) {
             for (CompareControl.SchemaComparison comparison : chain.getSchemaComparisons()) {
                 String comparisonSchema1;
                 String comparisonSchema2;
@@ -86,9 +85,9 @@ public class SchemaComparator implements DatabaseObjectComparator {
                 String finalSchema1 = schemaName1;
                 String finalSchema2 = schemaName2;
 
-                if (comparisonSchema1 != null && comparisonSchema1.equalsIgnoreCase(schemaName1)) {
+                if ((comparisonSchema1 != null) && comparisonSchema1.equalsIgnoreCase(schemaName1)) {
                     finalSchema1 = comparisonSchema2;
-                } else if (comparisonSchema2 != null && comparisonSchema2.equalsIgnoreCase(schemaName1)) {
+                } else if ((comparisonSchema2 != null) && comparisonSchema2.equalsIgnoreCase(schemaName1)) {
                     finalSchema1 = comparisonSchema1;
                 }
 
@@ -96,9 +95,9 @@ public class SchemaComparator implements DatabaseObjectComparator {
                     return true;
                 }
 
-                if (comparisonSchema1 != null && comparisonSchema1.equalsIgnoreCase(schemaName2)) {
+                if ((comparisonSchema1 != null) && comparisonSchema1.equalsIgnoreCase(schemaName2)) {
                     finalSchema2 = comparisonSchema2;
-                } else if (comparisonSchema2 != null && comparisonSchema2.equalsIgnoreCase(schemaName2)) {
+                } else if ((comparisonSchema2 != null) && comparisonSchema2.equalsIgnoreCase(schemaName2)) {
                     finalSchema2 = comparisonSchema1;
                 }
 

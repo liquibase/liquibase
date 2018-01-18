@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -9,8 +10,14 @@ import java.util.regex.Pattern;
 public class StringUtils {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
+    private static final SecureRandom rnd = new SecureRandom();
 
-
+    /**
+     * Returns the trimmed (left and right) version of the input string. If null is passed, an empty string is returned.
+     *
+     * @param string the input string to trim
+     * @return the trimmed string, or an empty string if the input was null.
+     */
     public static String trimToEmpty(String string) {
         if (string == null) {
             return "";
@@ -18,12 +25,18 @@ public class StringUtils {
         return string.trim();
     }
 
+    /**
+     * Returns the trimmed (left and right) form of the input string. If the string is empty after trimming (or null
+     * was passed in the first place), null is returned, i.e. the input string is reduced to nothing.
+     * @param string the string to trim
+     * @return the trimmed string or null
+     */
     public static String trimToNull(String string) {
         if (string == null) {
             return null;
         }
         String returnString = string.trim();
-        if (returnString.length() == 0) {
+        if (returnString.isEmpty()) {
             return null;
         } else {
             return returnString;
@@ -41,13 +54,13 @@ public class StringUtils {
 
         StringClauses parsed = SqlParser.parse(multiLineSQL, true, !stripComments);
 
-        List<String> returnArray = new ArrayList<String>();
+        List<String> returnArray = new ArrayList<>();
 
         StringBuilder currentString = new StringBuilder();
         String previousPiece = null;
         boolean previousDelimiter = false;
         for (Object piece : parsed.toArray(true)) {
-            if (splitStatements && piece instanceof String && isDelimiter((String) piece, previousPiece, endDelimiter)) {
+            if (splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
                 String trimmedString = StringUtils.trimToNull(currentString.toString());
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
@@ -55,8 +68,8 @@ public class StringUtils {
                 currentString = new StringBuilder();
                 previousDelimiter = true;
             } else {
-                if (!previousDelimiter || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace after a delimiter
-                    if (!currentString.toString().equals("") || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace before the statement
+                if (!previousDelimiter || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
+                    if ((currentString.length() > 0) || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
                         currentString.append(piece);
                     }
                 }
@@ -73,20 +86,29 @@ public class StringUtils {
         return returnArray.toArray(new String[returnArray.size()]);
     }
 
+    /**
+     * Returns true if the input is a delimiter in one of the popular RDBMSs. Recognized delimiters are: semicolon (;),
+     * a slash (as the only content) or the word GO (as the only content).
+     * @param piece the input line to test
+     * @param previousPiece the characters in the input stream that came before piece
+     * @param endDelimiter ??? (need to see this in a debugger to find out)
+     * @return
+     */
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
-            return piece.equals(";") || ((piece.equalsIgnoreCase("go") || piece.equals("/")) && (previousPiece == null || previousPiece.endsWith("\n")));
+            return ";".equals(piece) || (("go".equalsIgnoreCase(piece) || "/".equals(piece)) && ((previousPiece ==
+                null) || previousPiece.endsWith("\n")));
         } else {
             if (endDelimiter.length() == 1) {
                 return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
             } else {
-                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[.\n\r]*"+endDelimiter.toLowerCase());
+                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[\\s\n\r]*"+endDelimiter.toLowerCase());
             }
         }
     }
 
     /**
-     * Splits a (possible) multi-line SQL statement along ;'s and "go"'s.
+     * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
         return processMutliLineSQL(multiLineSQL, false, true, endDelimiter);
@@ -125,7 +147,7 @@ public class StringUtils {
             return null;
         }
 
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "";
         }
         
@@ -140,7 +162,7 @@ public class StringUtils {
 
     public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter, boolean sorted) {
         if (sorted) {
-            TreeSet<String> sortedSet = new TreeSet<String>();
+            TreeSet<String> sortedSet = new TreeSet<>();
             for (Object obj : collection) {
                 sortedSet.add(formatter.toString(obj));
             }
@@ -151,7 +173,7 @@ public class StringUtils {
 
     public static String join(Collection<String> collection, String delimiter, boolean sorted) {
         if (sorted) {
-            return join(new TreeSet<String>(collection), delimiter);
+            return join(new TreeSet<>(collection), delimiter);
         } else {
             return join(collection, delimiter);
         }
@@ -162,7 +184,7 @@ public class StringUtils {
     }
 
     public static String join(Map map, String delimiter, StringUtilsFormatter formatter) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
             list.add(entry.getKey().toString()+"="+formatter.toString(entry.getValue()));
         }
@@ -173,7 +195,7 @@ public class StringUtils {
         if (s == null) {
             return null;
         }
-        List<String> returnList = new ArrayList<String>();
+        List<String> returnList = new ArrayList<>();
         for (String string : s.split(regex)) {
             returnList.add(string.trim());
         }
@@ -267,6 +289,11 @@ public class StringUtils {
         return true;
     }
 
+    /**
+     * Returns true if ch is a "7-bit-clean" ASCII character (ordinal number < 128).
+     * @param ch the character to test
+     * @return true if 7 bit-clean, false otherwise.
+     */
     public static boolean isAscii(char ch) {
         return ch < 128;
     }
@@ -276,17 +303,24 @@ public class StringUtils {
         int len = str.length();
         for (int i = 0; i < len; i++) {
             char c = str.charAt(i);
-                if (c > 0x7F) {
-                    out.append("&#");
-                    out.append(Integer.toString(c, 10));
-                    out.append(';');
-                } else {
-                    out.append(c);
-                }
+            if (c > 0x7F) {
+                out.append("&#");
+                out.append(Integer.toString(c, 10));
+                out.append(';');
+            } else {
+                out.append(c);
+            }
         }
         return out.toString();
     }
 
+    /**
+     * Adds spaces to the right of the input value until the string has reached the given length. Nothing is done
+     * if the string already has the given length or if the string is even longer.
+     * @param value The string to pad (if necessary)
+     * @param length the desired length
+     * @return the input string, padded if necessary.
+     */
     public static String pad(String value, int length) {
         value = StringUtils.trimToEmpty(value);
         if (value.length() >= length) {
@@ -297,17 +331,33 @@ public class StringUtils {
     }
 
     /**
-     * Null-safe check if string is empty.
+     * Adds spaces to the left of the input value until the string has reached the given length. Nothing is done
+     * if the string already has the given length or if the string is even longer.
+     * @param value The string to pad (if necessary)
+     * @param length the desired length
+     * @return the input string, padded if necessary.
+     */
+    public static String leftPad(String value, int length) {
+        value = StringUtils.trimToEmpty(value);
+        if (value.length() >= length) {
+            return value;
+        }
+
+        return StringUtils.repeat(" ", length - value.length()) + value;
+    }
+
+    /**
+     * Returns true if the input string is the empty string (null-safe).
      *
      * @param value String to be checked
      * @return true if String is null or empty
      */
     public static boolean isEmpty(String value) {
-        return value == null || value.length() == 0;
+        return (value == null) || value.isEmpty();
     }
 
     /**
-     * Null-safe check if string is not empty
+     * Returns true if the input string is NOT the empty string. If the string is null, false is returned.
      *
      * @param value String to be checked
      * @return true if string is not null and not empty (length > 0)
@@ -323,13 +373,18 @@ public class StringUtils {
      * @return true if <code>value</code> starts with <code>startsWith</code>, otherwise false. If any of arguments is null returns false
      */
     public static boolean startsWith(String value, String startsWith) {
-        if(value == null || startsWith == null){
+        if((value == null) || (startsWith == null)){
             return false;
         }
 
         return value.startsWith(startsWith);
     }
 
+    /**
+     * Returns true if the given string only consists of whitespace characters (null-safe)
+     * @param string the string to test
+     * @return true if the string is null or only consists of whitespaces.
+     */
     public static boolean isWhitespace(CharSequence string) {
         if (string == null) {
             return true;
@@ -337,8 +392,57 @@ public class StringUtils {
         return StringUtils.trimToNull(string.toString()) == null;
     }
 
-    public static interface StringUtilsFormatter<Type> {
-        public String toString(Type obj);
+    /**
+     * Compares a minimum version number given in string form (only the first three parts are considered) with a
+     * candidate version given as the three ints major, minor and patch.
+     *
+     * @param minimumVersion The minimum version that is required, given as a string with up to 3 parts, e.g. "7.4" or "9.6.3"
+     * @param candidateMajor the version number to be tested, major part
+     * @param candidateMinor the version number to be tested, minor part
+     * @param candidatePatch the version number to be tested, patch part
+     * @return true if candidateMajor.candidateMinor.candidatePatch >= minimumVersion or false if not
+     */
+    public static boolean isMinimumVersion(String minimumVersion, int candidateMajor, int candidateMinor,
+                                           int candidatePatch) {
+        String[] parts = minimumVersion.split("\\.", 3);
+        int minMajor = Integer.parseInt(parts[0]);
+        int minMinor = (parts.length > 1) ? Integer.parseInt(parts[1]) : 0;
+        int minPatch = (parts.length > 2) ? Integer.parseInt(parts[2]) : 0;
+
+        if (minMajor > candidateMajor) {
+            return false;
+        }
+
+        if ((minMajor == candidateMajor) && (minMinor > candidateMinor)) {
+            return false;
+        }
+
+        return !((minMajor == candidateMajor) && (minMinor == candidateMinor) && (minPatch > candidatePatch));
+    }
+
+    public static String limitSize(String string, int maxLength) {
+        if (string.length() > maxLength) {
+            return string.substring(0, maxLength - 3) + "...";
+        }
+        return string;
+    }
+
+    /**
+     * Produce a random identifer of the given length, consisting only of uppercase letters.
+     * @param len desired length of the string
+     * @return an identifier of the desired length
+     */
+    public static String randomIdentifer(int len) {
+        final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        StringBuilder sb = new StringBuilder( len );
+        for (int i = 0; i < len; i++)
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
+    }
+
+    public interface StringUtilsFormatter<Type> {
+        String toString(Type obj);
     }
 
     public static class ToStringFormatter implements StringUtilsFormatter {
@@ -351,11 +455,74 @@ public class StringUtils {
         }
     }
 
-    public static String limitSize(String string, int maxLength) {
-        if (string.length() > maxLength) {
-            return string.substring(0, maxLength - 3) + "...";
+
+    /**
+     * From commonslang3 -> StringUtils
+     * <p>Gets a substring from the specified String avoiding exceptions.</p>
+     *
+     * <p>A negative start position can be used to start/end {@code n}
+     * characters from the end of the String.</p>
+     *
+     * <p>The returned substring starts with the character in the {@code start}
+     * position and ends before the {@code end} position. All position counting is
+     * zero-based -- i.e., to start at the beginning of the string use
+     * {@code start = 0}. Negative start and end positions can be used to
+     * specify offsets relative to the end of the String.</p>
+     *
+     * <p>If {@code start} is not strictly to the left of {@code end}, ""
+     * is returned.</p>
+     *
+     * <pre>
+     * StringUtils.substring(null, *, *)    = null
+     * StringUtils.substring("", * ,  *)    = "";
+     * StringUtils.substring("abc", 0, 2)   = "ab"
+     * StringUtils.substring("abc", 2, 0)   = ""
+     * StringUtils.substring("abc", 2, 4)   = "c"
+     * StringUtils.substring("abc", 4, 6)   = ""
+     * StringUtils.substring("abc", 2, 2)   = ""
+     * StringUtils.substring("abc", -2, -1) = "b"
+     * StringUtils.substring("abc", -4, 2)  = "ab"
+     * </pre>
+     *
+     * @param str  the String to get the substring from, may be null
+     * @param start  the position to start from, negative means
+     *  count back from the end of the String by this many characters
+     * @param end  the position to end at (exclusive), negative means
+     *  count back from the end of the String by this many characters
+     * @return substring from start position to end position,
+     *  {@code null} if null String input
+     */
+    public static String substring(final String str, int start, int end) {
+        if (str == null) {
+            return null;
         }
-        return string;
+
+        // handle negatives
+        if (end < 0) {
+            end = str.length() + end; // remember end is negative
+        }
+        if (start < 0) {
+            start = str.length() + start; // remember start is negative
+        }
+
+        // check length next
+        if (end > str.length()) {
+            end = str.length();
+        }
+
+        // if start is greater than end, return ""
+        if (start > end) {
+            return "";
+        }
+
+        if (start < 0) {
+            start = 0;
+        }
+        if (end < 0) {
+            end = 0;
+        }
+
+        return str.substring(start, end);
     }
 
 }

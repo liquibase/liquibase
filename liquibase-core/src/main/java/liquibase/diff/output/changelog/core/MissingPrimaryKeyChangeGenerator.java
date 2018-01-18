@@ -1,11 +1,8 @@
 package liquibase.diff.output.changelog.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddPrimaryKeyChange;
-import liquibase.change.core.CreateIndexChange;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -16,15 +13,12 @@ import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
@@ -56,7 +50,7 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        List<Change> returnList = new ArrayList<Change>();
+        List<Change> returnList = new ArrayList<>();
 
         PrimaryKey pk = (PrimaryKey) missingObject;
 
@@ -74,17 +68,19 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             change.setTablespace(pk.getTablespace());
         }
 
-        if (referenceDatabase instanceof MSSQLDatabase && pk.getBackingIndex() != null && pk.getBackingIndex().getClustered() != null && !pk.getBackingIndex().getClustered()) {
+        if ((referenceDatabase instanceof MSSQLDatabase) && (pk.getBackingIndex() != null) && (pk.getBackingIndex()
+            .getClustered() != null) && !pk.getBackingIndex().getClustered()) {
             change.setClustered(false);
         }
-        if (referenceDatabase instanceof PostgresDatabase && pk.getBackingIndex() != null && pk.getBackingIndex().getClustered() != null && pk.getBackingIndex().getClustered()) {
+        if ((referenceDatabase instanceof PostgresDatabase) && (pk.getBackingIndex() != null) && (pk.getBackingIndex
+            ().getClustered() != null) && pk.getBackingIndex().getClustered()) {
             change.setClustered(true);
         }
 
-        if (comparisonDatabase instanceof OracleDatabase
-                || (comparisonDatabase instanceof DB2Database && pk.getBackingIndex() != null && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
+        if ((comparisonDatabase instanceof OracleDatabase) || ((comparisonDatabase instanceof DB2Database) && (pk
+            .getBackingIndex() != null) && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
             Index backingIndex = pk.getBackingIndex();
-            if (backingIndex != null && backingIndex.getName() != null) {
+            if ((backingIndex != null) && (backingIndex.getName() != null)) {
                 try {
                     if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
                         CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);

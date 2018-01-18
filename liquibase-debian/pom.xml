@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.liquibase</groupId>
@@ -7,7 +8,7 @@
     </parent>
 
     <artifactId>liquibase-debian</artifactId>
-    
+
     <name>Liquibase Debian Packager</name>
     <description>Debian package builder for liquibase.</description>
      <organization>
@@ -120,7 +121,6 @@
                                     </mapper>
                                 </data>
                                 <data>
-                                    <!--<src>${project.build.directory}/dist/liquibase</src>-->
                                     <src>src/main/resources/liquibase</src>
                                     <type>file</type>
                                     <mapper>
@@ -150,7 +150,7 @@
                                 <data>
                                     <type>link</type>
                                     <linkName>/usr/bin/liquibase</linkName>
-                                    <linkTarget>../lib/liquibase-${project.version}/liquibase</linkTarget>  
+                                    <linkTarget>../lib/liquibase-${project.version}/liquibase</linkTarget>
                                     <symlink>true</symlink>
                                 </data>
 			    

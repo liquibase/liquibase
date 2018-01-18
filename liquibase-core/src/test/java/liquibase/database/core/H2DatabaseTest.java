@@ -3,8 +3,9 @@ package liquibase.database.core;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import org.junit.Assert;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
 

@@ -2,7 +2,8 @@ package liquibase.resource;
 
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.util.StringUtils;
 
 import java.io.File;
@@ -32,18 +33,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     @Override
     public Set<InputStream> getResourcesAsStream(String path) throws IOException {
         Enumeration<URL> resources = classLoader.getResources(path);
-        if (resources == null || !resources.hasMoreElements()) {
+        if ((resources == null) || !resources.hasMoreElements()) {
             return null;
         }
-        Set<String> seenUrls = new HashSet<String>();
-        Set<InputStream> returnSet = new HashSet<InputStream>();
+        Set<String> seenUrls = new HashSet<>();
+        Set<InputStream> returnSet = new HashSet<>();
         while (resources.hasMoreElements()) {
             URL url = resources.nextElement();
             if (seenUrls.contains(url.toExternalForm())) {
                 continue;
             }
             seenUrls.add(url.toExternalForm());
-            LogFactory.getInstance().getLog().debug("Opening "+url.toExternalForm()+" as "+path);
+            LogService.getLog(getClass()).debug(LogType.LOG, "Opening "+url.toExternalForm()+" as "+path);
 
             URLConnection connection = url.openConnection();
             connection.setUseCaches(false);
@@ -62,10 +63,10 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         Enumeration<URL> fileUrls = classLoader.getResources(path);
 
-        Set<String> returnSet = new HashSet<String>();
+        Set<String> returnSet = new HashSet<>();
 
         if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:"))) {
-            fileUrls = new Vector<URL>(Arrays.asList(new URL(path))).elements();
+            fileUrls = new Vector<>(Arrays.asList(new URL(path))).elements();
         }
 
         while (fileUrls.hasMoreElements()) {
@@ -108,9 +109,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                         if (entry.getName().startsWith(path)) {
 
                             if (!recursive) {
-                                String pathAsDir = path.endsWith("/")
-                                        ? path
-                                        : path + "/";
+                                String pathAsDir = path.endsWith("/") ? path : (path + "/");
                                 if (!entry.getName().startsWith(pathAsDir)
                                  || entry.getName().substring(pathAsDir.length()).contains("/")) {
                                     continue;
@@ -133,9 +132,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     if (file.exists()) {
                         getContents(file, recursive, includeFiles, includeDirectories, path, returnSet);
                     }
-                } catch (URISyntaxException e) {
-                    //not a local file
-                } catch (IllegalArgumentException e) {
+                } catch (URISyntaxException | IllegalArgumentException e) {
                     //not a local file
                 }
             }
@@ -149,7 +146,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             }
         }
 
-        if (returnSet.size() == 0) {
+        if (returnSet.isEmpty()) {
             return null;
         }
         return returnSet;
@@ -164,7 +161,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     public String toString() {
         String description;
         if (classLoader instanceof URLClassLoader) {
-            List<String> urls = new ArrayList<String>();
+            List<String> urls = new ArrayList<>();
             for (URL url : ((URLClassLoader) classLoader).getURLs()) {
                 urls.add(url.toExternalForm());
             }

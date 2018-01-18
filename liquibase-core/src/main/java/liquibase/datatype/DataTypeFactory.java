@@ -20,7 +20,7 @@ public class DataTypeFactory {
 
     private static DataTypeFactory instance;
 
-    private Map<String, List<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<String, List<Class<? extends LiquibaseDataType>>>();
+    private Map<String, List<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<>();
 
     protected DataTypeFactory() {
         Class<? extends LiquibaseDataType>[] classes;
@@ -53,7 +53,7 @@ public class DataTypeFactory {
     public void register(Class<? extends LiquibaseDataType> dataTypeClass) {
         try {
             LiquibaseDataType example = dataTypeClass.newInstance();
-            List<String> names = new ArrayList<String>();
+            List<String> names = new ArrayList<>();
             names.add(example.getName());
             names.addAll(Arrays.asList(example.getAliases()));
 
@@ -86,14 +86,13 @@ public class DataTypeFactory {
         registry.remove(name.toLowerCase());
     }
 
-//    public Map<String, SortedSet<Class<? extends LiquibaseDataType>>> getRegistry() {
-//        return registry;
-//    }
-
-//    public LiquibaseDataType fromDescription(String dataTypeDefinition) {
-//        return fromDescription(dataTypeDefinition, null);
-//    }
-
+    /**
+     * Translates a database-specific type name (e.g. VARCHAR2(255 BYTE) from Oracle) into a proper Liquibase
+     * data type (e.g. varchar(255) )
+     * @param dataTypeDefinition
+     * @param database
+     * @return
+     */
     public LiquibaseDataType fromDescription(String dataTypeDefinition, Database database) {
         String dataTypeName = dataTypeDefinition;
         if (dataTypeName.matches(".+\\(.*\\).*")) {
@@ -120,7 +119,8 @@ public class DataTypeFactory {
             String closeQuote = quotePair[1];
             if (dataTypeName.startsWith(openQuote)) {
                 int indexOfCloseQuote = dataTypeName.indexOf(closeQuote, openQuote.length());
-                if (indexOfCloseQuote != -1 && dataTypeName.indexOf(closeQuote, indexOfCloseQuote + closeQuote.length()) == -1) {
+                if ((indexOfCloseQuote != -1) && (dataTypeName.indexOf(closeQuote, indexOfCloseQuote + closeQuote
+                    .length()) == -1)) {
                     dataTypeName = dataTypeName.substring(openQuote.length(), indexOfCloseQuote) +
                             dataTypeName.substring(indexOfCloseQuote + closeQuote.length(), dataTypeName.length());
                     break;
@@ -129,8 +129,10 @@ public class DataTypeFactory {
         }
 
         String additionalInfo = null;
-        if (dataTypeName.toLowerCase().startsWith("bit varying") || dataTypeName.toLowerCase().startsWith("character varying")) {
-            //not going to do anything. Special case for postgres in our tests, need to better support handling these types of differences
+        if (dataTypeName.toLowerCase().startsWith("bit varying")
+            || dataTypeName.toLowerCase().startsWith("character varying")) {
+            // not going to do anything. Special case for postgres in our tests,
+            // need to better support handling these types of differences
         } else {
             String[] splitTypeName = dataTypeName.split("\\s+", 2);
             dataTypeName = splitTypeName[0];
@@ -160,22 +162,31 @@ public class DataTypeFactory {
             } while ((database != null) && !liquibaseDataType.supports(database) && iterator.hasNext());
         }
         if ((database != null) && !liquibaseDataType.supports(database)) {
-            throw new UnexpectedLiquibaseException("Could not find type for "+liquibaseDataType.toString()+" for databaes "+database.getShortName());
+            throw new UnexpectedLiquibaseException("Could not find type for "+liquibaseDataType.toString() +
+                    " for DBMS "+database.getShortName());
         }
         if (liquibaseDataType == null) {
             liquibaseDataType = new UnknownType(dataTypeName);
-
         }
         liquibaseDataType.setAdditionalInformation(additionalInfo);
 
+        // Does the type string have the form "some_data_type(additional,info,separated,by,commas)"?
+        // If so, process these as additional data type parameters.
         if (dataTypeDefinition.matches(".+\\s*\\(.*")) {
+            // Cut out the part between the first ()
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\(", "").replaceFirst("\\).*", "");
             String[] params = paramStrings.split(",");
+
             for (String param : params) {
                 param = StringUtils.trimToNull(param);
                 if (param != null) {
-                    if (liquibaseDataType instanceof CharType && !(database instanceof OracleDatabase)) {
-                        param = param.replaceFirst(" BYTE", ""); //only use byte types on oracle, not sure what else supports it
+                    if ((liquibaseDataType instanceof CharType) && !(database instanceof OracleDatabase)) {
+                        // TODO this might lead to wrong snapshot results in Oracle Database, because it assumes
+                        // NLS_LENGTH_SEMANTICS=BYTE. If NLS_LENGTH_SEMANTICS=CHAR, we need to trim " CHAR" instead.
+    
+                        // not sure what else supports it:
+                        param = param.replaceFirst(" BYTE", ""); //only use byte types on oracle,
+                        
                     }
                     liquibaseDataType.addParameter(param);
                 }
@@ -204,16 +215,17 @@ public class DataTypeFactory {
                     try {
                         ObjectUtil.setProperty(liquibaseDataType, paramAndValue[0], paramAndValue[1]);
                     } catch (Exception e) {
-                        throw new RuntimeException("Unknown property "+paramAndValue[0]+" for "+liquibaseDataType.getClass().getName()+" "+liquibaseDataType.toString());
+                        throw new RuntimeException("Unknown property " + paramAndValue[0] + " for " +
+                            liquibaseDataType.getClass().getName()+" "+liquibaseDataType.toString());
                     }
                 }
             }
         }
 
-        if (autoIncrement && liquibaseDataType instanceof IntType) {
+        if (autoIncrement && (liquibaseDataType instanceof IntType)) {
             ((IntType) liquibaseDataType).setAutoIncrement(true);
         }
-        if (autoIncrement && liquibaseDataType instanceof BigIntType) {
+        if (autoIncrement && (liquibaseDataType instanceof BigIntType)) {
             ((BigIntType) liquibaseDataType).setAutoIncrement(true);
         }
 

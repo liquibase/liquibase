@@ -11,6 +11,7 @@ import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.ForeignKeyConstraint
+import liquibase.statement.NotNullConstraint
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.statement.core.CreateTableStatement
 import liquibase.structure.core.Column

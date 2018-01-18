@@ -4,10 +4,9 @@ import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import org.junit.Assert;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import org.junit.Test;
 
 /**
  * Tests for {@link PostgresDatabase}

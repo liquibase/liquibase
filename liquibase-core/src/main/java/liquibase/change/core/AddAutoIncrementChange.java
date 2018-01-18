@@ -3,7 +3,8 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.DatabaseException;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -14,8 +15,6 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.math.BigInteger;
 
 /**
@@ -23,9 +22,12 @@ import java.math.BigInteger;
  * This change is only valid for databases with auto-increment/identity columns.
  * The current version does not support MS-SQL.
  */
-@DatabaseChange(name = "addAutoIncrement", description = "Converts an existing column to be an auto-increment (a.k.a 'identity') column",
-        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column",
-        databaseNotes = {@DatabaseChangeNote(database = "sqlite", notes = "If the column type is not INTEGER it is converted to INTEGER")}
+@DatabaseChange(name = "addAutoIncrement",
+    description = "Converts an existing column to be an auto-increment (a.k.a 'identity') column",
+    priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column",
+    databaseNotes = {@DatabaseChangeNote(
+        database = "sqlite", notes = "If the column type is not INTEGER it is converted to INTEGER"
+    )}
 )
 public class AddAutoIncrementChange extends AbstractChange {
 
@@ -37,7 +39,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     private BigInteger startWith;
     private BigInteger incrementBy;
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -73,7 +75,8 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column to make auto-increment", exampleValue = "int")
+    @DatabaseChangeProperty(description = "Current data type of the column to make auto-increment",
+        exampleValue = "int")
     public String getColumnDataType() {
         return columnDataType;
     }
@@ -107,10 +110,11 @@ public class AddAutoIncrementChange extends AbstractChange {
 
             String escapedTableName = database.escapeObjectName(getTableName(), Table.class);
             String escapedColumnName = database.escapeObjectName(getColumnName(), Table.class);
-            if (escapedTableName != null && escapedColumnName != null && !escapedTableName.startsWith("\"") && !escapedColumnName.startsWith("\"")) {
+            if ((escapedTableName != null) && (escapedColumnName != null) && !escapedTableName.startsWith("\"") &&
+                !escapedColumnName.startsWith("\"")
+            ) {
                 sequenceName = sequenceName.toLowerCase();
             }
-
 
             String schemaPrefix;
             if (this.schemaName == null) {
@@ -118,20 +122,21 @@ public class AddAutoIncrementChange extends AbstractChange {
             } else {
                 schemaPrefix = this.schemaName;
             }
-            if (schemaPrefix == null) {
-                schemaPrefix = "";
-            } else {
-                schemaPrefix = schemaPrefix+".";
-            }
+
+            SequenceNextValueFunction nvf = new SequenceNextValueFunction(sequenceName);
+            nvf.setSequenceSchemaName(schemaPrefix);
 
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, this.schemaName, sequenceName),
-                    new SetNullableStatement(catalogName, this.schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(), new SequenceNextValueFunction(schemaPrefix + sequenceName)),
+                    new SetNullableStatement(catalogName, this.schemaName, getTableName(), getColumnName(),
+                        null, false),
+                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(),
+                        getColumnDataType(), nvf)
             };
         }
 
-        return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
+        return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(),
+            getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
     }
 
     @Override
@@ -145,25 +150,25 @@ public class AddAutoIncrementChange extends AbstractChange {
         Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
         try {
             Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            if (column == null) return result.unknown("Column does not exist");
-
-
-            result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
-            if (getStartWith() != null && column.getAutoIncrementInformation().getStartWith() != null) {
-                result.assertCorrect(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()), "startsWith incorrect");
+            if (column == null) {
+                return result.unknown("Column does not exist");
             }
 
-            if (getIncrementBy() != null && column.getAutoIncrementInformation().getIncrementBy() != null) {
-                result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()), "Increment by incorrect");
+            result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
+            if ((getStartWith() != null) && (column.getAutoIncrementInformation().getStartWith() != null)) {
+                result.assertCorrect(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()),
+                     "startsWith incorrect");
+            }
+
+            if ((getIncrementBy() != null) && (column.getAutoIncrementInformation().getIncrementBy() != null)) {
+                result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()),
+                     "Increment by incorrect");
             }
 
             return result;
-        } catch (Exception e) {
+        } catch (DatabaseException|InvalidExampleException e) {
             return result.unknown(e);
-
         }
-
-
     }
 
     @Override

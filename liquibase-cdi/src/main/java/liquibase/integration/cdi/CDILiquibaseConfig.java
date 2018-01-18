@@ -1,7 +1,5 @@
 package liquibase.integration.cdi;
 
-import liquibase.resource.ResourceAccessor;
-
 import java.util.Map;
 
 /**
@@ -15,7 +13,7 @@ public class CDILiquibaseConfig {
     private String labels;
     private String changeLog;
     private Map<String,String> parameters;
-    private boolean dropFirst = false;
+    private boolean dropFirst;
     private String defaultSchema;
 
     public String getContexts() {

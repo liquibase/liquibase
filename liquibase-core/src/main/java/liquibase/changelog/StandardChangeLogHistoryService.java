@@ -7,17 +7,17 @@ import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.datatype.core.VarcharType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -36,8 +36,8 @@ import java.util.*;
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private List<RanChangeSet> ranChangeSetList;
-    private boolean serviceInitialized = false;
-    private Boolean hasDatabaseChangeLogTable = null;
+    private boolean serviceInitialized;
+    private Boolean hasDatabaseChangeLogTable;
     private boolean databaseChecksumsCompatible = true;
     private Integer lastChangeSetSequenceValue;
 
@@ -85,7 +85,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     protected String getCharTypeName() {
-        if (getDatabase() instanceof MSSQLDatabase && ((MSSQLDatabase) getDatabase()).sendsStringParametersAsUnicode()) {
+        if ((getDatabase() instanceof MSSQLDatabase) && ((MSSQLDatabase) getDatabase()).sendsStringParametersAsUnicode()) {
             return "nvarchar";
         }
         return "varchar";
@@ -105,7 +105,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             throw new UnexpectedLiquibaseException(e);
         }
 
-        List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
+        List<SqlStatement> statementsToExecute = new ArrayList<>();
 
         boolean changeLogCreateAttempted = false;
         if (changeLogTable != null) {
@@ -120,7 +120,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 DataType type = changeLogTable.getColumn("LIQUIBASE").getType();
                 if (type.getTypeName().toLowerCase().startsWith("varchar")) {
                     Integer columnSize = type.getColumnSize();
-                    liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
+                    liquibaseColumnNotRightSize = (columnSize != null) && (columnSize < 20);
                 } else {
                     liquibaseColumnNotRightSize = false;
                 }
@@ -131,7 +131,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 DataType type = changeLogTable.getColumn("MD5SUM").getType();
                 if (type.getTypeName().toLowerCase().startsWith("varchar")) {
                     Integer columnSize = type.getColumnSize();
-                    checksumNotRightSize = columnSize != null && columnSize < 35;
+                    checksumNotRightSize = (columnSize != null) && (columnSize < 35);
                 } else {
                     liquibaseColumnNotRightSize = false;
                 }
@@ -181,7 +181,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (hasContexts) {
                 Integer columnSize = changeLogTable.getColumn("CONTEXTS").getType().getColumnSize();
-                if (columnSize != null && columnSize < Integer.parseInt(getContextsSize())) {
+                if ((columnSize != null) && (columnSize < Integer.parseInt(getContextsSize()))) {
                     executor.comment("Modifying size of databasechangelog.contexts column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "("+getContextsSize()+")"));
                 }
@@ -192,7 +192,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (hasLabels) {
                 Integer columnSize = changeLogTable.getColumn("LABELS").getType().getColumnSize();
-                if (columnSize != null && columnSize < Integer.parseInt(getLabelsSize())) {
+                if ((columnSize != null) && (columnSize < Integer.parseInt(getLabelsSize()))) {
                     executor.comment("Modifying size of databasechangelog.labels column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName+"("+getLabelsSize()+")"));
                 }
@@ -210,7 +210,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));
-            if (md5sumRS.size() > 0) {
+            if (!md5sumRS.isEmpty()) {
                 String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
@@ -227,12 +227,12 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
                 throw new DatabaseException("Cannot create " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your getDatabase().\n\n" +
-                        "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
+                    "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
                         createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            LogFactory.getLogger().info("Creating database history table with name: " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
+            LogService.getLog(getClass()).info(LogType.LOG, "Creating database history table with name: " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
         }
 
         for (SqlStatement sql : statementsToExecute) {
@@ -240,7 +240,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 executor.execute(sql);
                 getDatabase().commit();
             } else {
-                LogFactory.getLogger().info("Cannot run "+sql.getClass().getSimpleName()+" on "+getDatabase().getShortName()+" when checking databasechangelog table");
+                LogService.getLog(getClass()).info(LogType.LOG, "Cannot run "+sql.getClass().getSimpleName()+" on "+getDatabase().getShortName()+" when checking databasechangelog table");
             }
         }
         serviceInitialized = true;
@@ -266,17 +266,18 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
-            List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
+            List<RanChangeSet> ranChangeSetList = new ArrayList<>();
             if (hasDatabaseChangeLogTable()) {
-                LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
+                LogService.getLog(getClass()).info(LogType.LOG, "Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
                 for (Map rs : results) {
                     String fileName = rs.get("FILENAME").toString();
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
-                    String md5sum = rs.get("MD5SUM") == null || !databaseChecksumsCompatible ? null : rs.get("MD5SUM").toString();
-                    String description = rs.get("DESCRIPTION") == null ? null : rs.get("DESCRIPTION").toString();
-                    String comments = rs.get("COMMENTS") == null ? null : rs.get("COMMENTS").toString();
+                    String md5sum = ((rs.get("MD5SUM") == null) || !databaseChecksumsCompatible) ? null : rs.get
+                        ("MD5SUM").toString();
+                    String description = (rs.get("DESCRIPTION") == null) ? null : rs.get("DESCRIPTION").toString();
+                    String comments = (rs.get("COMMENTS") == null) ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
                     Date dateExecuted = null;
                     if (tmpDateExecuted instanceof Date) {
@@ -289,9 +290,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         }
                     }
                     String tmpOrderExecuted = rs.get("ORDEREXECUTED").toString();
-                    Integer orderExecuted = (tmpOrderExecuted == null ? null : Integer.valueOf(tmpOrderExecuted));
-                    String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
-                    String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
+                    Integer orderExecuted = ((tmpOrderExecuted == null) ? null : Integer.valueOf(tmpOrderExecuted));
+                    String tag = (rs.get("TAG") == null) ? null : rs.get("TAG").toString();
+                    String execType = (rs.get("EXECTYPE") == null) ? null : rs.get("EXECTYPE").toString();
                     ContextExpression contexts = new ContextExpression((String) rs.get("CONTEXTS"));
                     Labels labels = new Labels((String) rs.get("LABELS"));
                     String deploymentId = (String) rs.get("DEPLOYMENT_ID");
@@ -301,7 +302,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         ranChangeSet.setOrderExecuted(orderExecuted);
                         ranChangeSetList.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
-                        LogFactory.getLogger().severe("Unknown EXECTYPE from database: " + execType);
+                        LogService.getLog(getClass()).severe(LogType.LOG, "Unknown EXECTYPE from database: " + execType);
                         throw e;
                     }
                 }
