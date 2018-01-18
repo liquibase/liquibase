@@ -337,10 +337,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
-            Comparator<?> resourceComparator = null;
+            Comparator<String> resourceComparator = null;
             if (resourceComparatorDef != null) {
                 try {
-                	resourceComparator = (Comparator<?>) Class.forName(resourceComparatorDef).newInstance();
+                	resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).newInstance();
                 } catch (Exception e) {
             		//take default comparator
                 	LogFactory.getInstance().getLog().info("no resourceComparator defined - taking default implementation");
@@ -351,7 +351,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
             includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
                     node.getChildValue(null, "errorIfMissingOrEmpty", true),
-                    getStandardChangeLogComparator(), resourceAccessor, includeContexts);
+                    resourceComparator, resourceAccessor, includeContexts);
         } else if (nodeName.equals("preConditions")) {
             this.preconditionContainer = new PreconditionContainer();
             try {
