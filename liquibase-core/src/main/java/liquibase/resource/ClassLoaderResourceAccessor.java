@@ -84,11 +84,9 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 }
                 zipFilePath = URLDecoder.decode(zipFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
-                if (path.startsWith("classpath:")) {
-                    path = path.replaceFirst("classpath:", "");
-                }
-                if (path.startsWith("classpath*:")) {
-                    path = path.replaceFirst("classpath\\*:", "");
+                String resourcePath = zipAndFile[1];
+                if (resourcePath.startsWith("/")) {
+                    resourcePath = resourcePath.substring(1);
                 }
 
                 // TODO:When we update to Java 7+, we can can create a FileSystem from the JAR (zip)
@@ -105,12 +103,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
 
-                        if (entry.getName().startsWith(path)) {
+                        if (entry.getName().startsWith(resourcePath)) {
 
                             if (!recursive) {
-                                String pathAsDir = path.endsWith("/")
-                                        ? path
-                                        : path + "/";
+                                String pathAsDir = resourcePath.endsWith("/")
+                                        ? resourcePath
+                                        : resourcePath + "/";
                                 if (!entry.getName().startsWith(pathAsDir)
                                  || entry.getName().substring(pathAsDir.length()).contains("/")) {
                                     continue;
