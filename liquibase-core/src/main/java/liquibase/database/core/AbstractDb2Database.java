@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -228,5 +229,10 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
             return true;
         }
         return super.isSystemObject(example);
+    }
+
+    @Override
+    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
+        return objectName;
     }
 }
