@@ -258,15 +258,15 @@ public class CommandLineUtils {
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName,
                                            String schemaName, String snapshotTypes, String author, String context,
-                                           String dataDir, DiffOutputControl diffOutputControl) throws
+                                           String dataDir, DiffOutputControl diffOutputControl, ObjectChangeFilter objectChangeFilter) throws
             IOException, ParserConfigurationException, LiquibaseException {
         doGenerateChangeLog(changeLogFile, originalDatabase, new CatalogAndSchema[]{new CatalogAndSchema(catalogName,
-                schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl);
+                schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl, objectChangeFilter);
     }
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
             schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
-                                                   diffOutputControl) throws IOException, ParserConfigurationException,
+                                                   diffOutputControl, ObjectChangeFilter objectChangeFilter) throws IOException, ParserConfigurationException,
             LiquibaseException {
         CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[schemas.length];
         int i = 0;
@@ -284,7 +284,8 @@ public class CommandLineUtils {
                 .setOutputStream(System.out)
                 .setCompareControl(compareControl);
         command.setChangeLogFile(changeLogFile)
-                .setDiffOutputControl(diffOutputControl);
+                .setDiffOutputControl(diffOutputControl)
+                .setObjectChangeFilter(objectChangeFilter);
         command.setAuthor(author)
                 .setContext(context);
 
