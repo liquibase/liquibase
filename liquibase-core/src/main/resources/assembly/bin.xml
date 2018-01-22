@@ -13,8 +13,8 @@
             <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>unix</lineEnding>
             <includes>
-                <include>dbmanul</include>
-                <include>dbmanul-sdk</include>
+                <include>liquibase</include>
+                <include>liquibase-sdk</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -35,8 +35,8 @@
             <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>unix</lineEnding>
             <excludes>
-                <exclude>dbmanul</exclude>
-                <exclude>dbmanul-sdk</exclude>
+                <exclude>liquibase</exclude>
+                <exclude>liquibase-sdk</exclude>
                 <exclude>*.bat</exclude>
             </excludes>
         </fileSet>
@@ -52,11 +52,11 @@
         <file>
             <source>${project.build.directory}/${project.build.finalName}.jar</source>
             <outputDirectory>${file.separator}</outputDirectory>
-            <destName>dbmanul.jar</destName>
+            <destName>liquibase.jar</destName>
             <fileMode>0644</fileMode>
         </file>
         <!--<file>-->
-        <!--<source>src/main/resources/dbmanul</source>-->
+        <!--<source>src/main/resources/liquibase</source>-->
         <!--<outputDirectory>/</outputDirectory>-->
         <!--<fileMode>0777</fileMode>-->
         <!--</file>-->
@@ -72,7 +72,7 @@
         <dependencySet>
             <outputDirectory>sdk/lib-sdk</outputDirectory>
             <excludes>
-                <exclude>org.dbmanul:dbmanul-core</exclude>
+                <exclude>org.liquibase:liquibase-core</exclude>
                 <exclude>org.yaml:snakeyaml</exclude>
             </excludes>
         </dependencySet>

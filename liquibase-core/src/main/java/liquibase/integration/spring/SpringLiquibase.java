@@ -240,13 +240,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             .getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-            LogService.getLog(getClass()).info(LogType.LOG, "DB-Manul did not run because " + LiquibaseConfiguration
+            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run because " + LiquibaseConfiguration
                 .getInstance().describeValueLookupLogic(shouldRunProperty) + " was set to false");
             return;
 		}
 		if (!shouldRun) {
-            LogService.getLog(getClass()).info(LogType.LOG, "DB-Manul did not run because 'shouldRun' " + "property " +
-                "was set to false on " + getBeanName() + " DB-Manul Spring bean.");
+            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run because 'shouldRun' " + "property was set " +
+                "to false on " + getBeanName() + " Liquibase Spring bean.");
             return;
 		}
 

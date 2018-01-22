@@ -12,7 +12,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
 
-@DatabaseChange(name="stop", description = "Stops DB-Manul execution with a message. Mainly useful for debugging and " +
+@DatabaseChange(name = "stop", description = "Stops Liquibase execution with a message. Mainly useful for debugging " +
+    "and " +
  "stepping through a changelog", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.9")
 public class StopChange extends AbstractChange {
 

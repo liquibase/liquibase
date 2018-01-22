@@ -150,7 +150,7 @@ public class LiquibaseTest {
             when(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(databaseConnection)).thenReturn(database);
 
             Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, databaseConnection);
-            assertSame("DB-Manul constructor passing connection did not find the correct database implementation",
+            assertSame("Liquibase constructor passing connection did not find the correct database implementation",
                 database, liquibase.getDatabase());
 
         } finally {

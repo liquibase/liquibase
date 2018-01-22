@@ -55,7 +55,7 @@ import static java.util.ResourceBundle.getBundle;
                 "If the data type for a load column is set to NUMERIC, numbers are parsed in US locale (e.g. 123.45)." +
                 "\n" +
                 "Date/Time values included in the CSV file should be in ISO format " +
-                "http://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by DB-Manul. DB-Manul will " +
+            "http://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by Liquibase. Liquibase will " +
                 "initially set the date format to be 'yyyy-MM-dd'T'HH:mm:ss' and then it checks for two special " +
                 "cases which will override the data format string.\n" +
                 "\n" +
@@ -63,7 +63,7 @@ import static java.util.ResourceBundle.getBundle;
                 "'yyyy-MM-dd'T'HH:mm:ss.SSS'\n" +
                 "If the string representing the date/time includes a space, then the date format is changed " +
                 "to 'yyyy-MM-dd HH:mm:ss'\n" +
-                "Once the date format string is set, DB-Manul will then call the SimpleDateFormat.parse() method " +
+            "Once the date format string is set, Liquibase will then call the SimpleDateFormat.parse() method " +
                 "attempting to parse the input string so that it can return a Date/Time. If problems occur, " +
                 "then a ParseException is thrown and the input string is treated as a String for the INSERT command " +
                 "to be generated.",

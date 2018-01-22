@@ -120,10 +120,10 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
 	private void runOnAllDataSources() throws LiquibaseException {
 		for(DataSource aDataSource : dataSources) {
-            log.info(LogType.LOG, "Initializing DB-Manul for data source " + aDataSource);
+            log.info(LogType.LOG, "Initializing Liquibase for data source " + aDataSource);
             SpringLiquibase liquibase = getSpringLiquibase(aDataSource);
 			liquibase.afterPropertiesSet();
-            log.info(LogType.LOG, "DB-Manul ran for data source " + aDataSource);
+            log.info(LogType.LOG, "Liquibase ran for data source " + aDataSource);
         }
 	}
 	
@@ -132,11 +132,11 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			if("default".equals(schema)) {
 				schema = null;
 			}
-            log.info(LogType.LOG, "Initializing DB-Manul for schema " + schema);
+            log.info(LogType.LOG, "Initializing Liquibase for schema " + schema);
             SpringLiquibase liquibase = getSpringLiquibase(dataSource);
 			liquibase.setDefaultSchema(schema);
 			liquibase.afterPropertiesSet();
-            log.info(LogType.LOG, "DB-Manul ran for schema " + schema);
+            log.info(LogType.LOG, "Liquibase ran for schema " + schema);
         }
 	}
 

@@ -235,10 +235,10 @@ public class ServiceLocator {
 
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Can not use " + clazz + " as a DB-Manul service " +
+                    LogService.getLog(getClass()).info(LogType.LOG, "Can not use " + clazz + " as a Liquibase service " +
                         "because it does not have a no-argument constructor");
                 } catch (NoClassDefFoundError e) {
-                    String message = "Can not use " + clazz + " as a DB-Manul service because " + e.getMessage()
+                    String message = "Can not use " + clazz + " as a Liquibase service because " + e.getMessage()
                         .replace("/", ".") + " is not in the classpath";
                     if (e.getMessage().startsWith("org/yaml/snakeyaml")) {
                         LogService.getLog(getClass()).info(LogType.LOG, message);

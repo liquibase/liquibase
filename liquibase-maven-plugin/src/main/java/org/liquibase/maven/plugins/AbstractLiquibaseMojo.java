@@ -307,12 +307,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
 
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            getLog().info("DB-Manul did not run because " + liquibaseConfiguration.describeValueLookupLogic
+            getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic
                 (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
         if (skip) {
-            getLog().warn("DB-Manul skipped due to maven configuration");
+            getLog().warn("Liquibase skipped due to maven configuration");
             return;
         }
 
@@ -369,7 +369,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             }
 
             if (clearCheckSums) {
-                getLog().info("Clearing the DB-Manul checksums on the database");
+                getLog().info("Clearing the Liquibase checksums on the database");
                 liquibase.clearCheckSums();
             }
 
@@ -387,7 +387,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         catch (LiquibaseException e) {
             cleanup(database);
-            throw new MojoExecutionException("Error setting up or running DB-Manul: " + e.getMessage(), e);
+            throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
         }
 
         cleanup(database);
@@ -423,7 +423,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         // Load the properties file if there is one, but only for values that the user has not
         // already specified.
         if (propertyFile != null) {
-            getLog().info("Parsing DB-Manul Properties File");
+            getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
             InputStream is;
             try {
@@ -551,7 +551,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             props.load(propertiesInputStream);
         }
         catch (IOException e) {
-            throw new MojoExecutionException("Could not load the properties DB-Manul file", e);
+            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
         }
 
         for (Iterator it = props.keySet().iterator(); it.hasNext();) {

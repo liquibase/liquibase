@@ -97,7 +97,7 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
-        log.info(LogType.LOG, "Booting DB-Manul " + LiquibaseUtil.getBuildVersion());
+        log.info(LogType.LOG, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();

@@ -149,7 +149,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
         GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            LogService.getLog(getClass()).info(LogType.LOG, "DB-Manul did not run on " + hostName
+            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run on " + hostName
                     + " because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                             + " was set to false");
             return false;
@@ -198,12 +198,12 @@ public class LiquibaseServletListener implements ServletContextListener {
     private void executeUpdate(ServletContext servletContext, InitialContext ic) throws NamingException, SQLException, LiquibaseException {
         setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE));
         if (getDataSource() == null) {
-            throw new RuntimeException("Cannot run DB-Manul, " + LIQUIBASE_DATASOURCE + " is not set");
+            throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_DATASOURCE + " is not set");
         }
 
         setChangeLogFile((String) servletValueContainer.getValue(LIQUIBASE_CHANGELOG));
         if (getChangeLogFile() == null) {
-            throw new RuntimeException("Cannot run DB-Manul, " + LIQUIBASE_CHANGELOG + " is not set");
+            throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_CHANGELOG + " is not set");
         }
 
         setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS));

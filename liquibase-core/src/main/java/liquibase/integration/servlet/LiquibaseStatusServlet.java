@@ -38,10 +38,10 @@ public class LiquibaseStatusServlet extends HttpServlet {
 
         PrintWriter writer = httpServletResponse.getWriter();
         writer.println("<html>");
-        writer.println("<head><title>DB-Manul Status</title></head>");
+        writer.println("<head><title>Liquibase Status</title></head>");
         writer.println("<body>");
         if (liquibaseRunLog.isEmpty()) {
-            writer.println("<b>DB-Manul did not run</b>");
+            writer.println("<b>Liquibase did not run</b>");
         } else {
             writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel, httpServletRequest)
                     + " " + getLevelLink(Level.WARNING, currentLevel, httpServletRequest)
@@ -53,7 +53,7 @@ public class LiquibaseStatusServlet extends HttpServlet {
                     + "</b>");
 
             writer.println("<hr>");
-            writer.println("<b>DB-Manul started at " + DateFormat.getDateTimeInstance().format(new Date
+            writer.println("<b>Liquibase started at " + DateFormat.getDateTimeInstance().format(new Date
                 (liquibaseRunLog.get(0).getMillis())));
             writer.println("<hr>");
             writer.println("<pre>");
@@ -70,7 +70,7 @@ public class LiquibaseStatusServlet extends HttpServlet {
 
             writer.println("</pre>");
             writer.println("<hr>");
-            writer.println("<b>DB-Manul finished at " + DateFormat.getDateTimeInstance().format(new Date
+            writer.println("<b>Liquibase finished at " + DateFormat.getDateTimeInstance().format(new Date
                 (liquibaseRunLog.get(liquibaseRunLog.size() - 1).getMillis())));
         }
         writer.println("</body>");

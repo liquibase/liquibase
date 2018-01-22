@@ -445,7 +445,7 @@ public class Liquibase {
         if (connection != null) {
             executor.comment("Against: " + connection.getConnectionUserName() + "@" + connection.getURL());
         }
-        executor.comment("DB-Manul version: " + LiquibaseUtil.getBuildVersion());
+        executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" +
             StreamUtil.getLineSeparator()
         );

@@ -16,7 +16,7 @@ sudo apt-get install rpm
 sudo apt-get install rpm-build
 +--------------------------
 
-    And you're ready to build dbmanul rpm package.
+    And you're ready to build liquibase rpm package.
 
 * Build on CentOS
     
@@ -66,42 +66,42 @@ target/site/index.html
     and a ready to use rpm in
 
 +-------------------------------------------
-target/rpm/dbmanul/RPMS/noarch/
+target/rpm/liquibase/RPMS/noarch/
 +-------------------------------------------
 
 * rpm install, remove, search and info
 
 
 +-------------------------------------------
-yum --nogpgcheck localinstall  dbmanul-3.3.0-SNAPSHOT20140618000252.noarch.rpm
+yum --nogpgcheck localinstall  liquibase-3.3.0-SNAPSHOT20140618000252.noarch.rpm
 +-------------------------------------------
 
-    To rapidly check if dbmanul is already installed :
+    To rapidly check if liquibase is already installed :
 
 +-------------------------------------------
-yum list installed | grep dbmanul
+yum list installed | grep liquibase
 +-------------------------------------------
 
-    Get infos about dbmanul package :
+    Get infos about liquibase package :
 
 +-------------------------------------------
-yum info dbmanul.noarch
+yum info liquibase.noarch
 +-------------------------------------------
 
     which should give you this kind of output (still developing on SNAPSHOT) :
 
 +-------------------------------------------
 Installed Packages
-Name        : dbmanul
+Name        : liquibase
 Arch        : noarch
 Version     : 3.3.0
 Release     : SNAPSHOT20140618000252
 Size        : 2.6 M
 Repo        : installed
-Summary     : DB-Manul rpm Packager
-URL         : http://www.dbmanul.org
+Summary     : Liquibase rpm Packager
+URL         : http://www.liquibase.org
 License     : Apache License, Version 2.0
-Description : DB-Manul is an open source database-independent library for tracking,
+Description : Liquibase is an open source database-independent library for tracking,
             :         managing and applying database schema changes. It was started in 2006 to allow
             :         easier tracking of database changes, especially in an agile software development
             :         environment.
@@ -111,14 +111,14 @@ Description : DB-Manul is an open source database-independent library for tracki
     Take a look at the (very concise but yet existing) man page :
 
 +-------------------------------------------
-man dbmanul
+man liquibase
 +-------------------------------------------
 
 
-    To remove/uninstall dbmanul :
+    To remove/uninstall liquibase :
 
 +-------------------------------------------
-yum remove dbmanul.noarch
+yum remove liquibase.noarch
 +-------------------------------------------
 
     which should give you this kind of output :
@@ -130,7 +130,7 @@ Dependencies Resolved
  Package                                Arch                                Version                                                   Repository                              Size
 ===================================================================================================================================================================================
 Removing:
- dbmanul                              noarch                              3.3.0-SNAPSHOT20140618000252                              installed                              2.6 M
+ liquibase                              noarch                              3.3.0-SNAPSHOT20140618000252                              installed                              2.6 M
 
 Transaction Summary
 ===================================================================================================================================================================================
@@ -144,7 +144,7 @@ Running Transaction Test
 Transaction Test Succeeded
 Running Transaction
 Warning: RPMDB altered outside of yum.
-  Erasing    : dbmanul-3.3.0-SNAPSHOT20140618000252.noarch                                                                                                                   1/1
-  Verifying  : dbmanul-3.3.0-SNAPSHOT20140618000252.noarch
+  Erasing    : liquibase-3.3.0-SNAPSHOT20140618000252.noarch                                                                                                                   1/1
+  Verifying  : liquibase-3.3.0-SNAPSHOT20140618000252.noarch
 +-------------------------------------------
 

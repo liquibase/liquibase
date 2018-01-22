@@ -305,12 +305,12 @@ public class CommandLineUtils {
         StringBuffer banner = new StringBuffer();
 
         banner.append(String.format(
-            coreBundle.getString("starting.db.manul.at.timestamp"), OffsetDateTime.now().truncatedTo(ChronoUnit
+            coreBundle.getString("starting.db.liquibase.at.timestamp"), OffsetDateTime.now().truncatedTo(ChronoUnit
                 .SECONDS).format
                 (RFC_1123_DATE_TIME)
         ));
         if (!myVersion.isEmpty() && !buildTimeString.isEmpty()) {
-            banner.append(String.format(coreBundle.getString("dbmanul.version.builddate"), myVersion, buildTimeString));
+            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion, buildTimeString));
         }
         return banner.toString();
     }

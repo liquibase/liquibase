@@ -27,12 +27,12 @@ import java.io.InputStream;
  */
 @DatabaseChange(name = "sqlFile",
         description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a " +
-         "file. It is useful for complex changes that are not supported through DB-Manul's automated refactoring " +
+            "file. It is useful for complex changes that are not supported through Liquibase's automated refactoring " +
           "tags such as stored procedures.\n" +
                 "\n" +
                 "The sqlFile refactoring finds the file by searching in the following order:\n" +
                 "\n" +
-                "The file is searched for in the classpath. This can be manually set and by default the DB-Manul " +
+            "The file is searched for in the classpath. This can be manually set and by default the Liquibase " +
                 "startup script adds the current directory when run.\n" +
                 "The file is searched for using the file attribute as a file name. This allows absolute paths to be " +
                 "used or relative paths to the working directory to be used.\n" +

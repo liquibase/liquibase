@@ -4,13 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>dbmanul-parent</artifactId>
-        <groupId>org.dbmanul</groupId>
-        <version>0.1.0-SNAPSHOT</version>
+        <artifactId>liquibase-parent</artifactId>
+        <groupId>org.liquibase</groupId>
+        <version>3.6.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>dbmanul-integration-tests</artifactId>
-    <name>DB-Manul Integration Tests</name>
+
+    <artifactId>liquibase-integration-tests</artifactId>
+    <name>Liquibase Integration Tests</name>
 
     <dependencies>
         <dependency>
@@ -61,13 +62,13 @@
 
         <!-- Main artifacts to be tested -->
         <dependency>
-            <groupId>org.dbmanul</groupId>
-            <artifactId>dbmanul-core</artifactId>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.dbmanul</groupId>
-            <artifactId>dbmanul-core</artifactId>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
@@ -106,7 +107,7 @@
 
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
-            <artifactId>jaybird-jdk18</artifactId>
+            <artifactId>jaybird-jdk17</artifactId>
             <scope>test</scope>
         </dependency>
 

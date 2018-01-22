@@ -69,7 +69,7 @@ public class MavenIntegrationTest {
         //Clear any artifact created by the test project to avoid unstable test results
         Verifier verifier = new Verifier(testDir.getAbsolutePath());
         verifier.setAutoclean(false); //Don't do clean automatically in each executeGoal
-       verifier.deleteArtifact("org.liquibase", "dbmanul-maven-integration-tests", "1.0-SNAPSHOT", "jar");
+       verifier.deleteArtifact("org.liquibase", "liquibase-maven-integration-tests", "1.0-SNAPSHOT", "jar");
         return verifier;
     }
     
