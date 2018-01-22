@@ -108,10 +108,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
 
-                        if (entry.getName().startsWith(path)) {
+                        if (entry.getName().startsWith(resourcePath)) {
 
                             if (!recursive) {
-                                String pathAsDir = path.endsWith("/") ? path : (path + "/");
+                                String pathAsDir = resourcePath.endsWith("/")
+                                        ? resourcePath
+                                        : resourcePath + "/";
                                 if (!entry.getName().startsWith(pathAsDir)
                                  || entry.getName().substring(pathAsDir.length()).contains("/")) {
                                     continue;

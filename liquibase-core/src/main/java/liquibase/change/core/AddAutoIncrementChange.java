@@ -128,10 +128,8 @@ public class AddAutoIncrementChange extends AbstractChange {
 
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, this.schemaName, sequenceName),
-                    new SetNullableStatement(catalogName, this.schemaName, getTableName(), getColumnName(),
-                        null, false),
-                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(),
-                        getColumnDataType(), nvf)
+                    new SetNullableStatement(catalogName, this.schemaName, getTableName(), getColumnName(), null, false),
+                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(), nvf)
             };
         }
 
