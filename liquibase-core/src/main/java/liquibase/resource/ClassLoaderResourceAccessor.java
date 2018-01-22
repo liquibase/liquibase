@@ -65,7 +65,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         Set<String> returnSet = new HashSet<String>();
 
-        if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:"))) {
+        if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:") || path.startsWith("wsjar:file:") || path.startsWith("zip:"))) {
             fileUrls = new Vector<URL>(Arrays.asList(new URL(path))).elements();
         }
 
@@ -107,12 +107,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
 
-                        if (entry.getName().startsWith(path)) {
+                        if (entry.getName().startsWith(resourcePath)) {
 
                             if (!recursive) {
-                                String pathAsDir = path.endsWith("/")
-                                        ? path
-                                        : path + "/";
+                                String pathAsDir = resourcePath.endsWith("/")
+                                        ? resourcePath
+                                        : resourcePath + "/";
                                 if (!entry.getName().startsWith(pathAsDir)
                                  || entry.getName().substring(pathAsDir.length()).contains("/")) {
                                     continue;
