@@ -5,6 +5,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.util.StringUtils;
+import liquibase.util.SpringBootFatJar;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,6 +86,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 }
                 zipFilePath = URLDecoder.decode(zipFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
+                path = SpringBootFatJar.getPathForResource(path);
                 if (path.startsWith("classpath:")) {
                     path = path.replaceFirst("classpath:", "");
                 }
