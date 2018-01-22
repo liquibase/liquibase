@@ -1561,4 +1561,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     public ValidationErrors validate() {
         return new ValidationErrors();
     }
+
+    /**
+     * This logic is used when db support catalogs
+     * @return UPPER_CASE by default
+     */
+    @Override
+    public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
+        return CatalogAndSchema.CatalogAndSchemaCase.UPPER_CASE;
+    }
 }

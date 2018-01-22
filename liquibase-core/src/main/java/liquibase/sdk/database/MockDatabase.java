@@ -422,6 +422,11 @@ public class MockDatabase implements Database, InternalDatabase {
         return supportsCatalogs;
     }
 
+    @Override
+    public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
+        return CatalogAndSchema.CatalogAndSchemaCase.UPPER_CASE;
+    }
+
     public void setSupportsCatalogs(boolean supportsCatalogs) {
         this.supportsCatalogs = supportsCatalogs;
     }

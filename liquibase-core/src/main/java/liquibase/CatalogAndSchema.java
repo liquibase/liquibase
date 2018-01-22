@@ -1,8 +1,6 @@
 package liquibase;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
@@ -21,6 +19,10 @@ public class CatalogAndSchema {
     public CatalogAndSchema(String catalogName, String schemaName) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
+    }
+
+    public enum CatalogAndSchemaCase {
+        LOWER_CASE, UPPER_CASE, ORIGINAL_CASE
     }
 
     public String getCatalogName() {
@@ -43,11 +45,7 @@ public class CatalogAndSchema {
         if (catalogAndSchema.getCatalogName() == null) {
             catalogMatches = (thisCatalogAndSchema.getCatalogName() == null);
         } else {
-            if (accordingTo instanceof DB2Database) {
-                catalogMatches = catalogAndSchema.getCatalogName().equals(thisCatalogAndSchema.getCatalogName());
-            } else {
-                catalogMatches = catalogAndSchema.getCatalogName().equalsIgnoreCase(thisCatalogAndSchema.getCatalogName());
-            }
+            catalogMatches = equals(accordingTo, catalogAndSchema.getCatalogName(),thisCatalogAndSchema.getCatalogName());
         }
         if (!catalogMatches) {
             return false;
@@ -57,10 +55,7 @@ public class CatalogAndSchema {
             if (catalogAndSchema.getSchemaName() == null) {
                 return thisCatalogAndSchema.getSchemaName() == null;
             } else {
-                if (accordingTo instanceof DB2Database) {
-                    return catalogAndSchema.getSchemaName().equals(thisCatalogAndSchema.getSchemaName());
-                }
-                return catalogAndSchema.getSchemaName().equalsIgnoreCase(thisCatalogAndSchema.getSchemaName());
+                return equals(accordingTo, catalogAndSchema.getSchemaName(), thisCatalogAndSchema.getSchemaName());
             }
         } else {
             return true;
@@ -96,40 +91,24 @@ public class CatalogAndSchema {
             schemaName = catalogName;
         }
 
-        if (accordingTo instanceof DB2Database) {
-            if (catalogName != null && catalogName.equals(accordingTo.getDefaultCatalogName())) {
-                catalogName = null;
-            }
-
-            if (schemaName != null && schemaName.equals(accordingTo.getDefaultSchemaName())) {
-                schemaName = null;
-            }
-        } else {
-            if (catalogName != null && catalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
-                catalogName = null;
-            }
-
-            if (schemaName != null && schemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
-                schemaName = null;
-            }
+        if (catalogName != null && equals(accordingTo, catalogName, accordingTo.getDefaultCatalogName())) {
+            catalogName = null;
         }
-
+        if (schemaName != null && equals(accordingTo, schemaName, accordingTo.getDefaultSchemaName())) {
+            schemaName = null;
+        }
         if (!accordingTo.supportsSchemas() && catalogName != null && schemaName != null && !catalogName.equals(schemaName)) {
             schemaName = null;
         }
 
-        if (accordingTo instanceof DB2Database) {
-            return new CatalogAndSchema(catalogName, schemaName);
-        }
-
-        if (accordingTo instanceof PostgresDatabase) {
+        if (CatalogAndSchemaCase.LOWER_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
             if (catalogName != null) {
                 catalogName = catalogName.toLowerCase();
             }
             if (schemaName != null) {
                 schemaName = schemaName.toLowerCase();
             }
-        } else {
+        } else if (CatalogAndSchemaCase.UPPER_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
             if (catalogName != null) {
                 catalogName = catalogName.toUpperCase();
             }
@@ -137,7 +116,6 @@ public class CatalogAndSchema {
                 schemaName = schemaName.toUpperCase();
             }
         }
-
         return new CatalogAndSchema(catalogName, schemaName);
 
     }
@@ -194,4 +172,24 @@ public class CatalogAndSchema {
 
         return catalogName+"."+schemaName;
     }
+
+    /**
+     * This method does schema or catalog comparision
+     *
+     * @param database - it's db object to getSchemaAndCatalogCase
+     * @param value1 - schema or catalog to compare with value2
+     * @param value2 - schema or catalog to compare with value1
+     *
+     * @return true if value1 and value2 equal
+     */
+    private boolean equals(Database database, String value1, String value2) {
+        CatalogAndSchemaCase schemaAndCatalogCase = database.getSchemaAndCatalogCase();
+        if (CatalogAndSchemaCase.UPPER_CASE.equals(schemaAndCatalogCase) ||
+                CatalogAndSchemaCase.LOWER_CASE.equals(schemaAndCatalogCase)) {
+            return value1.equalsIgnoreCase(value2);
+        }
+
+        return value1.equals(value2);
+    }
+
 }
