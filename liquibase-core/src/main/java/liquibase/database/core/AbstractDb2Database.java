@@ -240,7 +240,7 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
         if (objectType.isAssignableFrom(Schema.class) || objectType.isAssignableFrom(Catalog.class)) {
             return true;
         }
-        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.matches(".*\\W.*");
+        return super.mustQuoteObjectName(objectName, objectType);
     }
 
     /**
