@@ -358,7 +358,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementDB2Database() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (database instanceof DB2Database) {
+            if (database instanceof AbstractDb2Database) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
                 statement.addColumn(
                     COLUMN_NAME1,
@@ -376,7 +376,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementStartWithDB2Database() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (database instanceof DB2Database) {
+            if (database instanceof AbstractDb2Database) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
                 statement.addColumn(
                     COLUMN_NAME1,
@@ -394,7 +394,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementStartWithIncrementByDB2Database() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (database instanceof DB2Database) {
+            if (database instanceof AbstractDb2Database) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
                 statement.addColumn(
                     COLUMN_NAME1,

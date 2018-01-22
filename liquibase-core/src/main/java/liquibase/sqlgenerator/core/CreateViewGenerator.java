@@ -3,6 +3,8 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
+import liquibase.structure.core.Relation;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -31,9 +33,16 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
 
         if (createViewStatement.isReplaceIfExists()) {
-            validationErrors.checkDisallowedField("replaceIfExists",
-                createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, DB2Database.class,
-                DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+            //
+            // Special validation for DB2
+            // replaceIfExists is not allowed for version < 10.5
+            //
+            if (! db2VersionSupportsCreateOrReplace(database)) {
+                validationErrors.addError("'replaceIfExists' is not allowed on DB2 version < 10.5");
+            }
+            else {
+                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, Db2zDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+            }
         }
 
         return validationErrors;
@@ -88,14 +97,72 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                     "DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(),
                         statement.getSchemaName(), statement.getViewName())));
             } else {
+                //
+                // Do not generate CREATE OR REPLACE if:
+                // 1) It is already in the SQL
+                // 2) The DB2 version is < 10.5
+                //
                 if (!viewDefinition.contains("replace")) {
                     viewDefinition.replace("CREATE", "CREATE OR REPLACE");
                 }
             }
         }
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
-
         return sql.toArray(new Sql[sql.size()]);
+    }
+
+    //
+    // Return true if non-DB2 database or DB2 version >= 10.5
+    //
+    private boolean db2VersionSupportsCreateOrReplace(Database database) {
+        //
+        // Return true for all non-DB2 databases
+        //
+        if (! (database instanceof DB2Database)) {
+            return true;
+        }
+
+        //
+        // ASSERT:  We have a DB2 database
+        // DB2 must be version >= 10.5
+        //
+        int majorVersion = getMajorVersion(database);
+        if (majorVersion < 10) {
+            return false;
+        }
+
+        //
+        // ASSERT:  We have a version >= 10
+        // If it is > 10 then we return true
+        // If it is == 10 then we check the minor version
+        //
+        int minorVersion = getMinorVersion(database);
+        if (majorVersion > 10 || minorVersion >= 5) {
+          return true;
+        }
+        return false;
+    }
+
+    private int getMajorVersion(Database database) {
+        int majorVersion;
+        try {
+            majorVersion = database.getDatabaseMajorVersion();
+        }
+        catch (DatabaseException dbe) {
+            majorVersion = -1;
+        }
+        return majorVersion;
+    }
+
+    private int getMinorVersion(Database database) {
+        int minorVersion;
+        try {
+            minorVersion = database.getDatabaseMinorVersion();
+        }
+        catch (DatabaseException dbe) {
+            minorVersion = -1;
+        }
+        return minorVersion;
     }
 
     protected Relation getAffectedView(CreateViewStatement statement) {

@@ -63,7 +63,18 @@ public class DataType extends AbstractLiquibaseSerializable {
 
     @Override
     public String toString() {
+        String subtypeData = null;
         String value = typeName;
+        if(value.contains("FOR BIT DATA")){
+            value = typeName.replaceAll("\\(.*","");
+            subtypeData = " FOR BIT DATA";
+        }else if (value.contains("FOR SBCS DATA")){
+            value = typeName.replaceAll("\\(.*","");
+            subtypeData = " FOR SBCS DATA";
+        }else if (value.contains("FOR MIXED DATA")){
+            value = typeName.replaceAll("\\(.*","");
+            subtypeData = " FOR MIXED DATA";
+        }
         boolean unsigned = false;
         if (value.toLowerCase().endsWith(" unsigned")) {
             value = value.substring(0, value.length()-" unsigned".length());
@@ -72,9 +83,19 @@ public class DataType extends AbstractLiquibaseSerializable {
 
         if (columnSize == null) {
             if (decimalDigits != null) {
-                value += "(*, "+decimalDigits+")";
+                value += "(*, " + decimalDigits + ")";
             }
-        } else {
+        } else if (subtypeData != null) {
+            value += "(";
+            value += columnSize;
+            if (columnSizeUnit != null && (typeName.equalsIgnoreCase("VARCHAR")
+                    || typeName.equalsIgnoreCase("VARCHAR2")
+                    || typeName.equalsIgnoreCase("CHAR"))) {
+                value += " " + columnSizeUnit;
+            }
+            value +=")";
+            value +=subtypeData;
+        }else{
             value += "(";
             value += columnSize;
 

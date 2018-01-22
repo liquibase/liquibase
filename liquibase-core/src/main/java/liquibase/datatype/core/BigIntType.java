@@ -44,7 +44,7 @@ public class BigIntType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         }
-        if ((database instanceof DB2Database) || (database instanceof DerbyDatabase) || (database instanceof
+        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof
             HsqlDatabase) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("BIGINT");
         }

@@ -109,6 +109,7 @@ public class XMLChangeLogSerializerTest {
         change.setOnDelete("CASCADE");
         change.setOnUpdate("CASCADE");
         change.setInitiallyDeferred(true);
+        change.setValidate(true);
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addForeignKeyConstraint", node.getTagName());
@@ -121,6 +122,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("REF_COL_NAME", node.getAttribute("referencedColumnNames"));
         assertEquals("true", node.getAttribute("deferrable"));
         assertEquals("true", node.getAttribute("initiallyDeferred"));
+        assertEquals("true", node.getAttribute("validate"));
         assertEquals("CASCADE", node.getAttribute("onDelete"));
         assertEquals("CASCADE", node.getAttribute("onUpdate"));
 
@@ -167,6 +169,7 @@ public class XMLChangeLogSerializerTest {
         change.setConstraintName("PK_NAME");
         change.setTablespace("TABLESPACE_NAME");
         change.setDeferrable(true);
+        change.setValidate(true);
         change.setInitiallyDeferred(true);
         change.setDisabled(true);
 
@@ -180,6 +183,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
         assertEquals("true", node.getAttribute("deferrable"));
         assertEquals("true", node.getAttribute("initiallyDeferred"));
+        assertEquals("true", node.getAttribute("validate"));
     }
 
     @Test
@@ -228,6 +232,7 @@ public class XMLChangeLogSerializerTest {
 
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setDeferrable(Boolean.TRUE);
+        constraints.setShouldValidate(Boolean.TRUE);
         constraints.setDeleteCascade(true);
         constraints.setForeignKeyName("FK_NAME");
         constraints.setInitiallyDeferred(true);
@@ -245,8 +250,9 @@ public class XMLChangeLogSerializerTest {
         assertEquals("some value here", element.getAttribute("value"));
 
         Element constraintsElement = (Element) element.getChildNodes().item(0);
-        assertEquals(8, constraintsElement.getAttributes().getLength());
+        assertEquals(9, constraintsElement.getAttributes().getLength());
         assertEquals("true", constraintsElement.getAttribute("deferrable"));
+        assertEquals("true", constraintsElement.getAttribute("validate"));
         assertEquals("true", constraintsElement.getAttribute("deleteCascade"));
         assertEquals("FK_NAME", constraintsElement.getAttribute("foreignKeyName"));
         assertEquals("true", constraintsElement.getAttribute("initiallyDeferred"));

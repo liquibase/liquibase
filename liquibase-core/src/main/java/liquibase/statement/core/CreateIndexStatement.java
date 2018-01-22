@@ -2,8 +2,9 @@ package liquibase.statement.core;
 
 import liquibase.change.AddColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.CompoundStatement;
 
-public class CreateIndexStatement extends AbstractSqlStatement {
+public class CreateIndexStatement extends AbstractSqlStatement implements CompoundStatement {
 
     private String tableCatalogName;
     private String tableSchemaName;

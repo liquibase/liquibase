@@ -125,9 +125,10 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : viewsMetadataRs) {
+                    CatalogAndSchema catalogAndSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
                     View view = new View();
                     view.setName(row.getString("TABLE_NAME"));
-                    view.setSchema(schema);
+                    view.setSchema(new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName()));
                     view.setRemarks(row.getString("REMARKS"));
                     view.setDefinition(row.getString("OBJECT_BODY"));
                     if(database instanceof OracleDatabase) {

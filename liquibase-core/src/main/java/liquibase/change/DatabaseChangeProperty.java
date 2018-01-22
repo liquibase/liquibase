@@ -30,7 +30,7 @@ public @interface DatabaseChangeProperty {
     String exampleValue() default "";
 
     /**
-     * Value to put into {@link liquibase.change.ChangeParameterMetaData#getExampleValue(Database)}
+     * Value to put into {@link liquibase.change.ChangeParameterMetaData#getSince()}
      */
     String since() default "";
 

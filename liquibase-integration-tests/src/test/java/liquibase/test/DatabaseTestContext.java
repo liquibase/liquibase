@@ -1,9 +1,8 @@
 package liquibase.test;
 
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.core.DB2Database;
+import liquibase.database.*;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -160,8 +159,8 @@ public class DatabaseTestContext {
             try {
                 databaseConnection.rollback();
             } catch (DatabaseException e) {
-                if (database instanceof DB2Database) {
-                    // expected, there is a problem with it
+                if (database instanceof AbstractDb2Database) {
+//                    expected, there is a problem with it
                 } else {
                     throw e;
                 }

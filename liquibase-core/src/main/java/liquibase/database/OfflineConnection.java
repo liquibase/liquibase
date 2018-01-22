@@ -21,6 +21,8 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -50,13 +52,17 @@ public class OfflineConnection implements DatabaseConnection {
         }
         this.databaseShortName = matcher.group(1).toLowerCase();
         String params = StringUtils.trimToNull(matcher.group(2));
-        Map<String, String> params1 = new HashMap<String, String>();
-        if (params != null) {
-            String[] keyValues = params.split("&");
-            for (String param : keyValues) {
-                String[] split = param.split("=");
-                params1.put(split[0], split[1]);
+        try {
+            Map<String, String> params1 = new HashMap<String, String>();
+            if (params != null) {
+                String[] keyValues = params.split("&");
+                for (String param : keyValues) {
+                    String[] split = param.split("=");
+                    params1.put(split[0], split[1]);
+                }
             }
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
 
         this.productName = "Offline "+databaseShortName;
@@ -89,6 +95,7 @@ public class OfflineConnection implements DatabaseConnection {
                     SnapshotParser parser = SnapshotParserFactory.getInstance()
                             .getParser(snapshotFile, resourceAccessor);
                     this.snapshot = parser.parse(snapshotFile, resourceAccessor);
+                    this.productVersion = this.snapshot.getDatabase().getDatabaseProductVersion();
                     this.snapshot.getDatabase().setConnection(this);
 
                     for (Catalog catalog : this.snapshot.get(Catalog.class)) {

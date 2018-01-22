@@ -1,6 +1,7 @@
 package liquibase.precondition.core;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
@@ -39,7 +40,8 @@ public class RunningAsPrecondition extends AbstractPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         String loggedusername = database.getConnection().getConnectionUserName();
         if ((loggedusername != null) && (loggedusername.indexOf('@') >= 0)) {
             loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));

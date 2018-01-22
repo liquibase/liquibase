@@ -1,19 +1,32 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Extracts data from an existing column to create a lookup table.
@@ -173,6 +186,16 @@ public class AddLookupTableChange extends AbstractChange {
             createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " AS " + database.escapeObjectName(getNewColumnName(), Column.class) + " INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL"),};
         } else if (database instanceof SybaseASADatabase) {
             createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " AS " + database.escapeObjectName(getNewColumnName(), Column.class) + " INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL"),};
+        } else if (database instanceof Db2zDatabase) {
+            CreateTableStatement tableStatement = new CreateTableStatement(newTableCatalogName, newTableSchemaName, getNewTableName());
+            if (getNewColumnName() != null) {
+                tableStatement.addColumn(getNewColumnName(), DataTypeFactory.getInstance().fromDescription(getNewColumnDataType(), database));
+                tableStatement.addColumnConstraint(new NotNullConstraint(getNewColumnName()));
+            }
+            createTablesSQL = new SqlStatement[]{
+                    tableStatement,
+                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " SELECT DISTINCT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + database.escapeObjectName(getExistingColumnName(), Column.class) + " IS NOT NULL"),
+            };
         } else if (database instanceof DB2Database) {
             createTablesSQL = new SqlStatement[]{
                     new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " AS (SELECT " + database.escapeObjectName(getExistingColumnName(), Column.class) + " AS " + database.escapeObjectName(getNewColumnName(), Column.class) + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + ") WITH NO DATA"),
@@ -187,7 +210,7 @@ public class AddLookupTableChange extends AbstractChange {
 
         statements.addAll(Arrays.asList(createTablesSQL));
 
-        if (!(database instanceof OracleDatabase)) {
+        if (!(database instanceof OracleDatabase) && !(database instanceof Db2zDatabase)) {
             AddNotNullConstraintChange addNotNullChange = new AddNotNullConstraintChange();
             addNotNullChange.setSchemaName(newTableSchemaName);
             addNotNullChange.setTableName(getNewTableName());

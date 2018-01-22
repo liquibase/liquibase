@@ -232,7 +232,8 @@ public class Liquibase {
                 new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database));
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
     }
 
     public void update(String contexts, Writer output) throws LiquibaseException {
@@ -303,6 +304,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
                     new CountChangeSetFilter(changesToApply));
 
             logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
@@ -348,6 +350,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
                     new UpToTagChangeSetFilter(tag, ranChangeSetList));
 
             logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
@@ -539,6 +542,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
                     new CountChangeSetFilter(changesToRollback));
 
             if (rollbackScript == null) {
@@ -703,6 +707,7 @@ public class Liquibase {
                     new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
+                    new IgnoreChangeSetFilter(),
                     new DbmsChangeSetFilter(database));
 
             if (rollbackScript == null) {
@@ -792,6 +797,7 @@ public class Liquibase {
                     new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
+                    new IgnoreChangeSetFilter(),
                     new DbmsChangeSetFilter(database));
 
             if (rollbackScript == null) {
@@ -873,6 +879,7 @@ public class Liquibase {
                     new NotRanChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
+                    new IgnoreChangeSetFilter(),
                     new DbmsChangeSetFilter(database));
 
             logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
@@ -944,6 +951,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
                     new CountChangeSetFilter(1));
 
             logIterator.run(new ChangeLogSyncVisitor(database),
@@ -1036,6 +1044,7 @@ public class Liquibase {
                         new NotRanChangeSetFilter(database.getRanChangeSetList()),
                         new ContextChangeSetFilter(contexts),
                         new LabelChangeSetFilter(labelExpression),
+                        new IgnoreChangeSetFilter(),
                         new DbmsChangeSetFilter(database));
             } else if (count != null) {
                 ChangeLogIterator forwardIterator = new ChangeLogIterator(changeLog,
@@ -1043,6 +1052,7 @@ public class Liquibase {
                         new ContextChangeSetFilter(contexts),
                         new LabelChangeSetFilter(labelExpression),
                         new DbmsChangeSetFilter(database),
+                        new IgnoreChangeSetFilter(),
                         new CountChangeSetFilter(count));
                 final ListVisitor listVisitor = new ListVisitor();
                 forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
@@ -1052,6 +1062,7 @@ public class Liquibase {
                         new ContextChangeSetFilter(contexts),
                         new LabelChangeSetFilter(labelExpression),
                         new DbmsChangeSetFilter(database),
+                        new IgnoreChangeSetFilter(),
                         new ChangeSetFilter() {
                             @Override
                             public ChangeSetFilterResult accepts(ChangeSet changeSet) {
@@ -1067,6 +1078,7 @@ public class Liquibase {
                         new ContextChangeSetFilter(contexts),
                         new LabelChangeSetFilter(labelExpression),
                         new DbmsChangeSetFilter(database),
+                        new IgnoreChangeSetFilter(),
                         new UpToTagChangeSetFilter(tag, ranChangeSetList));
                 final ListVisitor listVisitor = new ListVisitor();
                 forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
@@ -1076,6 +1088,7 @@ public class Liquibase {
                         new ContextChangeSetFilter(contexts),
                         new LabelChangeSetFilter(labelExpression),
                         new DbmsChangeSetFilter(database),
+                        new IgnoreChangeSetFilter(),
                         new ChangeSetFilter() {
                             @Override
                             public ChangeSetFilterResult accepts(ChangeSet changeSet) {
@@ -1375,7 +1388,8 @@ public class Liquibase {
         ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database));
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
         ExpectedChangesVisitor visitor = new ExpectedChangesVisitor(database.getRanChangeSetList());
         logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
         return visitor.getUnexpectedChangeSets();

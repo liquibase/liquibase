@@ -56,7 +56,10 @@ public class Table extends Relation {
         Table that = (Table) o;
 
         if ((this.getSchema() != null) && (that.getSchema() != null)) {
-            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasTheSame = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            if (!schemasTheSame) {
+                return false;
+            }
         }
 
         return getName().equalsIgnoreCase(that.getName());
@@ -77,11 +80,11 @@ public class Table extends Relation {
     public Table setName(String name) {
         return (Table) super.setName(name);
     }
-    
+
     public String getTablespace() {
         return getAttribute("tablespace",String.class);
     }
-    
+
     public Table setTablespace(String tablespace) {
         setAttribute("tablespace", tablespace);
         return this;

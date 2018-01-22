@@ -32,13 +32,14 @@ public class DateTimeType extends LiquibaseDataType {
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP);
         }
 
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP, getParameters());
 		}
 
         if (database instanceof OracleDatabase) {
             if (getRawDefinition().toUpperCase().contains("TIME ZONE")) {
-                return new DatabaseDataType(getRawDefinition().replaceFirst("\\(11\\)$", ""));
+                // remove the last data type size that comes from column size
+                return new DatabaseDataType(getRawDefinition().replaceFirst("\\(\\d+\\)$", ""));
             }
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP, getParameters());
         }
@@ -166,7 +167,7 @@ public class DateTimeType extends LiquibaseDataType {
             return value;
         }
 
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"TIMESTAMP\"\\('", "").replaceFirst("'\\)", "");
         }
         if (database instanceof DerbyDatabase) {
@@ -227,7 +228,7 @@ public class DateTimeType extends LiquibaseDataType {
             return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         }
 
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             return new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSS");
         }
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");

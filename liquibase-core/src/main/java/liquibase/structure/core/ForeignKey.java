@@ -150,8 +150,8 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getName() + "(" + getForeignKeyTable() + "[" + StringUtils.join(getForeignKeyColumns(), ", ", columnFormatter) + "] -> " + getPrimaryKeyTable() + "[" + StringUtils.join(getPrimaryKeyColumns(), ", ", columnFormatter) + "])";
     }
 
-
     public boolean isDeferrable() {
+
         return getAttribute("deferrable", false);
     }
 
@@ -167,6 +167,27 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     public ForeignKey setInitiallyDeferred(boolean initiallyDeferred) {
         this.setAttribute("initiallyDeferred", initiallyDeferred);
+        return this;
+    }
+
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines whether a foreign key constraint on a column in a table
+     * should be checked if it refers to a valid row or not.
+     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
+     */
+    public boolean shouldValidate() {
+        return getAttribute("validate", true);
+    }
+
+    /**
+     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+     * check will be done to ensure old data has valid foreign keys - only new data would be checked
+     * to see if it complies with the constraint logic. The default state for foreign keys is to
+     * have 'ENABLE VALIDATE' set.
+     */
+    public ForeignKey setShouldValidate(boolean shouldValidate) {
+        this.setAttribute("validate", shouldValidate);
         return this;
     }
 
@@ -195,8 +216,11 @@ public class ForeignKey extends AbstractDatabaseObject{
 
         ForeignKey that = (ForeignKey) o;
 
-        if ((this.getSchema() != null) && (that.getSchema() != null)) {
-            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+        if (this.getSchema() != null && that.getSchema() != null) {
+            boolean schemasEqual = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            if (!schemasEqual) {
+                return false;
+            }
         }
 
 

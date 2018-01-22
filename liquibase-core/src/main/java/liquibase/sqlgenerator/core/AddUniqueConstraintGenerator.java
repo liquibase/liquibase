@@ -43,7 +43,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     @Override
     public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-        String sql = null;
+        String sql;
         if (statement.getConstraintName() == null) {
             sql = String.format("ALTER TABLE %s ADD UNIQUE" + (statement.isClustered() ? " CLUSTERED " : " ") + "(%s)"
                     , database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
@@ -70,18 +70,18 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         }
 
         boolean isInUsingIndexClause = false;
-    
+
         if (statement.getForIndexName() != null) {
             sql += " USING INDEX ";
             sql += database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(),
                 statement.getForIndexName(), Index.class);
             isInUsingIndexClause = true;
         }
-    
+
         if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON " + statement.getTablespace();
-            } else if ((database instanceof DB2Database) || (database instanceof SybaseASADatabase) || (database
+            } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase) || (database
                 instanceof InformixDatabase)) {
                 ; //not supported
             } else if (database instanceof OracleDatabase) {
@@ -100,6 +100,10 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
                     sql += " USING INDEX";
                 sql += " TABLESPACE " + statement.getTablespace();
             }
+        }
+
+        if (database instanceof OracleDatabase) {
+            sql += !statement.shouldValidate() ? " ENABLE NOVALIDATE " : "";
         }
 
         return new Sql[]{

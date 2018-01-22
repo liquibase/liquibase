@@ -3,14 +3,21 @@ package liquibase.executor.jvm;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
+import liquibase.logging.LogFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+import liquibase.sql.CallableSql;
+import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.*;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
@@ -68,7 +75,7 @@ public class JdbcExecutor extends AbstractExecutor {
             JdbcUtils.closeStatement(stmt);
         }
     }
-    
+
     // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
     // into a query. Instead, we process a whole query. The check should be performed at the places where
     // the query is composed.
@@ -109,6 +116,12 @@ public class JdbcExecutor extends AbstractExecutor {
         if(sql instanceof ExecutablePreparedStatement) {
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
             return;
+        }
+        if (sql instanceof CompoundStatement) {
+            if (database instanceof Db2zDatabase) {
+                executeDb2ZosComplexStatement(sql);
+                return;
+            }
         }
 
         execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
@@ -204,7 +217,7 @@ public class JdbcExecutor extends AbstractExecutor {
     public int update(final SqlStatement sql) throws DatabaseException {
         return update(sql, new ArrayList());
     }
-    
+
     // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
     // into a query. Instead, we process a whole query. The check should be performed at the places where
     // the query is composed.
@@ -260,6 +273,57 @@ public class JdbcExecutor extends AbstractExecutor {
     public void comment(String message) throws DatabaseException {
         LogService.getLog(getClass()).debug(LogType.LOG, message);
     }
+
+    private void executeDb2ZosComplexStatement(SqlStatement sqlStatement) throws DatabaseException {
+        DatabaseConnection con = database.getConnection();
+
+        if (con instanceof OfflineConnection) {
+            throw new DatabaseException("Cannot execute commands against an offline database");
+        }
+        Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(sqlStatement, database);
+        for (Sql sql : sqls) {
+            try {
+                if (sql instanceof CallableSql) {
+                    CallableStatement call = null;
+                    ResultSet resultSet = null;
+                    try {
+                        call = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(sql.toSql());
+                        resultSet = call.executeQuery();
+                        checkCallStatus(resultSet, ((CallableSql) sql).getExpectedStatus());
+                    } finally {
+                        JdbcUtils.close(resultSet, call);
+                    }
+                } else {
+                    Statement stmt = null;
+                    try {
+                        stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
+                        stmt.execute(sql.toSql());
+                        con.commit();
+                    } finally {
+                        JdbcUtils.closeStatement(stmt);
+                    }
+                }
+            } catch (Exception e) {
+                throw new DatabaseException(e.getMessage() + " [Failed SQL: " + sql.toSql() + "]", e);
+            }
+        }
+    }
+
+    private void checkCallStatus(ResultSet resultSet, String status) throws SQLException, DatabaseException {
+        if (status != null) {
+            StringBuilder message = new StringBuilder();
+            while (resultSet.next()) {
+                String string = resultSet.getString(2);
+                if (string.contains(status)) {
+                    return;
+                }
+                message.append(string).append("\n");
+            }
+            throw new DatabaseException(message.toString());
+        }
+    }
+
+
 
     private class ExecuteStatementCallback implements StatementCallback {
 

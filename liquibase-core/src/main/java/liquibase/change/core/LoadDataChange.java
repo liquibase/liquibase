@@ -87,6 +87,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
     private List<LoadDataColumnConfig> columns = new ArrayList<>();
 
+    private Boolean usePreparedStatements;
+
     /**
      * Transform a value read from a CSV file into a string to be written into the database if the column type
      * is not known.
@@ -164,6 +166,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     public void setFile(String file) {
         this.file = file;
+    }
+
+    public Boolean getUsePreparedStatements() {
+        return usePreparedStatements;
+    }
+
+    public void setUsePreparedStatements(Boolean usePreparedStatements) {
+        this.usePreparedStatements = usePreparedStatements;
     }
 
     public String getCommentLineStartsWith() {
@@ -304,6 +314,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 }
 
                 boolean needsPreparedStatement = false;
+                if (usePreparedStatements != null && usePreparedStatements) {
+                    needsPreparedStatement = true;
+                }
 
                 List<ColumnConfig> columnsFromCsv = new ArrayList<>();
                 for (int i = 0; i < headers.length; i++) {

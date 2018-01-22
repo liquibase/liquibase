@@ -1,11 +1,12 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -274,7 +275,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         String endDelimiter = ";";
         if (database instanceof OracleDatabase) {
             endDelimiter = "\n/";
-        } else if (database instanceof DB2Database) {
+        } else if (database instanceof AbstractDb2Database) {
             endDelimiter = "";
         }
 
@@ -289,6 +290,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                     throw new IOException("File does not exist: " + path);
                 }
                 procedureText = StreamUtil.getStreamContents(stream, encoding);
+                if (getChangeSet() != null) {
+                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+                    if (parameters != null) {
+                        procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
+                    }
+                }
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

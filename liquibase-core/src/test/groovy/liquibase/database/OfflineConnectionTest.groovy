@@ -2,10 +2,12 @@ package liquibase.database
 
 import liquibase.resource.ResourceAccessor
 import liquibase.sdk.database.MockDatabase
+import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
 import spock.lang.Specification
 
 class OfflineConnectionTest extends Specification {
+
     OfflineConnection offlineConnection = null
     ResourceAccessor resourceAccessor
 
@@ -20,7 +22,22 @@ class OfflineConnectionTest extends Specification {
                 "superuser", "superpass", null, resourceAccessor)
     }
 
-    void cleanup() {
+    def "constructor parses query parameters correctly"() {
+        when:
+        def connection = new OfflineConnection(url, new JUnitResourceAccessor());
+
+        then:
+        connection.params == expectedParams
+
+
+        where:
+        url                      | expectedParams
+        "offline:oracle?a=b"     | ["a": "b"]
+        "offline:oracle?a=b&c=d" | ["a": "b", "c": "d"]
+        "offline:oracle?space=b%20c&d=e" | ["d": "e", "space": "b c"]
+        "offline:oracle?eq=b%20%3D%20c&d=e" | ["d": "e", "eq": "b = c"]
+        "offline:oracle?fancy%20%3D%20key=b%20%3D%20c&d=e" | ["d": "e", "fancy = key": "b = c"]
+
     }
 
     def "IsCorrectDatabaseImplementation"() {
@@ -31,45 +48,6 @@ class OfflineConnectionTest extends Specification {
     def "Attached"() {
         expect:
         offlineConnection.attached new MockDatabase()
-    }
-
-    def "CreateChangeLogHistoryService"() {
-    }
-
-    def "GetSnapshot"() {
-    }
-
-    def "SetSnapshot"() {
-    }
-
-    def "Close"() {
-    }
-
-    def "Commit"() {
-    }
-
-    def "GetAutoCommit"() {
-    }
-
-    def "SetAutoCommit"() {
-    }
-
-    def "GetCatalog"() {
-    }
-
-    def "GetSchema"() {
-    }
-
-    def "NativeSQL"() {
-    }
-
-    def "Rollback"() {
-    }
-
-    def "GetDatabaseProductName"() {
-    }
-
-    def "GetDatabaseProductVersion"() {
     }
 
     def "GetDatabaseMajorVersion"() {
@@ -129,23 +107,5 @@ class OfflineConnectionTest extends Specification {
 
         then:
         "superuser" == username
-    }
-
-    def "SetConnectionUserName"() {
-    }
-
-    def "IsClosed"() {
-    }
-
-    def "GetSendsStringParametersAsUnicode"() {
-    }
-
-    def "SetSendsStringParametersAsUnicode"() {
-    }
-
-    def "IsCaseSensitive"() {
-    }
-
-    def "SetCaseSensitive"() {
     }
 }

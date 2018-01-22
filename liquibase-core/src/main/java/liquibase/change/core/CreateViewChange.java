@@ -1,6 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -223,21 +225,27 @@ public class CreateViewChange extends AbstractChange {
             fullDefinition = this.fullDefinition;
         }
 
-        String selectQuery;
-        String path = getPath();
-        if (path == null) {
-            selectQuery = StringUtils.trimToNull(getSelectQuery());
-        } else {
-            try {
-                InputStream stream = openSqlStream();
-                if (stream == null) {
-                    throw new IOException("File does not exist: " + path);
-                }
-                selectQuery = StreamUtil.getStreamContents(stream, encoding);
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        }
+		String selectQuery;
+		String path = getPath();
+		if (path == null) {
+			selectQuery = StringUtils.trimToNull(getSelectQuery());
+		} else {
+			try {
+				InputStream stream = openSqlStream();
+				if (stream == null) {
+					throw new IOException("File does not exist: " + path);
+				}
+				selectQuery = StreamUtil.getStreamContents(stream, encoding);
+			    if (getChangeSet() != null) {
+					ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+					if (parameters != null) {
+						selectQuery = parameters.expandExpressions(selectQuery, getChangeSet().getChangeLog());
+					}
+				}
+			} catch (IOException e) {
+				throw new UnexpectedLiquibaseException(e);
+			}
+		}
 
         if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
             statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));

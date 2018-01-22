@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
 import liquibase.util.JdbcUtils;
@@ -43,10 +44,21 @@ class ResultSetCache {
             }
 
             List<CachedRow> results;
+            boolean bulkQueried = false;
             if (resultSetExtractor.shouldBulkSelect(schemaKey, this)) {
-                cache.clear(); //remove any existing single fetches that may be duplicated
+
+                //remove any existing single fetches that may be duplicated
+                if (resultSetExtractor.bulkContainsSchema(schemaKey)) {
+                    for (Map cachedValue : cacheBySchema.values()) {
+                        cachedValue.clear();
+                    }
+                } else {
+                    cache.clear();
+                }
+
                 results = resultSetExtractor.bulkFetch();
                 didBulkQuery.put(schemaKey, true);
+                bulkQueried = true;
             } else {
                 // Don't store results in real cache to prevent confusion if later fetching all items.
                 cache = new HashMap<>();
@@ -60,6 +72,14 @@ class ResultSetCache {
 
             for (CachedRow row : results) {
                 for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
+                    if (bulkQueried && resultSetExtractor.bulkContainsSchema(schemaKey)) {
+                        String rowSchema = resultSetExtractor.getSchemaKey(row).toLowerCase();
+                        cache = cacheBySchema.get(rowSchema);
+                        if (cache == null) {
+                            cache = new HashMap<String, List<CachedRow>>();
+                            cacheBySchema.put(rowSchema, cache);
+                        }
+                    }
                     if (!cache.containsKey(rowKey)) {
                         cache.put(rowKey, new ArrayList<CachedRow>());
                     }
@@ -67,6 +87,9 @@ class ResultSetCache {
                 }
             }
 
+            if (bulkQueried) {
+                cache = cacheBySchema.get(schemaKey);
+            }
             List<CachedRow> returnList = cache.get(wantedKey);
             if (returnList == null) {
                 returnList = new ArrayList<>();
@@ -171,12 +194,44 @@ class ResultSetCache {
         }
     }
 
+//    public abstract static class MultiSchemaRowData extends RowData {
+//        public MultiSchemaRowData(String catalog, String schema, Database database, String... parameters) {
+//            super(catalog, schema, database, parameters);
+//        }
+//
+//        @Override
+//        public String createSchemaKey(Database database) {
+//            String multiSchemaKey = getMultiSchemaKey();
+//
+//            if (multiSchemaKey == null) {
+//                return super.createSchemaKey(database);
+//            }
+//
+//            for (Class<? extends Database> supportedDb : getMultiSchemaSupportedDatabases()) {
+//                if (supportedDb.isAssignableFrom(database.getClass())) {
+//                    return multiSchemaKey;
+//                }
+//            }
+//            return super.createSchemaKey(database);
+//        }
+//
+//        public abstract Class<? extends Database>[] getMultiSchemaSupportedDatabases();
+//
+//        public abstract String getMultiSchemaKey();
+//    }
+
     public abstract static class ResultSetExtractor {
 
         private final Database database;
 
         public ResultSetExtractor(Database database) {
             this.database = database;
+        }
+
+        public abstract boolean bulkContainsSchema(String schemaKey);
+
+        public String getSchemaKey(CachedRow row) {
+            throw new UnexpectedLiquibaseException("Not Implemented");
         }
 
         boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {

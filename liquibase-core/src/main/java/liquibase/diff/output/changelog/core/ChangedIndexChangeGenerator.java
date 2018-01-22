@@ -16,6 +16,8 @@ import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
@@ -61,14 +63,14 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
 
         Index index = (Index) changedObject;
 
-        if (index.getTable() != null) {
-            if ((index.getTable().getPrimaryKey() != null) && DatabaseObjectComparatorFactory.getInstance()
-                .isSameObject(index.getTable().getPrimaryKey().getBackingIndex(), changedObject, differences
+        if (index.getTable() != null  && index.getTable() instanceof Table) {
+            if ((((Table) index.getTable()).getPrimaryKey() != null) && DatabaseObjectComparatorFactory.getInstance()
+                .isSameObject(((Table) index.getTable()).getPrimaryKey().getBackingIndex(), changedObject, differences
                     .getSchemaComparisons(), comparisonDatabase)) {
-                return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
+                return ChangeGeneratorFactory.getInstance().fixChanged(((Table) index.getTable()).getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
             }
 
-            List<UniqueConstraint> uniqueConstraints = index.getTable().getUniqueConstraints();
+            List<UniqueConstraint> uniqueConstraints = ((Table) index.getTable()).getUniqueConstraints();
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
                     if ((constraint.getBackingIndex() != null) && DatabaseObjectComparatorFactory.getInstance()

@@ -11,10 +11,7 @@ import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 
 public class MissingIndexChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -42,8 +39,8 @@ public class MissingIndexChangeGenerator extends AbstractChangeGenerator impleme
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) missingObject;
 
-        if (comparisonDatabase instanceof MSSQLDatabase) {
-            PrimaryKey primaryKey = index.getTable().getPrimaryKey();
+        if (comparisonDatabase instanceof MSSQLDatabase && index.getTable() instanceof Table) {
+            PrimaryKey primaryKey = ((Table) index.getTable()).getPrimaryKey();
             if ((primaryKey != null) && DatabaseObjectComparatorFactory.getInstance().isSameObject(missingObject,
                 primaryKey.getBackingIndex(), control.getSchemaComparisons(), referenceDatabase)) {
                 return new Change[0]; //will be handled by the PK

@@ -25,6 +25,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
     private Boolean clustered;
+    private Boolean shouldValidate;
 
     private String forIndexName;
     private String forIndexSchemaName;
@@ -111,6 +112,28 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.disabled = disabled;
     }
 
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines whether a newly added unique constraint on a 
+     * column in a table should cause existing rows to be checked to see if they satisfy the 
+     * uniqueness constraint or not. 
+     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
+     */
+    @DatabaseChangeProperty(description = "This is true if the unique constraint has 'ENABLE VALIDATE' set, or false if the foreign key has 'ENABLE NOVALIDATE' set.")
+    public Boolean getValidate() {
+        return shouldValidate;
+    }
+
+    /**
+     * @param validate - if shouldValidate is set to FALSE then the constraint will be created
+     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+     * check will be done to ensure old data has valid constraints - only new data would be checked
+     * to see if it complies with the constraint logic. The default state for unique constraints is to
+     * have 'ENABLE VALIDATE' set.
+     */
+    public void setValidate(Boolean validate) {
+        this.shouldValidate = validate;
+    }
+
     public Boolean getClustered() {
         return clustered;
     }
@@ -165,12 +188,18 @@ public class AddUniqueConstraintChange extends AbstractChange {
             clustered = getClustered();
         }
 
+        boolean shouldValidate = true;
+        if (getValidate() != null) {
+            shouldValidate = getValidate();
+        }
+
         AddUniqueConstraintStatement statement = createAddUniqueConstraintStatement();
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
                         .setDisabled(disabled)
-                        .setClustered(clustered);
+                        .setClustered(clustered)
+                        .setShouldValidate(shouldValidate);
 
         statement.setForIndexName(getForIndexName());
         statement.setForIndexSchemaName(getForIndexSchemaName());

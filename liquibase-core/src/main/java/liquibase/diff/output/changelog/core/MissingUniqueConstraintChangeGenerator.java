@@ -63,6 +63,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
         change.setConstraintName(uc.getName());
         change.setColumnNames(uc.getColumnNames());
         change.setDeferrable(uc.isDeferrable() ? Boolean.TRUE : null);
+        change.setValidate(!uc.shouldValidate() ? Boolean.FALSE : null);
         change.setInitiallyDeferred(uc.isInitiallyDeferred() ? Boolean.TRUE : null);
         change.setDisabled(uc.isDisabled() ? Boolean.TRUE : null);
         if (referenceDatabase instanceof MSSQLDatabase) {

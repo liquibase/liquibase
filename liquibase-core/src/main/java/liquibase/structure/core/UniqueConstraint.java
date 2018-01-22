@@ -18,6 +18,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setAttribute("deferrable", false);
         setAttribute("initiallyDeferred", false);
         setAttribute("disabled", false);
+		setAttribute("validate", true);
     }
 
     public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, Column... columns) {
@@ -55,11 +56,11 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         return getTable().getSchema();
     }
 
-	public Table getTable() {
-		return getAttribute("table", Table.class);
+	public Relation getTable() {
+		return getAttribute("table", Relation.class);
 	}
 
-	public UniqueConstraint setTable(Table table) {
+	public UniqueConstraint setTable(Relation table) {
 		this.setAttribute("table", table);
         return this;
     }
@@ -97,6 +98,28 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		this.setAttribute("deferrable",  deferrable);
         return this;
     }
+
+  /**
+   * In Oracle PL/SQL, the VALIDATE keyword defines whether a newly added unique constraint on a 
+   * column in a table should cause existing rows to be checked to see if they satisfy the 
+   * uniqueness constraint or not. 
+   * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
+   */
+	public boolean shouldValidate() {
+		return getAttribute("validate", true);
+	}
+
+  /**
+   * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+   * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+   * check will be done to ensure old data has valid constraints - only new data would be checked
+   * to see if it complies with the constraint logic. The default state for unique constraints is to
+   * have 'ENABLE VALIDATE' set.
+   */
+	public UniqueConstraint setShouldValidate(boolean shouldValidate) {
+		this.setAttribute("validate", shouldValidate);
+		return this;
+	}
 
 	public boolean isInitiallyDeferred() {
 		return getAttribute("initiallyDeferred", Boolean.class);

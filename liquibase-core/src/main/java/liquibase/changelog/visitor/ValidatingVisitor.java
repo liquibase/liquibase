@@ -46,7 +46,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             if (preconditions == null) {
                 return;
             }
-            preconditions.check(database, changeLog, null);
+            preconditions.check(database, changeLog, null, null);
         } catch (PreconditionFailedException e) {
             LogService.getLog(getClass()).debug(LogType.LOG, "Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());

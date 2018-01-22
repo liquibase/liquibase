@@ -22,6 +22,7 @@ import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -30,6 +31,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private static final Logger LOGGER = LogService.getLog(DatabaseSnapshot.class);
+    public static final String ALL_CATALOGS_STRING_SCRATCH_KEY = "DatabaseSnapshot.allCatalogsString";
+
     private final DatabaseObject[] originalExamples;
     private HashSet<String> serializableFields;
     private SnapshotControl snapshotControl;
@@ -77,13 +80,22 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 }
             }
 
+            this.setScratchData("DatabaseSnapshot.allCatalogs", catalogs);
+
+            if (catalogs.size() > 1) {
+                List<String> quotedCatalogs = new ArrayList<String>();
+                for (Catalog catalog : catalogs) {
+                    quotedCatalogs.add("'" + catalog.getName() + "'");
+                }
+                this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", ").toUpperCase());
+            }
+
             if (getDatabase().supportsCatalogs()) {
                 for (Catalog catalog : catalogs) {
                     this.snapshotControl.addType(catalog.getClass(), database);
                     include(catalog);
                 }
             }
-
             for (DatabaseObject obj : examples) {
                 this.snapshotControl.addType(obj.getClass(), database);
 
@@ -193,8 +205,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 map.put("productName", database.getDatabaseProductName());
                 map.put("url", database.getConnection().getURL());
                 try {
-                    map.put("majorVersion", database.getDatabaseMajorVersion());
-                    map.put("minorVersion", database.getDatabaseMinorVersion());
+                    map.put("majorVersion", String.valueOf(database.getDatabaseMajorVersion()));
+                    map.put("minorVersion", String.valueOf(database.getDatabaseMinorVersion()));
                     map.put("productVersion", database.getDatabaseProductVersion());
                     map.put("user", database.getConnection().getConnectionUserName());
                 } catch (DatabaseException e) {
@@ -314,7 +326,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                     .class) || (object.getClass() == UniqueConstraint.class))) {
                 if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
                     String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
-                    if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC")) {
+                    if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC") || columnName.endsWith(" RANDOM")) {
                         continue;
                     }
                 }
@@ -344,6 +356,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 return fieldValue;
             }
 
+//            System.out.println("replaceObject "+fieldValue);
             if (isWrongSchema(((DatabaseObject) fieldValue))) {
                 DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue, schemaComparisons);
                 if (savedFieldValue == null) {

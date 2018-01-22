@@ -77,7 +77,7 @@ public class TimestampType extends DateTimeType {
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));
         }
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             Object[] parameters = getParameters();
             if ((parameters != null) && (parameters.length > 1)) {
                 parameters = new Object[] {parameters[1]};

@@ -125,6 +125,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private Labels labels;
 
     /**
+     *
+     * If set to true, the changeSet will be ignored (skipped)
+     *
+     */
+    private boolean ignore;
+
+    /**
      * Databases for which this changeset should run.  The string values should match the value returned from Database.getShortName()
      */
     private Set<String> dbmsSet;
@@ -277,6 +284,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
         this.created = node.getChildValue(null, "created", String.class);
         this.runOrder = node.getChildValue(null, "runOrder", String.class);
+        this.ignore = node.getChildValue(null, "ignore", false);
         this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
@@ -325,7 +333,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (child.getValue() == null) {
                     return;
                 }
-            
+
                 if (child.getValue() instanceof Collection) {
                     for (Object checksum : (Collection) child.getValue()) {
                         addValidCheckSum((String) checksum);
@@ -339,7 +347,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 String contextString = StringUtils.trimToNull(child.getChildValue(null, "context", String.class));
                 String labelsString = StringUtils.trimToNull(child.getChildValue(null, "labels", String.class));
                 boolean applyToRollback = child.getChildValue(null, "applyToRollback", false);
-            
+
                 Set<String> dbms = new HashSet<>();
                 if (dbmsString != null) {
                     dbms.addAll(StringUtils.splitAndTrim(dbmsString, ","));
@@ -348,13 +356,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (contextString != null) {
                     context = new ContextExpression(contextString);
                 }
-            
+
                 Labels labels = null;
                 if (labelsString != null) {
                     labels = new Labels(labelsString);
                 }
-            
-            
+
+
                 List<ParsedNode> potentialVisitors = child.getChildren();
                 for (ParsedNode node : potentialVisitors) {
                     SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(node.getName());
@@ -366,12 +374,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         sqlVisitor.setContexts(context);
                         sqlVisitor.setLabels(labels);
                         sqlVisitor.load(node, resourceAccessor);
-                    
+
                         addSqlVisitor(sqlVisitor);
                     }
                 }
-            
-            
+
+
                 break;
             case "preConditions":
                 this.preconditions = new PreconditionContainer();
@@ -512,7 +520,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
             try {
                 if (preconditions != null) {
-                    preconditions.check(database, databaseChangeLog, this);
+                    preconditions.check(database, databaseChangeLog, this, listener);
                 }
             } catch (PreconditionFailedException e) {
                 if (listener != null) {
@@ -651,6 +659,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database) throws RollbackFailedException {
+      rollback(database, null);
+    }
+
+    public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
@@ -670,13 +682,20 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         continue;
                     }
+                    if (listener != null) {
+                        listener.willRun(change, this, changeLog, database);
+                    }
                     ValidationErrors errors = change.validate(database);
                     if (errors.hasErrors()) {
                         throw new RollbackFailedException("Rollback statement failed validation: "+errors.toString());
                     }
+                    //
                     SqlStatement[] changeStatements = change.generateStatements(database);
                     if (changeStatements != null) {
                         statements.addAll(Arrays.asList(changeStatements));
+                    }
+                    if (listener != null) {
+                        listener.ran(change, this, changeLog, database);
                     }
                 }
                 if (!statements.isEmpty()) {
@@ -722,7 +741,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     protected boolean hasCustomRollbackChanges() {
         return (rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty();
     }
-    
+
     /**
      * Returns an unmodifiable list of changes.  To add one, use the addRefactoing method.
      */
@@ -760,6 +779,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public Set<String> getDbmsSet() {
         return dbmsSet;
+    }
+
+    public boolean isIgnore() {
+        return ignore;
+    }
+
+    public void setIgnore(boolean ignore) {
+        this.ignore = ignore;
     }
 
     public Collection<ContextExpression> getInheritableContexts() {

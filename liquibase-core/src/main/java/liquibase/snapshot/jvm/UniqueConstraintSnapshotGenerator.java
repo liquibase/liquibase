@@ -36,7 +36,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
-        Table table = exampleConstraint.getTable();
+        Relation table = exampleConstraint.getTable();
 
         List<Map<String, ?>> metadata = listColumns(exampleConstraint, database, snapshot);
 
@@ -61,9 +61,28 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
             }
+            setValidateOptionIfAvailable(database, constraint, col);
         }
 
         return constraint;
+    }
+
+    /**
+     * Method to map 'validate' option for UC. This thing works only for ORACLE
+     *
+     * @param database - DB where UC will be created
+     * @param uniqueConstraint - UC object to persist validate option
+     * @param columnsMetadata - it's a cache-map to get metadata about UC
+     */
+    private void setValidateOptionIfAvailable(Database database, UniqueConstraint uniqueConstraint, Map<String, ?> columnsMetadata) {
+        if (!(database instanceof OracleDatabase)) {
+            return;
+        }
+        final Object constraintValidate = columnsMetadata.get("CONSTRAINT_VALIDATE");
+        final String VALIDATE = "VALIDATED";
+        if (constraintValidate!=null && !constraintValidate.toString().trim().isEmpty()) {
+            uniqueConstraint.setShouldValidate(VALIDATE.equals(cleanNameFromDatabase(constraintValidate.toString().trim(), database)));
+        }
     }
 
     @Override
@@ -109,7 +128,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
-        Table table = example.getTable();
+        Relation table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
 
@@ -182,8 +201,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     sql += "ORDER BY " +
                             "[ic].[key_ordinal]";
             } else if (database instanceof OracleDatabase) {
-                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name " +
+                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name, f.validated as constraint_validate " +
                         "from all_cons_columns ucc " +
+                        "INNER JOIN all_constraints f " +
+                        "ON ucc.owner = f.owner " +
+                        "AND ucc.constraint_name = f.constraint_name " +
                         "where " +
                         (bulkQuery ? "" : "ucc.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' and ") +
                         "ucc.owner='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
@@ -215,6 +237,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             + "and t.tabschema = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
                             + "order by colseq";
                 }
+            } else if (database instanceof Db2zDatabase) {
+                sql = "select k.colname as column_name from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
+                        + "where k.constname = t.constname "
+                        + "and k.TBCREATOR = t.TBCREATOR "
+                        + "and t.type = 'U'"
+                        + "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' "
+                        + "and t.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
+                        + "order by colseq";
             } else if (database instanceof DerbyDatabase) {
                 sql = "SELECT cg.descriptor as descriptor, t.tablename "
                         + "FROM sys.sysconglomerates cg "

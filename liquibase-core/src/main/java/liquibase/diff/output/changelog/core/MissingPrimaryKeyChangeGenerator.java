@@ -4,10 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -77,7 +74,7 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             change.setClustered(true);
         }
 
-        if ((comparisonDatabase instanceof OracleDatabase) || ((comparisonDatabase instanceof DB2Database) && (pk
+        if ((comparisonDatabase instanceof OracleDatabase) || ((comparisonDatabase instanceof AbstractDb2Database) && (pk
             .getBackingIndex() != null) && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
             Index backingIndex = pk.getBackingIndex();
             if ((backingIndex != null) && (backingIndex.getName() != null)) {

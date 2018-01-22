@@ -257,6 +257,8 @@ public class ParsedNode {
                 return (T) new SequenceCurrentValueFunction(rawValue.toString());
             } else if (type.equals(DatabaseFunction.class)) {
                 return (T) new DatabaseFunction(rawValue.toString());
+            } else if (type.isEnum()) {
+                return (T) Enum.valueOf((Class<Enum>)type, rawValue.toString());
             } else {
                 throw new UnexpectedLiquibaseException("Cannot convert " + rawValue.getClass().getName() + " '" + rawValue + "' to " + type.getName());
             }

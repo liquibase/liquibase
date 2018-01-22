@@ -34,7 +34,7 @@ public class NumberType extends LiquibaseDataType {
                 parameters = Arrays.copyOfRange(parameters, 0, 2);
             }
             return new DatabaseDataType(database.escapeDataTypeName("numeric"), parameters);
-        } else if ((database instanceof MySQLDatabase) || (database instanceof DB2Database) || (database instanceof
+        } else if ((database instanceof MySQLDatabase) || (database instanceof AbstractDb2Database) || (database instanceof
             HsqlDatabase) || (database instanceof DerbyDatabase) || (database instanceof FirebirdDatabase) ||
             (database instanceof InformixDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
             SybaseDatabase)) {

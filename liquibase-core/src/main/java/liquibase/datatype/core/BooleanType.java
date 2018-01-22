@@ -16,7 +16,7 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-        if ((database instanceof DB2Database) || (database instanceof FirebirdDatabase)) {
+        if ((database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
@@ -94,7 +94,7 @@ public class BooleanType extends LiquibaseDataType {
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
         }
-        return (database instanceof DB2Database) || (database instanceof FirebirdDatabase) || (database instanceof
+        return (database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase) || (database instanceof
             MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof OracleDatabase) ||
             (database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
             SybaseDatabase);

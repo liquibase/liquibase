@@ -1,6 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -96,9 +97,11 @@ public class ConfigurationProperty {
             } else if (type.equals(BigDecimal.class)) {
                 return new BigDecimal((String) value);
             } else if (type.equals(Long.class)) {
-                return Long.valueOf((String) value);
+            	return Long.valueOf((String) value);
+            } else if (type.equals(List.class)) {
+                return StringUtils.splitAndTrim((String) value, ",");
             } else {
-                throw new UnexpectedLiquibaseException("Cannot parse property "+type.getSimpleName()+" to a "+type.getSimpleName());
+                throw new UnexpectedLiquibaseException("Cannot parse property "+value.getClass().getSimpleName()+" to a "+type.getSimpleName());
             }
         } else {
             throw new UnexpectedLiquibaseException("Could not convert "+value.getClass().getSimpleName()+" to a "+type.getSimpleName());
