@@ -937,12 +937,12 @@ public class Main {
         }
 
         try {
-            if (null != logFile) {
-                // TODO: Make command line parameter "logFile" work with the new logging system
-                throw new UnexpectedLiquibaseException("TODO: Make command line parameter \"logFile\" work with the " +
-                    "new logging system");
-            }
-        } catch (UnexpectedLiquibaseException e) {
+//            if (null != logFile) {
+//                LogService.getLog(getClass()).setLogLevel(logLevel, logFile);
+//            } else {
+//                LogService.getLog(getClass()).setLogLevel(logLevel);
+//            }
+        } catch (IllegalArgumentException e) {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
 
@@ -1523,7 +1523,6 @@ public class Main {
 
     private static class ConsoleLogFilter extends AbstractMatcherFilter {
 
-        // default ist false.
         private boolean outputLogs;
 
         @Override
