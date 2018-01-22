@@ -436,7 +436,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * {@link #getLiquibase()} instead.
      */
     @Deprecated
-    protected Liquibase createLiquibase() {
+    protected Liquibase createLiquibase() throws Exception {
         return this.liquibase;
     }
 
@@ -450,7 +450,7 @@ public abstract class BaseLiquibaseTask extends Task {
                                             String password,
                                             String defaultCatalogName,
                                             String defaultSchemaName,
-                                            String databaseClass) {
+                                            String databaseClass) throws Exception {
         return createDatabaseFromType(databaseType);
     }
 

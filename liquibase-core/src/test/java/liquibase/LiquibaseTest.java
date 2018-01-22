@@ -100,7 +100,7 @@ public class LiquibaseTest {
     }
 
     @Test
-    public void testConstructor() {
+    public void testConstructor() throws Exception {
         MockResourceAccessor resourceAccessor = this.mockResourceAccessor;
         MockDatabase database = new MockDatabase();
 
@@ -126,7 +126,7 @@ public class LiquibaseTest {
     }
 
     @Test
-    public void testConstructorChangelogPathsStandardize() {
+    public void testConstructorChangelogPathsStandardize() throws Exception {
         Liquibase liquibase = new Liquibase("path\\with\\windows\\separators.xml", mockResourceAccessor, new MockDatabase());
         assertEquals("Windows path separators are translated correctly",
             "path/with/windows/separators.xml", liquibase.getChangeLogFile());
@@ -159,14 +159,14 @@ public class LiquibaseTest {
     }
 
     @Test
-    public void testGetResourceAccessor() {
+    public void testGetResourceAccessor() throws LiquibaseException {
         Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
         assertSame("ressourceAccessor is set as requested",
             liquibase.getResourceAccessor(), liquibase.getResourceAccessor());
     }
 
     @Test
-    public void testSetCurrentDateTimeFunction() {
+    public void testSetCurrentDateTimeFunction() throws LiquibaseException {
         Database database = mockDatabase;
         String testFunction = "GetMyTime";
 
@@ -180,7 +180,7 @@ public class LiquibaseTest {
     public void testUpdatePassedStringContext() throws LiquibaseException {
         LiquibaseDelegate liquibase = new LiquibaseDelegate() {
             @Override
-            public void update(Contexts contexts) {
+            public void update(Contexts contexts) throws LiquibaseException {
                 objectToVerify = contexts;
             }
         };
@@ -277,7 +277,7 @@ public class LiquibaseTest {
          */
         protected Object objectToVerify;
 
-        private LiquibaseDelegate() {
+        private LiquibaseDelegate() throws LiquibaseException {
             super("com/example/test.xml", new MockResourceAccessor(), mock(Database.class));
         }
 

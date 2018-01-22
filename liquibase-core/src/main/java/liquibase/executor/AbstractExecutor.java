@@ -21,7 +21,7 @@ public abstract class AbstractExecutor implements Executor {
         this.database = database;
     }
 
-    protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) {
+    protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         if (sql == null) {
             return new String[0];
@@ -45,7 +45,7 @@ public abstract class AbstractExecutor implements Executor {
 
     @Override
     public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<>());
+        execute(change, new ArrayList<SqlVisitor>());
     }
 
     @Override

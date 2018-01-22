@@ -363,7 +363,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 }
 
                 if (filteredInOriginalQuery) {
-                    return (!(example instanceof PrimaryKey)) && (!(example instanceof Index)) && (!(example instanceof
+                    return !((example instanceof PrimaryKey) || (example instanceof Index) || (example instanceof
                         liquibase.statement.UniqueConstraint));
                 } else {
                     return true;

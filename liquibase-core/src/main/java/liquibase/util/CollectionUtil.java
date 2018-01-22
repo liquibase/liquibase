@@ -7,7 +7,7 @@ public class CollectionUtil {
     public static <T> Set<Set<T>> powerSet(Collection<T> originalSet) {
         Set<Set<T>> sets = new HashSet<>();
         if (originalSet.isEmpty()) {
-            sets.add(new HashSet<>());
+            sets.add(new HashSet<T>());
             return sets;
         }
         List<T> list = new ArrayList<>(originalSet);
@@ -29,7 +29,7 @@ public class CollectionUtil {
             return list;
         }
 
-        permute(new HashMap<>(), new ArrayList<>(parameterValues.keySet()), parameterValues, list);
+        permute(new HashMap<String, T>(), new ArrayList<String>(parameterValues.keySet()), parameterValues, list);
 
         return list;
 

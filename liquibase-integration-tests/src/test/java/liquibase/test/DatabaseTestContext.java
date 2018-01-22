@@ -297,7 +297,7 @@ public class DatabaseTestContext {
         return openConnection(url, username, password);
     }
 
-    public String getTestUrl(Database database) {
+    public String getTestUrl(Database database) throws Exception {
         for (DatabaseTestURL turl : getTestUrls()) {
             String url=turl.getUrl();
             if (database.getDefaultDriver(url) != null) {

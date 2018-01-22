@@ -7,8 +7,8 @@
          for server text-only consoles and the default setting of the
          infamous Windows command line window.
  -->
-    <entry key="commandline-helptext">
-        <![CDATA[
+	<entry key="commandline-helptext">
+		<![CDATA[
 Anwendung: java -jar liquibase.jar [options] [command]
 
 Die wichtigsten Hauptbefehle:

@@ -85,7 +85,7 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     private void outputStatement(SqlStatement sql) throws DatabaseException {
-        outputStatement(sql, new ArrayList<>());
+        outputStatement(sql, new ArrayList<SqlVisitor>());
     }
 
     private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -225,17 +225,17 @@ public class LoggingExecutor extends AbstractExecutor {
     private class NoopWriter extends Writer {
 
         @Override
-        public void write(char[] cbuf, int off, int len) {
+        public void write(char[] cbuf, int off, int len) throws IOException {
             // does nothing
         }
 
         @Override
-        public void flush() {
+        public void flush() throws IOException {
             // does nothing
         }
 
         @Override
-        public void close() {
+        public void close() throws IOException {
             // does nothing
         }
 

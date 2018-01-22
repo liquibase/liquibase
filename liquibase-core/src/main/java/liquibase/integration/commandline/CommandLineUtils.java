@@ -27,13 +27,12 @@ import liquibase.util.StringUtils;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URL;
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.ResourceBundle;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.ResourceBundle.getBundle;
 
 /**
@@ -221,7 +220,7 @@ public class CommandLineUtils {
                                          ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes,
                                          CompareControl.SchemaComparison[] schemaComparisons)
-        throws LiquibaseException {
+            throws LiquibaseException, IOException, ParserConfigurationException {
 
         DiffToChangeLogCommand command = (DiffToChangeLogCommand) CommandFactory.getInstance().getCommand
                 ("diffChangeLog");
@@ -252,8 +251,8 @@ public class CommandLineUtils {
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
             schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
-                                               diffOutputControl) throws
-        LiquibaseException {
+                                                   diffOutputControl) throws IOException, ParserConfigurationException,
+            LiquibaseException {
         CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[schemas.length];
         int i = 0;
         for (CatalogAndSchema schema : schemas) {
@@ -285,6 +284,8 @@ public class CommandLineUtils {
     public static String getBanner() {
         String myVersion = "";
         String buildTimeString = "";
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
         Class clazz = CommandLineUtils.class;
         String className = clazz.getSimpleName() + ".class";
@@ -305,12 +306,11 @@ public class CommandLineUtils {
         StringBuffer banner = new StringBuffer();
 
         banner.append(String.format(
-            coreBundle.getString("starting.db.liquibase.at.timestamp"), OffsetDateTime.now().truncatedTo(ChronoUnit
-                .SECONDS).format
-                (RFC_1123_DATE_TIME)
+            coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
         ));
         if (!myVersion.isEmpty() && !buildTimeString.isEmpty()) {
-            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion, buildTimeString));
+            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion,
+                buildTimeString));
         }
         return banner.toString();
     }

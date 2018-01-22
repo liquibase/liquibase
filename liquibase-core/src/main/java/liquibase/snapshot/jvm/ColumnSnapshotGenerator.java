@@ -14,6 +14,7 @@ import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
@@ -44,8 +45,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws
-        DatabaseException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        Database database = snapshot.getDatabase();
+        Relation relation = ((Column) example).getRelation();
         if ((((Column) example).getComputed() != null) && ((Column) example).getComputed()) {
             return example;
         }
@@ -86,7 +88,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
             return;
         }
@@ -475,7 +477,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
          */
         int jdbcType = columnMetadataResultSet.getInt("DATA_TYPE");
 
-        if ((jdbcType == Types.TIMESTAMP) || (jdbcType == Types.TIMESTAMP_WITH_TIMEZONE)) {
+        // Java 8 compatibility notes: When upgrading this project to JDK8 and beyond, also execute this if-branch
+        // if jdbcType is TIMESTAMP_WITH_TIMEZONE (does not exist yet in JDK7)
+        if (jdbcType == Types.TIMESTAMP) {
 
             if (decimalDigits == null) {
                 type.setColumnSize(null);

@@ -61,7 +61,7 @@ class ResultSetCache {
             for (CachedRow row : results) {
                 for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
                     if (!cache.containsKey(rowKey)) {
-                        cache.put(rowKey, new ArrayList<>());
+                        cache.put(rowKey, new ArrayList<CachedRow>());
                     }
                     cache.get(rowKey).add(row);
                 }

@@ -99,7 +99,7 @@ public class ServiceLocator {
         this.resourceAccessor = resourceAccessor;
         this.classesBySuperclass = new HashMap<>();
 
-        this.classResolver.setClassLoaders(new HashSet<>(Arrays.asList(resourceAccessor.toClassLoader())));
+        this.classResolver.setClassLoaders(new HashSet<>(Arrays.asList(new ClassLoader[]{resourceAccessor.toClassLoader()})));
 
         if (packagesToScan == null) {
             packagesToScan = new ArrayList<>();
@@ -216,7 +216,7 @@ public class ServiceLocator {
         }
     }
 
-    private List<Class> findClassesImpl(Class requiredInterface) {
+    private List<Class> findClassesImpl(Class requiredInterface) throws Exception {
         LogService.getLog(getClass()).debug(LogType.LOG, "ServiceLocator finding classes matching interface " + requiredInterface.getName());
 
         List<Class> classes = new ArrayList<>();
@@ -235,8 +235,8 @@ public class ServiceLocator {
 
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Can not use " + clazz + " as a Liquibase service " +
-                        "because it does not have a no-argument constructor");
+                    LogService.getLog(getClass()).info(LogType.LOG, "Can not use " + clazz + " as a Liquibase service because it does not have a " +
+                        "no-argument constructor");
                 } catch (NoClassDefFoundError e) {
                     String message = "Can not use " + clazz + " as a Liquibase service because " + e.getMessage()
                         .replace("/", ".") + " is not in the classpath";

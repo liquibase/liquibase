@@ -87,7 +87,7 @@ public class Context {
             Class type = getExtensionType(clazz);
             if (type != null) {
                 if (!seenExtensionClasses.containsKey(type)) {
-                    seenExtensionClasses.put(type, new HashSet<>());
+                    seenExtensionClasses.put(type, new HashSet<Class>());
                 }
                 seenExtensionClasses.get(type).add(clazz);
             }
@@ -109,7 +109,7 @@ public class Context {
         return getExtensionType(superclass);
     }
 
-    private void findClasses(String packageName, File dir) {
+    private void findClasses(String packageName, File dir) throws ClassNotFoundException {
         packageName = packageName.replaceFirst("^\\.","");
         String[] classFiles = dir.list(new FilenameFilter() {
             @Override

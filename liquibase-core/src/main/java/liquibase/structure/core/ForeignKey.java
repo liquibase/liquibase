@@ -11,8 +11,8 @@ import java.util.List;
 public class ForeignKey extends AbstractDatabaseObject{
 
     public ForeignKey() {
-        setForeignKeyColumns(new ArrayList<>());
-        setPrimaryKeyColumns(new ArrayList<>());
+        setForeignKeyColumns(new ArrayList<Column>());
+        setPrimaryKeyColumns(new ArrayList<Column>());
     }
 
     public ForeignKey(String name) {

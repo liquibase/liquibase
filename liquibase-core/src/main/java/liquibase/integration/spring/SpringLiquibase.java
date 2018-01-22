@@ -73,24 +73,15 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected ResourceLoader resourceLoader;
 
 	protected DataSource dataSource;
-
 	protected String changeLog;
-
 	protected String contexts;
-
     protected String labels;
-
     protected String tag;
-
 	protected Map<String, String> parameters;
-
 	protected String defaultSchema;
-
 	protected boolean dropFirst;
-
-    protected boolean shouldRun = true;
-
-    protected File rollbackFile;
+	protected boolean shouldRun = true;
+	protected File rollbackFile;
     /**
      * Ignores classpath prefix during changeset comparison.
      * This is particularly useful if Liquibase is run in different ways.
@@ -125,8 +116,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      * To avoid this issue, just set ignoreClasspathPrefix to true.
      */
     private boolean ignoreClasspathPrefix = true;
-
-    public SpringLiquibase() {
+	public SpringLiquibase() {
 		super();
 	}
 
@@ -356,29 +346,31 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		return new SpringResourceOpener(getChangeLog());
 	}
 
-    /**
-     * Gets the Spring-name of this instance.
-     */
-    public String getBeanName() {
-        return beanName;
-    }
+	/**
+	 * Gets the Spring-name of this instance.
+	 *
+	 * @return
+	 */
+	public String getBeanName() {
+		return beanName;
+	}
 
     /**
      * Spring sets this automatically to the instance's configured bean name.
      */
-	@Override
+    @Override
     public void setBeanName(String name) {
         this.beanName = name;
-	}
+    }
 
     public ResourceLoader getResourceLoader() {
         return resourceLoader;
     }
 
-	@Override
+    @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
-	}
+    }
 
 	public void setRollbackFile(File rollbackFile) {
 		this.rollbackFile = rollbackFile;

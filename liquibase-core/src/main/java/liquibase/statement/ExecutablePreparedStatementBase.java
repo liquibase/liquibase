@@ -155,7 +155,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                                 coreBundle.getString("jdbc.bind.parameter.unknown.numeric.value.type"),
                                 col.getName(),
                                 col.getValueNumeric().toString(),
-                            col.getValueNumeric().getClass().getTypeName()
+                            col.getValueNumeric().getClass().getName()
                         )
                 );
             }
@@ -324,7 +324,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
         return p;
     }
-
 
     @Override
     public boolean skipOnUnsupported() {

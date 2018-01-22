@@ -166,7 +166,7 @@ public class DatabaseObjectComparatorFactory {
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
         return createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo)
-            .findDifferences(object1, object2, accordingTo, compareControl, new HashSet<>());
+            .findDifferences(object1, object2, accordingTo, compareControl, new HashSet<String>());
 
     }
 
