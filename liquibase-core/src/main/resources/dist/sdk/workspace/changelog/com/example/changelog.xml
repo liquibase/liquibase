@@ -14,7 +14,7 @@
 
     <changeSet id="run-mark" author="alice" runAlways="true">
         <insert tableName="debug_info">
-            <column name="message" value="Liquibase update was ran"/>
+            <column name="message" value="DB-Manul update was ran"/>
             <column name="date_ran" valueComputed="current_datetime"/>
         </insert>
         <rollback/>

@@ -27,7 +27,7 @@ public class Main {
     public static void main(String[] args) {
         Main main = new Main();
 
-        main.header("Liquibase SDK");
+        main.header("DB-Manul SDK");
 
         try {
             main.init(args);
@@ -145,7 +145,7 @@ public class Main {
             dir = dir.getParentFile();
         }
 
-        throw new UnexpectedLiquibaseException("Could not find Liquibase SDK home. Please run liquibase-sdk from the " +
+        throw new UnexpectedLiquibaseException("Could not find DB-Manul SDK home. Please run liquibase-sdk from the " +
             "liquibase/sdk directory or one of it's sub directories");
     }
 

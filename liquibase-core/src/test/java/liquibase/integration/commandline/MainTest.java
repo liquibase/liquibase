@@ -95,7 +95,7 @@ public class MainTest {
     }
 
     @Test
-    public void startWithoutParameters() throws IOException, CommandLineParsingException {
+    public void startWithoutParameters() {
         exit.expectSystemExitWithStatus(1);
         Main.main(new String[0]);
         assertTrue("We just want to survive until this point", true);
@@ -404,6 +404,24 @@ public class MainTest {
     }
 
     @Test
+    public void propertiesFileChangeLogParameters() throws Exception {
+        Main cli = new Main();
+
+        Properties props = new Properties();
+        props.setProperty("driver", "DRIVER");
+        props.setProperty("parameter.some_changelog_parameter", "parameterValue");
+
+        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
+        props.store(propFile, "");
+
+        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
+
+        assertEquals("Changelog parameter in properties file is recognized", "parameterValue",
+            cli.changeLogParameters.get("some_changelog_parameter"));
+
+    }
+
+    @Test
     public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictModeIsFalse() throws Exception {
         Main cli = new Main();
         String[] args = new String[]{"--strict=false"};
@@ -603,6 +621,7 @@ public class MainTest {
                 "--changeLogFile=FILE",
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
+                "--databaseChangeLogTablespaceName=MYTABLES",
                 "tag", "TagHere"
         };
 
@@ -616,6 +635,7 @@ public class MainTest {
         assertEquals("Command line option --changeLogFile is parsed correctly", "FILE", cli.changeLogFile);
         assertEquals("Command line option --classpath is parsed correctly", "CLASSPATH;CLASSPATH2", cli.classpath);
         assertEquals("Command line option --contexts is parsed correctly", "CONTEXT1,CONTEXT2", cli.contexts);
+        assertEquals("Command line option --databaseChangeLogTablespaceName is parsed correctly", "MYTABLES", cli.databaseChangeLogTablespaceName);
         assertEquals("Main command 'tag' is parsed correctly", "tag", cli.command);
         assertEquals("Command parameter 'TagHere' is parsed correctly", "TagHere", cli.commandParams.iterator().next());
     }
@@ -693,7 +713,7 @@ public class MainTest {
     }
 
     @Test
-    public void testDatabaseChangeLogTableName_Options() throws IOException, CommandLineParsingException {
+    public void testDatabaseChangeLogTableName_Options() throws CommandLineParsingException {
         Main main = new Main();
         String[] opts = {
                 "--databaseChangeLogTableName=OPTSCHANGELOG",

@@ -66,7 +66,7 @@ public class ContextExpression {
         if (originalString != null) {
             return originalString;
         }
-        return "(" + StringUtils.join(new TreeSet(this.contexts), "), (") + ")";
+        return "(" + StringUtils.join(new TreeSet<String>(this.contexts), "), (") + ")";
     }
 
     /**
@@ -142,18 +142,10 @@ public class ContextExpression {
 
         for (String context : runtimeContexts.getContexts()) {
             if (context.equalsIgnoreCase(expression)) {
-                if (notExpression) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return !notExpression;
             }
         }
-        if (notExpression) {
-            return true;
-        } else {
-            return false;
-        }
+        return notExpression;
 
 
     }

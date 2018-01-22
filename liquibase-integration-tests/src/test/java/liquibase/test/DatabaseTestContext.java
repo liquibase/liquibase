@@ -55,8 +55,43 @@ public class DatabaseTestContext {
         return instance;
     }
 
+    /**
+     * Makes a best effort to gracefully shut down a (possible open) databaseConnection and ignores any
+     * errors that happen during that process.
+     *
+     * @param databaseConnection
+     */
+    private static void shutdownConnection(JdbcConnection databaseConnection) {
+        try {
+            try {
+                if (!databaseConnection.getUnderlyingConnection().getAutoCommit()) {
+                    databaseConnection.getUnderlyingConnection().rollback();
+                }
+            } catch (SQLException e) {
+                // Ignore. If rollback fails or is impossible, there is nothing we can do about it.
+            }
+
+            // Close the JDBC connection
+            databaseConnection.getUnderlyingConnection().close();
+        } catch (SQLException e) {
+            LogService.getLog(DatabaseTestContext.class).warning(LogType.USER_MESSAGE,
+                "Could not close the following connection: " + databaseConnection.getURL(), e);
+        }
+    }
+
+    /**
+     * Returns a DatabaseConnection for a givenUrl is one is already open. If not, attempts to create it, but only
+     * if a previous attempt at creating the connection has NOT failed (to prevent unnecessary connection attempts
+     * during the integration tests).
+     *
+     * @param givenUrl The JDBC URL to connect to
+     * @param username the user name to use to log in to the instance (may be null, esp. for embedded DBMS)
+     * @param password the password for the username (may be null)
+     * @return a DatabaseConnection if one has been established or fetched from the cache successfully, null otherwise
+     * @throws Exception if an error occurs while trying to get the connection
+     */
     private DatabaseConnection openConnection(final String givenUrl,
-        final String username, final String password) throws Exception {
+                                              final String username, final String password) throws Exception {
         // Insert the temp dir path and ensure our replacement ends with /
         String tempDir = System.getProperty("java.io.tmpdir");
         if (!tempDir.endsWith(System.getProperty("file.separator")))
@@ -110,8 +145,8 @@ public class DatabaseTestContext {
                 LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             } else if (url.startsWith("jdbc:sqlserver")
-                    || url.startsWith("jdbc:postgresql")
-                    || url.startsWith("jdbc:h2")) {
+                || url.startsWith("jdbc:postgresql")
+                || url.startsWith("jdbc:h2")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA;
                 LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
@@ -120,14 +155,13 @@ public class DatabaseTestContext {
                 databaseConnection.commit();
             }
         } catch (SQLException e) {
-//            e.printStackTrace();
-            //schema already exists
+            // schema already exists
         } finally {
             try {
                 databaseConnection.rollback();
             } catch (DatabaseException e) {
                 if (database instanceof DB2Database) {
-//                    expected, there is a problem with it
+                    // expected, there is a problem with it
                 } else {
                     throw e;
                 }
@@ -140,24 +174,25 @@ public class DatabaseTestContext {
 
             @Override
             public void run() {
-                try {
-                    try {
-                        if (!((JdbcConnection) databaseConnection).getUnderlyingConnection().getAutoCommit()) {
-                            ((JdbcConnection) databaseConnection).getUnderlyingConnection().rollback();
-                        }
-                    } catch (SQLException e) {
-                    }
-
-
-                    ((JdbcConnection) databaseConnection).getUnderlyingConnection().close();
-                } catch (SQLException e) {
-                    System.out.println("Could not close " + url);
-                    e.printStackTrace();
-                }
+                shutdownConnection((JdbcConnection) databaseConnection);
             }
         }));
 
         return databaseConnection;
+    }
+
+    /**
+     * Ensures that the next attempt to call openConnection for the given JDBC URL returns a fresh connection.
+     *
+     * @param url The JDBC connection URL to remove from the cache pool.
+     */
+    public void closeConnection(String url) {
+        JdbcConnection conn = (JdbcConnection) connectionsByUrl.get(url);
+        if (conn != null) {
+            shutdownConnection(conn);
+            connectionsByUrl.remove(url);
+            connectionsAttempted.remove(url);
+        }
     }
 
     public DatabaseConnection openDatabaseConnection(String url,
@@ -239,9 +274,6 @@ public class DatabaseTestContext {
         if (availableConnections == null) {
             availableConnections = new HashSet<DatabaseConnection>();
             for (DatabaseTestURL url : getTestUrls()) {
-//                if (url.indexOf("jtds") >= 0) {
-//                    continue;
-//                }
                 DatabaseConnection connection = openConnection(url.getUrl(), url.getUsername(), url.getPassword());
 
                 if (connection != null) {
@@ -265,7 +297,7 @@ public class DatabaseTestContext {
         return openConnection(url, username, password);
     }
 
-    public String getTestUrl(Database database) throws Exception {
+    public String getTestUrl(Database database) {
         for (DatabaseTestURL turl : getTestUrls()) {
             String url=turl.getUrl();
             if (database.getDefaultDriver(url) != null) {

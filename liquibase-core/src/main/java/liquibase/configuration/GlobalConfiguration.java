@@ -26,7 +26,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         super("liquibase");
 
         getContainer().addProperty(SHOULD_RUN, Boolean.class)
-            .setDescription("Should Liquibase commands execute")
+            .setDescription("Should DB-Manul commands execute")
                 .setDefaultValue(true)
                 .addAlias("should.run");
 
@@ -35,7 +35,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
                 .setDefaultValue("DATABASECHANGELOG");
 
         getContainer().addProperty(DATABASECHANGELOGLOCK_TABLE_NAME, String.class)
-            .setDescription("Name of table to use for tracking concurrent Liquibase usage")
+            .setDescription("Name of table to use for tracking concurrent DB-Manul usage")
                 .setDefaultValue("DATABASECHANGELOGLOCK");
 
         getContainer().addProperty(CHANGELOGLOCK_WAIT_TIME, Long.class)
@@ -47,13 +47,13 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
                 .setDefaultValue(10);
 
         getContainer().addProperty(LIQUIBASE_TABLESPACE_NAME, String.class)
-            .setDescription("Tablespace to use for Liquibase objects");
+            .setDescription("Tablespace to use for DB-Manul objects");
 
         getContainer().addProperty(LIQUIBASE_CATALOG_NAME, String.class)
-            .setDescription("Catalog to use for Liquibase objects");
+            .setDescription("Catalog to use for DB-Manul objects");
 
         getContainer().addProperty(LIQUIBASE_SCHEMA_NAME, String.class)
-            .setDescription("Schema to use for Liquibase objects");
+            .setDescription("Schema to use for DB-Manul objects");
 
         getContainer().addProperty(OUTPUT_LINE_SEPARATOR, String.class)
                 .setDescription("Line separator for output. Defaults to OS default")
@@ -65,21 +65,21 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
                 .addAlias("file.encoding");
 
         getContainer().addProperty(CONVERT_DATA_TYPES, Boolean.class)
-            .setDescription("Should Liquibase convert to/from STANDARD data types. Applies to both snapshot and " +
-                "update commands.")
+            .setDescription("Should DB-Manul convert to/from standard data types. Applies to both snapshot and update" +
+                " commands.")
                 .setDefaultValue(true);
 
         getContainer().addProperty(GENERATE_CHANGESET_CREATED_VALUES, Boolean.class)
-            .setDescription("Should Liquibase include a 'created' attribute in diff/generateChangeLog changeSets with" +
-                " the current datetime")
+            .setDescription("Should DB-Manul include a 'created' attribute in diff/generateChangeLog changeSets with " +
+                "the current datetime")
                 .setDefaultValue(false);
 
         getContainer().addProperty(AUTO_REORG, Boolean.class)
-            .setDescription("Should Liquibase automatically include REORG TABLE commands when needed?")
+            .setDescription("Should DB-Manul automatically include REORG TABLE commands when needed?")
                 .setDefaultValue(true);
 
         getContainer().addProperty(DIFF_COLUMN_ORDER, Boolean.class)
-            .setDescription("Should Liquibase compare column order in diff operation?")
+            .setDescription("Should DB-Manul compare column order in diff operation?")
                 .setDefaultValue(true);
 
         getContainer().addProperty(ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, Boolean.class)
@@ -88,7 +88,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
 
         getContainer().addProperty(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, Boolean.class)
-            .setDescription("Should Liquibase include the change description in the id when generating changeSets?")
+            .setDescription("Should DB-Manul include the change description in the id when generating changeSets?")
                 .setDefaultValue(false);
     }
 

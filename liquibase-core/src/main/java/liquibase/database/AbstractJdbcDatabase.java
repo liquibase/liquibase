@@ -153,7 +153,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void addReservedWords(Collection<String> words) {
+    public final void addReservedWords(Collection<String> words) {
         reservedWords.addAll(words);
     }
 
@@ -299,6 +299,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    public Integer getDefaultScaleForNativeDataType(String nativeDataType) {
+        // Default implementation does not return anything; this is up to the concrete implementation.
+        return null;
+    }
+
+    @Override
     public void setDefaultSchemaName(final String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
         if (!supportsSchemas()) {
@@ -309,8 +315,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Overwrite this method to get the default schema name for the connection.
      * If you only need to change the statement that obtains the current schema then override
-     *  @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
-     * @return
+     * @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
      */
     protected String getConnectionSchemaName() {
         if (connection == null) {
@@ -335,7 +340,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Override this method to change the statement.
      * Only override this if getConnectionSchemaName is left unchanges or is using this method.
      * @see AbstractJdbcDatabase#getConnectionSchemaName()
-     * @return
      */
     protected SqlStatement getConnectionSchemaNameCallStatement(){
         return new RawCallStatement("call current_schema");
@@ -452,7 +456,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     /***
      * Returns true if the String conforms to an ISO 8601 date, e.g. 2016-12-31
      * @param isoDate
-     * @return
      */
     protected boolean isDateOnly(final String isoDate) {
         return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}$");
@@ -464,7 +467,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * The "T" may be replaced by a space.
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * @param isoDate
-     * @return
      */
     protected boolean isDateTime(final String isoDate) {
         return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$");
@@ -477,7 +479,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * The "T" may be replaced by a space.
      * @param isoDate
-     * @return
      */
     protected boolean isTimestamp(final String isoDate) {
         return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$");
@@ -488,7 +489,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * e.g. 18:43:59
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * @param isoDate
-     * @return
      */
     protected boolean isTimeOnly(final String isoDate) {
         return isoDate.matches("^\\d{2}:\\d{2}:\\d{2}$");
@@ -804,10 +804,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         schema = schema.customize(this);
         if ("information_schema".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
-        } else if (getSystemViews().contains(viewName)) {
-            return true;
-        }
-        return false;
+        } else return getSystemViews().contains(viewName);
     }
 
     @Override
@@ -1236,7 +1233,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
+    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws
+        IOException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {

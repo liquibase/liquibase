@@ -27,12 +27,13 @@ import liquibase.util.StringUtils;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ResourceBundle;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.ResourceBundle.getBundle;
 
 /**
@@ -155,25 +156,10 @@ public class CommandLineUtils {
                     schema = defaultSchemaName;
                 }
                 ExecutorService.getInstance().getExecutor(database).execute(
-                        new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
-                                database.escapeObjectName(schema, Schema.class)))
-                ;
-            } else if ((database instanceof MSSQLDatabase) && (defaultSchemaName != null)) {
-                if (username != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
-                            "IF USER_NAME() <> N'dbo'\r\n" +
-                                    "BEGIN\r\n" +
-                                    "	DECLARE @sql [nvarchar](MAX)\r\n" +
-                                    "	SELECT @sql = N'ALTER USER ' + QUOTENAME(USER_NAME()) + N' WITH " +
-                                    "DEFAULT_SCHEMA" +
-                                    " = " + database.escapeStringForDatabase(database.escapeObjectName(username,
-                                    DatabaseObject.class)) + "'\r\n" +
-                                    "	EXEC sp_executesql @sql\r\n" +
-                                    "END"));
-                }
-            } else if ((database instanceof PostgresDatabase) && (defaultSchemaName != null)) {
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO "
-                        + database.escapeObjectName(defaultSchemaName, Schema.class)));
+                    new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
+                        database.escapeObjectName(schema, Schema.class)));
+            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
             } else if (database instanceof DB2Database) {
                 String schema = defaultCatalogName;
                 if (schema == null) {
@@ -235,7 +221,7 @@ public class CommandLineUtils {
                                          ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes,
                                          CompareControl.SchemaComparison[] schemaComparisons)
-            throws LiquibaseException, IOException, ParserConfigurationException {
+        throws LiquibaseException {
 
         DiffToChangeLogCommand command = (DiffToChangeLogCommand) CommandFactory.getInstance().getCommand
                 ("diffChangeLog");
@@ -266,8 +252,8 @@ public class CommandLineUtils {
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
             schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
-                                                   diffOutputControl) throws IOException, ParserConfigurationException,
-            LiquibaseException {
+                                               diffOutputControl) throws
+        LiquibaseException {
         CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[schemas.length];
         int i = 0;
         for (CatalogAndSchema schema : schemas) {
@@ -299,8 +285,6 @@ public class CommandLineUtils {
     public static String getBanner() {
         String myVersion = "";
         String buildTimeString = "";
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
         Class clazz = CommandLineUtils.class;
         String className = clazz.getSimpleName() + ".class";
@@ -321,11 +305,12 @@ public class CommandLineUtils {
         StringBuffer banner = new StringBuffer();
 
         banner.append(String.format(
-            coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
+            coreBundle.getString("starting.db.manul.at.timestamp"), OffsetDateTime.now().truncatedTo(ChronoUnit
+                .SECONDS).format
+                (RFC_1123_DATE_TIME)
         ));
         if (!myVersion.isEmpty() && !buildTimeString.isEmpty()) {
-            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion,
-                buildTimeString));
+            banner.append(String.format(coreBundle.getString("dbmanul.version.builddate"), myVersion, buildTimeString));
         }
         return banner.toString();
     }

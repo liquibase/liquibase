@@ -28,6 +28,8 @@ import java.util.Set;
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
+    public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
+    public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = LogService.getLog(PostgresDatabase.class);
 
@@ -101,7 +103,25 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
+        if (!PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName())) {
+            return false;
+        }
+
+        int majorVersion = conn.getDatabaseMajorVersion();
+        int minorVersion =conn.getDatabaseMinorVersion();
+
+        if ((majorVersion < MINIMUM_DBMS_MAJOR_VERSION) || ((majorVersion == MINIMUM_DBMS_MAJOR_VERSION) &&
+            (minorVersion < MINIMUM_DBMS_MINOR_VERSION))) {
+            LOG.warning(
+                String.format(
+                    "Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
+                        "older than %d.%d. This means that you might encounter strange behaviour and " +
+                        "incorrect error messages.",
+                    majorVersion, minorVersion, majorVersion, minorVersion));
+            return true;
+        }
+
+        return true;
     }
 
     @Override
@@ -147,7 +167,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if ((setting != null) && "on".equals(setting)) {
-                        LOG.warning(LogType.LOG, "EnterpriseDB " + conn.getURL() + " does not store DATE columns. Auto-converts " +
+                        LOG.warning(LogType.LOG, "EnterpriseDB " + conn.getURL() + " does not store DATE columns. Instead, it auto-converts " +
                                 "them " +
                                 "to TIMESTAMPs. (edb_redwood_date=true)");
                     }

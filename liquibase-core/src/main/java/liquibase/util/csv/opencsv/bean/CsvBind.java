@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface CsvBind {
     /**
-     * @returns if the field is required to contain information.
+     * @return if the field is required to contain information.
      */
     boolean required() default false;
 }

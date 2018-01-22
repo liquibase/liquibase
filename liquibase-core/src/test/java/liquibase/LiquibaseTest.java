@@ -100,7 +100,7 @@ public class LiquibaseTest {
     }
 
     @Test
-    public void testConstructor() throws Exception {
+    public void testConstructor() {
         MockResourceAccessor resourceAccessor = this.mockResourceAccessor;
         MockDatabase database = new MockDatabase();
 
@@ -126,7 +126,7 @@ public class LiquibaseTest {
     }
 
     @Test
-    public void testConstructorChangelogPathsStandardize() throws Exception {
+    public void testConstructorChangelogPathsStandardize() {
         Liquibase liquibase = new Liquibase("path\\with\\windows\\separators.xml", mockResourceAccessor, new MockDatabase());
         assertEquals("Windows path separators are translated correctly",
             "path/with/windows/separators.xml", liquibase.getChangeLogFile());
@@ -150,7 +150,7 @@ public class LiquibaseTest {
             when(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(databaseConnection)).thenReturn(database);
 
             Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, databaseConnection);
-            assertSame("Liquibase constructor passing connection did not find the correct database implementation",
+            assertSame("DB-Manul constructor passing connection did not find the correct database implementation",
                 database, liquibase.getDatabase());
 
         } finally {
@@ -159,14 +159,14 @@ public class LiquibaseTest {
     }
 
     @Test
-    public void testGetResourceAccessor() throws LiquibaseException {
+    public void testGetResourceAccessor() {
         Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
         assertSame("ressourceAccessor is set as requested",
             liquibase.getResourceAccessor(), liquibase.getResourceAccessor());
     }
 
     @Test
-    public void testSetCurrentDateTimeFunction() throws LiquibaseException {
+    public void testSetCurrentDateTimeFunction() {
         Database database = mockDatabase;
         String testFunction = "GetMyTime";
 
@@ -180,7 +180,7 @@ public class LiquibaseTest {
     public void testUpdatePassedStringContext() throws LiquibaseException {
         LiquibaseDelegate liquibase = new LiquibaseDelegate() {
             @Override
-            public void update(Contexts contexts) throws LiquibaseException {
+            public void update(Contexts contexts) {
                 objectToVerify = contexts;
             }
         };
@@ -277,7 +277,7 @@ public class LiquibaseTest {
          */
         protected Object objectToVerify;
 
-        private LiquibaseDelegate() throws LiquibaseException {
+        private LiquibaseDelegate() {
             super("com/example/test.xml", new MockResourceAccessor(), mock(Database.class));
         }
 

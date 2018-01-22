@@ -1,0 +1,57 @@
+
+This text file is mainly a lookup help for DB-Manul developers to quickly see if a bug in the upstream Liquibase
+project might have already be fixed in DB-Manul (either by a DB-Manul-specific fix or because the bug fixes has
+been merged from upstream).
+
+There is no automatic sorting mechanism for this file. Please keep it tidy and sorted descending by Liquibase bug id
+to maximise its usefulness. Thank you.
+
+[Liquibase bug id] [DB-Manul bug] [if fixed, commit#]                      [short bug description]
+=====================================================================================================================
+[CORE-3138]        none           1a437d9bc52cb0a8512203f755be1b3e62e77469 correct AddAutoIncrement for SQLAnywhere
+[CORE-3115]        none           b83cee394e9392079f09f69d91f6abf3b9f8c0da Added trim() in the DataTypeFactory.java
+[CORE-3079]        none           e14e982bb01b35ec4eae51580ee33b131142edb3 Make includeObjects and excludeObjects
+                                                                           affect which objects are snapshotted
+[CORE-3076]        none           eaf994fed9e54a3388928aeaaa5f867ebd0c4833 SUM is not reserved word for HsqlDB
+[CORE-3063]        none           (several commits)                        Integration tests failing on master
+[CORE-3055]        none           0b2b69fe6f551f121786abb43925997b72601301 SQLAnywhere: supports Sequences
+[CORE-3054]        none           7d8e717571d87b18dcaecb6399011fd6b44c2da5 SQLAnywhere: java-coredump on
+                                                                           changeSet-SQL
+[CORE-3051]        none           50c53d50b8c17ba52c0a24f6d36fc94a5f0d55ad ASANY supports no CASCADE in DROP TABLE
+[CORE-3040]        none           58b2839feefd1a003e6555c3761bd0e28c64cc8d onlyUpdate="true" flag generates empty
+                                                                           statements for MySQL DB (pr#682)
+[CORE-3022]        none           b6fa2263d2db2a23d42369ee30b0cd11031c22ec Derby Database loads driver from wrong
+                                                                           classloader on close
+[CORE-3020]        none           5608dfccf3c50f321d140b3d5f75059f8ce432ac No warning when included file doesn't exist
+[CORE-3014]        none           e567bf5eef2764e2cf7d2e8d4bb21372e8aa3e77 validation error on empty column name in
+                                                                           CreateIndexChange
+[CORE-3013]        none           5e264828ebe28f1ed86cdfc7bfbf4bb6ca05f83f Improve error message on failing change
+                                                                           set when using includeAll
+[CORE-3009]        none           968bd791c91f6caa36271346ce66537260d9fbc9 ASANY Drop Default Value failed
+                                                                           (upstream pr #659)
+[CORE-3006]        none           c307b0795a01086a60e89026a548745c54c1a79e Probably fixed with rewrite of date literal
+                                                                           detection using RegExp; needs verification
+[CORE-3005]        none           60adb8f56fa2d13036f5ae33139dd3f0169e233b Consideration of DB2 system views
+                                                                           (upstream pr#647)
+[CORE-3003]        none           50c53d50b8c17ba52c0a24f6d36fc94a5f0d55ad SQLAnywhere: Owner/Schema-Identifier at
+                                                                           index-names not allowed
+[CORE-3002]        none           c133369a5b6f0530d3cdd862a5bac3edbfd69319 SQLAnywhere: DROP UNIQUE CONSTRAINT fails
+[CORE-2993]        none           b5717eb7a6482ccf204d4bfc0656a8564a67e4e0 createSequence with order enabled for DB2
+[CORE-2989]        none           083373aa75d7ad9c70943304cd28c2209f7493e0 Custom change: configure change before
+                                                                           calling getConfirmationMessage (upstream
+                                                                           pr#634)
+[CORE-2978]        none           88f76fc67f10f17e02cd2909fea876ff904777c4 Broken PostgreSQL AddAutoIncrementChange SQL
+                                                                           code generation
+[CORE-2977]        none           4b65c947c7711eadfde5713af31eccb654fb5bfc Use the same name as Postgres for primary key
+                                                                           constraints
+[CORE-2944]        none           b03d74146a235520edc69388f003d569f0d3b31e outputDefaultSchema and outputDefaultCatalog command line parameters not respected
+[CORE-2773]        none           f425f011638db46b0bdc6a680e2d2e5f014feb8d Detection of DB2/AS400 improved
+[CORE-2162]        none           none                                     MSSQL: Multiple inserts in sqlFile do not
+                                                                           fail as expected - IMHO not a valid bug.
+[CORE-1852]        none           6a379a7a9aaf0ceffe6762b9bcc95c29d3be4615 checksum depends on line endings and
+                                                                           startCommentSymbol
+[CORE-1775]        none           e87c24f02b8a4b0e8bda59f7a8582c4069a077d2 Informix error when creating primary key
+[CORE-1515]        none           266d4eb3e86be2a62cc08f6a5d9b798e0d3929ce Fix regression of "default precision" should
+                                                                           not be returned in MSSQL-snapshots
+[CORE-1225]        none           (partly fixed)                           support placing metadata tables in different
+                                                                           tablespaces.

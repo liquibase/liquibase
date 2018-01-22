@@ -1,0 +1,126 @@
+
+This text file is mainly a lookup help for DB-Manul developers to quickly check if a certain upstream pull request
+has already been merged into DB-Manul.
+
+There is no automatic sorting mechanism for this file. Please keep it tidy and sorted descending by Liquibase pull
+request number (pr#) to maximise its usefulness. Thank you.
+
+[pr#] | [merge status] [description]
+(2nd line):            [if not going to be merged: reason]
+=======================================================================================================================
+730     MERGED         Fix includeAll on WebSphere and Weblogic
+729     (TODO)         (is from a private repository, need to merge it manually)
+728     MERGED         [MSSQL] With additional logic: Prevent using a defaultSchemaName that is different from the
+                       login default schema since MSSQL does not support setting it on a session level basis.
+727     (missing)
+726     REJECTED       [CORE-3140] PR is only usuable with MSSQL 2005 (too old to support it properly, sorry)
+725     TODO           (need to understand the class loader mechnism better to understand the change)
+724     MERGED         [CORE-3138]: correct AddAutoIncrement for SQLAnywhere
+723     MERGED         [CORE-1225]: add --databaseChangeLogTablespaceName as command line option
+722     (missing)
+721     MERGED         [CORE-3115]: Added trim() in the DataTypeFactory.java
+720-687 TODO
+686     MERGED         Prevent liquibase.exception.DatabaseException
+685     MERGED         [CORE-3079] Make includeObjects and excludeObjects affect which objects are snapshotted
+684     MERGED         [CORE-3076] HsqlDB: add SUM to keywords
+683     (TODO)         Adds support for Actian Ingres RDBMS - need to clarify license, create integration tests etc.
+                       before I can fully merge it.
+682     MERGED         [CORE-3040] - onlyUpdate="true" flag generates empty statements for MySQL DB
+681     N/A            Support for Actian Ingress RDBMS - work probably already included in #683.
+678     MERGED         Add SchemesCDIConfig+ (it should allow you to create a dependent tree…
+677     MERGED         Fix json serialize fail on changeset precondition enums
+676     N/A            [CORE-3063] integration tests that cannot connect should be Ignored not Passed
+                       -> Already fixed in DB-Manul
+675     MERGED         [CORE-3063] run integration tests in travis-ci for Pull Requests
+674     MERGED         Fix path handling for ClassLoaderResourceAccessor
+673     MERGED         [CORE-3055] SQLAnywhere: supports Sequences
+672     MERGED         [CORE-3054] SQLAnywhere: java-coredump on changeSet-SQL
+671     N/A            [CORE-3051] ASANY supports no CASCADE in DROP TABLE
+                       -> Already fixed in DB-Manul
+670     MERGED         [CORE-3050] Do not build string to check StringBuilder is empty
+669     (TODO)         Sets class name in CustomWrapper classes must be normalized.
+                       (upstream unit tests fail with this and my expertise has not advanced enough to
+                       understand / fix it myself)
+668     MERGED         Bug fix for null pointer
+667     MERGED         Adding logic to persist full hierarchy of context expressions into databasechangelog table
+666     MERGED         refactoring: extract methods, decrease level on indention
+665     (TODO)         SAP/Sybase ASE: Liquibase change
+                       Failed to merge, the code base is too far off mine. Asked the original author if he is interested
+                       in rebasing it.
+664     MERGED         [CORE-3013] replaces "error in yaml" with "error in file <FILENAME>"
+663     MERGED         [CORE-3014] validation error on empty column name in CreateIndexChange
+662     MERGED         [CORE-3022] Derby Database loads driver from wrong classloader on close
+661     MERGED         [CORE-3020] No warning when included file doesn't exist
+660     (TODO)         [CORE-3010] MySQL Add Default Value failed
+                       In general, ALTER TABLE ... ALTER COLUMN ... SET DEFAULT works in MySQL/MariaDB - maybe
+                       the problem only happens with certain expressions for defaultValue?
+659     MERGED         [CORE-3009] ASANY Drop Default Value failed
+658     GONE
+657     GONE
+656     MERGED         [CORE-2993] createSequence with order enabled for DB2
+655     MERGED         [CORE-2773] Detection of DB2/AS400 improved
+654     REJECTED       Mark failed changeset executions in the databasechangelog
+                       The behaviour changes so that the same change set is not executed again until the identifier
+                       changes - I don't think that's a good thing, it makes bugfixing of changesets inconvenient
+                       for developers
+653     N/A            [CORE-3003] SQLAnywhere: Owner/Schema-Identifier at index-names not allowed
+                       -> already fixed in DB-Manul
+652     N/A            [CORE-3002] SQLAnywhere: DROP UNIQUE CONSTRAINT fails
+                       -> already fixed in DB-Manul
+651     N/A            Does not apply to DB-Manul because dropAllForeignKeys has been completely rewritten and no
+                       DBMS-specific generators exist for that anymore.
+650     MERGED         [CORE-3000] BatchInsertExecutablePreparedStatement merged, but with modifications to make it
+                       work with all JDBC drivers that support batching, not just Oracle DB.
+649     MERGED         Corrected documentation errors in AbstractLiquibaseMojo.java
+648     MERGED         [CORE-1852] checksum depends on line endings and startCommentSymbol
+647     MERGED         [CORE-3005] Consideration of DB2 system views
+646     N/A            [CORE-3006] probably already fixed in DB-Manul by another fix; needs verification
+645     GONE
+644     N/A            [CORE-2978] Broken PostgreSQL AddAutoIncrementChange SQL code generation
+                       (likely already fixed by another checkin)
+643     GONE
+642     MERGED         [CORE-2977] Use the same name as Postgres for primary key constraints
+641     GONE
+640     N/A            Could not reproduce the problem with the current DB-Manul codebase. Added an integration test
+                       for it (commit #f6e83948c9f235ac45d30e9dd8cc4c9f75de70a3). It may be that I misunderstood the
+                       problem description - please contact me if that is the case.
+639     GONE
+638     GONE
+637     N/A            already implemented in DB-Manul
+636     N/A            already implemented in DB-Manul
+635     GONE
+634     MERGED         [CORE-2989]: Custom change: configure change before calling getConfirmationMessage
+633     (TODO)         [CORE-2965] allow any additional attributes for the change elements in … #633
+                       proposal looks good, but I am a little worried about
+                       <xsd:anyAttribute namespace="##any"/> - before I merge it, I need to confirm that ##any does
+                       not cause invalid attribute names from the changeset-3.6.xsd to pass as valid. Maybe
+                       <xsd:anyAttribute namespace="##other"/> would serve the same purpose? Need to investigate.
+632     REJECTED       [CORE-2162] MSSQL: Multiple inserts in sqlFile do not fail as expected.
+                       The problem here is that multiple DML commands should never go into a single
+                       java.sql.Statement.execute call. Therefore, I think that [CORE-2162] is not a valid bug.
+631     MERGED         Fix for "Different object quoting strategies are used for validation and execution of a
+                       ChangeSet."
+630     TODO           Trigger an exception on a RAISERROR - the idea looks good, but I still fail to find a test
+                       case where a single executed statement returns multiple result sets. I need that to make a
+                       test case to protect against regression.
+629     MERGED         [CORE-2944] Honor `outputDefaultSchema=false` and `outputDefaultCatalog=false` when generating
+                       SQL code.
+628     MERGED         Fix for whitespace before delimiter
+627     GONE
+626     MERGED         Postgres does not support parameters for type int
+625     TODO           --do-not-warn-about--DBA_RECYCLEBIN the idea is legitimate, but I would rather have it
+                       implemented as a proper command line option (in the classes Main and CommandLineUtils, so that
+                       it can be used from Maven/Ant/etc. as well). I also found the queries where the recycle bin is
+                       used, maybe I can work around the need to access to it.
+624     DUPLICATE      Don't hardcode version dependencies using 'Class-Path:' in MANIFEST.MF - 4.0.x (I could not
+                       find a Liquibase 4.x.x branch that is more current than the master branch, so I use the 3.5.x
+                       version of the same PR:
+623     MERGED         Don't hardcode version dependencies using 'Class-Path:' in MANIFEST.MF - 3.5.x
+622     DUPLICATE      Another version of #623 (already merged)
+621     MERGED         Fix some required fields in the preconditions
+620     N/A            Made ChangeWithColumns extend Change so that an extension would have …
+                       It seems the original author did not want to merge that change any more (from what he wrote
+                       in his comments), but did not delete the PR. Skipping it for now.
+619     MERGED         Avoid null pointer exception on snapshot action
+618     MERGED         Fix the escaping of object name on the MS SQL
+596     DUPLICATE      of pr #655

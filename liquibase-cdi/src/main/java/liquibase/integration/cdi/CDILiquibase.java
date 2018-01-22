@@ -39,35 +39,37 @@ import java.util.Map;
  * <code>db-changelog.xml</code> from the classpath and apply it against
  * <code>myDataSource</code>.
  * <p/>
- * Various producers methods are required to resolve the dependencies
- * i.e.
- * <code>
+ * Various producers methods are required to resolve the dependencies, i.e.
+ * <pre>
+ * {@code
+ *
  * public class CDILiquibaseProducer {
  *
- *  @Produces @LiquibaseType
- *  public CDILiquibaseConfig createConfig() {
- *     CDILiquibaseConfig config = new CDILiquibaseConfig();
- *     config.setChangeLog("liquibase/parser/core/xml/simpleChangeLog.xml");
- *     return config;
- *  }
+ *  @literal @Produces @LiquibaseType
+ *   public CDILiquibaseConfig createConfig() {
+ *      CDILiquibaseConfig config = new CDILiquibaseConfig();
+ *      config.setChangeLog("liquibase/parser/core/xml/simpleChangeLog.xml");
+ *      return config;
+ *   }
  *
- *  @Produces @LiquibaseType
- *  public DataSource createDataSource() throws SQLException {
- *     jdbcDataSource ds = new jdbcDataSource();
- *     ds.setDatabase("jdbc:hsqldb:mem:test");
- *     ds.setUser("sa");
- *     ds.setPassword("");
- *     return ds;
- *  }
+ *  @literal @Produces @LiquibaseType
+ *   public DataSource createDataSource() throws SQLException {
+ *      jdbcDataSource ds = new jdbcDataSource();
+ *      ds.setDatabase("jdbc:hsqldb:mem:test");
+ *      ds.setUser("sa");
+ *      ds.setPassword("");
+ *      return ds;
+ *   }
  *
- *  @Produces @LiquibaseType
- *  public ResourceAccessor create() {
- *     return new ClassLoaderResourceAccessor(getClass().getClassLoader());
- *  }
+ *  @literal @Produces @LiquibaseType
+ *   public ResourceAccessor create() {
+ *      return new ClassLoaderResourceAccessor(getClass().getClassLoader());
+ *   }
  *
  * }
- * </code>
  *
+ * }
+ * </p>
  * @author Aaron Walker (http://github.com/aaronwalker)
  */
 @ApplicationScoped
@@ -79,6 +81,7 @@ public class CDILiquibase implements Extension {
     private Logger log = LogService.getLog(CDILiquibase.class);
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
+
     @Inject @LiquibaseType
     private DataSource dataSource;
     private boolean initialized;
@@ -94,7 +97,7 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
-        log.info(LogType.LOG, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
+        log.info(LogType.LOG, "Booting DB-Manul " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();
@@ -108,7 +111,8 @@ public class CDILiquibase implements Extension {
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
             log.info(LogType.LOG, String.format("Liquibase did not run on %s because %s was set to false.",
                     hostName,
-                    liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
+                liquibaseConfiguration.describeValueLookupLogic(
+                    GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
             ));
             return;
         }

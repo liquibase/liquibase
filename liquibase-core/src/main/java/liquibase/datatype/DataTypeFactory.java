@@ -7,6 +7,7 @@ import liquibase.datatype.core.BigIntType;
 import liquibase.datatype.core.CharType;
 import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.UnknownType;
+import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.core.DataType;
@@ -22,6 +23,10 @@ public class DataTypeFactory {
 
     private Map<String, List<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<>();
 
+    /**
+     * Build the factory registry from all classes in the classpath that implement
+     * {@link LiquibaseDataType}
+     */
     protected DataTypeFactory() {
         Class<? extends LiquibaseDataType>[] classes;
         try {
@@ -32,12 +37,16 @@ public class DataTypeFactory {
                 register(clazz);
             }
 
-        } catch (Exception e) {
+        } catch (ServiceNotFoundException e) {
             throw new UnexpectedLiquibaseException(e);
         }
 
     }
 
+    /**
+     * Get this factory singleton
+     * @return a reference to this factory
+     */
     public static synchronized DataTypeFactory getInstance() {
         if (instance == null) {
             instance = new DataTypeFactory();
@@ -45,11 +54,19 @@ public class DataTypeFactory {
         return instance;
     }
 
+    /**
+     * Discards the active factory and creates a new singleton instance.
+     */
     public static synchronized void reset() {
         instance = new DataTypeFactory();
     }
 
-
+    /**
+     * Registers an implementation of {@link LiquibaseDataType} with both its name and all aliases for the data type
+     * as a handler in the factory's registry. Classes implement the {@link LiquibaseDataType#getPriority()}, which will
+     * cause the class with the highest priority to become the primary handler for the data type.
+     * @param dataTypeClass the implementation to register
+     */
     public void register(Class<? extends LiquibaseDataType> dataTypeClass) {
         try {
             LiquibaseDataType example = dataTypeClass.newInstance();
@@ -71,7 +88,7 @@ public class DataTypeFactory {
             for (String name : names) {
                 name = name.toLowerCase();
                 if (registry.get(name) == null) {
-                    registry.put(name, new ArrayList<Class<? extends LiquibaseDataType>>());
+                    registry.put(name, new ArrayList<>());
                 }
                 List<Class<? extends LiquibaseDataType>> classes = registry.get(name);
                 classes.add(dataTypeClass);
@@ -82,25 +99,41 @@ public class DataTypeFactory {
         }
     }
 
+    /**
+     * Remove
+     * @param name
+     */
     public void unregister(String name) {
         registry.remove(name.toLowerCase());
     }
 
     /**
-     * Translates a database-specific type name (e.g. VARCHAR2(255 BYTE) from Oracle) into a proper Liquibase
-     * data type (e.g. varchar(255) )
-     * @param dataTypeDefinition
-     * @param database
-     * @return
+     * Translates a column data type definition (e.g. varchar(255), java.sql.Types.NVARCHAR(10),
+     * VARCHAR2(255 BYTE)... ) into a normalized data type in object form. Note that, due to variety of allowed ways
+     * to specify a data type (SQL-Standard, Java type, native RDBMS type...), the dataTypeDefinition we receive for
+     * processing may already be the native type for the target RDBMS.
+     * @param dataTypeDefinition the definition from the changeSet
+     * @param database the {@link Database} object from for which the native definition is to be generated
+     * @return the corresponding Liquibase data type in object form.
      */
     public LiquibaseDataType fromDescription(String dataTypeDefinition, Database database) {
         String dataTypeName = dataTypeDefinition;
+
+        // Remove the first occurrence of (anything within parentheses). This will remove the size information from
+        // most data types, e.g. VARCHAR2(255 CHAR) -> VARCHAR2. We will retrieve that length information again later,
+        // but for the moment, we are only interested in the "naked" data type name.
         if (dataTypeName.matches(".+\\(.*\\).*")) {
             dataTypeName = dataTypeName.replaceFirst("\\s*\\(.*\\)", "");
         }
+
+        // Remove everything { after the first opening curly bracket
+        // e.g. int{autoIncrement:true}" -> "int"
         if (dataTypeName.matches(".+\\{.*")) {
             dataTypeName = dataTypeName.replaceFirst("\\s*\\{.*", "");
         }
+
+        // If the remaining string ends with " identity", then remove the " identity" and remember than we want
+        // to set the autoIncrement property later.
         boolean autoIncrement = false;
         if (dataTypeName.endsWith(" identity")) {
             dataTypeName = dataTypeName.replaceFirst(" identity$", "");
@@ -114,6 +147,7 @@ public class DataTypeFactory {
             { "`",  "`"  }, // backticks (a la mysql)
             { "'",  "'"  }  // single quotes
         };
+
         for (String[] quotePair : quotePairs) {
             String openQuote = quotePair[0];
             String closeQuote = quotePair[1];
@@ -128,30 +162,36 @@ public class DataTypeFactory {
             }
         }
 
+        // record additional information that is still attached to the data type name
         String additionalInfo = null;
         if (dataTypeName.toLowerCase().startsWith("bit varying")
             || dataTypeName.toLowerCase().startsWith("character varying")) {
             // not going to do anything. Special case for postgres in our tests,
             // need to better support handling these types of differences
         } else {
-            String[] splitTypeName = dataTypeName.split("\\s+", 2);
+            // Heuristic: from what we now have left of the data type name, everything after the first space
+            // is counted as additional information.
+            String[] splitTypeName = dataTypeName.trim().split("\\s+", 2);
             dataTypeName = splitTypeName[0];
             if (splitTypeName.length > 1) {
                 additionalInfo = splitTypeName[1];
             }
         }
 
+        // try to find matching classes for the data type name in our registry
         Collection<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase());
 
         LiquibaseDataType liquibaseDataType = null;
         if (classes == null) {
+            // Map (date/time) INTERVAL types to the UnknownType
             if (dataTypeName.toUpperCase().startsWith("INTERVAL")) {
                 liquibaseDataType = new UnknownType(dataTypeDefinition);
             } else {
                 liquibaseDataType = new UnknownType(dataTypeName);
             }
         } else {
-
+            // Iterate through the list (which is already sorted by priority) until we find a class
+            // for this dataTypeName that supports the given database.
             Iterator<Class<? extends LiquibaseDataType>> iterator = classes.iterator();
             do {
                 try {
@@ -162,7 +202,7 @@ public class DataTypeFactory {
             } while ((database != null) && !liquibaseDataType.supports(database) && iterator.hasNext());
         }
         if ((database != null) && !liquibaseDataType.supports(database)) {
-            throw new UnexpectedLiquibaseException("Could not find type for "+liquibaseDataType.toString() +
+            throw new UnexpectedLiquibaseException("Could not find type for " + liquibaseDataType.toString() +
                     " for DBMS "+database.getShortName());
         }
         if (liquibaseDataType == null) {
@@ -193,31 +233,19 @@ public class DataTypeFactory {
             }
         }
 
-        /*
-        The block below seems logically incomplete.
-        It will always end up putting the second word after the entire type name
-        e.g. character varying will become CHARACTER VARYING varying
-
-        //try to something like "int(11) unsigned" or int unsigned but not "varchar(11 bytes)"
-        String lookingForAdditionalInfo = dataTypeDefinition;
-        lookingForAdditionalInfo = lookingForAdditionalInfo.replaceFirst("\\(.*\\)", "");
-        if (lookingForAdditionalInfo.contains(" ")) {
-            liquibaseDataType.setAdditionalInformation(lookingForAdditionalInfo.split(" ", 2)[1]);
-        }*/
-
+        // Did the original definition have embedded information in curly braces, e.g.
+        // "int{autoIncrement:true}"? If so, we will extract and process it now.
         if (dataTypeDefinition.matches(".*\\{.*")) {
-            String paramStrings = dataTypeDefinition.replaceFirst(".*?\\{", "").replaceFirst("\\}.*", "");
+            String paramStrings = dataTypeDefinition.replaceFirst(".*?\\{", "")
+                .replaceFirst("\\}.*", "");
             String[] params = paramStrings.split(",");
             for (String param : params) {
                 param = StringUtils.trimToNull(param);
                 if (param != null) {
                     String[] paramAndValue = param.split(":", 2);
-                    try {
-                        ObjectUtil.setProperty(liquibaseDataType, paramAndValue[0], paramAndValue[1]);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Unknown property " + paramAndValue[0] + " for " +
-                            liquibaseDataType.getClass().getName()+" "+liquibaseDataType.toString());
-                    }
+                    // TODO: A run-time exception will occur here if the user writes a property name into the
+                    // data type which does not exist - but what else could we do in this case, except aborting?
+                    ObjectUtil.setProperty(liquibaseDataType, paramAndValue[0], paramAndValue[1]);
                 }
             }
         }

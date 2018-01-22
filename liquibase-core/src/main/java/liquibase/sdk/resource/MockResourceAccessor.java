@@ -14,7 +14,7 @@ public class MockResourceAccessor implements ResourceAccessor {
     private Map<String, String> contentByFileName;
 
     public MockResourceAccessor() {
-        this(new HashMap<String, String>());
+        this(new HashMap<>());
     }
 
     public MockResourceAccessor(Map<String, String> contentByFileName) {
@@ -35,7 +35,8 @@ public class MockResourceAccessor implements ResourceAccessor {
     }
 
     @Override
-    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean
+        recursive) {
         Set<String> returnSet = new HashSet<>();
         for (String file : contentByFileName.keySet()) {
             if (file.startsWith(path)) {

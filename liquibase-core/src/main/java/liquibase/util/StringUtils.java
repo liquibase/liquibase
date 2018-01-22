@@ -92,7 +92,6 @@ public class StringUtils {
      * @param piece the input line to test
      * @param previousPiece the characters in the input stream that came before piece
      * @param endDelimiter ??? (need to see this in a debugger to find out)
-     * @return
      */
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
@@ -455,6 +454,31 @@ public class StringUtils {
         }
     }
 
+    /**
+     * Returns if two strings are equal, ignoring:
+     * <ul>
+     * <li>case (uppercase/lowercase)</li>
+     * <li>difference between null, and empty string, and a string that only has spaces</li>
+     * </ul>
+     *
+     * @param s1 the first String to compare (or null)
+     * @param s2 the second String to compare (or null)
+     * @return true if the Strings are equal by the above criteria, false in all other cases
+     */
+    public static boolean equalsIgnoreCaseAndEmpty(String s1, String s2) {
+        String clean1 = trimToNull(s1);
+        String clean2 = trimToNull(s2);
+        if (clean1 == null && clean2 == null) {
+            return true;
+        } else {
+            // Both cannot be null at this point
+            if (clean1 == null || clean2 == null) {
+                return false;
+            }
+        }
+        return clean1.equalsIgnoreCase(clean2);
+    }
+
 
     /**
      * From commonslang3 -> StringUtils
@@ -524,5 +548,6 @@ public class StringUtils {
 
         return str.substring(start, end);
     }
+
 
 }

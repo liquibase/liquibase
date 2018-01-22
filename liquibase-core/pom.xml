@@ -4,21 +4,19 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.liquibase</groupId>
-		<artifactId>liquibase-parent</artifactId>
-		<version>3.6.0-SNAPSHOT</version>
+		<groupId>org.dbmanul</groupId>
+		<artifactId>dbmanul-parent</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>liquibase-core</artifactId>
-	<name>Liquibase Core</name>
+	<artifactId>dbmanul-core</artifactId>
 	<packaging>jar</packaging>
+	<name>DB-Manul Core</name>
 
 
 	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<bundle.namespace>liquibase.*</bundle.namespace>
-        <project.version>3.6.0-SNP</project.version>
+		<bundle.namespace>dbmanul.*</bundle.namespace>
+		<project.version>${project.version}-SNP</project.version>
 	</properties>
 
 	<dependencies>
@@ -148,8 +146,7 @@
     </dependencies>
 
 	<build>
-    <finalName>liquibase-${project.version}</finalName>
-
+		<finalName>dbmanul-${project.version}</finalName>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -235,7 +232,9 @@
 							<goal>javadoc</goal>
 						</goals>
 						<configuration>
-							<sourcepath>../liquibase-core/src/main/java</sourcepath>
+							<sourcepath>
+								../liquibase-core/src/main/java;../liquibase-core/target/generated-sources/javacc
+							</sourcepath>
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
@@ -247,7 +246,7 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<configuration>
 					<instructions>
-            <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
+						<Bundle-SymbolicName>org.dbmanul.core</Bundle-SymbolicName>
 						<Import-Package>
 							javax.servlet.*;version="[2.6,4)";resolution:=optional,
 							javax.sql.*,
@@ -285,7 +284,9 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>${maven-assembly-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>distro</id>
@@ -297,10 +298,10 @@
 							<descriptors>
 								<descriptor>src/main/resources/assembly/bin.xml</descriptor>
 							</descriptors>
+							<tarLongFileMode>posix</tarLongFileMode>
 						</configuration>
 					</execution>
 				</executions>
-				<version>2.3</version>
 			</plugin>
 
 			<plugin>

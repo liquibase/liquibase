@@ -114,9 +114,6 @@ public class PrimaryKey extends AbstractDatabaseObject {
         if (returnValue == 0) {
             returnValue = this.getColumnNames().compareTo(o.getColumnNames());
         }
-//        if (returnValue == 0) {
-//            returnValue = this.getName().compareTo(o.getName());
-//        }
 
         return returnValue;
     }

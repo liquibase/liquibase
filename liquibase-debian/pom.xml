@@ -2,18 +2,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-parent</artifactId>
-        <version>3.6.0-SNAPSHOT</version>
+        <groupId>org.dbmanul</groupId>
+        <artifactId>dbmanul-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>liquibase-debian</artifactId>
+    <artifactId>dbmanul-debian</artifactId>
+    <name>DB-Manul Debian Packager</name>
 
-    <name>Liquibase Debian Packager</name>
-    <description>Debian package builder for liquibase.</description>
+    <description>Debian package builder for DB-Manul.</description>
      <organization>
-        <name>Liquibase.org</name>
-        <url>http://www.liquibase.org</url>
+        <name>dbmanul.org</name>
+        <url>http://www.dbmanul.org</url>
     </organization>
      <licenses>
         <license>
@@ -23,14 +23,14 @@
     </licenses>
 
     <properties>
-        <!-- Jdeb version, used to build the debian package  : should it match liquibase target version one ? -->
+        <!-- Jdeb version, used to build the debian package  : should it match dbmanul target version one ? -->
         <jdeb.version>1.0.1</jdeb.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <groupId>org.dbmanul</groupId>
+            <artifactId>dbmanul-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -59,8 +59,8 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>org.liquibase</includeGroupIds>
-                            <includeArtifactIds>liquibase-core</includeArtifactIds>
+                            <includeGroupIds>org.dbmanul</includeGroupIds>
+                            <includeArtifactIds>dbmanul-core</includeArtifactIds>
                             <outputDirectory>
                                 ${project.build.directory}
                                 <!-- or: ${project.basedir}/wherever/you/want/it -->
@@ -76,11 +76,11 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.liquibase</groupId>
-                                    <artifactId>liquibase-core</artifactId>
+                                    <groupId>org.dbmanul</groupId>
+                                    <artifactId>dbmanul-core</artifactId>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/</outputDirectory>
-                                    <destFileName>liquibase.jar</destFileName>
+                                    <destFileName>dbmanul.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.yaml</groupId>
@@ -111,22 +111,22 @@
                         <configuration>
                             <dataSet>
                                 <data>
-                                    <src>${project.build.directory}/liquibase.jar</src>
-                                    <dst>liquibase.jar</dst>
+                                    <src>${project.build.directory}/dbmanul.jar</src>
+                                    <dst>dbmanul.jar</dst>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
                                         <filemode>555</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                        <prefix>/usr/lib/dbmanul-${project.version}</prefix>
                                     </mapper>
                                 </data>
                                 <data>
-                                    <src>src/main/resources/liquibase</src>
+                                    <src>src/main/resources/dbmanul</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
                                         <filemode>555</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                        <prefix>/usr/lib/dbmanul-${project.version}</prefix>
                                     </mapper>
                                 </data>
                                 <data>
@@ -135,22 +135,22 @@
                                     <mapper>
                                         <type>perm</type>
                                         <filemode>444</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                        <prefix>/usr/lib/dbmanul-${project.version}</prefix>
                                     </mapper>
                                 </data>
                                 <data>
-                                    <src>${project.build.directory}/dist/liquibase.spec</src>
+                                    <src>${project.build.directory}/dist/dbmanul.spec</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
                                         <filemode>444</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                        <prefix>/usr/lib/dbmanul-${project.version}</prefix>
                                     </mapper>
                                 </data>
                                 <data>
                                     <type>link</type>
-                                    <linkName>/usr/bin/liquibase</linkName>
-                                    <linkTarget>../lib/liquibase-${project.version}/liquibase</linkTarget>
+                                    <linkName>/usr/bin/dbmanul</linkName>
+                                    <linkTarget>../lib/dbmanul-${project.version}/dbmanul</linkTarget>
                                     <symlink>true</symlink>
                                 </data>
 			    
@@ -163,16 +163,15 @@
                                     <mapper>
                                         <type>perm</type>
                                         <filemode>444</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}/lib</prefix>
+                                        <prefix>/usr/lib/dbmanul-${project.version}/lib</prefix>
                                     </mapper>
                                 </data>
                                 <!-- Now, add bash auto-completion file to make life easier
-                                when usin liquibase in command line mode
+                                when using dbmanul in command line mode
                                 /etc/bash_completion.d/
                                 -->
                                 <data>
-                                    <!--<src>${project.build.directory}/dist/liquibase</src>-->
-                                    <src>src/main/resources/liquibase.sh</src>
+                                    <src>src/main/resources/dbmanul.sh</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>

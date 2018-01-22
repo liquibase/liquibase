@@ -55,7 +55,7 @@ import static java.util.ResourceBundle.getBundle;
                 "If the data type for a load column is set to NUMERIC, numbers are parsed in US locale (e.g. 123.45)." +
                 "\n" +
                 "Date/Time values included in the CSV file should be in ISO format " +
-            "http://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by Liquibase. Liquibase will " +
+                "http://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by DB-Manul. DB-Manul will " +
                 "initially set the date format to be 'yyyy-MM-dd'T'HH:mm:ss' and then it checks for two special " +
                 "cases which will override the data format string.\n" +
                 "\n" +
@@ -63,7 +63,7 @@ import static java.util.ResourceBundle.getBundle;
                 "'yyyy-MM-dd'T'HH:mm:ss.SSS'\n" +
                 "If the string representing the date/time includes a space, then the date format is changed " +
                 "to 'yyyy-MM-dd HH:mm:ss'\n" +
-            "Once the date format string is set, Liquibase will then call the SimpleDateFormat.parse() method " +
+                "Once the date format string is set, DB-Manul will then call the SimpleDateFormat.parse() method " +
                 "attempting to parse the input string so that it can return a Date/Time. If problems occur, " +
                 "then a ParseException is thrown and the input string is treated as a String for the INSERT command " +
                 "to be generated.",
@@ -85,6 +85,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String encoding;
     private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
     private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
+
     private List<LoadDataColumnConfig> columns = new ArrayList<>();
 
     /**
@@ -525,25 +526,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
      * no data type of.
      * @param columns a list of LoadDataColumnConfigs to process
      */
-    @SuppressWarnings("CommentedOutCodeLine")
     private void retrieveMissingColumnLoadTypes(List<LoadDataColumnConfig> columns, Database database) throws
             DatabaseException {
-        boolean matched = false;
-
         // If no column is missing type information, we are already done.
-        for (LoadDataColumnConfig c : columns) {
-            if (c.getType() == null) {
-                matched = true;
-            }
-        }
-        if (!matched) {
+        if (columns.stream().noneMatch(c -> c.getType() == null)) {
             return;
         }
-        /* The above is the JDK7 version of:
-           if (columns.stream().noneMatch(c -> c.getType() == null)) {
-            return;
-        }
-        */
 
         // Snapshot the database table
         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(getCatalogName(), getSchemaName());
@@ -571,32 +559,18 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
         // Save the columns of the database table in a lookup table
         Map<String, Column> tableColumns = new HashMap<>();
-        for (Column c : snapshotOfTable.getColumns()) {
-            tableColumns.put(c.getName(), c);
-        }
-        /* The above is the JDK7 version of:
-            snapshotOfTable.getColumns().forEach(c -> tableColumns.put(c.getName(), c));
-        */
+        snapshotOfTable.getColumns().forEach(c -> tableColumns.put(c.getName(), c));
 
         // Normalise the LoadDataColumnConfig column names to the database
         Map<String, LoadDataColumnConfig> columnConfigs = new HashMap<>();
-        for (LoadDataColumnConfig c : columns) {
-            columnConfigs.put(
-                database.correctObjectName(c.getName(), Column.class),
-                c
-            );
-        }
-        /* The above is the JDK7 version of:
         columns.forEach(c -> columnConfigs.put(
                 database.correctObjectName(c.getName(), Column.class),
                 c
         ));
-        */
 
-        for (Map.Entry<String, LoadDataColumnConfig> entry : columnConfigs.entrySet()) {
-            if (!(entry.getValue().getType() == null)) {
-                continue;
-            }
+        columnConfigs.entrySet().stream()
+                .filter(entry -> entry.getValue().getType() == null)
+                .forEach(entry -> {
             LoadDataColumnConfig columnConfig = entry.getValue();
             DataType dataType = tableColumns.get(entry.getKey()).getType();
             if (dataType == null) {
@@ -614,30 +588,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 }
             }
         }
-
-        /* The above is the JDK7 version of:
-        columnConfigs.entrySet().stream()
-                .filter(entry -> entry.getValue().getType() == null)
-                .forEach(entry -> {
-                    LoadDataColumnConfig columnConfig = entry.getValue();
-                    DataType dataType = tableColumns.get(entry.getKey()).getType();
-                    if (dataType == null) {
-                        LOG.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
-                                columnConfig.toString(), snapshotOfTable.toString() ));
-                        columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
-                    } else {
-                        LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance()
-                                .fromDescription(dataType.toString(), database);
-                        if (liquibaseDataType != null) {
-                            columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
-                        } else {
-                            LOG.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
-                                    columnConfig.toString(), snapshotOfTable.toString(), liquibaseDataType.toString()));
-                        }
-                    }
-                }
         );
-        */
     }
 
     /**

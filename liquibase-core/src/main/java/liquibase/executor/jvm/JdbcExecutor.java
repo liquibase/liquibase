@@ -101,7 +101,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void execute(final SqlStatement sql) throws DatabaseException {
-        execute(sql, new ArrayList<SqlVisitor>());
+        execute(sql, new ArrayList<>());
     }
 
     @Override
@@ -116,7 +116,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
-        return query(sql, rse, new ArrayList<SqlVisitor>());
+        return query(sql, rse, new ArrayList<>());
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
@@ -257,7 +257,7 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     @Override
-    public void comment(String message) throws DatabaseException {
+    public void comment(String message) {
         LogService.getLog(getClass()).debug(LogType.LOG, message);
     }
 
@@ -366,7 +366,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
 
         @Override
-        public Object doInCallableStatement(CallableStatement cs) throws SQLException, DatabaseException {
+        public Object doInCallableStatement(CallableStatement cs) throws SQLException {
             ResultSet rs = null;
             try {
                 rs = cs.executeQuery();

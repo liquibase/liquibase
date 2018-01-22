@@ -40,7 +40,6 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columnDataType", statement.getColumnDataType());
 
-
         return validationErrors;
     }
 
@@ -49,15 +48,29 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
             AddAutoIncrementStatement statement,
             Database database,
             SqlGeneratorChain sqlGeneratorChain) {
-        String sql = "ALTER TABLE "
-            + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
-            + " MODIFY "
-            + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
-            + " "
-            + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}", database).toDatabaseDataType(database)
-            + " " 
-            + database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
-
+    	String sql;
+    	if (database instanceof SybaseASADatabase) {
+            sql = "ALTER TABLE " +
+                database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(),
+                    statement.getTableName()) +
+                " ALTER " +
+                database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement
+                    .getTableName(), statement.getColumnName()) +
+                " SET " +
+                database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
+    	} else {
+            sql = "ALTER TABLE " +
+                database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement
+                    .getTableName()) +
+                " MODIFY " +
+                database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement
+                    .getTableName(), statement.getColumnName()) +
+                " " +
+                DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() +
+                    "{autoIncrement:true}", database).toDatabaseDataType(database) +
+                " " +
+                database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
+    	}
         return new Sql[]{
             new UnparsedSql(sql, getAffectedColumn(statement))
         };
@@ -65,7 +78,8 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
 
     protected Column getAffectedColumn(AddAutoIncrementStatement statement) {
         return new Column()
-            .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+            .setRelation(new Table().setName(statement.getTableName()).setSchema(
+                new Schema(statement.getCatalogName(), statement.getSchemaName())))
             .setName(statement.getColumnName());
     }
 }

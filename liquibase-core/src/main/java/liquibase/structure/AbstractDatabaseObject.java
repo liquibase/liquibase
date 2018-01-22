@@ -15,6 +15,15 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Template class for all types of database objects can be manipulated using ChangeSets. Objects represented by
+ * subclasses are not specific to any RDBMS and thus only contain "high-level" properties that can be found in most
+ * DBMS. Examples for things that are represented are {@link liquibase.structure.core.Table},
+ * {@link liquibase.structure.core.PrimaryKey} and {@link liquibase.structure.core.Column}.
+ * <p/>
+ * Core features of this class include the functionality for the attributes collection ( {@link #getAttributes()} }
+ * and the ability to load an object from a serialised form {@link #load(ParsedNode, ResourceAccessor)} .
+ */
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     private Map<String, Object> attributes = new HashMap<>();
@@ -63,11 +72,13 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T getAttribute(String attribute, Class<T> type) {
         return (T) attributes.get(attribute);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T getAttribute(String attribute, T defaultValue) {
         T value = (T) attributes.get(attribute);
         if (value == null) {

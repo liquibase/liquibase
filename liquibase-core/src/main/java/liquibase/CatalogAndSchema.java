@@ -67,7 +67,7 @@ public class CatalogAndSchema {
      * If the database does not support schemas, the returned object will have a null schema.
      * If the database does not support catalogs, the returned object will have a null catalog.
      * If either the schema or catalog matches the database default catalog or schema, they will be nulled out.
-     * Catalog and/or schema names will be upper case unless the database violates the SQL STANDARD by being
+     * Catalog and/or schema names will be upper case unless the database violates the SQL standard by being
      * case-sensitive about some or all unquoted identifiers.
      *
      * @see CatalogAndSchema#customize(liquibase.database.Database)

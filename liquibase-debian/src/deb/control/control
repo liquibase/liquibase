@@ -1,9 +1,9 @@
-Package: liquibase
+Package: dbmanul
 Version: [[version]]
 Section: misc
 Priority: optional
 Architecture: all
 Depends:
-Maintainer: Nathan Voxland <nathan.voxland@liquibase.org>
-Description: Liquibase Debian Installer
+Maintainer: Andreas Buschka <andreas.buschka@dbmanul.org>
+Description: DB-Manul - a change management system for databases
 Distribution: development

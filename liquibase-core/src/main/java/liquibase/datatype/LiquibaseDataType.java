@@ -86,11 +86,22 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     public Object[] getParameters() {
         return parameters.toArray();
     }
-    
+
+    /**
+     * Adds an object to the list of this data type's parameters. Note that it is possible to temporarily exceed the
+     * allowed number of allowed parameters until {@link #validate(Database)} is called, because the number of
+     * allowed parameters might differ between DBMS.
+     * @param value the new value to add as parameter.
+     */
     public void addParameter(Object value) {
         this.parameters.add(value);
     }
 
+    /**
+     * Returns additional information that was stored during {@link DataTypeFactory#fromDescription(String, Database)}
+     * or other parsers.
+     * @return the additional information. Might be null.
+     */
     public String getAdditionalInformation() {
         return additionalInformation;
     }
@@ -99,10 +110,19 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         this.additionalInformation = additionalInformation;
     }
 
+    /**
+     * Obtains the "raw" data type definition if one was used to create this object as a result of parsing
+     * @return the raw definition, or null.
+     */
     public String getRawDefinition() {
         return rawDefinition;
     }
 
+    /**
+     * Validates the correct state of this data type against a given database.
+     * @param database the database to validate against
+     * @return true if the current settings for this data type can be implemented on the given database, false otherwise
+     */
     public boolean validate(Database database) {
         int maxParameters = this.getMaxParameters(database);
         int minParameters = this.getMinParameters(database);
@@ -117,6 +137,11 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return true;
     }
 
+    /**
+     * Transforms this data type into the native data type of the target DBMS.
+     * @param database the {@link Database} for which the native data type is to be constructed
+     * @return the new, native data type
+     */
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof MSSQLDatabase) {
             String name = database.escapeDataTypeName(getName());
@@ -221,6 +246,11 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         this.rawDefinition = originalDefinition;
     }
 
+    /**
+     * Removes any trailing ".0[...]0" from the end of a number
+     * @param value the number (in String form) to format
+     * @return the formatted number
+     */
     protected String formatNumber(String value) {
         if (value == null) {
             return null;

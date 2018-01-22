@@ -28,7 +28,24 @@ public class ValidationErrors {
         }
     }
 
-    public void checkDisallowedField(String disallowedFieldName, Object value, Database database, Class<? extends Database>... disallowedDatabases) {
+    /**
+     * <p>Checks if a field is forbidden in combination with a given Database (most often because that database
+     * does not implement the features required by the field/value combination). If a "forbidden" use is detected,
+     * a validation error is added to the current list of ValidationErrors.</p>
+     * Note:
+     * <ul>
+     * <li>if value==null, the field is ALLOWED for all DBs</li>
+     * <li>if the disallowedDatabases list does not at least contain 1 entry, the field is NOT allowed</li>
+     * </ul>
+     *
+     * @param disallowedFieldName field whose value is checked
+     * @param value               value that might be disallowed
+     * @param database            database the object/value combination is checked against
+     * @param disallowedDatabases a list of "forbidden" databases that do not allow this field/value combination
+     */
+    @SafeVarargs
+    public final void checkDisallowedField(String disallowedFieldName, Object value, Database database,
+                                           Class<? extends Database>... disallowedDatabases) {
         boolean isDisallowed = false;
         if ((disallowedDatabases == null) || (disallowedDatabases.length == 0)) {
             isDisallowed = true;

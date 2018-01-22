@@ -1,16 +1,16 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-    <groupId>org.liquibase</groupId>
-    <artifactId>liquibase-maven-integration-tests</artifactId>
+	<groupId>org.dbmanul</groupId>
+	<artifactId>dbmanul-maven-integration-tests</artifactId>
 	<packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
-    <name>Liquibase Maven Integration tests</name>
-    <url>http://www.liquibase.org</url>
+	<version>0.1.0-SNAPSHOT</version>
+	<name>DB-Manul Maven Integration tests</name>
+	<url>http://www.dbmanul.org</url>
 	<dependencies>
 		<dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+			<groupId>org.dbmanul</groupId>
+			<artifactId>dbmanul-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -18,8 +18,8 @@
 	<build>
 		<plugins>
 			<plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
+				<groupId>org.dbmanul</groupId>
+				<artifactId>dbmanul-maven-plugin</artifactId>
 				<version>${project.version}</version>
 				<dependencies>
                     <dependency>
@@ -31,7 +31,7 @@
 				<configuration>
 					<changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>
 					<driver>org.hsqldb.jdbcDriver</driver>
-                    <url>jdbc:hsqldb:file:liquibase;shutdown=true</url>
+					<url>jdbc:hsqldb:file:dbmanul;shutdown=true</url>
 					<logging>debug</logging>
 					<verbose>true</verbose>
 					<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>

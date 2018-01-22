@@ -4,7 +4,6 @@ import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -31,19 +30,19 @@ public class ChangeFactoryTest {
     }
 
     @Test
-    public void supportStatement() throws Exception {
+    public void supportStatement() {
         CreateSequenceStatement statement = new CreateSequenceStatement(null, null, "seq_my_table");
         MSSQLDatabase database10 = new MSSQLDatabase() {
             @Override
-            public int getDatabaseMajorVersion() throws DatabaseException {
-                return SQL_SERVER_2008_MAJOR_VERSION;
+            public int getDatabaseMajorVersion() {
+                return MSSQL_SERVER_VERSIONS.MSSQL2008;
             }
         };
 
         MSSQLDatabase database11 = new MSSQLDatabase() {
             @Override
-            public int getDatabaseMajorVersion() throws DatabaseException {
-                return SQL_SERVER_2012_MAJOR_VERSION;
+            public int getDatabaseMajorVersion() {
+                return MSSQL_SERVER_VERSIONS.MSSQL2012;
             }
         };
 

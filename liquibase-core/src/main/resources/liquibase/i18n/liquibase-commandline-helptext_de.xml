@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-	<!-- IMPORTANT!
-	     There are unit test that ensure the help text does not exceed
-	     80 characters per line. This may seem ancient, but still makes sense
-	     for server text-only consoles and the default setting of the
-	     infamous Windows command line window.
+    <!-- IMPORTANT!
+         There are unit tests that ensure the help text does not exceed
+         80 characters per line. This may seem ancient, but still makes sense
+         for server text-only consoles and the default setting of the
+         infamous Windows command line window.
  -->
-	<entry key="commandline-helptext">
-		<![CDATA[
-Anwendung: java -jar liquibase.jar [options] [command]
+    <entry key="commandline-helptext">
+        <![CDATA[
+Anwendung: java -jar dbmanul.jar [options] [command]
 
 Die wichtigsten Hauptbefehle:
  update                         Wendet ChangeLog-Dateien an, um die Struktur
@@ -161,6 +161,10 @@ Optionale Parameter:
                                             die die Sperre auf die Historien-
                                             tabelle verwaltet, an. (Standard:
                                             (DATABASECHANGELOGLOCK)
+ --databaseChangeLogTablespaceName=<name>   Name des Tablespaces, in dem die
+                                            Tabellen DATABASECHANGELOG und
+                                            -LOCK erstellt werden (falls sie
+                                            noch nicht vorhanden sind)
  --includeSystemClasspath=<true|false>      Berücksichtigt den Standard-Java-
                                             Classpath des Systems für die
                                             Ausführung (Standardwert: true)
@@ -260,7 +264,7 @@ Standardoptionen aus den Dateien "liquibase.properties" und
 existieren.
 
 Die vollständige Dokumentation befindet sich auf:
-http://www.liquibase.org
+http://www.dbmanul.org
 ]]>
-	</entry>
+    </entry>
 </properties>

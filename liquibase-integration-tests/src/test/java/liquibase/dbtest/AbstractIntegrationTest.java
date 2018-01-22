@@ -82,6 +82,7 @@ public abstract class AbstractIntegrationTest {
     private String objectQuotingStrategyChangeLog;
     private Database database;
     private String jdbcUrl;
+    private String defaultSchemaName;
 
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
@@ -139,9 +140,9 @@ public abstract class AbstractIntegrationTest {
                 return null;
 
             DatabaseTestURL testUrl = new DatabaseTestURL(databaseManager, url,
-                    // These may be set to null if not defined as properties.
-                    integrationTestProperties.getProperty("integration.test." + databaseManager + ".username"),
-                    integrationTestProperties.getProperty("integration.test." + databaseManager + ".password")
+                // These may be set to null if not defined as properties.
+                integrationTestProperties.getProperty("integration.test." + databaseManager + ".username"),
+                integrationTestProperties.getProperty("integration.test." + databaseManager + ".password")
             );
             return testUrl;
         } catch (IOException e) {
@@ -167,7 +168,6 @@ public abstract class AbstractIntegrationTest {
     /**
      * Reset database connection and internal objects before each test.
      * CAUTION! Does not wipe the schemas - if you want that, you must call {@link #clearDatabase()} .
-     *
      */
     @Before
     public void setUp() throws Exception {
@@ -178,8 +178,17 @@ public abstract class AbstractIntegrationTest {
         org.junit.Assume.assumeTrue(database != null);
 
         if (database != null) {
+            if (database.supportsTablespaces()) {
+                // Use the opportunity to test if the DATABASECHANGELOG table is placed in the correct tablespace
+                database.setLiquibaseTablespaceName(DatabaseTestContext.ALT_TABLESPACE);
+            }
             if (!database.getConnection().getAutoCommit()) {
                 database.rollback();
+            }
+
+            // If we should test with a custom defaultSchemaName:
+            if (getDefaultSchemaName() != null && getDefaultSchemaName().length() > 0) {
+                database.setDefaultSchemaName(getDefaultSchemaName());
             }
 
             SnapshotGeneratorFactory.resetAll();
@@ -187,7 +196,6 @@ public abstract class AbstractIntegrationTest {
 
             LockServiceFactory.getInstance().resetAll();
             LockServiceFactory.getInstance().getLockService(database).init();
-
 
             ChangeLogHistoryServiceFactory.getInstance().resetAll();
         }
@@ -231,29 +239,28 @@ public abstract class AbstractIntegrationTest {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
                     emptyTestSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database);
                 }
-
-                if (database.supportsCatalogs()) {
-                    /*
-                     * There is a special treatment for identifiers in the case when (a) the RDBMS does NOT support
-                     * schemas AND (b) the RDBMS DOES support catalogs AND (c) someone uses "schemaName=..." in a
-                     * Liquibase ChangeSet. In this case, AbstractJdbcDatabase.escapeObjectName assumes the author
-                     * was intending to write "catalog=..." and transparently rewrites the expression.
-                     * For us, this means that we have to wipe both ALT_SCHEMA and ALT_CATALOG to be sure we
-                     * are doing a thorough cleanup.
-                     */
-                    CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[] {
-                            new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
-                            new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
-                            new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
-                            new CatalogAndSchema(null, "LBCAT2"),
-                            new CatalogAndSchema("lbcat2", database.getDefaultSchemaName()),
-                            new CatalogAndSchema(null, "lbcat2")
-                    };
-                    for (CatalogAndSchema location: alternativeLocations) {
-                        emptyTestSchema(location.getCatalogName(), null, database);
-                    }
-                }
             }
+
+            /*
+             * There is a special treatment for identifiers in the case when (a) the RDBMS does NOT support
+             * schemas AND (b) the RDBMS DOES support catalogs AND (c) someone uses "schemaName=..." in a
+             * Liquibase ChangeSet. In this case, AbstractJdbcDatabase.escapeObjectName assumes the author
+             * was intending to write "catalog=..." and transparently rewrites the expression.
+             * For us, this means that we have to wipe both ALT_SCHEMA and ALT_CATALOG to be sure we
+             * are doing a thorough cleanup.
+             */
+            CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[]{
+                new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
+                new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
+                new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
+                new CatalogAndSchema(null, "LBCAT2"),
+                new CatalogAndSchema("lbcat2", database.getDefaultSchemaName()),
+                new CatalogAndSchema(null, "lbcat2")
+            };
+            for (CatalogAndSchema location : alternativeLocations) {
+                emptyTestSchema(location.getCatalogName(), location.getSchemaName(), database);
+            }
+
             database.commit();
             SnapshotGeneratorFactory.resetAll();
         } catch (Exception e) {
@@ -316,7 +323,7 @@ public abstract class AbstractIntegrationTest {
         return createLiquibase(changeLogFile, fileOpener);
     }
 
-    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws LiquibaseException {
+    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) {
         ExecutorService.getInstance().clearExecutor(database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
@@ -741,6 +748,9 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void testRerunDiffChangeLogAltSchema() throws Exception {
         assumeNotNull(this.getDatabase());
+        if (database.getShortName().equalsIgnoreCase("mssql")) {
+            return; // not possible on MSSQL.
+        }
         if (!database.supportsSchemas()) {
             return;
         }
@@ -1101,5 +1111,13 @@ public abstract class AbstractIntegrationTest {
 
     protected void setJdbcUrl(String jdbcUrl) {
         this.jdbcUrl = jdbcUrl;
+    }
+
+    public String getDefaultSchemaName() {
+        return defaultSchemaName;
+    }
+
+    public void setDefaultSchemaName(String defaultSchemaName) {
+        this.defaultSchemaName = defaultSchemaName;
     }
 }

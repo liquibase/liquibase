@@ -34,7 +34,7 @@ public abstract class AbstractLiquibaseMojoTest extends AbstractMojoTestCase {
     assertTrue("The configuration pom could not be found, " + testPom.getAbsolutePath(),
                testPom.exists());
 
-      PlexusConfiguration config = extractPluginConfiguration("liquibase-plugin",
+    PlexusConfiguration config = extractPluginConfiguration("dbmanul-plugin",
                                                             testPom);
     assertNotNull("There should be a configuration for the plugin in the pom", config);
     return config;

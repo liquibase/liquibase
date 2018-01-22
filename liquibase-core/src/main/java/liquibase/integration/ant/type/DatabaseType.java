@@ -68,7 +68,7 @@ public class DatabaseType extends DataType {
             } else {
                 Driver jdbcDriver = (Driver) ClasspathUtils.newInstance(getDriver(), classLoader, Driver.class);
                 if(jdbcDriver == null) {
-                    throw new BuildException("Unable to create Liquibase Database instance. Could not instantiate the" +
+                    throw new BuildException("Unable to create DB-Manul Database instance. Could not instantiate the" +
                      " JDBC driver.");
                 }
                 Properties connectionProps = new Properties();
@@ -87,7 +87,7 @@ public class DatabaseType extends DataType {
 
                 Connection connection = jdbcDriver.connect(getUrl(), connectionProps);
                 if(connection == null) {
-                    throw new BuildException("Unable to create Liquibase database instance. Could not connect to the " +
+                    throw new BuildException("Unable to create DB-Manul database instance. Could not connect to the " +
                      "database.");
                 }
                 jdbcConnection = new JdbcConnection(connection);
@@ -138,10 +138,10 @@ public class DatabaseType extends DataType {
 
             return database;
         } catch (SQLException e) {
-            throw new BuildException("Unable to create Liquibase database instance. A JDBC error occurred. " + e
+            throw new BuildException("Unable to create DB-Manul database instance. A JDBC error occurred. " + e
             .toString(), e);
         } catch (DatabaseException e) {
-            throw new BuildException("Unable to create Liquibase database instance. " + e.toString(), e);
+            throw new BuildException("Unable to create DB-Manul database instance. " + e.toString(), e);
         }
     }
 
@@ -155,15 +155,15 @@ public class DatabaseType extends DataType {
     }
 
     private void logParameters() {
-        log("Creating Liquibase Database", Project.MSG_DEBUG);
+        log("Creating DB-Manul Database", Project.MSG_DEBUG);
         log("JDBC driver: " + driver, Project.MSG_DEBUG);
         log("JDBC URL: " + url, Project.MSG_DEBUG);
         log("JDBC username: " + user, Project.MSG_DEBUG);
         log("Default catalog name: " + defaultCatalogName, Project.MSG_DEBUG);
         log("Default schema name: " + defaultSchemaName, Project.MSG_DEBUG);
-        log("Liquibase catalog name: " + liquibaseCatalogName, Project.MSG_DEBUG);
-        log("Liquibase schema name: " + liquibaseSchemaName, Project.MSG_DEBUG);
-        log("Liquibase tablespace name: " + liquibaseTablespaceName, Project.MSG_DEBUG);
+        log("DB-Manul catalog name: " + liquibaseCatalogName, Project.MSG_DEBUG);
+        log("DB-Manul schema name: " + liquibaseSchemaName, Project.MSG_DEBUG);
+        log("DB-Manul tablespace name: " + liquibaseTablespaceName, Project.MSG_DEBUG);
         log("Database changelog table name: " + databaseChangeLogTableName, Project.MSG_DEBUG);
         log("Database changelog lock table name: " + databaseChangeLogLockTableName, Project.MSG_DEBUG);
         log("Output default catalog: " + outputDefaultCatalog, Project.MSG_DEBUG);

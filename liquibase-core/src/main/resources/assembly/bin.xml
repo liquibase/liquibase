@@ -1,6 +1,6 @@
 <assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
-          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+          xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
     <id>bin</id>
     <formats>
         <format>tar.gz</format>
@@ -10,17 +10,21 @@
     <fileSets>
         <fileSet>
             <directory>src/main/resources/dist</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>unix</lineEnding>
             <includes>
-                <include>liquibase</include>
-                <include>liquibase-sdk</include>
+                <include>dbmanul</include>
+                <include>dbmanul-sdk</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
             <directory>src/main/resources/dist</directory>
-            <outputDirectory>/</outputDirectory>
+            <!-- <outputDirectory>${file.separator}</outputDirectory> is there because maven-assembly-plugin would
+                 complain on Windows otherwise:
+                 "OS=Windows and the assembly descriptor contains a *nix-specific root-relative-reference (starting with slash) /"
+            -->
+            <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>dos</lineEnding>
             <includes>
                 <include>*.bat</include>
@@ -28,11 +32,11 @@
         </fileSet>
         <fileSet>
             <directory>src/main/resources/dist</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>unix</lineEnding>
             <excludes>
-                <exclude>liquibase</exclude>
-                <exclude>liquibase-sdk</exclude>
+                <exclude>dbmanul</exclude>
+                <exclude>dbmanul-sdk</exclude>
                 <exclude>*.bat</exclude>
             </excludes>
         </fileSet>
@@ -47,12 +51,12 @@
     <files>
         <file>
             <source>${project.build.directory}/${project.build.finalName}.jar</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>liquibase.jar</destName>
+            <outputDirectory>${file.separator}</outputDirectory>
+            <destName>dbmanul.jar</destName>
             <fileMode>0644</fileMode>
         </file>
         <!--<file>-->
-        <!--<source>src/main/resources/liquibase</source>-->
+        <!--<source>src/main/resources/dbmanul</source>-->
         <!--<outputDirectory>/</outputDirectory>-->
         <!--<fileMode>0777</fileMode>-->
         <!--</file>-->
@@ -68,7 +72,7 @@
         <dependencySet>
             <outputDirectory>sdk/lib-sdk</outputDirectory>
             <excludes>
-                <exclude>org.liquibase:liquibase-core</exclude>
+                <exclude>org.dbmanul:dbmanul-core</exclude>
                 <exclude>org.yaml:snakeyaml</exclude>
             </excludes>
         </dependencySet>

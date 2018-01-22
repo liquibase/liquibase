@@ -13,8 +13,13 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import org.junit.Test;
 
-import java.util.Calendar;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Vector;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
@@ -22,7 +27,7 @@ import static org.junit.Assume.assumeNotNull;
 public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
     public MssqlIntegrationTest() throws Exception {
-        super("Mssql", DatabaseFactory.getInstance().getDatabase("mssql"));
+        super("mssql", DatabaseFactory.getInstance().getDatabase("mssql"));
     }
 
     @Override
@@ -41,21 +46,41 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
 
+        Vector<Integer> expectedMicrosecValues = new Vector<>();
+        expectedMicrosecValues.add(0);
+        expectedMicrosecValues.add(123000000);
+        expectedMicrosecValues.add(123456700);
         for (Table table : snapshot.get(Table.class)) {
             for (Column column : table.getColumns()) {
                 if (column.getName().toLowerCase().endsWith("_default")) {
                     Object defaultValue = column.getDefaultValue();
                     assertNotNull("Null default value for " + table.getName() + "." + column.getName(), defaultValue);
                     if (column.getName().toLowerCase().contains("date") || column.getName().toLowerCase().contains("time")) {
-                        if (defaultValue instanceof DatabaseFunction) {
-                            ((DatabaseFunction) defaultValue).getValue().contains("type datetimeoffset");
+                        if (defaultValue instanceof String) {
+                            assertTrue(defaultValue.equals("2017-12-09 23:52:39.1234567 +01:00"));
                         } else {
                             assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof Date);
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(((Date) defaultValue));
-                            assertEquals(1, calendar.get(Calendar.DAY_OF_MONTH));
-                            assertEquals(1, calendar.get(Calendar.MONTH));
-                            assertEquals(2000, calendar.get(Calendar.YEAR));
+                            LocalDateTime dtt = null;
+                            if (defaultValue instanceof java.sql.Timestamp) {
+                                dtt = ((Timestamp)defaultValue).toLocalDateTime();
+                            }
+                            if (defaultValue instanceof java.sql.Date) {
+                                java.sql.Date tmpDate = (java.sql.Date)defaultValue;
+                                dtt =  LocalDateTime.of(tmpDate.toLocalDate(),  LocalTime.of(0, 0));
+                            }
+                            if (defaultValue instanceof java.sql.Time) {
+                                java.sql.Time tmpDate = (java.sql.Time)defaultValue;
+                                dtt =  LocalDateTime.of(LocalDate.of(2017, 12, 9),
+                                    tmpDate.toLocalTime());
+                            }
+
+                            assertTrue( expectedMicrosecValues.contains( dtt.getNano() ));
+                            assertEquals(dtt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                + " is the 9th day of the month.", 9, dtt.getDayOfMonth() );
+                            assertEquals(dtt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                + " is the 12th month (December).",12, dtt.getMonthValue() );
+                            assertEquals(dtt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                                + " is the year 2017.",2017, dtt.getYear());
                         }
                     } else if (column.getName().toLowerCase().contains("char_")) {
                         assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof String);
@@ -73,6 +98,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
     @Test
     public void dataTypesTest() throws Exception {
         assumeNotNull(this.getDatabase());
+        clearDatabase();
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.types.xml");
         liquibase.update((String) null);
@@ -126,8 +152,17 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
 
     @Test
+    /**
+     * When snapshotting an MSSQL database, size information is included for
+     * XML, SMALLMONEY, HIERARCHYID, DATETIME2, IMAGE, and DATETIMEOFFSET even when the default precisions (if
+     * applicable at all) are used. Default sizes/precisions should not be transferred into resulting ChangeLogs/
+     * snapshots.
+     *
+     * Reference: https://liquibase.jira.com/browse/CORE-1515
+     */
     public void dataTypeParamsTest() throws Exception {
         assumeNotNull(this.getDatabase());
+        clearDatabase();
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.type.params.xml");
         liquibase.update((String) null);
@@ -142,7 +177,6 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                 String expectedType = column.getName().split("_")[0];
 
                 String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType(), new MSSQLDatabase()).toDatabaseDataType(getDatabase()).toString();
-
                 assertFalse("Parameter found in " + table.getName() + "." + column.getName(), foundTypeDefinition.contains("("));
             }
         }

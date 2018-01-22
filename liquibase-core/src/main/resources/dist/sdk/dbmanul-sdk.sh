@@ -29,7 +29,7 @@ fi
 # build classpath from all jars in lib
 if [ -f /usr/bin/cygpath ]; then
   CP=.
-  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
+  for i in "$LIQUIBASE_HOME"/dbmanul*.jar; do
     i=`cygpath --windows "$i"`
     CP="$CP;$i"
   done
@@ -43,7 +43,7 @@ if [ -f /usr/bin/cygpath ]; then
   done
 else
   CP=.
-  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
+  for i in "$LIQUIBASE_HOME"/dbmanul*.jar; do
     CP="$CP":"$i"
   done
   for i in "$LIQUIBASE_HOME"/lib/*.jar; do
