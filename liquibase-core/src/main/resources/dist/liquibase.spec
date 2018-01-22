@@ -1,11 +1,11 @@
 # Settings
 %define packagedby "Nathan Voxland <nathan@voxland.net>"
 # Enable / Disable sub-packages
-%define mysql        1
+%define mysql        0
 %define oracle       0
-%define postgresql   1
-%define mssql        1
-%define sqlite       1
+%define postgresql   0
+%define mssql        0
+%define sqlite       0
 # Liquibase Package
 %define lqver        3.6.0
 %define buildnum     1
@@ -14,8 +14,8 @@
 %define gpl2license  gpl-2.0.txt
 ## Oracle Files
 %define oraLicense   oracle-license.txt 
-%define orajarjdbc   ojdbc8-12.2.0.1.jar
-%define orajarucp    ucp-12.2.0.1.jar
+%define orajarjdbc   ojdbc8-12.1.0.2.jar
+%define orajarucp    ucp-12.1.0.2.jar
 %define orajari18n   orai18n.jar
 ## Postgresql
 %define pgsqljar     postgresql-42.1.1.jar
@@ -194,7 +194,6 @@ EOF
 %if %{oracle}
 %exclude %{_libdir}/%{name}/lib/%{oraLicense}
 %exclude %{_libdir}/%{name}/lib/%{orajarjdbc}
-%exclude %{_libdir}/%{name}/lib/%{orajarucp}
 %exclude %{_libdir}/%{name}/lib/%{orajari18n}
 %endif
 
@@ -257,3 +256,5 @@ EOF
 - Updated JDBC libraries and URLs.
 * Mon Jan 25 2010 William Lovins <rpmbuild@icainformatics.com> - 1.9.5-1
 - initial public version of spec
+
+

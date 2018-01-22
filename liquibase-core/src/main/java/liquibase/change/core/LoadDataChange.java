@@ -580,14 +580,23 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
         // Normalise the LoadDataColumnConfig column names to the database
         Map<String, LoadDataColumnConfig> columnConfigs = new HashMap<>();
+        for (LoadDataColumnConfig c : columns) {
+            columnConfigs.put(
+                database.correctObjectName(c.getName(), Column.class),
+                c
+            );
+        }
+        /* The above is the JDK7 version of:
         columns.forEach(c -> columnConfigs.put(
                 database.correctObjectName(c.getName(), Column.class),
                 c
         ));
+        */
 
-        columnConfigs.entrySet().stream()
-                .filter(entry -> entry.getValue().getType() == null)
-                .forEach(entry -> {
+        for (Map.Entry<String, LoadDataColumnConfig> entry : columnConfigs.entrySet()) {
+            if (!(entry.getValue().getType() == null)) {
+                continue;
+            }
             LoadDataColumnConfig columnConfig = entry.getValue();
             DataType dataType = tableColumns.get(entry.getKey()).getType();
             if (dataType == null) {
@@ -605,7 +614,30 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 }
             }
         }
+
+        /* The above is the JDK7 version of:
+        columnConfigs.entrySet().stream()
+                .filter(entry -> entry.getValue().getType() == null)
+                .forEach(entry -> {
+                    LoadDataColumnConfig columnConfig = entry.getValue();
+                    DataType dataType = tableColumns.get(entry.getKey()).getType();
+                    if (dataType == null) {
+                        LOG.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
+                                columnConfig.toString(), snapshotOfTable.toString() ));
+                        columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
+                    } else {
+                        LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance()
+                                .fromDescription(dataType.toString(), database);
+                        if (liquibaseDataType != null) {
+                            columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
+                        } else {
+                            LOG.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
+                                    columnConfig.toString(), snapshotOfTable.toString(), liquibaseDataType.toString()));
+                        }
+                    }
+                }
         );
+        */
     }
 
     /**

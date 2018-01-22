@@ -15,9 +15,6 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -193,40 +190,17 @@ public class DateTimeType extends LiquibaseDataType {
 
             return new Timestamp(dateTimeFormat.parse(value).getTime());
         } catch (ParseException e) {
-            String[] genericFormats = new String[] {
-                "yyyy-MM-dd'T'HH:mm:ss[.nnnnnnnnn]",
-                "yyyy-MM-dd' 'HH:mm:ss[.nnnnnnnnn]",
-                "yyyy-MM-dd"
-            };
+            String[] genericFormats = new String[] {"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ss" };
 
             for (String format : genericFormats) {
-                    /**
-                     * Java 7's SimpleDateFormat cannot deal with microseconds. java.sql.Timestamp.valueOf cannot
-                     * work with the 'T' form (ISO 8601). So it's either Java 8 or some custom library like Yoda.
-                      */
                 try {
-                    /**
-                     * If the value contains fractions of a second, normalise the fractions to 9 digits.
-                      */
-                    Matcher fractionalPartMatcher = Pattern.compile("(.*\\.)(\\d{1,9})(?:$| )(.*)").matcher(value);
-                    if (fractionalPartMatcher.find()) {
-                        String fractionalPart = fractionalPartMatcher.group(2);
-                        // Add required number of '0's
-                        fractionalPart = String.format("%-9s", fractionalPart).replace(' ', '0');
-                        // And insert into the string
-                        value = fractionalPartMatcher.replaceFirst("$1" + fractionalPart + "$3");
-                    }
-
-                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
-                    LocalDateTime parsedTimestamp = LocalDateTime.parse(value, dtf);
-                    return Timestamp.valueOf(parsedTimestamp);
-                } catch (DateTimeParseException e1) {
-                    // It's ok, try the next format.
+                    return new Timestamp(new SimpleDateFormat(format).parse(value).getTime());
+                } catch (ParseException ignore) {
+                    //doesn't match
                 }
             }
 
-            if (value.contains("/") || value.contains("-")) {
-                // maybe a custom format the database expects. Just return it as it is (String).
+            if (value.contains("/") || value.contains("-")) { //maybe a custom format the database expects. Just return it.
                 return value;
             }
 
