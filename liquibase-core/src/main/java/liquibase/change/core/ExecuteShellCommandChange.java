@@ -13,6 +13,7 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.logging.LogFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
@@ -46,7 +47,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private String executable;
     private List<String> os;
     private List<String> args = new ArrayList<String>();
-    protected List<String> finalCommandArray;
     private String timeout;
     private static final Pattern TIMEOUT_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$");
     private static final Long SECS_IN_MILLIS = 1000L;
@@ -79,10 +79,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     public List<String> getArgs() {
         return Collections.unmodifiableList(args);
-    }
-
-    public void setOs(String os) {
-        this.os = StringUtils.splitAndTrim(os, ",");
     }
 
     @DatabaseChangeProperty(description = "Timeout value for executable to run", exampleValue = "10s")
@@ -142,7 +138,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             nonExecutedMode = true;
         }
 
-        this.finalCommandArray = createFinalCommandArray();
+        this.finalCommandArray = createFinalCommandArray(database);
 
         if (shouldRun && !nonExecutedMode) {
 
@@ -180,18 +176,18 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     }
 
-    protected List<String> createFinalCommandArray() {
+    protected List<String> createFinalCommandArray(Database database) {
         List<String> commandArray = new ArrayList<>();
         commandArray.add(getExecutable());
         commandArray.addAll(getArgs());
         return commandArray;
     }
 
-    protected void executeCommand() throws Exception {
+    protected void executeCommand(Database database) throws Exception {
         ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         ByteArrayOutputStream inputStream = new ByteArrayOutputStream();
 
-        ProcessBuilder pb = createProcessBuilder();
+        ProcessBuilder pb = createProcessBuilder(database);
         Process p = pb.start();
         int returnCode = 0;
         try {
@@ -323,7 +319,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
     }
 
-    protected ProcessBuilder createProcessBuilder() {
+    protected ProcessBuilder createProcessBuilder(Database database) {
         ProcessBuilder pb = new ProcessBuilder(finalCommandArray);
         pb.redirectErrorStream(true);
         return pb;
@@ -367,12 +363,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
     }
-
-    @Override
-    public String toString() {
-        return "external process '" + getExecutable() + "' " + getArgs();
-    }
-
     private class StreamGobbler extends Thread {
         private static final int THREAD_SLEEP_MILLIS = 100;
         private final OutputStream outputStream;

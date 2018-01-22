@@ -22,6 +22,15 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
 
     @Override
     public boolean supports(SetNullableStatement statement, Database database) {
+        try {
+            if (database instanceof Db2zDatabase || (database instanceof DB2Database) && (database.getDatabaseMajorVersion() > 0 && database.getDatabaseMajorVersion() < 9)) {
+                //"DB2 versions less than 9 or z/OS do not support modifying null constraints";
+                return false;
+            }
+        } catch (DatabaseException ignore) {
+            //cannot check
+        }
+
         return !((database instanceof FirebirdDatabase) || (database instanceof SQLiteDatabase));
     }
 
@@ -35,14 +44,6 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof
             InformixDatabase) || (database instanceof H2Database)) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
-        }
-
-        try {
-            if (database instanceof Db2zDatabase || (database instanceof DB2Database) && (database.getDatabaseMajorVersion() > 0 && database.getDatabaseMajorVersion() < 9)) {
-                validationErrors.addError("DB2 versions less than 9 or z/OS do not support modifying null constraints");
-            }
-        } catch (DatabaseException ignore) {
-            //cannot check
         }
         return validationErrors;
     }

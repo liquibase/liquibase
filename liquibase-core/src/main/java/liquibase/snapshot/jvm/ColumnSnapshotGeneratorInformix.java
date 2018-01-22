@@ -48,8 +48,7 @@ public class ColumnSnapshotGeneratorInformix extends ColumnSnapshotGenerator {
     }
 
     @Override
-    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database)
-            throws DatabaseException {
+    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws DatabaseException {
         // For an explanation of the information encoded in the column length, please see
         // https://www.ibm.com/support/knowledgecenter/SSGU8G_11.50.0/com.ibm.sqlr.doc/ids_sqr_027.htm
         String typeName = columnMetadataResultSet.getString("TYPE_NAME").toUpperCase();

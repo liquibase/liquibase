@@ -27,7 +27,7 @@ class OfflineConnectionTest extends Specification {
         def connection = new OfflineConnection(url, new JUnitResourceAccessor());
 
         then:
-        connection.params == expectedParams
+        connection.databaseParams == expectedParams
 
 
         where:

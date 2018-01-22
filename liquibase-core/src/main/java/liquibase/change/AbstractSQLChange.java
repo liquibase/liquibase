@@ -184,8 +184,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 );
             }
 
-            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(),
-                this.isStripComments(), stream));
+            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {

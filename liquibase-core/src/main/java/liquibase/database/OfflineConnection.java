@@ -48,7 +48,7 @@ public class OfflineConnection implements DatabaseConnection {
         this.url = url;
         Matcher matcher = Pattern.compile("offline:(\\w+)\\??(.*)").matcher(url);
         if (!matcher.matches()) {
-            throw new UnexpectedLiquibaseException("Could not parse offline url "+url);
+            throw new UnexpectedLiquibaseException("Could not parse offline url " + url);
         }
         this.databaseShortName = matcher.group(1).toLowerCase();
         String params = StringUtils.trimToNull(matcher.group(2));
@@ -58,59 +58,60 @@ public class OfflineConnection implements DatabaseConnection {
                 String[] keyValues = params.split("&");
                 for (String param : keyValues) {
                     String[] split = param.split("=");
-                    params1.put(split[0], split[1]);
+                    params1.put(URLDecoder.decode(split[0], "UTF-8"), URLDecoder.decode(split[1], "UTF-8"));
+                }
+            }
+
+
+            this.productName = "Offline " + databaseShortName;
+            for (Map.Entry<String, String> paramEntry : params1.entrySet()) {
+
+                if ("version".equals(paramEntry.getKey())) {
+                    this.productVersion = paramEntry.getValue();
+                    String[] versionParts = productVersion.split("\\.");
+                    try {
+                        this.databaseMajorVersion = Integer.parseInt(versionParts[0]);
+                        if (versionParts.length > 1) {
+                            this.databaseMinorVersion = Integer.parseInt(versionParts[1]);
+                        }
+                    } catch (NumberFormatException e) {
+                        LogService.getLog(getClass()).warning(LogType.LOG, "Cannot parse database version " + productVersion);
+                    }
+                } else if ("productName".equals(paramEntry.getKey())) {
+                    this.productName = paramEntry.getValue();
+                } else if ("catalog".equals(paramEntry.getKey())) {
+                    this.catalog = params1.get("catalog");
+                } else if ("caseSensitive".equals(paramEntry.getKey())) {
+                    this.caseSensitive = Boolean.parseBoolean(paramEntry.getValue());
+                } else if ("changeLogFile".equals(paramEntry.getKey())) {
+                    this.changeLogFile = paramEntry.getValue();
+                } else if ("outputLiquibaseSql".equals(paramEntry.getKey())) {
+                    this.outputLiquibaseSql = OutputLiquibaseSql.fromString(paramEntry.getValue());
+                } else if ("snapshot".equals(paramEntry.getKey())) {
+                    String snapshotFile = paramEntry.getValue();
+                    try {
+                        SnapshotParser parser = SnapshotParserFactory.getInstance()
+                                .getParser(snapshotFile, resourceAccessor);
+                        this.snapshot = parser.parse(snapshotFile, resourceAccessor);
+                        this.productVersion = this.snapshot.getDatabase().getDatabaseProductVersion();
+                        this.snapshot.getDatabase().setConnection(this);
+
+                        for (Catalog catalog : this.snapshot.get(Catalog.class)) {
+                            if (catalog.isDefault()) {
+                                this.catalog = catalog.getName();
+                            }
+                        }
+                    } catch (LiquibaseException e) {
+                        throw new UnexpectedLiquibaseException("Cannot parse snapshot " + url, e);
+                    }
+                } else if ("sendsStringParametersAsUnicode".equals(paramEntry.getKey())) {
+                    this.sendsStringParametersAsUnicode = Boolean.parseBoolean(paramEntry.getValue());
+                } else {
+                    this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
                 }
             }
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
-        }
-
-        this.productName = "Offline "+databaseShortName;
-        for (Map.Entry<String, String> paramEntry : params1.entrySet()) {
-
-            if ("version".equals(paramEntry.getKey())) {
-                this.productVersion = paramEntry.getValue();
-                String[] versionParts = productVersion.split("\\.");
-                try {
-                    this.databaseMajorVersion = Integer.parseInt(versionParts[0]);
-                    if (versionParts.length > 1) {
-                        this.databaseMinorVersion = Integer.parseInt(versionParts[1]);
-                    }
-                } catch (NumberFormatException e) {
-                    LogService.getLog(getClass()).warning(LogType.LOG, "Cannot parse database version "+productVersion);
-                }
-            } else if ("productName".equals(paramEntry.getKey())) {
-                this.productName = paramEntry.getValue();
-            } else if ("catalog".equals(paramEntry.getKey())) {
-                this.catalog = params1.get("catalog");
-            } else if ("caseSensitive".equals(paramEntry.getKey())) {
-                 this.caseSensitive = Boolean.parseBoolean(paramEntry.getValue());
-            } else if ("changeLogFile".equals(paramEntry.getKey())) {
-                this.changeLogFile = paramEntry.getValue();
-            } else if ("outputLiquibaseSql".equals(paramEntry.getKey())) {
-                this.outputLiquibaseSql = OutputLiquibaseSql.fromString(paramEntry.getValue());
-            } else if ("snapshot".equals(paramEntry.getKey())) {
-                String snapshotFile = paramEntry.getValue();
-                try {
-                    SnapshotParser parser = SnapshotParserFactory.getInstance()
-                            .getParser(snapshotFile, resourceAccessor);
-                    this.snapshot = parser.parse(snapshotFile, resourceAccessor);
-                    this.productVersion = this.snapshot.getDatabase().getDatabaseProductVersion();
-                    this.snapshot.getDatabase().setConnection(this);
-
-                    for (Catalog catalog : this.snapshot.get(Catalog.class)) {
-                        if (catalog.isDefault()) {
-                            this.catalog = catalog.getName();
-                        }
-                    }
-                } catch (LiquibaseException e) {
-                    throw new UnexpectedLiquibaseException("Cannot parse snapshot " + url, e);
-                }
-            } else if ("sendsStringParametersAsUnicode".equals(paramEntry.getKey())) {
-                this.sendsStringParametersAsUnicode = Boolean.parseBoolean(paramEntry.getValue());
-            } else {
-                this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
-            }
         }
     }
 
@@ -131,10 +132,10 @@ public class OfflineConnection implements DatabaseConnection {
             ((AbstractJdbcDatabase) database).setCaseSensitive(this.caseSensitive);
         }
 
-        if ( snapshot == null) {
+        if (snapshot == null) {
             try {
                 snapshot = new EmptyDatabaseSnapshot(database);
-            } catch (DatabaseException|InvalidExampleException e) {
+            } catch (DatabaseException | InvalidExampleException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
@@ -144,8 +145,8 @@ public class OfflineConnection implements DatabaseConnection {
 
     protected ChangeLogHistoryService createChangeLogHistoryService(Database database) {
         return new OfflineChangeLogHistoryService(database, new File(changeLogFile),
-            outputLiquibaseSql != OutputLiquibaseSql.NONE, // Output DML
-            outputLiquibaseSql == OutputLiquibaseSql.ALL   // Output DDL
+                outputLiquibaseSql != OutputLiquibaseSql.NONE, // Output DML
+                outputLiquibaseSql == OutputLiquibaseSql.ALL   // Output DDL
         );
     }
 

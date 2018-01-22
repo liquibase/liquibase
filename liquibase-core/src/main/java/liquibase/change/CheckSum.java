@@ -76,7 +76,7 @@ public final class CheckSum {
     /**
      * Compute a CheckSum of the given data stream (no normalization of line endings!)
      */
-    public static CheckSum compute(final InputStream stream) {
+    public static CheckSum compute(final InputStream stream, boolean standardizeLineEndings) {
         InputStream newStream = stream;
         if (standardizeLineEndings) {
             newStream = new InputStream() {

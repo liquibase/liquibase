@@ -117,6 +117,9 @@ public class DataTypeFactory {
      * @return the corresponding Liquibase data type in object form.
      */
     public LiquibaseDataType fromDescription(String dataTypeDefinition, Database database) {
+        if (dataTypeDefinition == null) {
+            return null;
+        }
         String dataTypeName = dataTypeDefinition;
 
         // Remove the first occurrence of (anything within parentheses). This will remove the size information from

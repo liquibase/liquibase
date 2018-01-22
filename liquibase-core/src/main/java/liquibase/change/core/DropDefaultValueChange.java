@@ -94,16 +94,4 @@ public class DropDefaultValueChange extends AbstractChange {
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
-
-    @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors vErrors = super.validate(database);
-        if ((database instanceof DB2Database) && (((DB2Database) database).getDataServerType() != DB2Database
-            .DataServerType.DB2LUW)) {
-            vErrors.addWarning("Due to lack of SQL PL support in DB2 flavours other than LUW, " +
-                    "it is not possible to prevent SQL errors (e.g. during change log rollbacks) " +
-                    "if the column does not have a DEFAULT value the moment DROP DEFAULT gets executed.");
-        }
-        return vErrors;
-    }
 }

@@ -45,7 +45,7 @@ public class CheckSumTest {
     @Test
     public void compute_Stream() {
         String valueToHash = "asdf";
-        CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()));
+        CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false);
         assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
         assertFalse(checkSum.toString().equals(valueToHash));
         assertEquals(CheckSum.compute(valueToHash).toString(), checkSum.toString());

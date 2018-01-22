@@ -14,19 +14,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.Db2zDatabase;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogService;
@@ -376,7 +364,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "JOIN ALL_INDEXES i ON i.owner=c.index_owner AND i.index_name = c.index_name and i.table_owner = c.table_owner " +
                                         "LEFT OUTER JOIN all_ind_expressions e ON e.index_owner=c.index_owner AND e.index_name = c.index_name AND e.column_position = c.column_position   " +
                                         "LEFT OUTER JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=c.table_name ";
-                        if (!bulkFetch || getAllCatalogsStringScratchData() == null) {
+                        if (!isBulkFetchMode || getAllCatalogsStringScratchData() == null) {
                             sql += "WHERE c.TABLE_OWNER = '" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' ";
                         } else {
                             sql += "WHERE c.TABLE_OWNER IN ('" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "', " + getAllCatalogsStringScratchData() + ")";
@@ -452,11 +440,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "FROM SYSIBM.SYSKEYS k " +
                                 "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
                                 "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
-                        if (!bulkFetch && tableName != null) {
+                        if (!isBulkFetchMode && tableName != null) {
                             sql += " AND i.TBNAME='" + database.escapeStringForDatabase(tableName) + "'";
                         }
 
-                        if (!bulkFetch && indexName != null) {
+                        if (!isBulkFetchMode && indexName != null) {
                             sql += " AND i.NAME='" + database.escapeStringForDatabase(indexName) + "'";
                         }
 
@@ -969,10 +957,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    if ((database instanceof DB2Database) && (((DB2Database) database).getDataServerType() ==
-                        DataServerType.DB2I)) {
-                        return queryDB2I(schema, view);
-                    }
                     return extract(databaseMetaData.getTables(catalog, schema, ((view == null) ? SQL_FILTER_MATCH_ALL
                         : view), new String[]{"VIEW"}));
                 }
@@ -987,21 +971,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    if ((database instanceof DB2Database) && (((DB2Database) database).getDataServerType() ==
-                        DataServerType.DB2I)) {
-                        return queryDB2I(schema, null);
-                    }
                     return extract(databaseMetaData.getTables(catalog, schema, SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
                 }
 
-
-                private List<CachedRow> queryDB2I(String schema, String view) throws DatabaseException, SQLException {
-                    String sql = "SELECT TABLE_CATALOG as TABLE_CAT, TABLE_SCHEMA as TABLE_SCHEM, TABLE_NAME, VIEW_DEFINITION as OBJECT_BODY FROM SYSIBM.VIEWS WHERE TABLE_SCHEMA='" + schema + "'";
-                    if (view != null) {
-                        sql += " AND TABLE_NAME='" + view + "'";
-                    }
-                    return executeAndExtract(sql, database);
-                }
 
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
@@ -1323,22 +1295,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     } else if (database instanceof DB2Database) {
                         // if we are on DB2 AS400 iSeries
-                        if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
+                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                             sql = "select constraint_name as constraint_name, table_name as table_name from QSYS2.TABLE_CONSTRAINTS where table_schema='" + jdbcSchemaName + "' and constraint_type='UNIQUE'";
                             if (tableName != null) {
                                 sql += " and table_name = '" + tableName + "'";
                             }
                             // DB2 z/OS
-                        }
-                        // if we are on DB2 z/OS
-                        else if (((DB2Database) database).getDataServerType() == DataServerType.DB2Z) {
-                            sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from sysibm.syskeycoluse k, sysibm.systabconst t "
-                                    + "where k.constname = t.constname "
-                                    + "and t.tbcreator = '" + jdbcSchemaName + "' "
-                                    + "and t.type='U'";
-                            if (tableName != null) {
-                                sql += " and t.tbname = '" + tableName + "'";
-                            }
                         }
                         // here we are on DB2 UDB
                         else {

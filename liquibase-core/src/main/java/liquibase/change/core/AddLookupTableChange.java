@@ -3,12 +3,8 @@ package liquibase.change.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeStatus;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
+
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.Db2zDatabase;
@@ -18,6 +14,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
@@ -48,6 +45,17 @@ public class AddLookupTableChange extends AbstractChange {
     private String newColumnName;
     private String newColumnDataType;
     private String constraintName;
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors errors = super.validate(database);
+        if (database instanceof Db2zDatabase) {
+            if (this.getNewColumnDataType() == null) {
+                errors.addError("newColumnDataType is required for " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " on " + database.getShortName());
+            }
+        }
+        return errors;
+    }
 
     public String getExistingTableCatalogName() {
         return existingTableCatalogName;

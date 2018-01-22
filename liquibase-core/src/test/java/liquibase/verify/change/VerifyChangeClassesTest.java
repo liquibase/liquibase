@@ -6,6 +6,7 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeParameterMetaData;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogService;
@@ -79,6 +80,11 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                         requiredParams.add("incrementBy");
                     }
                 }
+
+                if (database instanceof Db2zDatabase && "addLookupTable".equalsIgnoreCase(changeName)) {
+                    requiredParams.add("newColumnDataType");
+                }
+
 
                 // For every required parameter of the change, fetch an example value.
                 for (String paramName : requiredParams) {

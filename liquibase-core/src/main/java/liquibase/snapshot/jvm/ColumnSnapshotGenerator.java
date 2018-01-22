@@ -9,6 +9,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
@@ -336,7 +337,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
      * @return a DataType object with detailed information about the type
      * @throws DatabaseException If an error occurs during processing (mostly caused by Exceptions in JDBC calls)
      */
-    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
+    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws DatabaseException {
 
         if (database instanceof OracleDatabase) {
             String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
