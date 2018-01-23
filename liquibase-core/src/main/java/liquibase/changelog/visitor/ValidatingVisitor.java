@@ -107,22 +107,23 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             
             if(shouldValidate){
                 warnings.addAll(change.warn(database));
-            
-                try {                
-                    ValidationErrors foundErrors = change.validate(database);
 
-                    if ((foundErrors != null) && foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
-                        (ChangeSet.ValidationFailOption.MARK_RAN))) {
+                try {
+                    ValidationErrors foundErrors = change.validate(database);
+                    if ((foundErrors != null)) {
+                        if (foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
+                                (ChangeSet.ValidationFailOption.MARK_RAN))) {
                             LogService.getLog(getClass()).info(
                                     LogType.LOG, "Skipping change set " + changeSet + " due to validation error(s): " +
                                             StringUtils.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
-                    } else {
-                        if (!foundErrors.getWarningMessages().isEmpty())
-                            LogService.getLog(getClass()).warning(
-                                    LogType.LOG, "Change set " + changeSet + ": " +
-                                            StringUtils.join(foundErrors.getWarningMessages(), ", "));
-                        validationErrors.addAll(foundErrors, changeSet);
+                        } else {
+                            if (!foundErrors.getWarningMessages().isEmpty())
+                                LogService.getLog(getClass()).warning(
+                                        LogType.LOG, "Change set " + changeSet + ": " +
+                                                StringUtils.join(foundErrors.getWarningMessages(), ", "));
+                            validationErrors.addAll(foundErrors, changeSet);
+                        }
                     }
                 } catch (Exception e) {
                     changeValidationExceptions.add(e);
