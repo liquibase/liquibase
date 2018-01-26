@@ -4,7 +4,7 @@ jobs:
     working_directory: ~/liquibase
     docker:
       # The first docker image is the image where the actual build process will run in CircleCI:
-      - image: circleci/openjdk:8
+      - image: circleci/openjdk:7
       # We need MySQL 5.6.4+ for the integration tests due to operations on TIMESTAMP(6) data types:
       - image: circleci/mysql:5.6.36
       # Use the oldest PostgreSQL version available, so we do not accidentally break an older version.
