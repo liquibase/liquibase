@@ -272,16 +272,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         String selectStatement;
                         if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                            LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
-                            LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
-                            LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
-                            LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
+                            LogService.getLog(getClass()).debug("rawCatalogName : <" + rawCatalogName + ">");
+                            LogService.getLog(getClass()).debug("rawSchemaName : <" + rawSchemaName + ">");
+                            LogService.getLog(getClass()).debug("rawTableName : <" + rawTableName + ">");
+                            LogService.getLog(getClass()).debug("raw selectStatement : <" + selectStatement + ">");
 
 
                         } else {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                         }
-                        LogFactory.getLogger().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                        LogService.getLog(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                         Statement statement = null;
                         ResultSet columnSelectRS = null;

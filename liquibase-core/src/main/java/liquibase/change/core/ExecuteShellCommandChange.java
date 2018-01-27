@@ -13,7 +13,6 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
@@ -28,7 +27,8 @@ import liquibase.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -222,9 +222,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 (GlobalConfiguration.class).getOutputEncoding());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
-            LogFactory.getLogger().severe(errorStreamOut);
+            LogService.getLog(getClass()).severe(LogType.LOG, errorStreamOut);
         }
-        LogFactory.getLogger().info(infoStreamOut);
+        LogService.getLog(getClass()).info(LogType.LOG, infoStreamOut);
 
         processResult(returnCode, errorStreamOut, infoStreamOut, database);
     }

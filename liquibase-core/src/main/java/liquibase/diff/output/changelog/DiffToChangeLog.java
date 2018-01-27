@@ -1,26 +1,5 @@
 package liquibase.diff.output.changelog;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import javax.xml.parsers.ParserConfigurationException;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
@@ -28,11 +7,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.Db2zDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -41,8 +16,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.serializer.ChangeLogSerializer;
@@ -54,9 +27,12 @@ import liquibase.structure.core.Column;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtils;
 
-public class DiffToChangeLog {
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
-    private static final Logger logger = new LogFactory().getLog("DiffToChangeLog");
+public class DiffToChangeLog {
 
     public static final String ORDER_ATTRIBUTE = "order";
     public static final String DATABASE_CHANGE_LOG_CLOSING_XML_TAG = "</databaseChangeLog>";
@@ -387,7 +363,7 @@ public class DiffToChangeLog {
             else if (! tryDbaDependencies) {
               throw new DatabaseException(dbe);
             }
-            logger.warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
+            LogService.getLog(getClass()).warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
             tryDbaDependencies = false;
             return queryForDependencies(executor, schemas);
         }
