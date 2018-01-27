@@ -34,7 +34,7 @@ public class ChangeLogWriter {
 
 
         String changeLogOutFile = changeLog.replace(":", "_");
-        File xmlFile = new File(outputDir, changeLogOutFile + ".html");
+        File xmlFile = new File(outputDir, changeLogOutFile.toLowerCase() + ".html");
         xmlFile.getParentFile().mkdirs();
 
         BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile, false), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
