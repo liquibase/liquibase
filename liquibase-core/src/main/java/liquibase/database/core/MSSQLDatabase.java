@@ -166,10 +166,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsSequences() {
         try {
-            if (isAzureDb()) {
-                return false;
-            }
-            if (this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012) {
+            if (isAzureDb() || this.getDatabaseMajorVersion() >= MSSQL_SERVER_VERSIONS.MSSQL2012) {
                 return true;
             }
         } catch (DatabaseException e) {
