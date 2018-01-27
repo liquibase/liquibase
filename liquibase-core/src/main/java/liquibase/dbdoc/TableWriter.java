@@ -38,8 +38,7 @@ public class TableWriter extends HTMLWriter {
             String remarks = column.getRemarks();
             cells.add(Arrays.asList(column.getType().toString(),
                     column.isNullable() ? "NULL" : "NOT NULL",
-                    "<A HREF=\"../columns/" + table.getSchema().getName().toLowerCase() + "." + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>",
-                    remarks != null ? remarks : ""));
+                    "<A HREF=\"../columns/" + table.getSchema().getName().toLowerCase() + "." + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>", (remarks != null) ? remarks : ""));
             //todo: add foreign key info to columns?
         }
 
