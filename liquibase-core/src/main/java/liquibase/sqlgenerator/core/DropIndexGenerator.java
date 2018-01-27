@@ -20,7 +20,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("indexName", statement.getIndexName());
 
-        if ((database instanceof MySQLDatabase) || (database instanceof MSSQLDatabase)) {
+        if ((database instanceof MySQLDatabase) || (database instanceof MSSQLDatabase) || database instanceof SybaseASADatabase) {
             validationErrors.checkRequiredField("tableName", statement.getTableName());
         }
 

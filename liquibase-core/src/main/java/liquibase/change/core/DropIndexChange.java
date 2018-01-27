@@ -38,7 +38,7 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name fo the indexed table.", requiredForDatabase = { "sybase","mysql","mssql","mariadb" })
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name fo the indexed table.", requiredForDatabase = { "sybase","mysql","mssql","mariadb", "asany" })
     public String getTableName() {
         return tableName;
     }
