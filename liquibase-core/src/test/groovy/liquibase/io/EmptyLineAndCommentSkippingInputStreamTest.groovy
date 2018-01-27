@@ -39,6 +39,9 @@ class EmptyLineAndCommentSkippingInputStreamTest extends Specification {
                 ["just data",
                  "Line1\nLine2", "Line1\nLine2"],
 
+                ["just data but lines contain comment character",
+                 "Li#ne1\nLine2#", "Li#ne1\nLine2#"],
+
                 ["just data in windows format",
                  "Line1\r\nLine2", "Line1\nLine2"],
 
