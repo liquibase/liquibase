@@ -14,6 +14,9 @@ set LIQUIBASE_HOME=%LIQUIBASE_HOME:"=%
 rem add the lib directory itself to the classpath
 set CP=!CP!;!LIQUIBASE_HOME!lib
 
+rem special characters may be lost
+setlocal DISABLEDELAYEDEXPANSION
+
 rem get command line args into a variable
 set CMD_LINE_ARGS=%1
 if ""%1""=="""" goto done
