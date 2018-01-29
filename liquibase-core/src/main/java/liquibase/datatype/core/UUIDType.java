@@ -15,8 +15,9 @@ public class UUIDType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         try {
-            if ((database instanceof H2Database) || ((database instanceof PostgresDatabase) && (((database
-                .getDatabaseMajorVersion() * 10) + database.getDatabaseMinorVersion()) >= 83))) {
+            if (database instanceof H2Database
+                    || (database instanceof PostgresDatabase && database.getDatabaseMajorVersion() * 10 + database.getDatabaseMinorVersion() >= 83)
+                    || (database instanceof HsqlDatabase && database.getDatabaseMajorVersion() * 10 + database.getDatabaseMinorVersion() >= 24)) {
                 return new DatabaseDataType("UUID");
             }
         } catch (DatabaseException e) {
