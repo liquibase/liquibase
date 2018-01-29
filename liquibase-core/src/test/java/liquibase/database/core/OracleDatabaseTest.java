@@ -2,24 +2,21 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import liquibase.database.OfflineConnection;
-import liquibase.resource.ResourceAccessor;
-import liquibase.test.JUnitResourceAccessor;
-import org.junit.Assert;
-import org.junit.Test;
-import liquibase.database.AbstractJdbcDatabaseTest;
-import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.OfflineConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sdk.executor.MockExecutor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.test.JUnitResourceAccessor;
+import org.junit.Assert;
+import org.junit.Test;
 
-import javax.annotation.Resource;
-
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
