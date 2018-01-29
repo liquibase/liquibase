@@ -27,7 +27,7 @@ public class TableComparator  implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Table && databaseObject2 instanceof Table)) {
+        if (!((databaseObject1 instanceof Table) && (databaseObject2 instanceof Table))) {
             return false;
         }
 

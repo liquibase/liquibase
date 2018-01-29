@@ -2,10 +2,10 @@ package liquibase.change;
 
 import liquibase.change.core.*;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.serializer.LiquibaseSerializable;
 import org.junit.Test;
 
@@ -168,7 +168,7 @@ public class ChangeParameterMetaDataTest {
 
         ChangeParameterMetaData replaceIfExists  = ChangeFactory.getInstance().getChangeMetaData(new CreateViewChange()).getParameters().get("replaceIfExists");
         assertSetsEqual(new String[]{}, replaceIfExists.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
-        assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
+        assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2","db2"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
     }
 
 

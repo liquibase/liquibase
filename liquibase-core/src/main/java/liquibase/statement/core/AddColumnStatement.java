@@ -1,17 +1,8 @@
 package liquibase.statement.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import liquibase.statement.*;
 
-import liquibase.statement.AbstractSqlStatement;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.PrimaryKeyConstraint;
-import liquibase.statement.UniqueConstraint;
+import java.util.*;
 
 public class AddColumnStatement extends AbstractSqlStatement {
 
@@ -26,9 +17,9 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String addAfterColumn;
     private String addBeforeColumn;
     private Integer addAtPosition;
-    private Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+    private Set<ColumnConstraint> constraints = new HashSet<>();
 
-    private List<AddColumnStatement> columns = new ArrayList<AddColumnStatement>();
+    private List<AddColumnStatement> columns = new ArrayList<>();
 
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
         this.catalogName = catalogName;
@@ -158,28 +149,28 @@ public class AddColumnStatement extends AbstractSqlStatement {
     }
 
     public String getAddAfterColumn() {
-    	return addAfterColumn;
+        return addAfterColumn;
     }
 
     public void setAddAfterColumn(String addAfterColumn) {
-		this.addAfterColumn = addAfterColumn;
-	}
+        this.addAfterColumn = addAfterColumn;
+    }
 
     public String getAddBeforeColumn() {
-    	return addBeforeColumn;
+        return addBeforeColumn;
     }
 
     public void setAddBeforeColumn(String addBeforeColumn) {
-		this.addBeforeColumn = addBeforeColumn;
-	}
+        this.addBeforeColumn = addBeforeColumn;
+    }
 
-	public Integer getAddAtPosition() {
-		return addAtPosition;
-	}
+    public Integer getAddAtPosition() {
+        return addAtPosition;
+    }
 
-	public void setAddAtPosition(Integer addAtPosition) {
-		this.addAtPosition = addAtPosition;
-	}
+    public void setAddAtPosition(Integer addAtPosition) {
+        this.addAtPosition = addAtPosition;
+    }
 
     public String getDefaultValueConstraintName() {
         return defaultValueConstraintName;

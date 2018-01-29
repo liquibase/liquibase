@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 
 public class InsertOrUpdateStatementTest extends InsertStatementTest {

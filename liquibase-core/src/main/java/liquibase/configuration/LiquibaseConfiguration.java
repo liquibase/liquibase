@@ -11,11 +11,15 @@ import java.util.Map;
 /**
  * Provides unified management of configuration properties within Liquibase core and in extensions.
  * <p>
- * This class is the top level container used to access {@link ConfigurationContainer} implementations which contain the actual configuration properties.
- * Normal use is to call LiquibaseConfiguration.getInstance().getConfiguration(NEEDED_CONFIGURATION.class).getYOUR_PROPERTY()
+ * This class is the top level container used to access {@link ConfigurationContainer} implementations which contain
+ * the actual configuration properties.
+ * Normal use is to call
+ * LiquibaseConfiguration.getInstance().getConfiguration(NEEDED_CONFIGURATION.class).getYOUR_PROPERTY()
  * <p>
- * This class is implemented as a singleton with a single global set of configuration objects, but the {@link #setInstance(LiquibaseConfiguration)} method can be used to replace
- * the singleton with an alternate implementation that uses ThreadLocal objects or any other way of managing configurations.
+ * This class is implemented as a singleton with a single global set of configuration objects, but the
+ * {@link #setInstance(LiquibaseConfiguration)} method can be used to replace
+ * the singleton with an alternate implementation that uses ThreadLocal objects or any other way of managing
+ * configurations.
  */
 public class LiquibaseConfiguration {
 
@@ -39,9 +43,10 @@ public class LiquibaseConfiguration {
 
     /**
      * Overrides the standard singleton instance created by getInstance().
-     * Useful for alternate implementations with more complex AbstractConfigurationContainer lookup logic such as different configurations per thread.
+     * Useful for alternate implementations with more complex AbstractConfigurationContainer lookup logic such
+     * as different configurations per thread.
      */
-    public static void setInstance(LiquibaseConfiguration instance) {
+    public static synchronized void setInstance(LiquibaseConfiguration instance) {
         LiquibaseConfiguration.instance = instance;
     }
 
@@ -54,8 +59,8 @@ public class LiquibaseConfiguration {
 
 
     /**
-     * Re-initialize the configuration with the given ConfigurationProviders. Any existing AbstractConfigurationContainer instances are reset to
-     * defaults.
+     * Re-initialize the configuration with the given ConfigurationProviders. Any existing
+     * AbstractConfigurationContainer instances are reset to defaults.
      */
     public void init(ConfigurationValueProvider... configurationValueProviders) {
         if (configurationValueProviders == null) {
@@ -70,7 +75,7 @@ public class LiquibaseConfiguration {
      * Resets existing AbstractConfigurationContainer instances to their default values.
      */
     public void reset() {
-        this.configurations = new HashMap<Class, ConfigurationContainer>();
+        this.configurations = new HashMap<>();
     }
 
 
@@ -127,10 +132,11 @@ public class LiquibaseConfiguration {
     }
 
     /**
-     * Generates a human consumable description of how the configured ConfigurationValueProvider(s) will attempt to set a default value.
+     * Generates a human consumable description of how the configured ConfigurationValueProvider(s) will
+     * attempt to set a default value.
      */
     public String describeValueLookupLogic(ConfigurationProperty property) {
-        List<String> reasons = new ArrayList<String>();
+        List<String> reasons = new ArrayList<>();
         for (ConfigurationValueProvider container : configurationValueProviders) {
             reasons.add(container.describeValueLookupLogic(property));
         }

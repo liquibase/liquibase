@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <preConditions>
+            <dbms type="mariadb"/>
+    </preConditions>
+    
+    <changeSet id="1" author="nvoxland">
+        <createTable tableName="news">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(50)"/>            
+            <column name="summary" type="varchar(50)"/>            
+            <column name="abstract" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="nvoxland" context="test">
+        <insert tableName="news">
+            <column name="abstract" value="good news"/>
+            <column name="title">Liquibase 0.8 Released</column>
+            <column name="summary" value="YAY"/>
+        </insert>
+        <insert tableName="news">
+            <column name="title" value="Liquibase 0.9 Released"/>
+            <column name="summary" value="Horay!"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3" author="nvoxland" context="demo">
+        <insert tableName="news">
+            <column name="title" value="Liquibase 1.0 Released"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

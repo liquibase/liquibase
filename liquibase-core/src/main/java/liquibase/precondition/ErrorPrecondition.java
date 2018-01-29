@@ -1,7 +1,6 @@
 package liquibase.precondition;
 
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.precondition.Precondition;
 
 public class ErrorPrecondition {
     private Throwable cause;

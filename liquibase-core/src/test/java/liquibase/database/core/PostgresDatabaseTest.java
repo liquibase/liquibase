@@ -1,13 +1,13 @@
 package liquibase.database.core;
 
+import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import org.junit.Assert;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import org.junit.Test;
 
 /**
  * Tests for {@link PostgresDatabase}
@@ -91,4 +91,16 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("\"tbl\"", database.escapeTableName(null, null, "tbl"));
         assertEquals("\"user\"", database.escapeTableName(null, null, "user"));
     }
+
+    @Test
+    public void testIfEscapeLogicNotImpactOnChangeLog() {
+        PostgresDatabase database = (PostgresDatabase) getDatabase();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+
+        final String COLUMN_AUTHOR = "AUTHOR"; //one column from changeLog table should be enough for test
+
+        String result = database.escapeObjectName(COLUMN_AUTHOR, LiquibaseColumn.class);
+        assertEquals(COLUMN_AUTHOR, result);
+    }
+
 }

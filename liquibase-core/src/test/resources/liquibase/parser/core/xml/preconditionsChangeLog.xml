@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
 
     <preConditions>
-        <runningAs username="testUser"/>
+        <runningAs username="${loginUser}"/>
         <or>
             <dbms type="mssql"/>
             <dbms type="mysql"/>

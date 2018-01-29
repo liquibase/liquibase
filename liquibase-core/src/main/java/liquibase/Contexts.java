@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class Contexts {
 
-    private HashSet<String> contexts = new HashSet<String>();
+    private HashSet<String> contextStore = new HashSet<>();
 
     public Contexts() {
     }
@@ -19,13 +19,22 @@ public class Contexts {
             parseContextString(contexts[0]);
         } else {
             for (String context : contexts) {
-                this.contexts.add(context.toLowerCase());
+                this.contextStore.add(context.toLowerCase());
             }
         }
     }
 
     public Contexts(String contexts) {
         parseContextString(contexts);
+    }
+
+    public Contexts(Collection<String> contexts) {
+        if (contexts != null) {
+            for (String context : contexts) {
+                this.contextStore.add(context.toLowerCase());
+            }
+
+        }
     }
 
     private void parseContextString(String contexts) {
@@ -35,39 +44,30 @@ public class Contexts {
             return;
         }
         for (String context : StringUtils.splitAndTrim(contexts, ",")) {
-            this.contexts.add(context.toLowerCase());
+            this.contextStore.add(context.toLowerCase());
         }
 
-    }
-
-    public Contexts(Collection<String> contexts) {
-        if (contexts != null) {
-            for (String context : contexts) {
-                this.contexts.add(context.toLowerCase());
-            }
-
-        }
     }
 
     public boolean add(String context) {
-        return this.contexts.add(context.toLowerCase());
+        return this.contextStore.add(context.toLowerCase());
     }
     
     public boolean remove(String context) {
-      return this.contexts.remove(context.toLowerCase());
+        return this.contextStore.remove(context.toLowerCase());
     }
 
     @Override
     public String toString() {
-        return StringUtils.join(new TreeSet(this.contexts),",");
+        return StringUtils.join(new TreeSet<String>(this.contextStore), ",");
     }
 
 
     public boolean isEmpty() {
-        return this.contexts == null || this.contexts.isEmpty();
+        return (this.contextStore == null) || this.contextStore.isEmpty();
     }
 
     public Set<String> getContexts() {
-        return Collections.unmodifiableSet(contexts);
+        return Collections.unmodifiableSet(contextStore);
     }
 }

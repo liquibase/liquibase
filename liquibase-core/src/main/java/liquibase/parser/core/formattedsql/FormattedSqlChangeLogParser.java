@@ -7,7 +7,8 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.parser.ChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
@@ -37,19 +38,19 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 reader = new BufferedReader(new UtfBomAwareReader(fileStream));
 
                 String line = reader.readLine();
-                return line != null && line.matches("\\-\\-\\s*liquibase formatted.*");
+                return (line != null) && line.matches("\\-\\-\\s*liquibase formatted.*");
             } else {
                 return false;
             }
         } catch (IOException e) {
-            LogFactory.getLogger().debug("Exception reading " + changeLogFile, e);
+            LogService.getLog(getClass()).debug(LogType.LOG, "Exception reading " + changeLogFile, e);
             return false;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    LogFactory.getLogger().debug("Exception closing " + changeLogFile, e);
+                    LogService.getLog(getClass()).debug(LogType.LOG, "Exception closing " + changeLogFile, e);
                 }
             }
         }
@@ -166,7 +167,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     );
                     String labels = parseString(labelsPatternMatcher);
                     String logicalFilePath = parseString(logicalFilePathMatcher);
-                    if (logicalFilePath == null || "".equals (logicalFilePath)) {
+                    if ((logicalFilePath == null) || "".equals(logicalFilePath)) {
                        logicalFilePath = changeLog.getLogicalFilePath ();
                     }
                     String dbms = parseString(dbmsPatternMatcher);
@@ -246,7 +247,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             if (changeSet != null) {
                 change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeSet.getChangeLog()));
 
-                if (change.getEndDelimiter() == null && StringUtils.trimToEmpty(change.getSql()).endsWith("\n/")) {
+                if ((change.getEndDelimiter() == null) && StringUtils.trimToEmpty(change.getSql()).endsWith("\n/")) {
                     change.setEndDelimiter("\n/$");
                 }
 
@@ -288,7 +289,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         };
         for (Pattern pattern : patterns) {
             Matcher matcher = pattern.matcher(body);
-            if (matcher.matches() && matcher.groupCount() == 2) {
+            if (matcher.matches() && (matcher.groupCount() == 2)) {
                 SqlPrecondition p = new SqlPrecondition();
                 p.setExpectedResult(matcher.group(1));
                 p.setSql(matcher.group(2));

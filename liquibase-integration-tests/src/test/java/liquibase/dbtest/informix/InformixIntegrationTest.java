@@ -1,5 +1,6 @@
 package liquibase.dbtest.informix;
 
+import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 
 /*
@@ -11,7 +12,12 @@ import liquibase.dbtest.AbstractIntegrationTest;
 public class InformixIntegrationTest extends AbstractIntegrationTest {
 
     public InformixIntegrationTest() throws Exception {
-        super("informix", "jdbc:informix-sqli://" + getDatabaseServerHostname("Informix") + ":9088/liquibase:informixserver=ol_ids_1150_1");
+        super("informix", DatabaseFactory.getInstance().getDatabase("informix"));
     }
 
+    @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        // Seems unlikely to ever be provided by Travis, as it's not free
+        return false;
+    }
 }

@@ -5,12 +5,10 @@ import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +110,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     	// Note: The attribute "constraintName" is used to pass the column 
     	// name instead of the constraint name.
 		
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<SqlStatement> statements = new ArrayList<>();
     	
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {

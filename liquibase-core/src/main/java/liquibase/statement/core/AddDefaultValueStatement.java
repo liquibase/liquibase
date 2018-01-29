@@ -12,7 +12,6 @@ public class AddDefaultValueStatement extends AbstractSqlStatement {
 
     private String defaultValueConstraintName;
 
-
     public AddDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType) {
         this(catalogName, schemaName, tableName, columnName, columnDataType, null);
     }
@@ -31,8 +30,8 @@ public class AddDefaultValueStatement extends AbstractSqlStatement {
     }
     
     public String getColumnDataType() {
-		return columnDataType;
-	}
+        return columnDataType;
+    }
 
     public String getCatalogName() {
         return catalogName;

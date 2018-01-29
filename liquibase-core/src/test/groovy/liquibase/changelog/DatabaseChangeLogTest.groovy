@@ -24,7 +24,7 @@ class DatabaseChangeLogTest extends Specification {
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <preConditions>
-        <runningAs username="testUser"/>
+        <runningAs username="${loginUser}"/>
         <or>
             <dbms type="mssql"/>
             <dbms type="mysql"/>
@@ -129,15 +129,19 @@ create view sql_view as select * from sql_table;'''
 
     def "included changelog files have their preconditions and changes included in root changelog"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2")])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
+
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
                 .addChildren([include: [file: "com/example/test1.xml"]])
                 .addChildren([include: [file: "com/example/test2.xml"]])
                 , resourceAccessor)
+
 
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 3
@@ -161,36 +165,42 @@ create view sql_view as select * from sql_table;'''
         when:
         def resourceAccessor = new MockResourceAccessor([
                 "com/example/test1.xml": test1Xml,
-                "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2"),
+                "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2"),
                 "com/example/test.sql" : testSql
         ])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
-                .addChildren([includeAll: [path: "com/example"]])
+                .addChildren([includeAll: [path: "com/example", resourceComparator : "liquibase.changelog.ReversedChangeLogNamesComparator"]])
                 , resourceAccessor)
 
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 4
         ((RunningAsPrecondition) rootChangeLog.preconditions.nestedPreconditions[0]).username == "user1"
 
-        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.size() == 0
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.size() == 2
 
         ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions.size() == 2
         ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0]).username == "testUser"
         ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[1]).nestedPreconditions.size() == 2
 
-        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[3]).nestedPreconditions.size() == 2
-        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[3]).nestedPreconditions[0]).username == "otherUser"
-        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[3]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[3]).nestedPreconditions.size() == 0
 
         rootChangeLog.changeSets.size() == 4
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").changes[0]).tableName == "person"
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").changes[0]).tableName == "person2"
         ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
+
+        // assert reversed order
+        ((CreateTableChange) rootChangeLog.getChangeSets().get(0).changes[0]).tableName == "test_table"
+        ((CreateTableChange) rootChangeLog.getChangeSets().get(2).changes[0]).tableName == "person"
+        ((CreateTableChange) rootChangeLog.getChangeSets().get(1).changes[0]).tableName == "person2"
+        ((RawSQLChange) rootChangeLog.getChangeSets().get(3).changes[0]).sql == testSql
     }
 
     def "includeAll executes include in alphabetical order"() {

@@ -5,24 +5,30 @@ import liquibase.statement.*;
 
 import java.util.*;
 
-public class CreateTableStatement extends AbstractSqlStatement {
+public class CreateTableStatement extends AbstractSqlStatement implements CompoundStatement {
     private String catalogName;
     private String schemaName;
     private String tableName;
     private String tablespace;
     private String remarks;
-    private List<String> columns = new ArrayList<String>();
-    private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<AutoIncrementConstraint>();
-    private Map<String, LiquibaseDataType> columnTypes = new HashMap<String, LiquibaseDataType>();
-    private Map<String, Object> defaultValues = new HashMap<String, Object>();
-    private Map<String, String> defaultValueConstraintNames = new HashMap<String, String>();
-    private Map<String, String> columnRemarks = new HashMap<String, String>();
+    private List<String> columns = new ArrayList<>();
+    private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<>();
+    private Map<String, LiquibaseDataType> columnTypes = new HashMap<>();
+    private Map<String, Object> defaultValues = new HashMap<>();
+    private Map<String, String> defaultValueConstraintNames = new HashMap<>();
+    private Map<String, String> columnRemarks = new HashMap<>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
-    private Set<String> notNullColumns = new HashSet<String>();
-    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
-    private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
+    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<>();
 
+    /* NOT NULL constraints in RDBMSs are curious beasts. In some RDBMS, they do not exist as constraints at all, i.e.
+       they are merely a property of the column. In others, like Oracle DB, they can exist in both forms, and to be
+       able to give the NN constraint a name in CREATE TABLE, we need to save both the NN property as well as the NN constraint. To make things even more complicated, you cannot just add a NN constraint after the list
+       of columns, like you could do with UNIQUE, CHECK or FOREIGN KEY constraints. They must be defined
+       in line with the column (this implies that a NN constraint can always affects exactly one column). */
+    private HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
+
+    private Set<UniqueConstraint> uniqueConstraints = new HashSet<>();
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;
@@ -80,8 +86,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return uniqueConstraints;
     }
 
-
-    public Set<String> getNotNullColumns() {
+    public Map<String, NotNullConstraint> getNotNullColumns() {
         return notNullColumns;
     }
 
@@ -92,9 +97,9 @@ public class CreateTableStatement extends AbstractSqlStatement {
 ////        }
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
-	    pkConstraint.setTablespace(tablespace);
+        pkConstraint.setTablespace(tablespace);
 
-        List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>();
+        List<ColumnConstraint> allConstraints = new ArrayList<>();
         allConstraints.addAll(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
@@ -122,7 +127,6 @@ public class CreateTableStatement extends AbstractSqlStatement {
 
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, ColumnConstraint[] constraints) {
         return addColumn(columnName,columnType,defaultValue,null,constraints);
-
     }
 
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String remarks, ColumnConstraint... constraints) {
@@ -157,7 +161,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
                     }
                 } else if (constraint instanceof NotNullConstraint) {
                     ((NotNullConstraint) constraint).setColumnName(columnName);
-                    getNotNullColumns().add(columnName);
+                    getNotNullColumns().put(columnName, (NotNullConstraint) constraint);
                 } else if (constraint instanceof ForeignKeyConstraint) {
                     ((ForeignKeyConstraint) constraint).setColumn(columnName);
                     getForeignKeyConstraints().add(((ForeignKeyConstraint) constraint));
@@ -188,7 +192,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
     }
 
     public CreateTableStatement addColumnConstraint(NotNullConstraint notNullConstraint) {
-        getNotNullColumns().add(notNullConstraint.getColumnName());
+        getNotNullColumns().put(notNullConstraint.getColumnName(), notNullConstraint);
         return this;
     }
 
@@ -223,7 +227,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return defaultValueConstraintNames;
     }
 
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
 }

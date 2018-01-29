@@ -5,7 +5,6 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.structure.core.Column;
@@ -56,11 +55,10 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 			    .append(" (")
 			    .append(database.escapeColumnNameList(statement.getReferencedColumnNames()))
 			    .append(")");
-
-	    if (statement.getOnUpdate() != null) {
+        if (statement.getOnUpdate() != null) {
 		    if (database instanceof OracleDatabase) {
 			    //don't use
-            } else if ((database instanceof MSSQLDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
+            } else if ((database instanceof MSSQLDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnUpdate())) {
                 //don't use
 		    } else if (database instanceof InformixDatabase) {
 			    //TODO don't know if correct
@@ -69,18 +67,19 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 		    }
 	    }
 
-	    if (statement.getOnDelete() != null) {
-            if ((database instanceof OracleDatabase) && (statement.getOnDelete().equalsIgnoreCase("RESTRICT") || statement.getOnDelete().equalsIgnoreCase("NO ACTION"))) {
+        if (statement.getOnDelete() != null) {
+            if ((database instanceof OracleDatabase) && ("RESTRICT".equalsIgnoreCase(statement.getOnDelete()) || ("NO " +
+                "ACTION").equalsIgnoreCase(statement.getOnDelete()))) {
                 //don't use
-            } else if ((database instanceof MSSQLDatabase) && statement.getOnDelete().equalsIgnoreCase("RESTRICT")) {
+            } else if ((database instanceof MSSQLDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnDelete())) {
                 //don't use
-		    } else if (database instanceof InformixDatabase && !(statement.getOnDelete().equalsIgnoreCase("CASCADE"))) {
-			    //TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
-		    	// see "REFERENCES Clause" in manual
-		    } else {
-			    sb.append(" ON DELETE ").append(statement.getOnDelete());
-		    }
-	    }
+            } else if ((database instanceof InformixDatabase) && !("CASCADE".equalsIgnoreCase(statement.getOnDelete()))) {
+                //TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
+                // see "REFERENCES Clause" in manual
+            } else {
+                sb.append(" ON DELETE ").append(statement.getOnDelete());
+            }
+        }
 
         if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
             if (statement.isDeferrable()) {
@@ -92,14 +91,18 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             }
         }
 
-	    if (database instanceof InformixDatabase) {
-		    sb.append(" CONSTRAINT ");
-		    sb.append(database.escapeConstraintName(statement.getConstraintName()));
-	    }
+        if (database instanceof OracleDatabase) {
+            sb.append(!statement.shouldValidate() ? " ENABLE NOVALIDATE " : "");
+        }
 
-	    return new Sql[]{
-			    new UnparsedSql(sb.toString(), getAffectedForeignKey(statement))
-	    };
+        if (database instanceof InformixDatabase) {
+            sb.append(" CONSTRAINT ");
+            sb.append(database.escapeConstraintName(statement.getConstraintName()));
+        }
+
+        return new Sql[]{
+                new UnparsedSql(sb.toString(), getAffectedForeignKey(statement))
+        };
     }
 
     protected ForeignKey getAffectedForeignKey(AddForeignKeyConstraintStatement statement) {

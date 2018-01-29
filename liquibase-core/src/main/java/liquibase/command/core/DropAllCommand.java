@@ -13,8 +13,10 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtils;
 
@@ -26,7 +28,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     private Database database;
     private CatalogAndSchema[] schemas;
 
-    private Logger log = LogFactory.getInstance().getLog();
+    private Logger log = LogService.getLog(getClass());
 
     @Override
     public String getName() {
@@ -56,13 +58,13 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     }
 
     public DropAllCommand setSchemas(String... schemas) {
-        if (schemas == null || schemas.length == 0 || schemas[0] == null) {
+        if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
             this.schemas = null;
             return this;
         }
 
         schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
-        List<CatalogAndSchema> finalList = new ArrayList<CatalogAndSchema>();
+        List<CatalogAndSchema> finalList = new ArrayList<>();
         for (String schema : schemas) {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
@@ -76,11 +78,12 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     @Override
     protected CommandResult run() throws Exception {
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         try {
-            LockServiceFactory.getInstance().getLockService(database).waitForLock();
+            lockService.waitForLock();
 
             for (CatalogAndSchema schema : schemas) {
-                log.info("Dropping Database Objects in schema: " + schema);
+                log.info(LogType.LOG, "Dropping Database Objects in schema: " + schema);
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }
@@ -89,7 +92,8 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         } catch (Exception e) {
             throw new DatabaseException(e);
         } finally {
-            LockServiceFactory.getInstance().getLockService(database).destroy();
+            lockService.releaseLock();
+            lockService.destroy();
             resetServices();
         }
 

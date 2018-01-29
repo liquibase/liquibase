@@ -1,12 +1,12 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
-import liquibase.database.Database;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -17,23 +17,23 @@ public class DateType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof MSSQLDatabase) {
-            try {
-                if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
-                    return new DatabaseDataType(database.escapeDataTypeName("datetime"));
-                }
-            } catch (DatabaseException ignore) { } //assuming it is a newer version
             return new DatabaseDataType(database.escapeDataTypeName("date"));
         }
         return new DatabaseDataType(getName());
     }
 
     @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.DATE;
+    }
+
+    @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
-        } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+        } else if ("CURRENT_TIMESTAMP()".equals(value.toString())) {
               return database.getCurrentDateTimeFunction();
         } else if (value instanceof java.sql.Timestamp) {
             return database.getDateLiteral(((java.sql.Timestamp) value));
@@ -51,7 +51,7 @@ public class DateType extends LiquibaseDataType {
 
     @Override
     public Object sqlToObject(String value, Database database) {
-        if (database instanceof DB2Database) {
+        if (database instanceof AbstractDb2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"DATE\"\\('", "").replaceFirst("'\\)", "");
         }
         if (database instanceof DerbyDatabase) {
@@ -64,7 +64,8 @@ public class DateType extends LiquibaseDataType {
         try {
             DateFormat dateFormat = getDateFormat(database);
 
-            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+', 'YYYY\\-MM\\-DD'\\)")) {
+            if ((database instanceof OracleDatabase) && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+', " +
+                "'YYYY\\-MM\\-DD'\\)")) {
                 dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
             }
@@ -76,7 +77,7 @@ public class DateType extends LiquibaseDataType {
     }
 
     private boolean zeroTime(String stringVal) {
-        return stringVal.replace("-","").replace(":", "").replace(" ","").replace("0","").equals("");
+        return "".equals(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
     }
 
     protected DateFormat getDateFormat(Database database) {
@@ -86,7 +87,4 @@ public class DateType extends LiquibaseDataType {
             return new SimpleDateFormat("yyyy-MM-dd");
         }
     }
-
-
-
 }

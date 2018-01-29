@@ -9,9 +9,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 public class DiffResult {
@@ -24,9 +23,9 @@ public class DiffResult {
     private StringDiff productNameDiff;
     private StringDiff productVersionDiff;
 
-    private Set<DatabaseObject> missingObjects = new HashSet<DatabaseObject>();
-    private Set<DatabaseObject> unexpectedObjects = new HashSet<DatabaseObject>();
-    private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<DatabaseObject, ObjectDifferences>();
+    private Set<DatabaseObject> missingObjects = new HashSet<>();
+    private Set<DatabaseObject> unexpectedObjects = new HashSet<>();
+    private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<>();
 
 
     public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot comparisonDatabaseSnapshot, CompareControl compareControl) {
@@ -79,7 +78,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> SortedSet<T> getMissingObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
-        TreeSet<T> set = new TreeSet<T>(comparator);
+        TreeSet<T> set = new TreeSet<>(comparator);
         set.addAll(getMissingObjects(type));
         return set;
     }
@@ -96,7 +95,7 @@ public class DiffResult {
     }
 
     public void addMissingObject(DatabaseObject obj) {
-        if (obj instanceof Column && ((Column) obj).getComputed() != null && ((Column) obj).getComputed()) {
+        if ((obj instanceof Column) && (((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {
             return; //not really missing, it's a virtual column
         }
         missingObjects.add(obj);
@@ -117,7 +116,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> SortedSet<T> getUnexpectedObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
-        TreeSet<T> set = new TreeSet<T>(comparator);
+        TreeSet<T> set = new TreeSet<>(comparator);
         set.addAll(getUnexpectedObjects(type));
         return set;
     }
@@ -152,7 +151,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> SortedMap<T, ObjectDifferences> getChangedObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
-        SortedMap<T, ObjectDifferences> map = new TreeMap<T, ObjectDifferences>(comparator);
+        SortedMap<T, ObjectDifferences> map = new TreeMap<>(comparator);
         map.putAll(getChangedObjects(type));
         return map;
     }
@@ -170,9 +169,10 @@ public class DiffResult {
 
 
     public void addChangedObject(DatabaseObject obj, ObjectDifferences differences) {
-        if (obj instanceof Catalog || obj instanceof Schema) {
-            if (differences.getSchemaComparisons() != null && differences.getDifferences().size() == 1 && differences.getDifference("name") != null) {
-                if (obj instanceof Catalog && this.getReferenceSnapshot().getDatabase().supportsSchemas()) { //still save name
+        if ((obj instanceof Catalog) || (obj instanceof Schema)) {
+            if ((differences.getSchemaComparisons() != null) && (differences.getDifferences().size() == 1) &&
+                (differences.getDifference("name") != null)) {
+                if ((obj instanceof Catalog) && this.getReferenceSnapshot().getDatabase().supportsSchemas()) { //still save name
                     changedObjects.put(obj, differences);
                     return;
                 } else {
@@ -191,7 +191,7 @@ public class DiffResult {
 //            differencesInData = !changeSets.isEmpty();
 //        }
 
-        return missingObjects.size() == 0 && unexpectedObjects.size() == 0 && changedObjects.size() == 0;
+        return missingObjects.isEmpty() && unexpectedObjects.isEmpty() && changedObjects.isEmpty();
     }
 
     public Set<Class<? extends DatabaseObject>> getComparedTypes() {

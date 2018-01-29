@@ -8,7 +8,7 @@ import liquibase.exception.DatabaseException;
  * Encapsulates MySQL database support.
  */
 public class MariaDBDatabase extends MySQLDatabase {
-    public static final String PRODUCT_NAME = "MariaDB";
+    private static final String PRODUCT_NAME = "MariaDB";
 
     @Override
     public String getShortName() {
@@ -30,6 +30,13 @@ public class MariaDBDatabase extends MySQLDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
+        // Presumbably for compatiblity reasons, a MariaDB instance might identify with getDatabaseProductName()=MySQL.
+        // To be certain, We search for "mariadb" in the version string.
+        if (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName())) {
+            return true; // Identified as MariaDB product
+        } else {
+            return (("MYSQL".equalsIgnoreCase(conn.getDatabaseProductName())) && conn.getDatabaseProductVersion()
+            .toLowerCase().contains("mariadb"));
+        }
     }
 }

@@ -20,11 +20,14 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
     private boolean deferrable;
     private boolean initiallyDeferred;
+    private boolean shouldValidate = true; //only Oracle PL/SQL feature
 
     private String onDelete;
     private String onUpdate;
 
-    public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName, String baseTableName, ColumnConfig[] baseColumns, String referencedTableCatalogName, String referencedTableSchemaName, String referencedTableName, ColumnConfig[] referencedColumns) {
+    public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName,
+                                            String baseTableName, ColumnConfig[] baseColumns, String referencedTableCatalogName,
+                                            String referencedTableSchemaName, String referencedTableName, ColumnConfig[] referencedColumns) {
         this.baseTableCatalogName = baseTableCatalogName;
         this.baseTableSchemaName = baseTableSchemaName;
         this.baseTableName = baseTableName;
@@ -124,6 +127,27 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
     public AddForeignKeyConstraintStatement setOnDelete(String deleteRule) {
         this.onDelete = deleteRule;
+        return this;
+    }
+
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines whether a foreign key constraint on a column in a table
+     * should be checked if it refers to a valid row or not.
+     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
+     */
+    public boolean shouldValidate() {
+        return shouldValidate;
+    }
+
+    /**
+     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+     * check will be done to ensure old data has valid foreign keys - only new data would be checked
+     * to see if it complies with the constraint logic. The default state for foreign keys is to
+     * have 'ENABLE VALIDATE' set.
+     */
+    public AddForeignKeyConstraintStatement setShouldValidate(boolean shouldValidate) {
+        this.shouldValidate = shouldValidate;
         return this;
     }
 }

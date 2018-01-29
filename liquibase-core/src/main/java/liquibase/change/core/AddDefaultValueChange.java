@@ -4,9 +4,9 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
@@ -209,8 +209,11 @@ public class AddDefaultValueChange extends AbstractChange {
             ((SequenceNextValueFunction) defaultValue).setSequenceSchemaName(this.getSchemaName());
         }
 
+        AddDefaultValueStatement statement = new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue);
+        statement.setDefaultValueConstraintName(this.getDefaultValueConstraintName());
+
         return new SqlStatement[]{
-                new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
+                statement
         };
     }
 

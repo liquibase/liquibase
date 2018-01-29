@@ -28,7 +28,7 @@ import java.util.*;
 public class ParsedNode {
     private String namespace;
     private String name;
-    private List<ParsedNode> children = new ArrayList<ParsedNode>();
+    private List<ParsedNode> children = new ArrayList<>();
     private Object value;
 
     public ParsedNode(String namespace, String name) {
@@ -63,7 +63,7 @@ public class ParsedNode {
      * Returned list is unmodifiableList.
      */
     public List<ParsedNode> getChildren(String namespace, String nodename) {
-        List<ParsedNode> returnList = new ArrayList<ParsedNode>();
+        List<ParsedNode> returnList = new ArrayList<>();
         for (ParsedNode node : children) {
             if (nodeMatches(node, namespace, nodename)) {
                 returnList.add(node);
@@ -77,15 +77,6 @@ public class ParsedNode {
      */
     public Object getValue() {
         return value;
-    }
-
-    /**
-     * Return the value associated with this node converted to the given type.
-     *
-     * @throws ParsedNodeException if the current value type cannot be converted
-     */
-    public <T> T getValue(Class<T> type) throws ParsedNodeException {
-        return convertObject(value, type);
     }
 
     /**
@@ -109,7 +100,7 @@ public class ParsedNode {
                     newValue.add(obj);
                 }
             }
-            if (newValue.size() == 0) {
+            if (newValue.isEmpty()) {
                 //do nothing
             } else if (newValue.size() == 1) {
                 this.value = newValue.get(0);
@@ -122,6 +113,15 @@ public class ParsedNode {
             this.value = value;
         }
         return this;
+    }
+
+    /**
+     * Return the value associated with this node converted to the given type.
+     *
+     * @throws ParsedNodeException if the current value type cannot be converted
+     */
+    public <T> T getValue(Class<T> type) throws ParsedNodeException {
+        return convertObject(value, type);
     }
 
     /**
@@ -150,7 +150,7 @@ public class ParsedNode {
      * For each key in the map, a new child is added with the key as the name and the value (with all {@link #setValue(Object)}) logic) is the value.
      */
     public ParsedNode addChildren(Map<String, Object> child) throws ParsedNodeException {
-        if (child == null || child.size() == 0) {
+        if ((child == null) || child.isEmpty()) {
             return this; //do nothing
         }
         for (Map.Entry<String, Object> entry : child.entrySet()) {
@@ -247,7 +247,7 @@ public class ParsedNode {
                 return (T) new BigInteger(rawValue.toString());
             } else if (type.equals(BigDecimal.class)) {
                 return (T) new BigDecimal(rawValue.toString());
-            } else if (type.equals(Boolean.class) && rawValue instanceof String) {
+            } else if (type.equals(Boolean.class) && (rawValue instanceof String)) {
                 return (T) Boolean.valueOf(rawValue.toString());
             } else if (type.isAssignableFrom(Date.class)) {
                 return (T) new ISODateFormat().parse(rawValue.toString());
@@ -257,10 +257,12 @@ public class ParsedNode {
                 return (T) new SequenceCurrentValueFunction(rawValue.toString());
             } else if (type.equals(DatabaseFunction.class)) {
                 return (T) new DatabaseFunction(rawValue.toString());
+            } else if (type.isEnum()) {
+                return (T) Enum.valueOf((Class<Enum>)type, rawValue.toString());
             } else {
                 throw new UnexpectedLiquibaseException("Cannot convert " + rawValue.getClass().getName() + " '" + rawValue + "' to " + type.getName());
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (e instanceof UnexpectedLiquibaseException) {
                 throw (UnexpectedLiquibaseException) e;
             }
@@ -282,7 +284,7 @@ public class ParsedNode {
     @Override
     public String toString() {
         String string = name;
-        if (children.size() > 0) {
+        if (!children.isEmpty()) {
             string += "[" + StringUtils.join(children, ",", new StringUtils.ToStringFormatter(), true) + "]";
         }
         if (value != null) {
@@ -299,7 +301,7 @@ public class ParsedNode {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ParsedNode && this.toString().equals(obj.toString());
+        return (obj instanceof ParsedNode) && this.toString().equals(obj.toString());
     }
 
     @Override

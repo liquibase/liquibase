@@ -1,14 +1,13 @@
 package liquibase.util;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
+import liquibase.logging.LogService;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
@@ -23,6 +22,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SqlUtil {
+
+    private SqlUtil() {
+        throw new IllegalStateException("This utility class must not be instantiated. Sorry.");
+    }
 
     public static boolean isNumeric(int dataType) {
         List<Integer> numericTypes = Arrays.asList(
@@ -64,7 +67,6 @@ public class SqlUtil {
         if (type.getDataTypeId() != null) {
             typeId = type.getDataTypeId();
         }
-        String typeName = type.getTypeName();
 
         LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().from(type, database);
 
@@ -77,20 +79,23 @@ public class SqlUtil {
             }
         }
 
-
-        if (database instanceof OracleDatabase && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
+        if ((database instanceof OracleDatabase) && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
             //oracle returns functions without quotes
             Object maybeDate = null;
 
-            if (liquibaseDataType instanceof DateType || typeId == Types.DATE) {
+            if ((liquibaseDataType instanceof DateType) || (typeId == Types.DATE)) {
                 if (stringVal.endsWith("'HH24:MI:SS')")) {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
+                    maybeDate = DataTypeFactory.getInstance().fromDescription(
+                    "time", database).sqlToObject(stringVal, database);
                 } else {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
+                    maybeDate = DataTypeFactory.getInstance().fromDescription(
+                    "date", database).sqlToObject(stringVal, database);
                 }
-            } else if (liquibaseDataType instanceof DateTimeType || typeId == Types.TIMESTAMP) {
-                maybeDate = DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
-            } else if (!stringVal.matches("\\d+\\.?\\d*")) { //not just a number
+            } else if ((liquibaseDataType instanceof DateTimeType) || (typeId == Types.TIMESTAMP)) {
+                maybeDate = DataTypeFactory.getInstance().fromDescription(
+                "datetime", database).sqlToObject(stringVal, database);
+            } else if (!stringVal.matches("\\d+\\.?\\d*")) {
+                //not just a number
                 return new DatabaseFunction(stringVal);
             }
             if (maybeDate != null) {
@@ -114,6 +119,7 @@ public class SqlUtil {
             return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
         }
 
+        String typeName = type.getTypeName();
         Scanner scanner = new Scanner(stringVal.trim());
         if (typeId == Types.ARRAY) {
             return new DatabaseFunction(stringVal);
@@ -132,7 +138,7 @@ public class SqlUtil {
             stringVal = stringVal.trim();
 
             if (database instanceof MySQLDatabase) {
-                return stringVal.equals("1") || stringVal.equalsIgnoreCase("true");
+                return "1".equals(stringVal) || "true".equalsIgnoreCase(stringVal);
             }
 
             Object value;
@@ -142,6 +148,13 @@ public class SqlUtil {
                 value = Integer.valueOf(stringVal);
             }
 
+            if (database instanceof MSSQLDatabase && value instanceof Boolean) {
+                if ((Boolean) value) {
+                    return new DatabaseFunction("'true'");
+                } else {
+                    return new DatabaseFunction("'false'");
+                }
+            }
             return value;
         } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
             if (strippedSingleQuotes) {
@@ -222,7 +235,7 @@ public class SqlUtil {
         } else if (liquibaseDataType instanceof NVarcharType || typeId == Types.NVARCHAR) {
             return stringVal;
         } else if (typeId == Types.OTHER) {
-            if (database instanceof DB2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
+            if (database instanceof AbstractDb2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
                 return new BigDecimal(stringVal);
             }
             return new DatabaseFunction(stringVal);
@@ -258,11 +271,13 @@ public class SqlUtil {
             return stringVal;
         } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
             return stringVal;
+        } else if ((database instanceof MSSQLDatabase) && typeName.toLowerCase().startsWith("datetimeoffset")) {
+            return stringVal;
         } else {
             if (stringVal.equals("")) {
                 return stringVal;
             }
-            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
+            LogService.getLog(SqlUtil.class).info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
             if (strippedSingleQuotes) { //put quotes back
                 return new DatabaseFunction("'"+stringVal+"'");
             }
@@ -270,24 +285,29 @@ public class SqlUtil {
         }
     }
 
-    public static String replacePredicatePlaceholders(Database database, String predicate, List<String> columnNames, List<Object> parameters) {
+    public static String replacePredicatePlaceholders(Database database, String predicate, List<String> columnNames,
+        List<Object> parameters) {
         Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(predicate.trim());
         StringBuffer sb = new StringBuffer();
         Iterator<String> columnNameIter = columnNames.iterator();
         Iterator<Object> paramIter = parameters.iterator();
         while (matcher.find()) {
-            if (matcher.group().equals(":name")) {
+            if (":name".equals(matcher.group())) {
                 while (columnNameIter.hasNext()) {
                     String columnName = columnNameIter.next();
                     if (columnName == null) {
                         continue;
                     }
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement(database.escapeObjectName(columnName, Column.class)));
+                    matcher.appendReplacement(sb, Matcher.quoteReplacement(
+                        database.escapeObjectName(columnName, Column.class))
+                    );
                     break;
                 }
             } else if (paramIter.hasNext()) {
                 Object param = paramIter.next();
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database)));
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(
+                    DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database))
+                );
             }
         }
         matcher.appendTail(sb);

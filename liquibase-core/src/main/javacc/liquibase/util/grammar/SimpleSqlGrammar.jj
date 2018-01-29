@@ -2,7 +2,7 @@ options {
   STATIC = false;
   IGNORE_CASE=true;
   UNICODE_INPUT=true;
-  JAVA_UNICODE_ESCAPE=true;
+  JAVA_UNICODE_ESCAPE=false;
   DEBUG_PARSER=false;
 }
 
@@ -68,7 +68,7 @@ TOKEN : /* Numeric Constants */
 
 TOKEN:
 {
-    < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>))+ >
+    < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (["\r","\n"," "])* (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>))+ >
 |	< S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> )+ ( <DIGIT> | <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> )* >
 | 	< #LETTER: ["a"-"z", "A"-"Z", "_", "$"] >
 |   < #SPECIAL_CHARS: "$" | "_" | "#" | "@" >

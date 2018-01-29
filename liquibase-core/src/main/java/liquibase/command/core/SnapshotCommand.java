@@ -8,7 +8,10 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.serializer.SnapshotSerializerFactory;
-import liquibase.snapshot.*;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotListener;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -43,13 +46,13 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     }
 
     public SnapshotCommand setSchemas(String... schemas) {
-        if (schemas == null || schemas.length == 0 || schemas[0] == null) {
+        if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
             this.schemas = null;
             return this;
         }
 
         schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
-        List<CatalogAndSchema> finalList = new ArrayList<CatalogAndSchema>();
+        List<CatalogAndSchema> finalList = new ArrayList<>();
         for (String schema : schemas) {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }

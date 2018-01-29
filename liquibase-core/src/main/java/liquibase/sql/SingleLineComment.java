@@ -7,8 +7,8 @@ import java.util.HashSet;
 
 public class SingleLineComment implements Sql {
 
-	final private String sql;
-	final private String lineCommentToken;
+	private final String sql;
+	private final String lineCommentToken;
 	
 	public SingleLineComment(String sql, String lineCommentToken) {
 		this.sql = sql;
@@ -17,7 +17,7 @@ public class SingleLineComment implements Sql {
 	
 	@Override
     public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
-		return new HashSet<DatabaseObject>();
+		return new HashSet<>();
 	}
 
 	@Override

@@ -1,15 +1,15 @@
 package liquibase.precondition.core;
 
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.precondition.Precondition;
-import liquibase.database.Database;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.PreconditionErrorException;
 
 public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
 
@@ -53,7 +53,8 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         ChangeLogParameters changeLogParameters = changeLog.getChangeLogParameters();
         if (changeLogParameters == null) {
             throw new PreconditionFailedException("No Changelog properties were set", changeLog, this);
@@ -62,7 +63,7 @@ public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
         if (propertyValue == null) {
             throw new PreconditionFailedException("Changelog property '"+ property +"' was not set", changeLog, this);
         }
-        if (value != null && !propertyValue.toString().equals(value)) {
+        if ((value != null) && !propertyValue.toString().equals(value)) {
             throw new PreconditionFailedException("Expected changelog property '"+ property +"' to have a value of '"+value+"'.  Got '"+propertyValue+"'", changeLog, this);
         }
     }

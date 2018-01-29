@@ -16,6 +16,8 @@ import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
@@ -46,7 +48,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         //don't try to recreate indexes that differ in just clustered
         Difference clusteredDiff = differences.getDifference("clustered");
         if (clusteredDiff != null) {
-            if (clusteredDiff.getReferenceValue() == null || clusteredDiff.getComparedValue() == null) {
+            if ((clusteredDiff.getReferenceValue() == null) || (clusteredDiff.getComparedValue() == null)) {
                 differences.removeDifference("clustered");
             }
         }
@@ -61,15 +63,19 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
 
         Index index = (Index) changedObject;
 
-        if (index.getTable() != null) {
-            if (index.getTable().getPrimaryKey() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable().getPrimaryKey().getBackingIndex(), changedObject, differences.getSchemaComparisons(), comparisonDatabase)) {
-                return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
+        if (index.getTable() != null  && index.getTable() instanceof Table) {
+            if ((((Table) index.getTable()).getPrimaryKey() != null) && DatabaseObjectComparatorFactory.getInstance()
+                .isSameObject(((Table) index.getTable()).getPrimaryKey().getBackingIndex(), changedObject, differences
+                    .getSchemaComparisons(), comparisonDatabase)) {
+                return ChangeGeneratorFactory.getInstance().fixChanged(((Table) index.getTable()).getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
             }
 
-            List<UniqueConstraint> uniqueConstraints = index.getTable().getUniqueConstraints();
+            List<UniqueConstraint> uniqueConstraints = ((Table) index.getTable()).getUniqueConstraints();
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
-                    if (constraint.getBackingIndex() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(constraint.getBackingIndex(), changedObject, differences.getSchemaComparisons(), comparisonDatabase)) {
+                    if ((constraint.getBackingIndex() != null) && DatabaseObjectComparatorFactory.getInstance()
+                        .isSameObject(constraint.getBackingIndex(), changedObject, differences.getSchemaComparisons()
+                            , comparisonDatabase)) {
                         return ChangeGeneratorFactory.getInstance().fixChanged(constraint, differences, control, referenceDatabase, comparisonDatabase);
                     }
 
@@ -83,7 +89,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
 
         CreateIndexChange addIndexChange = createCreateIndexChange();
         addIndexChange.setTableName(index.getTable().getName());
-        List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
+        List<AddColumnConfig> columns = new ArrayList<>();
         for (Column col : index.getColumns()) {
             columns.add(new AddColumnConfig(col));
         }
@@ -118,7 +124,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
                 control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
             }
 
-            if (index.isUnique() != null && index.isUnique()) {
+            if ((index.isUnique() != null) && index.isUnique()) {
                 control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
                 if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
                     control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(comparedColumns));

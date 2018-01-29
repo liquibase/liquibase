@@ -18,7 +18,7 @@ public class ChangeStatus {
             if (this.status == Status.complete) {
                 this.message = incompleteMessage;
                 this.status = Status.incorrect;
-            } else if (this.status != Status.notApplied && this.status != Status.unknown) {
+            } else if ((this.status != Status.notApplied) && (this.status != Status.unknown)) {
                 this.message = incompleteMessage;
                 this.status = Status.notApplied;
             }
@@ -33,7 +33,7 @@ public class ChangeStatus {
                 status = Status.complete;
             }
         } else {
-            if (this.status == null || this.status == Status.complete) {
+            if ((this.status == null) || (this.status == Status.complete)) {
                 this.status = Status.incorrect;
                 this.message = incorrectMessage;
             }

@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertEquals;
-
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.InsertStatement;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class InsertOrUpdateGeneratorPostgresTest {
     private static final String CATALOG_NAME = "mycatalog";
@@ -21,7 +21,7 @@ public class InsertOrUpdateGeneratorPostgresTest {
         InsertGenerator generator = new InsertGenerator();
         InsertStatement statement = new InsertStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
         ColumnConfig columnConfig = new ColumnConfig();
-        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SCHEMA_NAME+'.'+SEQUENCE_NAME));
+        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(SEQUENCE_NAME, SCHEMA_NAME));
         columnConfig.setName("col3");
         statement.addColumn(columnConfig);
 

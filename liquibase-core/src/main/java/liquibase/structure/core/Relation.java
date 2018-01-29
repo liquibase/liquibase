@@ -16,6 +16,8 @@ public abstract class Relation extends AbstractDatabaseObject {
 
     protected Relation() {
         setAttribute("columns", new ArrayList());
+        setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
+        setAttribute("indexes", new ArrayList<Index>());
     }
 
     @Override
@@ -30,6 +32,15 @@ public abstract class Relation extends AbstractDatabaseObject {
 
         return this;
     }
+
+    public List<Index> getIndexes() {
+        return getAttribute("indexes", List.class);
+    }
+
+    public List<UniqueConstraint> getUniqueConstraints() {
+        return getAttribute("uniqueConstraints", List.class);
+    }
+
 
     @Override
     public DatabaseObject[] getContainingObjects() {
@@ -94,7 +105,7 @@ public abstract class Relation extends AbstractDatabaseObject {
     public int compareTo(Object o) {
         Relation that = (Relation) o;
         int returnValue = 0;
-        if (this.getSchema() != null && that.getSchema() != null) {
+        if ((this.getSchema() != null) && (that.getSchema() != null)) {
             returnValue = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
         }
 

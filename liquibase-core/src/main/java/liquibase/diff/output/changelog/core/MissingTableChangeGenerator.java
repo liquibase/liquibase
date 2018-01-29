@@ -22,129 +22,15 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
-    @Override
-    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (Table.class.isAssignableFrom(objectType)) {
-            return PRIORITY_DEFAULT;
-        }
-        return PRIORITY_NONE;
-    }
-
-    @Override
-    public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return null;
-    }
-
-    @Override
-    public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
-    }
-
-    @Override
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        Table missingTable = (Table) missingObject;
-
-        PrimaryKey primaryKey = missingTable.getPrimaryKey();
-
-//        if (control.diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(missingTable.getSchema().toCatalogAndSchema(), missingTable.getName())) {
-//            continue;
-//        }
-
-        CreateTableChange change = createCreateTableChange();
-        change.setTableName(missingTable.getName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(missingTable.getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(missingTable.getSchema().getName());
-        }
-        if (missingTable.getRemarks() != null) {
-            change.setRemarks(missingTable.getRemarks());
-        }
-
-        for (Column column : missingTable.getColumns()) {
-            ColumnConfig columnConfig = new ColumnConfig();
-            columnConfig.setName(column.getName());
-            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), referenceDatabase);
-            DatabaseDataType ddt = ldt.toDatabaseDataType(comparisonDatabase);
-            String typeString = ddt.toString();
-            if (comparisonDatabase instanceof MSSQLDatabase) {
-                typeString = comparisonDatabase.unescapeDataTypeString(typeString);
-            }
-            columnConfig.setType(typeString);
-
-            if (column.isAutoIncrement()) {
-                columnConfig.setAutoIncrement(true);
-            }
-
-            ConstraintsConfig constraintsConfig = null;
-            // In MySQL, the primary key must be specified at creation for an autoincrement column
-            if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumns().size() == 1 && primaryKey.getColumnNamesAsList().contains(column.getName())) {
-                if (referenceDatabase instanceof MSSQLDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && !primaryKey.getBackingIndex().getClustered()) {
-                    // have to handle PK as a separate statement
-                } else if (referenceDatabase instanceof PostgresDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && primaryKey.getBackingIndex().getClustered()) {
-                    // have to handle PK as a separate statement
-                } else {
-                    constraintsConfig = new ConstraintsConfig();
-                    if (shouldAddPrimarykeyToConstraints(missingObject, control, referenceDatabase, comparisonDatabase)) {
-                        constraintsConfig.setPrimaryKey(true);
-                        constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
-                        // MySQL sets some primary key names as PRIMARY which is invalid
-                        if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
-                            constraintsConfig.setPrimaryKeyName(null);
-                        } else {
-                            constraintsConfig.setPrimaryKeyName(primaryKey.getName());
-                        }
-                        control.setAlreadyHandledMissing(primaryKey);
-                        control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
-                    } else {
-                        constraintsConfig.setNullable(false);
-                    }
-                }
-            } else if (column.isNullable() != null && !column.isNullable()) {
-                constraintsConfig = new ConstraintsConfig();
-                constraintsConfig.setNullable(false);
-            }
-
-            if (constraintsConfig != null) {
-                columnConfig.setConstraints(constraintsConfig);
-            }
-
-            setDefaultValue(columnConfig, column, referenceDatabase);
-
-            if (column.getRemarks() != null) {
-                columnConfig.setRemarks(column.getRemarks());
-            }
-
-            if (column.getAutoIncrementInformation() != null) {
-                BigInteger startWith = column.getAutoIncrementInformation().getStartWith();
-                BigInteger incrementBy = column.getAutoIncrementInformation().getIncrementBy();
-                if (startWith != null && !startWith.equals(BigInteger.ONE)) {
-                    columnConfig.setStartWith(startWith);
-                }
-                if (incrementBy != null && !incrementBy.equals(BigInteger.ONE)) {
-                    columnConfig.setIncrementBy(incrementBy);
-                }
-            }
-
-            change.addColumn(columnConfig);
-            control.setAlreadyHandledMissing(column);
-        }
-
-
-        return new Change[]{
-                change
-        };
-    }
-
-    public boolean shouldAddPrimarykeyToConstraints(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase) {
-        return true;
-    }
 
     public static void setDefaultValue(ColumnConfig columnConfig, Column column, Database database) {
         LiquibaseDataType dataType = DataTypeFactory.getInstance().from(column.getType(), database);
@@ -166,8 +52,9 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             if ("current".equals(function.getValue())) {
                 if (database instanceof InformixDatabase) {
                     if (dataType instanceof DateTimeType) {
-                        if (dataType.getAdditionalInformation() == null || dataType.getAdditionalInformation().length() == 0) {
-                            if (dataType.getParameters() != null && dataType.getParameters().length > 0) {
+                        if ((dataType.getAdditionalInformation() == null) || dataType.getAdditionalInformation()
+                                .isEmpty()) {
+                            if ((dataType.getParameters() != null) && (dataType.getParameters().length > 0)) {
 
                                 String parameter = String.valueOf(dataType.getParameters()[0]);
 
@@ -211,7 +98,159 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         columnConfig.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
     }
 
+    @Override
+    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+        if (Table.class.isAssignableFrom(objectType)) {
+            return PRIORITY_DEFAULT;
+        }
+        return PRIORITY_NONE;
+    }
+
+    @Override
+    public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return null;
+    }
+
+    @Override
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return null;
+    }
+
+    @Override
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+        Table missingTable = (Table) missingObject;
+
+        PrimaryKey primaryKey = missingTable.getPrimaryKey();
+        List<String> pkColumnList = ((primaryKey != null) ? primaryKey.getColumnNamesAsList() : null);
+        Map<Column, UniqueConstraint> singleUniqueConstraints = getSingleColumnUniqueConstraints(missingTable);
+
+        CreateTableChange change = createCreateTableChange();
+        change.setTableName(missingTable.getName());
+        if (control.getIncludeCatalog()) {
+            change.setCatalogName(missingTable.getSchema().getCatalogName());
+        }
+        if (control.getIncludeSchema()) {
+            change.setSchemaName(missingTable.getSchema().getName());
+        }
+        if (missingTable.getRemarks() != null) {
+            change.setRemarks(missingTable.getRemarks());
+        }
+        if ((missingTable.getTablespace() != null) && comparisonDatabase.supportsTablespaces()) {
+            change.setTablespace(missingTable.getTablespace());
+        }
+
+        for (Column column : missingTable.getColumns()) {
+            ColumnConfig columnConfig = new ColumnConfig();
+            columnConfig.setName(column.getName());
+            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), referenceDatabase);
+            DatabaseDataType ddt = ldt.toDatabaseDataType(comparisonDatabase);
+            String typeString = ddt.toString();
+            if (comparisonDatabase instanceof MSSQLDatabase) {
+                typeString = comparisonDatabase.unescapeDataTypeString(typeString);
+            }
+            columnConfig.setType(typeString);
+
+            if (column.isAutoIncrement()) {
+                columnConfig.setAutoIncrement(true);
+            }
+
+            ConstraintsConfig constraintsConfig = null;
+            // In MySQL, the primary key must be specified at creation for an autoincrement column
+            if ((pkColumnList != null) && pkColumnList.contains(column.getName())) {
+                if ((referenceDatabase instanceof MSSQLDatabase) && (primaryKey.getBackingIndex() != null) &&
+                        (primaryKey.getBackingIndex().getClustered() != null) && !primaryKey.getBackingIndex()
+                        .getClustered()) {
+                    // have to handle PK as a separate statement
+                } else if ((referenceDatabase instanceof PostgresDatabase) && (primaryKey.getBackingIndex() != null)
+                        && (primaryKey.getBackingIndex().getClustered() != null) && primaryKey.getBackingIndex()
+                        .getClustered()) {
+                    // have to handle PK as a separate statement
+                } else {
+                    constraintsConfig = new ConstraintsConfig();
+                    if (shouldAddPrimarykeyToConstraints(missingObject, control, referenceDatabase, comparisonDatabase)) {
+                        constraintsConfig.setPrimaryKey(true);
+                        constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
+
+                        // MySQL sets some primary key names as PRIMARY which is invalid
+                        if ((comparisonDatabase instanceof MySQLDatabase) && "PRIMARY".equals(primaryKey.getName())) {
+                            constraintsConfig.setPrimaryKeyName(null);
+                        } else {
+                            constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                        }
+                        control.setAlreadyHandledMissing(primaryKey);
+                        control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
+                    } else {
+                        constraintsConfig.setNullable(false);
+                    }
+                }
+            } else if ((column.isNullable() != null) && !column.isNullable()) {
+                constraintsConfig = new ConstraintsConfig();
+                constraintsConfig.setNullable(false);
+            }
+
+            if (referenceDatabase instanceof MySQLDatabase) {
+                UniqueConstraint uniqueConstraint = singleUniqueConstraints.get(column);
+                if (uniqueConstraint != null) {
+                    if (!control.alreadyHandledMissing(uniqueConstraint, referenceDatabase)) {
+                        if (constraintsConfig == null) {
+                            constraintsConfig = new ConstraintsConfig();
+                        }
+                        constraintsConfig.setUnique(true);
+                        control.setAlreadyHandledMissing(uniqueConstraint);
+                        control.setAlreadyHandledMissing(uniqueConstraint.getBackingIndex());
+                    }
+                }
+            }
+
+            if (constraintsConfig != null) {
+                columnConfig.setConstraints(constraintsConfig);
+            }
+
+            setDefaultValue(columnConfig, column, referenceDatabase);
+
+            if (column.getRemarks() != null) {
+                columnConfig.setRemarks(column.getRemarks());
+            }
+
+            if (column.getAutoIncrementInformation() != null) {
+                BigInteger startWith = column.getAutoIncrementInformation().getStartWith();
+                BigInteger incrementBy = column.getAutoIncrementInformation().getIncrementBy();
+                if ((startWith != null) && !startWith.equals(BigInteger.ONE)) {
+                    columnConfig.setStartWith(startWith);
+                }
+                if ((incrementBy != null) && !incrementBy.equals(BigInteger.ONE)) {
+                    columnConfig.setIncrementBy(incrementBy);
+                }
+            }
+
+            change.addColumn(columnConfig);
+            control.setAlreadyHandledMissing(column);
+        }
+
+        // In SQLite, we must specify the PRIMARY KEY at table creation time
+
+
+        return new Change[]{
+                change
+        };
+    }
+
+    private Map<Column, UniqueConstraint> getSingleColumnUniqueConstraints(Table missingTable) {
+        Map<Column, UniqueConstraint> map = new HashMap<>();
+        List<UniqueConstraint> constraints = missingTable.getUniqueConstraints() == null ? null : missingTable.getUniqueConstraints();
+        for (UniqueConstraint constraint : constraints) {
+            if (constraint.getColumns().size() == 1) {
+                map.put(constraint.getColumns().get(0), constraint);
+            }
+        }
+        return map;
+    }
+
     protected CreateTableChange createCreateTableChange() {
         return new CreateTableChange();
+    }
+
+    public boolean shouldAddPrimarykeyToConstraints(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase) {
+        return true;
     }
 }

@@ -18,10 +18,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtils;
 import liquibase.util.csv.CSVWriter;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -48,9 +45,13 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
 
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl outputControl, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
-        Statement stmt = null;
+    
         ResultSet rs = null;
-        try {
+        try (
+            Statement stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        )
+        {
             Data data = (Data) missingObject;
 
             Table table = data.getTable();
@@ -60,11 +61,11 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
 
             String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
 
-            stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            
             stmt.setFetchSize(100);
             rs = stmt.executeQuery(sql);
 
-            List<String> columnNames = new ArrayList<String>();
+            List<String> columnNames = new ArrayList<>();
             for (int i=0; i< rs.getMetaData().getColumnCount(); i++) {
                 columnNames.add(rs.getMetaData().getColumnName(i+1));
             }
@@ -78,55 +79,63 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                     parentDir.mkdirs();
                 }
                 if (!parentDir.isDirectory()) {
-                    throw new RuntimeException(parentDir
-                            + " is not a directory");
+                    throw new IOException(parentDir.getAbsolutePath() +  " is not a valid directory");
                 }
             }
-
-            CSVWriter outputFile = new CSVWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())));
-            String[] dataTypes = new String[columnNames.size()];
-            String[] line = new String[columnNames.size()];
-            for (int i = 0; i < columnNames.size(); i++) {
-                line[i] = columnNames.get(i);
-            }
-            outputFile.writeNext(line);
-
-            int rowNum = 0;
-            while (rs.next()) {
-                line = new String[columnNames.size()];
-
+    
+            String[] dataTypes = new String[0];
+            try (
+                        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+                        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+                             fileOutputStream,
+                             LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                             .getOutputEncoding()
+                        );
+                        CSVWriter outputFile = new CSVWriter(new BufferedWriter(outputStreamWriter));
+            ) {
+                
+                dataTypes = new String[columnNames.size()];
+                String[] line = new String[columnNames.size()];
                 for (int i = 0; i < columnNames.size(); i++) {
-                    Object value = JdbcUtils.getResultSetValue(rs, i + 1);
-                    if (dataTypes[i] == null && value != null) {
-                        if (value instanceof Number) {
-                            dataTypes[i] = "NUMERIC";
-                        } else if (value instanceof Boolean) {
-                            dataTypes[i] = "BOOLEAN";
-                        } else if (value instanceof Date) {
-                            dataTypes[i] = "DATE";
-                        } else {
-                            dataTypes[i] = "STRING";
-                        }
-                    }
-                    if (value == null) {
-                        line[i] = "NULL";
-                    } else {
-                        if (value instanceof Date) {
-                            line[i] = new ISODateFormat().format(((Date) value));
-                        } else {
-                            line[i] = value.toString();
-                        }
-                    }
+                    line[i] = columnNames.get(i);
                 }
                 outputFile.writeNext(line);
-                rowNum++;
-                if (rowNum % 5000 == 0) {
-                    outputFile.flush();
+        
+                int rowNum = 0;
+                while (rs.next()) {
+                    line = new String[columnNames.size()];
+    
+                    for (int i = 0; i < columnNames.size(); i++) {
+                        Object value = JdbcUtils.getResultSetValue(rs, i + 1);
+                        if ((dataTypes[i] == null) && (value != null)) {
+                            if (value instanceof Number) {
+                                dataTypes[i] = "NUMERIC";
+                            } else if (value instanceof Boolean) {
+                                dataTypes[i] = "BOOLEAN";
+                            } else if (value instanceof Date) {
+                                dataTypes[i] = "DATE";
+                            } else {
+                                dataTypes[i] = "STRING";
+                            }
+                        }
+                        if (value == null) {
+                            line[i] = "NULL";
+                        } else {
+                            if (value instanceof Date) {
+                                line[i] = new ISODateFormat().format(((Date) value));
+                            } else {
+                                line[i] = value.toString();
+                            }
+                        }
+                    }
+                    outputFile.writeNext(line);
+                    rowNum++;
+                    if ((rowNum % 5000) == 0) {
+                        outputFile.flush();
+                    }
                 }
             }
-            outputFile.flush();
-            outputFile.close();
-
+    
             LoadDataChange change = new LoadDataChange();
             change.setFile(fileName);
             change.setEncoding(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
@@ -157,13 +166,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             if (rs != null) {
                 try {
                     rs.close();
-                } catch (SQLException ignore) { }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ignore) { }
-            }
-        }
-    }
-}
+                } catch (SQLException ignore) {
+                    // nothing can be done
+                } // try...
+            } // rs == null?
+        } // try... finally
+    } // method fixMissing
+} // class MissingDataExternalFileChangeGenerator
