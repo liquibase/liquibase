@@ -77,6 +77,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
                 "SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction());
     }
 
+    @Test
     public void testGetDefaultDriver() {
         Database database = new OracleDatabase();
 
@@ -104,6 +105,36 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         database.execute(new SqlStatement[]{updateStatement}, new ArrayList<SqlVisitor>());
 
         assertEquals("UPDATE \"SAMPLESCHEMA\".\"test_table\" SET \"id\" = \"SAMPLESCHEMA\".\"test_table_id_seq\".nextval;", mockExecutor.getRanSql().trim());
+    }
+
+    @Test
+    public void getDateLiteral_dateOnly() {
+        assertEquals("TO_DATE('2017-08-16', 'YYYY-MM-DD')", database.getDateLiteral("2017-08-16"));
+    }
+
+    @Test
+    public void getDateLiteral_timeOnly() {
+        assertEquals("TO_DATE('16:32:55', 'HH24:MI:SS')", database.getDateLiteral("16:32:55"));
+    }
+
+    @Test
+    public void getDateLiteral_timestamp() {
+        assertEquals("TO_TIMESTAMP('2017-08-16 16:32:55.125', 'YYYY-MM-DD HH24:MI:SS.FF')", database.getDateLiteral("2017-08-16T16:32:55.125"));
+    }
+
+    @Test
+    public void getDateLiteral_datetime() {
+        assertEquals("TO_TIMESTAMP('2017-08-16 16:32:55', 'YYYY-MM-DD HH24:MI:SS')", database.getDateLiteral("2017-08-16T16:32:55.3"));
+    }
+
+    @Test
+    public void getDateLiteral_datetime_invalid() {
+        assertEquals("UNSUPPORTED:2017-08-16T16:32:55_3", database.getDateLiteral("2017-08-16T16:32:55_3"));
+    }
+
+    @Test
+    public void getDateLiteral_unsupported() {
+        assertEquals("UNSUPPORTED:123", database.getDateLiteral("123"));
     }
 }
 
