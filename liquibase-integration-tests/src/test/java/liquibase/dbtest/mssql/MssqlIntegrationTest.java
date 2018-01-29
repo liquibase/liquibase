@@ -54,7 +54,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTime(((Date) defaultValue));
                             assertEquals(1, calendar.get(Calendar.DAY_OF_MONTH));
-                            assertEquals(1, calendar.get(Calendar.MONTH));
+                            assertEquals(0, calendar.get(Calendar.MONTH));
                             assertEquals(2000, calendar.get(Calendar.YEAR));
                         }
                     } else if (column.getName().toLowerCase().contains("char_")) {
