@@ -47,15 +47,17 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                     Object defaultValue = column.getDefaultValue();
                     assertNotNull("Null default value for " + table.getName() + "." + column.getName(), defaultValue);
                     if (column.getName().toLowerCase().contains("date") || column.getName().toLowerCase().contains("time")) {
-                        if (defaultValue instanceof DatabaseFunction) {
+                        if (defaultValue instanceof String) {
+                            assertTrue(defaultValue.equals("2017-12-09 23:52:39.1234567 +01:00"));
+                        } else if (defaultValue instanceof DatabaseFunction) {
                             ((DatabaseFunction) defaultValue).getValue().contains("type datetimeoffset");
                         } else {
                             assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof Date);
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTime(((Date) defaultValue));
-                            assertEquals(1, calendar.get(Calendar.DAY_OF_MONTH));
-                            assertEquals(0, calendar.get(Calendar.MONTH));
-                            assertEquals(2000, calendar.get(Calendar.YEAR));
+                            assertEquals(9, calendar.get(Calendar.DAY_OF_MONTH));
+                            assertEquals(11, calendar.get(Calendar.MONTH));
+                            assertEquals(2017, calendar.get(Calendar.YEAR));
                         }
                     } else if (column.getName().toLowerCase().contains("char_")) {
                         assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof String);
