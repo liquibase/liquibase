@@ -2,14 +2,21 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.executor.MockExecutor;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.annotation.Resource;
-
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
@@ -80,5 +87,23 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
                 database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
     }
 
+    @Test
+    public void validateCore2953WrongSqlOnValueSequenceNext() throws LiquibaseException {
+        Database database = getDatabase();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        database.setDefaultSchemaName("sampleschema");
+
+        MockExecutor mockExecutor = new MockExecutor();
+        mockExecutor.setDatabase(database);
+
+        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+
+        UpdateStatement updateStatement = new UpdateStatement(null, null, "test_table");
+        updateStatement.addNewColumnValue("id", new SequenceNextValueFunction("test_table_id_seq"));
+
+        database.execute(new SqlStatement[]{updateStatement}, new ArrayList<SqlVisitor>());
+
+        assertEquals("UPDATE \"SAMPLESCHEMA\".\"test_table\" SET \"id\" = \"SAMPLESCHEMA\".\"test_table_id_seq\".nextval;", mockExecutor.getRanSql().trim());
+    }
 }
 
