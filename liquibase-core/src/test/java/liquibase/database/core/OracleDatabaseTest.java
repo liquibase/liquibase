@@ -124,7 +124,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Test
     public void getDateLiteral_datetime() {
-        assertEquals("TO_TIMESTAMP('2017-08-16 16:32:55', 'YYYY-MM-DD HH24:MI:SS')", database.getDateLiteral("2017-08-16T16:32:55.3"));
+        assertEquals("TO_TIMESTAMP('2017-08-16 16:32:55.3', 'YYYY-MM-DD HH24:MI:SS.FF')", database.getDateLiteral("2017-08-16T16:32:55.3"));
     }
 
     @Test
