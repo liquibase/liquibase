@@ -1,5 +1,16 @@
 package liquibase.database.core;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -402,7 +413,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             } else //noinspection HardCodedStringLiteral
                 if (example.getName().startsWith("USLOG$")) { //for update materialized view
                 return true;
-            } else if (example.getName().startsWith("SYS_FBA")) { //for Flashback tables 
+            } else if (example.getName().startsWith("SYS_FBA")) { //for Flashback tables
                 return true;
             }
         }
@@ -531,7 +542,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             SequenceCurrentValueFunction)){
             String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
             // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
-            return quotedSeq.replaceFirst("\"([^\\.\"]*)\\.([^\\.\"]*)\"","\"$1\".\"$2\"");
+            return quotedSeq.replaceFirst("\"([^\\.\"]+)\\.([^\\.\"]+)\"","\"$1\".\"$2\"");
 
         }
 
