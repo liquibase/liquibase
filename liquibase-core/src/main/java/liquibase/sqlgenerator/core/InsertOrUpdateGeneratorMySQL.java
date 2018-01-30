@@ -5,6 +5,7 @@ import java.util.HashSet;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.LiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.structure.core.Column;
@@ -53,8 +54,12 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) {
-        return "";
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    	if (insertOrUpdateStatement.getOnlyUpdate()) {
+    		return super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
+    	} else {
+            return "";
+    	}
     }
 
     @Override
