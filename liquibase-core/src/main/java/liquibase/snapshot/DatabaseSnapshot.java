@@ -337,7 +337,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
 
 //            System.out.println("replaceObject "+fieldValue);
-            if (isWrongSchema(((DatabaseObject) fieldValue))) {
+            if (!(fieldValue instanceof Catalog) && isWrongSchema(((DatabaseObject) fieldValue))) {
                 DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue, schemaComparisons);
                 if (savedFieldValue == null) {
                     savedFieldValue = (DatabaseObject) fieldValue;
