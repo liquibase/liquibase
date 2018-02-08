@@ -1,7 +1,7 @@
 package liquibase.diff.compare.core
 
 import liquibase.diff.compare.DatabaseObjectComparatorFactory
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
 import spock.lang.Specification

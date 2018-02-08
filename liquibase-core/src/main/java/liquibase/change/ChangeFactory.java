@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -34,7 +35,7 @@ public class ChangeFactory {
     
     private void init() {
         Class<? extends Change>[] classes;
-        classes = ServiceLocator.getInstance().findClasses(Change.class);
+        classes = Scope.getCurrentScope().getServiceLocator().findClasses(Change.class);
 
         for (Class<? extends Change> clazz : classes) {
             //noinspection unchecked

@@ -1,5 +1,6 @@
 package liquibase.datatype;
 
+import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
@@ -30,7 +31,7 @@ public class DataTypeFactory {
     protected DataTypeFactory() {
         Class<? extends LiquibaseDataType>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(LiquibaseDataType.class);
+            classes = Scope.getCurrentScope().getServiceLocator().findClasses(LiquibaseDataType.class);
 
             for (Class<? extends LiquibaseDataType> clazz : classes) {
                 //noinspection unchecked

@@ -25,7 +25,7 @@ import liquibase.logging.core.NoOpLoggerContext;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.sdk.resource.MockResourceAccessor;
 import liquibase.test.Assert;
 import org.junit.After;

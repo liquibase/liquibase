@@ -1,6 +1,6 @@
 package liquibase
 
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 

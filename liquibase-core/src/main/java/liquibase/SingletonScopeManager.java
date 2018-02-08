@@ -1,8 +1,8 @@
 package liquibase;
 
-public class SingletonScopeFactory extends ScopeManager {
+public class SingletonScopeManager extends ScopeManager {
 
-    private Scope currentScope = new Scope();
+    private Scope currentScope;
 
     @Override
     public synchronized Scope getCurrentScope() {
@@ -10,11 +10,12 @@ public class SingletonScopeFactory extends ScopeManager {
     }
 
     @Override
+    protected Scope init(Scope scope) throws Exception {
+        return scope;
+    }
+
+    @Override
     protected synchronized void setCurrentScope(Scope scope) {
         this.currentScope = scope;
-
-        if (this.currentScope == null) {
-            this.currentScope = new Scope();
-        }
     }
 }

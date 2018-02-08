@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
@@ -40,7 +41,7 @@ public class LockServiceFactory {
     private LockServiceFactory() {
 		Class<? extends LockService>[] classes;
 		try {
-			classes = ServiceLocator.getInstance().findClasses(LockService.class);
+			classes = Scope.getCurrentScope().getServiceLocator().findClasses(LockService.class);
 
 			for (Class<? extends LockService> clazz : classes) {
 				register(clazz.getConstructor().newInstance());

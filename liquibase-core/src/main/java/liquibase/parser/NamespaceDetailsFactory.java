@@ -1,5 +1,6 @@
 package liquibase.parser;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
@@ -29,7 +30,7 @@ public class NamespaceDetailsFactory {
     private NamespaceDetailsFactory() {
         Class<? extends NamespaceDetails>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(NamespaceDetails.class);
+            classes = Scope.getCurrentScope().getServiceLocator().findClasses(NamespaceDetails.class);
 
             for (Class<? extends NamespaceDetails> clazz : classes) {
                 register(clazz.getConstructor().newInstance());

@@ -1,5 +1,6 @@
 package liquibase.structure.core;
 
+import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
@@ -36,7 +37,7 @@ public class DatabaseObjectFactory {
             Set<String> typesToInclude = new HashSet<>(Arrays.asList(typesString.toLowerCase().split("\\s*,\\s*")));
             Set<String> typesNotFound = new HashSet<>(typesToInclude);
 
-            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
+            Class<? extends DatabaseObject>[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(DatabaseObject.class);
             for (Class<? extends DatabaseObject> clazz : classes) {
                 if (typesToInclude.contains(clazz.getSimpleName().toLowerCase())
                         || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"s")
@@ -59,7 +60,7 @@ public class DatabaseObjectFactory {
         if (standardTypes == null) {
             Set<Class<? extends DatabaseObject>> set = new HashSet<>();
 
-            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
+            Class<? extends DatabaseObject>[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(DatabaseObject.class);
             for (Class<? extends DatabaseObject> clazz : classes) {
                 try {
                     if (!clazz.equals(LiquibaseColumn.class) && clazz.newInstance().snapshotByDefault()) {

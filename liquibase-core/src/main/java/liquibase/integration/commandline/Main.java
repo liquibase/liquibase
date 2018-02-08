@@ -6,10 +6,7 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.filter.AbstractMatcherFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
+import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandFactory;
@@ -187,16 +184,18 @@ public class Main {
             }
 
             main.applyDefaults();
-            main.configureClassLoader();
-            main.doMigration();
+            Scope.getCurrentScope().child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {
+                main.doMigration();
 
-            if (COMMANDS.UPDATE.equals(main.command)) {
-                log.info(LogType.USER_MESSAGE, coreBundle.getString("update.successful"));
-            } else if (main.command.startsWith(COMMANDS.ROLLBACK) && !main.command.endsWith("SQL")) {
-                log.info(LogType.USER_MESSAGE, coreBundle.getString("rollback.successful"));
-            } else if (!main.command.endsWith("SQL")) {
-                log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("command.successful"), main.command));
-            }
+                if (COMMANDS.UPDATE.equals(main.command)) {
+                    log.info(LogType.USER_MESSAGE, coreBundle.getString("update.successful"));
+                } else if (main.command.startsWith(COMMANDS.ROLLBACK) && !main.command.endsWith("SQL")) {
+                    log.info(LogType.USER_MESSAGE, coreBundle.getString("rollback.successful"));
+                } else if (!main.command.endsWith("SQL")) {
+                    log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("command.successful"), main.command));
+                }
+
+            });
         } catch (Exception e) {
             String message = e.getMessage();
             if (e.getCause() != null) {
@@ -847,7 +846,7 @@ public class Main {
         }
     }
 
-    protected void configureClassLoader() throws CommandLineParsingException {
+    protected ClassLoader configureClassLoader() throws CommandLineParsingException {
         final List<URL> urls = new ArrayList<>();
         if (this.classpath != null) {
             String[] classpathSoFar;
@@ -921,8 +920,9 @@ public class Main {
             });
         }
 
-        ServiceLocator.getInstance().setResourceAccessor(new ClassLoaderResourceAccessor(classLoader));
         Thread.currentThread().setContextClassLoader(classLoader);
+
+        return classLoader;
     }
 
 

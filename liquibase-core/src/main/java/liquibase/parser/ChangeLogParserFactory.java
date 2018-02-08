@@ -1,5 +1,6 @@
 package liquibase.parser;
 
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
@@ -48,7 +49,7 @@ public class ChangeLogParserFactory {
 
         parsers = new ArrayList<>();
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
+            classes = Scope.getCurrentScope().getServiceLocator().findClasses(ChangeLogParser.class);
 
             for (Class<? extends ChangeLogParser> clazz : classes) {
                     register((ChangeLogParser) clazz.getConstructor().newInstance());

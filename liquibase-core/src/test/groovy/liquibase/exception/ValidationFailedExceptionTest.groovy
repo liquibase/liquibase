@@ -9,7 +9,7 @@ import liquibase.changelog.visitor.ValidatingVisitor
 import liquibase.database.Database
 import liquibase.precondition.core.NotPrecondition
 import liquibase.precondition.core.PreconditionContainer
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import spock.lang.Specification
 
 /**

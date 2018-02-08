@@ -1,4 +1,4 @@
-package liquibase.sdk.database;
+package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;

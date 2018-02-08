@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.change.core.DropColumnChange;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropColumnStatement;
 import org.junit.Assert;

@@ -4,7 +4,7 @@ import liquibase.change.ChangeStatus
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.change.StandardChangeTest;
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertOrUpdateStatement;

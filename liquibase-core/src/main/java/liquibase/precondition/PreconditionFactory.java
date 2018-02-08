@@ -1,5 +1,6 @@
 package liquibase.precondition;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -17,7 +18,7 @@ public class PreconditionFactory {
         preconditions = new HashMap<>();
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(Precondition.class);
+            classes = Scope.getCurrentScope().getServiceLocator().findClasses(Precondition.class);
 
             for (Class<? extends Precondition> clazz : classes) {
                     register(clazz);

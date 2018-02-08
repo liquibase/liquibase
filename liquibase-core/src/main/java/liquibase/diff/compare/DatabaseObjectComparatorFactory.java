@@ -1,5 +1,6 @@
 package liquibase.diff.compare;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -23,7 +24,7 @@ public class DatabaseObjectComparatorFactory {
     private DatabaseObjectComparatorFactory() {
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(DatabaseObjectComparator.class);
+            classes = Scope.getCurrentScope().getServiceLocator().findClasses(DatabaseObjectComparator.class);
 
             for (Class clazz : classes) {
                 register((DatabaseObjectComparator) clazz.getConstructor().newInstance());

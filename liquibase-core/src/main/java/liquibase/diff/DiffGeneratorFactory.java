@@ -1,5 +1,6 @@
 package liquibase.diff;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
@@ -17,7 +18,7 @@ public class DiffGeneratorFactory {
 
     protected DiffGeneratorFactory() {
         try {
-            Class[] classes = ServiceLocator.getInstance().findClasses(DiffGenerator.class);
+            Class[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(DiffGenerator.class);
 
             //noinspection unchecked
             for (Class<? extends DiffGenerator> clazz : classes) {

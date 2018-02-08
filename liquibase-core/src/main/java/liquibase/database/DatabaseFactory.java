@@ -1,5 +1,6 @@
 package liquibase.database;
 
+import liquibase.Scope;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -25,7 +26,7 @@ public class DatabaseFactory {
 
     private DatabaseFactory() {
         try {
-            Class<? extends Database>[] classes = ServiceLocator.getInstance().findClasses(Database.class);
+            Class<? extends Database>[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(Database.class);
 
             for (Class<? extends Database> clazz : classes) {
                 try {

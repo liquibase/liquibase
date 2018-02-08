@@ -2,7 +2,7 @@ package liquibase.datatype.core
 
 import liquibase.database.core.*
 import liquibase.exception.UnexpectedLiquibaseException
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 

@@ -7,7 +7,7 @@ import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.exception.ValidationErrors
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.statement.SqlStatement
 import spock.lang.Shared

@@ -6,8 +6,11 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.LiquibaseListener;
+import liquibase.logging.LogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.ServiceLocator;
+import liquibase.servicelocator.StandardServiceLocator;
 import liquibase.util.SmartMap;
 
 import java.lang.reflect.Constructor;
@@ -33,10 +36,14 @@ public class Scope {
         changeLogHistoryService,
         lockService,
         executeMode,
-        lineSeparator,
+        lineSeparator, serviceLocator,
     }
 
-    private static ScopeManager scopeManager = new SingletonScopeFactory();
+    private static ScopeManager scopeManager;
+
+    static {
+        setScopeManager(new SingletonScopeManager());
+    }
 
     private Scope parent;
     private SmartMap values = new SmartMap();
@@ -44,16 +51,39 @@ public class Scope {
     private LiquibaseListener listener;
 
     public static Scope getCurrentScope() {
+        if (scopeManager == null) {
+            return null;
+        }
         return scopeManager.getCurrentScope();
     }
 
+    public static void setScopeManager(ScopeManager scopeManager)  {
+        Scope currentScope = getCurrentScope();
+        if (currentScope == null) {
+            currentScope = new Scope();
+        }
+
+        try {
+            currentScope = scopeManager.init(currentScope);
+        } catch (Exception e) {
+            LogService.getLog(Scope.class).warning(e.getMessage(), e);
+        }
+        scopeManager.setCurrentScope(currentScope);
+
+        Scope.scopeManager = scopeManager;
+
+
+    }
 
     /**
      * Creates a new "root" scope.
-     * Defaults resourceAccessor to {@link ClassLoaderResourceAccessor}
+     * Defaults resourceAccessor to {@link ClassLoaderResourceAccessor}.
+     * Defaults serviceLocator to {@link StandardServiceLocator}
      */
-    Scope() {
+    private Scope() {
         values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+        values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
+
     }
 
     protected Scope(Scope parent, Map<String, Object> scopeValues) {
@@ -75,7 +105,7 @@ public class Scope {
     /**
      * Creates a new scope that is a child of this scope.
      */
-    public static void child(Map<String, Object> scopeValues, ScopedRunner runner) {
+    public static void child(Map<String, Object> scopeValues, ScopedRunner runner) throws Exception {
         child((LiquibaseListener) null, scopeValues, runner);
     }
 
@@ -85,11 +115,11 @@ public class Scope {
      *
      * @see #getListeners(Class)
      */
-    public static void child(LiquibaseListener listener, ScopedRunner runner) {
+    public static void child(LiquibaseListener listener, ScopedRunner runner) throws Exception {
         child(listener, null, runner);
     }
 
-    public static void child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunner runner) {
+    public static void child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunner runner) throws Exception{
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
@@ -104,14 +134,14 @@ public class Scope {
     /**
      * Creates a new scope that is a child of this scope.
      */
-    public void child(String newValueKey, Object newValue, ScopedRunner runner) {
+    public void child(String newValueKey, Object newValue, ScopedRunner runner) throws Exception {
         Map<String, Object> scopeValues = new HashMap<String, Object>();
         scopeValues.put(newValueKey, newValue);
 
         child(scopeValues, runner);
     }
 
-    public void child(Enum newValueKey, Object newValue, ScopedRunner runner) {
+    public void child(Enum newValueKey, Object newValue, ScopedRunner runner) throws Exception {
         child(newValueKey.name(), newValue, runner);
     }
 
@@ -218,6 +248,10 @@ public class Scope {
         return classLoader;
     }
 
+    public ServiceLocator getServiceLocator() {
+        return get(Attr.serviceLocator, ServiceLocator.class);
+    }
+
     public ResourceAccessor getResourceAccessor() {
         return get(Attr.resourceAccessor, ResourceAccessor.class);
     }
@@ -268,7 +302,7 @@ public class Scope {
     }
 
     public interface ScopedRunner {
-        void run();
+        void run() throws Exception;
     }
 
 }

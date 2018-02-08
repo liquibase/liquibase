@@ -2,14 +2,12 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
-import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
-import liquibase.database.OfflineConnection
 import liquibase.database.core.MSSQLDatabase
 import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.SqlStatement

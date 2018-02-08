@@ -79,7 +79,6 @@ public class Main {
     }
 
     public void init(String[] args) throws UserError {
-        Context.reset();
         CommandLineParser globalParser = new GnuParser();
 
         List<String> globalArgs = new ArrayList<>();

@@ -6,7 +6,7 @@ import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet
 import liquibase.exception.UnexpectedLiquibaseException
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.statement.SqlStatement
 import spock.lang.Unroll

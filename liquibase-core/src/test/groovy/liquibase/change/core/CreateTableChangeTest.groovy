@@ -4,14 +4,13 @@ import liquibase.change.ChangeStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.ForeignKeyConstraint
-import liquibase.statement.NotNullConstraint
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.statement.core.CreateTableStatement
 import liquibase.structure.core.Column
