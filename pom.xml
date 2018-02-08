@@ -326,6 +326,7 @@
                     <configuration>
                         <stagingRepository>/tmp/maven-snapshot</stagingRepository>
                         <mavenExecutorId>forked-path</mavenExecutorId>
+                        <pushChanges>false</pushChanges>
                     </configuration>
                 </plugin>
 
