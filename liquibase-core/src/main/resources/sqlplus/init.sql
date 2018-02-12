@@ -10,7 +10,7 @@ set time on
 set sqlprompt "  >  "
 WHENEVER OSERROR EXIT SQL.SQLCODE rollback
 WHENEVER SQLERROR EXIT SQL.SQLCODE rollback
-
+set autocommit on
 set define off
 
 set echo on
