@@ -38,14 +38,14 @@ public class TableWriter extends HTMLWriter {
             String remarks = column.getRemarks();
             cells.add(Arrays.asList(column.getType().toString(),
                     column.isNullable() ? "NULL" : "NOT NULL",
-                    "<A HREF=\"../columns/" + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>", (remarks != null) ? remarks : ""));
+                    "<A HREF=\"../columns/" + table.getSchema().getName().toLowerCase() + "." + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>", (remarks != null) ? remarks : ""));
             //todo: add foreign key info to columns?
         }
 
 
         writeTable("Current Columns", cells, fileWriter);
     }
-    
+
     private void writeTableRemarks(Writer fileWriter, Table table, Database database) throws IOException {
         final String tableRemarks = table.getRemarks();
         if ((tableRemarks != null) && !tableRemarks.isEmpty()) {
@@ -54,7 +54,7 @@ public class TableWriter extends HTMLWriter {
         	writeTable("Table Description", cells, fileWriter);
         }
     }
-    
+
     private void writeTableIndexes(Writer fileWriter, Table table, Database database) throws IOException {
         final List<List<String>> cells = new ArrayList<>();
         final PrimaryKey primaryKey = table.getPrimaryKey();
@@ -68,7 +68,7 @@ public class TableWriter extends HTMLWriter {
         writeTable("Current Table Indexes", cells, fileWriter);
         }
     }
-    
+
     private void writeTableForeignKeys(Writer fileWriter, Table table, Database database) throws IOException {
         final List<List<String>> cells = new ArrayList<>();
         if(!table.getOutgoingForeignKeys().isEmpty())

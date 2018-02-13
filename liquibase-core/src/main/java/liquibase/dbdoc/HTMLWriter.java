@@ -134,7 +134,7 @@ public abstract class HTMLWriter {
                 if (!change.getChangeSet().equals(lastChangeSet)) {
                     lastChangeSet = change.getChangeSet();
                     fileWriter.append("<TR BGCOLOR=\"#EEEEFF\" CLASS=\"TableSubHeadingColor\">\n");
-                    writeTD(fileWriter, "<a href='../changelogs/"+DBDocUtil.toFileName(change.getChangeSet().getFilePath())+".html'>"+change.getChangeSet().getFilePath()+"</a>");
+                    writeTD(fileWriter, "<a href='../changelogs/"+DBDocUtil.toFileName(change.getChangeSet().getFilePath().toLowerCase())+".html'>"+change.getChangeSet().getFilePath()+"</a>");
                     writeTD(fileWriter, change.getChangeSet().getId());
                     writeTD(fileWriter, "<a href='../authors/"+DBDocUtil.toFileName(change.getChangeSet().getAuthor().toLowerCase())+".html'>"+StringUtils.escapeHtml(change.getChangeSet().getAuthor().toLowerCase())+"</a>");
 
@@ -166,7 +166,7 @@ public abstract class HTMLWriter {
         }
 
         fileWriter.append("</TABLE>");
-        fileWriter.append("&nbsp;</P>");        
+        fileWriter.append("&nbsp;</P>");
 
     }
 }
