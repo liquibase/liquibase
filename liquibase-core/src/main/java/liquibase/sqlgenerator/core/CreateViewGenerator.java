@@ -41,7 +41,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 validationErrors.addError("'replaceIfExists' is not allowed on DB2 version < 10.5");
             }
             else {
-                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, Db2zDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, Db2zDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
             }
         }
 
@@ -92,7 +92,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                         + "] AS SELECT " +
                         "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
                 viewDefinition.replaceIfExists("CREATE", "ALTER");
-            } else if (database instanceof PostgresDatabase) {
+            } else if (database instanceof PostgresDatabase || database instanceof HsqlDatabase) {
                 sql.add(new UnparsedSql(
                     "DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(),
                         statement.getSchemaName(), statement.getViewName())));
