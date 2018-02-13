@@ -489,6 +489,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     return statements.toArray(new SqlStatement[statements.size()]);
                 }
             } else {
+            	if (statements.isEmpty()) {
+            		// avoid returning unnecessary dummy statement
+            		return new SqlStatement[0];
+            	}
+
                 InsertSetStatement statementSet = this.createStatementSet(
                         getCatalogName(), getSchemaName(), getTableName()
                 );
