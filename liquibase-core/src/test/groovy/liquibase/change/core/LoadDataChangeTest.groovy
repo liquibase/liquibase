@@ -34,7 +34,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
     }
 
 
-    def "loadDataEmpty using InsertSetStatement"() throws Exception {
+    def "loadDataEmpty database agnostic"() throws Exception {
         when:
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -72,6 +72,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         then:
         sqlStatements.length == 0
     }
+
 
     @Unroll("multiple formats with the same data for #fileName")
     def "multiple formats with the same data using InsertSetStatement"() throws Exception {

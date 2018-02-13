@@ -347,7 +347,25 @@ public class JdbcExecutor extends AbstractExecutor {
                     stmt.setEscapeProcessing(false);
                 }
                 try {
-                    stmt.execute(statement);
+                    //if execute returns false, we can retrieve the affected rows count
+                    // (true used when resultset is returned)
+                    if (!stmt.execute(statement)) {
+                        log.debug(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
+                    }
+                } catch (Throwable e) {
+                    throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
+                }
+                try {
+                    int updateCount = 0;
+                    //cycle for retrieving row counts from all statements
+                    do {
+                        if (!stmt.getMoreResults()) {
+                            updateCount = stmt.getUpdateCount();
+                            if (updateCount != -1)
+                                log.debug(Integer.toString(updateCount) + " row(s) affected");
+                        }
+                    } while (updateCount != -1);
+
                 } catch (Exception e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
                 }

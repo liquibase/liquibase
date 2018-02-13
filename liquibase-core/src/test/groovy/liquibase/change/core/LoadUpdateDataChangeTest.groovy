@@ -8,6 +8,10 @@ import liquibase.database.core.MockDatabase
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.test.JUnitResourceAccessor
+import liquibase.database.core.MSSQLDatabase
+
+
 import static org.junit.Assert.*
 
 public class LoadUpdateDataChangeTest extends StandardChangeTest {
@@ -22,6 +26,21 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         "Data loaded from FILE_NAME into TABLE_NAME" == refactoring.getConfirmationMessage()
     }
 
+	def "loadUpdateEmpty database agnostic"() throws Exception {
+		when:
+		LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
+		refactoring.setSchemaName("SCHEMA_NAME");
+		refactoring.setTableName("TABLE_NAME");
+		refactoring.setFile("liquibase/change/core/empty.data.csv");
+		refactoring.setSeparator(",");
+
+		refactoring.setResourceAccessor(new JUnitResourceAccessor());
+
+		SqlStatement[] sqlStatement = refactoring.generateRollbackStatements(new MSSQLDatabase());
+		
+		then:
+		sqlStatement.length == 0
+	}
 
     def "loadUpdate generates InsertOrUpdateStatements"() throws Exception {
         when:

@@ -50,6 +50,8 @@ public class ISODateFormat {
             return format(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return format(((java.sql.Timestamp) date));
+        } else if (date instanceof java.util.Date) {
+            return format(new java.sql.Timestamp(date.getTime()));
         } else {
             throw new RuntimeException("Unknown type: "+date.getClass().getName());
         }

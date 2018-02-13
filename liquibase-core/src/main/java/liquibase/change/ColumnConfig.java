@@ -4,6 +4,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.serializer.ReflectionSerializer;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SequenceCurrentValueFunction;
@@ -913,6 +914,16 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         public Number getDelegate() {
             return delegate;
+        }
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        Object o = ReflectionSerializer.getInstance().getValue(this, field);
+        if (field.equals("valueDate") || field.equals("defaultValueDate")) {
+            return new ISODateFormat().format((Date)o);
+        } else {
+            return o;
         }
     }
 }

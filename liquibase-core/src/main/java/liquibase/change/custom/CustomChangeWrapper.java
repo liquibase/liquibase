@@ -73,6 +73,10 @@ public class CustomChangeWrapper extends AbstractChange {
         this.classLoader = classLoader;
     }
 
+    public CustomChangeWrapper setClassName(String className) throws CustomChangeException {
+        return setClass(className);
+    }
+
     /**
      * Specify the name of the class to use as the CustomChange. This method instantiates the class using {@link #getClassLoader()} or fallback methods
      * and assigns it to {@link #getCustomChange()}.
