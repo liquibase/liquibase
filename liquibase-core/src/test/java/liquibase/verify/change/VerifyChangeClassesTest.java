@@ -1,5 +1,6 @@
 package liquibase.verify.change;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeMetaData;
@@ -17,7 +18,7 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.verify.AbstractVerifyTest;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
     @Test
     public void compareGeneratedSqlWithExpectedSqlForMinimalChangesets() throws Exception {
-        ChangeFactory changeFactory = ChangeFactory.getInstance();
+        ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
         for (String changeName : changeFactory.getDefinedChanges()) {
             if ("addDefaultValue".equals(changeName)) {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
@@ -56,7 +57,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 if (change.generateStatementsVolatile(database)) {
                     continue;
                 }
-                ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(change);
+                ChangeMetaData changeMetaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change);
 
                 change.setResourceAccessor(new JUnitResourceAccessor());
 
@@ -135,7 +136,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
      */
     @Test
     public void lessThanMinimumFails() throws Exception {
-        ChangeFactory changeFactory = ChangeFactory.getInstance();
+        ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
         for (String changeName : changeFactory.getDefinedChanges()) {
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 if (database.getShortName() == null) {
@@ -149,7 +150,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 if (change.generateStatementsVolatile(database)) {
                     continue;
                 }
-                ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(change);
+                ChangeMetaData changeMetaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change);
 
                 change.setResourceAccessor(new JUnitResourceAccessor());
 
@@ -176,7 +177,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
     @Ignore
     @Test
     public void extraParamsIsValidSql() throws Exception {
-        ChangeFactory changeFactory = ChangeFactory.getInstance();
+        ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
         for (String changeName : changeFactory.getDefinedChanges()) {
             if ("addDefaultValue".equals(changeName)) {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
@@ -201,7 +202,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 if (baseChange.generateStatementsVolatile(database)) {
                     continue;
                 }
-                ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(baseChange);
+                ChangeMetaData changeMetaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(baseChange);
                 ArrayList<String> optionalParameters = new ArrayList<String>(changeMetaData.getOptionalParameters(database).keySet());
                 Collections.sort(optionalParameters);
 
@@ -211,7 +212,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     public int compare(List<String> o1, List<String> o2) {
                         int comp = Integer.valueOf(o1.size()).compareTo(o2.size());
                         if (comp == 0) {
-                            comp =  StringUtils.join(o1,",").compareTo(StringUtils.join(o2, ","));
+                            comp =  StringUtil.join(o1,",").compareTo(StringUtil.join(o2, ","));
                         }
                         return comp;
                     }

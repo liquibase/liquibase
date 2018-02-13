@@ -5,7 +5,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.
@@ -327,7 +327,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
     private Boolean parseBoolean(String value) {
-        value = StringUtils.trimToNull(value);
+        value = StringUtil.trimToNull(value);
         if ((value == null) || "null".equalsIgnoreCase(value)) {
             return null;
         } else {

@@ -12,7 +12,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
@@ -174,14 +174,14 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                     diffOutputControl.setObjectChangeFilter(objectChangeFilter);
                 }
 
-                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, objectChangeFilter, StringUtils.trimToNull(diffTypes));
+                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, objectChangeFilter, StringUtil.trimToNull(diffTypes));
                 getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
             }
             catch (IOException|ParserConfigurationException e) {
                 throw new LiquibaseException(e);
             }
         } else {
-            CommandLineUtils.doDiff(referenceDatabase, db, StringUtils.trimToNull(diffTypes));
+            CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes));
         }
     }
 

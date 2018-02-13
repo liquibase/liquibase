@@ -1,5 +1,6 @@
 package liquibase.serializer.core.string
 
+import liquibase.Scope
 import spock.lang.Specification
 import spock.lang.Unroll;
 
@@ -270,9 +271,7 @@ public class StringChangeLogSerializerTest extends Specification {
         assert string.indexOf("@") < 0: "@ in string.  Probably poorly serialzed object reference." + string;
 
         where:
-        change << ChangeFactory.getInstance().getRegistry().values().collect {
-            it.iterator().next().getConstructor().newInstance()
-        }
+        change << Scope.getCurrentScope().getSingleton(ChangeFactory.class).findAllInstances()
     }
 
     private void setFields(Object object) throws Exception {

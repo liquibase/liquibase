@@ -41,10 +41,6 @@ public class Scope {
 
     private static ScopeManager scopeManager;
 
-    static {
-        setScopeManager(new SingletonScopeManager());
-    }
-
     private Scope parent;
     private SmartMap values = new SmartMap();
 
@@ -52,7 +48,8 @@ public class Scope {
 
     public static Scope getCurrentScope() {
         if (scopeManager == null) {
-            return null;
+            scopeManager = new SingletonScopeManager();
+            scopeManager.setCurrentScope(new Scope());
         }
         return scopeManager.getCurrentScope();
     }

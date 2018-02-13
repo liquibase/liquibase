@@ -16,7 +16,7 @@ import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -214,7 +214,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             for (ColumnConfig column : columns) {
                 names.add(column.getName());
             }
-            return "Columns " + StringUtils.join(names, ",") + " dropped from " + getTableName();
+            return "Columns " + StringUtil.join(names, ",") + " dropped from " + getTableName();
         } else {
             return "Column " + getTableName() + "." + getColumnName() + " dropped";
         }

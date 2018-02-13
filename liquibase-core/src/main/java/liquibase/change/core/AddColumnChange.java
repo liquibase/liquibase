@@ -13,7 +13,7 @@ import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -165,7 +165,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
       }
 
       for (ColumnConfig column : getColumns()) {
-          String columnRemarks = StringUtils.trimToNull(column.getRemarks());
+          String columnRemarks = StringUtil.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
               SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
               if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
@@ -233,7 +233,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             names.add(col.getName() + "(" + col.getType() + ")");
         }
 
-        return "Columns " + StringUtils.join(names, ",") + " added to " + tableName;
+        return "Columns " + StringUtil.join(names, ",") + " added to " + tableName;
     }
 
     @Override

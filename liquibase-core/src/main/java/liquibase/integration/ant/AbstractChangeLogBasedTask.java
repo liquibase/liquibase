@@ -1,7 +1,7 @@
 package liquibase.integration.ant;
 
 import liquibase.LabelExpression;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 
@@ -67,7 +67,7 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     }
 
     public String getOutputEncoding() {
-        return (StringUtils.trimToNull(outputEncoding) == null) ? getDefaultOutputEncoding() : outputEncoding.trim();
+        return (StringUtil.trimToNull(outputEncoding) == null) ? getDefaultOutputEncoding() : outputEncoding.trim();
     }
 
     public void setOutputEncoding(String outputEncoding) {

@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -17,7 +16,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
 
@@ -88,9 +87,9 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
             if (rs.next()) {
                 String result = rs.getString(1);
                 if (result != null) {
-                    this.defaultSchemaName = StringUtils.trimToNull(result);
+                    this.defaultSchemaName = StringUtil.trimToNull(result);
                 } else {
-                    this.defaultSchemaName = StringUtils.trimToNull(super.getDefaultSchemaName());
+                    this.defaultSchemaName = StringUtil.trimToNull(super.getDefaultSchemaName());
                 }
             }
         } catch (Exception e) {

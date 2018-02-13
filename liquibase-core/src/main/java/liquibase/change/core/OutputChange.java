@@ -13,7 +13,7 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 @DatabaseChange(name="output", description = "Logs a message and continues execution.", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "3.3")
 public class OutputChange extends AbstractChange {
@@ -34,7 +34,7 @@ public class OutputChange extends AbstractChange {
     }
 
     public void setMessage(String message) {
-        this.message = StringUtils.trimToNull(message);
+        this.message = StringUtil.trimToNull(message);
     }
 
     @DatabaseChangeProperty(description = "Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default value: STDERR", exampleValue = "STDERR")
@@ -46,7 +46,7 @@ public class OutputChange extends AbstractChange {
     }
 
     public void setTarget(String target) {
-        this.target = StringUtils.trimToNull(target);
+        this.target = StringUtil.trimToNull(target);
     }
 
 

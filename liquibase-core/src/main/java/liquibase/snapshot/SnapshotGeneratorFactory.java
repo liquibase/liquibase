@@ -25,12 +25,9 @@ public class SnapshotGeneratorFactory {
     private List<SnapshotGenerator> generators = new ArrayList<>();
 
     protected SnapshotGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = Scope.getCurrentScope().getServiceLocator().findClasses(SnapshotGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SnapshotGenerator) clazz.getConstructor().newInstance());
+            for (SnapshotGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotGenerator.class)) {
+                register(generator);
             }
 
         } catch (Exception e) {

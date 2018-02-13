@@ -35,7 +35,7 @@ import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 import liquibase.util.BooleanParser;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
@@ -290,13 +290,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             // Start at '1' to take into account the header (already processed):
             int lineNumber = 1;
 
-            boolean isCommentingEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
+            boolean isCommentingEnabled = StringUtil.isNotEmpty(commentLineStartsWith);
 
             List<SqlStatement> statements = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
                 if
-                ((line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
+                ((line.length == 0) || ((line.length == 1) && (StringUtil.trimToNull(line[0]) == null)) ||
                     (isCommentingEnabled && isLineCommented(line))
                 ) {
                     //nothing interesting on this line
@@ -674,7 +674,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     private boolean isLineCommented(String[] line) {
-        return StringUtils.startsWith(line[0], commentLineStartsWith);
+        return StringUtil.startsWith(line[0], commentLineStartsWith);
     }
 
     @Override
@@ -699,7 +699,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
 
         char quotchar;
-        if (StringUtils.trimToEmpty(this.quotchar).isEmpty()) {
+        if (StringUtil.trimToEmpty(this.quotchar).isEmpty()) {
             // hope this is impossible to have a field surrounded with non ascii char 0x01
             quotchar = '\1';
         } else {

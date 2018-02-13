@@ -10,13 +10,11 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -263,7 +261,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (tableName == null) {
             return false;
         }
-        return StringUtils.hasUpperCase(tableName) && StringUtils.hasLowerCase(tableName);
+        return StringUtil.hasUpperCase(tableName) && StringUtil.hasLowerCase(tableName);
     }
 
     @Override
@@ -303,7 +301,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         // https://www.postgresql.org/docs/9.2/static/datatype-datetime.html
         String minimumVersion = "7.2";
 
-        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, 0)) {
+        if (StringUtil.isMinimumVersion(minimumVersion, major, minor, 0)) {
             return 6;
         } else {
             return 0;

@@ -2,7 +2,7 @@ package liquibase.exception;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -102,7 +102,7 @@ public class ValidationErrors {
         if (getErrorMessages().isEmpty()) {
             return "No errors";
         }
-        return StringUtils.join(getErrorMessages(), "; ");
+        return StringUtil.join(getErrorMessages(), "; ");
     }
 
     @Override

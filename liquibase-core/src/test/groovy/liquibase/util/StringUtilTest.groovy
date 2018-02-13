@@ -6,12 +6,12 @@ import spock.lang.Unroll
 
 import static spock.util.matcher.HamcrestSupport.that
 
-class StringUtilsTest extends Specification {
+class StringUtilTest extends Specification {
 
     @Unroll
     def "processMultilineSql examples"() {
         expect:
-        that Arrays.asList(StringUtils.processMutliLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
+        that Arrays.asList(StringUtil.processMutliLineSQL(rawString, stripComments, splitStatements, endDelimiter)), Matchers.contains(expected.toArray())
 
         where:
         stripComments | splitStatements | endDelimiter | rawString                                                                                                                                                                                           | expected
@@ -36,7 +36,7 @@ class StringUtilsTest extends Specification {
     @Unroll
     def "stripComments examples"() {
         expect:
-        StringUtils.stripComments(rawString) == expected
+        StringUtil.stripComments(rawString) == expected
 
         where:
         rawString                                                 | expected
@@ -53,7 +53,7 @@ class StringUtilsTest extends Specification {
     @Unroll
     def "splitSql examples"() {
         expect:
-        that Arrays.asList(StringUtils.splitSQL(rawString, endDelimiter)), Matchers.contains(expected.toArray())
+        that Arrays.asList(StringUtil.splitSQL(rawString, endDelimiter)), Matchers.contains(expected.toArray())
 
         where:
         endDelimiter | rawString                                                                                                                                                                                                                                                                                                                                     | expected
@@ -82,7 +82,7 @@ class StringUtilsTest extends Specification {
             String comment = " -- with comment\n"
             String totalLine = sql + comment
             start = System.currentTimeMillis()
-            result = StringUtils.stripComments(totalLine)
+            result = StringUtil.stripComments(totalLine)
             end = System.currentTimeMillis()
             if ((end - start) <= acceptableMs) {
                 break
@@ -97,7 +97,7 @@ class StringUtilsTest extends Specification {
 
     def "join with map"() {
         expect:
-        StringUtils.join((Map) map as Map, delimiter) == value
+        StringUtil.join((Map) map as Map, delimiter) == value
 
         where:
         map                               | value                    | delimiter
@@ -108,9 +108,10 @@ class StringUtilsTest extends Specification {
         [key1: "a", key2: "b", key3: "c"] | "key1=a, key2=b, key3=c" | ", "
     }
 
+    @Unroll
     def "join sorted"() {
         expect:
-        StringUtils.join(array, ",", sorted) == expected
+        StringUtil.join(array, ",", sorted) == expected
 
         where:
         array           | sorted | expected
@@ -118,9 +119,10 @@ class StringUtilsTest extends Specification {
         ["a", "c", "b"] | false  | "a,c,b"
     }
 
+    @Unroll
     def "join with formatter sorted"() {
         expect:
-        StringUtils.join(array, ",", new StringUtils.ToStringFormatter(), sorted) == expected
+        StringUtil.join(array, ",", new StringUtil.ToStringFormatter(), sorted) == expected
 
         where:
         array     | sorted | expected
@@ -129,9 +131,10 @@ class StringUtilsTest extends Specification {
     }
 
 
+    @Unroll
     def "pad"() {
         expect:
-        StringUtils.pad(input, pad) == output
+        StringUtil.pad(input, pad) == output
 
         where:
         input   | pad | output
@@ -150,7 +153,7 @@ class StringUtilsTest extends Specification {
     @Unroll
     def "leftPad"() {
         expect:
-        StringUtils.leftPad(input, pad) == output
+        StringUtil.leftPad(input, pad) == output
 
         where:
         input   | pad | output
@@ -170,7 +173,7 @@ class StringUtilsTest extends Specification {
     @Unroll
     def "stripSqlCommentsFromTheEnd"() {
         expect:
-        StringUtils.stripSqlCommentsAndWhitespacesFromTheEnd(input) == output
+        StringUtil.stripSqlCommentsAndWhitespacesFromTheEnd(input) == output
 
         where:
         input                                                                                                                                            | output
@@ -187,5 +190,31 @@ class StringUtilsTest extends Specification {
         "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;--last comment\n/*****another\nblock\n***/"                    | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;"
         "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;\t--last comment\n\n\n\t--another\n/*****another\nblock\n***/" | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;"
 
+    }
+
+
+    @Unroll
+    def "concatConsistentCase"() {
+        expect:
+        StringUtil.concatConsistentCase(base, addition) == expected
+
+        where:
+        base | addition | expected
+        "abc" | "_xyz" | "abc_xyz"
+        "abc" | "_XYZ" | "abc_xyz"
+        "abc" | "_XyZ" | "abc_xyz"
+
+        "ABC" | "_xyz" | "ABC_XYZ"
+        "ABC" | "_XYZ" | "ABC_XYZ"
+        "ABC" | "_XyZ" | "ABC_XYZ"
+
+        "AbC" | "_xyz" | "AbC_xyz"
+        "AbC" | "_XYZ" | "AbC_XYZ"
+        "AbC" | "_XyZ" | "AbC_XyZ"
+
+        "a1" | "_x" | "a1_x"
+        "A1" | "_x" | "A1_X"
+        "123" | "_x" | "123_x"
+        "123" | "_X" | "123_X"
     }
 }

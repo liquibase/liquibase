@@ -1,6 +1,6 @@
 package liquibase.structure.core;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class View extends Relation {
 
@@ -35,7 +35,7 @@ public class View extends Relation {
         View that = (View) o;
 
         if ((this.getSchema() != null) && (that.getSchema() != null)) {
-            boolean schemasEqual = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasEqual = StringUtil.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtil.trimToEmpty(that.getSchema().getName()));
             if (!schemasEqual) {
                 return false;
             }

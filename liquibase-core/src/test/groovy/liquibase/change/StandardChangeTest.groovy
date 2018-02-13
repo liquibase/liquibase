@@ -1,5 +1,6 @@
 package liquibase.change
 
+import liquibase.Scope
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.snapshot.SnapshotGeneratorFactory
 import spock.lang.Shared
@@ -19,7 +20,7 @@ public abstract class StandardChangeTest extends Specification {
 
     def "refactoring name matches expected class name"() {
         expect:
-        assert ChangeFactory.getInstance().getChangeMetaData(getChangeClass().newInstance()).getName().toLowerCase() == getExpectedChangeName()
+        assert Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(getChangeClass().newInstance()).getName().toLowerCase() == getExpectedChangeName()
     }
 
     protected String getExpectedChangeName() {

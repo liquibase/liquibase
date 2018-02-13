@@ -39,7 +39,6 @@ public class SnapshotParserFactory {
     }
 
     private SnapshotParserFactory() {
-        Class<? extends SnapshotParser>[] classes;
         snapshotParserComparator = new Comparator<SnapshotParser>() {
             @Override
             public int compare(SnapshotParser o1, SnapshotParser o2) {
@@ -49,10 +48,8 @@ public class SnapshotParserFactory {
 
         parsers = new ArrayList<>();
         try {
-            classes = Scope.getCurrentScope().getServiceLocator().findClasses(SnapshotParser.class);
-
-            for (Class<? extends SnapshotParser> clazz : classes) {
-                    register((SnapshotParser) clazz.getConstructor().newInstance());
+            for (SnapshotParser parser : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotParser.class)) {
+                    register(parser);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

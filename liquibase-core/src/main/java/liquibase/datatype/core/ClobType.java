@@ -9,7 +9,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 @DataTypeInfo(name = "clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB", "nclob", "longnvarchar", "ntext", "java.sql.Types.LONGNVARCHAR", "java.sql.Types.NCLOB", "tinytext", "mediumtext"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
@@ -30,7 +30,7 @@ public class ClobType extends LiquibaseDataType {
         if (val.startsWith("'")) {
             return val;
         } else {
-            if ((database instanceof MSSQLDatabase) && !StringUtils.isAscii(val)) {
+            if ((database instanceof MSSQLDatabase) && !StringUtil.isAscii(val)) {
                 return "N'" + database.escapeStringForDatabase(val) + "'";
             }
 
@@ -40,7 +40,7 @@ public class ClobType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
             if ((!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration
                 .CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("text"))
@@ -49,7 +49,7 @@ public class ClobType extends LiquibaseDataType {
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^\\[?text\\]?\\s*", "");
                 type.addAdditionalInformation("(max)"
-                        + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                        + (StringUtil.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
         }
@@ -66,7 +66,7 @@ public class ClobType extends LiquibaseDataType {
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^\\[?text\\]?\\s*", "");
                 type.addAdditionalInformation("(max)"
-                        + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                        + (StringUtil.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
             if (originalDefinition.toLowerCase().startsWith("ntext")
@@ -77,7 +77,7 @@ public class ClobType extends LiquibaseDataType {
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^\\[?ntext\\]?\\s*", "");
                 type.addAdditionalInformation("(max)"
-                    + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                    + (StringUtil.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
             if ("nclob".equalsIgnoreCase(originalDefinition)) {

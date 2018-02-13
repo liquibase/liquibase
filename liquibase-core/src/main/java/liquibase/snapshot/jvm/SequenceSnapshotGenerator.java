@@ -13,7 +13,6 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
-import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.List;

@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
@@ -48,7 +48,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     }
 
     public String getColumnNames() {
-        return StringUtils.join(columns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+        return StringUtil.join(columns, ", ", new StringUtil.StringUtilFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig obj) {
                 return obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : "");

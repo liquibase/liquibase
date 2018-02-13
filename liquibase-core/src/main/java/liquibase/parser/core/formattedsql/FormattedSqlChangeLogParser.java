@@ -15,7 +15,7 @@ import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.SystemUtils;
 
 import java.io.BufferedReader;
@@ -117,7 +117,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
-                    String finalCurrentSql = changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeLog);
+                    String finalCurrentSql = changeLogParameters.expandExpressions(StringUtil.trimToNull(currentSql.toString()), changeLog);
                     if (changeSet != null) {
 
                         if (finalCurrentSql == null) {
@@ -126,7 +126,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                         change.setSql(finalCurrentSql);
 
-                        if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
+                        if (StringUtil.trimToNull(currentRollbackSql.toString()) != null) {
                             if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
                                 changeSet.addRollbackChange(new EmptyChange());
                             } else {
@@ -162,8 +162,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
-                    String context = StringUtils.trimToNull(
-                            StringUtils.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
+                    String context = StringUtil.trimToNull(
+                            StringUtil.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
                     );
                     String labels = parseString(labelsPatternMatcher);
                     String logicalFilePath = parseString(logicalFilePathMatcher);
@@ -216,9 +216,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 Matcher onUpdateSqlMatcher = onUpdateSqlPattern.matcher(body);
 
                                 PreconditionContainer pc = new PreconditionContainer();
-                                pc.setOnFail(StringUtils.trimToNull(parseString(onFailMatcher)));
-                                pc.setOnError(StringUtils.trimToNull(parseString(onErrorMatcher)));
-                                pc.setOnSqlOutput(StringUtils.trimToNull(parseString(onUpdateSqlMatcher)));
+                                pc.setOnFail(StringUtil.trimToNull(parseString(onFailMatcher)));
+                                pc.setOnError(StringUtil.trimToNull(parseString(onErrorMatcher)));
+                                pc.setOnSqlOutput(StringUtil.trimToNull(parseString(onUpdateSqlMatcher)));
                                 changeSet.setPreconditions(pc);
                             }
                         } else if (preconditionMatcher.matches()) {
@@ -227,11 +227,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 changeSet.setPreconditions(new PreconditionContainer());
                             }
                             if (preconditionMatcher.groupCount() == 2) {
-                                String name = StringUtils.trimToNull(preconditionMatcher.group(1));
+                                String name = StringUtil.trimToNull(preconditionMatcher.group(1));
                                 if (name != null) {
                                     String body = preconditionMatcher.group(2).trim();
                                     if ("sql-check".equals(name)) {
-                                        changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtils.trimToNull(body), changeSet.getChangeLog())));
+                                        changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtil.trimToNull(body), changeSet.getChangeLog())));
                                     } else {
                                         throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                                     }
@@ -245,13 +245,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             }
 
             if (changeSet != null) {
-                change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeSet.getChangeLog()));
+                change.setSql(changeLogParameters.expandExpressions(StringUtil.trimToNull(currentSql.toString()), changeSet.getChangeLog()));
 
-                if ((change.getEndDelimiter() == null) && StringUtils.trimToEmpty(change.getSql()).endsWith("\n/")) {
+                if ((change.getEndDelimiter() == null) && StringUtil.trimToEmpty(change.getSql()).endsWith("\n/")) {
                     change.setEndDelimiter("\n/$");
                 }
 
-                if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
+                if (StringUtil.trimToNull(currentRollbackSql.toString()) != null) {
                     if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
                         changeSet.addRollbackChange(new EmptyChange());
                     } else {

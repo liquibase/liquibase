@@ -8,7 +8,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -219,7 +219,7 @@ public class Column extends AbstractDatabaseObject {
                 returnValue = this.getRelation().compareTo(o.getRelation());
                 if ((returnValue == 0) && (this.getRelation().getSchema() != null) && (o.getRelation().getSchema() !=
                     null)) {
-                    returnValue = StringUtils.trimToEmpty(this.getSchema().getName()).compareTo(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
+                    returnValue = StringUtil.trimToEmpty(this.getSchema().getName()).compareTo(StringUtil.trimToEmpty(o.getRelation().getSchema().getName()));
                 }
             }
 
@@ -329,7 +329,7 @@ public class Column extends AbstractDatabaseObject {
             return null;
         }
 
-        List<String> columnNameList = StringUtils.splitAndTrim(columnNames, ",");
+        List<String> columnNameList = StringUtil.splitAndTrim(columnNames, ",");
         Column[] returnArray = new Column[columnNameList.size()];
         for (int i = 0; i < columnNameList.size(); i++) {
             returnArray[i] = fromName(columnNameList.get(i));

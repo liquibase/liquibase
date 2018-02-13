@@ -14,7 +14,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
@@ -39,7 +39,7 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         ForeignKey fk = (ForeignKey) changedObject;
 
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
+        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.toString(false);
@@ -53,9 +53,9 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
         AddForeignKeyConstraintChange addFkChange = new AddForeignKeyConstraintChange();
         addFkChange.setConstraintName(fk.getName());
         addFkChange.setBaseTableName(fk.getForeignKeyTable().getName());
-        addFkChange.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", formatter));
+        addFkChange.setBaseColumnNames(StringUtil.join(fk.getForeignKeyColumns(), ",", formatter));
         addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-        addFkChange.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", formatter));
+        addFkChange.setReferencedColumnNames(StringUtil.join(fk.getPrimaryKeyColumns(), ",", formatter));
 
         if (control.getIncludeCatalog()) {
             dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());

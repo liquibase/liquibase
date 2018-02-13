@@ -2,7 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,13 +141,13 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public String toString() {
-        StringUtils.StringUtilsFormatter<Column> columnFormatter = new StringUtils.StringUtilsFormatter<Column>() {
+        StringUtil.StringUtilFormatter<Column> columnFormatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.getName();
             }
         };
-        return getName() + "(" + getForeignKeyTable() + "[" + StringUtils.join(getForeignKeyColumns(), ", ", columnFormatter) + "] -> " + getPrimaryKeyTable() + "[" + StringUtils.join(getPrimaryKeyColumns(), ", ", columnFormatter) + "])";
+        return getName() + "(" + getForeignKeyTable() + "[" + StringUtil.join(getForeignKeyColumns(), ", ", columnFormatter) + "] -> " + getPrimaryKeyTable() + "[" + StringUtil.join(getPrimaryKeyColumns(), ", ", columnFormatter) + "])";
     }
 
     public boolean isDeferrable() {
@@ -217,7 +217,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         ForeignKey that = (ForeignKey) o;
 
         if (this.getSchema() != null && that.getSchema() != null) {
-            boolean schemasEqual = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasEqual = StringUtil.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtil.trimToEmpty(that.getSchema().getName()));
             if (!schemasEqual) {
                 return false;
             }
@@ -228,24 +228,24 @@ public class ForeignKey extends AbstractDatabaseObject{
             return this.getName().equalsIgnoreCase(that.getName());
         }
 
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
+        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.toString(false);
             }
         };
 
-        return (StringUtils.join(getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(that
+        return (StringUtil.join(getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtil.join(that
             .getForeignKeyColumns(), ",", formatter)) && ((getForeignKeyTable() != null) && (that.getForeignKeyTable
-            () != null) && getForeignKeyTable().equals(that.getForeignKeyTable())) && (StringUtils.join
-            (getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(that.getPrimaryKeyColumns(),
+            () != null) && getForeignKeyTable().equals(that.getForeignKeyTable())) && (StringUtil.join
+            (getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtil.join(that.getPrimaryKeyColumns(),
             ",", formatter))) && ((getPrimaryKeyTable() != null) && (that.getPrimaryKeyTable() != null) &&
             getPrimaryKeyTable().equals(that.getPrimaryKeyTable())));
     }
 
     @Override
     public int hashCode() {
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
+        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.toString(false);
@@ -257,7 +257,7 @@ public class ForeignKey extends AbstractDatabaseObject{
             result = getPrimaryKeyTable().hashCode();
         }
         if (getPrimaryKeyColumns() != null) {
-            result = (31 * result) + StringUtils.join(getPrimaryKeyColumns(), ",", formatter).toUpperCase().hashCode();
+            result = (31 * result) + StringUtil.join(getPrimaryKeyColumns(), ",", formatter).toUpperCase().hashCode();
         }
 
         if (getForeignKeyTable() != null) {
@@ -265,7 +265,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         }
 
         if (getForeignKeyColumns() != null) {
-            result = (31 * result) + StringUtils.join(getForeignKeyColumns(), ",", formatter).toUpperCase().hashCode();
+            result = (31 * result) + StringUtil.join(getForeignKeyColumns(), ",", formatter).toUpperCase().hashCode();
         }
 
         return result;
@@ -274,7 +274,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public int compareTo(Object other) {
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
+        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.toString(false);
@@ -287,7 +287,7 @@ public class ForeignKey extends AbstractDatabaseObject{
             returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
         }
         if ((returnValue == 0) && (this.getForeignKeyColumns() != null) && (o.getForeignKeyColumns() != null)) {
-            returnValue = StringUtils.join(this.getForeignKeyColumns(), ",", formatter).compareToIgnoreCase(StringUtils.join(o.getForeignKeyColumns(), ",", formatter));
+            returnValue = StringUtil.join(this.getForeignKeyColumns(), ",", formatter).compareToIgnoreCase(StringUtil.join(o.getForeignKeyColumns(), ",", formatter));
         }
         if ((returnValue == 0) && (this.getName() != null) && (o.getName() != null)) {
             returnValue = this.getName().compareToIgnoreCase(o.getName());
@@ -297,7 +297,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         }
 
         if ((returnValue == 0) && (this.getPrimaryKeyColumns() != null) && (o.getPrimaryKeyColumns() != null)) {
-            returnValue = StringUtils.join(this.getPrimaryKeyColumns(), ",", formatter).compareToIgnoreCase(StringUtils.join(o.getPrimaryKeyColumns(), ",", formatter));
+            returnValue = StringUtil.join(this.getPrimaryKeyColumns(), ",", formatter).compareToIgnoreCase(StringUtil.join(o.getPrimaryKeyColumns(), ",", formatter));
         }
         if ((returnValue == 0) && (this.getUpdateRule() != null) && (o.getUpdateRule() != null))
             returnValue = this.getUpdateRule().compareTo(o.getUpdateRule());

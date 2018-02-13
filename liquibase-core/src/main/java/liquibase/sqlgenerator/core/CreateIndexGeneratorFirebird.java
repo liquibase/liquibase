@@ -10,7 +10,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -105,7 +105,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
          * Firebird automatically creates indexes for PRIMARY KEY, UNIQUE KEY and FOREIGN KEY constraints,
          * so we should not duplicate that functionality (=we should not issue CREATE INDEX statements for them)
          */
-        List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
+        List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
         if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains
             (Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
             return new Sql[0];

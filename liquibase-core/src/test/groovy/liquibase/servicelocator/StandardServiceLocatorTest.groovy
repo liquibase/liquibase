@@ -19,6 +19,7 @@ import liquibase.serializer.SnapshotSerializer
 import liquibase.snapshot.SnapshotGenerator
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.structure.DatabaseObject
+import liquibase.util.TestUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -28,28 +29,7 @@ class StandardServiceLocatorTest extends Specification {
 
     @Unroll("#featureName: #type.name")
     def "all classes are listed in service loader files"() {
-        def basedir = new File(getClass().getResource("/" + type.name.replace(".", "/") + ".class").toURI()).parentFile
-
-        def first = type.name.replaceFirst(/\.\w+$/, "").replace(".", File.separatorChar as String)
-        def rootDir = basedir.toString().replaceFirst(first.replace("\\", "\\\\")+"\$", "")
-
-        def subclasses = new TreeSet<String>()
-
-        expect:
-        basedir.eachFileRecurse { file ->
-            if (file.name.endsWith(".class") && !file.name.contains("\$")) {
-                def potentialClass = Class.forName(file.absolutePath.substring(rootDir.length()).replace("\\", ".")
-                        .replace("/", ".").replaceFirst(/\.class$/, ""))
-                if (type.isAssignableFrom(potentialClass) && !type.equals(potentialClass) && !Modifier.isAbstract(potentialClass.getModifiers())) {
-                    try {
-                        potentialClass.getConstructor()
-                        subclasses.add(potentialClass.name)
-                    } catch (NoSuchMethodException ignored) {
-                        //don't add it to the list
-                    }
-                }
-            }
-        }
+        def subclasses = TestUtil.getClasses(type)
 
         def loaderFile = getClass().getResourceAsStream("/META-INF/services/" + type.getName())
         loaderFile.text.trim().replace("\r", "") == subclasses.join("\n")

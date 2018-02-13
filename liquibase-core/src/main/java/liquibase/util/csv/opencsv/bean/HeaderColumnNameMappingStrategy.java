@@ -1,6 +1,6 @@
 package liquibase.util.csv.opencsv.bean;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.csv.opencsv.CSVReader;
 
 import java.beans.BeanInfo;
@@ -110,7 +110,7 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
    @Override
    public PropertyDescriptor findDescriptor(int col) throws IntrospectionException {
       String columnName = getColumnName(col);
-      return (StringUtils.trimToNull(columnName) != null) ? findDescriptor(columnName) : null;
+      return (StringUtil.trimToNull(columnName) != null) ? findDescriptor(columnName) : null;
    }
 
    /**
@@ -123,7 +123,7 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
    @Override
    public BeanField findField(int col) {
       String columnName = getColumnName(col);
-      return (StringUtils.trimToNull(columnName) != null) ? findField(columnName) : null;
+      return (StringUtil.trimToNull(columnName) != null) ? findField(columnName) : null;
    }
 
    /**

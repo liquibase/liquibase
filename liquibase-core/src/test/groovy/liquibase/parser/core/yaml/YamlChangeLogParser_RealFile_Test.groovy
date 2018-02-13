@@ -10,6 +10,7 @@ import com.example.liquibase.change.PrimaryKeyConfig
 import com.example.liquibase.change.UniqueConstraintConfig
 
 import liquibase.Contexts
+import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
@@ -131,7 +132,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSet(path, "nvoxland", "1").shouldAlwaysRun()
         assert !changeLog.getChangeSet(path, "nvoxland", "1").shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
         assert changeLog.getChangeSets().get(0).getChanges().get(0) instanceof CreateTableChange
 
         then:
@@ -144,10 +145,10 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[0] instanceof RawSQLChange
         assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[1] instanceof RawSQLChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
         assert changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0) instanceof AddColumnChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(1)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(1)).getName() == "addColumn"
         assert changeLog.getChangeSets().get(1).getChanges().get(1) instanceof AddColumnChange
 
         changeLog.getChangeSet(path, "bob", "3").getChanges().size() == 1
@@ -156,7 +157,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSet(path, "bob", "3").shouldAlwaysRun()
         assert !changeLog.getChangeSet(path, "bob", "3").shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "bob", "3").getChanges().get(0)).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "bob", "3").getChanges().get(0)).getName() == "createTable"
         assert changeLog.getChangeSet(path, "bob", "3").getChanges().get(0) instanceof CreateTableChange
 
 
@@ -309,7 +310,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeSet.getComments() == "Some comments go here"
 
         Change change = changeSet.getChanges().get(0);
-        ChangeFactory.getInstance().getChangeMetaData(change).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
         assert change instanceof CreateTableChange
     }
 
@@ -583,7 +584,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
     def "nested objects are parsed"() {
         setup:
-        ChangeFactory.getInstance().register(CreateTableExampleChange)
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).register(new CreateTableExampleChange())
 
         when:
         def path = "liquibase/parser/core/yaml/nestedObjectsChangeLog.yaml"
@@ -661,6 +662,6 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getDescending() == true
 
         cleanup:
-        ChangeFactory.getInstance().unregister("createTableExample");
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample");
     }
 }

@@ -8,7 +8,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -136,7 +136,7 @@ public abstract class HTMLWriter {
                     fileWriter.append("<TR BGCOLOR=\"#EEEEFF\" CLASS=\"TableSubHeadingColor\">\n");
                     writeTD(fileWriter, "<a href='../changelogs/"+DBDocUtil.toFileName(change.getChangeSet().getFilePath())+".html'>"+change.getChangeSet().getFilePath()+"</a>");
                     writeTD(fileWriter, change.getChangeSet().getId());
-                    writeTD(fileWriter, "<a href='../authors/"+DBDocUtil.toFileName(change.getChangeSet().getAuthor().toLowerCase())+".html'>"+StringUtils.escapeHtml(change.getChangeSet().getAuthor().toLowerCase())+"</a>");
+                    writeTD(fileWriter, "<a href='../authors/"+DBDocUtil.toFileName(change.getChangeSet().getAuthor().toLowerCase())+".html'>"+ StringUtil.escapeHtml(change.getChangeSet().getAuthor().toLowerCase())+"</a>");
 
                     ChangeSet.RunStatus runStatus = database.getRunStatus(change.getChangeSet());
                     if (runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
@@ -154,7 +154,7 @@ public abstract class HTMLWriter {
 
                     fileWriter.append("</TR>");
 
-                    if (StringUtils.trimToNull(change.getChangeSet().getComments()) != null) {
+                    if (StringUtil.trimToNull(change.getChangeSet().getComments()) != null) {
                         fileWriter.append("<TR><TD BGCOLOR='#EEEEFF' CLASS='TableSubHeadingColor' colspan='4'>").append(change.getChangeSet().getComments()).append("</TD></TR>");
                     }
 

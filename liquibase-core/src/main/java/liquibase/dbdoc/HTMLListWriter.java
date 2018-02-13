@@ -2,7 +2,7 @@ package liquibase.dbdoc;
 
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.SortedSet;
@@ -41,7 +41,7 @@ public class HTMLListWriter {
                 fileWriter.append(DBDocUtil.toFileName(object.toString().endsWith(".xml") ? object.toString() : object.toString().toLowerCase()));
                 fileWriter.append(getTargetExtension());
                 fileWriter.append("\" target=\"objectFrame\">");
-                fileWriter.append(StringUtils.escapeHtml(object.toString()));
+                fileWriter.append(StringUtil.escapeHtml(object.toString()));
                 fileWriter.append("</A><BR>\n");
             }
 

@@ -1,6 +1,6 @@
 package liquibase.resource;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -109,6 +109,6 @@ public class CompositeResourceAccessor implements ResourceAccessor {
         for (ResourceAccessor opener : resourceAccessors) {
             openerStrings.add(opener.toString());
         }
-        return getClass().getName()+"("+StringUtils.join(openerStrings,",")+")";
+        return getClass().getName()+"("+ StringUtil.join(openerStrings,",")+")";
     }
 }

@@ -1,11 +1,13 @@
 package liquibase.change;
 
+import liquibase.ExtensibleObject;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.plugin.Plugin;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
@@ -21,7 +23,7 @@ import java.util.Set;
  * @see ChangeFactory
  * @see Database
  */
-public interface Change extends LiquibaseSerializable {
+public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject {
 
     /**
      * This method will be called by the changlelog parsing process after all of the

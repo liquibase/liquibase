@@ -17,12 +17,9 @@ public class ChangeGeneratorFactory {
     private List<ChangeGenerator> generators = new ArrayList<>();
 
     private ChangeGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = Scope.getCurrentScope().getServiceLocator().findClasses(ChangeGenerator.class);
-
-            for (Class clazz : classes) {
-                register((ChangeGenerator) clazz.getConstructor().newInstance());
+            for (ChangeGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeGenerator.class)) {
+                register(generator);
             }
 
         } catch (Exception e) {

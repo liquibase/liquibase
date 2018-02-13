@@ -31,12 +31,9 @@ public class SqlGeneratorFactory {
     private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
 
     private SqlGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = Scope.getCurrentScope().getServiceLocator().findClasses(SqlGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SqlGenerator) clazz.getConstructor().newInstance());
+            for (SqlGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SqlGenerator.class)) {
+                register(generator);
             }
 
         } catch (Exception e) {

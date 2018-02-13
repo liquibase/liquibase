@@ -39,20 +39,12 @@ public class ChangeLogParserFactory {
     }
 
     private ChangeLogParserFactory() {
-        Class<? extends ChangeLogParser>[] classes;
-        changelogParserComparator = new Comparator<ChangeLogParser>() {
-            @Override
-            public int compare(ChangeLogParser o1, ChangeLogParser o2) {
-                return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
-            }
-        };
+        changelogParserComparator = (o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority());
 
         parsers = new ArrayList<>();
         try {
-            classes = Scope.getCurrentScope().getServiceLocator().findClasses(ChangeLogParser.class);
-
-            for (Class<? extends ChangeLogParser> clazz : classes) {
-                    register((ChangeLogParser) clazz.getConstructor().newInstance());
+            for (ChangeLogParser parser : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogParser.class)) {
+                    register(parser);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

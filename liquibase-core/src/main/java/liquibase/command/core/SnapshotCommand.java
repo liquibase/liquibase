@@ -12,7 +12,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotListener;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
             return this;
         }
 
-        schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
+        schemas = StringUtil.join(schemas, ",").split("\\s*,\\s*");
         List<CatalogAndSchema> finalList = new ArrayList<>();
         for (String schema : schemas) {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));

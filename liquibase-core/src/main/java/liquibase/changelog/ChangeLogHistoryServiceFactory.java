@@ -36,12 +36,9 @@ public class ChangeLogHistoryServiceFactory {
     }
 
     private ChangeLogHistoryServiceFactory() {
-        Class<? extends ChangeLogHistoryService>[] classes;
         try {
-            classes = Scope.getCurrentScope().getServiceLocator().findClasses(ChangeLogHistoryService.class);
-
-            for (Class<? extends ChangeLogHistoryService> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (ChangeLogHistoryService service : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogHistoryService.class)) {
+                register(service);
             }
 
         } catch (Exception e) {

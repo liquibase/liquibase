@@ -37,7 +37,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -863,8 +863,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String escapeObjectName(String catalogName, String schemaName, final String objectName,
                                    final Class<? extends DatabaseObject> objectType) {
         if (supportsSchemas()) {
-            catalogName = StringUtils.trimToNull(catalogName);
-            schemaName = StringUtils.trimToNull(schemaName);
+            catalogName = StringUtil.trimToNull(catalogName);
+            schemaName = StringUtil.trimToNull(schemaName);
 
             if (catalogName == null) {
                 catalogName = this.getDefaultCatalogName();
@@ -895,8 +895,8 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
         } else if (supportsCatalogs()) {
-            catalogName = StringUtils.trimToNull(catalogName);
-            schemaName = StringUtils.trimToNull(schemaName);
+            catalogName = StringUtil.trimToNull(catalogName);
+            schemaName = StringUtil.trimToNull(schemaName);
 
             if (catalogName != null) {
                 if (getOutputDefaultCatalog()) {
@@ -1008,7 +1008,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeColumnNameList(final String columnNames) {
         StringBuilder sb = new StringBuilder();
-        for (String columnName : StringUtils.splitAndTrim(columnNames, ",")) {
+        for (String columnName : StringUtil.splitAndTrim(columnNames, ",")) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }

@@ -14,7 +14,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class IndexExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
@@ -88,14 +88,14 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
         try {
             Schema schema = new Schema(getCatalogName(), getSchemaName());
             Index example = new Index();
-            String tableName = StringUtils.trimToNull(getTableName());
+            String tableName = StringUtil.trimToNull(getTableName());
             if (tableName != null) {
                 example.setTable((Table) new Table()
                         .setName(database.correctObjectName(getTableName(), Table.class))
                         .setSchema(schema));
             }
             example.setName(database.correctObjectName(getIndexName(), Index.class));
-            if (StringUtils.trimToNull(getColumnNames()) != null) {
+            if (StringUtil.trimToNull(getColumnNames()) != null) {
                 for (String column : getColumnNames().split("\\s*,\\s*")) {
                     example.addColumn(new Column(database.correctObjectName(column, Column.class)));
                 }
@@ -110,7 +110,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
                 if (tableName != null) {
                     name += " on "+database.escapeObjectName(getTableName(), Table.class);
 
-                    if (StringUtils.trimToNull(getColumnNames()) != null) {
+                    if (StringUtil.trimToNull(getColumnNames()) != null) {
                         name += " columns "+getColumnNames();
                     }
                 }
@@ -140,7 +140,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
         if (tableName != null) {
             string += " on "+getTableName();
 
-            if (StringUtils.trimToNull(getColumnNames()) != null) {
+            if (StringUtil.trimToNull(getColumnNames()) != null) {
                 string += " columns "+getColumnNames();
             }
         }

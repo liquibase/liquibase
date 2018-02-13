@@ -10,7 +10,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -59,7 +59,7 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         if ((thisForeignKey.getForeignKeyColumns() != null) && (thisForeignKey.getPrimaryKeyColumns() != null) &&
             (otherForeignKey.getForeignKeyColumns() != null) && (otherForeignKey.getPrimaryKeyColumns() != null)) {
         boolean columnsTheSame;
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
+        StringUtil.StringUtilFormatter formatter = new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.toString(false);
@@ -67,11 +67,11 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         };
 
         if (accordingTo.isCaseSensitive()) {
-                columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
-                        StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
+                columnsTheSame = StringUtil.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equals(StringUtil.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
+                        StringUtil.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equals(StringUtil.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
         } else {
-                columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
-                        StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
+                columnsTheSame = StringUtil.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtil.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
+                        StringUtil.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtil.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
         }
 
         return columnsTheSame &&

@@ -18,7 +18,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -51,7 +51,7 @@ public class OfflineConnection implements DatabaseConnection {
             throw new UnexpectedLiquibaseException("Could not parse offline url " + url);
         }
         this.databaseShortName = matcher.group(1).toLowerCase();
-        String params = StringUtils.trimToNull(matcher.group(2));
+        String params = StringUtil.trimToNull(matcher.group(2));
         try {
             Map<String, String> params1 = new HashMap<String, String>();
             if (params != null) {

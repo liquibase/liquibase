@@ -6,7 +6,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,7 +60,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
 
             if (!values.isEmpty()) {
                 buffer.append("\n");
-                buffer.append(StringUtils.join(values, "\n"));
+                buffer.append(StringUtil.join(values, "\n"));
                 buffer.append("\n");
             }
             buffer.append(indent(indent - 1)).append("]");
@@ -73,7 +73,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
     }
 
     private String indent(int indent) {
-        return StringUtils.repeat(" ", INDENT_LENGTH * indent);
+        return StringUtil.repeat(" ", INDENT_LENGTH * indent);
     }
 
     private String serializeObject(Object[] collection, int indent) {

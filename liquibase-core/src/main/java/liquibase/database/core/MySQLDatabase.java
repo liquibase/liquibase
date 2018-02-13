@@ -14,7 +14,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.sql.DatabaseMetaData;
@@ -257,7 +257,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         if (getHasJdbcConstraintDeferrableBug() != null)  // cached value
             return getHasJdbcConstraintDeferrableBug();
 
-        String randomIdentifier = "TMP_" + StringUtils.randomIdentifer(16);
+        String randomIdentifier = "TMP_" + StringUtil.randomIdentifer(16);
         try
         {
             // Get the real connection and metadata reference
@@ -336,7 +336,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         // https://dev.mysql.com/doc/refman/5.7/en/data-types.html
         String minimumVersion = "5.6.4";
 
-        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, patch))
+        if (StringUtil.isMinimumVersion(minimumVersion, major, minor, patch))
             return 6;
         else
             return 0;

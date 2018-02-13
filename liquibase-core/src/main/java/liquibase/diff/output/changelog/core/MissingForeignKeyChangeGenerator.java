@@ -9,7 +9,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -56,7 +56,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
                 includedCatalog = true;
             } else if ((defaultCatalogName != null) && !defaultCatalogName.equalsIgnoreCase
                 (missingPrimaryKeyCatalogName)) {
-                if (!(StringUtils.trimToEmpty(comparisonDatabase.getDefaultCatalogName()).equalsIgnoreCase(StringUtils.trimToEmpty(missingPrimaryKeyCatalogName)))) { //don't include catalogName if it's in the default catalog
+                if (!(StringUtil.trimToEmpty(comparisonDatabase.getDefaultCatalogName()).equalsIgnoreCase(StringUtil.trimToEmpty(missingPrimaryKeyCatalogName)))) { //don't include catalogName if it's in the default catalog
                     change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
                     includedCatalog = true;
                 }
@@ -69,14 +69,14 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
                 change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
             } else if (((defaultSchemaName != null) && !defaultSchemaName.equalsIgnoreCase(((ForeignKey)
                 missingObject).getPrimaryKeyTable().getSchema().getName()))) {
-                if (!(StringUtils.trimToEmpty(comparisonDatabase.getDefaultSchemaName()).equalsIgnoreCase(StringUtils.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getName())))) { //don't include schemaName if it's in the default schema
+                if (!(StringUtil.trimToEmpty(comparisonDatabase.getDefaultSchemaName()).equalsIgnoreCase(StringUtil.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getName())))) { //don't include schemaName if it's in the default schema
                     change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
                 }
 
             }
         }
 
-        change.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
+        change.setReferencedColumnNames(StringUtil.join(fk.getPrimaryKeyColumns(), ",", new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.getName();
@@ -90,7 +90,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
         if (control.getIncludeSchema()) {
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
         }
-        change.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
+        change.setBaseColumnNames(StringUtil.join(fk.getForeignKeyColumns(), ",", new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.getName();

@@ -22,7 +22,7 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.File;
@@ -528,7 +528,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
         } catch (UnknownChangelogFormatException e) {
             // This matches only an extension, but filename can be a full path, too. Is it right?
-            boolean matchesFileExtension = StringUtils.trimToEmpty(fileName).matches("\\.\\w+$");
+            boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
             if (matchesFileExtension || logEveryUnknownFileFormat) {
                 LogService.getLog(getClass()).warning(
                         LogType.LOG, "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"

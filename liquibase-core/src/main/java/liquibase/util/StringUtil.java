@@ -1,5 +1,9 @@
 package liquibase.util;
 
+import liquibase.ExtensibleObject;
+import liquibase.database.Database;
+import liquibase.structure.DatabaseObject;
+
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -7,7 +11,7 @@ import java.util.regex.Pattern;
 /**
  * Various utility methods for working with strings.
  */
-public class StringUtils {
+public class StringUtil {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
     private static final SecureRandom rnd = new SecureRandom();
@@ -61,15 +65,15 @@ public class StringUtils {
         boolean previousDelimiter = false;
         for (Object piece : parsed.toArray(true)) {
             if (splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
-                String trimmedString = StringUtils.trimToNull(currentString.toString());
+                String trimmedString = StringUtil.trimToNull(currentString.toString());
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
                 }
                 currentString = new StringBuilder();
                 previousDelimiter = true;
             } else {
-                if (!previousDelimiter || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
-                    if ((currentString.length() > 0) || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
+                if (!previousDelimiter || (StringUtil.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
+                    if ((currentString.length() > 0) || (StringUtil.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
                         currentString.append(piece);
                     }
                 }
@@ -78,7 +82,7 @@ public class StringUtils {
             previousPiece = (String) piece;
         }
 
-        String trimmedString = StringUtils.trimToNull(currentString.toString());
+        String trimmedString = StringUtil.trimToNull(currentString.toString());
         if (trimmedString != null) {
             returnArray.add(trimmedString);
         }
@@ -125,7 +129,7 @@ public class StringUtils {
         return SqlParser.parse(multiLineSQL, true, false).toString().trim();
     }
 
-    public static String join(Object[] array, String delimiter, StringUtilsFormatter formatter) {
+    public static String join(Object[] array, String delimiter, StringUtilFormatter formatter) {
         if (array == null) {
             return null;
         }
@@ -141,7 +145,7 @@ public class StringUtils {
 
     }
 
-    public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter) {
+    public static String join(Collection collection, String delimiter, StringUtilFormatter formatter) {
         if (collection == null) {
             return null;
         }
@@ -159,7 +163,7 @@ public class StringUtils {
         return returnString.substring(0, returnString.length() - delimiter.length());
     }
 
-    public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter, boolean sorted) {
+    public static String join(Collection collection, String delimiter, StringUtilFormatter formatter, boolean sorted) {
         if (sorted) {
             TreeSet<String> sortedSet = new TreeSet<>();
             for (Object obj : collection) {
@@ -182,10 +186,25 @@ public class StringUtils {
         return join(map, delimiter, new ToStringFormatter());
     }
 
-    public static String join(Map map, String delimiter, StringUtilsFormatter formatter) {
+    public static String join(Map map, String delimiter, StringUtilFormatter formatter) {
         List<String> list = new ArrayList<>();
         for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
             list.add(entry.getKey().toString()+"="+formatter.toString(entry.getValue()));
+        }
+        return join(list, delimiter);
+    }
+
+   public static String join(ExtensibleObject extensibleObject, String delimiter) {
+        return join(extensibleObject, delimiter, new ToStringFormatter());
+    }
+
+    public static String join(ExtensibleObject extensibleObject, String delimiter, StringUtilFormatter formatter) {
+        List<String> list = new ArrayList<>();
+        for (String attribute : new TreeSet<>(extensibleObject.getAttributes())) {
+            String formattedValue = formatter.toString(extensibleObject.get(attribute, Object.class));
+            if (formattedValue != null) {
+                list.add(attribute + "=" + formattedValue);
+            }
         }
         return join(list, delimiter);
     }
@@ -223,7 +242,7 @@ public class StringUtils {
         {
             ints[i] = array[i];
         }
-	return StringUtils.join(ints, delimiter);
+	return StringUtil.join(ints, delimiter);
     }
 
     public static String join(int[] array, String delimiter) {
@@ -249,7 +268,7 @@ public class StringUtils {
     }
 
     public static String indent(String string, int padding) {
-        String pad = StringUtils.repeat(" ", padding);
+        String pad = StringUtil.repeat(" ", padding);
         return pad+(string.replaceAll("\n", "\n" + pad));
     }
 
@@ -321,12 +340,12 @@ public class StringUtils {
      * @return the input string, padded if necessary.
      */
     public static String pad(String value, int length) {
-        value = StringUtils.trimToEmpty(value);
+        value = StringUtil.trimToEmpty(value);
         if (value.length() >= length) {
             return value;
         }
 
-        return value + StringUtils.repeat(" ", length - value.length());
+        return value + StringUtil.repeat(" ", length - value.length());
     }
 
     /**
@@ -337,12 +356,12 @@ public class StringUtils {
      * @return the input string, padded if necessary.
      */
     public static String leftPad(String value, int length) {
-        value = StringUtils.trimToEmpty(value);
+        value = StringUtil.trimToEmpty(value);
         if (value.length() >= length) {
             return value;
         }
 
-        return StringUtils.repeat(" ", length - value.length()) + value;
+        return StringUtil.repeat(" ", length - value.length()) + value;
     }
 
     /**
@@ -388,7 +407,7 @@ public class StringUtils {
         if (string == null) {
             return true;
         }
-        return StringUtils.trimToNull(string.toString()) == null;
+        return StringUtil.trimToNull(string.toString()) == null;
     }
 
     /**
@@ -440,15 +459,40 @@ public class StringUtils {
         return sb.toString();
     }
 
-    public interface StringUtilsFormatter<Type> {
+    public interface StringUtilFormatter<Type> {
         String toString(Type obj);
     }
 
-    public static class ToStringFormatter implements StringUtilsFormatter {
+    public static class ToStringFormatter implements StringUtilFormatter {
         @Override
         public String toString(Object obj) {
             if (obj == null) {
                 return null;
+            }
+            return obj.toString();
+        }
+    }
+
+  public static class DefaultFormatter implements StringUtilFormatter {
+        @Override
+        public String toString(Object obj) {
+            if (obj == null) {
+                return null;
+            } else if (obj instanceof Class) {
+                return ((Class) obj).getName();
+            } else if (obj instanceof Object[]) {
+                if (((Object[]) obj).length == 0) {
+                    return null;
+                } else {
+                    return "[" + StringUtil.join((Object[]) obj, ", ", this) + "]";
+                }
+            } else if (obj instanceof Collection) {
+                if (((Collection) obj).size() == 0) {
+                    return null;
+                } else {
+                    return "[" + StringUtil.join((Collection) obj, ", ", this) + "]";
+                }
+
             }
             return obj.toString();
         }
@@ -618,7 +662,7 @@ public class StringUtils {
 
     
     /**
-     * From commonslang3 -> StringUtils
+     * From commonslang3 -> StringUtil
      * <p>Gets a substring from the specified String avoiding exceptions.</p>
      *
      * <p>A negative start position can be used to start/end {@code n}
@@ -634,15 +678,15 @@ public class StringUtils {
      * is returned.</p>
      *
      * <pre>
-     * StringUtils.substring(null, *, *)    = null
-     * StringUtils.substring("", * ,  *)    = "";
-     * StringUtils.substring("abc", 0, 2)   = "ab"
-     * StringUtils.substring("abc", 2, 0)   = ""
-     * StringUtils.substring("abc", 2, 4)   = "c"
-     * StringUtils.substring("abc", 4, 6)   = ""
-     * StringUtils.substring("abc", 2, 2)   = ""
-     * StringUtils.substring("abc", -2, -1) = "b"
-     * StringUtils.substring("abc", -4, 2)  = "ab"
+     * StringUtil.substring(null, *, *)    = null
+     * StringUtil.substring("", * ,  *)    = "";
+     * StringUtil.substring("abc", 0, 2)   = "ab"
+     * StringUtil.substring("abc", 2, 0)   = ""
+     * StringUtil.substring("abc", 2, 4)   = "c"
+     * StringUtil.substring("abc", 4, 6)   = ""
+     * StringUtil.substring("abc", 2, 2)   = ""
+     * StringUtil.substring("abc", -2, -1) = "b"
+     * StringUtil.substring("abc", -4, 2)  = "ab"
      * </pre>
      *
      * @param str  the String to get the substring from, may be null
@@ -685,5 +729,22 @@ public class StringUtils {
 
         return str.substring(start, end);
     }
+
+    /**
+     * Concatenates the addition string to the baseString string, adjusting the case of "addition" to match the base string.
+     * If the string is all caps, append addition in all caps. If all lower case, append in all lower case. If baseString is mixed case, make no changes to addition.
+     */
+    public static String concatConsistentCase(String baseString, String addition) {
+        boolean hasLowerCase = hasLowerCase(baseString);
+        boolean hasUpperCase = hasUpperCase(baseString);
+        if ((hasLowerCase && hasUpperCase) || (!hasLowerCase && !hasUpperCase)) { //mixed case || no letters
+            return baseString + addition;
+        } else if (hasLowerCase) {
+            return baseString + addition.toLowerCase();
+        } else {
+            return baseString + addition.toUpperCase();
+        }
+    }
+
 
 }

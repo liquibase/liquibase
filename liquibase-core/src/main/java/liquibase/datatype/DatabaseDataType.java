@@ -1,6 +1,6 @@
 package liquibase.datatype;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 /**
  * This class represents a native data type used by a specific RDBMS. This is in contrast of
@@ -30,7 +30,7 @@ public class DatabaseDataType {
                     stringParams[i] = parameters[i].toString();
                 }
             }
-            type += "("+ StringUtils.join(stringParams, ", ")+")";
+            type += "("+ StringUtil.join(stringParams, ", ")+")";
         }
     }
 

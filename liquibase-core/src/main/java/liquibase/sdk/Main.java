@@ -3,7 +3,7 @@ package liquibase.sdk;
 import liquibase.command.LiquibaseCommand;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.convert.ConvertCommand;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -106,15 +106,15 @@ public class Main {
 
 //        Context context = Context.getInstance();
 //        if (context.getSeenExtensionClasses().size() == 0) {
-//            System.out.println("No extension classes found in "+StringUtils.join(context.getPackages(), ","));
+//            System.out.println("No extension classes found in "+StringUtil.join(context.getPackages(), ","));
 //            return;
 //        }
 //
 //        System.out.println("Extension classes found:");
 //        for (Map.Entry<Class, Set<Class>> entry : context.getSeenExtensionClasses().entrySet()) {
-//            System.out.println(StringUtils.indent(entry.getKey().getName()+" extensions:", 4));
+//            System.out.println(StringUtil.indent(entry.getKey().getName()+" extensions:", 4));
 //
-//            System.out.println(StringUtils.indent(StringUtils.join(entry.getValue(), "\n", new StringUtils.StringUtilsFormatter() {
+//            System.out.println(StringUtil.indent(StringUtil.join(entry.getValue(), "\n", new StringUtil.StringUtilFormatter() {
 //                @Override
 //                public String toString(Object obj) {
 //                    return ((Class) obj).getName();
@@ -198,7 +198,7 @@ public class Main {
             path = environment.get("path");
         }
         if (path == null) {
-            throw new UnexpectedLiquibaseException("Cannot find path variable in environment. Possible variables are " + StringUtils.join(environment.keySet(), ","));
+            throw new UnexpectedLiquibaseException("Cannot find path variable in environment. Possible variables are " + StringUtil.join(environment.keySet(), ","));
         }
 
         return path;

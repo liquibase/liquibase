@@ -1,6 +1,6 @@
 package liquibase.database;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -16,11 +16,11 @@ public class DatabaseList {
      * If an empty or null definition or null is passed, it will return the passed returnValueIfEmpty value.
      */
     public static boolean definitionMatches(String definition, String databaseShortName, boolean returnValueIfEmpty) {
-        return definitionMatches(StringUtils.splitAndTrim(StringUtils.trimToNull(definition), ","), databaseShortName, returnValueIfEmpty);
+        return definitionMatches(StringUtil.splitAndTrim(StringUtil.trimToNull(definition), ","), databaseShortName, returnValueIfEmpty);
     }
 
     public static boolean definitionMatches(String definition, Database database, boolean returnValueIfEmpty) {
-        return definitionMatches(StringUtils.splitAndTrim(StringUtils.trimToNull(definition), ","), database, returnValueIfEmpty);
+        return definitionMatches(StringUtil.splitAndTrim(StringUtil.trimToNull(definition), ","), database, returnValueIfEmpty);
     }
 
     /**

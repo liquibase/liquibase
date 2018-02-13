@@ -1,7 +1,7 @@
 package liquibase;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -42,12 +42,12 @@ public class LabelExpression {
     }
 
     private void parseLabelString(String labels) {
-        labels = StringUtils.trimToNull(labels);
+        labels = StringUtil.trimToNull(labels);
 
         if (labels == null) {
             return;
         }
-        for (String label : StringUtils.splitAndTrim(labels, ",")) {
+        for (String label : StringUtil.splitAndTrim(labels, ",")) {
             this.labels.add(label.toLowerCase());
         }
 
@@ -66,7 +66,7 @@ public class LabelExpression {
         if (originalString != null) {
             return originalString;
         }
-        return "(" + StringUtils.join(new TreeSet<>(this.labels), "), (") + ")";
+        return "(" + StringUtil.join(new TreeSet<>(this.labels), "), (") + ")";
     }
 
     /**

@@ -17,9 +17,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
-import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +111,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
             List<Column> referenceColumns = (List<Column>) columnsDifference.getReferenceValue();
             List<Column> comparedColumns = (List<Column>) columnsDifference.getComparedValue();
 
-            StringUtils.StringUtilsFormatter<Column> formatter = new StringUtils.StringUtilsFormatter<Column>() {
+            StringUtil.StringUtilFormatter<Column> formatter = new StringUtil.StringUtilFormatter<Column>() {
                 @Override
                 public String toString(Column obj) {
                     return obj.toString(false);
@@ -120,13 +119,13 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
             };
 
             control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(referenceColumns));
-            if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
+            if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, ",", formatter))) {
                 control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
             }
 
             if ((index.isUnique() != null) && index.isUnique()) {
                 control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
-                if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
+                if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, ",", formatter))) {
                     control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(comparedColumns));
                 }
             }

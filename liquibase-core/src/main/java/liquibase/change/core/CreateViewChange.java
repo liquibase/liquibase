@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.*;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -21,7 +21,7 @@ import liquibase.statement.core.DropViewStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.View;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -138,14 +138,13 @@ public class CreateViewChange extends AbstractChange {
     public ValidationErrors validate(Database database) {
         ValidationErrors validate = super.validate(database);
         if (!validate.hasErrors()) {
-            if ((StringUtils.trimToNull(getSelectQuery()) != null) && (StringUtils.trimToNull(getPath()) != null)) {
-                validate.addError("Cannot specify both 'path' and a nested view definition in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
+            if ((StringUtil.trimToNull(getSelectQuery()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
+                validate.addError("Cannot specify both 'path' and a nested view definition in " + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName());
             }
-            if ((StringUtils.trimToNull(getSelectQuery()) == null) && (StringUtils.trimToNull(getPath()) == null)) {
+            if ((StringUtil.trimToNull(getSelectQuery()) == null) && (StringUtil.trimToNull(getPath()) == null)) {
                 validate.addError("For a createView change, you must specify either 'path' or a nested view " +
                         "definition in " +
-                        "" + ChangeFactory
-                        .getInstance().getChangeMetaData(this).getName());
+                        "" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName());
             }
 
         }
@@ -160,7 +159,7 @@ public class CreateViewChange extends AbstractChange {
         try {
             return StreamUtil.openStream(getPath(), getRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
         } catch (IOException e) {
-            throw new IOException("<" + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
+            throw new IOException("<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
         }
     }
 
@@ -228,7 +227,7 @@ public class CreateViewChange extends AbstractChange {
 		String selectQuery;
 		String path = getPath();
 		if (path == null) {
-			selectQuery = StringUtils.trimToNull(getSelectQuery());
+			selectQuery = StringUtil.trimToNull(getSelectQuery());
 		} else {
 			try {
 				InputStream stream = openSqlStream();
@@ -256,7 +255,7 @@ public class CreateViewChange extends AbstractChange {
                     .setFullDefinition(fullDefinition));
         }
 
-        if ((database instanceof OracleDatabase) && (StringUtils.trimToNull(remarks) != null)) {
+        if ((database instanceof OracleDatabase) && (StringUtil.trimToNull(remarks) != null)) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, viewName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);

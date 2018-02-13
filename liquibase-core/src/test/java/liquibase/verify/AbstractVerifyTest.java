@@ -1,6 +1,6 @@
 package liquibase.verify;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.junit.ComparisonFailure;
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -60,7 +60,7 @@ public class AbstractVerifyTest {
 
         public void test() throws Exception {
             String existingContent = readExistingValue();
-            if ("".equals(existingContent) && (StringUtils.trimToNull(stateContent.toString()) != null)) {
+            if ("".equals(existingContent) && (StringUtil.trimToNull(stateContent.toString()) != null)) {
                 save();
             } else {
                 try {

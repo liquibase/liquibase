@@ -18,7 +18,7 @@ import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -329,7 +329,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
-		if (StringUtils.trimToNull(this.defaultSchema) != null) {
+		if (StringUtil.trimToNull(this.defaultSchema) != null) {
 			database.setDefaultSchemaName(this.defaultSchema);
 		}
 		return database;

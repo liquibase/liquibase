@@ -5,7 +5,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class Db2zDatabase extends AbstractDb2Database {
 
@@ -18,7 +18,7 @@ public class Db2zDatabase extends AbstractDb2Database {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return conn.getDatabaseProductName().startsWith("DB2") && StringUtils.startsWith(conn.getDatabaseProductVersion(), "DSN");
+        return conn.getDatabaseProductName().startsWith("DB2") && StringUtil.startsWith(conn.getDatabaseProductVersion(), "DSN");
     }
 
     @Override
@@ -34,7 +34,7 @@ public class Db2zDatabase extends AbstractDb2Database {
     @Override
     public boolean isSystemObject(DatabaseObject example) {
         boolean isSystemIndex = example instanceof Index && example.getName() != null && example.getName().contains("_#_");
-        boolean isSystemColumn = example instanceof Column && StringUtils.startsWith(example.getName(), "DB2_GENERATED");
+        boolean isSystemColumn = example instanceof Column && StringUtil.startsWith(example.getName(), "DB2_GENERATED");
         return isSystemIndex || isSystemColumn || super.isSystemObject(example);
     }
 

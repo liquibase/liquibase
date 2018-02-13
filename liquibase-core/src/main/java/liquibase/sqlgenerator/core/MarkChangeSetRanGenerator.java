@@ -18,9 +18,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.structure.core.Column;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
@@ -82,7 +81,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
                         .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
-                        .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))
+                        .addColumnValue("COMMENTS", limitSize(StringUtil.trimToEmpty(changeSet.getComments())))
                         .addColumnValue("EXECTYPE", statement.getExecType().value)
                         .addColumnValue("CONTEXTS", ((changeSet.getContexts() == null) || changeSet.getContexts()
                             .isEmpty()) ? null : buildFullContext(changeSet))

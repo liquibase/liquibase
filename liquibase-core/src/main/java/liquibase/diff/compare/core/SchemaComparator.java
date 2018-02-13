@@ -7,7 +7,7 @@ import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Set;
 
@@ -44,7 +44,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
         }
 
 
-        if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
+        if (StringUtil.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtil.trimToEmpty(schemaName2))) {
             return true;
         }
 
@@ -63,7 +63,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
                 schemaName2 = accordingTo.getDefaultCatalogName();
             }
         }
-        if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
+        if (StringUtil.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtil.trimToEmpty(schemaName2))) {
             return true;
         }
 
@@ -91,7 +91,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
                     finalSchema1 = comparisonSchema1;
                 }
 
-                if (StringUtils.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtils.trimToEmpty(finalSchema2))) {
+                if (StringUtil.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtil.trimToEmpty(finalSchema2))) {
                     return true;
                 }
 
@@ -101,7 +101,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
                     finalSchema2 = comparisonSchema1;
                 }
 
-                if (StringUtils.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtils.trimToEmpty(finalSchema2))) {
+                if (StringUtil.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtil.trimToEmpty(finalSchema2))) {
                     return true;
                 }
             }
@@ -110,7 +110,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
         schemaName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
         schemaName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
 
-        return StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2));
+        return StringUtil.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtil.trimToEmpty(schemaName2));
     }
 
 

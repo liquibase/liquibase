@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 /**
  * Object representing a database catalog and schema. This differs from {@link liquibase.structure.core.Schema} in that it has
@@ -73,8 +73,8 @@ public class CatalogAndSchema {
      * @see CatalogAndSchema#customize(liquibase.database.Database)
      * */
     public CatalogAndSchema standardize(Database accordingTo) {
-        String workCatalogName = StringUtils.trimToNull(getCatalogName());
-        String workSchemaName = StringUtils.trimToNull(getSchemaName());
+        String workCatalogName = StringUtil.trimToNull(getCatalogName());
+        String workSchemaName = StringUtil.trimToNull(getSchemaName());
 
         if (!accordingTo.supportsCatalogs()) {
             return new CatalogAndSchema(null, null);

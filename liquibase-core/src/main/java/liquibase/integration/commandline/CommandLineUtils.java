@@ -20,9 +20,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -87,12 +86,12 @@ public class CommandLineUtils {
                                                 String databaseChangeLogTableName,
                                                 String databaseChangeLogLockTableName) throws DatabaseException {
         try {
-            liquibaseCatalogName = StringUtils.trimToNull(liquibaseCatalogName);
-            liquibaseSchemaName = StringUtils.trimToNull(liquibaseSchemaName);
-            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
-            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
-            databaseChangeLogTableName = StringUtils.trimToNull(databaseChangeLogTableName);
-            databaseChangeLogLockTableName = StringUtils.trimToNull(databaseChangeLogLockTableName);
+            liquibaseCatalogName = StringUtil.trimToNull(liquibaseCatalogName);
+            liquibaseSchemaName = StringUtil.trimToNull(liquibaseSchemaName);
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
+            databaseChangeLogTableName = StringUtil.trimToNull(databaseChangeLogTableName);
+            databaseChangeLogLockTableName = StringUtil.trimToNull(databaseChangeLogLockTableName);
 
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
@@ -106,8 +105,8 @@ public class CommandLineUtils {
                 }
             }
 
-            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
-            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
 
             database.setDefaultCatalogName(defaultCatalogName);
             database.setDefaultSchemaName(defaultSchemaName);

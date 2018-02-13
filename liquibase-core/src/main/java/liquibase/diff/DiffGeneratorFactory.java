@@ -18,11 +18,8 @@ public class DiffGeneratorFactory {
 
     protected DiffGeneratorFactory() {
         try {
-            Class[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(DiffGenerator.class);
-
-            //noinspection unchecked
-            for (Class<? extends DiffGenerator> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (DiffGenerator diffGenerator : Scope.getCurrentScope().getServiceLocator().findInstances(DiffGenerator.class)) {
+                register(diffGenerator);
             }
 
         } catch (Exception e) {
@@ -57,7 +54,7 @@ public class DiffGeneratorFactory {
         }
 
         if (foundGenerators.isEmpty()) {
-            throw new UnexpectedLiquibaseException("Cannot find DiffGenerator for "+referenceDatabase.getShortName()+", "+comparisonDatabase.getShortName());
+            throw new UnexpectedLiquibaseException("Cannot find DiffGenerator for " + referenceDatabase.getShortName() + ", " + comparisonDatabase.getShortName());
         }
 
         try {

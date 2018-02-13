@@ -11,7 +11,7 @@ import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeyStatement> {
 
@@ -57,7 +57,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             sql += " (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         }
 
-        if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
+        if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON "+statement.getTablespace();
             } else if ((database instanceof AbstractDb2Database) || (database instanceof SybaseASADatabase)) {

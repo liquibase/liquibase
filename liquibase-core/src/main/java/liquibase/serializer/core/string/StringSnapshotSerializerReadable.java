@@ -12,7 +12,7 @@ import liquibase.structure.CatalogLevelObject;
 import liquibase.structure.DatabaseLevelObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,7 +43,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             SnapshotControl snapshotControl = snapshot.getSnapshotControl();
             List<Class> includedTypes = sort(snapshotControl.getTypesToInclude());
 
-            buffer.append("Included types:\n" ).append(StringUtils.indent(StringUtils.join(includedTypes, "\n", new StringUtils.StringUtilsFormatter<Class>() {
+            buffer.append("Included types:\n" ).append(StringUtil.indent(StringUtil.join(includedTypes, "\n", new StringUtil.StringUtilFormatter<Class>() {
                 @Override
                 public String toString(Class obj) {
                     return obj.getName();
@@ -89,7 +89,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                     }
                     outputObjects(objects, type, catalogBuffer);
                 }
-                buffer.append(StringUtils.indent(catalogBuffer.toString(), INDENT_LENGTH));
+                buffer.append(StringUtil.indent(catalogBuffer.toString(), INDENT_LENGTH));
 
             }
 
@@ -109,10 +109,10 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             StringBuilder typeBuffer = new StringBuilder();
             for (DatabaseObject databaseObject : databaseObjects) {
                 typeBuffer.append(databaseObject.getName()).append("\n");
-                typeBuffer.append(StringUtils.indent(serialize(databaseObject, null), INDENT_LENGTH)).append("\n");
+                typeBuffer.append(StringUtil.indent(serialize(databaseObject, null), INDENT_LENGTH)).append("\n");
             }
 
-            catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), INDENT_LENGTH)).append("\n");
+            catalogBuffer.append(StringUtil.indent(typeBuffer.toString(), INDENT_LENGTH)).append("\n");
         }
     }
 
@@ -149,7 +149,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                 boolean expandContainedObjects = shouldExpandNestedObject(value, databaseObject);
 
                 if (expandContainedObjects) {
-                    value = ((DatabaseObject) value).getName()+"\n"+StringUtils.indent(serialize((DatabaseObject) value, databaseObject), INDENT_LENGTH);
+                    value = ((DatabaseObject) value).getName()+"\n"+ StringUtil.indent(serialize((DatabaseObject) value, databaseObject), INDENT_LENGTH);
                 } else {
                     value = databaseObject.getSerializableFieldValue(attribute);
                 }
@@ -158,12 +158,12 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                     value = null;
                 } else {
                     if (((Collection) value).iterator().next() instanceof DatabaseObject) {
-                        value = StringUtils.join(new TreeSet<>((Collection<DatabaseObject>) value), "\n", new StringUtils.StringUtilsFormatter() {
+                        value = StringUtil.join(new TreeSet<>((Collection<DatabaseObject>) value), "\n", new StringUtil.StringUtilFormatter() {
                             @Override
                             public String toString(Object obj) {
                                 if (obj instanceof DatabaseObject) {
                                     if (shouldExpandNestedObject(obj, databaseObject)) {
-                                        return ((DatabaseObject) obj).getName()+"\n"+StringUtils.indent(serialize(((DatabaseObject) obj), databaseObject), INDENT_LENGTH);
+                                        return ((DatabaseObject) obj).getName()+"\n"+ StringUtil.indent(serialize(((DatabaseObject) obj), databaseObject), INDENT_LENGTH);
                                     } else {
                                         return ((DatabaseObject) obj).getName();
                                     }
@@ -172,7 +172,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                                 }
                             }
                         });
-                        value = "\n"+StringUtils.indent((String) value, INDENT_LENGTH);
+                        value = "\n"+ StringUtil.indent((String) value, INDENT_LENGTH);
                     } else {
                         value = databaseObject.getSerializableFieldValue(attribute);
                     }

@@ -32,11 +32,10 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.xml.XMLResourceBundle;
 import liquibase.util.xml.XmlResourceBundleControl;
 import org.slf4j.LoggerFactory;
@@ -519,11 +518,11 @@ public class Main {
         } else if (!isCommand(command)) {
             messages.add(String.format(coreBundle.getString("command.unknown"), command));
         } else {
-            if (StringUtils.trimToNull(url) == null) {
+            if (StringUtil.trimToNull(url) == null) {
                 messages.add(String.format(coreBundle.getString("option.required"), "--" + OPTIONS.URL));
             }
 
-            if (isChangeLogRequired(command) && (StringUtils.trimToNull(changeLogFile) == null)) {
+            if (isChangeLogRequired(command) && (StringUtil.trimToNull(changeLogFile) == null)) {
                 messages.add(String.format(coreBundle.getString("option.required"), "--" + OPTIONS.CHANGELOG_FILE));
             }
 
@@ -790,7 +789,7 @@ public class Main {
         String attributeName = splitArg[0];
         String value = splitArg[1];
 
-        if (PROMPT_FOR_VALUE.equalsIgnoreCase(StringUtils.trimToEmpty(value))) {
+        if (PROMPT_FOR_VALUE.equalsIgnoreCase(StringUtil.trimToEmpty(value))) {
             Console c = System.console();
             if (c == null) {
                 throw new CommandLineParsingException(
@@ -959,8 +958,8 @@ public class Main {
         database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
         try {
 
-            String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
-            String includeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
+            String excludeObjects = StringUtil.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
+            String includeObjects = StringUtil.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
 
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
@@ -1004,14 +1003,14 @@ public class Main {
             if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(
                     createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                    database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons
+                    database, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
                 );
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
                     createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
                     database,
-                    diffOutputControl, objectChangeFilter, StringUtils.trimToNull(diffTypes), finalSchemaComparisons
+                    diffOutputControl, objectChangeFilter, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
                 );
                 return;
             } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
@@ -1041,8 +1040,8 @@ public class Main {
 
                 CatalogAndSchema[] finalTargetSchemas = computedSchemas.finalTargetSchemas;
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
-                    StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor),
-                    StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory),
+                    StringUtil.trimToNull(diffTypes), StringUtil.trimToNull(changeSetAuthor),
+                    StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
                     diffOutputControl);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {

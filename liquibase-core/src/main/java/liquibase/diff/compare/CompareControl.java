@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -104,9 +104,9 @@ public class CompareControl {
             List<CatalogAndSchema> referenceSchemas = new ArrayList<>();
             List<CatalogAndSchema> targetSchemas = new ArrayList<>();
 
-            List<String> splitReferenceSchemaNames = StringUtils.splitAndTrim(referenceSchemaNames, ",");
-            List<String> splitSchemaNames = StringUtils.splitAndTrim(schemaNames, ",");
-            List<String> splitOutputSchemaNames = StringUtils.splitAndTrim(StringUtils.trimToNull(outputSchemaNames),
+            List<String> splitReferenceSchemaNames = StringUtil.splitAndTrim(referenceSchemaNames, ",");
+            List<String> splitSchemaNames = StringUtil.splitAndTrim(schemaNames, ",");
+            List<String> splitOutputSchemaNames = StringUtil.splitAndTrim(StringUtil.trimToNull(outputSchemaNames),
                 ",");
 
             if (splitReferenceSchemaNames.size() != splitSchemaNames.size()) {

@@ -7,7 +7,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 @DataTypeInfo(name = "xml", aliases = { "xmltype", "java.sql.Types.SQLXML" }, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class XMLType extends LiquibaseDataType {
@@ -17,7 +17,7 @@ public class XMLType extends LiquibaseDataType {
             return null;
         }
         String val = value.toString();
-        if ((database instanceof MSSQLDatabase) && !StringUtils.isAscii(val)) {
+        if ((database instanceof MSSQLDatabase) && !StringUtil.isAscii(val)) {
             return "N'" + database.escapeStringForDatabase(val) + "'";
         } else if (database instanceof PostgresDatabase) {
             try {

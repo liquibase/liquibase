@@ -1,5 +1,6 @@
-package liquibase.change.core;
+package liquibase.change.core
 
+import liquibase.Scope;
 import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
@@ -15,7 +16,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
     def getAppliesTo() {
         expect:
         def change = new AddAutoIncrementChange();
-        ChangeFactory.getInstance().getChangeMetaData(change).getAppliesTo().iterator().next() == "column"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getAppliesTo().iterator().next() == "column"
     }
 
 
@@ -34,7 +35,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
     def "check change metadata"() {
         expect:
         def change = new AddAutoIncrementChange();
-        def metaData = ChangeFactory.getInstance().getChangeMetaData(change);
+        def metaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change);
         metaData.getName() == "addAutoIncrement"
 
     }

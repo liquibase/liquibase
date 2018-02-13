@@ -11,7 +11,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.LoggerContext;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -105,7 +105,7 @@ public class ChangeLogIterator {
         return changeSet.toString(true)
                 + ":" + (labels == null ? null : labels.toString())
                 + ":" + (contexts == null ? null : contexts.toString())
-                + ":" + StringUtils.join(changeSet.getDbmsSet(), ",");
+                + ":" + StringUtil.join(changeSet.getDbmsSet(), ",");
     }
 
     protected boolean alreadySaw(ChangeSet changeSet) {

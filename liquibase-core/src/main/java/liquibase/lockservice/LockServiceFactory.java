@@ -39,12 +39,9 @@ public class LockServiceFactory {
     }
 
     private LockServiceFactory() {
-		Class<? extends LockService>[] classes;
 		try {
-			classes = Scope.getCurrentScope().getServiceLocator().findClasses(LockService.class);
-
-			for (Class<? extends LockService> clazz : classes) {
-				register(clazz.getConstructor().newInstance());
+			for (LockService lockService : Scope.getCurrentScope().getServiceLocator().findInstances(LockService.class)) {
+				register(lockService);
 			}
 
 		} catch (Exception e) {

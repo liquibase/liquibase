@@ -5,7 +5,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -263,7 +263,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             String packageName = type.getPackage().getName();
             List<String> packageNameParts = Arrays.asList(packageName.split("\\."));
             for (int i = 0; i < packageNameParts.size(); i++) {
-                String thisPackage = StringUtils.join(packageNameParts.subList(0, i + 1), "/");
+                String thisPackage = StringUtil.join(packageNameParts.subList(0, i + 1), "/");
                 addFoundClass(thisPackage, type);
             }
         }

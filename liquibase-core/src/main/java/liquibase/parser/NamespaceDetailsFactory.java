@@ -28,12 +28,9 @@ public class NamespaceDetailsFactory {
     }
 
     private NamespaceDetailsFactory() {
-        Class<? extends NamespaceDetails>[] classes;
         try {
-            classes = Scope.getCurrentScope().getServiceLocator().findClasses(NamespaceDetails.class);
-
-            for (Class<? extends NamespaceDetails> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (NamespaceDetails details : Scope.getCurrentScope().getServiceLocator().findInstances(NamespaceDetails.class)) {
+                register(details);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
