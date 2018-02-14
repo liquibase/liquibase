@@ -34,9 +34,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
-        // objects in mysql are always case sensitive
-        super.quotingStartCharacter = "`";
-        super.quotingEndCharacter = "`";
         setHasJdbcConstraintDeferrableBug(null);
     }
 
@@ -340,6 +337,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 6;
         else
             return 0;
+    }
+
+    @Override
+    protected String getQuotingStartCharacter() {
+        return "`"; // objects in mysql are always case sensitive
+
+    }
+
+    @Override
+    protected String getQuotingEndCharacter() {
+        return "`"; // objects in mysql are always case sensitive
     }
 
     /**
