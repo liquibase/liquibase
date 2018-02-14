@@ -1274,8 +1274,7 @@ public class Liquibase {
         return listUnrunChangeSets(contexts, labels, true);
     }
 
-    protected List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels,
-                                                  boolean checkLiquibaseTables) throws LiquibaseException {
+    public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels, boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labels);
 
