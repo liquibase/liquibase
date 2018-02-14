@@ -84,13 +84,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("systypes");
         systemTablesAndViews.add("sysusers");
         systemTablesAndViews.add("sysdiagrams");
-
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
-
-        super.quotingStartCharacter = "[";
-        super.quotingEndCharacter = "]";
-        super.quotingEndReplacement = "]]";
 
         // Information obtained from:
         // https://docs.microsoft.com/en-us/sql/t-sql/data-types/precision-scale-and-length-transact-sql
@@ -466,7 +461,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         int indexOfPeriod = dataTypeName.indexOf('.');
 
         if (indexOfPeriod < 0) {
-            if (!dataTypeName.startsWith(quotingStartCharacter)) {
+            if (!dataTypeName.startsWith(getQuotingStartCharacter())) {
                 dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
             }
 
@@ -474,12 +469,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
 
         String schemaName = dataTypeName.substring(0, indexOfPeriod);
-        if (!schemaName.startsWith(quotingStartCharacter)) {
+        if (!schemaName.startsWith(getQuotingStartCharacter())) {
             schemaName = escapeObjectName(schemaName, Schema.class);
         }
 
         dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
-        if (!dataTypeName.startsWith(quotingStartCharacter)) {
+        if (!dataTypeName.startsWith(getQuotingStartCharacter())) {
             dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
         }
 
@@ -593,5 +588,20 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             LogService.getLog(getClass()).warning(LogType.LOG, "Could not determine engine edition", e);
         }
         return "Unknown";
+    }
+
+    @Override
+    protected String getQuotingStartCharacter() {
+        return "[";
+    }
+
+    @Override
+    protected String getQuotingEndCharacter() {
+        return "]";
+    }
+
+    @Override
+    protected String getQuotingEndReplacement() {
+        return "]]";
     }
 }
