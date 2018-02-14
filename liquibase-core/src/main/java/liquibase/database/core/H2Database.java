@@ -70,6 +70,10 @@ public class H2Database extends AbstractJdbcDatabase {
             "WHERE");
     private String connectionSchemaName = "PUBLIC";
 
+    private static final int MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES = 1;
+    private static final int MINOR_VERSION_FOR_MINMAX_IN_SEQUENCES = 3;
+    private static final int BUILD_VERSION_FOR_MINMAX_IN_SEQUENCES = 175;
+
     public H2Database() {
         super.unquotedObjectsAreUppercased=true;
         super.setCurrentDateTimeFunction("NOW()");
@@ -277,6 +281,43 @@ public class H2Database extends AbstractJdbcDatabase {
             }
         }
         super.setConnection(conn);
+    }
+
+    public boolean supportsMinMaxForSequences() {
+
+        try {
+            if (getDatabaseMajorVersion() > MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES) {
+
+                return true;
+            } else if (getDatabaseMajorVersion() == MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES
+                       && getDatabaseMinorVersion() > MINOR_VERSION_FOR_MINMAX_IN_SEQUENCES) {
+
+                return true;
+            } else if (getDatabaseMajorVersion() == MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES
+                       && getDatabaseMinorVersion() == MINOR_VERSION_FOR_MINMAX_IN_SEQUENCES
+                       && getBuildVersion() >= BUILD_VERSION_FOR_MINMAX_IN_SEQUENCES) {
+                return true;
+            }
+
+        } catch (DatabaseException e) {
+            LogFactory.getInstance().getLog().warning("Failed to determine database version, reported error: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private int getBuildVersion() throws DatabaseException {
+
+        Pattern patchVersionPattern = Pattern.compile("^(?:\\d+\\.)(?:\\d+\\.)(\\d+).*$");
+        Matcher matcher = patchVersionPattern.matcher(getDatabaseProductVersion());
+
+        if (matcher.matches()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+        else {
+            LogFactory.getInstance().getLog().warning("Failed to determine H2 build number from product version: " + getDatabaseProductVersion());
+            return -1;
+        }
+
     }
 
     @Override
