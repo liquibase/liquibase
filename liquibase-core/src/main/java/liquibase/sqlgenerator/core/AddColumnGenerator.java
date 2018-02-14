@@ -6,6 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.StringUtils;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -160,7 +161,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
 
         if((database instanceof MySQLDatabase) && (statement.getRemarks() != null)) {
-            alterTable += " COMMENT '" + statement.getRemarks() + "' ";
+            alterTable += " COMMENT '" + database.escapeStringForDatabase(StringUtils.trimToEmpty(statement.getRemarks())) + "' ";
         }
 
         if ((statement.getAddAfterColumn() != null) && !statement.getAddAfterColumn().isEmpty()) {

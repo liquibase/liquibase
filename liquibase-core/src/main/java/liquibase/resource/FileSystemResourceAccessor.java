@@ -126,7 +126,12 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             });
 
             for (String rootPath : getRootPaths()) {
-                rootPaths.add(rootPath.replaceFirst("^file:", "").replace("\\", "/"));
+                if (rootPath.matches("file:/[A-Za-z]:/.*")) {
+                    rootPath = rootPath.replaceFirst("file:/", "");
+                } else {
+                    rootPath = rootPath.replaceFirst("file:", "");
+                }
+                rootPaths.add(rootPath.replace("\\", "/"));
             }
 
             Set<String> finalReturnSet = new LinkedHashSet<>();
