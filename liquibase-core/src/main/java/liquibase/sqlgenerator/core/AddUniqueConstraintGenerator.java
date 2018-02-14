@@ -64,9 +64,10 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             if (statement.isInitiallyDeferred()) {
                 sql += " INITIALLY DEFERRED";
             }
-            if (statement.isDisabled()) {
-                sql += " DISABLE";
-            }
+        }
+
+        if ((database instanceof OracleDatabase) &&  statement.isDisabled()) {
+            sql += " DISABLE";
         }
 
         boolean isInUsingIndexClause = false;
