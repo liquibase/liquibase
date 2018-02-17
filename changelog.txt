@@ -1,6 +1,20 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.5.5 (2018.02.5)
+
+-  [CORE-2851] - includeAll tag with a relative path duplicates the database changes with an absolute and with a relative changelog
+
+Changes in version 3.5.4 (2018.02.5)
+
+- [CORE-2863] - Issue with Spring boot 1.4.0 - 1.4.3
+- [CORE-2898] - includeAll broken in 3.5.1
+- [CORE-2948] - Changelog with includeAll will not find child changelogs in Spring Boot's executable JAR
+- [CORE-2978] - AddAutoIncrement on Postgres does not work when no schema is specified
+- [CORE-3123] - ResourceComparator is not applied for includeAll
+- [CORE-3139] - ClassLoaderResourceAccessor cannot read jar path resources from SpringLiquibase
+- [CORE-3015] - Oracle: diffChangeLog TIMESTAMP WITH LOCAL TIME ZONE correctly
+
 Changes in version 3.5.3 (2016.10.13)
 
 - No changes
