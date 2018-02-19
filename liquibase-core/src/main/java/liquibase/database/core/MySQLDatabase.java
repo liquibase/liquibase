@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -52,7 +53,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 return null;
             }
             if (!this.isCaseSensitive()) {
-                return name.toLowerCase();
+                return name.toLowerCase(Locale.US);
             }
             return name;
         }

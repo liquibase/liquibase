@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -215,7 +216,7 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public boolean isReservedWord(String objectName) {
-        return keywords.contains(objectName.toUpperCase());
+        return keywords.contains(objectName.toUpperCase(Locale.US));
     }
 
     @Override

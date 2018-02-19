@@ -6,6 +6,8 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
+import java.util.Locale;
+
 /**
  * Object representing a database catalog and schema. This differs from {@link liquibase.structure.core.Schema} in that it has
  * not come from an actual database Schema.
@@ -106,18 +108,18 @@ public class CatalogAndSchema {
 
         if (accordingTo instanceof PostgresDatabase) {
             if (workCatalogName != null) {
-                workCatalogName = workCatalogName.toLowerCase();
+                workCatalogName = workCatalogName.toLowerCase(Locale.US);
             }
             if (workSchemaName != null) {
-                workSchemaName = workSchemaName.toLowerCase();
+                workSchemaName = workSchemaName.toLowerCase(Locale.US);
             }
         } else {
             if (!accordingTo.isCaseSensitive()) {
                 if (workCatalogName != null) {
-                    workCatalogName = workCatalogName.toUpperCase();
+                    workCatalogName = workCatalogName.toUpperCase(Locale.US);
                 }
                 if (workSchemaName != null) {
-                    workSchemaName = workSchemaName.toUpperCase();
+                    workSchemaName = workSchemaName.toUpperCase(Locale.US);
                 }
             }
         }

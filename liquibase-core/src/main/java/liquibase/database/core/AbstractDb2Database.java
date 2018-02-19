@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -187,9 +189,9 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
     @Override
     public String generatePrimaryKeyName(String tableName) {
         if (tableName.equals(getDatabaseChangeLogTableName())) {
-            tableName = "DbChgLog".toUpperCase();
+            tableName = "DbChgLog".toUpperCase(Locale.US);
         } else if (tableName.equals(getDatabaseChangeLogLockTableName())) {
-            tableName = "DbChgLogLock".toUpperCase();
+            tableName = "DbChgLogLock".toUpperCase(Locale.US);
         }
 
         String pkName = super.generatePrimaryKeyName(tableName);

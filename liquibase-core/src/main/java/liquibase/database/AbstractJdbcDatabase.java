@@ -270,9 +270,9 @@ public abstract class AbstractJdbcDatabase implements Database {
                 ( objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
-            return objectName.toUpperCase();
+            return objectName.toUpperCase(Locale.US);
         } else {
-            return objectName.toLowerCase();
+            return objectName.toLowerCase(Locale.US);
         }
     }
 
@@ -1053,7 +1053,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String generatePrimaryKeyName(final String tableName) {
-        return "PK_" + tableName.toUpperCase();
+        return "PK_" + tableName.toUpperCase(Locale.US);
     }
 
     @Override

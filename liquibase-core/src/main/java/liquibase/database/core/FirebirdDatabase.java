@@ -6,6 +6,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
+import java.util.Locale;
+
 /**
  * Firebird database implementation.
  * SQL Syntax ref: http://www.ibphoenix.com/main.nfs?a=ibphoenix&page=ibp_60_sqlref
@@ -104,7 +106,7 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
         if (objectName == null) {
             return null;
         }
-        return objectName.toUpperCase().trim();
+        return objectName.toUpperCase(Locale.US).trim();
     }
 
     @Override
