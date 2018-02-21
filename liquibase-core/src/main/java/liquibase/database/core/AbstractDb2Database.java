@@ -1,12 +1,7 @@
 package liquibase.database.core;
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -16,8 +11,14 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
+
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
 
@@ -228,5 +229,25 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
             return true;
         }
         return super.isSystemObject(example);
+    }
+
+    @Override
+    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
+        return objectName;
+    }
+
+    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectType.isAssignableFrom(Schema.class) || objectType.isAssignableFrom(Catalog.class)) {
+            return true;
+        }
+        return super.mustQuoteObjectName(objectName, objectType);
+    }
+
+    /**
+     * DB2 database are not case sensitive. However schemas and catalogs are case sensitive
+     */
+    @Override
+    public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
+        return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
     }
 }

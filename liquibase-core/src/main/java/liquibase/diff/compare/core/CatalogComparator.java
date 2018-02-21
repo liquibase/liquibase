@@ -24,7 +24,7 @@ public class CatalogComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-       return null;
+        return null;
     }
 
     @Override
@@ -58,10 +58,15 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return otherSchema.getCatalogName() == null;
         }
 
-        if (thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
-            return true;
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
+            if (StringUtils.trimToEmpty(object1Name).equals(StringUtils.trimToEmpty(object2Name))){
+                return true;
+            }
+        } else {
+            if (StringUtils.trimToEmpty(object1Name).equalsIgnoreCase(StringUtils.trimToEmpty(object2Name))) {
+                return true;
+            }
         }
-
         if (accordingTo.supportsSchemas()) { //no need to check schema mappings
             return false;
         }
