@@ -1532,5 +1532,14 @@ public class Liquibase {
         }
     }
 
+    /**
+     * Checks changelogs for not existing files.
+     * It is actual for the maven build phase without database
+     */
+    public void validateResources() throws LiquibaseException {
+        DatabaseChangeLog changeLog = getDatabaseChangeLog();
+        changeLog.validateResources();
+    }
+
 }
 

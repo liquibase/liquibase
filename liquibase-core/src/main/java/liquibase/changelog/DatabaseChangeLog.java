@@ -7,14 +7,11 @@ import liquibase.RuntimeEnvironment;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
+import liquibase.changelog.visitor.ResourceValidationChangeSetVisitor;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.UnknownChangelogFormatException;
-import liquibase.exception.ValidationFailedException;
+import liquibase.exception.*;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
@@ -24,6 +21,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
@@ -546,4 +544,15 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    public void validateResources() throws LiquibaseException {
+        ChangeLogIterator logIterator = new ChangeLogIterator(this);
+        ResourceValidationChangeSetVisitor changeSetVisitor = new ResourceValidationChangeSetVisitor();
+
+        logIterator.run(changeSetVisitor, new RuntimeEnvironment(new MockDatabase(), new Contexts(), new LabelExpression()));
+
+        ValidationErrors validationErrors = changeSetVisitor.getValidationErrors();
+        if (validationErrors.hasErrors()) {
+            throw new ResourceValidationFailedException(validationErrors);
+        }
+    }
 }

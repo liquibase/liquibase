@@ -35,7 +35,7 @@ import liquibase.util.StringUtils;
                 "A multiline comment that starts with /* and ends with */.\n" +
                 "A single line comment starting with <space>--<space> and finishing at the end of the line",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class SQLFileChange extends AbstractSQLChange {
+public class SQLFileChange extends AbstractSQLChange implements ResourceDependentChange {
 
     private String path;
     private Boolean relativeToChangelogFile;
@@ -97,6 +97,7 @@ public class SQLFileChange extends AbstractSQLChange {
         }
     }
 
+    @Override
     public InputStream openSqlStream() throws IOException {
         if (path == null) {
             return null;
