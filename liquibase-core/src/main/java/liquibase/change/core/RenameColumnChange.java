@@ -141,62 +141,6 @@ public class RenameColumnChange extends AbstractChange {
         }
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-
-        // SQLite does not support this ALTER TABLE operation until now.
-        // For more information see: http://www.sqlite.org/omitted.html.
-        // This is a small work around...
-    
-        // define alter table logic
-        AlterTableVisitor renameAlterVisitor =
-        new AlterTableVisitor() {
-            @Override
-            public ColumnConfig[] getColumnsToAdd() {
-                return new ColumnConfig[0];
-            }
-            @Override
-            public boolean copyThisColumn(ColumnConfig column) {
-                return true;
-            }
-            @Override
-            public boolean createThisColumn(ColumnConfig column) {
-                if (column.getName().equals(getOldColumnName())) {
-                    column.setName(getNewColumnName());
-                }
-                return true;
-            }
-            @Override
-            public boolean createThisIndex(Index index) {
-                if (index.getColumnNames().contains(getOldColumnName())) {
-                    Iterator<Column> columnIterator = index.getColumns().iterator();
-                    while (columnIterator.hasNext()) {
-                        Column column = columnIterator.next();
-                        if (column.getName().equals(getOldColumnName())) {
-                            columnIterator.remove();
-                            break;
-                        }
-                    }
-                    index.addColumn(new Column(getNewColumnName()).setRelation(index.getTable()));
-                }
-                return true;
-            }
-        };
-
-        List<SqlStatement> statements = new ArrayList<>();
-
-        try {
-            // alter table
-            statements.addAll(SQLiteDatabase.getAlterTableStatements(
-                    renameAlterVisitor,
-                    database,getCatalogName(), getSchemaName(),getTableName()));
-        } catch (Exception e) {
-            System.err.println(e);
-            e.printStackTrace();
-        }
-
-        return statements.toArray(new SqlStatement[statements.size()]);
-    }
-
     @Override
     protected Change[] createInverses() {
         RenameColumnChange inverse = new RenameColumnChange();

@@ -18,10 +18,8 @@ public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<C
 
     @Override
     public Sql[] generateSql(ClearDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String schemaName = statement.getSchemaName();
-        if (schemaName == null) {
-            schemaName = database.getLiquibaseSchemaName();
-        }
+        String schemaName;
+        /*nolgpl: set schemaName to value from statement or database's liquibaseSchemaName */
         return new Sql[] {
                 new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName()),
                         getAffectedTable(database, schemaName)) };

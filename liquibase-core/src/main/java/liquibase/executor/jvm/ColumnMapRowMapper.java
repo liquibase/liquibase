@@ -54,7 +54,7 @@ public class ColumnMapRowMapper implements RowMapper {
      * @see java.sql.ResultSetMetaData#getColumnName
      */
     protected String getColumnKey(String columnName) {
-        return columnName.toUpperCase();
+        return columnName; /*nolgpl return upper case version */
     }
 
     /**

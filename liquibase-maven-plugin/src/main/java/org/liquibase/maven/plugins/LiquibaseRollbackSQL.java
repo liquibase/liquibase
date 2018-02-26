@@ -17,7 +17,6 @@ import java.text.ParseException;
  * Generates the SQL that is required to rollback the database using one or more of the specified
  * attributes 'rollbackCount', 'rollbackTag' and/or 'rollbackDate'
  *
- * @author Oleg Taranenko
  * @description Liquibase RollbackSQL Maven plugin
  * @goal rollbackSQL
  */

@@ -97,7 +97,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
 ////        }
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
-        pkConstraint.setTablespace(tablespace);
+        /*nolgpl set tablepace on pkConstraint */
 
         List<ColumnConstraint> allConstraints = new ArrayList<>();
         allConstraints.addAll(Arrays.asList(constraints));

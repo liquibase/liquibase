@@ -21,9 +21,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private String constraintName;
     private String tablespace;
 
-    private Boolean deferrable;
-    private Boolean initiallyDeferred;
-    private Boolean disabled;
     private Boolean clustered;
     private Boolean shouldValidate;
 
@@ -88,29 +85,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
-    public Boolean getDeferrable() {
-        return deferrable;
-    }
-
-    public void setDeferrable(Boolean deferrable) {
-        this.deferrable = deferrable;
-    }
-
-    public Boolean getInitiallyDeferred() {
-        return initiallyDeferred;
-    }
-
-    public void setInitiallyDeferred(Boolean initiallyDeferred) {
-        this.initiallyDeferred = initiallyDeferred;
-    }
-
-    public Boolean getDisabled() {
-        return disabled;
-    }
-
-    public void setDisabled(Boolean disabled) {
-        this.disabled = disabled;
-    }
+    /*nolgpl: implement get/set methods for deferrable, initiallyDeferred, and disabled */
 
     /**
      * In Oracle PL/SQL, the VALIDATE keyword defines whether a newly added unique constraint on a 

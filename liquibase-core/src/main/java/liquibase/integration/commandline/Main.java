@@ -194,7 +194,7 @@ public class Main {
                 log.info(LogType.USER_MESSAGE, coreBundle.getString("update.successful"));
             } else if (main.command.startsWith(COMMANDS.ROLLBACK) && !main.command.endsWith("SQL")) {
                 log.info(LogType.USER_MESSAGE, coreBundle.getString("rollback.successful"));
-            } else if (!main.command.endsWith("SQL")) {
+            } else if (/*nolgpl: check that main.command doesn't end with 'SQL' */) {
                 log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("command.successful"), main.command));
             }
         } catch (Exception e) {

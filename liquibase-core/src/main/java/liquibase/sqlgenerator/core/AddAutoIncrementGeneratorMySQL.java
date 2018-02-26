@@ -10,11 +10,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-/**
- * SQLite does not support this ALTER TABLE operation until now.
- * For more information see: http://www.sqlite.org/omitted.html.
- * This is a small work around...
- */
 public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
 
     @Override

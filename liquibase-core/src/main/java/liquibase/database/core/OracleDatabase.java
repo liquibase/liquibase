@@ -105,9 +105,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                  * see https://liquibase.jira.com/browse/CORE-2192
                  */
                 if (conn instanceof JdbcConnection) {
-                    Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
-                    wrappedConn.setAccessible(true);
-                    sqlConn = (Connection) wrappedConn.invoke(conn);
+                    /*nolgpl set sqlConn = the getWrappedConnection() via reflection */
                 }
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);

@@ -103,48 +103,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
     	
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-    	
-    	// Note: The attribute "constraintName" is used to pass the column 
-    	// name instead of the constraint name.
-		
-    	List<SqlStatement> statements = new ArrayList<>();
-    	
-		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			@Override
-            public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			@Override
-            public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			@Override
-            public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getConstraintName())) {
-					column.getConstraints().setPrimaryKey(false);
-				}
-				return true;
-			}
-			@Override
-            public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return statements.toArray(new SqlStatement[statements.size()]);
+    	/*nolgpl implement */
     }
 
     @Override

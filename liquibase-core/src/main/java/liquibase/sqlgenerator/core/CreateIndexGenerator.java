@@ -70,7 +70,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	         *  parent table.
 		      */
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
+		    if ((/*NOLGPL check associatedWith is not null*/) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
                 .contains(Index.MARK_UNIQUE_CONSTRAINT))) {
 			    return new Sql[0];
 		    }

@@ -31,9 +31,7 @@ public class GetViewDefinitionGeneratorSybase extends GetViewDefinitionGenerator
             schemaName = "dbo";
         }
 
-        String sql = "select text from syscomments where id = object_id('" +
-                schemaName + "." +
-                statement.getViewName() + "') order by colid";
+        String sql = ""; /*nolgpl: set sql to get veiew definition from syscomments, orderd by colid */
 
         return new Sql[]{
                 new UnparsedSql(sql)

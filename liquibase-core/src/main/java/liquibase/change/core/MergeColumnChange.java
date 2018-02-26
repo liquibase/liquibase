@@ -134,47 +134,7 @@ public class MergeColumnChange extends AbstractChange {
         statements.add(new RawSqlStatement(updateStatement));
         
         if (database instanceof SQLiteDatabase) {
-            // SQLite does not support this ALTER TABLE operation until now.
-			// For more information see: http://www.sqlite.org/omitted.html
-			// This is a small work around...
-    		
-			// define alter table logic
-    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-    			@Override
-                public ColumnConfig[] getColumnsToAdd() {
-    				ColumnConfig[] new_columns = new ColumnConfig[1];
-    				ColumnConfig new_column = new ColumnConfig();
-    		        new_column.setName(getFinalColumnName());
-    		        new_column.setType(getFinalColumnType());
-    				new_columns[0] = new_column;
-    				return new_columns;
-    			}
-    			@Override
-                public boolean copyThisColumn(ColumnConfig column) {
-    				return !(column.getName().equals(getColumn1Name()) ||
-    						column.getName().equals(getColumn2Name()));
-    			}
-    			@Override
-                public boolean createThisColumn(ColumnConfig column) {
-    				return !(column.getName().equals(getColumn1Name()) ||
-    						column.getName().equals(getColumn2Name()));
-    			}
-    			@Override
-                public boolean createThisIndex(Index index) {
-    				return !(index.getColumnNames().contains(getColumn1Name()) ||
-    						index.getColumnNames().contains(getColumn2Name()));
-    			}
-    		};
-        	
-        	try {
-        		// alter table
-				statements.addAll(SQLiteDatabase.getAlterTableStatements(
-						rename_alter_visitor,
-						database,getCatalogName(), getSchemaName(),getTableName()));
-    		} catch (Exception e) {
-				e.printStackTrace();
-			}
-    		
+           /* nolgpl: implement */
         } else {
         	// ...if it is not a SQLite database 
         	

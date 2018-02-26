@@ -13,9 +13,6 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private String constraintName;
     private String tablespace;
 
-    private boolean deferrable;
-    private boolean initiallyDeferred;
-    private boolean disabled;
     private boolean clustered;
     private boolean shouldValidate = true; //only Oracle PL/SQL feature
 
@@ -68,32 +65,8 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         this.tablespace = tablespace;
         return this;
     }
-    public boolean isDeferrable() {
-        return deferrable;
-    }
 
-    public AddUniqueConstraintStatement setDeferrable(boolean deferrable) {
-        this.deferrable = deferrable;
-        return this;
-    }
-
-    public boolean isInitiallyDeferred() {
-        return initiallyDeferred;
-    }
-
-    public AddUniqueConstraintStatement setInitiallyDeferred(boolean initiallyDeferred) {
-        this.initiallyDeferred = initiallyDeferred;
-        return this;
-    }
-
-    public AddUniqueConstraintStatement setDisabled(boolean disabled) {
-        this.disabled= disabled;
-        return this;
-    }
-
-    public boolean isDisabled() {
-        return disabled;
-    }
+    /* nolgpl: add get/set for deferrable, initiallyDeferred, and disabled */
 
     public AddUniqueConstraintStatement setClustered(boolean clustered) {
         this.clustered= clustered;

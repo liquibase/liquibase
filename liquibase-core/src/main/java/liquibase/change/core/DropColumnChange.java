@@ -172,39 +172,8 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) throws
-    DatabaseException {
-        
-        // SQLite does not support this ALTER TABLE operation until now.
-        // For more information see: http://www.sqlite.org/omitted.html.
-        // This is a small work around...
-        
-        // define alter table logic
-        SQLiteDatabase.AlterTableVisitor renameAlterVisitor = new SQLiteDatabase.AlterTableVisitor() {
-            public ColumnConfig[] getColumnsToAdd() {
-                return new ColumnConfig[0];
-            }
-            
-            public boolean createThisColumn(ColumnConfig column) {
-                return !column.getName().equals(columnName);
-            }
-            
-            public boolean copyThisColumn(ColumnConfig column) {
-                return !column.getName().equals(columnName);
-            }
-            
-            public boolean createThisIndex(Index index) {
-                return !index.getColumnNames().contains(columnName);
-            }
-        };
-        
-        // alter table
-        List<SqlStatement> statements = new ArrayList<>();
-    
-        statements.addAll(SQLiteDatabase.getAlterTableStatements(renameAlterVisitor, database, getCatalogName(),
-        getSchemaName(), getTableName()));
-        
-        return statements.toArray(new SqlStatement[statements.size()]);
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) throws DatabaseException {
+        /* nolgpl implement for sqlite */
     }
     
     @Override

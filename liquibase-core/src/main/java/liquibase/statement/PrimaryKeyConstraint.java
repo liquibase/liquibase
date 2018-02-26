@@ -9,9 +9,7 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
 
     private String constraintName;
 
-	// used for PK's index configuration
-	private String tablespace;
-    
+
     private List<String> columns = new ArrayList<>();
 
     public PrimaryKeyConstraint() {
@@ -26,13 +24,7 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
         return constraintName;
     }
 
-	public String getTablespace() {
-		return tablespace;
-	}
-
-	public void setTablespace(String tablespace) {
-		this.tablespace = tablespace;
-	}
+    /* nolgpl: get/set for tablespace */
 
 	public List<String> getColumns() {
         return Collections.unmodifiableList(columns);
