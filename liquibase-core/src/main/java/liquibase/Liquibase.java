@@ -804,7 +804,7 @@ public class Liquibase {
                 logIterator.run(createRollbackVisitor(),
                     new RuntimeEnvironment(database, contexts, labelExpression));
             } else {
-                executeRollbackScript(rollbackScript);
+                executeRollbackScript(rollbackScript, contexts, labelExpression);
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
         } finally {
