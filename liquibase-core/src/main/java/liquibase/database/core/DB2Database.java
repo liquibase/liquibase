@@ -15,4 +15,5 @@ public class DB2Database extends AbstractDb2Database {
     public String getShortName() {
         return "db2";
     }
+
 }

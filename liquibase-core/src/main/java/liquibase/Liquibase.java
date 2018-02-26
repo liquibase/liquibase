@@ -225,6 +225,9 @@ public class Liquibase {
         return new UpdateVisitor(database, changeExecListener);
     }
 
+    protected RollbackVisitor createRollbackVisitor() {
+        return new RollbackVisitor(database, changeExecListener);
+    }
 
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
@@ -546,12 +549,10 @@ public class Liquibase {
                     new CountChangeSetFilter(changesToRollback));
 
             if (rollbackScript == null) {
-                logIterator.run(
-                    new RollbackVisitor(database,changeExecListener),
-                    new RuntimeEnvironment(database, contexts, labelExpression)
-                );
-            } else {
-                executeRollbackScript(rollbackScript);
+                logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+            }
+            else {
+                executeRollbackScript(rollbackScript, contexts, labelExpression);
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
         } finally {
@@ -581,8 +582,7 @@ public class Liquibase {
         }, new RuntimeEnvironment(database, contexts, labelExpression));
     }
 
-    protected void executeRollbackScript(String rollbackScript)
-        throws LiquibaseException {
+    protected void executeRollbackScript(String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         final Executor executor = ExecutorService.getInstance().getExecutor(database);
         String rollbackScriptContents;
         try {
@@ -711,10 +711,10 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database));
 
             if (rollbackScript == null) {
-                logIterator.run(new RollbackVisitor(database, changeExecListener),
+                logIterator.run(createRollbackVisitor(),
                     new RuntimeEnvironment(database, contexts, labelExpression));
             } else {
-                executeRollbackScript(rollbackScript);
+                executeRollbackScript(rollbackScript, contexts, labelExpression);
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
         } finally {
@@ -801,7 +801,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database));
 
             if (rollbackScript == null) {
-                logIterator.run(new RollbackVisitor(database, changeExecListener),
+                logIterator.run(createRollbackVisitor(),
                     new RuntimeEnvironment(database, contexts, labelExpression));
             } else {
                 executeRollbackScript(rollbackScript);
@@ -1099,7 +1099,7 @@ public class Liquibase {
                         });
             }
 
-            logIterator.run(new RollbackVisitor(database, changeExecListener),
+            logIterator.run(createRollbackVisitor(),
                 new RuntimeEnvironment(database, contexts, labelExpression)
             );
         } finally {
