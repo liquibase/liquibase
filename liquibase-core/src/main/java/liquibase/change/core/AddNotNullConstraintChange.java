@@ -148,7 +148,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 //    					"values for the existing null values.");
 //    		}
 //    	}
-		
+
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
 			@Override
@@ -210,7 +210,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    @DatabaseChangeProperty(description = "This is true if the foreign key has 'ENABLE VALIDATE' set, or false if the not null constrain has 'ENABLE NOVALIDATE' set.")
+    @DatabaseChangeProperty(description = "This is true if the not null constraint has 'ENABLE VALIDATE' set, or false if the not null constrain has 'ENABLE NOVALIDATE' set.")
     public Boolean getValidate() {
         return shouldValidate;
     }
