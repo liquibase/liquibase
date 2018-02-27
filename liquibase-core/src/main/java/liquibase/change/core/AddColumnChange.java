@@ -100,7 +100,11 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
                 if (constraintsConfig.isNullable() != null && !constraintsConfig.isNullable()) {
-                    constraints.add(new NotNullConstraint());
+                    NotNullConstraint notNullConstraint = new NotNullConstraint();
+                    if (constraintsConfig.shouldValidate()!=null && !constraintsConfig.shouldValidate()) {
+                        notNullConstraint.setValidate(false);
+                    }
+                    constraints.add(notNullConstraint);
                 }
                 if (constraintsConfig.isUnique() != null && constraintsConfig.isUnique()) {
                     constraints.add(new UniqueConstraint());

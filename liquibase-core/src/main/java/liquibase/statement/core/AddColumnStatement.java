@@ -135,6 +135,20 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return true;
     }
 
+    public boolean shouldValidate() {
+        if (isPrimaryKey()) {
+            return false;
+        }
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof NotNullConstraint) {
+                if (!((NotNullConstraint) constraint).shouldValidate()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public boolean isUnique() {
         for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof UniqueConstraint) {
