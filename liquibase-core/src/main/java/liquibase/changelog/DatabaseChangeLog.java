@@ -9,6 +9,7 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
+import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.SetupException;
@@ -172,11 +173,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (normalizePath(changeSet.getFilePath()).equalsIgnoreCase(normalizePath(path))
                     && changeSet.getAuthor().equalsIgnoreCase(author)
                     && changeSet.getId().equalsIgnoreCase(id)
-                    && (changeSet.getDbmsSet() == null
-                    || changeLogParameters == null
-                    || changeLogParameters.getValue("database.typeName", this) == null
-                    || changeSet.getDbmsSet().isEmpty()
-                    || changeSet.getDbmsSet().contains(changeLogParameters.getValue("database.typeName", this).toString()))) {
+                    && isDbmsMatch(changeSet.getDbmsSet())) {
                 return changeSet;
             }
         }
@@ -308,7 +305,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         expandExpressions(node);
         String nodeName = node.getName();
         if (nodeName.equals("changeSet")) {
-            this.addChangeSet(createChangeSet(node, resourceAccessor));
+            if (isDbmsMatch(node.getChildValue(null, "dbms", String.class))) {
+                this.addChangeSet(createChangeSet(node, resourceAccessor));
+            }
         } else if (nodeName.equals("include")) {
             String path = node.getChildValue(null, "file", String.class);
             if (path == null) {
@@ -397,6 +396,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
         }
+    }
+
+    public boolean isDbmsMatch(String dbmsList) {
+        return isDbmsMatch(DatabaseList.toDbmsSet(dbmsList));
+    }
+
+    public boolean isDbmsMatch(Set<String> dbmsSet) {
+        return dbmsSet == null
+                || changeLogParameters == null
+                || changeLogParameters.getValue("database.typeName", this) == null
+                || dbmsSet.isEmpty()
+                || dbmsSet.contains(changeLogParameters.getValue("database.typeName", this).toString());
     }
 
     public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter,
