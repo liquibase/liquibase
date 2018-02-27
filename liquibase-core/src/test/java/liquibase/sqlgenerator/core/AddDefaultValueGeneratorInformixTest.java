@@ -23,7 +23,7 @@ public class AddDefaultValueGeneratorInformixTest {
 		SortedSet<SqlGenerator> sqlGenerators = new TreeSet<SqlGenerator>();
 		SqlGeneratorChain sqlGenerationChain = new SqlGeneratorChain(sqlGenerators);
 		Sql[] sqls = informix.generateSql(statement, database, sqlGenerationChain);
-		assertEquals("ALTER TABLE tbl1 MODIFY (id INT8 DEFAULT 1);", sqls[0].toSql());
+		assertEquals("ALTER TABLE tbl1 MODIFY (id INT8 DEFAULT 1)", sqls[0].toSql());
 
 	}
 }
