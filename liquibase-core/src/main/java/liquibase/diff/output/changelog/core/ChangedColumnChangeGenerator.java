@@ -100,7 +100,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 }
                 change.setTableName(column.getRelation().getName());
                 change.setColumnName(column.getName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
+                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toDatabaseDataType(comparisonDatabase).toString());
                 changes.add(change);
             } else {
                 AddNotNullConstraintChange change = new AddNotNullConstraintChange();
@@ -112,7 +112,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 }
                 change.setTableName(column.getRelation().getName());
                 change.setColumnName(column.getName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
+                change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toDatabaseDataType(comparisonDatabase).toString());
                 changes.add(change);
             }
         }
@@ -207,7 +207,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setTableName(tableName);
                 change.setColumnName(column.getName());
                 DataType referenceType = (DataType) typeDifference.getReferenceValue();
-                change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
+                change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toDatabaseDataType(comparisonDatabase).toString());
 
                 changes.add(change);
             }
