@@ -44,8 +44,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
             schemaName2 = ((Schema) databaseObject2).getCatalogName();
         }
 
-
-        if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
+        if (equalsSchemas(accordingTo, schemaName1, schemaName2)) {
             return true;
         }
 
@@ -64,7 +63,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
                 schemaName2 = accordingTo.getDefaultCatalogName();
             }
         }
-        if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
+        if (equalsSchemas(accordingTo, schemaName1, schemaName2)) {
             return true;
         }
 
@@ -86,23 +85,14 @@ public class SchemaComparator implements DatabaseObjectComparator {
                 String finalSchema1 = schemaName1;
                 String finalSchema2 = schemaName2;
 
-                if (comparisonSchema1 != null && comparisonSchema1.equalsIgnoreCase(schemaName1)) {
-                    finalSchema1 = comparisonSchema2;
-                } else if (comparisonSchema2 != null && comparisonSchema2.equalsIgnoreCase(schemaName1)) {
-                    finalSchema1 = comparisonSchema1;
-                }
-
-                if (StringUtils.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtils.trimToEmpty(finalSchema2))) {
+                finalSchema1 = getFinalSchemaAfterComparison(accordingTo, schemaName1, comparisonSchema1,
+                        comparisonSchema2, finalSchema1);
+                if (equalsSchemas(accordingTo, finalSchema1, finalSchema2)) {
                     return true;
                 }
-
-                if (comparisonSchema1 != null && comparisonSchema1.equalsIgnoreCase(schemaName2)) {
-                    finalSchema2 = comparisonSchema2;
-                } else if (comparisonSchema2 != null && comparisonSchema2.equalsIgnoreCase(schemaName2)) {
-                    finalSchema2 = comparisonSchema1;
-                }
-
-                if (StringUtils.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtils.trimToEmpty(finalSchema2))) {
+                finalSchema2 = getFinalSchemaAfterComparison(accordingTo, schemaName2, comparisonSchema2,
+                        comparisonSchema1, finalSchema2);
+                if (equalsSchemas(accordingTo, finalSchema1, finalSchema2)) {
                     return true;
                 }
             }
@@ -111,7 +101,38 @@ public class SchemaComparator implements DatabaseObjectComparator {
         schemaName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
         schemaName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
 
-        return StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2));
+        return equalsSchemas(accordingTo, schemaName1, schemaName2);
+    }
+
+    private String getFinalSchemaAfterComparison(Database accordingTo, String schemaName1, String comparisonSchema1, String comparisonSchema2, String finalSchema1) {
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())){
+            if (comparisonSchema1 != null && comparisonSchema1.equals(schemaName1)) {
+                finalSchema1 = comparisonSchema2;
+            } else if (comparisonSchema2 != null && comparisonSchema2.equals(schemaName1)) {
+                finalSchema1 = comparisonSchema1;
+            }
+        } else {
+            if (comparisonSchema1 != null && comparisonSchema1.equalsIgnoreCase(schemaName1)) {
+                finalSchema1 = comparisonSchema2;
+            } else if (comparisonSchema2 != null && comparisonSchema2.equalsIgnoreCase(schemaName1)) {
+                finalSchema1 = comparisonSchema1;
+            }
+        }
+        return finalSchema1;
+    }
+
+    private boolean equalsSchemas(Database accordingTo, String schemaName1, String schemaName2) {
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())){
+            if (StringUtils.trimToEmpty(schemaName1).equals(StringUtils.trimToEmpty(schemaName2))) {
+                return true;
+            }
+        } else {
+            if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
+                return true;
+            }
+
+        }
+        return false;
     }
 
 
