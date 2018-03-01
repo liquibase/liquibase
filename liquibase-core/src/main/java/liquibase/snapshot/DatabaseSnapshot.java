@@ -473,8 +473,15 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 catalogName = obj.getName();
             }
             if (catalogName != null) {
-                catalogNames.add(catalogName.toLowerCase());
+                if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+                    catalogNames.add(catalogName);
+                } else {
+                    catalogNames.add(catalogName.toLowerCase());
+                }
             }
+        }
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+            return !catalogNames.contains(fieldCatalog);
         }
 
         return !catalogNames.contains(fieldCatalog.toLowerCase());

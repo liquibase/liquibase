@@ -4,15 +4,13 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
-import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.Set;
 
-public class SchemaComparator implements DatabaseObjectComparator {
+public class SchemaComparator extends CommonCatalogSchemaComparator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Schema.class.isAssignableFrom(objectType)) {
@@ -49,20 +47,8 @@ public class SchemaComparator implements DatabaseObjectComparator {
         }
 
         //switch off default names and then compare again
-        if (schemaName1 == null) {
-            if (accordingTo.supportsSchemas()) {
-                schemaName1 = accordingTo.getDefaultSchemaName();
-            } else if (accordingTo.supportsCatalogs()) {
-                schemaName1 = accordingTo.getDefaultCatalogName();
-            }
-        }
-        if (schemaName2 == null) {
-            if (accordingTo.supportsSchemas()) {
-                schemaName2 = accordingTo.getDefaultSchemaName();
-            } else if (accordingTo.supportsCatalogs()) {
-                schemaName2 = accordingTo.getDefaultCatalogName();
-            }
-        }
+        schemaName1 = getSchemaAfterComparison(accordingTo, schemaName1);
+        schemaName2 = getSchemaAfterComparison(accordingTo, schemaName2);
         if (equalsSchemas(accordingTo, schemaName1, schemaName2)) {
             return true;
         }
@@ -70,18 +56,8 @@ public class SchemaComparator implements DatabaseObjectComparator {
         //check with schemaComparisons
         if (chain.getSchemaComparisons() != null && chain.getSchemaComparisons().length > 0) {
             for (CompareControl.SchemaComparison comparison : chain.getSchemaComparisons()) {
-                String comparisonSchema1;
-                String comparisonSchema2;
-                if (accordingTo.supportsSchemas()) {
-                    comparisonSchema1 = comparison.getComparisonSchema().getSchemaName();
-                    comparisonSchema2 = comparison.getReferenceSchema().getSchemaName();
-                } else if (accordingTo.supportsCatalogs()) {
-                    comparisonSchema1 = comparison.getComparisonSchema().getCatalogName();
-                    comparisonSchema2 = comparison.getReferenceSchema().getCatalogName();
-                } else {
-                    break;
-                }
-
+                String comparisonSchema1 = getComparisonSchemaOrCatalog(accordingTo, comparison);
+                String comparisonSchema2 = getReferenceSchemaOrCatalog(accordingTo, comparison);
                 String finalSchema1 = schemaName1;
                 String finalSchema2 = schemaName2;
 
@@ -104,6 +80,17 @@ public class SchemaComparator implements DatabaseObjectComparator {
         return equalsSchemas(accordingTo, schemaName1, schemaName2);
     }
 
+    private String getSchemaAfterComparison(Database accordingTo, String schemaName1) {
+        if (schemaName1 == null) {
+            if (accordingTo.supportsSchemas()) {
+                schemaName1 = accordingTo.getDefaultSchemaName();
+            } else if (accordingTo.supportsCatalogs()) {
+                schemaName1 = accordingTo.getDefaultCatalogName();
+            }
+        }
+        return schemaName1;
+    }
+
     private String getFinalSchemaAfterComparison(Database accordingTo, String schemaName1, String comparisonSchema1, String comparisonSchema2, String finalSchema1) {
         if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())){
             if (comparisonSchema1 != null && comparisonSchema1.equals(schemaName1)) {
@@ -120,21 +107,6 @@ public class SchemaComparator implements DatabaseObjectComparator {
         }
         return finalSchema1;
     }
-
-    private boolean equalsSchemas(Database accordingTo, String schemaName1, String schemaName2) {
-        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())){
-            if (StringUtils.trimToEmpty(schemaName1).equals(StringUtils.trimToEmpty(schemaName2))) {
-                return true;
-            }
-        } else {
-            if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
-                return true;
-            }
-
-        }
-        return false;
-    }
-
 
     @Override
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {

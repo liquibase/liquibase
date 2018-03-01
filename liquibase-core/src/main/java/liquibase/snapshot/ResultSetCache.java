@@ -179,6 +179,10 @@ class ResultSetCache {
                     if (catalog == null) {
                         return "all";
                     }
+                    if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                            equals(database.getSchemaAndCatalogCase())) {
+                        return catalog;
+                    }
                     return catalog.toLowerCase();
                 }
             }

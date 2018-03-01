@@ -60,6 +60,9 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected boolean isDefaultCatalog(Catalog match, Database database) {
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+            return (match.getName() == null || match.getName().equals(database.getDefaultCatalogName()));
+        }
         return (match.getName() == null || match.getName().equalsIgnoreCase(database.getDefaultCatalogName()));
     }
 
