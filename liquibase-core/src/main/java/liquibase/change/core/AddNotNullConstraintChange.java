@@ -96,6 +96,10 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
+////  if (database instanceof SQLiteDatabase) {
+//      // return special statements for SQLite databases
+//      return generateStatementsForSQLiteDatabase(database);
+//    }
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         if (defaultNullValue != null) {
@@ -206,7 +210,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     /**
-     * In Oracle PL/SQL, the VALIDATE keyword defines whether a not null constraint on a column in a table
+     * In certain SQL dialects, the VALIDATE keyword defines whether a NOT NULL constraint on a column in a table
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
