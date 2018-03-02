@@ -8,9 +8,7 @@ import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ForeignKeyConstraint;
-import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.*;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.*;
@@ -159,8 +157,14 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     }
                 }
 
-                if (statement.getNotNullColumns().contains(column)) {
+                if (statement.getNotNullColumns().containsKey(column)) {
                     buffer.append(" NOT NULL");
+                    NotNullConstraint notNullConstraint = statement.getNotNullColumns().get(column);
+                    if (!notNullConstraint.shouldValidate()){
+                        if (database instanceof OracleDatabase){
+                            buffer.append(" ENABLE NOVALIDATE ");
+                        }
+                    }
                 } else {
                     if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().toLowerCase().contains("timestamp"))) {
                         buffer.append(" NULL");

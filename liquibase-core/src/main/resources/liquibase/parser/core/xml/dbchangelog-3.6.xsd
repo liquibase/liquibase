@@ -285,6 +285,7 @@
 		<xsd:attribute name="deferrable" type="booleanExp" />
 		<xsd:attribute name="initiallyDeferred" type="booleanExp" />
         <xsd:attribute name="checkConstraint" type="xsd:string" />
+		<xsd:attribute name="validate" type="booleanExp" />
     </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="column">
@@ -639,6 +640,7 @@
 		<xsd:attribute name="defaultNullValue" type="xsd:string" />
 		<xsd:attribute name="columnDataType" type="xsd:string" />
         <xsd:attribute name="constraintName" type="xsd:string"/>
+		<xsd:attribute name="validate" type="booleanExp" />
 	</xsd:attributeGroup>
 
 

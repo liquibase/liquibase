@@ -165,6 +165,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 column.setNullable(false);
             }
+            setValidateOptionIfAvailable(database, column, columnMetadataResultSet);
         } else {
             int nullable = columnMetadataResultSet.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {
@@ -254,6 +255,22 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         column.setDefaultValueConstraintName(columnMetadataResultSet.getString("COLUMN_DEF_NAME"));
 
         return column;
+    }
+
+    /**
+     * Method to map 'validate' option for column. This thing works only for ORACLE
+     *
+     * @param database - DB where UC will be created
+     * @param column - Column object to persist validate option
+     * @param columnMetadataResultSet - it's a cache-map to get metadata about column not null constraint
+     */
+    private void setValidateOptionIfAvailable(Database database, Column column,  CachedRow columnMetadataResultSet) {
+        String validated = columnMetadataResultSet.getString("VALIDATED");
+
+        final String VALIDATE = "VALIDATED";
+        if (validated!=null && !validated.trim().isEmpty()) {
+            column.setShouldValidate(VALIDATE.equals(cleanNameFromDatabase(validated.trim(), database)));
+        }
     }
 
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {

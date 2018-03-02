@@ -2,6 +2,10 @@ package liquibase.statement;
 
 public class NotNullConstraint implements ColumnConstraint {
     private String columnName;
+    /**
+     * Default value is true
+     */
+    private boolean validate = true;
 
 
     public NotNullConstraint() {
@@ -9,6 +13,11 @@ public class NotNullConstraint implements ColumnConstraint {
 
     public NotNullConstraint(String columnName) {
         setColumnName(columnName);
+    }
+
+    public NotNullConstraint(String columnName, boolean validate) {
+        setColumnName(columnName);
+        setValidate(validate);
     }
 
 
@@ -19,5 +28,13 @@ public class NotNullConstraint implements ColumnConstraint {
     public NotNullConstraint setColumnName(String columnName) {
         this.columnName = columnName;
         return this;
+    }
+
+    public boolean shouldValidate() {
+        return validate;
+    }
+
+    public void setValidate(boolean validate) {
+        this.validate = validate;
     }
 }

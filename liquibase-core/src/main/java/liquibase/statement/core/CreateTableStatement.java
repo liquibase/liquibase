@@ -19,7 +19,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private Map<String, String> columnRemarks = new HashMap<String, String>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
-    private Set<String> notNullColumns = new HashSet<String>();
+    private Map<String,NotNullConstraint> notNullConstraints = new HashMap<String, NotNullConstraint>();
     private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
     private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
 
@@ -81,15 +81,11 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
 
-    public Set<String> getNotNullColumns() {
-        return notNullColumns;
+    public Map<String,NotNullConstraint> getNotNullColumns() {
+        return notNullConstraints;
     }
 
     public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
-//        String pkName = "PK_" + getTableName().toUpperCase();
-////        if (pkName.length() > 18) {
-////            pkName = pkName.substring(0, 17);
-////        }
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
 	    pkConstraint.setTablespace(tablespace);
@@ -157,7 +153,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
                     }
                 } else if (constraint instanceof NotNullConstraint) {
                     ((NotNullConstraint) constraint).setColumnName(columnName);
-                    getNotNullColumns().add(columnName);
+                    getNotNullColumns().put(columnName, (NotNullConstraint) constraint);
                 } else if (constraint instanceof ForeignKeyConstraint) {
                     ((ForeignKeyConstraint) constraint).setColumn(columnName);
                     getForeignKeyConstraints().add(((ForeignKeyConstraint) constraint));
@@ -188,7 +184,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public CreateTableStatement addColumnConstraint(NotNullConstraint notNullConstraint) {
-        getNotNullColumns().add(notNullConstraint.getColumnName());
+        getNotNullColumns().put(notNullConstraint.getColumnName(), notNullConstraint);
         return this;
     }
 
