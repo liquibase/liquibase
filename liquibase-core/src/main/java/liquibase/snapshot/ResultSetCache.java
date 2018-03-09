@@ -1,5 +1,6 @@
 package liquibase.snapshot;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -73,7 +74,9 @@ class ResultSetCache {
             for (CachedRow row : results) {
                 for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
                     if (bulkQueried && resultSetExtractor.bulkContainsSchema(schemaKey)) {
-                        String rowSchema = resultSetExtractor.getSchemaKey(row).toLowerCase();
+                        String rowSchema = CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                                equals(resultSetExtractor.database.getSchemaAndCatalogCase())?resultSetExtractor.getSchemaKey(row):
+                                resultSetExtractor.getSchemaKey(row).toLowerCase();
                         cache = cacheBySchema.get(rowSchema);
                         if (cache == null) {
                             cache = new HashMap<String, List<CachedRow>>();
@@ -160,13 +163,25 @@ class ResultSetCache {
             if (!database.supportsCatalogs() && !database.supportsSchemas()) {
                 return "all";
             } else if (database.supportsCatalogs() && database.supportsSchemas()) {
+                if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                        equals(database.getSchemaAndCatalogCase())) {
+                    return (catalog + "." + schema);
+                }
                 return (catalog + "." + schema).toLowerCase();
             } else {
                 if (catalog == null && schema != null) {
+                    if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                            equals(database.getSchemaAndCatalogCase())) {
+                        return schema;
+                    }
                     return schema.toLowerCase();
                 } else {
                     if (catalog == null) {
                         return "all";
+                    }
+                    if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                            equals(database.getSchemaAndCatalogCase())) {
+                        return catalog;
                     }
                     return catalog.toLowerCase();
                 }
@@ -175,6 +190,10 @@ class ResultSetCache {
 
         public String createKey(Database database, String... params) {
             String key = StringUtils.join(params, ":");
+            if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
+                    equals(database.getSchemaAndCatalogCase())) {
+                return key;
+            }
             if (!database.isCaseSensitive()) {
                 return key.toLowerCase();
             }

@@ -80,7 +80,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 for (Catalog catalog : catalogs) {
                     quotedCatalogs.add("'" + catalog.getName() + "'");
                 }
-                this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", ").toUpperCase());
+                if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+                    this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", "));
+                } else {
+                    this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", ").toUpperCase());
+                }
             }
 
 
@@ -469,8 +473,15 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 catalogName = obj.getName();
             }
             if (catalogName != null) {
-                catalogNames.add(catalogName.toLowerCase());
+                if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+                    catalogNames.add(catalogName);
+                } else {
+                    catalogNames.add(catalogName.toLowerCase());
+                }
             }
+        }
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+            return !catalogNames.contains(fieldCatalog);
         }
 
         return !catalogNames.contains(fieldCatalog.toLowerCase());

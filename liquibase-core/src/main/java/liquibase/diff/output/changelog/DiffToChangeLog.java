@@ -73,6 +73,13 @@ public class DiffToChangeLog {
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
         this.diffOutputControl = diffOutputControl;
+        respectSchemaAndCatalogCaseIfNeeded(diffOutputControl);
+    }
+
+    private void respectSchemaAndCatalogCaseIfNeeded(DiffOutputControl diffOutputControl) {
+        if (this.diffResult.getComparisonSnapshot().getDatabase() instanceof AbstractDb2Database) {
+            diffOutputControl.setRespectSchemaAndCatalogCase(true);
+        }
     }
 
     public DiffToChangeLog(DiffOutputControl diffOutputControl) {
