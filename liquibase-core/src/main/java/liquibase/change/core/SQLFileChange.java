@@ -1,8 +1,5 @@
 package liquibase.change.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
@@ -11,6 +8,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -167,5 +167,10 @@ public class SQLFileChange extends AbstractSQLChange implements ResourceDependen
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public InputStream openStream() throws IOException {
+        return openSqlStream();
     }
 }

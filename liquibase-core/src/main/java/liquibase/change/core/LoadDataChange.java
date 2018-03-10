@@ -1,13 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeStatus;
-import liquibase.change.ChangeWithColumns;
-import liquibase.change.CheckSum;
-import liquibase.change.ColumnConfig;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -49,7 +42,7 @@ import java.util.*;
                 "Once the date format string is set, Liquibase will then call the SimpleDateFormat.parse() method attempting to parse the input string so that it can return a Date/Time. If problems occur, then a ParseException is thrown and the input string is treated as a String for the INSERT command to be generated.",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
         since = "1.7")
-public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
+public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig>, ResourceDependentChange {
 
     /**
      * CSV Lines starting with that sign(s) will be treated as comments by default
@@ -495,5 +488,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public InputStream openStream() throws IOException {
+        InputStream is = StreamUtil.openStream(file, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+        if (is == null) {
+            throw new IOException("Unable to read: " + file);
+        }
+        return is;
     }
 }

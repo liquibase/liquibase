@@ -113,4 +113,17 @@ public class SQLFileChangeTest extends StandardChangeTest {
 
     }
 
+    def "openStream"() {
+        when:
+        def change = new SQLFileChange();
+        change.path = "liquibase/change/core/SQLFileTestData.sql"
+        change.resourceAccessor = resourceSupplier.simpleResourceAccessor;
+
+        def is = change.openStream()
+
+        then:
+        is.close()
+        assert is != null
+    }
+
 }

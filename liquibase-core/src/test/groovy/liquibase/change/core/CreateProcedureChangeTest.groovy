@@ -39,4 +39,17 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         then:
         change.serialize().toString() == "createProcedure[procedureBody=create procedure sql]"
     }
+
+    def "openStream"() {
+        when:
+        def change = new CreateProcedureChange();
+        change.path = "liquibase/change/core/SQLFileTestData.sql"
+        change.resourceAccessor = resourceSupplier.simpleResourceAccessor
+
+        def is = change.openStream()
+
+        then:
+        is.close()
+        assert is != null
+    }
 }

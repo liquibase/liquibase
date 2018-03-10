@@ -366,4 +366,17 @@ public class LoadDataChangeTest extends StandardChangeTest {
         then:
         assert md5sum1.equals(md5sum2)
     }
+
+    def "openStream"() {
+        when:
+        def change = new LoadDataChange();
+        change.file = "liquibase/change/core/SQLFileTestData.sql"
+        change.resourceAccessor = resourceSupplier.simpleResourceAccessor
+
+        def is = change.openStream()
+
+        then:
+        is.close()
+        assert is != null
+    }
 }

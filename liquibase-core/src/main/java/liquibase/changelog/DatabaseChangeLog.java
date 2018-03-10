@@ -544,9 +544,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    public void validateResources() throws LiquibaseException {
+    public void validateResources(ResourceAccessor resourceAccessor) throws LiquibaseException {
         ChangeLogIterator logIterator = new ChangeLogIterator(this);
-        ResourceValidationChangeSetVisitor changeSetVisitor = new ResourceValidationChangeSetVisitor();
+        logIterator.setIncludeMD5Sum(false);
+        ResourceValidationChangeSetVisitor changeSetVisitor = new ResourceValidationChangeSetVisitor(resourceAccessor);
 
         logIterator.run(changeSetVisitor, new RuntimeEnvironment(new MockDatabase(), new Contexts(), new LabelExpression()));
 

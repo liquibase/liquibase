@@ -3,14 +3,13 @@ package liquibase.changelog;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
-import liquibase.changelog.filter.*;
-import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.changelog.filter.ChangeSetFilter;
+import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.database.Database;
+import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -18,6 +17,8 @@ import java.util.*;
 public class ChangeLogIterator {
     private DatabaseChangeLog databaseChangeLog;
     private List<ChangeSetFilter> changeSetFilters;
+
+    private boolean includeMD5Sum = true;
 
     private Set<String> seenChangeSets = new HashSet<String>();
 
@@ -104,7 +105,7 @@ public class ChangeLogIterator {
         Labels labels = changeSet.getLabels();
         ContextExpression contexts = changeSet.getContexts();
 
-        return changeSet.toString(true)
+        return changeSet.toString(includeMD5Sum)
                 + ":" + (labels == null ? null : labels.toString())
                 + ":" + (contexts == null ? null : contexts.toString())
                 + ":" + StringUtils.join(changeSet.getDbmsSet(), ",");
@@ -119,5 +120,9 @@ public class ChangeLogIterator {
 
     public List<ChangeSetFilter> getChangeSetFilters() {
         return Collections.unmodifiableList(changeSetFilters);
+    }
+
+    public void setIncludeMD5Sum(boolean includeMD5Sum) {
+        this.includeMD5Sum = includeMD5Sum;
     }
 }

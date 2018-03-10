@@ -276,4 +276,12 @@ create view sql_view as select * from sql_table;'''
 
     }
 
+    def "validateResources succeeded"() {
+        when:
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        def resourceAccessor = resourceSupplier.simpleResourceAccessor;
+
+        then:
+        changeLogFile.validateResources(resourceAccessor);
+    }
 }
