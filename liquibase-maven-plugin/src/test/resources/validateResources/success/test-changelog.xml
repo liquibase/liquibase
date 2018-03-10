@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+        logicalFilePath="testChangelogLogicalFilePath">
+
+    <include relativeToChangelogFile="true" file="testInclude/testIncluded.xml"/>
+
+    <changeSet author="tgdmemae" id="table" logicalFilePath="testChangeSetLogicalFilePath">
+        <preConditions>
+            <changeSetExecuted id="123" author="123" changeLogFile="testChangeSetExecutedFile.xml"/>
+        </preConditions>
+
+        <sqlFile relativeToChangelogFile="true" path="sqlFiles/testSql.sql"/>
+
+        <insert tableName="T1">
+            <column name="TXT" valueClobFile="clob/val.txt"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
