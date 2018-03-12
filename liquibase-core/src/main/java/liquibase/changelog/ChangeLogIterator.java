@@ -76,11 +76,11 @@ public class ChangeLogIterator {
 
                 log.setChangeSet(changeSet);
                 if (shouldVisit && !alreadySaw(changeSet)) {
-                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(changeSet.getDbConnection()), reasonsAccepted);
                     markSeen(changeSet);
                 } else {
                     if (visitor instanceof SkippedChangeSetVisitor) {
-                        ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
+                        ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(changeSet.getDbConnection()), reasonsDenied);
                     }
                 }
                 log.setChangeSet(null);

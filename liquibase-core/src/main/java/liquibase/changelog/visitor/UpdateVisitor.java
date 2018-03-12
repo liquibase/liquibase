@@ -48,7 +48,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         ExecType execType = null;
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();
         try {
-            execType = changeSet.execute(databaseChangeLog, execListener, this.database);
+            execType = changeSet.execute(databaseChangeLog, execListener, database);
         } catch (MigrationFailedException e) {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
             throw e;
@@ -62,6 +62,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         this.database.markChangeSetExecStatus(changeSet, execType);
 
         this.database.commit();
+        database.commit();
     }
 
     protected void fireRunFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, MigrationFailedException e) {

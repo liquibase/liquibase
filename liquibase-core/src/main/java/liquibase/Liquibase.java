@@ -2,12 +2,7 @@ package liquibase;
 
 import java.io.*;
 import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -40,6 +35,7 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
+import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -65,6 +61,7 @@ public class Liquibase {
     private ResourceAccessor resourceAccessor;
 
     protected Database database;
+    protected HashMap<String, Database> databases = new HashMap<String, Database>();
     private Logger log;
 
     private ChangeLogParameters changeLogParameters;
@@ -94,6 +91,19 @@ public class Liquibase {
      * @see ResourceAccessor
      */
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws LiquibaseException {
+        this(changeLogFile, resourceAccessor, database, null);
+    }
+
+    public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
+        this(changeLog != null ? changeLog.getPhysicalFilePath() : null, resourceAccessor, database, null);
+        this.databaseChangeLog = changeLog;
+    }
+
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, HashMap<String, Database> databases) {
+        this(changeLogFile, resourceAccessor, databases.get(RuntimeEnvironment.MAIN_DB_KEY), databases);
+    }
+
+    private Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database, HashMap<String, Database> databases) {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
@@ -103,21 +113,11 @@ public class Liquibase {
         this.resourceAccessor = resourceAccessor;
         this.changeLogParameters = new ChangeLogParameters(database);
         this.database = database;
-    }
-
-    public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
-        log = LogFactory.getLogger();
-        this.databaseChangeLog = changeLog;
-
-        if (changeLog != null) {
-            this.changeLogFile = changeLog.getPhysicalFilePath();
+        if (databases != null) {
+            this.databases = databases;
+        } else {
+            this.databases.put(RuntimeEnvironment.MAIN_DB_KEY, database);
         }
-        if (this.changeLogFile != null) {
-            changeLogFile = changeLogFile.replace('\\', '/'); //convert to standard / if using absolute path on windows
-        }
-        this.resourceAccessor = resourceAccessor;
-        this.database = database;
-        this.changeLogParameters = new ChangeLogParameters(database);
     }
 
     /**
@@ -207,11 +207,12 @@ public class Liquibase {
 
             ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
-            changeLog.validate(database, contexts, labelExpression);
+            RuntimeEnvironment env = new RuntimeEnvironment(databases, contexts, labelExpression);
+            changeLog.validate(env);
 
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
-            changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+            changeLogIterator.run(createUpdateVisitor(), env);
         } finally {
             database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
             try {
@@ -302,7 +303,8 @@ public class Liquibase {
             checkLiquibaseTables(true, changeLog, contexts, labelExpression);
             ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
-            changeLog.validate(database, contexts, labelExpression);
+            RuntimeEnvironment env = new RuntimeEnvironment(databases, contexts, labelExpression);
+            changeLog.validate(env);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
@@ -311,7 +313,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToApply));
 
-            logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(createUpdateVisitor(), env);
         } finally {
             try {
                 lockService.releaseLock();
@@ -346,7 +348,8 @@ public class Liquibase {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
             checkLiquibaseTables(true, changeLog, contexts, labelExpression);
-            changeLog.validate(database, contexts, labelExpression);
+            RuntimeEnvironment env = new RuntimeEnvironment(databases, contexts, labelExpression);
+            changeLog.validate(env);
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -356,7 +359,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new UpToTagChangeSetFilter(tag, ranChangeSetList));
 
-            logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(createUpdateVisitor(), env);
         } finally {
             try {
                 lockService.releaseLock();

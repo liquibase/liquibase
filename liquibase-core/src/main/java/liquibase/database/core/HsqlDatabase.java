@@ -122,6 +122,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
+        // TODO: 01.03.2018 Override method AbstractJdbcDatabase.getConnectionSchemaNameCallStatement(). Schema is not "PUBLIC" if used "SET SCHEMA" or "ALTER USER ... SET INITIAL SCHEMA" HyperSQL-commands.
         return "PUBLIC";
     }
 

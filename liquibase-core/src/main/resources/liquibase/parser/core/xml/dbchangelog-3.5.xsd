@@ -196,6 +196,7 @@
 							<xsd:attribute name="file" type="xsd:string" use="required" />
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
 							<xsd:attribute name="context" type="xsd:string" />
+							<xsd:attribute name="db" type="xsd:string" />
 							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
