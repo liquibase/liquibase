@@ -586,6 +586,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     boolean getMapDateToTimestamp = true;
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    String jdbcTableName = database.escapeStringForDatabase(tableName);
+
                     String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS," +
                             "OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE AS DATA_TYPE_NAME, DATA_TYPE_MOD, DATA_TYPE_OWNER, " +
                             // note: oracle reports DATA_LENGTH=4*CHAR_LENGTH when using VARCHAR( <N> CHAR ), thus BYTEs
@@ -599,13 +602,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "ac.VALIDATED as VALIDATED " +
                             "FROM ALL_TAB_COLS c " +
                             "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) " +
-                            "LEFT JOIN all_cons_columns acc USING ( OWNER, TABLE_NAME, COLUMN_NAME) " +
-                            "LEFT JOIN all_constraints ac USING ( OWNER, TABLE_NAME, CONSTRAINT_NAME) ";
+                            "LEFT JOIN (select * from all_cons_columns where OWNER = '"+jdbcSchemaName+"' "
+                            +"AND TABLE_NAME='" +jdbcTableName+ "' and POSITION is null) USING (OWNER,TABLE_NAME,COLUMN_NAME) " +
+                            "LEFT JOIN (select * from all_constraints where OWNER = '"+jdbcSchemaName+"' "
+                            +"AND TABLE_NAME='"+jdbcTableName+"') ac USING (OWNER,TABLE_NAME,CONSTRAINT_NAME) ";
 
                     if (!bulk || getAllCatalogsStringScratchData() == null) {
-                        sql += "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
+                        sql += "WHERE OWNER='" + jdbcSchemaName + "' AND hidden_column='NO'";
                     } else {
-                        sql += "WHERE OWNER IN ('" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "', " + getAllCatalogsStringScratchData() + ") AND hidden_column='NO'";
+                        sql += "WHERE OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") AND hidden_column='NO'";
                     }
 
                     if (!bulk) {
@@ -617,10 +622,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     }
                     sql += " AND " + ((OracleDatabase) database).getSystemTableWhereClause("TABLE_NAME");
-                    sql += " AND acc.POSITION is null ";
                     sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
 
-                    return this.executeAndExtract(sql, database);
+                    return executeAndExtract(sql, database);
                 }
 
 
