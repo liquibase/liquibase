@@ -624,7 +624,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     sql += " AND " + ((OracleDatabase) database).getSystemTableWhereClause("TABLE_NAME");
                     sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
 
-                    return executeAndExtract(sql, database);
+                    return this.executeAndExtract(sql, database);
                 }
 
 
