@@ -595,12 +595,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "DATA_DEFAULT, " +
                             "NUM_BUCKETS, CHARACTER_SET_NAME, " +
                             "CHAR_COL_DECL_LENGTH, CHAR_LENGTH, " +
-                            "CHAR_USED, VIRTUAL_COLUMN, " +
-                            "ac.VALIDATED as VALIDATED " +
+                            "CHAR_USED, VIRTUAL_COLUMN " +
                             "FROM ALL_TAB_COLS c " +
-                            "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) " +
-                            "LEFT JOIN all_cons_columns acc USING ( OWNER, TABLE_NAME, COLUMN_NAME) " +
-                            "LEFT JOIN all_constraints ac USING ( OWNER, TABLE_NAME, CONSTRAINT_NAME) ";
+                            "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) ";
 
                     if (!bulk || getAllCatalogsStringScratchData() == null) {
                         sql += "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
