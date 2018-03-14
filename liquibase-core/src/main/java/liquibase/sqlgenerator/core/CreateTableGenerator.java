@@ -160,7 +160,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 if (statement.getNotNullColumns().containsKey(column)) {
                     buffer.append(" NOT NULL");
                     NotNullConstraint notNullConstraint = statement.getNotNullColumns().get(column);
-                    if (!notNullConstraint.shouldValidate()){
+                    if (!notNullConstraint.shouldValidateNullable()){
                         if (database instanceof OracleDatabase){
                             buffer.append(" ENABLE NOVALIDATE ");
                         }

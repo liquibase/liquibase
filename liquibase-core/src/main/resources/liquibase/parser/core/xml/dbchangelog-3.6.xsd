@@ -286,6 +286,10 @@
 		<xsd:attribute name="initiallyDeferred" type="booleanExp" />
         <xsd:attribute name="checkConstraint" type="xsd:string" />
 		<xsd:attribute name="validate" type="booleanExp" />
+		<xsd:attribute name="validateNullable" type="booleanExp" />
+		<xsd:attribute name="validateUnique" type="booleanExp" />
+		<xsd:attribute name="validatePrimaryKey" type="booleanExp" />
+		<xsd:attribute name="validateForeignKey " type="booleanExp" />
     </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="column">

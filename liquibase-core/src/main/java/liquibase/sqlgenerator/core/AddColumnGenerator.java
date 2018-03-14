@@ -149,7 +149,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
             if (database instanceof OracleDatabase) {
-                if (!statement.shouldValidate()) {
+                if (!statement.shouldValidateNullable()) {
                     alterTable+= " ENABLE NOVALIDATE ";
                 }
             }

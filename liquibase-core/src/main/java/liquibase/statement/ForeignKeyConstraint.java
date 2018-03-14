@@ -11,10 +11,21 @@ public class ForeignKeyConstraint implements ColumnConstraint {
     private boolean deleteCascade = false;
     private boolean initiallyDeferred = false;
     private boolean deferrable = false;
+    /**
+     * Default value is true
+     */
+    private boolean validateForeignKey = true;
 
     public ForeignKeyConstraint(String foreignKeyName,String references) {
         this.foreignKeyName = foreignKeyName;
         this.references = references;
+    }
+
+    public ForeignKeyConstraint(String foreignKeyName,String references, boolean validateForeignKey) {
+        this.foreignKeyName = foreignKeyName;
+        this.references = references;
+        setValidateForeignKey(validateForeignKey);
+
     }
 
     public ForeignKeyConstraint(String foreignKeyName,String references, String referencedTableName, String referencedColumnNames) {
@@ -22,6 +33,15 @@ public class ForeignKeyConstraint implements ColumnConstraint {
         this.references = references;
         this.referencedTableName = referencedTableName;
         this.referencedColumnNames = referencedColumnNames;
+    }
+
+    public ForeignKeyConstraint(String foreignKeyName,String references, String referencedTableName,
+        String referencedColumnNames, boolean validateForeignKey) {
+        this.foreignKeyName = foreignKeyName;
+        this.references = references;
+        this.referencedTableName = referencedTableName;
+        this.referencedColumnNames = referencedColumnNames;
+        setValidateForeignKey(validateForeignKey);
     }
 
     public String getForeignKeyName() {
@@ -91,5 +111,13 @@ public class ForeignKeyConstraint implements ColumnConstraint {
     public ForeignKeyConstraint setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
         return this;
+    }
+
+    public boolean shouldValidateForeignKey() {
+        return validateForeignKey;
+    }
+
+    public void setValidateForeignKey(boolean validateForeignKey) {
+        this.validateForeignKey = validateForeignKey;
     }
 }

@@ -1,17 +1,8 @@
 package liquibase.statement.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import liquibase.statement.*;
 
-import liquibase.statement.AbstractSqlStatement;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.PrimaryKeyConstraint;
-import liquibase.statement.UniqueConstraint;
+import java.util.*;
 
 public class AddColumnStatement extends AbstractSqlStatement {
 
@@ -135,13 +126,35 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return true;
     }
 
-    public boolean shouldValidate() {
+    public boolean shouldValidateNullable() {
         if (isPrimaryKey()) {
             return false;
         }
         for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof NotNullConstraint) {
-                if (!((NotNullConstraint) constraint).shouldValidate()) {
+                if (!((NotNullConstraint) constraint).shouldValidateNullable()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean shouldValidateUnique() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof UniqueConstraint) {
+                if (!((UniqueConstraint) constraint).shouldValidateUnique()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean shouldValidatePrimaryKey() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof PrimaryKeyConstraint) {
+                if (!((PrimaryKeyConstraint) constraint).shouldValidatePrimaryKey()) {
                     return false;
                 }
             }

@@ -46,6 +46,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Schema schema = relation.getSchema();
 
         List<CachedRow> columnMetadataRs = null;
+        List<CachedRow> notNullConstraintsMetadataRs = null;
         try {
 
             Column column = null;
@@ -56,7 +57,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
+                    ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+                notNullConstraintsMetadataRs = databaseMetaData.getNotNullConstraints(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
+                    ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+                if (!notNullConstraintsMetadataRs.isEmpty()){
+                    //TODO
+                }
 
                 if (columnMetadataRs.size() > 0) {
                     CachedRow data = columnMetadataRs.get(0);
