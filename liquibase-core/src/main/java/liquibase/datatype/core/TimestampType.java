@@ -14,6 +14,8 @@ import liquibase.logging.LogType;
 import liquibase.util.StringUtils;
 import liquibase.util.grammar.ParseException;
 
+import java.util.Locale;
+
 /**
  * Data type support for TIMESTAMP data types in various DBMS. All DBMS are at least expected to support the
  * year, month, day, hour, minute and second parts. Optionally, fractional seconds and time zone information can be
@@ -69,7 +71,7 @@ public class TimestampType extends DateTimeType {
             if (!LiquibaseConfiguration.getInstance()
                     .getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES)
                     .getValue(Boolean.class)
-                    && originalDefinition.toLowerCase().startsWith("timestamp")) {
+                    && originalDefinition.toLowerCase(Locale.US).startsWith("timestamp")) {
                 return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
             }
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));
@@ -122,8 +124,8 @@ public class TimestampType extends DateTimeType {
             String additionalInformation = this.getAdditionalInformation();
 
             if ((additionalInformation != null) && (database instanceof PostgresDatabase)) {
-                if (additionalInformation.toUpperCase().contains("TIMEZONE")) {
-                    additionalInformation = additionalInformation.toUpperCase().replace("TIMEZONE", "TIME ZONE");
+                if (additionalInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
+                    additionalInformation = additionalInformation.toUpperCase(Locale.US).replace("TIMEZONE", "TIME ZONE");
                 }
             }
 

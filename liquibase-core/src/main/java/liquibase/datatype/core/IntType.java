@@ -8,6 +8,8 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
+import java.util.Locale;
+
 /**
  * Represents a signed integer number using 32 bits of storage.
  */
@@ -67,14 +69,14 @@ public class IntType extends LiquibaseDataType {
     public void finishInitialization(String originalDefinition) {
         super.finishInitialization(originalDefinition);
 
-        if (originalDefinition.toLowerCase().startsWith("serial")) {
+        if (originalDefinition.toLowerCase(Locale.US).startsWith("serial")) {
             autoIncrement = true;
         }
     }
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         }
         if (value instanceof DatabaseFunction) {

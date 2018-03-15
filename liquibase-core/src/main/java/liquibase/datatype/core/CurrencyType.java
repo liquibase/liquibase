@@ -8,6 +8,8 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.util.StringUtils;
 
+import java.util.Locale;
+
 
 @DataTypeInfo(name="currency", aliases = {"money", "smallmoney"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class CurrencyType  extends LiquibaseDataType {
@@ -21,8 +23,8 @@ public class CurrencyType  extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("smallmoney")
-                    || originalDefinition.toLowerCase().startsWith("[smallmoney]")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("smallmoney")
+                    || originalDefinition.toLowerCase(Locale.US).startsWith("[smallmoney]")) {
 
                 return new DatabaseDataType(database.escapeDataTypeName("smallmoney"));
             }

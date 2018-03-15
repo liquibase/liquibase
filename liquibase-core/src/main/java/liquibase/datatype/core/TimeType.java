@@ -12,6 +12,7 @@ import liquibase.util.StringUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 @DataTypeInfo(name="time", aliases = {"java.sql.Types.TIME", "java.sql.Time", "timetz"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class TimeType  extends LiquibaseDataType {
@@ -55,7 +56,7 @@ public class TimeType  extends LiquibaseDataType {
         }
 
         if (database instanceof PostgresDatabase) {
-            String rawDefinition = originalDefinition.toLowerCase();
+            String rawDefinition = originalDefinition.toLowerCase(Locale.US);
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
                 return new DatabaseDataType("TIME WITH TIME ZONE");
             } else {
@@ -68,7 +69,7 @@ public class TimeType  extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         }  else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
