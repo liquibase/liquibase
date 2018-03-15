@@ -85,13 +85,32 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         return notNullConstraints;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName,
+        String tablespace, ColumnConstraint... constraints) {
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
 	    pkConstraint.setTablespace(tablespace);
 
         List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>();
         allConstraints.addAll(Arrays.asList(constraints));
+        allConstraints.add(new NotNullConstraint(columnName));
+        allConstraints.add(pkConstraint);
+
+        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+
+        return this;
+    }
+
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue,
+        Boolean validate,String keyName, String tablespace, ColumnConstraint... constraints) {
+        PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
+        if (validate!=null) {
+            pkConstraint.setValidatePrimaryKey(validate);
+        }
+        pkConstraint.addColumns(columnName);
+        pkConstraint.setTablespace(tablespace);
+
+        List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 

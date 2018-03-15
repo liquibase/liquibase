@@ -75,7 +75,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return databaseMetaData;
         }
 
-        public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName, final String fkName) throws DatabaseException {
+        public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName,
+            final String fkName) throws DatabaseException {
             return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
                 @Override
@@ -498,14 +499,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
       /**
        * Return the NotNullConstraints for the given catalog, schema, table, and column.
        */
-      public List<CachedRow> getNotNullConstraints(final String catalogName, final String schemaName,
-          final String tableName, final String columnName) throws DatabaseException {
+      public List<CachedRow> getNotNullConst(final String catalogName, final String schemaName,
+          final String tableName) throws DatabaseException {
           if(!(database instanceof OracleDatabase)) {
             return Collections.emptyList();
           }
         GetNotNullConstraintsResultSetCache getNotNullConstraintsResultSetCache = new GetNotNullConstraintsResultSetCache(database, catalogName,
-            schemaName, tableName, columnName);
-        return getResultSetCache("getNotNullConstraints").get(getNotNullConstraintsResultSetCache);
+            schemaName, tableName);
+        return getResultSetCache("getNotNullConst").get(getNotNullConstraintsResultSetCache);
       }
 
       private class GetColumnResultSetCache extends ResultSetCache.SingleResultSetExtractor {
@@ -783,34 +784,29 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         final String catalogName;
         final String schemaName;
         final String tableName;
-        final String columnName;
 
-        private GetNotNullConstraintsResultSetCache(Database database, String catalogName, String schemaName, String tableName, String columnName) {
+        private GetNotNullConstraintsResultSetCache(Database database, String catalogName, String schemaName, String tableName) {
           super(database);
           this.catalogName = catalogName;
           this.schemaName = schemaName;
           this.tableName = tableName;
-          this.columnName = columnName;
         }
 
         @Override
         public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
           return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEMA"),
-              database, row.getString("TABLE_NAME"), row.getString("COLUMN_NAME"));
+              database, row.getString("TABLE_NAME"));
         }
 
         @Override
         public ResultSetCache.RowData wantedKeyParameters() {
-          return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
+          return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
         }
 
-        @Override
-        public boolean bulkContainsSchema(String schemaKey) {
-          String catalogs = getAllCatalogsStringScratchData();
-          return catalogs != null && schemaKey != null
-              && catalogs.contains("'" + schemaKey.toUpperCase() + "'")
-              && database instanceof OracleDatabase;
-        }
+          @Override
+          public boolean bulkContainsSchema(String schemaKey) {
+              return database instanceof OracleDatabase;
+          }
 
         @Override
         public String getSchemaKey(CachedRow row) {
@@ -842,13 +838,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
           return Collections.emptyList();
         }
 
-
         private List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
           CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
           String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
           String jdbcTableName = database.escapeStringForDatabase(tableName);
-          String jdbcColumnName = database.escapeStringForDatabase(columnName);
           String sql = "SELECT  NULL AS TABLE_CAT, c.OWNER AS TABLE_SCHEMA,c.OWNER, c.TABLE_NAME, c.COLUMN_NAME, NULLABLE,"
               + " ac.VALIDATED as VALIDATED FROM ALL_TAB_COLS c "
               + " JOIN ALL_COL_COMMENTS cc ON c.OWNER = cc.OWNER AND c.TABLE_NAME = cc.TABLE_NAME AND c.COLUMN_NAME = cc.COLUMN_NAME "
@@ -866,9 +860,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
           if (!bulk) {
             if (tableName != null) {
               sql += " AND c.TABLE_NAME='" + jdbcTableName + "'";
-            }
-            if (columnName != null) {
-              sql += " AND c.COLUMN_NAME='" + jdbcColumnName + "'";
             }
           }
           sql += " ORDER BY c.OWNER, c.TABLE_NAME, c.COLUMN_ID";
@@ -1170,7 +1161,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         } else if (database instanceof OracleDatabase) {
                             warnAboutDbaRecycleBin();
 
-                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq, c.constraint_name AS pk_name " +
+                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name as COLUMN_NAME, c.position AS key_seq, c.constraint_name AS pk_name, k.VALIDATED as VALIDATED " +
                                     "FROM all_cons_columns c, all_constraints k " +
                                     "LEFT JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=k.table_name " +
                                     "WHERE k.constraint_type = 'P' " +
@@ -1393,10 +1384,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     } else if (database instanceof OracleDatabase) {
                         warnAboutDbaRecycleBin();
 
-                        sql = "select uc.owner AS CONSTRAINT_SCHEM, uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
+                        sql = "select uc.owner AS CONSTRAINT_SCHEM, uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG, uc.VALIDATED as VALIDATED, ac.COLUMN_NAME as COLUMN_NAME " +
                                 "from all_constraints uc " +
                                 "join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner and uc.table_name=ui.table_name " +
                                 "LEFT OUTER JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=ui.table_name " +
+                                "LEFT JOIN all_cons_columns ac ON ac.OWNER = uc.OWNER AND ac.TABLE_NAME = uc.TABLE_NAME AND ac.CONSTRAINT_NAME = uc.CONSTRAINT_NAME "+
                                 "where uc.constraint_type='U' ";
                         if (tableName != null || getAllCatalogsStringScratchData() == null) {
                             sql += "and uc.owner = '" + jdbcSchemaName + "'";

@@ -279,6 +279,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
+            if (database instanceof OracleDatabase) {
+                buffer.append(!uniqueConstraint.shouldValidateUnique() ? " ENABLE NOVALIDATE " : "");
+            }
             buffer.append(",");
         }
 

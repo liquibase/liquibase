@@ -149,9 +149,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
             if (database instanceof OracleDatabase) {
-                if (!statement.shouldValidateNullable()) {
-                    alterTable+= " ENABLE NOVALIDATE ";
-                }
+                alterTable+= !statement.shouldValidateNullable() ? " ENABLE NOVALIDATE " : "";
             }
         } else {
             if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase|| (database instanceof MSSQLDatabase && columnType.toString().equalsIgnoreCase("timestamp"))) {
