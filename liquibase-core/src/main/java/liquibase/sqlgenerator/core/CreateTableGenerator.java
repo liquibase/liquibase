@@ -221,6 +221,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" USING INDEX TABLESPACE ");
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
                 }
+                buffer.append(!statement.getPrimaryKeyConstraint().shouldValidatePrimaryKey() ? " ENABLE NOVALIDATE " : "");
                 buffer.append(",");
             }
         }
@@ -264,6 +265,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (fkConstraint.isDeferrable()) {
                 buffer.append(" DEFERRABLE");
             }
+
+            if (database instanceof OracleDatabase) {
+                buffer.append(!fkConstraint.shouldValidateForeignKey() ? " ENABLE NOVALIDATE " : "");
+            }
+
             buffer.append(",");
         }
 

@@ -105,7 +105,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
 
             for (AddColumnStatement statement : columns) {
-                addUniqueConstrantStatements(statement, database, result);
+                addUniqueConstraintStatements(statement, database, result);
                 addForeignKeyStatements(statement, database, result);
             }
 
@@ -124,7 +124,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
 
-        addUniqueConstrantStatements(statement, database, returnSql);
+        addUniqueConstraintStatements(statement, database, returnSql);
         addForeignKeyStatements(statement, database, returnSql);
 
         return returnSql.toArray(new Sql[returnSql.size()]);
@@ -159,6 +159,9 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
         if (statement.isPrimaryKey()) {
             alterTable += " PRIMARY KEY";
+          if (database instanceof OracleDatabase) {
+            alterTable+= !statement.shouldValidatePrimaryKey() ? " ENABLE NOVALIDATE " : "";
+          }
         }
 
         if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
@@ -186,9 +189,10 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 .setName(statement.getColumnName());
     }
 
-    protected void addUniqueConstrantStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
+    protected void addUniqueConstraintStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
         if (statement.isUnique()) {
             AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), ColumnConfig.arrayFromNames(statement.getColumnName()), statement.getUniqueStatementName());
+            addConstraintStmt.setShouldValidate(statement.shouldValidateUnique());
             returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addConstraintStmt, database)));
         }
     }
@@ -219,6 +223,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
 
                 AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), ColumnConfig.arrayFromNames(statement.getColumnName()), null, refSchemaName, refTableName, ColumnConfig.arrayFromNames(refColName));
+                addForeignKeyConstraintStatement.setShouldValidate(fkConstraint.shouldValidateForeignKey());
                 returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
             }
         }

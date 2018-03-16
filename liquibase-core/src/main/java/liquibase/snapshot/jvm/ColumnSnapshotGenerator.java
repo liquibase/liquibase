@@ -76,19 +76,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
               populateValidatePrimaryKeyIfNeeded(column, metaDataPrimaryKeys);
               populateValidateUniqueIfNeeded(column, metaDataUniqueConst);
               populateValidateForeignKeyIfNeeded(column, metaDataForeignKeys);
-              populateValidate(column);
             }
 
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
-        }
-    }
-
-    private void populateValidate(Column column) {
-        if (!column.shouldValidateNullable() && !column.shouldValidatePrimaryKey() &&
-            !column.shouldValidateUnique() && !column.shouldValidateForeignKey()) {
-            column.setShouldValidate(false);
         }
     }
 
@@ -107,8 +99,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     break;
                 }
                 column.setShouldValidateNullable(validated.toString().equalsIgnoreCase(VALIDATE));
-                break;
+                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
+                return;
             }
+            column.setShouldValidate(true);
         }
     }
 
@@ -127,8 +121,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     break;
                 }
                 column.setShouldValidatePrimaryKey(validated.toString().equalsIgnoreCase(VALIDATE));
-                break;
+                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
+                return;
             }
+            column.setShouldValidate(true);
         }
     }
 
@@ -147,8 +143,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     break;
                 }
                 column.setShouldValidateUnique(validated.toString().equalsIgnoreCase(VALIDATE));
+                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
                 break;
             }
+            column.setShouldValidate(true);
         }
     }
 
@@ -167,8 +165,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     break;
                 }
                 column.setShouldValidateForeignKey(validated.toString().equalsIgnoreCase(VALIDATE));
+                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
                 break;
             }
+            column.setShouldValidate(true);
         }
     }
 
