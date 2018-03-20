@@ -83,6 +83,9 @@ public class CustomChangeWrapper extends AbstractChange {
      * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link liquibase.change.Change#generateStatements(liquibase.database.Database)}
      */
     public CustomChangeWrapper setClass(String className) throws CustomChangeException {
+        if (className == null) {
+            return this;
+        }
         if (classLoader == null) {
             throw new CustomChangeException("CustomChangeWrapper classLoader not set");
         }

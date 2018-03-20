@@ -250,6 +250,8 @@ public interface Database extends PrioritizedService {
 
     boolean supportsCatalogs();
 
+    CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase();
+
     boolean supportsSchemas();
 
     boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type);

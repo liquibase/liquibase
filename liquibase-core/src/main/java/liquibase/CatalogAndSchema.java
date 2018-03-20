@@ -1,7 +1,6 @@
 package liquibase;
 
 import liquibase.database.Database;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
@@ -24,6 +23,10 @@ public class CatalogAndSchema {
         this.schemaName = schemaName;
     }
 
+    public enum CatalogAndSchemaCase {
+        LOWER_CASE, UPPER_CASE, ORIGINAL_CASE
+    }
+
     public String getCatalogName() {
         return catalogName;
     }
@@ -44,10 +47,8 @@ public class CatalogAndSchema {
         if (workCatalogAndSchema.getCatalogName() == null) {
             catalogMatches = (thisCatalogAndSchema.getCatalogName() == null);
         } else {
-            catalogMatches = workCatalogAndSchema.getCatalogName().equalsIgnoreCase(thisCatalogAndSchema
-                    .getCatalogName());
+            catalogMatches = equals(accordingTo, workCatalogAndSchema.getCatalogName(),thisCatalogAndSchema.getCatalogName());
         }
-
         if (!catalogMatches) {
             return false;
         }
@@ -56,7 +57,7 @@ public class CatalogAndSchema {
             if (workCatalogAndSchema.getSchemaName() == null) {
                 return thisCatalogAndSchema.getSchemaName() == null;
             } else {
-                return workCatalogAndSchema.getSchemaName().equalsIgnoreCase(thisCatalogAndSchema.getSchemaName());
+                return equals(accordingTo, workCatalogAndSchema.getSchemaName(), thisCatalogAndSchema.getSchemaName());
             }
         } else {
             return true;
@@ -93,27 +94,25 @@ public class CatalogAndSchema {
             workSchemaName = workCatalogName;
         }
 
-        if ((workCatalogName != null) && workCatalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
+        if (workCatalogName != null && equals(accordingTo, workCatalogName, accordingTo.getDefaultCatalogName())) {
             workCatalogName = null;
         }
-
-        if ((workSchemaName != null) && workSchemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
+        if (workSchemaName != null && equals(accordingTo, workSchemaName, accordingTo.getDefaultSchemaName())) {
             workSchemaName = null;
         }
-
         if (!accordingTo.supportsSchemas() && (workCatalogName != null) && (workSchemaName != null) &&
             !workCatalogName.equals(workSchemaName)) {
             workSchemaName = null;
         }
 
-        if (accordingTo instanceof PostgresDatabase) {
+        if (CatalogAndSchemaCase.LOWER_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
             if (workCatalogName != null) {
                 workCatalogName = workCatalogName.toLowerCase(Locale.US);
             }
             if (workSchemaName != null) {
                 workSchemaName = workSchemaName.toLowerCase(Locale.US);
             }
-        } else {
+        } else if (CatalogAndSchemaCase.UPPER_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
             if (!accordingTo.isCaseSensitive()) {
                 if (workCatalogName != null) {
                     workCatalogName = workCatalogName.toUpperCase(Locale.US);
@@ -123,7 +122,6 @@ public class CatalogAndSchema {
                 }
             }
         }
-
         return new CatalogAndSchema(workCatalogName, workSchemaName);
 
     }
@@ -180,4 +178,24 @@ public class CatalogAndSchema {
 
         return tmpCatalogName + "." + tmpSchemaName;
     }
+
+    /**
+     * This method does schema or catalog comparision
+     *
+     * @param database - it's db object to getSchemaAndCatalogCase
+     * @param value1 - schema or catalog to compare with value2
+     * @param value2 - schema or catalog to compare with value1
+     *
+     * @return true if value1 and value2 equal
+     */
+    private boolean equals(Database database, String value1, String value2) {
+        CatalogAndSchemaCase schemaAndCatalogCase = database.getSchemaAndCatalogCase();
+        if (CatalogAndSchemaCase.UPPER_CASE.equals(schemaAndCatalogCase) ||
+                CatalogAndSchemaCase.LOWER_CASE.equals(schemaAndCatalogCase)) {
+            return value1.equalsIgnoreCase(value2);
+        }
+
+        return value1.equals(value2);
+    }
+
 }
