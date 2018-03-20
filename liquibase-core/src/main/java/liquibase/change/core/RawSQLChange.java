@@ -29,6 +29,8 @@ import liquibase.util.StringUtils;
 public class RawSQLChange extends AbstractSQLChange {
 
     private String comment;
+
+    private Boolean rerunnable;
     
     public RawSQLChange() {
     }
@@ -36,7 +38,6 @@ public class RawSQLChange extends AbstractSQLChange {
     public RawSQLChange(String sql) {
         setSql(sql);
     }
-
 
     @Override
     @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, exampleValue = "insert into person (name) values ('Bob')", requiredForDatabase = "all")
@@ -69,5 +70,19 @@ public class RawSQLChange extends AbstractSQLChange {
         if (nestedSql != null) {
             setSql(nestedSql);
         }
+    }
+
+    public boolean isRerunnable() {
+        if (rerunnable == null) {
+            return false;
+        }
+        return rerunnable;
+    }
+
+    public void setRerunnable(Boolean rerunnable) {
+        if (rerunnable == null) {
+            this.rerunnable = false;
+        }
+        this.rerunnable = rerunnable;
     }
 }
