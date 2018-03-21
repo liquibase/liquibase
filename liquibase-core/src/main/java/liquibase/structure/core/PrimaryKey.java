@@ -169,4 +169,16 @@ public class PrimaryKey extends AbstractDatabaseObject {
         setAttribute("backingIndex", backingIndex);
         return this;
     }
+
+    /**
+     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+     * check will be done to ensure old data has valid primary keys - only new data would be checked
+     * to see if it complies with the constraint logic. The default state for primary keys is to
+     * have 'ENABLE VALIDATE' set.
+     */
+    public PrimaryKey setShouldValidate(boolean shouldValidate) {
+        this.setAttribute("validate", shouldValidate);
+        return this;
+    }
 }

@@ -28,7 +28,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     private String foreignKeyName;
     private Boolean initiallyDeferred;
     private Boolean deferrable;
-    private Boolean validate;
     private Boolean validateNullable;
     private Boolean validateUnique;
     private Boolean validatePrimaryKey;
@@ -243,32 +242,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
      * Sets null if the passed string is null or "null" or "NULL".
      * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
      */
-    public ConstraintsConfig setShouldValidate(String validate) {
-        this.validate = parseBoolean(validate);
-        return this;
-    }
-
-    /**
-     * Returns whether a NotNullConst, ForeignKeyConst, UniqueConst, PrimaryKeyConst
-     * defined for this column should validate.
-     * Returns null if not setShouldValidate has not been called.
-     */
-    public Boolean shouldValidate() {
-        return validate;
-    }
-
-    public ConstraintsConfig setShouldValidate(Boolean validate) {
-        this.validate = validate;
-        return this;
-    }
-
-    /**
-     * Set the shouldValidate field based on the passed string.
-     * Sets true if the passed string is 1 or true or TRUE.
-     * Sets false if the passed string is 0 or false or FALSE.
-     * Sets null if the passed string is null or "null" or "NULL".
-     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
-     */
     public ConstraintsConfig setShouldValidateNullable(String validateNullable) {
         this.validateNullable = parseBoolean(validateNullable);
         return this;
@@ -284,9 +257,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     public ConstraintsConfig setShouldValidateNullable(Boolean validateNullable) {
         this.validateNullable = validateNullable;
-        if (shouldValidate()!=null && !shouldValidate()){
-            this.validateNullable = shouldValidate();
-        }
         return this;
     }
 
@@ -312,9 +282,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     public ConstraintsConfig setShouldValidateUnique(Boolean validateUnique) {
         this.validateUnique = validateUnique;
-        if (shouldValidate()!=null && !shouldValidate()){
-            this.validateUnique = shouldValidate();
-        }
         return this;
     }
 
@@ -340,9 +307,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     public ConstraintsConfig setShouldValidatePrimaryKey(Boolean validatePrimaryKey) {
         this.validatePrimaryKey = validatePrimaryKey;
-        if (shouldValidate()!=null && !shouldValidate()){
-            this.validatePrimaryKey = shouldValidate();
-        }
         return this;
     }
 
@@ -368,9 +332,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     public ConstraintsConfig setShouldValidateForeignKey(Boolean validateForeignKey) {
         this.validateForeignKey = validateForeignKey;
-        if (shouldValidate()!=null && !shouldValidate()){
-            this.validateForeignKey = shouldValidate();
-        }
         return this;
     }
 

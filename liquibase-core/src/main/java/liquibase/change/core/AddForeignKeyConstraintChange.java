@@ -151,7 +151,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     /**
-     * In Oracle PL/SQL, the VALIDATE keyword defines whether a foreign key constraint on a column in a table
+     * the VALIDATE keyword defines whether a foreign key constraint on a column in a table
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
