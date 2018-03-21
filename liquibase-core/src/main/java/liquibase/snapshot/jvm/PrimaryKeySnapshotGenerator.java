@@ -74,7 +74,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     /**
-     * Method to map 'validate' option for PK. This thing works only for ORACLE
+     * Method to map 'validate' option for PK.
      *
      * @param database - DB where PK will be created
      * @param primaryKey - PK object to persist validate option
