@@ -170,35 +170,72 @@ public class ConstraintsConfigTest extends Specification {
         thrown(UnexpectedLiquibaseException)
     }
 
-    def setShouldValidate() {
+    def setShouldValidateNullable_string() {
         expect:
-        assert new ConstraintsConfig().setShouldValidate(true).shouldValidate()
-        assert !new ConstraintsConfig().setShouldValidate(false).shouldValidate()
+        assert new ConstraintsConfig().setShouldValidateNullable("true").shouldValidateNullable()
+        assert new ConstraintsConfig().setShouldValidateNullable("TRUE").shouldValidateNullable()
+        assert new ConstraintsConfig().setShouldValidateNullable("1").shouldValidateNullable()
+
+        assert !new ConstraintsConfig().setShouldValidateNullable("false").shouldValidateNullable()
+        assert !new ConstraintsConfig().setShouldValidateNullable("FALSE").shouldValidateNullable()
+        assert !new ConstraintsConfig().setShouldValidateNullable("0").shouldValidateNullable()
+
+        new ConstraintsConfig().setShouldValidateNullable("").shouldValidateNullable() == null
+        new ConstraintsConfig().setShouldValidateNullable("null").shouldValidateNullable() == null
+        new ConstraintsConfig().setShouldValidateNullable("NULL").shouldValidateNullable() == null
+        def constraint = new ConstraintsConfig().setShouldValidateNullable((String) null)
+        constraint.shouldValidateNullable() == null
     }
 
-    def setShouldValidate_string() {
+    def setShouldValidateUnique_string() {
         expect:
-        assert new ConstraintsConfig().setShouldValidate("true").shouldValidate()
-        assert new ConstraintsConfig().setShouldValidate("TRUE").shouldValidate()
-        assert new ConstraintsConfig().setShouldValidate("1").shouldValidate()
+        assert new ConstraintsConfig().setShouldValidateUnique("true").shouldValidateUnique()
+        assert new ConstraintsConfig().setShouldValidateUnique("TRUE").shouldValidateUnique()
+        assert new ConstraintsConfig().setShouldValidateUnique("1").shouldValidateUnique()
 
-        assert !new ConstraintsConfig().setShouldValidate("false").shouldValidate()
-        assert !new ConstraintsConfig().setShouldValidate("FALSE").shouldValidate()
-        assert !new ConstraintsConfig().setShouldValidate("0").shouldValidate()
+        assert !new ConstraintsConfig().setShouldValidateUnique("false").shouldValidateUnique()
+        assert !new ConstraintsConfig().setShouldValidateUnique("FALSE").shouldValidateUnique()
+        assert !new ConstraintsConfig().setShouldValidateUnique("0").shouldValidateUnique()
 
-        new ConstraintsConfig().setShouldValidate("").shouldValidate() == null
-        new ConstraintsConfig().setShouldValidate("null").shouldValidate() == null
-        new ConstraintsConfig().setShouldValidate("NULL").shouldValidate() == null
-        def constraint = new ConstraintsConfig().setShouldValidate((String) null)
-        constraint.shouldValidate() == null
+        new ConstraintsConfig().setShouldValidateUnique("").shouldValidateUnique() == null
+        new ConstraintsConfig().setShouldValidateUnique("null").shouldValidateUnique() == null
+        new ConstraintsConfig().setShouldValidateUnique("NULL").shouldValidateUnique() == null
+        def constraint = new ConstraintsConfig().setShouldValidateUnique((String) null)
+        constraint.shouldValidateUnique() == null
     }
 
-    def setShouldValidate_badString() {
-        when:
-        new ConstraintsConfig().setShouldValidate("bad val")
+    def setShouldValidateForeignKey_string() {
+        expect:
+        assert new ConstraintsConfig().setShouldValidateForeignKey("true").shouldValidateForeignKey()
+        assert new ConstraintsConfig().setShouldValidateForeignKey("TRUE").shouldValidateForeignKey()
+        assert new ConstraintsConfig().setShouldValidateForeignKey("1").shouldValidateForeignKey()
 
-        then:
-        thrown(UnexpectedLiquibaseException)
+        assert !new ConstraintsConfig().setShouldValidateForeignKey("false").shouldValidateForeignKey()
+        assert !new ConstraintsConfig().setShouldValidateForeignKey("FALSE").shouldValidateForeignKey()
+        assert !new ConstraintsConfig().setShouldValidateForeignKey("0").shouldValidateForeignKey()
+
+        new ConstraintsConfig().setShouldValidateForeignKey("").shouldValidateForeignKey() == null
+        new ConstraintsConfig().setShouldValidateForeignKey("null").shouldValidateForeignKey() == null
+        new ConstraintsConfig().setShouldValidateForeignKey("NULL").shouldValidateForeignKey() == null
+        def constraint = new ConstraintsConfig().setShouldValidateForeignKey((String) null)
+        constraint.shouldValidateForeignKey() == null
+    }
+
+    def setShouldValidatePrimaryKey_string() {
+        expect:
+        assert new ConstraintsConfig().setShouldValidatePrimaryKey("true").shouldValidatePrimaryKey()
+        assert new ConstraintsConfig().setShouldValidatePrimaryKey("TRUE").shouldValidatePrimaryKey()
+        assert new ConstraintsConfig().setShouldValidatePrimaryKey("1").shouldValidatePrimaryKey()
+
+        assert !new ConstraintsConfig().setShouldValidatePrimaryKey("false").shouldValidatePrimaryKey()
+        assert !new ConstraintsConfig().setShouldValidatePrimaryKey("FALSE").shouldValidatePrimaryKey()
+        assert !new ConstraintsConfig().setShouldValidatePrimaryKey("0").shouldValidatePrimaryKey()
+
+        new ConstraintsConfig().setShouldValidatePrimaryKey("").shouldValidatePrimaryKey() == null
+        new ConstraintsConfig().setShouldValidatePrimaryKey("null").shouldValidatePrimaryKey() == null
+        new ConstraintsConfig().setShouldValidatePrimaryKey("NULL").shouldValidatePrimaryKey() == null
+        def constraint = new ConstraintsConfig().setShouldValidatePrimaryKey((String) null)
+        constraint.shouldValidatePrimaryKey() == null
     }
 
     def setPrimaryKeyName() {

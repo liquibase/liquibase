@@ -5,8 +5,7 @@ public class NotNullConstraint implements ColumnConstraint {
     /**
      * Default value is true
      */
-    private boolean validate = true;
-
+    private boolean validateNullable = true;
 
     public NotNullConstraint() {
     }
@@ -15,9 +14,9 @@ public class NotNullConstraint implements ColumnConstraint {
         setColumnName(columnName);
     }
 
-    public NotNullConstraint(String columnName, boolean validate) {
+    public NotNullConstraint(String columnName, boolean validateNullable) {
         setColumnName(columnName);
-        setValidate(validate);
+        setValidateNullable(validateNullable);
     }
 
 
@@ -30,11 +29,11 @@ public class NotNullConstraint implements ColumnConstraint {
         return this;
     }
 
-    public boolean shouldValidate() {
-        return validate;
+    public boolean shouldValidateNullable() {
+        return validateNullable;
     }
 
-    public void setValidate(boolean validate) {
-        this.validate = validate;
+    public void setValidateNullable(boolean validateNullable) {
+        this.validateNullable = validateNullable;
     }
 }

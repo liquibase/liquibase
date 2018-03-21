@@ -1,16 +1,16 @@
 package liquibase.statement;
 
-import liquibase.structure.core.Index;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class UniqueConstraint implements ColumnConstraint {
     private String constraintName;
+    /**
+     * Default value is true
+     */
+    private boolean validateUnique = true;
     private List<String> columns = new ArrayList<String>();
-
-    private Index backingIndex;
 
     public UniqueConstraint() {
 
@@ -19,6 +19,12 @@ public class UniqueConstraint implements ColumnConstraint {
     public UniqueConstraint(String constraintName) {
         this.constraintName = constraintName;
     }
+
+    public UniqueConstraint(String constraintName, boolean validateUnique) {
+        this.constraintName = constraintName;
+        setValidateUnique(validateUnique);
+    }
+
 
     public UniqueConstraint addColumns(String... columns) {
         this.columns.addAll(Arrays.asList(columns));
@@ -36,5 +42,13 @@ public class UniqueConstraint implements ColumnConstraint {
 
     public List<String> getColumns() {
         return columns;
+    }
+
+    public boolean shouldValidateUnique() {
+        return validateUnique;
+    }
+
+    public void setValidateUnique(boolean validateUnique) {
+        this.validateUnique = validateUnique;
     }
 }

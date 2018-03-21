@@ -28,7 +28,10 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     private String foreignKeyName;
     private Boolean initiallyDeferred;
     private Boolean deferrable;
-    private Boolean validate;
+    private Boolean validateNullable;
+    private Boolean validateUnique;
+    private Boolean validatePrimaryKey;
+    private Boolean validateForeignKey ;
 
     /**
      * Returns if the column should be nullable. Returns null if unspecified.
@@ -239,21 +242,96 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
      * Sets null if the passed string is null or "null" or "NULL".
      * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
      */
-    public ConstraintsConfig setShouldValidate(String validate) {
-        this.validate = parseBoolean(validate);
+    public ConstraintsConfig setShouldValidateNullable(String validateNullable) {
+        this.validateNullable = parseBoolean(validateNullable);
         return this;
     }
 
     /**
-     * Returns whether a foreign key defined for this column should validate. 
+     * Returns whether a NotNullConst defined for this column should validate.
      * Returns null if not setShouldValidate has not been called.
      */
-    public Boolean shouldValidate() {
-        return validate;
+    public Boolean shouldValidateNullable() {
+        return validateNullable;
     }
 
-    public ConstraintsConfig setShouldValidate(Boolean validate) {
-        this.validate = validate;
+    public ConstraintsConfig setShouldValidateNullable(Boolean validateNullable) {
+        this.validateNullable = validateNullable;
+        return this;
+    }
+
+    /**
+     * Set the shouldValidate field based on the passed string.
+     * Sets true if the passed string is 1 or true or TRUE.
+     * Sets false if the passed string is 0 or false or FALSE.
+     * Sets null if the passed string is null or "null" or "NULL".
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
+     */
+    public ConstraintsConfig setShouldValidateUnique(String validateUnique) {
+        this.validateUnique = parseBoolean(validateUnique);
+        return this;
+    }
+
+    /**
+     * Returns whether a UniqueConst defined for this column should validate.
+     * Returns null if not setShouldValidate has not been called.
+     */
+    public Boolean shouldValidateUnique() {
+        return validateUnique;
+    }
+
+    public ConstraintsConfig setShouldValidateUnique(Boolean validateUnique) {
+        this.validateUnique = validateUnique;
+        return this;
+    }
+
+    /**
+     * Set the shouldValidate field based on the passed string.
+     * Sets true if the passed string is 1 or true or TRUE.
+     * Sets false if the passed string is 0 or false or FALSE.
+     * Sets null if the passed string is null or "null" or "NULL".
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
+     */
+    public ConstraintsConfig setShouldValidatePrimaryKey(String validatePrimaryKey) {
+        this.validatePrimaryKey = parseBoolean(validatePrimaryKey);
+        return this;
+    }
+
+    /**
+     * Returns whether a PrimaryKeyConst defined for this column should validate.
+     * Returns null if not setShouldValidate has not been called.
+     */
+    public Boolean shouldValidatePrimaryKey() {
+        return validatePrimaryKey;
+    }
+
+    public ConstraintsConfig setShouldValidatePrimaryKey(Boolean validatePrimaryKey) {
+        this.validatePrimaryKey = validatePrimaryKey;
+        return this;
+    }
+
+    /**
+     * Set the shouldValidate field based on the passed string.
+     * Sets true if the passed string is 1 or true or TRUE.
+     * Sets false if the passed string is 0 or false or FALSE.
+     * Sets null if the passed string is null or "null" or "NULL".
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
+     */
+    public ConstraintsConfig setShouldValidateForeignKey(String validateForeignKey) {
+        this.validateForeignKey= parseBoolean(validateForeignKey);
+        return this;
+    }
+
+    /**
+     * Returns whether a ForeignKeyConst defined for this column should validate.
+     * Returns null if not setShouldValidate has not been called.
+     */
+    public Boolean shouldValidateForeignKey() {
+        return validateForeignKey;
+    }
+
+    public ConstraintsConfig setShouldValidateForeignKey(Boolean validateForeignKey) {
+        this.validateForeignKey = validateForeignKey;
         return this;
     }
 

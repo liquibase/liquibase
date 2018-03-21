@@ -69,6 +69,9 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         if (database instanceof OracleDatabase && statement.getForIndexName() != null) {
             sql += " USING INDEX "+database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
         }
+        if (database instanceof OracleDatabase) {
+            sql += !statement.shouldValidate() ? " ENABLE NOVALIDATE " : "";
+        }
 
         if (database instanceof PostgresDatabase && statement.isClustered() != null && statement.isClustered() && statement.getConstraintName() != null) {
             return new Sql[] {

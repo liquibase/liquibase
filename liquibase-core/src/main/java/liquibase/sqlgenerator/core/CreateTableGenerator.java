@@ -160,7 +160,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 if (statement.getNotNullColumns().containsKey(column)) {
                     buffer.append(" NOT NULL");
                     NotNullConstraint notNullConstraint = statement.getNotNullColumns().get(column);
-                    if (!notNullConstraint.shouldValidate()){
+                    if (!notNullConstraint.shouldValidateNullable()){
                         if (database instanceof OracleDatabase){
                             buffer.append(" ENABLE NOVALIDATE ");
                         }
@@ -221,6 +221,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" USING INDEX TABLESPACE ");
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
                 }
+                buffer.append(!statement.getPrimaryKeyConstraint().shouldValidatePrimaryKey() ? " ENABLE NOVALIDATE " : "");
                 buffer.append(",");
             }
         }
@@ -264,6 +265,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (fkConstraint.isDeferrable()) {
                 buffer.append(" DEFERRABLE");
             }
+
+            if (database instanceof OracleDatabase) {
+                buffer.append(!fkConstraint.shouldValidateForeignKey() ? " ENABLE NOVALIDATE " : "");
+            }
+
             buffer.append(",");
         }
 
@@ -278,6 +284,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
+            }
+            if (database instanceof OracleDatabase) {
+                buffer.append(!uniqueConstraint.shouldValidateUnique() ? " ENABLE NOVALIDATE " : "");
             }
             buffer.append(",");
         }

@@ -37,37 +37,138 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
         Database database = snapshot.getDatabase();
         Relation relation = ((Column) example).getRelation();
         if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
             return example;
         }
         Schema schema = relation.getSchema();
-
-        List<CachedRow> columnMetadataRs = null;
         try {
-
             Column column = null;
 
             if (example.getAttribute(LIQUIBASE_COMPLETE, false)) {
                 column = (Column) example;
                 example.setAttribute(LIQUIBASE_COMPLETE, null);
-            } else {
-                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+                return column;
+            }
 
-                if (columnMetadataRs.size() > 0) {
-                    CachedRow data = columnMetadataRs.get(0);
-                    column = readColumn(data, relation, database);
-                    setAutoIncrementDetails(column, database, snapshot);
-                }
+            String catalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(schema);
+            String schemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema);
+            String tableName = relation.getName();
+            String columnName = example.getName();
+
+            JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+
+            List<CachedRow> metaDataColumns = databaseMetaData.getColumns(catalogName,schemaName,tableName, columnName);
+            List<CachedRow> metaDataNotNullConst = databaseMetaData.getNotNullConst(catalogName, schemaName, tableName);
+            List<CachedRow> metaDataPrimaryKeys = databaseMetaData.getPrimaryKeys(catalogName, schemaName, tableName);
+            List<CachedRow> metaDataUniqueConst = databaseMetaData.getUniqueConstraints(catalogName, schemaName, tableName);
+            List<CachedRow> metaDataForeignKeys = databaseMetaData.getForeignKeys(catalogName, schemaName, tableName, null);
+
+            if (!metaDataColumns.isEmpty()) {
+              CachedRow data = metaDataColumns.get(0);
+              column = readColumn(data, relation, database);
+              setAutoIncrementDetails(column, database, snapshot);
+
+              populateValidateNullableIfNeeded(column, metaDataNotNullConst);
+              populateValidatePrimaryKeyIfNeeded(column, metaDataPrimaryKeys);
+              populateValidateUniqueIfNeeded(column, metaDataUniqueConst);
+              populateValidateForeignKeyIfNeeded(column, metaDataForeignKeys);
             }
 
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
+        }
+    }
+
+    private void populateValidateNullableIfNeeded(Column column, List<CachedRow> metaDataNotNullConst) {
+        String name = column.getName();
+        for (CachedRow cachedRow: metaDataNotNullConst) {
+            Object columnNameObj = cachedRow.get("COLUMN_NAME");
+            if (columnNameObj == null) {
+                throw new AssertionError("Please check query to fetch data for notNullConst!. "
+                    + "I didn't fetch needed data");
+            }
+            if (name.equalsIgnoreCase(columnNameObj.toString())){
+                final String VALIDATE = "VALIDATED";
+                Object validated = cachedRow.get(VALIDATE);
+                if (validated== null) {
+                    break;
+                }
+                column.setShouldValidateNullable(validated.toString().equalsIgnoreCase(VALIDATE));
+                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
+                return;
+            }
+            column.setShouldValidate(true);
+        }
+    }
+
+    private void populateValidatePrimaryKeyIfNeeded(Column column, List<CachedRow> metaDataPrimaryKeys) {
+        String name = column.getName();
+        for (CachedRow cachedRow: metaDataPrimaryKeys) {
+            Object columnNameObj = cachedRow.get("COLUMN_NAME");
+            if (columnNameObj == null) {
+                throw new AssertionError("Please check query to fetch data for primaryKeys!. "
+                    + "I didn't fetch needed data");
+            }
+            if (name.equalsIgnoreCase(columnNameObj.toString())){
+                final String VALIDATE = "VALIDATED";
+                Object validated = cachedRow.get(VALIDATE);
+                if (validated== null) {
+                    break;
+                }
+                column.setShouldValidatePrimaryKey(validated.toString().equalsIgnoreCase(VALIDATE));
+                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
+                return;
+            }
+            column.setShouldValidate(true);
+        }
+    }
+
+    private void populateValidateUniqueIfNeeded(Column column, List<CachedRow> metaDataUniqueConst) {
+        String name = column.getName();
+        for (CachedRow cachedRow: metaDataUniqueConst) {
+            Object columnNameObj = cachedRow.get("COLUMN_NAME");
+            if (columnNameObj == null) {
+                throw new AssertionError("Please check query to fetch data for uniqueConst!. "
+                    + "I didn't fetch needed data");
+            }
+            if (name.equalsIgnoreCase(columnNameObj.toString())){
+                final String VALIDATE = "VALIDATED";
+                Object validated = cachedRow.get(VALIDATE);
+                if (validated== null) {
+                    break;
+                }
+                column.setShouldValidateUnique(validated.toString().equalsIgnoreCase(VALIDATE));
+                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
+                break;
+            }
+            column.setShouldValidate(true);
+        }
+    }
+
+    private void populateValidateForeignKeyIfNeeded(Column column, List<CachedRow> metaDataForeignKeys) {
+        String name = column.getName();
+        for (CachedRow cachedRow: metaDataForeignKeys) {
+            Object columnNameObj = cachedRow.get("PKCOLUMN_NAME");
+            if (columnNameObj == null) {
+                throw new AssertionError("Please check query to fetch data for foreignKeys!. "
+                    + "I didn't fetch needed data");
+            }
+            if (name.equalsIgnoreCase(columnNameObj.toString())){
+                final String VALIDATE = "VALIDATED";
+                Object validated = cachedRow.get(VALIDATE);
+                if (validated== null) {
+                    break;
+                }
+                column.setShouldValidateForeignKey(validated.toString().equalsIgnoreCase(VALIDATE));
+                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
+                break;
+            }
+            column.setShouldValidate(true);
         }
     }
 
@@ -165,7 +266,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 column.setNullable(false);
             }
-            setValidateOptionIfAvailable(database, column, columnMetadataResultSet);
         } else {
             int nullable = columnMetadataResultSet.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {

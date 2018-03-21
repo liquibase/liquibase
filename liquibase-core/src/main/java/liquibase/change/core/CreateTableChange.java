@@ -68,8 +68,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             LiquibaseDataType columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""), database);
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
-
-                statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
+                statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.shouldValidatePrimaryKey(),
+                    constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace());
 
             } else {
                 statement.addColumn(column.getName(),
@@ -83,7 +83,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             if (constraints != null) {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
                     statement.addColumnConstraint(new NotNullConstraint(column.getName(),
-                        constraints.shouldValidate()==null?true:constraints.shouldValidate()));
+                        constraints.shouldValidateNullable()==null?true:constraints.shouldValidateNullable()));
                 }
 
                 if (constraints.getReferences() != null ||
@@ -100,11 +100,16 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                     fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
                     fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
                     fkConstraint.setDeferrable(constraints.isDeferrable() != null && constraints.isDeferrable());
+                    Boolean validate = constraints.shouldValidateForeignKey();
+                    if (validate!=null) {
+                        fkConstraint.setValidateForeignKey(constraints.shouldValidateForeignKey());
+                    }
                     statement.addColumnConstraint(fkConstraint);
                 }
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
-                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName()).addColumns(column.getName()));
+                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName(),
+                        constraints.shouldValidateUnique()==null?true:constraints.shouldValidateUnique()).addColumns(column.getName()));
                 }
             }
 

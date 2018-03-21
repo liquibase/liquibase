@@ -26,6 +26,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String forIndexName;
     private String forIndexSchemaName;
     private String forIndexCatalogName;
+    private Boolean shouldValidate;
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to create the primary key on")
     public String getTableName() {
@@ -112,16 +113,42 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.clustered = clustered;
     }
 
+    /**
+     * the VALIDATE keyword defines whether a primary key constraint on a column in a table
+     * should be checked if it refers to a valid row or not.
+     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
+     */
+    @DatabaseChangeProperty(description = "This is true if the primary key has 'ENABLE VALIDATE' set, or false if the primary key has 'ENABLE NOVALIDATE' set.")
+    public Boolean getValidate() {
+        return shouldValidate;
+    }
+
+    /**
+     *
+     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+     * check will be done to ensure old data has valid primary keys - only new data would be checked
+     * to see if it complies with the constraint logic. The default state for primary keys is to
+     * have 'ENABLE VALIDATE' set.
+     */
+    public void setValidate(Boolean shouldValidate) {
+        this.shouldValidate = shouldValidate;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-
+        boolean shouldValidate = true;
+        if (getValidate() != null) {
+            shouldValidate = getValidate();
+        }
         AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
         statement.setClustered(getClustered());
         statement.setForIndexName(getForIndexName());
         statement.setForIndexSchemaName(getForIndexSchemaName());
         statement.setForIndexCatalogName(getForIndexCatalogName());
+        statement.setShouldValidate(shouldValidate);
 
         if (database instanceof DB2Database) {
             return new SqlStatement[]{
