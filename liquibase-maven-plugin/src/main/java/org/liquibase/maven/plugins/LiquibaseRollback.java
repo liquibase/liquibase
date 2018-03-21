@@ -66,7 +66,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
                                      + "or rollbackDate");
     }
 
-    if ((/* check if rollbackCount is not -1 */) && (rollbackCount <= 0)) {
+    if ((rollbackCount != -1) && (rollbackCount <= 0)) {
       throw new MojoFailureException("A rollback count of " + rollbackCount + " is meaningless, please "
                                      + "select a value greater than 0");
     }

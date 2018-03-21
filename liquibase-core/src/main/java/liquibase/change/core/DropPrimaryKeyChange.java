@@ -100,10 +100,11 @@ public class DropPrimaryKeyChange extends AbstractChange {
         }
 
     }
-    
+
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
-    	/*nolgpl implement */
+        SqlStatement[] sqlStatements = null;
+        /*nolgpl implement */
+        return sqlStatements;
     }
 
     @Override

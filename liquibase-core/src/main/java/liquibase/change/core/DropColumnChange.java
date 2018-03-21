@@ -173,7 +173,9 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
     
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) throws DatabaseException {
+        SqlStatement[] sqlStatements = null;
         /* nolgpl implement for sqlite */
+        return sqlStatements;
     }
     
     @Override

@@ -28,6 +28,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private String forIndexSchemaName;
     private String forIndexCatalogName;
 
+    private Boolean deferrable;
+    private Boolean initiallyDeferred;
+    private Boolean disabled;
+
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
@@ -85,7 +89,32 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
-    /*nolgpl: implement get/set methods for deferrable, initiallyDeferred, and disabled */
+    @DatabaseChangeProperty(description = "True if this constraint is deferrable, False otherwise")
+    public Boolean getDeferrable() {
+        return deferrable;
+    }
+
+    public void setDeferrable(Boolean deferrable) {
+        this.deferrable = deferrable;
+    }
+
+    @DatabaseChangeProperty(description = "True if this constraint is initially deferred, False otherwise")
+    public Boolean getInitiallyDeferred() {
+        return initiallyDeferred;
+    }
+
+    public void setInitiallyDeferred(Boolean initiallyDeferred) {
+        this.initiallyDeferred = initiallyDeferred;
+    }
+
+    @DatabaseChangeProperty(description = "True if this constraint is disabled, False otherwise")
+    public Boolean getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(Boolean disabled) {
+        this.disabled = disabled;
+    }
 
     /**
      * In Oracle PL/SQL, the VALIDATE keyword defines whether a newly added unique constraint on a 

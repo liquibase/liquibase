@@ -8,7 +8,7 @@ import java.util.List;
 public class PrimaryKeyConstraint implements ColumnConstraint {
 
     private String constraintName;
-
+    private String tablespace;
 
     private List<String> columns = new ArrayList<>();
 
@@ -24,9 +24,16 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
         return constraintName;
     }
 
-    /* nolgpl: get/set for tablespace */
+    public String getTablespace() {
+        return tablespace;
+    }
 
-	public List<String> getColumns() {
+    public PrimaryKeyConstraint setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+        return this;
+    }
+
+    public List<String> getColumns() {
         return Collections.unmodifiableList(columns);
     }
 

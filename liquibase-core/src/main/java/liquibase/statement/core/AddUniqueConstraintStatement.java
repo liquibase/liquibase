@@ -16,6 +16,10 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private boolean clustered;
     private boolean shouldValidate = true; //only Oracle PL/SQL feature
 
+    private boolean deferrable;
+    private boolean initiallyDeferred;
+    private boolean disabled;
+
     private String forIndexName;
     private String forIndexSchemaName;
     private String forIndexCatalogName;
@@ -66,7 +70,32 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         return this;
     }
 
-    /* nolgpl: add get/set for deferrable, initiallyDeferred, and disabled */
+    public boolean isDeferrable() {
+        return deferrable;
+    }
+
+    public AddUniqueConstraintStatement setDeferrable(boolean deferrable) {
+        this.deferrable = deferrable;
+        return this;
+    }
+
+    public boolean isInitiallyDeferred() {
+        return initiallyDeferred;
+    }
+
+    public AddUniqueConstraintStatement setInitiallyDeferred(boolean initiallyDeferred) {
+        this.initiallyDeferred = initiallyDeferred;
+        return this;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public AddUniqueConstraintStatement setDisabled(boolean disabled) {
+        this.disabled = disabled;
+        return this;
+    }
 
     public AddUniqueConstraintStatement setClustered(boolean clustered) {
         this.clustered= clustered;

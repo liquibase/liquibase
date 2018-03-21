@@ -57,7 +57,12 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             );
         }
         if ((database instanceof OracleDatabase) || (database instanceof PostgresDatabase)) {
-            /*nolgpl: add deferrable and/or initially deferrrable depending on statement flags */
+            if (statement.isDeferrable()) {
+                sql += " DEFERRABLE";
+            }
+            if (statement.isInitiallyDeferred()) {
+                sql += " INITIALLY DEFERRED";
+            }
         }
 
         if ((database instanceof OracleDatabase) &&  statement.isDisabled()) {
