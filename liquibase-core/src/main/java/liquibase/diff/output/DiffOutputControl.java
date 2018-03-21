@@ -36,6 +36,7 @@ public class DiffOutputControl {
     private Labels labels = null;
 
     private ObjectChangeFilter objectChangeFilter;
+    private boolean respectSchemaAndCatalogCase = false;
 
     public DiffOutputControl() {
         includeSchema = true;
@@ -185,4 +186,11 @@ public class DiffOutputControl {
         }
     }
 
+    public boolean shouldRespectSchemaAndCatalogCase() {
+        return respectSchemaAndCatalogCase;
+    }
+
+    public void setRespectSchemaAndCatalogCase(boolean respectSchemaAndCatalogCase) {
+        this.respectSchemaAndCatalogCase = respectSchemaAndCatalogCase;
+    }
 }

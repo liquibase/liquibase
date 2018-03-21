@@ -5,6 +5,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.util.ObjectUtil;
 
 public abstract class AbstractChangeGenerator implements ChangeGenerator {
+    private boolean respectSchemaAndCatalogCase = false;
 
     @Override
     public Change[] fixSchema(Change[] changes, CompareControl.SchemaComparison[] schemaComparisons) {
@@ -38,12 +39,10 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
                     Object value = change.getSerializableFieldValue(field);
                     if (schemaComparisons != null && value != null && value instanceof String) {
                         for (CompareControl.SchemaComparison comparison : schemaComparisons) {
-                            if (comparison.getOutputSchemaAs() != null
-                                    && comparison.getComparisonSchema() != null
-                                    && (comparison.getComparisonSchema().getSchemaName().equalsIgnoreCase((String) value)
-                                    || comparison.getComparisonSchema().getCatalogName().equalsIgnoreCase((String) value))
-                                    ) {
-                                ObjectUtil.setProperty(change, field, comparison.getOutputSchemaAs());
+                            if (!respectSchemaAndCatalogCase) {
+                                setPropertyIgnoreSchemaAndCatalogCase(change, field, (String) value, comparison);
+                            } else {
+                                setProperty(change, field, (String) value, comparison);
                             }
                         }
                     }
@@ -51,5 +50,29 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
             }
         }
         return changes;
+    }
+
+    private void setPropertyIgnoreSchemaAndCatalogCase(Change change, String field, String value, CompareControl.SchemaComparison comparison) {
+        if (comparison.getOutputSchemaAs() != null
+                && comparison.getComparisonSchema() != null
+                && (comparison.getComparisonSchema().getSchemaName().equalsIgnoreCase(value)
+                || comparison.getComparisonSchema().getCatalogName().equalsIgnoreCase(value))
+                ) {
+            ObjectUtil.setProperty(change, field, comparison.getOutputSchemaAs());
+        }
+    }
+
+    private void setProperty(Change change, String field, String value, CompareControl.SchemaComparison comparison) {
+        if (comparison.getOutputSchemaAs() != null
+                && comparison.getComparisonSchema() != null
+                && (comparison.getComparisonSchema().getSchemaName().equals(value)
+                || comparison.getComparisonSchema().getCatalogName().equals(value))
+                ) {
+            ObjectUtil.setProperty(change, field, comparison.getOutputSchemaAs());
+        }
+    }
+
+    public void setRespectSchemaAndCatalogCase(boolean respectSchemaAndCatalogCase) {
+        this.respectSchemaAndCatalogCase = respectSchemaAndCatalogCase;
     }
 }

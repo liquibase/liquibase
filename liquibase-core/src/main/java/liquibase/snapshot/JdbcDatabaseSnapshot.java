@@ -780,98 +780,98 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         }
 
-      private class GetNotNullConstraintsResultSetCache extends ResultSetCache.SingleResultSetExtractor {
-        final String catalogName;
-        final String schemaName;
-        final String tableName;
+        private class GetNotNullConstraintsResultSetCache extends ResultSetCache.SingleResultSetExtractor {
+            final String catalogName;
+            final String schemaName;
+            final String tableName;
 
-        private GetNotNullConstraintsResultSetCache(Database database, String catalogName, String schemaName, String tableName) {
-          super(database);
-          this.catalogName = catalogName;
-          this.schemaName = schemaName;
-          this.tableName = tableName;
-        }
-
-        @Override
-        public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
-          return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEMA"),
-              database, row.getString("TABLE_NAME"));
-        }
-
-        @Override
-        public ResultSetCache.RowData wantedKeyParameters() {
-          return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
-        }
-
-          @Override
-          public boolean bulkContainsSchema(String schemaKey) {
-              return database instanceof OracleDatabase;
-          }
-
-        @Override
-        public String getSchemaKey(CachedRow row) {
-          return row.getString("TABLE_SCHEMA");
-        }
-
-        @Override
-        boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-          if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) ||
-              tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-            return false;
-          }
-          return true;
-        }
-
-        @Override
-        public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
-          if (database instanceof OracleDatabase) {
-            return oracleQuery(false);
-          }
-          return Collections.emptyList();
-        }
-
-        @Override
-        public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
-          if (database instanceof OracleDatabase) {
-            return oracleQuery(true);
-          }
-          return Collections.emptyList();
-        }
-
-        private List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
-          CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-          String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-          String jdbcTableName = database.escapeStringForDatabase(tableName);
-          String sql = "SELECT  NULL AS TABLE_CAT, c.OWNER AS TABLE_SCHEMA,c.OWNER, c.TABLE_NAME, c.COLUMN_NAME, NULLABLE,"
-              + " ac.VALIDATED as VALIDATED FROM ALL_TAB_COLS c "
-              + " JOIN ALL_COL_COMMENTS cc ON c.OWNER = cc.OWNER AND c.TABLE_NAME = cc.TABLE_NAME AND c.COLUMN_NAME = cc.COLUMN_NAME "
-              + " LEFT JOIN all_cons_columns acc ON c.OWNER = acc.OWNER AND c.TABLE_NAME = acc.TABLE_NAME AND c.COLUMN_NAME = acc.COLUMN_NAME "
-              + " LEFT JOIN all_constraints ac ON c.OWNER = ac.OWNER AND c.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
-
-          if (!bulk || getAllCatalogsStringScratchData() == null) {
-            sql += " WHERE c.OWNER='" + jdbcSchemaName + "' AND hidden_column='NO' AND CONSTRAINT_TYPE='C' "
-                + " AND c.NULLABLE = 'Y' and search_condition is not null";
-          } else {
-            sql += " WHERE c.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
-              + " AND hidden_column='NO' AND CONSTRAINT_TYPE='C' AND c.NULLABLE = 'Y' and search_condition is not null";
-          }
-
-          if (!bulk) {
-            if (tableName != null) {
-              sql += " AND c.TABLE_NAME='" + jdbcTableName + "'";
+            private GetNotNullConstraintsResultSetCache(Database database, String catalogName, String schemaName, String tableName) {
+                super(database);
+                this.catalogName = catalogName;
+                this.schemaName = schemaName;
+                this.tableName = tableName;
             }
-          }
-          sql += " ORDER BY c.OWNER, c.TABLE_NAME, c.COLUMN_ID";
 
-          return this.executeAndExtract(sql, database);
-        }
+            @Override
+            public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEMA"),
+                    database, row.getString("TABLE_NAME"));
+            }
 
-        @Override
-        protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
-          return super.extract(resultSet, informixIndexTrimHint);
+            @Override
+            public ResultSetCache.RowData wantedKeyParameters() {
+                return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
+            }
+
+            @Override
+            public boolean bulkContainsSchema(String schemaKey) {
+                return database instanceof OracleDatabase;
+            }
+
+            @Override
+            public String getSchemaKey(CachedRow row) {
+                return row.getString("TABLE_SCHEMA");
+            }
+
+            @Override
+            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) ||
+                    tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                if (database instanceof OracleDatabase) {
+                    return oracleQuery(false);
+                }
+                return Collections.emptyList();
+            }
+
+            @Override
+            public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                if (database instanceof OracleDatabase) {
+                    return oracleQuery(true);
+                }
+                return Collections.emptyList();
+            }
+
+            private List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
+                CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                String jdbcTableName = database.escapeStringForDatabase(tableName);
+                String sql = "SELECT  NULL AS TABLE_CAT, c.OWNER AS TABLE_SCHEMA,c.OWNER, c.TABLE_NAME, c.COLUMN_NAME, NULLABLE,"
+                    + " ac.VALIDATED as VALIDATED FROM ALL_TAB_COLS c "
+                    + " JOIN ALL_COL_COMMENTS cc ON c.OWNER = cc.OWNER AND c.TABLE_NAME = cc.TABLE_NAME AND c.COLUMN_NAME = cc.COLUMN_NAME "
+                    + " LEFT JOIN all_cons_columns acc ON c.OWNER = acc.OWNER AND c.TABLE_NAME = acc.TABLE_NAME AND c.COLUMN_NAME = acc.COLUMN_NAME "
+                    + " LEFT JOIN all_constraints ac ON c.OWNER = ac.OWNER AND c.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
+
+                if (!bulk || getAllCatalogsStringScratchData() == null) {
+                    sql += " WHERE c.OWNER='" + jdbcSchemaName + "' AND hidden_column='NO' AND CONSTRAINT_TYPE='C' "
+                        + " AND c.NULLABLE = 'Y' and search_condition is not null";
+                } else {
+                    sql += " WHERE c.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
+                        + " AND hidden_column='NO' AND CONSTRAINT_TYPE='C' AND c.NULLABLE = 'Y' and search_condition is not null";
+                }
+
+                if (!bulk) {
+                    if (tableName != null) {
+                        sql += " AND c.TABLE_NAME='" + jdbcTableName + "'";
+                    }
+                }
+                sql += " ORDER BY c.OWNER, c.TABLE_NAME, c.COLUMN_ID";
+
+                return this.executeAndExtract(sql, database);
+            }
+
+            @Override
+            protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
+                return super.extract(resultSet, informixIndexTrimHint);
+            }
         }
-      }
 
         public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws DatabaseException {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
