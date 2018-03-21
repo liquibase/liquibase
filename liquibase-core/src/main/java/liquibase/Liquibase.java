@@ -579,9 +579,7 @@ public class Liquibase {
             throw new LiquibaseException("Error reading rollbackScript "+executor+": "+e.getMessage());
         }
 
-        RawSQLChange rollbackChange = new RawSQLChange(rollbackScriptContents);
-        rollbackChange.setSplitStatements(true);
-        rollbackChange.setStripComments(true);
+        RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
 
         try {
             executor.execute(rollbackChange);
@@ -594,6 +592,13 @@ public class Liquibase {
             }
         }
         database.commit();
+    }
+
+    protected RawSQLChange buildRawSQLChange(String rollbackScriptContents) {
+        RawSQLChange rollbackChange = new RawSQLChange(rollbackScriptContents);
+        rollbackChange.setSplitStatements(true);
+        rollbackChange.setStripComments(true);
+        return rollbackChange;
     }
 
     public void rollback(String tagToRollBackTo, String contexts, Writer output) throws LiquibaseException {
