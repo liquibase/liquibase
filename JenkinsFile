@@ -27,8 +27,9 @@ pipeline {
                         maven.pull()
                         maven.inside {
                             // Protoclub Core Compile
+							sh 'pwd'
 							sh 'ls'
-                            sh 'mvn -U -DskipTests clean install -f pom.xml'
+                            // sh 'mvn -U -DskipTests clean install -f pom.xml'
                         }
                     }
                     // archiveArtifacts artifacts: '**/repl/target/*.jar'   
