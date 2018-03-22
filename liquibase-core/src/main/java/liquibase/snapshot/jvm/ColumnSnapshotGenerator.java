@@ -85,7 +85,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private void populateValidateNullableIfNeeded(Column column, List<CachedRow> metaDataNotNullConst, Database database) {
-        if(!(database instanceof OracleDatabase)) return;
+        if(!(database instanceof OracleDatabase)) {
+            return;
+        }
         String name = column.getName();
         for (CachedRow cachedRow: metaDataNotNullConst) {
             Object columnNameObj = cachedRow.get("COLUMN_NAME");
@@ -108,7 +110,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private void populateValidatePrimaryKeyIfNeeded(Column column, List<CachedRow> metaDataPrimaryKeys, Database database) {
-        if(!(database instanceof OracleDatabase)) return;
+        if(!(database instanceof OracleDatabase)) {
+            return;
+        }
         String name = column.getName();
         for (CachedRow cachedRow: metaDataPrimaryKeys) {
             Object columnNameObj = cachedRow.get("COLUMN_NAME");
@@ -131,7 +135,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private void populateValidateUniqueIfNeeded(Column column, List<CachedRow> metaDataUniqueConst, Database database) {
-        if(!(database instanceof OracleDatabase)) return;
+        if(!(database instanceof OracleDatabase)) {
+            return;
+        }
         String name = column.getName();
         for (CachedRow cachedRow: metaDataUniqueConst) {
             Object columnNameObj = cachedRow.get("COLUMN_NAME");
@@ -154,7 +160,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private void populateValidateForeignKeyIfNeeded(Column column, List<CachedRow> metaDataForeignKeys, Database database) {
-        if(!(database instanceof OracleDatabase)) return;
+        if(!(database instanceof OracleDatabase)) {
+            return;
+        }
         String name = column.getName();
         for (CachedRow cachedRow: metaDataForeignKeys) {
             Object columnNameObj = cachedRow.get("PKCOLUMN_NAME");
@@ -208,7 +216,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected void setAutoIncrementDetails(Column column, Database database, DatabaseSnapshot snapshot) {
-        if (column.getAutoIncrementInformation() != null && database instanceof MSSQLDatabase && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
+        if (column.getAutoIncrementInformation() != null &&
+            database instanceof MSSQLDatabase &&
+            database.getConnection() != null &&
+            !(database.getConnection() instanceof OfflineConnection)) {
             Map<String, Column.AutoIncrementInformation> autoIncrementColumns = (Map) snapshot.getScratchData("autoIncrementColumns");
             if (autoIncrementColumns == null) {
                 autoIncrementColumns = new HashMap<String, Column.AutoIncrementInformation>();
