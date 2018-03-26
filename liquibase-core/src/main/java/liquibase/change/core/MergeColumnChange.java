@@ -6,6 +6,8 @@ import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
@@ -114,13 +116,13 @@ public class MergeColumnChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(final Database database) {
         List<SqlStatement> statements = new ArrayList<>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
         addNewColumnChange.setTableName(getTableName());
-        AddColumnConfig columnConfig = new AddColumnConfig();
+        final AddColumnConfig columnConfig = new AddColumnConfig();
         columnConfig.setName(getFinalColumnName());
         columnConfig.setType(getFinalColumnType());
         addNewColumnChange.addColumn(columnConfig);
@@ -135,6 +137,54 @@ public class MergeColumnChange extends AbstractChange {
         
         if (database instanceof SQLiteDatabase) {
            /* nolgpl: implement */
+
+            // Since SQLite does not support a Merge column statement,
+            SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
+                @Override
+                public ColumnConfig[] getColumnsToAdd() {
+                    // This gets called after
+                    ColumnConfig[] columnConfigs = new ColumnConfig[1];
+                    ColumnConfig mergedColumn = new ColumnConfig();
+                    mergedColumn.setName(getFinalColumnName());
+                    mergedColumn.setType(getFinalColumnType());
+                    columnConfigs[0] = mergedColumn;
+                    return columnConfigs;
+                }
+
+                @Override
+                public boolean copyThisColumn(ColumnConfig column) {
+                    // don't create columns that are merged
+                    return !column.getName().equals(getColumn1Name())
+                            && !column.getName().equals(getColumn2Name());
+                }
+
+                @Override
+                public boolean createThisColumn(ColumnConfig column) {
+                    // don't copy columns that are merged
+                    return !column.getName().equals(getColumn1Name())
+                            && !column.getName().equals(getColumn2Name());
+                }
+
+                @Override
+                public boolean createThisIndex(Index index) {
+                    // skip the index if it has old columns
+                    for (Column column : index.getColumns()) {
+                        if (column.getName().equals(getColumn1Name())
+                                || column.getName().equals(getColumn2Name())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            };
+            List<SqlStatement> workAroundStatements = null;
+            try {
+                workAroundStatements = SQLiteDatabase.getAlterTableStatements(alterTableVisitor, database, getCatalogName(), getSchemaName(), getTableName());
+                statements.addAll(workAroundStatements);
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+
         } else {
         	// ...if it is not a SQLite database 
         	

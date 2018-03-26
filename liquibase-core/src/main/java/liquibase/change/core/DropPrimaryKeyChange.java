@@ -4,9 +4,12 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 
@@ -103,7 +106,49 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
         SqlStatement[] sqlStatements = null;
-        /*nolgpl implement */
+
+
+        // Since SQLite does not support a drop column statement, use alter table visitor to copy the table
+        // and disabling the primary key constraint from the column
+        SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
+            @Override
+            public ColumnConfig[] getColumnsToAdd() {
+                return new ColumnConfig[0];
+            }
+
+            @Override
+            public boolean copyThisColumn(ColumnConfig column) {
+                // toggle the primary key off
+                if (column.getConstraints().isPrimaryKey()) {
+                    column.getConstraints().setPrimaryKey(false);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean createThisColumn(ColumnConfig column) {
+                // toggle the primary key off
+                if (column.getConstraints().isPrimaryKey()) {
+                    column.getConstraints().setPrimaryKey(false);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean createThisIndex(Index index) {
+                return true;
+            }
+        };
+        List<SqlStatement> statements = null;
+        try {
+            statements = SQLiteDatabase.getAlterTableStatements(alterTableVisitor, database, getCatalogName(), getSchemaName(), getTableName());
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        if (statements.size() > 0) {
+            sqlStatements = new SqlStatement[statements.size()];
+            return statements.toArray(sqlStatements);
+        }
         return sqlStatements;
     }
 

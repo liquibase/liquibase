@@ -174,7 +174,42 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) throws DatabaseException {
         SqlStatement[] sqlStatements = null;
-        /* nolgpl implement for sqlite */
+        // Since SQLite does not support a drop column statement, use alter table visitor to copy the table
+        // except for the column (and index containing that column) to delete.
+
+        SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
+            @Override
+            public ColumnConfig[] getColumnsToAdd() {
+                return new ColumnConfig[0];
+            }
+
+            @Override
+            public boolean copyThisColumn(ColumnConfig column) {
+                return !column.getName().equals(columnName);
+            }
+
+            @Override
+            public boolean createThisColumn(ColumnConfig column) {
+                return !column.getName().equals(columnName);
+            }
+
+            @Override
+            public boolean createThisIndex(Index index) {
+                // don't create the index if it has the column we are dropping
+                boolean indexContainsColumn = false;
+                for (Column column : index.getColumns()) {
+                    if (column.getName().equals(columnName)) {
+                        indexContainsColumn = true;
+                    }
+                }
+                return !indexContainsColumn;
+            }
+        };
+        List<SqlStatement> statements = SQLiteDatabase.getAlterTableStatements(alterTableVisitor, database, getCatalogName(), getSchemaName(), getTableName());
+        if (statements.size() > 0) {
+            sqlStatements = new SqlStatement[statements.size()];
+            return statements.toArray(sqlStatements);
+        }
         return sqlStatements;
     }
     
