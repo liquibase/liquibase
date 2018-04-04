@@ -237,13 +237,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     protected void setDbms(String dbmsList) {
-        if (StringUtils.trimToNull(dbmsList) != null) {
-            String[] strings = dbmsList.toLowerCase().split(",");
-            dbmsSet = new HashSet<>();
-            for (String string : strings) {
-                dbmsSet.add(string.trim().toLowerCase());
-            }
-        }
+        this.dbmsSet = DatabaseList.toDbmsSet(dbmsList);
     }
 
     public String getFilePath() {

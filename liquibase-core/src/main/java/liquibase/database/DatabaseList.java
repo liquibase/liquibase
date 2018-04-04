@@ -70,4 +70,15 @@ public class DatabaseList {
         }
         return definitionMatches(definition, shortName, returnValueIfEmptyList);
     }
+
+    public static Set<String> toDbmsSet(String dbmsList) {
+        Set<String> dbmsSet = null;
+        if (StringUtils.trimToNull(dbmsList) != null) {
+            dbmsSet = new HashSet<String>();
+            for (String string : dbmsList.toLowerCase().split(",")) {
+                dbmsSet.add(string.trim());
+            }
+        }
+        return dbmsSet;
+    }
 }
