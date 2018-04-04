@@ -86,7 +86,7 @@ public class DataTypeFactory {
             };
 
             for (String name : names) {
-                name = name.toLowerCase();
+                name = name.toLowerCase(Locale.US);
                 if (registry.get(name) == null) {
                     registry.put(name, new ArrayList<Class<? extends LiquibaseDataType>>());
                 }
@@ -104,7 +104,7 @@ public class DataTypeFactory {
      * @param name
      */
     public void unregister(String name) {
-        registry.remove(name.toLowerCase());
+        registry.remove(name.toLowerCase(Locale.US));
     }
 
     /**
@@ -138,8 +138,8 @@ public class DataTypeFactory {
         // If the remaining string ends with " identity", then remove the " identity" and remember than we want
         // to set the autoIncrement property later.
         boolean autoIncrement = false;
-        if (dataTypeName.endsWith(" identity")) {
-            dataTypeName = dataTypeName.replaceFirst(" identity$", "");
+        if (dataTypeName.toLowerCase(Locale.US).endsWith(" identity")) {
+            dataTypeName = dataTypeName.toLowerCase(Locale.US).replaceFirst(" identity$", "");
             autoIncrement = true;
         }
 
@@ -167,8 +167,8 @@ public class DataTypeFactory {
 
         // record additional information that is still attached to the data type name
         String additionalInfo = null;
-        if (dataTypeName.toLowerCase().startsWith("bit varying")
-            || dataTypeName.toLowerCase().startsWith("character varying")) {
+        if (dataTypeName.toLowerCase(Locale.US).startsWith("bit varying")
+            || dataTypeName.toLowerCase(Locale.US).startsWith("character varying")) {
             // not going to do anything. Special case for postgres in our tests,
             // need to better support handling these types of differences
         } else {
@@ -182,12 +182,12 @@ public class DataTypeFactory {
         }
 
         // try to find matching classes for the data type name in our registry
-        Collection<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase());
+        Collection<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase(Locale.US));
 
         LiquibaseDataType liquibaseDataType = null;
         if (classes == null) {
             // Map (date/time) INTERVAL types to the UnknownType
-            if (dataTypeName.toUpperCase().startsWith("INTERVAL")) {
+            if (dataTypeName.toUpperCase(Locale.US).startsWith("INTERVAL")) {
                 liquibaseDataType = new UnknownType(dataTypeDefinition);
             } else {
                 liquibaseDataType = new UnknownType(dataTypeName);

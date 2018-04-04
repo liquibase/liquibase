@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +38,7 @@ public class DateTimeType extends LiquibaseDataType {
 		}
 
         if (database instanceof OracleDatabase) {
-            if (getRawDefinition().toUpperCase().contains("TIME ZONE")) {
+            if (getRawDefinition().toUpperCase(Locale.US).contains("TIME ZONE")) {
                 // remove the last data type size that comes from column size
                 return new DatabaseDataType(getRawDefinition().replaceFirst("\\(\\d+\\)$", ""));
             }
@@ -49,9 +50,9 @@ public class DateTimeType extends LiquibaseDataType {
             Object[] parameters = getParameters();
             if (originalDefinition.matches("(?i)^\\[?smalldatetime.*")) {
                 return new DatabaseDataType(database.escapeDataTypeName("smalldatetime"));
-            } else if ("datetime2".equalsIgnoreCase(originalDefinition)
-                    || "[datetime2]".equals(originalDefinition)
-                    || originalDefinition.matches("(?i)\\[?datetime2\\]?\\s*\\(.+")
+            } else if ("datetime2".equals(originalDefinition.toLowerCase(Locale.US))
+                    || "[datetime2]".equals(originalDefinition.toLowerCase(Locale.US))
+                    || originalDefinition.toLowerCase(Locale.US).matches("(?i)\\[?datetime2\\]?\\s*\\(.+")
                     ) {
 
                 // If the scale for datetime2 is the database default anyway, omit it.
@@ -97,7 +98,7 @@ public class DateTimeType extends LiquibaseDataType {
             return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
         }
         if (database instanceof PostgresDatabase) {
-            String rawDefinition = originalDefinition.toLowerCase();
+            String rawDefinition = originalDefinition.toLowerCase(Locale.US);
             Object[] params = getParameters();
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
                 if (params.length == 0 ) {
@@ -149,7 +150,7 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);

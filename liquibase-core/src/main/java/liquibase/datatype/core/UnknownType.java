@@ -9,6 +9,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Container for a data type that is not covered by any implementation in {@link liquibase.datatype.core}. Most often,
@@ -41,7 +42,7 @@ public class UnknownType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         int dataTypeMaxParameters;
-        if ("enum".equalsIgnoreCase(getName()) || "set".equalsIgnoreCase(getName())) {
+        if ("enum".equals(getName().toLowerCase(Locale.US)) || "set".equals(getName().toLowerCase(Locale.US))) {
             dataTypeMaxParameters = Integer.MAX_VALUE;
         } else {
             dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
@@ -49,21 +50,21 @@ public class UnknownType extends LiquibaseDataType {
         Object[] parameters = getParameters();
 
         if (database instanceof OracleDatabase) {
-            if ("LONG".equalsIgnoreCase(getName())
-                    || "BFILE".equalsIgnoreCase(getName())
-                    || "ROWID".equalsIgnoreCase(getName())
-                    || "ANYDATA".equalsIgnoreCase(getName())
-                    || "SDO_GEOMETRY".equalsIgnoreCase(getName())
+            if ("LONG".equals(getName().toUpperCase(Locale.US))
+                    || "BFILE".equals(getName().toUpperCase(Locale.US))
+                    || "ROWID".equals(getName().toUpperCase(Locale.US))
+                    || "ANYDATA".equals(getName().toUpperCase(Locale.US))
+                    || "SDO_GEOMETRY".equals(getName().toUpperCase(Locale.US))
                     ) {
                 parameters = new Object[0];
-            } else if ("RAW".equalsIgnoreCase(getName())) {
+            } else if ("RAW".equals(getName().toUpperCase(Locale.US))) {
                 return new DatabaseDataType(getName(), parameters);
-            } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
+            } else if (getName().toUpperCase(Locale.US).startsWith("INTERVAL ")) {
                 return new DatabaseDataType(getName().replaceAll("\\(\\d+\\)", ""));
             } else {
                 // probably a user defined type. Can't call getUserDefinedTypes() to know for sure, since that returns
                 // all types including system types.
-                return new DatabaseDataType(getName().toUpperCase());
+                return new DatabaseDataType(getName().toUpperCase(Locale.US));
             }
         }
 
@@ -80,7 +81,7 @@ public class UnknownType extends LiquibaseDataType {
             }
             type = new DatabaseDataType(database.escapeDataTypeName(getName()), parameters);
         } else {
-            type = new DatabaseDataType(getName().toUpperCase(), parameters);
+            type = new DatabaseDataType(getName().toUpperCase(Locale.US), parameters);
         }
         type.addAdditionalInformation(getAdditionalInformation());
 

@@ -11,12 +11,14 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
+import java.util.Locale;
+
 @DataTypeInfo(name = "clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB", "nclob", "longnvarchar", "ntext", "java.sql.Types.LONGNVARCHAR", "java.sql.Types.NCLOB", "tinytext", "mediumtext"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         }
 
@@ -43,8 +45,8 @@ public class ClobType extends LiquibaseDataType {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
             if ((!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration
-                .CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("text"))
-                || originalDefinition.toLowerCase().startsWith("[text]")) {
+                .CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toUpperCase(Locale.US).startsWith("text"))
+                || originalDefinition.toUpperCase(Locale.US).startsWith("[text]")) {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^\\[?text\\]?\\s*", "");
@@ -69,8 +71,8 @@ public class ClobType extends LiquibaseDataType {
                         + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
-            if (originalDefinition.toLowerCase().startsWith("ntext")
-                    || originalDefinition.toLowerCase().startsWith("[ntext]")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("ntext")
+                    || originalDefinition.toLowerCase(Locale.US).startsWith("[ntext]")) {
                 // The SQL Server datatype "ntext" is deprecated and should be replaced with NVARCHAR(MAX).
                 // See: https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"));
@@ -80,19 +82,19 @@ public class ClobType extends LiquibaseDataType {
                     + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
-            if ("nclob".equalsIgnoreCase(originalDefinition)) {
+            if ("nclob".equals(originalDefinition.toLowerCase(Locale.US))) {
                 return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
             }
 
             return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
         } else if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("text")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
                 return new DatabaseDataType("TEXT");
-            } else if (originalDefinition.toLowerCase().startsWith("tinytext")) {
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("tinytext")) {
                 return new DatabaseDataType("TINYTEXT");
-            } else if (originalDefinition.toLowerCase().startsWith("mediumtext")) {
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("mediumtext")) {
                 return new DatabaseDataType("MEDIUMTEXT");
-            } else if (originalDefinition.toLowerCase().startsWith("nclob")) {
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("nclob")) {
                 DatabaseDataType type = new DatabaseDataType("LONGTEXT");
                 type.addAdditionalInformation("CHARACTER SET utf8");
                 return type;
@@ -100,7 +102,7 @@ public class ClobType extends LiquibaseDataType {
                 return new DatabaseDataType("LONGTEXT");
             }
         } else if ((database instanceof H2Database) || (database instanceof HsqlDatabase)) {
-            if (originalDefinition.toLowerCase().startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR")) {
                 return new DatabaseDataType("LONGVARCHAR");
             } else {
                 return new DatabaseDataType("CLOB");
@@ -109,12 +111,12 @@ public class ClobType extends LiquibaseDataType {
             instanceof SybaseDatabase)) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
-            if ("nclob".equalsIgnoreCase(originalDefinition)) {
+            if ("nclob".equals(originalDefinition.toLowerCase(Locale.US))) {
                 return new DatabaseDataType("NCLOB");
             }
             return new DatabaseDataType("CLOB");
         } else if (database instanceof InformixDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("text")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("text")) {
                 return new DatabaseDataType("TEXT");
             }
         }

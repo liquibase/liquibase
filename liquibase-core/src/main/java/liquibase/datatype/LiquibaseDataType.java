@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Object representing a data type, instead of a plain string. It will be returned by
@@ -153,7 +154,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
             return new DatabaseDataType(name, parameters);
         }
 
-        DatabaseDataType type = new DatabaseDataType(name.toUpperCase(), getParameters());
+        DatabaseDataType type = new DatabaseDataType(name.toUpperCase(Locale.US), getParameters());
         type.addAdditionalInformation(additionalInformation);
 
         return type;
@@ -163,7 +164,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
      * Returns the value object in a format to include in SQL. Quote if necessary.
      */
     public String objectToSql(Object value, Database database) {
-        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return functionToSql((DatabaseFunction) value, database);
@@ -237,9 +238,9 @@ public abstract class LiquibaseDataType implements PrioritizedService {
      * @return see above
      */
     protected boolean isCurrentDateTimeFunction(String string, Database database) {
-        return string.toLowerCase().startsWith("current_timestamp")
-                || string.toLowerCase().startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
-                || database.getCurrentDateTimeFunction().equalsIgnoreCase(string);
+        return string.toLowerCase(Locale.US).startsWith("current_timestamp")
+                || string.toLowerCase(Locale.US).startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
+                || database.getCurrentDateTimeFunction().toLowerCase(Locale.US).equals(string.toLowerCase(Locale.US));
     }
 
     public void finishInitialization(String originalDefinition) {

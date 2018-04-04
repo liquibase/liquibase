@@ -12,6 +12,7 @@ import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Locale;
 
 @DataTypeInfo(name="char", aliases = {"java.sql.Types.CHAR", "bpchar"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class CharType extends LiquibaseDataType {
@@ -51,7 +52,7 @@ public class CharType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         }
 

@@ -8,6 +8,8 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
+import java.util.Locale;
+
 @DataTypeInfo(name="smallint", aliases = {"java.sql.Types.SMALLINT", "int2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class SmallIntType extends LiquibaseDataType {
 
@@ -52,7 +54,7 @@ public class SmallIntType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         }
         if (value instanceof DatabaseFunction) {
