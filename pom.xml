@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>3.6.0-SNAPSHOT</version>
+    <version>3.6.0</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
@@ -50,7 +49,7 @@
         <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
         <url>scm:git:git@github.com:liquibase/liquibase.git</url>
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>liquibase-parent-3.6.0</tag>
     </scm>
 
     <issueManagement>
@@ -552,7 +551,7 @@
                     <version>1.4</version>
                     <configuration>
                         <providerSelection>2.0</providerSelection>
-                        <source/>
+                        <source />
                     </configuration>
                     <executions>
                         <execution>
@@ -765,7 +764,7 @@
                                 <configuration>
                                     <target>
                                         <!-- Safety -->
-                                        <mkdir dir="${project.build.directory}"/>
+                                        <mkdir dir="${project.build.directory}" />
                                     </target>
                                 </configuration>
                             </execution>
