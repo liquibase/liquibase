@@ -1,6 +1,87 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.6.0 (2018.04.5)
+
+- [CORE-1609] - Command Prompt: Can't connect to database with a special character in pwd
+- [CORE-1852] - checksums depend on environment
+- [CORE-1888] - Sybase error for TINYINT, INT, BIGINT: Can’t specify a length, scale or storage property on type ‘int/tinyint/bigint’.
+- [CORE-2008] - H2 Supports minValue and maxValue in Sequences since Version 1.3.175, but Liquibase does not
+- [CORE-2033] - NPE during Diff when case sensitive table missing
+- [CORE-2135] - liquibase corrupting UTF-8 changesets
+- [CORE-2162] - MSSQL: Multiple inserts in sqlFile do not fail as expected
+- [CORE-2191] - Update on SQL Azure database fails due to unavailable sys.extended_properties
+- [CORE-2527] - Sybase create table fails because column name is too long
+- [CORE-2631] - dbdoc does not specify content type
+- [CORE-2739] - --delimiter parameter in liquibase --help
+- [CORE-2747] - CreateView / Oracle: Keyword REPLACE in view definition prohibits "or replace" in DDL statement
+- [CORE-2772] - primaryKeyExists check fails on Turkish locale for some chars
+- [CORE-2773] - DB2 AS/400 - generateChangeLog throwing Exception
+- [CORE-2796] - Handle TimeStamps with nano second precision correctly
+- [CORE-2797] - Determine the DB2 data server type correctly
+- [CORE-2820] - Unsupported ReorganizeTable for DB2 z/OS causes changelog validation to fail
+- [CORE-2821] - AddForeignKey statement generates incorrect SQL for DB2 z/OS
+- [CORE-2826] - indexExists precondition fails on AS400 + JDBCDatabaseSnapshot/Snapshot generator code is not coded generically?
+- [CORE-2843] - Sql wrong lexical analysis for string literals - escaped single quotes are misparsed
+- [CORE-2875] - UTF-8 character not understood
+- [CORE-2894] - Oracle snapshot not detecting custom datatypes in different schemas
+- [CORE-2909] - column remarks for mysql should be escaped
+- [CORE-2911] - Oracle: generateChangeLog on RAW types not including the size param
+- [CORE-2928] - Invalid snapshot of "duplicate" foreign keys
+- [CORE-2929] - Views with definitions that start with a comment are not captured correctly in generateChangeLog
+- [CORE-2940] - Do not print warning when DBA_RECYCLEBIN is not available
+- [CORE-2944] - outputDefaultSchema and outputDefaultCatalog command line parameters not respected
+- [CORE-2953] - update with valueSequenceNext and schema produces wrong SQL on oracle
+- [CORE-2965] - Custom Properties XML Changelog
+- [CORE-2992] - liquibase.util.grammar.TokenMgrError: Lexical error at line 1, column 71. Encountered: "\u00b4" (180), after : ""
+- [CORE-2993] - createSequence with order denied on DB2
+- [CORE-3002] - SQLAnywhere: Revert Unique Index failed
+- [CORE-3006] - Oracle CSV-Import: "String index out of range: -1"
+- [CORE-3009] - SQLAnywhere: Drop Default Value failed
+- [CORE-3020] - No warning when included file doesn't exist (missing extension)
+- [CORE-3033] - typo in postgresql reserverd word
+- [CORE-3040] - onlyUpdate="true" flag generates empty statements for MySQL DB
+- [CORE-3046] - Fix faulty snakeyaml class-path entry after upgrade to 1.17
+- [CORE-3051] - SQLAnywhere: Drop Table does not support CASCADE
+- [CORE-3054] - SQLAnywhere: java-coredump on changeSet-SQL
+- [CORE-3055] - SQLAnywhere: supports Sequences
+- [CORE-3063] - Integration tests failing on master
+- [CORE-3069] - Checksum: line endings not standardized on windows if multiple lines
+- [CORE-3072] - Add usePreparedStatements="true|false" flag to loadData
+- [CORE-3076] - SUM is not reserved word for HsqlDB
+- [CORE-3099] - Non English environment; invalid tablename and column name can be generated because of toUpperCase toLowerCase method which is dependent to locale in java
+- [CORE-3101] - dropPrimaryKey TABLE_SCHEMA = 'null'
+- [CORE-3106] - SQLAnywhere: DROP INDEX should use tablename
+- [CORE-3115] - Prefix space in column type causing the Unknown LiquibaseDataType with the latest release
+- [CORE-3117] - TIMESTAMP WITH TIME ZONE datatype is changed to TIMESTAMP in H2
+- [CORE-3119] - Maven failing to use driverPropertiesFile from Liquibase Properties File
+- [CORE-3135] - Column t1.tgconstrname does not exist
+- [CORE-3138] - SQLAnywhere: AddAutoIncrement-Statement is wrong
+- [CORE-3140] - MSSQL2005 doesn't support built-in function original_db_name()
+- [CORE-3155] - CSV line content behind inline comment character doesn't contribute to checksum
+- [CORE-3162] - Diff problem with MSSQL case sensitive database
+- [CORE-3171] - LoadUpdateData doesn't work on SAP SQLAnywhere
+- [CORE-3180] - A DBMS-specific change set referencing a DBMS-specific rollback can't be parsed on a different DBMS
+- [CORE-2735] - Add possibility to test rollback with SpringLiquibase
+- [CORE-1225] - Add support for tablespace assigned to liquibase metadata tables
+- [CORE-2628] - defaultSchema parameter doesn't do Connection.setCatalog() for SpringLiquibase
+- [CORE-2842] - MSSQL: Support creating clustered unique constraints
+- [CORE-2891] - Liquibase "Command" objects can be extended and overridden
+- [CORE-2919] - Make all variants of Liquibase.listUnrunChangeSets public
+- [CORE-2952] - Use the clustered index if duplicate indexes are defined
+- [CORE-2955] - MSSQL: Capture explicit null default values on snapshot and generate/diffChangeLog
+- [CORE-2970] - MSSQL: Support default value constraint names
+- [CORE-2977] - Generated primary key constraint name doesn't match Postgres default
+- [CORE-2985] - MSSQL Snapshot performance improvements
+- [CORE-3000] - Oracle JDBC batch for load_data
+- [CORE-3005] - Consideration of DB2/400 system views
+- [CORE-3017] - Add path attribute to createView
+- [CORE-3018] - Oracle: support remarks on createView
+- [CORE-3045] - Support indexes on views
+- [CORE-3079] - Make includeObjects and excludeObjects affect which objects are snapshotted
+- [CORE-3094] - HSQLDB UUID support
+- [CORE-2920] - Using "//" as an endDelimiter stopped working 3.5.0
+
 Changes in version 3.5.5 (2018.02.5)
 
 -  [CORE-2851] - includeAll tag with a relative path duplicates the database changes with an absolute and with a relative changelog
