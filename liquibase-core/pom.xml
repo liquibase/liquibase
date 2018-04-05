@@ -18,7 +18,7 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<bundle.namespace>liquibase.*</bundle.namespace>
-        <project.version>3.6.0-SNP</project.version>
+        <project.version>3.6.0</project.version>
 	</properties>
 
 	<dependencies>
