@@ -8,17 +8,19 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.ColumnConstraint;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.structure.core.Index;
-
-import java.util.Set;
 
 /**
  * Workaround for adding column on existing table for SQLite.
  *
  */
 public class AddColumnGeneratorSQLite extends AddColumnGenerator {
+
+    @Override
+    public boolean supports(AddColumnStatement statement, Database database) {
+        return database instanceof SQLiteDatabase;
+    }
 
     @Override
     public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
