@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
@@ -8,7 +7,6 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.ColumnConstraint;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.structure.core.Index;
 
@@ -32,6 +30,11 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
     public boolean generateStatementsIsVolatile(Database database) {
         // need metadata for copying the table
         return true;
+    }
+
+    @Override
+    public boolean supports(AddColumnStatement statement, Database database) {
+        return database instanceof SQLiteDatabase;
     }
 
     @Override
