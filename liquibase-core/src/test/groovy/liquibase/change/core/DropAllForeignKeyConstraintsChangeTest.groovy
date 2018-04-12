@@ -107,8 +107,8 @@ class DropAllForeignKeyConstraintsChangeTest extends Specification {
 
         where:
         shortDbName  | expectedValue
-        "db2"        | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
-                        "ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref2"]
+        "db2"        | ["ALTER TABLE \"schema_base\".base_table DROP CONSTRAINT fk_base_ref1",
+                        "ALTER TABLE \"schema_base\".base_table DROP CONSTRAINT fk_base_ref2"]
         "derby"      | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
                         "ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref2"]
         "firebird"   | ["ALTER TABLE base_table DROP CONSTRAINT fk_base_ref1",
