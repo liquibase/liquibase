@@ -63,12 +63,17 @@ public class Index extends AbstractDatabaseObject {
         return getRelation().getSchema();
     }
     
+ // Turn off temporarily until all errors are fixed
 //    /**
 //     * @deprecated Use {@link #getRelation()}
 //     */
 //    @Deprecated
 //	public Table getTable() {
-//		return getAttribute("table", Table.class);
+//		Relation relation = getRelation();
+//	if (relation instanceof Table)
+//	return (Table) relation;
+//else
+//	return null;
 //	}
 //
 //    /**
@@ -76,8 +81,7 @@ public class Index extends AbstractDatabaseObject {
 //     */
 //    @Deprecated
 //	public Index setTable(Table table) {
-//		this.setAttribute("table", table);
-//        return this;
+//		return setRelation(table);
 //    }
     
     public Relation getRelation() {
