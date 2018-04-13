@@ -56,26 +56,25 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         return getRelation().getSchema();
     }
     
-    // Turn off temporarily until all errors are fixed
-//    /**
-//     * @deprecated Use {@link #getRelation()}
-//     */
-//    @Deprecated
-//	public Table getTable() {
-//		Relation relation = getRelation();
-//		if (relation instanceof Table)
-//			return (Table) relation;
-//		else
-//			return null;
-//	}
-//
-//    /**
-//     * @deprecated Use {@link #setRelation(Relation)}
-//     */
-//    @Deprecated
-//	public UniqueConstraint setTable(Table table) {
-//		return setRelation(table);
-//    }
+    /**
+     * @deprecated Use {@link #getRelation()}
+     */
+    @Deprecated
+	public Table getTable() {
+		Relation relation = getRelation();
+		if (relation instanceof Table)
+			return (Table) relation;
+		else
+			return null;
+	}
+
+    /**
+     * @deprecated Use {@link #setRelation(Relation)}
+     */
+    @Deprecated
+	public UniqueConstraint setTable(Table table) {
+		return setRelation(table);
+    }
     
     public Relation getRelation() {
     	return getAttribute("table", Relation.class);
