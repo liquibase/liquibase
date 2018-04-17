@@ -27,7 +27,11 @@ import java.util.regex.Pattern;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
-    private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
+  /**
+   * This just helpful attribute that indicates whether we need to process column object. It's visible only
+   * in scope of snapshot process
+   */
+  private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
 
     private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w ]+");
     private Pattern postgresNumberValuePattern = Pattern.compile("(\\d*)::[\\w ]+");
@@ -78,6 +82,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
               populateValidateForeignKeyIfNeeded(column, metaDataForeignKeys, database);
             }
 
+            example.setAttribute(LIQUIBASE_COMPLETE, null);
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -185,7 +190,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
         if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
             return;
         }
@@ -205,7 +210,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : allColumnsMetadataRs) {
                     Column column = readColumn(row, relation, database);
                     setAutoIncrementDetails(column, database, snapshot);
-                    column.setAttribute(LIQUIBASE_COMPLETE, true);
+                    column.setAttribute(LIQUIBASE_COMPLETE, column.isNullable());
                     relation.getColumns().add(column);
                 }
             } catch (Exception e) {
