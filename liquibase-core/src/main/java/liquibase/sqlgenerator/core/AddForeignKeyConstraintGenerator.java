@@ -62,7 +62,9 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
                 //don't use
 		    } else if (database instanceof InformixDatabase) {
 			    //TODO don't know if correct
-		    } else {
+            } else if ((database instanceof FirebirdDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnUpdate())) {
+                //don't use
+            } else {
 			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());
 		    }
 	    }
@@ -76,6 +78,8 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             } else if ((database instanceof InformixDatabase) && !("CASCADE".equalsIgnoreCase(statement.getOnDelete()))) {
                 //TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
                 // see "REFERENCES Clause" in manual
+            } else if ((database instanceof FirebirdDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnDelete())) {
+                //don't use
             } else {
                 sb.append(" ON DELETE ").append(statement.getOnDelete());
             }
