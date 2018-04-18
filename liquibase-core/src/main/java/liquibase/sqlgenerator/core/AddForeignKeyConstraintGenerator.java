@@ -62,9 +62,9 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
                 //don't use
 		    } else if (database instanceof InformixDatabase) {
 			    //TODO don't know if correct
-            } else if ((database instanceof FirebirdDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnUpdate())) {
-                //don't use
-            } else {
+		    } else if ((database instanceof FirebirdDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnUpdate())) {
+			    //don't use
+		    } else {
 			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());
 		    }
 	    }
