@@ -28,8 +28,8 @@ import java.util.regex.Pattern;
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
   /**
-   * This just helpful attribute that indicates whether we need to process column object. It's visible only
-   * in scope of snapshot process
+   * This attribute indicates whether we need to process a column object. It is visible only
+   * in scope of snapshot process.
    */
   private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
 
