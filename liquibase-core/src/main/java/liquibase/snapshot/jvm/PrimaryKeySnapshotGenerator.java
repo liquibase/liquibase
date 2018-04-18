@@ -84,7 +84,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
         if (!(database instanceof OracleDatabase)) {
             return;
         }
-        final String constraintValidate = cachedRow.getString("VALIDATE");
+        final String constraintValidate = cachedRow.getString("VALIDATED");
         final String VALIDATE = "VALIDATED";
         if (constraintValidate!=null && !constraintValidate.isEmpty()) {
             primaryKey.setShouldValidate(VALIDATE.equals(cleanNameFromDatabase(constraintValidate.trim(), database)));
