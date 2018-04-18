@@ -222,7 +222,7 @@
         </preConditions>
         <sql>More invalid SQL. should not run due to "continue"</sql>
     </changeSet>
-    
+
     <changeSet id="add-column-test1" author="alan">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -998,7 +998,7 @@
 
 
     <sql>
-      <![CDATA[  
+      <![CDATA[
         insert into testutf8insert (stringvalue) values ('€');
         insert into testutf8insert (stringvalue) values ('£');
         ]]>
@@ -1116,6 +1116,29 @@
                     <foreignKeyConstraintExists foreignKeyName="fk_ref1" foreignKeyTableName="child_table"/>
                     <foreignKeyConstraintExists foreignKeyName="fk_ref2" foreignKeyTableName="child_table"/>
                 </or>
+            </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="drop_all_indexes" author="wallaby1999">
+        <createTable tableName="dropIndexTest">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(10)"/>
+            <column name="lastname" type="varchar(10)"/>
+        </createTable>
+        <createIndex indexName="idx_dropindextest" tableName="dropIndexTest">
+            <column name="firstname"/>
+            <column name="lastname"/>
+        </createIndex>
+        <dropAllIndexes tableName="dropIndexTest"/>
+    </changeSet>
+
+    <changeSet id="verify_drop_all_indexes" author="wallaby1999">
+        <preConditions>
+            <not>
+                <indexExists indexName="idx_dropindextest"/>
             </not>
         </preConditions>
     </changeSet>
