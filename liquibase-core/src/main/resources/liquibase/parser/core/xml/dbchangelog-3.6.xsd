@@ -874,6 +874,19 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:attributeGroup name="dropAllIndexesAttrib">
+        <xsd:attribute name="catalogName" type="xsd:string"/>
+        <xsd:attribute name="schemaName" type="xsd:string"/>
+        <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+    </xsd:attributeGroup>
+
+    <xsd:element name="dropAllIndexes">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="changeAttributes"/>
+            <xsd:attributeGroup ref="dropAllIndexesAttrib"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="dropNotNullConstraint">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes" />
