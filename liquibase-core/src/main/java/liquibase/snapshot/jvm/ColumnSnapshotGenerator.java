@@ -27,7 +27,11 @@ import java.util.regex.Pattern;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
-    private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
+  /**
+   * This attribute indicates whether we need to process a column object. It is visible only
+   * in scope of snapshot process.
+   */
+  private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
 
     private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w ]+");
     private Pattern postgresNumberValuePattern = Pattern.compile("(\\d*)::[\\w ]+");
@@ -63,9 +67,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             List<CachedRow> metaDataColumns = databaseMetaData.getColumns(catalogName,schemaName,tableName, columnName);
             List<CachedRow> metaDataNotNullConst = databaseMetaData.getNotNullConst(catalogName, schemaName, tableName);
-            List<CachedRow> metaDataPrimaryKeys = databaseMetaData.getPrimaryKeys(catalogName, schemaName, tableName);
-            List<CachedRow> metaDataUniqueConst = databaseMetaData.getUniqueConstraints(catalogName, schemaName, tableName);
-            List<CachedRow> metaDataForeignKeys = databaseMetaData.getForeignKeys(catalogName, schemaName, tableName, null);
 
             if (!metaDataColumns.isEmpty()) {
               CachedRow data = metaDataColumns.get(0);
@@ -73,11 +74,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
               setAutoIncrementDetails(column, database, snapshot);
 
               populateValidateNullableIfNeeded(column, metaDataNotNullConst, database);
-              populateValidatePrimaryKeyIfNeeded(column, metaDataPrimaryKeys, database);
-              populateValidateUniqueIfNeeded(column, metaDataUniqueConst, database);
-              populateValidateForeignKeyIfNeeded(column, metaDataForeignKeys, database);
             }
 
+            example.setAttribute(LIQUIBASE_COMPLETE, null);
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -102,97 +101,20 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     break;
                 }
                 column.setShouldValidateNullable(validated.toString().equalsIgnoreCase(VALIDATE));
-                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
                 return;
             }
-            column.setShouldValidate(true);
-        }
-    }
-
-    private void populateValidatePrimaryKeyIfNeeded(Column column, List<CachedRow> metaDataPrimaryKeys, Database database) {
-        if(!(database instanceof OracleDatabase)) {
-            return;
-        }
-        String name = column.getName();
-        for (CachedRow cachedRow: metaDataPrimaryKeys) {
-            Object columnNameObj = cachedRow.get("COLUMN_NAME");
-            if (columnNameObj == null) {
-                throw new AssertionError("Please check query to fetch data for primaryKeys!. "
-                    + "I didn't fetch needed data");
-            }
-            if (name.equalsIgnoreCase(columnNameObj.toString())){
-                final String VALIDATE = "VALIDATED";
-                Object validated = cachedRow.get(VALIDATE);
-                if (validated== null) {
-                    break;
-                }
-                column.setShouldValidatePrimaryKey(validated.toString().equalsIgnoreCase(VALIDATE));
-                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
-                return;
-            }
-            column.setShouldValidate(true);
-        }
-    }
-
-    private void populateValidateUniqueIfNeeded(Column column, List<CachedRow> metaDataUniqueConst, Database database) {
-        if(!(database instanceof OracleDatabase)) {
-            return;
-        }
-        String name = column.getName();
-        for (CachedRow cachedRow: metaDataUniqueConst) {
-            Object columnNameObj = cachedRow.get("COLUMN_NAME");
-            if (columnNameObj == null) {
-                throw new AssertionError("Please check query to fetch data for uniqueConst!. "
-                    + "I didn't fetch needed data");
-            }
-            if (name.equalsIgnoreCase(columnNameObj.toString())){
-                final String VALIDATE = "VALIDATED";
-                Object validated = cachedRow.get(VALIDATE);
-                if (validated== null) {
-                    break;
-                }
-                column.setShouldValidateUnique(validated.toString().equalsIgnoreCase(VALIDATE));
-                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
-                break;
-            }
-            column.setShouldValidate(true);
-        }
-    }
-
-    private void populateValidateForeignKeyIfNeeded(Column column, List<CachedRow> metaDataForeignKeys, Database database) {
-        if(!(database instanceof OracleDatabase)) {
-            return;
-        }
-        String name = column.getName();
-        for (CachedRow cachedRow: metaDataForeignKeys) {
-            Object columnNameObj = cachedRow.get("PKCOLUMN_NAME");
-            if (columnNameObj == null) {
-                throw new AssertionError("Please check query to fetch data for foreignKeys!. "
-                    + "I didn't fetch needed data");
-            }
-            if (name.equalsIgnoreCase(columnNameObj.toString())){
-                final String VALIDATE = "VALIDATED";
-                Object validated = cachedRow.get(VALIDATE);
-                if (validated== null) {
-                    break;
-                }
-                column.setShouldValidateForeignKey(validated.toString().equalsIgnoreCase(VALIDATE));
-                column.setShouldValidate(validated.toString().equalsIgnoreCase(VALIDATE));
-                break;
-            }
-            column.setShouldValidate(true);
         }
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
         if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
             return;
         }
         if (foundObject instanceof Relation) {
             Database database = snapshot.getDatabase();
             Relation relation = (Relation) foundObject;
-            List<CachedRow> allColumnsMetadataRs = null;
+            List<CachedRow> allColumnsMetadataRs;
             try {
 
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
@@ -205,7 +127,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : allColumnsMetadataRs) {
                     Column column = readColumn(row, relation, database);
                     setAutoIncrementDetails(column, database, snapshot);
-                    column.setAttribute(LIQUIBASE_COMPLETE, true);
+                    column.setAttribute(LIQUIBASE_COMPLETE, !column.isNullable());
                     relation.getColumns().add(column);
                 }
             } catch (Exception e) {
@@ -370,22 +292,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         column.setDefaultValueConstraintName(columnMetadataResultSet.getString("COLUMN_DEF_NAME"));
 
         return column;
-    }
-
-    /**
-     * Method to map 'validate' option for column. This thing works only for ORACLE
-     *
-     * @param database - DB where UC will be created
-     * @param column - Column object to persist validate option
-     * @param columnMetadataResultSet - it's a cache-map to get metadata about column not null constraint
-     */
-    private void setValidateOptionIfAvailable(Database database, Column column,  CachedRow columnMetadataResultSet) {
-        String validated = columnMetadataResultSet.getString("VALIDATED");
-
-        final String VALIDATE = "VALIDATED";
-        if (validated!=null && !validated.trim().isEmpty()) {
-            column.setShouldValidate(VALIDATE.equals(cleanNameFromDatabase(validated.trim(), database)));
-        }
     }
 
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {

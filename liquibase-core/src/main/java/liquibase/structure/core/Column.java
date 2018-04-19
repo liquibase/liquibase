@@ -193,27 +193,6 @@ public class Column extends AbstractDatabaseObject {
     }
 
     /**
-     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
-     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
-     * check will be done to ensure old data has valid all constraints - only new data would be checked
-     * to see if it complies with the constraint logic. The default state for not null constraint is to
-     * have 'ENABLE VALIDATE' set.
-     */
-    public Column setShouldValidate(boolean shouldValidate) {
-        this.setAttribute("validate", shouldValidate);
-        return this;
-    }
-
-    /**
-     * VALIDATE keyword defines whether a not null constraint on a column in a table
-     * should be checked if it refers to a valid row or not.
-     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
-     */
-    public boolean shouldValidateNullable() {
-        return getAttribute("validateNullable", true);
-    }
-
-    /**
      * @param shouldValidateNullable - if shouldValidateNullable is set to FALSE then the constraint will be created
      * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
      * check will be done to ensure old data has valid not null constraint - only new data would be checked
@@ -222,69 +201,6 @@ public class Column extends AbstractDatabaseObject {
      */
     public Column setShouldValidateNullable(boolean shouldValidateNullable) {
         this.setAttribute("validateNullable", shouldValidateNullable);
-        return this;
-    }
-
-    /**
-     * the VALIDATE keyword defines whether a unique constraint on a column in a table
-     * should be checked if it refers to a valid row or not.
-     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
-     */
-    public boolean shouldValidateUnique() {
-        return getAttribute("validateUnique", true);
-    }
-
-    /**
-     * @param shouldValidateUnique - if shouldValidateNullable is set to FALSE then the constraint will be created
-     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
-     * check will be done to ensure old data has valid unique constraint - only new data would be checked
-     * to see if it complies with the constraint logic. The default state for not null constraint is to
-     * have 'ENABLE VALIDATE' set.
-     */
-    public Column setShouldValidateUnique(boolean shouldValidateUnique) {
-        this.setAttribute("validateUnique", shouldValidateUnique);
-        return this;
-    }
-
-    /**
-     * the VALIDATE keyword defines whether a primary key on a column in a table
-     * should be checked if it refers to a valid row or not.
-     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
-     */
-    public boolean shouldValidatePrimaryKey() {
-        return getAttribute("validatePrimaryKey", true);
-    }
-
-    /**
-     * @param shouldValidatePrimaryKey - if shouldValidateNullable is set to FALSE then the constraint will be created
-     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
-     * check will be done to ensure old data has valid primary key - only new data would be checked
-     * to see if it complies with the constraint logic. The default state for not null constraint is to
-     * have 'ENABLE VALIDATE' set.
-     */
-    public Column setShouldValidatePrimaryKey(boolean shouldValidatePrimaryKey) {
-        this.setAttribute("validatePrimaryKey", shouldValidatePrimaryKey);
-        return this;
-    }
-
-    /**
-     * the VALIDATE keyword defines whether a foreign key on a column in a table
-     * should be checked if it refers to a valid row or not.
-     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
-     */
-    public boolean shouldValidateForeignKey() {
-        return getAttribute("validateForeignKey", true);
-    }
-
-    /**
-     * @param shouldValidateForeignKey - if shouldValidateNullable is set to FALSE then the constraint will be created
-     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
-     * check will be done to ensure old data has valid foreign key - only new data would be checked
-     * to see if it complies with the constraint logic. The default state for not null constraint is to
-     * have 'ENABLE VALIDATE' set.
-     */
-    public Column setShouldValidateForeignKey(boolean shouldValidateForeignKey) {
-        this.setAttribute("validateForeignKey", shouldValidateForeignKey);
         return this;
     }
 
