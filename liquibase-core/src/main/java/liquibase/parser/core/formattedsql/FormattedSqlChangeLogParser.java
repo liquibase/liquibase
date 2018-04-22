@@ -14,11 +14,13 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
+import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.SystemUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
@@ -324,7 +326,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
         InputStream resourceAsStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
         if (resourceAsStream == null) {
-            throw new IOException("File does not exist: "+physicalChangeLogLocation);
+            final File physicalChangeLogFile = new File(physicalChangeLogLocation);
+            throw new IOException("File does not exist: " + physicalChangeLogFile.getAbsolutePath());
         }
         return resourceAsStream;
     }
