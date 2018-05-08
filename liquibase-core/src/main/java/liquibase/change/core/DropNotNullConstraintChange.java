@@ -66,28 +66,6 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    /**
-     * In certain SQL dialects, the VALIDATE keyword defines whether a not null constraint on a column in a table
-     * should be checked if it refers to a valid row or not.
-     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
-     */
-    @DatabaseChangeProperty(description = "This is true if the not null constraint has 'ENABLE VALIDATE' set, or false if the not null constrain has 'ENABLE NOVALIDATE' set.")
-    public Boolean getValidate() {
-        return shouldValidate;
-    }
-
-    /**
-     *
-     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
-     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
-     * check will be done to ensure old data has valid not null constrain - only new data would be checked
-     * to see if it complies with the constraint logic. The default state for not null constrain is to
-     * have 'ENABLE VALIDATE' set.
-     */
-    public void setValidate(Boolean shouldValidate) {
-        this.shouldValidate = shouldValidate;
-    }
-
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
