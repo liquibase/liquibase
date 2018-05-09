@@ -93,6 +93,13 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 if (path.startsWith("classpath*:")) {
                     path = path.replaceFirst("classpath\\*:", "");
                 }
+                // if path is like 'jar:<url>!/{entry}', use the last part as resource path
+                if (path.contains("!/")) {
+                    String[] components = path.split("!/");
+                    if (components.length > 1) {
+                        path = components[components.length - 1];
+                    }
+                }
 
                 // TODO:When we update to Java 7+, we can can create a FileSystem from the JAR (zip)
                 // file, and then use NIO's directory walking and filtering mechanisms to search through it.
