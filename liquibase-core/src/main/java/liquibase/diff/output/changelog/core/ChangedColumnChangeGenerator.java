@@ -100,7 +100,6 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setTableName(column.getRelation().getName());
                 change.setColumnName(column.getName());
                 change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
-                change.setValidate(column.shouldValidate());
                 changes.add(change);
             } else {
                 AddNotNullConstraintChange change = new AddNotNullConstraintChange();
