@@ -2,8 +2,13 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
+import liquibase.datatype.DatabaseDataType;
+import liquibase.datatype.core.TimestampType;
+
 import org.junit.Assert;
 import static org.junit.Assert.*;
+
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 /**
@@ -45,6 +50,14 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void getCurrentDateTimeFunction() {
         Assert.assertEquals("SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction());
+    }
+
+    @Test
+    public void verifyTimestampDataTypeWhenWithoutClauseIsPresent() {
+        TimestampType ts = new TimestampType();
+        ts.setAdditionalInformation("WITHOUT TIME ZONE");
+        DatabaseDataType oracleDataType = ts.toDatabaseDataType(getDatabase());
+        assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
     }
 
     public void testGetDefaultDriver() {

@@ -1,5 +1,7 @@
 package liquibase.datatype.core;
 
+import java.util.Locale;
+
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -47,9 +49,15 @@ public class TimestampType extends DateTimeType {
             DatabaseDataType type = new DatabaseDataType("TIMESTAMP");
             String additionalInformation = this.getAdditionalInformation();
 
-            if (additionalInformation != null && database instanceof PostgresDatabase) {
-                if (additionalInformation.toUpperCase().contains("TIMEZONE")) {
-                    additionalInformation = additionalInformation.toUpperCase().replace("TIMEZONE", "TIME ZONE");
+            if (additionalInformation != null) {
+                String additionInformation = additionalInformation.toUpperCase(Locale.US);
+                if ((database instanceof PostgresDatabase) && additionInformation.contains("TIMEZONE")) {
+                    additionalInformation = additionInformation.replace("TIMEZONE", "TIME ZONE");
+                }
+                // CORE-3229 Oracle 11g doesn't support WITHOUT clause in TIMESTAMP data type
+                if ((database instanceof OracleDatabase) && additionInformation.startsWith("WITHOUT")) {
+                    // https://docs.oracle.com/cd/B19306_01/server.102/b14225/ch4datetime.htm#sthref389
+                    additionalInformation = null;
                 }
             }
 
