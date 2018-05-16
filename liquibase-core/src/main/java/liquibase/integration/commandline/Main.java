@@ -187,6 +187,7 @@ public class Main {
             }
 
             main.applyDefaults();
+            main.changeLogLevel();
             main.configureClassLoader();
             main.doMigration();
 
@@ -246,6 +247,25 @@ public class Main {
             CommandLineOutputAppender appender = new CommandLineOutputAppender(LoggerFactory.getILoggerFactory(), target);
             root.addAppender(appender);
             appender.start();
+        }
+    }
+
+    /**
+     * Change the logging based on the parsed value of logLevel
+     */
+    protected void changeLogLevel() {
+        if ("off".equals(logLevel)) {
+            return;
+        }
+
+        Level newLevel = Level.toLevel(logLevel);
+
+        ch.qos.logback.classic.Logger root =
+            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        root.setLevel(newLevel);
+
+        if (Level.INFO.isGreaterOrEqual(newLevel)) {
+            consoleLogFilter.outputLogs = true;
         }
     }
 
