@@ -352,8 +352,14 @@ public class StandardLockService implements LockService {
     @Override
     public void destroy() throws DatabaseException {
         try {
+            //
+            // DAT-310
+            // This code now uses the ChangeGeneratorFactory to 
+            // allow extension code to be called
+            //
             DatabaseObject example =
-                    new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
+                    new Table().setName(database.getDatabaseChangeLogLockTableName())
+                               .setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
             if (SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 DatabaseObject table = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
                 DiffOutputControl diffOutputControl = new DiffOutputControl(true, true, false, null);

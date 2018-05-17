@@ -418,8 +418,17 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void destroy() throws DatabaseException {
         Database database = getDatabase();
         try {
+            //
+            // DAT-310
+            // This code now uses the ChangeGeneratorFactory to 
+            // allow extension code to be called
+            // TODO: 
+            // This code is basically duplicated in StandardLockService
+            // Refactor for DRY
+            //
             DatabaseObject example =
-              new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
+              new Table().setName(database.getDatabaseChangeLogTableName())
+                         .setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
             if (SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 DatabaseObject table = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
                 DiffOutputControl diffOutputControl = new DiffOutputControl(true, true, false, null);
