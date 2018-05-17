@@ -419,12 +419,15 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         Database database = getDatabase();
         try {
             //
-            // DAT-310
             // This code now uses the ChangeGeneratorFactory to 
-            // allow extension code to be called
-            // TODO: 
-            // This code is basically duplicated in StandardLockService
-            // Refactor for DRY
+            // allow extension code to be called in order to 
+            // delete the changelog table.
+            //
+            // To implement the extension, you will need to override:
+            // DropTableStatement
+            // DropTableChange
+            // DropTableGenerator
+            //
             //
             DatabaseObject example =
               new Table().setName(database.getDatabaseChangeLogTableName())

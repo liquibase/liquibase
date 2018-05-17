@@ -353,9 +353,15 @@ public class StandardLockService implements LockService {
     public void destroy() throws DatabaseException {
         try {
             //
-            // DAT-310
             // This code now uses the ChangeGeneratorFactory to 
-            // allow extension code to be called
+            // allow extension code to be called in order to 
+            // delete the changelog lock table.
+            //
+            // To implement the extension, you will need to override:
+            // DropTableStatement
+            // DropTableChange
+            // DropTableGenerator
+            //
             //
             DatabaseObject example =
                     new Table().setName(database.getDatabaseChangeLogLockTableName())
