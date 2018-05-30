@@ -8,7 +8,7 @@ public class SpringBootFatJarTest {
     @Test
     public void testGetPathForResourceWithFatJarPath() {
         String result = SpringBootFatJar.getPathForResource("some/path!/that/has!/two/bangs");
-        assertEquals(result, "that/has/two/bangs");
+        assertEquals(result, "two/bangs");
     }
 
     @Test
