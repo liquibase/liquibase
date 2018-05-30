@@ -58,6 +58,10 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
      * 
      * Split a dot-annotated attribute value
      * Called only for schemaName and catalogName attributes
+     * We fix up the string before the split to avoid
+     * issues with '.' characters occurring in a property
+     * We replace the string '#|#' with the single '.' 
+     * afterwards, and then split.
      *
      * @param  field     The attribute field to set
      * @param  value     The value to set
@@ -83,6 +87,17 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
         return valueToSet;
     }
 
+    /**
+     * 
+     * For an input String, replace any '.'
+     * characters which occur inside a property
+     * expression like ${env.tag}.  By doing this,
+     * correctly split the entire value on '.'.
+     *
+     * @param  stringToDoctor   The string to fix up
+     * @return String
+
+     */
     private String doctor(String stringToDoctor) {
         boolean startProp = false;
         int pos = 0;
