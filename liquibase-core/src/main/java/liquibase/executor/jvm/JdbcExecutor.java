@@ -1,5 +1,6 @@
 package liquibase.executor.jvm;
 
+import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -16,6 +17,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
+import liquibase.statement.core.DropTableStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -116,7 +118,12 @@ public class JdbcExecutor extends AbstractExecutor {
             }
         }
 
-        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        if (sql instanceof DropTableStatement && database instanceof Db2zDatabase) {
+            execute(new ExecuteStatementCallbackAndCatch(sql, sqlVisitors), sqlVisitors);
+        }
+        else {
+            execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        }
     }
 
 
@@ -334,6 +341,39 @@ public class JdbcExecutor extends AbstractExecutor {
         }
     }
 
+    /**
+     *
+     * This class executes a SQL statement with a try-catch
+     * If the exception message contains "drop database" then
+     * we just log the exception and continue, otherwise we re-throw
+     * This keeps us from erroring out in the case of DB2 z/OS, where
+     * we may end up attempting to drop the same database multiple times
+     * This should only affect DB2 z/OS, since we do not drop databases 
+     * for any other platform.
+     *
+     */
+    private class ExecuteStatementCallbackAndCatch extends ExecuteStatementCallback {
+        private ExecuteStatementCallbackAndCatch(SqlStatement sql, List<SqlVisitor> sqlVisitors) {
+            super(sql, sqlVisitors);
+        }
+
+        @Override
+        public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
+            try {
+                return super.doInStatement(stmt);
+            }
+            catch (DatabaseException dbe) {
+                String message = dbe.getMessage();
+                if (message != null && message.toLowerCase().contains("failed sql: drop database ")) {
+                    log.info("If this is an attempt to drop a database, the database may have already been dropped");
+                }
+                else {
+                    throw new DatabaseException(dbe);
+                }
+            }
+            return null;
+        }
+    }
 
     private class ExecuteStatementCallback implements StatementCallback {
 
