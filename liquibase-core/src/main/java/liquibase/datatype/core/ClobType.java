@@ -45,11 +45,11 @@ public class ClobType extends LiquibaseDataType {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
             if ((!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration
-                .CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toUpperCase(Locale.US).startsWith("text"))
-                || originalDefinition.toUpperCase(Locale.US).startsWith("[text]")) {
+                .CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase(Locale.US).startsWith("text"))
+                || originalDefinition.toLowerCase(Locale.US).startsWith("[text]")) {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
-                String originalExtraInfo = originalDefinition.replaceFirst("^\\[?text\\]?\\s*", "");
+                String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
                 type.addAdditionalInformation("(max)"
                         + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
@@ -66,7 +66,7 @@ public class ClobType extends LiquibaseDataType {
                 // See: https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
-                String originalExtraInfo = originalDefinition.replaceFirst("^\\[?text\\]?\\s*", "");
+                String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
                 type.addAdditionalInformation("(max)"
                         + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
@@ -77,7 +77,7 @@ public class ClobType extends LiquibaseDataType {
                 // See: https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
-                String originalExtraInfo = originalDefinition.replaceFirst("^\\[?ntext\\]?\\s*", "");
+                String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?ntext\\]?\\s*", "");
                 type.addAdditionalInformation("(max)"
                     + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
