@@ -4,6 +4,8 @@ import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
+import liquibase.datatype.DatabaseDataType;
+import liquibase.datatype.core.TimestampType;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
@@ -13,6 +15,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.test.JUnitResourceAccessor;
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -75,6 +78,14 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     public void getCurrentDateTimeFunction() {
         Assert.assertEquals("Oracle Database's 'give me the current timestamp' function is correctly reported.",
                 "SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction());
+    }
+
+    @Test
+    public void verifyTimestampDataTypeWhenWithoutClauseIsPresent() {
+        TimestampType ts = new TimestampType();
+        ts.setAdditionalInformation("WITHOUT TIME ZONE");
+        DatabaseDataType oracleDataType = ts.toDatabaseDataType(getDatabase());
+        assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
     }
 
     @Test
