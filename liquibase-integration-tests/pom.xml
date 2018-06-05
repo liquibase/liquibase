@@ -5,7 +5,7 @@
     <parent>
         <artifactId>liquibase-parent</artifactId>
         <groupId>org.liquibase</groupId>
-        <version>3.6.1-SNAPSHOT</version>
+        <version>3.6.2-SNAPSHOT</version>
     </parent>
 
 

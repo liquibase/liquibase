@@ -1,6 +1,12 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.6.1 (2018.04.11)
+
+- [CORE-3200] - Wrong SQL generator is selected
+- [CORE-3201] - Command line missing required dependencies in 3.6.0 tarball
+- [CORE-3198] - Configuration option to prefer internal XSD usage
+
 Changes in version 3.6.0 (2018.04.5)
 
 - [CORE-1609] - Command Prompt: Can't connect to database with a special character in pwd
