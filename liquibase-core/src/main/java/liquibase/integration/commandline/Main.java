@@ -224,14 +224,11 @@ public class Main {
 
         org.slf4j.Logger rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 
-        switch (rootLogger.getClass().getName()) {
-            case "ch.qos.logback.classic.Logger":
-                CommandLineOutputAppender.setupLogging((ch.qos.logback.classic.Logger) rootLogger, defaultLogLevel);
-                break;
-
-            default:
-                System.err.println(
-                        "Logging cannot be configured; a supported org.slf4j.Logger implementation is not on the classpath.");
+        if ("ch.qos.logback.classic.Logger".equals(rootLogger.getClass().getName())) {
+            CommandLineOutputAppender.setupLogging(rootLogger, defaultLogLevel);
+        } else {
+            System.err.println(
+                    "Liquibase command line logging cannot be configured; a supported org.slf4j.Logger implementation is not on the classpath.");
         }
     }
 

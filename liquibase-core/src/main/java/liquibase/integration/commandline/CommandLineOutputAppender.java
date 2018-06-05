@@ -95,7 +95,8 @@ public class CommandLineOutputAppender extends ConsoleAppender {
     /**
      * Set up Logback logging to the STDOUT/STDERR console streams.
      */
-    protected static void setupLogging(final Logger root, final LogLevel defaultLogLevel) {
+    protected static void setupLogging(final org.slf4j.Logger rootLogger, final LogLevel defaultLogLevel) {
+        Logger root = (ch.qos.logback.classic.Logger) rootLogger;
         // NOTE: Mismatched levels default to debug.
         root.setLevel(Level.toLevel(defaultLogLevel.name()));
     
