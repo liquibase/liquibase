@@ -1,11 +1,5 @@
 package liquibase.integration.commandline;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.ConsoleAppender;
-import ch.qos.logback.core.filter.AbstractMatcherFilter;
-import ch.qos.logback.core.spi.FilterReply;
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -68,8 +62,6 @@ public class Main {
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static XMLResourceBundle commandLineHelpBundle = ((XMLResourceBundle) getBundle
             ("liquibase/i18n/liquibase-commandline-helptext", new XmlResourceBundleControl()));
-
-    private static ConsoleLogFilter consoleLogFilter = new ConsoleLogFilter();
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -227,25 +219,19 @@ public class Main {
      * Set up the logging to the STDOUT/STDERR console streams.
      */
     protected static void setupLogging() {
-        LogLevel defaultLogLevel =
-            (LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class)).getLogLevel();
+        LogLevel defaultLogLevel = (LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class))
+                .getLogLevel();
 
-        ch.qos.logback.classic.Logger root =
-            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.toLevel(defaultLogLevel.name()));
+        org.slf4j.Logger rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 
-        Iterator<Appender<ILoggingEvent>> appenderIterator = root.iteratorForAppenders();
-        while (appenderIterator.hasNext()) {
-            Appender<ILoggingEvent> next = appenderIterator.next();
-            if (next instanceof ConsoleAppender) {
-                ((ConsoleAppender) next).addFilter(consoleLogFilter);
-            }
-        }
+        switch (rootLogger.getClass().getName()) {
+            case "ch.qos.logback.classic.Logger":
+                CommandLineOutputAppender.setupLogging((ch.qos.logback.classic.Logger) rootLogger, defaultLogLevel);
+                break;
 
-        for (String target : new String[] {"System.out", "System.err"}) {
-            CommandLineOutputAppender appender = new CommandLineOutputAppender(LoggerFactory.getILoggerFactory(), target);
-            root.addAppender(appender);
-            appender.start();
+            default:
+                System.err.println(
+                        "Logging cannot be configured; a supported org.slf4j.Logger implementation is not on the classpath.");
         }
     }
 
@@ -1521,17 +1507,4 @@ public class Main {
         private static final String VERSION = "version";
     }
 
-    private static class ConsoleLogFilter extends AbstractMatcherFilter {
-
-        private boolean outputLogs;
-
-        @Override
-        public FilterReply decide(Object event) {
-            if (outputLogs) {
-                return FilterReply.ACCEPT;
-            } else {
-                return FilterReply.DENY;
-            }
-        }
-    }
 }
