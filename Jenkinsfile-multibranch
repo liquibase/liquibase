@@ -1,0 +1,47 @@
+pipeline {
+    agent {
+        node {
+            label 'dockerBuilder'
+        }
+    }
+    environment {
+        GITHUB_AUTH = credentials('github-auth')
+        ART_AUTH = credentials('artifactory-auth')
+        DOCKER_AUTH = credentials('docker-auth')
+        APPVERSION_PREFIX = 4.36
+        // Env var examples using properties file
+        // buildPropertiesString = readFile file: 'target/classes/datical.build.properties'
+        // buildProperties = new java.util.Properties()
+        // buildProperties.load(new java.io.StringReader(buildPropertiesString))
+        // version = buildProperties['build.version']
+        // artifactId = buildProperties['build.artifact.id']
+        // branch = buildProperties['build.git.branch']
+        // dockerTag = branch.replaceFirst(/^master$/, 'latest')
+    }
+    stages {
+        stage('Compile Liquibase') {
+            steps {
+                script {
+                    docker.withRegistry('https://docker-dev.artifactory.datical.net', 'docker-auth') {
+                        maven = docker.image("datical/build-maven")
+                        maven.pull()
+                        maven.inside {
+                            // Protoclub Core Compile
+							sh 'pwd'
+							sh 'ls'
+                            // sh 'mvn -U -DskipTests clean install -f pom.xml'
+                        }
+                    }
+                    // archiveArtifacts artifacts: '**/repl/target/*.jar'   
+                    // stash name: 'protoclub-core-target'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Jenkinsfile Build Complete'
+        }
+    }
+}
+
