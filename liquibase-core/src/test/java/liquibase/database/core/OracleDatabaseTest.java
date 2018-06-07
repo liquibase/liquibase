@@ -4,6 +4,8 @@ import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
+import liquibase.datatype.DatabaseDataType;
+import liquibase.datatype.core.TimestampType;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
@@ -21,6 +23,9 @@ import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 import static org.junit.Assert.*;
+
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
@@ -78,6 +83,13 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     @Test
+    public void verifyTimestampDataTypeWhenWithoutClauseIsPresent() {
+        TimestampType ts = new TimestampType();
+        ts.setAdditionalInformation("WITHOUT TIME ZONE");
+        DatabaseDataType oracleDataType = ts.toDatabaseDataType(getDatabase());
+        assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
+    }
+
     public void testGetDefaultDriver() {
         Database database = new OracleDatabase();
 
