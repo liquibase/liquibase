@@ -120,9 +120,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                                 }
                             }
 
-                            if (entry.isDirectory() && includeDirectories) {
-                                returnSet.add(entry.getName());
-                            } else if (includeFiles) {
+                            if ((entry.isDirectory() && includeDirectories) || (!entry.isDirectory() && includeFiles)) {
                                 returnSet.add(entry.getName());
                             }
                         }
