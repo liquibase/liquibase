@@ -42,7 +42,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             String author = (changeSet.getAuthor()).replaceAll("\\s+", "_");
             author = author.replace("_(generated)","");
 
-            builder.append("--changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
+            builder.append("-- changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
             for (Change change : changeSet.getChanges()) {
                 Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
@@ -81,7 +81,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         StringBuilder builder = new StringBuilder();
-        builder.append("--liquibase formatted sql\n\n");
+        builder.append("-- liquibase formatted sql\n\n");
 
         for (T child : children) {
             builder.append(serialize(child, true));
