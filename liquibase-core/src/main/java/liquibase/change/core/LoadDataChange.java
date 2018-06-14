@@ -590,7 +590,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         // Save the columns of the database table in a lookup table
         Map<String, Column> tableColumns = new HashMap<>();
         for (Column c : snapshotOfTable.getColumns()) {
-            tableColumns.put(c.getName(), c);
+            // Normalise the LoadDataColumnConfig column names to the database
+            tableColumns.put(database.correctObjectName(c.getName(), Column.class), c);
         }
         /* The above is the JDK7 version of:
             snapshotOfTable.getColumns().forEach(c -> tableColumns.put(c.getName(), c));
