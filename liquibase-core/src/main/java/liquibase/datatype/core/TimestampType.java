@@ -119,13 +119,22 @@ public class TimestampType extends DateTimeType {
             type = new DatabaseDataType("TIMESTAMP");
         }
 
-        if (((getAdditionalInformation() != null) && ((database instanceof PostgresDatabase) || (database instanceof
-            OracleDatabase))) || (database instanceof HsqlDatabase) || (database instanceof H2Database)){
+        if (getAdditionalInformation() != null
+                && (database instanceof PostgresDatabase
+                || database instanceof OracleDatabase)
+                || database instanceof H2Database
+                || database instanceof HsqlDatabase){
             String additionalInformation = this.getAdditionalInformation();
 
-            if ((additionalInformation != null) && (database instanceof PostgresDatabase)) {
-                if (additionalInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
-                    additionalInformation = additionalInformation.toUpperCase(Locale.US).replace("TIMEZONE", "TIME ZONE");
+            if (additionalInformation != null) {
+                String additionInformation = additionalInformation.toUpperCase(Locale.US);
+                if ((database instanceof PostgresDatabase) && additionInformation.contains("TIMEZONE")) {
+                    additionalInformation = additionInformation.replace("TIMEZONE", "TIME ZONE");
+                }
+                // CORE-3229 Oracle 11g doesn't support WITHOUT clause in TIMESTAMP data type
+                if ((database instanceof OracleDatabase) && additionInformation.startsWith("WITHOUT")) {
+                    // https://docs.oracle.com/cd/B19306_01/server.102/b14225/ch4datetime.htm#sthref389
+                    additionalInformation = null;
                 }
             }
 
