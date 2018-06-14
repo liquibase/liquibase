@@ -92,7 +92,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                         + "] AS SELECT " +
                         "''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
                 viewDefinition.replaceIfExists("CREATE", "ALTER");
-            } else if (database instanceof PostgresDatabase || database instanceof HsqlDatabase) {
+            } else if (database instanceof HsqlDatabase) {
                 sql.add(new UnparsedSql(
                     "DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(),
                         statement.getSchemaName(), statement.getViewName())));
