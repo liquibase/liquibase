@@ -660,7 +660,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                   dbIdParam = "";
               } else {
                   dbIdParam = ", db_id('"+databaseName+"')";
-                  databasePrefix = databaseName + ".";
+                  databasePrefix = "[" + databaseName + "].";
               }
 
               String sql = "select " +
@@ -959,7 +959,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         dbIdParam = "";
                     } else {
                         dbIdParam = ", db_id('"+databaseName+"')";
-                        databasePrefix = databaseName + ".";
+                        databasePrefix = "[" + databaseName + "].";
                     }
 
 
