@@ -118,15 +118,28 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
      * Convenience method for when the schemaName is set but we don't want to parse the body
      */
     public static void surroundWithSchemaSets(List<Sql> sql, String schemaName, Database database) {
-        if ((StringUtils.trimToNull(schemaName) != null) && !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
+        if ((StringUtils.trimToNull(schemaName) != null) &&
+                !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
             String defaultSchema = database.getDefaultSchemaName();
             if (database instanceof OracleDatabase) {
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
                 sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(defaultSchema, Schema.class)));
-            } else if (database instanceof AbstractDb2Database) {
+            }
+            else if (database instanceof AbstractDb2Database) {
                 sql.add(0, new UnparsedSql("SET CURRENT SCHEMA " + schemaName));
                 sql.add(new UnparsedSql("SET CURRENT SCHEMA " + defaultSchema));
             }
+        }
+    }
+
+    /**
+     * Convenience method for when the catalogName is set but we don't want to parse the body
+     */
+    public static void surroundWithCatalogSets(List<Sql> sql, String catalogName, Database database) {
+        if (database instanceof MSSQLDatabase) {
+            String defaultCatalogName = database.getDefaultCatalogName();
+            sql.add(0, new UnparsedSql("USE [" + catalogName + "]"));
+            sql.add(new UnparsedSql("USE [" + defaultCatalogName + "]"));
         }
     }
 
