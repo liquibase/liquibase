@@ -104,6 +104,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         Database database = getDatabase();
 
+        String charTypeName = getCharTypeName();
+
         Table changeLogTable = getChangelogTable(database);
 
         List<SqlStatement> statementsToExecute = new ArrayList<>();
@@ -117,27 +119,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
+            boolean hasMD5SUM = changeLogTable.getColumn("MD5SUM") != null;
             boolean hasContexts = changeLogTable.getColumn("CONTEXTS") != null;
             boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
-            boolean liquibaseColumnNotRightSize = false;
-            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                DataType type = changeLogTable.getColumn("LIQUIBASE").getType();
-                if (type.getTypeName().toLowerCase().startsWith("varchar")) {
-                    Integer columnSize = type.getColumnSize();
-                    liquibaseColumnNotRightSize = (columnSize != null) && (columnSize < 20);
-                }
-            }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
-            boolean checksumNotRightSize = false;
-            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                DataType type = changeLogTable.getColumn("MD5SUM").getType();
-                if (type.getTypeName().toLowerCase().startsWith("varchar")) {
-                    Integer columnSize = type.getColumnSize();
-                    checksumNotRightSize = (columnSize != null) && (columnSize < 35);
-                }
-            }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
-            String charTypeName = getCharTypeName();
             boolean hasDeploymentIdColumn = changeLogTable.getColumn("DEPLOYMENT_ID") != null;
 
             if (!hasDescription) {
@@ -160,7 +146,46 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
                     getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)",
                     null));
+            } else {
+                boolean liquibaseColumnNotRightSize = false;
+                if (!(this.getDatabase() instanceof SQLiteDatabase)) {
+                    DataType type = changeLogTable.getColumn("LIQUIBASE").getType();
+                    if (type.getTypeName().toLowerCase().startsWith("varchar")) {
+                        Integer columnSize = type.getColumnSize();
+                        liquibaseColumnNotRightSize = (columnSize != null) && (columnSize < 20);
+                    }
+                }
+                if (liquibaseColumnNotRightSize) {
+                    executor.comment("Modifying size of databasechangelog.liquibase column");
+
+                    statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
+                            getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)"));
+                }
             }
+
+            if (!hasMD5SUM) {
+                executor.comment("Adding missing databasechangelog.liquibase column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
+                        getDatabaseChangeLogTableName(), "MD5SUM", charTypeName + "(35)",
+                        null));
+            } else {
+                boolean checksumNotRightSize = false;
+                if (!(this.getDatabase() instanceof SQLiteDatabase)) {
+                    DataType type = changeLogTable.getColumn("MD5SUM").getType();
+                    if (type.getTypeName().toLowerCase().startsWith("varchar")) {
+                        Integer columnSize = type.getColumnSize();
+                        checksumNotRightSize = (columnSize != null) && (columnSize < 35);
+                    }
+                }
+
+                if (checksumNotRightSize) {
+                    executor.comment("Modifying size of databasechangelog.md5sum column");
+
+                    statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
+                            getDatabaseChangeLogTableName(), "MD5SUM", charTypeName + "(35)"));
+                }
+            }
+
             if (!hasOrderExecuted) {
                 executor.comment("Adding missing databasechangelog.orderexecuted column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
@@ -170,18 +195,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
                     getDatabaseChangeLogTableName(), "ORDEREXECUTED", "int", false));
             }
-            if (checksumNotRightSize) {
-                executor.comment("Modifying size of databasechangelog.md5sum column");
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName(), "MD5SUM", charTypeName + "(35)"));
-            }
-            if (liquibaseColumnNotRightSize) {
-                executor.comment("Modifying size of databasechangelog.liquibase column");
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)"));
-            }
             if (!hasExecTypeColumn) {
                 executor.comment("Adding missing databasechangelog.exectype column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
