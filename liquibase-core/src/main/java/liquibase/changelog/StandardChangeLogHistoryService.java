@@ -101,20 +101,17 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         if (serviceInitialized) {
             return;
         }
+
         Database database = getDatabase();
 
-        Table changeLogTable = null;
-        try {
-            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl
-                (database, false, Table.class, Column.class), database);
-        } catch (LiquibaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+        Table changeLogTable = getChangelogTable(database);
 
         List<SqlStatement> statementsToExecute = new ArrayList<>();
 
         boolean changeLogCreateAttempted = false;
+
         Executor executor = ExecutorService.getInstance().getExecutor(database);
+
         if (changeLogTable != null) {
             boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
@@ -285,6 +282,17 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
         }
         serviceInitialized = true;
+    }
+
+    private Table getChangelogTable(Database database) {
+        Table changeLogTable = null;
+        try {
+            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl
+                (database, false, Table.class, Column.class), database);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        return changeLogTable;
     }
 
     @Override
