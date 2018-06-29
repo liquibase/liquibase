@@ -125,8 +125,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 if (type.getTypeName().toLowerCase().startsWith("varchar")) {
                     Integer columnSize = type.getColumnSize();
                     liquibaseColumnNotRightSize = (columnSize != null) && (columnSize < 20);
-                } else {
-                    liquibaseColumnNotRightSize = false;
                 }
             }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
@@ -136,8 +134,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 if (type.getTypeName().toLowerCase().startsWith("varchar")) {
                     Integer columnSize = type.getColumnSize();
                     checksumNotRightSize = (columnSize != null) && (columnSize < 35);
-                } else {
-                    liquibaseColumnNotRightSize = false;
                 }
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
