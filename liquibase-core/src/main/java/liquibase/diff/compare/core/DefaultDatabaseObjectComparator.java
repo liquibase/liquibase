@@ -22,9 +22,22 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        String name = databaseObject.getName();
-        if (name == null) {
-            name = "null";
+        String name = "";
+        if (databaseObject.getSchema() != null) {
+            String catalogName = databaseObject.getSchema().getCatalogName();
+            String schemaName = databaseObject.getSchema().getName();
+            if (catalogName != null) {
+                name = catalogName + ".";
+            }
+            if ( schemaName != null) {
+                name = schemaName  + ".";
+            }
+        }
+
+        if (databaseObject.getName() == null) {
+            name += "null";
+        } else {
+            name += databaseObject.getName();
         }
         return new String[] {name.toLowerCase()};
     }

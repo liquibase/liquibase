@@ -167,7 +167,7 @@ public class Index extends AbstractDatabaseObject {
         if (this.getTable() != null && o.getTable() != null) {
             returnValue = this.getTable().compareTo(o.getTable());
             if (returnValue == 0 && this.getTable().getSchema() != null && o.getTable().getSchema() != null) {
-                returnValue = StringUtils.trimToEmpty(this.getTable().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getTable().getSchema().getName()));
+                returnValue = this.getTable().getSchema().compareTo(o.getTable().getSchema());
             }
         }
 
@@ -188,7 +188,9 @@ public class Index extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        return toString().hashCode();
+        int result = getSchema() != null? getSchema().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        return result;
     }
 
     @Override

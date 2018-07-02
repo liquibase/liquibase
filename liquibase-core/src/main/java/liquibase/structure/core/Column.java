@@ -239,12 +239,12 @@ public class Column extends AbstractDatabaseObject {
             } else {
                 returnValue = this.getRelation().compareTo(o.getRelation());
                 if (returnValue == 0 && this.getRelation().getSchema() != null && o.getRelation().getSchema() != null) {
-                    returnValue = StringUtils.trimToEmpty(this.getSchema().getName()).compareTo(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
+                    returnValue = this.getSchema().compareTo(o.getRelation().getSchema());
                 }
             }
 
             if (returnValue == 0) {
-                returnValue = this.toString().compareTo(o.toString());
+                returnValue = this.toString().toUpperCase().compareTo(o.toString().toUpperCase());
             }
 
             return returnValue;
@@ -262,7 +262,7 @@ public class Column extends AbstractDatabaseObject {
 
             Column column = (Column) o;
 
-            return toString().equalsIgnoreCase(column.toString());
+            return this.compareTo(column) == 0;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -271,7 +271,9 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        return toString().toUpperCase().hashCode();
+        int result = getSchema() != null? getSchema().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().toUpperCase().hashCode() : 0);
+        return result;
     }
 
     public boolean isDataTypeDifferent(Column otherColumn) {
