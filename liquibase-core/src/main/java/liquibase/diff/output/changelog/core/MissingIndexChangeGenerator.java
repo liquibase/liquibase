@@ -39,8 +39,8 @@ public class MissingIndexChangeGenerator extends AbstractChangeGenerator impleme
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) missingObject;
 
-        if (comparisonDatabase instanceof MSSQLDatabase && index.getTable() instanceof Table) {
-            PrimaryKey primaryKey = ((Table) index.getTable()).getPrimaryKey();
+        if (comparisonDatabase instanceof MSSQLDatabase && index.getRelation() instanceof Table) {
+            PrimaryKey primaryKey = ((Table) index.getRelation()).getPrimaryKey();
             if ((primaryKey != null) && DatabaseObjectComparatorFactory.getInstance().isSameObject(missingObject,
                 primaryKey.getBackingIndex(), control.getSchemaComparisons(), referenceDatabase)) {
                 return new Change[0]; //will be handled by the PK
@@ -48,15 +48,15 @@ public class MissingIndexChangeGenerator extends AbstractChangeGenerator impleme
         }
 
         CreateIndexChange change = createCreateIndexChange();
-        change.setTableName(index.getTable().getName());
+        change.setTableName(index.getRelation().getName());
         if (control.getIncludeTablespace()) {
             change.setTablespace(index.getTablespace());
         }
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(index.getTable().getSchema().getCatalogName());
+            change.setCatalogName(index.getRelation().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(index.getTable().getSchema().getName());
+            change.setSchemaName(index.getRelation().getSchema().getName());
         }
         change.setIndexName(index.getName());
         change.setUnique(((index.isUnique() != null) && index.isUnique()) ? Boolean.TRUE : null);
