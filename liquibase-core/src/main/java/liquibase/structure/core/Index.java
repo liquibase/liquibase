@@ -29,7 +29,7 @@ public class Index extends AbstractDatabaseObject {
         this();
         setName(indexName);
         if (tableName != null) {
-            setTable(new Table(catalogName, schemaName, tableName));
+            setRelation(new Table(catalogName, schemaName, tableName));
             if ((columns != null) && (columns.length > 0)) {
                 setColumns(Arrays.asList(columns));
             }
@@ -39,7 +39,7 @@ public class Index extends AbstractDatabaseObject {
     @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
-                getTable()
+        		getRelation()
         };
     }
 
@@ -56,19 +56,39 @@ public class Index extends AbstractDatabaseObject {
 
     @Override
     public Schema getSchema() {
-        if (getTable() == null) {
+        if (getRelation() == null) {
             return null;
         }
         
-        return getTable().getSchema();
+        return getRelation().getSchema();
     }
+    
+    /**
+     * @deprecated Use {@link #getRelation()}
+     */
+    @Deprecated
+	public Table getTable() {
+		Relation relation = getRelation();
+		if (relation instanceof Table)
+		return (Table) relation;
+	else
+		return null;
+	}
 
-    public Relation getTable() {
-        return getAttribute("table", Relation.class);
+    /**
+     * @deprecated Use {@link #setRelation(Relation)}
+     */
+    @Deprecated
+	public Index setTable(Table table) {
+		return setRelation(table);
     }
-
-    public Index setTable(Relation table) {
-        this.setAttribute("table", table);
+    
+    public Relation getRelation() {
+    	return getAttribute("table", Relation.class);
+    }
+    
+    public Index setRelation(Relation relation) {
+    	this.setAttribute("table", relation);
         return this;
     }
 
@@ -86,7 +106,7 @@ public class Index extends AbstractDatabaseObject {
     }
 
     public Index addColumn(Column column) {
-        column.setRelation(getTable());
+        column.setRelation(getRelation());
         getColumns().add(column);
 
         return this;
@@ -95,7 +115,7 @@ public class Index extends AbstractDatabaseObject {
     public Index setColumns(List<Column> columns) {
         if (getAttribute("table", Object.class) instanceof Table) {
             for (Column column :columns) {
-                column.setRelation(getTable());
+                column.setRelation(getRelation());
             }
         }
         setAttribute("columns", columns);
@@ -162,10 +182,10 @@ public class Index extends AbstractDatabaseObject {
         Index o = (Index) other;
         int returnValue = 0;
 
-        if ((this.getTable() != null) && (o.getTable() != null)) {
-            returnValue = this.getTable().compareTo(o.getTable());
-            if ((returnValue == 0) && (this.getTable().getSchema() != null) && (o.getTable().getSchema() != null)) {
-                returnValue = StringUtils.trimToEmpty(this.getTable().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getTable().getSchema().getName()));
+        if ((this.getRelation() != null) && (o.getRelation() != null)) {
+            returnValue = this.getRelation().compareTo(o.getRelation());
+            if ((returnValue == 0) && (this.getRelation().getSchema() != null) && (o.getRelation().getSchema() != null)) {
+                returnValue = StringUtils.trimToEmpty(this.getRelation().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
             }
         }
 
@@ -213,10 +233,10 @@ public class Index extends AbstractDatabaseObject {
         if ((this.isUnique() != null) && this.isUnique()) {
             stringBuffer.append(" UNIQUE ");
         }
-        if ((getTable() != null) && (getColumns() != null)) {
-            String tableName = getTable().getName();
-            if ((getTable().getSchema() != null) && (getTable().getSchema().getName() != null)) {
-                tableName = getTable().getSchema().getName()+"."+tableName;
+        if ((getRelation() != null) && (getColumns() != null)) {
+            String tableName = getRelation().getName();
+            if ((getRelation().getSchema() != null) && (getRelation().getSchema().getName() != null)) {
+                tableName = getRelation().getSchema().getName()+"."+tableName;
             }
             stringBuffer.append(" ON ").append(tableName);
             if ((getColumns() != null) && !getColumns().isEmpty()) {

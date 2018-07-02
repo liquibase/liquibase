@@ -65,7 +65,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     if (index == null) {
                         index = new Index();
                         index.setName(indexName);
-                        index.setTable(relation);
+                        index.setRelation(relation);
 
                         short type = row.getShort("TYPE");
                         if (type == DatabaseMetaData.tableIndexClustered) {
@@ -85,7 +85,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean
                         .FALSE : null);
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
+                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getRelation()));
                 }
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
@@ -115,12 +115,12 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         if ((foundObject instanceof UniqueConstraint) && (((UniqueConstraint) foundObject).getBackingIndex() == null)
             && !(snapshot.getDatabase() instanceof DB2Database) && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
-            Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable());
+            Index exampleIndex = new Index().setRelation(((UniqueConstraint) foundObject).getRelation());
             exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
             ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
         }
         if ((foundObject instanceof ForeignKey) && (((ForeignKey) foundObject).getBackingIndex() == null)) {
-            Index exampleIndex = new Index().setTable(((ForeignKey) foundObject).getForeignKeyTable());
+            Index exampleIndex = new Index().setRelation(((ForeignKey) foundObject).getForeignKeyTable());
             exampleIndex.getColumns().addAll(((ForeignKey) foundObject).getForeignKeyColumns());
             ((ForeignKey) foundObject).setBackingIndex(exampleIndex);
         }
@@ -129,7 +129,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
-        Relation exampleIndex = ((Index) example).getTable();
+        Relation exampleIndex = ((Index) example).getRelation();
 
         String tableName = null;
         Schema schema = null;
@@ -234,7 +234,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     if ("V".equals(row.getString("INTERNAL_OBJECT_TYPE"))) {
                         relation = new View();
                     }
-                    returnIndex.setTable(relation.setName(row.getString("TABLE_NAME")).setSchema(schema));
+                    returnIndex.setRelation(relation.setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
 
@@ -302,10 +302,10 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ?
                                 Boolean.FALSE : null);
                             returnIndex.getColumns().set(position - 1, new Column(columnName)
-                                    .setDescending(descending).setRelation(returnIndex.getTable()));
+                                    .setDescending(descending).setRelation(returnIndex.getRelation()));
                         } else {
                             returnIndex.getColumns().set(position - 1, new Column()
-                                    .setRelation(returnIndex.getTable()).setName(definition, true));
+                                    .setRelation(returnIndex.getRelation()).setName(definition, true));
                         }
                     }
                 }
@@ -321,7 +321,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             //prefer clustered version of the index
             List<Index> nonClusteredIndexes = new ArrayList<>();
             for (Index index : foundIndexes.values()) {
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleIndex, snapshot.getSchemaComparisons(), database)) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getRelation(), exampleIndex, snapshot.getSchemaComparisons(), database)) {
                     boolean actuallyMatches = false;
                     if (database.isCaseSensitive()) {
                         if (index.getColumnNames().equals(((Index) example).getColumnNames())) {

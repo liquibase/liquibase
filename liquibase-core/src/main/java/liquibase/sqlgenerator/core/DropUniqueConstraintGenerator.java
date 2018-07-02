@@ -53,7 +53,7 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
     }
 
     protected UniqueConstraint getAffectedUniqueConstraint(DropUniqueConstraintStatement statement) {
-        UniqueConstraint constraint = new UniqueConstraint().setName(statement.getConstraintName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+        UniqueConstraint constraint = new UniqueConstraint().setName(statement.getConstraintName()).setRelation((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
         if (statement.getUniqueColumns() != null) {
             int i = 0;
             for (ColumnConfig column : statement.getUniqueColumns()) {
