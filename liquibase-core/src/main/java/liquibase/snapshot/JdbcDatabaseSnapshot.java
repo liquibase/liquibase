@@ -193,14 +193,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
-                        String sql = getMSSQLSql(jdbcSchemaName);
+                        String sql = getMSSQLSql(jdbcSchemaName, tableName);
                         return executeAndExtract(sql, database);
                     } else {
                         throw new RuntimeException("Cannot bulk select");
                     }
                 }
 
-                protected String getMSSQLSql(String jdbcSchemaName) {
+                protected String getMSSQLSql(String jdbcSchemaName, String tableName) {
                     //comes from select object_definition(object_id('sp_fkeys'))
                     return "select " +
                             "convert(sysname,db_name()) AS PKTABLE_CAT, " +
@@ -232,7 +232,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "c2.object_id = f.parent_object_id and " +
                             "c1.column_id = k.referenced_column_id and " +
                             "c2.column_id = k.parent_column_id and " +
-                            "object_schema_name(o1.object_id)='" + jdbcSchemaName + "' " +
+                            "object_schema_name(o1.object_id)='" + jdbcSchemaName + "' and " +
+                            "convert(sysname,o2.name)='" + tableName + "' " +
                             "order by 5, 6, 7, 9, 8";
                 }
 
