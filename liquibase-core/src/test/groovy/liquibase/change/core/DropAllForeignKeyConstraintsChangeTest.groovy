@@ -106,14 +106,14 @@ class DropAllForeignKeyConstraintsChangeTest extends Specification {
         DatabaseFactory.reset()
 
         where:
-        shortDbName  | expectedValue
-        "db2"        | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
+        shortDbName | expectedValue
+        "db2"       | ["ALTER TABLE \"schema_base\".base_table DROP CONSTRAINT fk_base_ref1",
+                       "ALTER TABLE \"schema_base\".base_table DROP CONSTRAINT fk_base_ref2"]
+        "derby"     | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
                         "ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref2"]
-        "derby"      | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
-                        "ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref2"]
-        "firebird"   | ["ALTER TABLE base_table DROP CONSTRAINT fk_base_ref1",
+        "firebird"  | ["ALTER TABLE base_table DROP CONSTRAINT fk_base_ref1",
                         "ALTER TABLE base_table DROP CONSTRAINT fk_base_ref2"]
-        "h2"         | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
+        "h2"        | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
                         "ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref2"]
         "hsqldb"     | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
                         "ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref2"]
@@ -129,8 +129,8 @@ class DropAllForeignKeyConstraintsChangeTest extends Specification {
                         "ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref2"]
         "asany"      | ["ALTER TABLE schema_base.base_table DROP FOREIGN KEY fk_base_ref1",
                         "ALTER TABLE schema_base.base_table DROP FOREIGN KEY fk_base_ref2"]
-        "sybase"     | ["ALTER TABLE [schema_base].[base_table] DROP CONSTRAINT [fk_base_ref1]",
-                        "ALTER TABLE [schema_base].[base_table] DROP CONSTRAINT [fk_base_ref2]"]
+        "sybase"     | ["ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref1",
+                        "ALTER TABLE schema_base.base_table DROP CONSTRAINT fk_base_ref2"]
 
 
     }

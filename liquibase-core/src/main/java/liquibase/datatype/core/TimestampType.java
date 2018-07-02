@@ -121,8 +121,11 @@ public class TimestampType extends DateTimeType {
             type = new DatabaseDataType("TIMESTAMP");
         }
 
-        if (((getAdditionalInformation() != null) && ((database instanceof PostgresDatabase) || (database instanceof
-            OracleDatabase))) || (database instanceof HsqlDatabase) || (database instanceof H2Database)){
+        if (getAdditionalInformation() != null
+                && (database instanceof PostgresDatabase
+                || database instanceof OracleDatabase)
+                || database instanceof H2Database
+                || database instanceof HsqlDatabase){
             String additionalInformation = this.getAdditionalInformation();
 
             if (additionalInformation != null) {
