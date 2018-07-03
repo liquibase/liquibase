@@ -91,14 +91,6 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
     }
 
-    @Test
-    public void verifyTimestampDataTypeWhenWithoutClauseIsPresent() {
-        TimestampType ts = new TimestampType();
-        ts.setAdditionalInformation("WITHOUT TIME ZONE");
-        DatabaseDataType oracleDataType = ts.toDatabaseDataType(getDatabase());
-        assertThat(oracleDataType.getType(), CoreMatchers.is("TIMESTAMP"));
-    }
-
     public void testGetDefaultDriver() {
         Database database = new OracleDatabase();
 
