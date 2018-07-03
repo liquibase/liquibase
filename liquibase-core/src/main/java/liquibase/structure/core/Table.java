@@ -40,7 +40,6 @@ public class Table extends Relation {
 
         if (this.getSchema() != null && that.getSchema() != null) {
             boolean schemasTheSame = this.getSchema().equals(that.getSchema());
-            //boolean schemasTheSame = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
             if (!schemasTheSame) {
                 return false;
             }
