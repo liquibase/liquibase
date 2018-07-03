@@ -124,13 +124,8 @@ public class PrimaryKey extends AbstractDatabaseObject {
             return getName();
         } else {
             String tableName = getTable().getName();
-            Schema tableSchema = getTable().getSchema();
-            if (tableSchema != null) {
-                String tableCatalogName = "";
-                if (tableSchema.getCatalogName() != null) {
-                    tableCatalogName = tableSchema.getCatalogName() + ".";
-                }
-                tableName = tableCatalogName + tableSchema.getName()+"."+tableName;
+            if (getTable().getSchema() != null) {
+                tableName = getTable().getSchema().getName()+"."+tableName;
             }
             return getName() + " on " + tableName + "(" + getColumnNames() + ")";
         }

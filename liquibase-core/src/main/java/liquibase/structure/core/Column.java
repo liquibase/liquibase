@@ -271,9 +271,7 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        int result = getSchema() != null? getSchema().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().toUpperCase().hashCode() : 0);
-        return result;
+        return toString().toUpperCase().hashCode();
     }
 
     public boolean isDataTypeDifferent(Column otherColumn) {
