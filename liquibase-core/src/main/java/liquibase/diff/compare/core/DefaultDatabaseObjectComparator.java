@@ -30,7 +30,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
                 name = catalogName + ".";
             }
             if ( schemaName != null) {
-                name = schemaName  + ".";
+                name += schemaName  + ".";
             }
         }
 
