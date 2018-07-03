@@ -62,7 +62,7 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
         StoredDatabaseLogic that = (StoredDatabaseLogic) obj;
 
         if (this.getSchema() != null && that.getSchema() != null) {
-            boolean schemasEqual = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasEqual = this.getSchema().equals(that.getSchema());
             if (!schemasEqual) {
                 return false;
             }
@@ -73,6 +73,8 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
 
     @Override
     public int hashCode() {
-        return StringUtils.trimToEmpty(this.getName()).toLowerCase().hashCode();
+        int result = getSchema() != null ? getSchema().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().toUpperCase().hashCode() : 0);
+        return result;
     }
 }

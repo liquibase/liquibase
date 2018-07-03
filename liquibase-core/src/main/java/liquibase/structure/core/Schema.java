@@ -70,10 +70,7 @@ public class Schema extends AbstractDatabaseObject {
 
         Schema schema = (Schema) o;
 
-        Boolean includeCatalog = LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class)
-                .getValue(GlobalConfiguration.INCLUDE_CATALOG_IN_EQUALS, Boolean.class);
-        if (includeCatalog != null && includeCatalog) {
+        if (shouldIncludeCatalogInEquals()) {
             if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null)
                 return false;
         }
@@ -84,7 +81,7 @@ public class Schema extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        int result = getCatalog() != null ? getCatalog().hashCode() : 0;
+        int result = (shouldIncludeCatalogInEquals() && getCatalog() != null) ? getCatalog().hashCode() : 0;
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
         return result;
     }

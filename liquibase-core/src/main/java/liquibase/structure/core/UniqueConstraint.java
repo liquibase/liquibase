@@ -191,8 +191,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 			} else if (null == that.getTable()) {
 				result = false;
 			} else {
-				result = this.getTable().getName().equals(
-						that.getTable().getName());
+				result = this.getTable().equals(that.getTable());
 			}
 		}
 
@@ -204,12 +203,14 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     public int compareTo(Object other) {
         UniqueConstraint o = (UniqueConstraint) other;
 		// Need check for nulls here due to NullPointerException using Postgres
-		String thisTableName;
-		String thatTableName;
-		thisTableName = null == this.getTable() ? "" : this.getTable()
-				.getName();
-		thatTableName = null == o.getTable() ? "" : o.getTable().getName();
-		int returnValue = thisTableName.compareTo(thatTableName);
+		int returnValue = 0;
+		if (getTable() != null && o.getTable() != null) {
+			returnValue = getTable().compareTo(o.getTable());
+		} else if (getTable() != null) {
+			return 1;
+		} else if (o.getTable() != null) {
+			return -1;
+		}
 		if (returnValue == 0) {
 			returnValue = this.getName().compareTo(o.getName());
 		}

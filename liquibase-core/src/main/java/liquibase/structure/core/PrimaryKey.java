@@ -90,7 +90,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     @Override
     public int compareTo(Object other) {
         PrimaryKey o = (PrimaryKey) other;
-        int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
+        int returnValue = this.getTable().compareTo(o.getTable());
         if (returnValue == 0) {
             returnValue = this.getColumnNames().compareTo(o.getColumnNames());
         }
@@ -109,7 +109,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return !(getColumnNames() != null ? !getColumnNames().equals(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable().getName() != null ? !getTable().getName().equals(that.getTable().getName()) : that.getTable().getName() != null);
+        return !(getColumnNames() != null ? !getColumnNames().equals(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable() != null ? !getTable().equals(that.getTable()) : that.getTable() != null);
 
     }
 
@@ -124,8 +124,13 @@ public class PrimaryKey extends AbstractDatabaseObject {
             return getName();
         } else {
             String tableName = getTable().getName();
-            if (getTable().getSchema() != null) {
-                tableName = getTable().getSchema().getName()+"."+tableName;
+            Schema tableSchema = getTable().getSchema();
+            if (tableSchema != null) {
+                String tableCatalogName = "";
+                if (tableSchema.getCatalogName() != null) {
+                    tableCatalogName = tableSchema.getCatalogName() + ".";
+                }
+                tableName = tableCatalogName + tableSchema.getName()+"."+tableName;
             }
             return getName() + " on " + tableName + "(" + getColumnNames() + ")";
         }
