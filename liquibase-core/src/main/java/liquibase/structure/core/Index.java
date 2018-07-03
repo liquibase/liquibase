@@ -188,9 +188,7 @@ public class Index extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        int result = getSchema() != null? getSchema().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
-        return result;
+        return toString().hashCode();
     }
 
     @Override

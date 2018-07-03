@@ -73,8 +73,6 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
 
     @Override
     public int hashCode() {
-        int result = getSchema() != null ? getSchema().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().toUpperCase().hashCode() : 0);
-        return result;
+        return StringUtils.trimToEmpty(this.getName()).toLowerCase().hashCode();
     }
 }

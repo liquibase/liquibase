@@ -47,9 +47,7 @@ public class View extends Relation {
 
     @Override
     public int hashCode() {
-        int result = getSchema() != null ? getSchema().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().toUpperCase().hashCode() : 0);
-        return result;
+        return getName().toUpperCase().hashCode();
     }
 
     @Override

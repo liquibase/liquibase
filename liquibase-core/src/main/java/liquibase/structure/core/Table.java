@@ -40,7 +40,6 @@ public class Table extends Relation {
 
         if (this.getSchema() != null && that.getSchema() != null) {
             boolean schemasTheSame = this.getSchema().equals(that.getSchema());
-            //boolean schemasTheSame = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
             if (!schemasTheSame) {
                 return false;
             }
@@ -52,9 +51,7 @@ public class Table extends Relation {
 
     @Override
     public int hashCode() {
-        int result = getSchema() != null ? getSchema().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().toUpperCase().hashCode() : 0);
-        return result;
+        return StringUtils.trimToEmpty(getName()).toUpperCase().hashCode();
     }
 
     @Override

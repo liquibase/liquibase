@@ -221,9 +221,6 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
      * @return
      */
     public boolean shouldIncludeCatalogInEquals() {
-        Boolean includeCatalog = LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class)
-                .getValue(GlobalConfiguration.INCLUDE_CATALOG_IN_EQUALS, Boolean.class);
-        return includeCatalog != null ? includeCatalog : false;
+        return LiquibaseConfiguration.getInstance().shouldIncludeCatalogInEquals();
     }
 }
