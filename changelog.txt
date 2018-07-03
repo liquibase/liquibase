@@ -1,6 +1,13 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.6.2 (2018.06.30)
+
+- [CORE-3129] - PostgreSQL dropPrimaryKey with objectQuotingStrategy="QUOTE_ALL_OBJECTS"
+- [CORE-3206] - Liquibase 3.6.x is binary api-incompatible with 3.5.x
+- [CORE-3213] - Changelog with includeAll will not find child changelogs in multi-modules Spring Boot's executable JAR
+- [CORE-3229] - Oracle 11g doesn't support TIMESTAMP WITHOUT TIME ZONE data type
+
 Changes in version 3.6.1 (2018.04.11)
 
 - [CORE-3200] - Wrong SQL generator is selected
