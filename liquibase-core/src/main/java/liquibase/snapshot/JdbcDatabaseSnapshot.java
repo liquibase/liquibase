@@ -232,9 +232,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "c2.object_id = f.parent_object_id and " +
                             "c1.column_id = k.referenced_column_id and " +
                             "c2.column_id = k.parent_column_id and " +
-                            "object_schema_name(o1.object_id)='" + jdbcSchemaName + "' and " +
-                            "convert(sysname,o2.name)='" + tableName + "' " +
-                            "order by 5, 6, 7, 9, 8";
+                            "((object_schema_name(o1.object_id)='" + jdbcSchemaName + "'" +
+                            " and convert(sysname,schema_name(o2.schema_id))='" + jdbcSchemaName + "' and " +
+                            "convert(sysname,o2.name)='" + tableName + "' ) or ( convert(sysname,schema_name" +
+                            "(o2.schema_id))='" + jdbcSchemaName + "' and convert(sysname,o2.name)='" + tableName +
+                            "' )) order by 5, 6, 7, 9, 8";
                 }
 
                 protected String getDB2Sql(String jdbcSchemaName, String tableName) {
