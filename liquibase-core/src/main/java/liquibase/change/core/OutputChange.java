@@ -19,7 +19,7 @@ import liquibase.util.StringUtils;
 public class OutputChange extends AbstractChange {
 
     private String message;
-    private String target = "";
+    private String target = null;
 
     @Override
     public ValidationErrors validate(Database database) {
