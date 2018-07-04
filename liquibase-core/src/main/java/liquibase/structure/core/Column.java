@@ -236,7 +236,7 @@ public class Column extends AbstractDatabaseObject {
                 return 1;
             } else if (this.getRelation() == null && o.getRelation() != null) {
                 return -1;
-            } else {
+            } else if (this.getRelation() != null && o.getRelation() != null) {
                 returnValue = this.getRelation().compareTo(o.getRelation());
                 if (returnValue == 0 && this.getRelation().getSchema() != null && o.getRelation().getSchema() != null) {
                     returnValue = this.getSchema().compareTo(o.getRelation().getSchema());
