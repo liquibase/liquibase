@@ -34,7 +34,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
             hashes.add(databaseObject.getName().toLowerCase());
         }
 
-        Relation table = ((UniqueConstraint) databaseObject).getTable();
+        Relation table = ((UniqueConstraint) databaseObject).getRelation();
         if (table != null) {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }
@@ -55,8 +55,8 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
         int thisConstraintSize = thisConstraint.getColumns().size();
         int otherConstraintSize = otherConstraint.getColumns().size();
 
-        if ((thisConstraint.getTable() != null) && (otherConstraint.getTable() != null)) {
-            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getTable(), otherConstraint.getTable(), chain.getSchemaComparisons(), accordingTo)) {
+        if ((thisConstraint.getRelation() != null) && (otherConstraint.getRelation() != null)) {
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getRelation(), otherConstraint.getRelation(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
             if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null) &&
@@ -78,7 +78,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
                 }
 
                 for (int i = 0; i < otherConstraintSize; i++) {
-                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getColumns().get(i).setRelation(thisConstraint.getTable()), otherConstraint.getColumns().get(i).setRelation(otherConstraint.getTable()), chain.getSchemaComparisons(), accordingTo)) {
+                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getColumns().get(i).setRelation(thisConstraint.getRelation()), otherConstraint.getColumns().get(i).setRelation(otherConstraint.getRelation()), chain.getSchemaComparisons(), accordingTo)) {
                         return false;
                     }
                 }

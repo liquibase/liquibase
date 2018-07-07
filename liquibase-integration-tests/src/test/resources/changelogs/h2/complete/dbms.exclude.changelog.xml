@@ -9,7 +9,7 @@
     <dbms type="h2"/>
   </preConditions>
 
-  <changeSet id="1" author="dbiggs" dbms="!oracle">
+  <changeSet id="1" author="dbiggs" dbms="h2">
     <createTable tableName="testDbmsExclude">
       <column name="sampleField" type="varchar(50)"/>
     </createTable>

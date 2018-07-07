@@ -76,7 +76,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             if (returnKey != null) {
-                Index exampleIndex = new Index().setTable(returnKey.getTable());
+                Index exampleIndex = new Index().setRelation(returnKey.getTable());
                 exampleIndex.setColumns(returnKey.getColumns());
                 returnKey.setBackingIndex(exampleIndex);
             }

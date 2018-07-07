@@ -62,6 +62,14 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     private String defaultSchema;
 
+	private String liquibaseSchema;
+
+	private String liquibaseTablespace;
+
+	private String databaseChangeLogTable;
+
+	private String databaseChangeLogLockTable;
+
     private boolean dropFirst;
 
     private boolean shouldRun = true;
@@ -151,6 +159,10 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		liquibase.setResourceLoader(resourceLoader);
 		liquibase.setDataSource(dataSource);
 		liquibase.setDefaultSchema(defaultSchema);
+		liquibase.setLiquibaseSchema(liquibaseSchema);
+		liquibase.setLiquibaseTablespace(liquibaseTablespace);
+		liquibase.setDatabaseChangeLogTable(databaseChangeLogTable);
+		liquibase.setDatabaseChangeLogLockTable(databaseChangeLogLockTable);
 		return liquibase;
 	}
 
@@ -201,6 +213,38 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
 	public void setDefaultSchema(String defaultSchema) {
 		this.defaultSchema = defaultSchema;
+	}
+
+	public String getLiquibaseSchema() {
+		return liquibaseSchema;
+	}
+
+	public void setLiquibaseSchema(String liquibaseSchema) {
+		this.liquibaseSchema = liquibaseSchema;
+	}
+
+	public String getLiquibaseTablespace() {
+		return liquibaseTablespace;
+	}
+
+	public void setLiquibaseTablespace(String liquibaseTablespace) {
+		this.liquibaseTablespace = liquibaseTablespace;
+	}
+
+	public String getDatabaseChangeLogTable() {
+		return databaseChangeLogTable;
+	}
+
+	public void setDatabaseChangeLogTable(String databaseChangeLogTable) {
+		this.databaseChangeLogTable = databaseChangeLogTable;
+	}
+
+	public String getDatabaseChangeLogLockTable() {
+		return databaseChangeLogLockTable;
+	}
+
+	public void setDatabaseChangeLogLockTable(String databaseChangeLogLockTable) {
+		this.databaseChangeLogLockTable = databaseChangeLogLockTable;
 	}
 
 	public boolean isDropFirst() {
