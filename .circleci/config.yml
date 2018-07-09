@@ -23,11 +23,11 @@ jobs:
       # Tests for embedded RDBMS (esp. hsqldb and Derby-DB) crash more often without this one:
       _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
     steps:
-#      - run:
-#          name: Install RDBMS client software
+      - run:
+          name: Install needed packages
 #          command: |
-#            # So that we can fetch .deb packages from Microsoft, who only deliver by https:
-#            sudo apt-get install -y apt-transport-https
+            sudo apt-get install -y apt-transport-https rpm
+
 #
 #            # Install the Microsoft repository for the MSSQL client tools:
 #            curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
