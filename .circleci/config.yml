@@ -25,7 +25,7 @@ jobs:
     steps:
       - run:
           name: Install needed packages
-#          command: |
+          command: |
             sudo apt-get install -y apt-transport-https rpm
 
 #
