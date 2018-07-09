@@ -42,9 +42,6 @@ jobs:
       - checkout
       - restore_cache:
           key: liquibase-{{ checksum "pom.xml" }}
-      - run:
-          name: Get project dependencies
-          command: mvn dependency:go-offline
 
       - run:
           name: Build and test
