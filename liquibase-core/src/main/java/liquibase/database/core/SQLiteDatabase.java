@@ -76,7 +76,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             for (Index index : SnapshotGeneratorFactory.getInstance().createSnapshot(
                     new CatalogAndSchema(catalogName, schemaName), database,
                     new SnapshotControl(database, Index.class)).get(Index.class)) {
-                if (index.getTable().getName().equalsIgnoreCase(tableName)) {
+                if (index.getRelation().getName().equalsIgnoreCase(tableName)) {
                     if (alterTableVisitor.createThisIndex(index)) {
                         newIndices.add(index);
                     }

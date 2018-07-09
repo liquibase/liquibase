@@ -79,6 +79,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     protected String tag;
 	protected Map<String, String> parameters;
 	protected String defaultSchema;
+	protected String liquibaseSchema;
+	protected String databaseChangeLogTable;
+	protected String databaseChangeLogLockTable;
+	protected String liquibaseTablespace;
 	protected boolean dropFirst;
 	protected boolean shouldRun = true;
 	protected File rollbackFile;
@@ -225,6 +229,38 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.defaultSchema = defaultSchema;
 	}
 
+    public String getLiquibaseTablespace() {
+        return liquibaseTablespace;
+    }
+
+    public void setLiquibaseTablespace(String liquibaseTablespace) {
+        this.liquibaseTablespace = liquibaseTablespace;
+    }
+
+    public String getLiquibaseSchema() {
+        return liquibaseSchema;
+    }
+
+    public void setLiquibaseSchema(String liquibaseSchema) {
+        this.liquibaseSchema = liquibaseSchema;
+    }
+
+    public String getDatabaseChangeLogTable() {
+        return databaseChangeLogTable;
+    }
+
+    public void setDatabaseChangeLogTable(String databaseChangeLogTable) {
+        this.databaseChangeLogTable = databaseChangeLogTable;
+    }
+
+    public String getDatabaseChangeLogLockTable() {
+        return databaseChangeLogLockTable;
+    }
+
+	public void setDatabaseChangeLogLockTable(String databaseChangeLogLockTable) {
+		this.databaseChangeLogLockTable = databaseChangeLogLockTable;
+	}
+
 	/**
 	 * Returns whether a rollback should be tested at update time or not.
 	 */
@@ -363,6 +399,22 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             } else if (database.supportsCatalogs()) {
                 database.setDefaultCatalogName(this.defaultSchema);
             }
+        }
+        if (StringUtils.trimToNull(this.liquibaseSchema) != null) {
+            if (database.supportsSchemas()) {
+                database.setLiquibaseSchemaName(this.liquibaseSchema);
+            } else if (database.supportsCatalogs()) {
+                database.setLiquibaseCatalogName(this.liquibaseSchema);
+            }
+        }
+        if (StringUtils.trimToNull(this.liquibaseTablespace) != null && database.supportsTablespaces()) {
+            database.setLiquibaseTablespaceName(this.liquibaseTablespace);
+        }
+        if (StringUtils.trimToNull(this.databaseChangeLogTable) != null) {
+            database.setDatabaseChangeLogTableName(this.databaseChangeLogTable);
+        }
+        if (StringUtils.trimToNull(this.databaseChangeLogLockTable) != null) {
+            database.setDatabaseChangeLogLockTableName(this.databaseChangeLogLockTable);
         }
 		return database;
 	}

@@ -45,20 +45,20 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         UniqueConstraint uc = (UniqueConstraint) missingObject;
 
-        if (uc.getTable() == null) {
+        if (uc.getRelation() == null) {
             return null;
         }
 
         AddUniqueConstraintChange change = createAddUniqueConstraintChange();
-        change.setTableName(uc.getTable().getName());
+        change.setTableName(uc.getRelation().getName());
         if ((uc.getBackingIndex() != null) && control.getIncludeTablespace()) {
             change.setTablespace(uc.getBackingIndex().getTablespace());
         }
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(uc.getTable().getSchema().getCatalogName());
+            change.setCatalogName(uc.getRelation().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(uc.getTable().getSchema().getName());
+            change.setSchemaName(uc.getRelation().getSchema().getName());
         }
         change.setConstraintName(uc.getName());
         change.setColumnNames(uc.getColumnNames());
