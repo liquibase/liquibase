@@ -48,7 +48,7 @@ jobs:
 
       - run:
           name: Build and test
-          command: mvn package
+          command: mvn clean package
 
       - save_cache:
           paths:
