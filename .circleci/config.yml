@@ -91,7 +91,11 @@ jobs:
 #          when: always
 #
       - store_test_results:
-          path: target/surefire-reports
+          path: liquibase-core/target/surefire-reports
       - store_artifacts:
-          path: target/liquibase-*.jar
+          path: liquibase-core/target/liquibase-*.jar
+      - store_artifacts:
+          path: liquibase-core/target/liquibase-*.rpm
+      - store_artifacts:
+          path: liquibase-core/target/liquibase-*.deb
 
