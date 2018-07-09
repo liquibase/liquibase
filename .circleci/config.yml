@@ -40,8 +40,20 @@ jobs:
 #            rm -f ./libssl1.0.0_1.0.1t-1+deb8u7_amd64.deb
 #            sudo ACCEPT_EULA=Y apt-get install -y rpm postgresql-client mysql-client mssql-tools unixodbc-dev locales-all
       - checkout
-#      - restore_cache:
-#          key: liquibase-{{ checksum "pom.xml" }}
+      - restore_cache:
+          key: liquibase-{{ checksum "pom.xml" }}
+      - run:
+          name: Get project dependencies
+          command: mvn dependency:go-offline
+
+      - run:
+          name: Build and test
+          command: mvn package
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: liquibase-{{ checksum "pom.xml" }}
 #      - run:
 #         name: Prepare test databases
 #         command: |
@@ -59,33 +71,30 @@ jobs:
 #          # Configure the SQL Server test database:
 #          # Disable for now because some SQL Server integration tests need to be fixed
 #          /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Liquibase01#' -i liquibase-integration-tests/setup/mssql/create_dbs_for_integration_tests.sql
-      - run:
-          name: Build and test everything.
-          command: mvn -B -Psonar --fail-at-end clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${CIRCLE_BRANCH}
-      - run:
-          name: Collect test results and build artifacts
-          command: |
-              mkdir /home/circleci/circle_test_reports
-              export CIRCLE_TEST_REPORTS=/home/circleci/circle_test_reports
-              mkdir -p ${CIRCLE_TEST_REPORTS}/junit/
-              find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/junit/ \;
-              find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/junit/ \;
-
-              mkdir /home/circleci/circle_artifacts
-              export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts
-
-              cp liquibase-core/target/liquibase*-bin.zip ${CIRCLE_ARTIFACTS}
-              cp liquibase-core/target/liquibase*-bin.tar.gz ${CIRCLE_ARTIFACTS}
-              cp liquibase-core/target/liquibase*-SNAPSHOT.jar ${CIRCLE_ARTIFACTS}
-              cp liquibase-rpm/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm ${CIRCLE_ARTIFACTS}
-              cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
-          when: always
-
+#      - run:
+#          name: Build and test everything.
+#          command: mvn -B -Psonar --fail-at-end clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${CIRCLE_BRANCH}
+#      - run:
+#          name: Collect test results and build artifacts
+#          command: |
+#              mkdir /home/circleci/circle_test_reports
+#              export CIRCLE_TEST_REPORTS=/home/circleci/circle_test_reports
+#              mkdir -p ${CIRCLE_TEST_REPORTS}/junit/
+#              find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/junit/ \;
+#              find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/junit/ \;
+#
+#              mkdir /home/circleci/circle_artifacts
+#              export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts
+#
+#              cp liquibase-core/target/liquibase*-bin.zip ${CIRCLE_ARTIFACTS}
+#              cp liquibase-core/target/liquibase*-bin.tar.gz ${CIRCLE_ARTIFACTS}
+#              cp liquibase-core/target/liquibase*-SNAPSHOT.jar ${CIRCLE_ARTIFACTS}
+#              cp liquibase-rpm/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm ${CIRCLE_ARTIFACTS}
+#              cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
+#          when: always
+#
       - store_test_results:
-          path: /home/circleci/circle_test_reports
+          path: target/surefire-reports
       - store_artifacts:
-          path: /home/circleci/circle_artifacts
-#      - save_cache:
-#          paths:
-#            - ~/.m2
-#          key: liquibase-{{ checksum "pom.xml" }}
+          path: target/liquibase-*.jar
+
