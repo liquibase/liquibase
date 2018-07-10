@@ -1,6 +1,5 @@
 package liquibase.structure;
 
-import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
@@ -50,7 +49,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     public int compareTo(Object o) {
         AbstractDatabaseObject that = (AbstractDatabaseObject) o;
         if (this.getSchema() != null && that.getSchema() != null) {
-            if (shouldIncludeCatalogInEquals()) {
+            if (shouldIncludeCatalogInSpecification()) {
                 String thisCatalogName = this.getSchema().getCatalogName();
                 String thatCatalogName = that.getSchema().getCatalogName();
 
@@ -220,7 +219,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
      *
      * @return
      */
-    public boolean shouldIncludeCatalogInEquals() {
-        return LiquibaseConfiguration.getInstance().shouldIncludeCatalogInEquals();
+    public boolean shouldIncludeCatalogInSpecification() {
+        return LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
     }
 }
