@@ -236,15 +236,15 @@ public class Column extends AbstractDatabaseObject {
                 return 1;
             } else if (this.getRelation() == null && o.getRelation() != null) {
                 return -1;
-            } else {
+            } else if (this.getRelation() != null && o.getRelation() != null) {
                 returnValue = this.getRelation().compareTo(o.getRelation());
                 if (returnValue == 0 && this.getRelation().getSchema() != null && o.getRelation().getSchema() != null) {
-                    returnValue = StringUtils.trimToEmpty(this.getSchema().getName()).compareTo(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
+                    returnValue = this.getSchema().compareTo(o.getRelation().getSchema());
                 }
             }
 
             if (returnValue == 0) {
-                returnValue = this.toString().compareTo(o.toString());
+                returnValue = this.toString().toUpperCase().compareTo(o.toString().toUpperCase());
             }
 
             return returnValue;
@@ -262,7 +262,7 @@ public class Column extends AbstractDatabaseObject {
 
             Column column = (Column) o;
 
-            return toString().equalsIgnoreCase(column.toString());
+            return this.compareTo(column) == 0;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

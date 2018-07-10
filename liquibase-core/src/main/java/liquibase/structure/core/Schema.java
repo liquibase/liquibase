@@ -1,6 +1,8 @@
 package liquibase.structure.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
@@ -68,7 +70,10 @@ public class Schema extends AbstractDatabaseObject {
 
         Schema schema = (Schema) o;
 
-        if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null) return false;
+        if (shouldIncludeCatalogInEquals()) {
+            if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null)
+                return false;
+        }
         if (getName() != null ? !getName().equalsIgnoreCase(schema.getName()) : schema.getName() != null) return false;
 
         return true;
@@ -76,7 +81,7 @@ public class Schema extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        int result = getCatalog() != null ? getCatalog().hashCode() : 0;
+        int result = (shouldIncludeCatalogInEquals() && getCatalog() != null) ? getCatalog().hashCode() : 0;
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
         return result;
     }

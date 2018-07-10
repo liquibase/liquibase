@@ -218,7 +218,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         ForeignKey that = (ForeignKey) o;
 
         if (this.getSchema() != null && that.getSchema() != null) {
-            boolean schemasEqual = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasEqual = this.getSchema().equals(that.getSchema());
             if (!schemasEqual) {
                 return false;
             }

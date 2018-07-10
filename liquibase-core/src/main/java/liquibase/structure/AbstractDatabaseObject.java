@@ -1,5 +1,7 @@
 package liquibase.structure;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -11,8 +13,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +50,22 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     public int compareTo(Object o) {
         AbstractDatabaseObject that = (AbstractDatabaseObject) o;
         if (this.getSchema() != null && that.getSchema() != null) {
+            if (shouldIncludeCatalogInEquals()) {
+                String thisCatalogName = this.getSchema().getCatalogName();
+                String thatCatalogName = that.getSchema().getCatalogName();
+
+                if (thisCatalogName != null && thatCatalogName != null) {
+                    int compare = thisCatalogName.compareToIgnoreCase(thatCatalogName);
+                    if (compare != 0) {
+                        return compare;
+                    }
+                } else if (thisCatalogName != null) {
+                    return 1;
+                } else if (thatCatalogName != null) {
+                    return -1;
+                } // if they are both null, it will continue with rest
+            }
+            // now compare schema name
             int compare = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
             if (compare != 0) {
                 return compare;
@@ -196,5 +212,15 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     @Override
     public String toString() {
         return getName();
+    }
+
+    /**
+     * Convenience method to check if the object types should consider catalog name
+     * also during comparision (equals(), hashcode() and compareTo())
+     *
+     * @return
+     */
+    public boolean shouldIncludeCatalogInEquals() {
+        return LiquibaseConfiguration.getInstance().shouldIncludeCatalogInEquals();
     }
 }
