@@ -99,10 +99,10 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     sanitizePath = sanitizePath.replaceFirst("classpath\\*:", "");
                 }
                 // if path is like 'jar:<url>!/{entry}', use the last part as resource path
-                if (path.contains("!/")) {
-                    String[] components = path.split("!/");
+                if (sanitizePath.contains("!/")) {
+                    String[] components = sanitizePath.split("!/");
                     if (components.length > 1) {
-                        path = components[components.length - 1];
+                        sanitizePath = components[components.length - 1];
                     }
                 }
 
