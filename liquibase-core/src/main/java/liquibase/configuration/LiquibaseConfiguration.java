@@ -144,9 +144,9 @@ public class LiquibaseConfiguration {
      *
      * @return
      */
-    public boolean shouldIncludeCatalogInEquals() {
+    public boolean shouldIncludeCatalogInSpecification() {
         Boolean includeCatalog = getConfiguration(GlobalConfiguration.class)
-                .getValue(GlobalConfiguration.INCLUDE_CATALOG_IN_EQUALS, Boolean.class);
+                .getValue(GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION, Boolean.class);
         return includeCatalog != null ? includeCatalog : false;
     }
 }
