@@ -90,11 +90,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     protected String getCharTypeName() {
-        if ((getDatabase() instanceof MSSQLDatabase) && ((MSSQLDatabase) getDatabase())
-            .sendsStringParametersAsUnicode()) {
-            return "nvarchar";
-        }
-        return "varchar";
+        return getDatabase().getCharTypeName();
     }
 
     public void init() throws DatabaseException {

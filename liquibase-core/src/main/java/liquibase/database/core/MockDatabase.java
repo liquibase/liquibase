@@ -812,4 +812,8 @@ public class MockDatabase implements Database, InternalDatabase {
     public boolean requiresExplicitNullForColumns() {
         return false;
     }
+
+    public String getCharTypeName() {
+        return "varchar";
+    }
 }

@@ -590,6 +590,13 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return "Unknown";
     }
 
+    public String getCharTypeName() {
+        if (this.sendsStringParametersAsUnicode()) {
+            return "nvarchar";
+        }
+        return "varchar";
+    }
+
     @Override
     protected String getQuotingStartCharacter() {
         return "[";
