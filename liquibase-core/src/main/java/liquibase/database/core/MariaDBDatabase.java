@@ -2,6 +2,9 @@ package liquibase.database.core;
 
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
+import liquibase.util.StringUtils;
 
 
 /**
@@ -26,6 +29,35 @@ public class MariaDBDatabase extends MySQLDatabase {
             return "org.mariadb.jdbc.Driver";
         }
         return null;
+    }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+
+        try {
+            major = getDatabaseMajorVersion();
+            minor = getDatabaseMinorVersion();
+            patch = getDatabasePatchVersion();
+        } catch (DatabaseException x) {
+            LogService.getLog(getClass()).warning(
+                    LogType.LOG, "Unable to determine exact database server version"
+                            + " - specified TIMESTAMP precision"
+                            + " will not be set: ", x);
+            return 0;
+        }
+
+        // MariaDB 5.3 introduced fractional support...
+        // https://mariadb.com/kb/en/library/microseconds-in-mariadb/
+        String minimumVersion = "5.3.0";
+
+        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, patch))
+            return 6;
+        else
+            return 0;
     }
 
     @Override
