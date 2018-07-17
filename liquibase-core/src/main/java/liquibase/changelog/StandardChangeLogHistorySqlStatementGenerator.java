@@ -25,36 +25,32 @@ public class StandardChangeLogHistorySqlStatementGenerator {
 
         List<SqlStatement> statementsToExecute = new ArrayList<>();
 
-        boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
-        boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
-        boolean hasTag = changeLogTable.getColumn("TAG") != null;
-        boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
-        boolean hasMD5SUM = changeLogTable.getColumn("MD5SUM") != null;
-        boolean hasContexts = changeLogTable.getColumn("CONTEXTS") != null;
-        boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
-        boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
-        boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
-        boolean hasDeploymentIdColumn = changeLogTable.getColumn("DEPLOYMENT_ID") != null;
-
         String liquibaseCatalogName = database.getLiquibaseCatalogName();
         String liquibaseSchemaName = database.getLiquibaseSchemaName();
         String databaseChangeLogTableName = database.getDatabaseChangeLogTableName();
 
+        boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
         if (!hasDescription) {
             executor.comment("Adding missing databasechangelog.description column");
             statementsToExecute.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
                     databaseChangeLogTableName, "DESCRIPTION", charTypeName + "(255)", null));
         }
+
+        boolean hasTag = changeLogTable.getColumn("TAG") != null;
         if (!hasTag) {
             executor.comment("Adding missing databasechangelog.tag column");
             statementsToExecute.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
                     databaseChangeLogTableName, "TAG", charTypeName + "(255)", null));
         }
+
+        boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
         if (!hasComments) {
             executor.comment("Adding missing databasechangelog.comments column");
             statementsToExecute.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
                     databaseChangeLogTableName, "COMMENTS", charTypeName + "(255)", null));
         }
+
+        boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
         if (!hasLiquibase) {
             executor.comment("Adding missing databasechangelog.liquibase column");
             statementsToExecute.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
@@ -77,6 +73,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
             }
         }
 
+        boolean hasMD5SUM = changeLogTable.getColumn("MD5SUM") != null;
         if (!hasMD5SUM) {
             executor.comment("Adding missing databasechangelog.liquibase column");
             statementsToExecute.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
@@ -100,6 +97,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
             }
         }
 
+        boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
         if (!hasOrderExecuted) {
             executor.comment("Adding missing databasechangelog.orderexecuted column");
             statementsToExecute.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
@@ -110,7 +108,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
                     databaseChangeLogTableName, "ORDEREXECUTED", "int", false));
         }
 
-
+        boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
         if (!hasExecTypeColumn) {
             executor.comment("Adding missing databasechangelog.exectype column");
             statementsToExecute.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
@@ -123,6 +121,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
                     false));
         }
 
+        boolean hasContexts = changeLogTable.getColumn("CONTEXTS") != null;
         if (hasContexts) {
             Integer columnSize = changeLogTable.getColumn("CONTEXTS").getType().getColumnSize();
             if ((columnSize != null) && (columnSize < Integer.parseInt(CONTEXTS_SIZE))) {
@@ -138,6 +137,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
                     + CONTEXTS_SIZE+")", null));
         }
 
+        boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
         if (hasLabels) {
             Integer columnSize = changeLogTable.getColumn("LABELS").getType().getColumnSize();
             if ((columnSize != null) && (columnSize < Integer.parseInt(LABELS_SIZE))) {
@@ -153,6 +153,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
                     LABELS_SIZE + ")", null));
         }
 
+        boolean hasDeploymentIdColumn = changeLogTable.getColumn("DEPLOYMENT_ID") != null;
         if (!hasDeploymentIdColumn) {
             executor.comment("Adding missing databasechangelog.deployment_id column");
             statementsToExecute.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
