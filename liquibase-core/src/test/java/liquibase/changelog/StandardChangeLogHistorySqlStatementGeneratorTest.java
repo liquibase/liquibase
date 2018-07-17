@@ -166,12 +166,12 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
 
     @Test
     public void shouldNotUpdateContextsColumnIfRightSize() throws DatabaseException {
-        shouldNotUpdateColumnIfRightSize("CONTEXTS", Integer.parseInt(CONTEXTS_SIZE));
+        shouldNotUpdateColumnIfRightSize("CONTEXTS", CONTEXTS_SIZE);
     }
 
     @Test
     public void shouldNotUpdateLabelsColumnIfRightSize() throws DatabaseException {
-        shouldNotUpdateColumnIfRightSize("LABELS", Integer.parseInt(LABELS_SIZE));
+        shouldNotUpdateColumnIfRightSize("LABELS", LABELS_SIZE);
     }
 
     @Test
