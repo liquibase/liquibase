@@ -6,6 +6,7 @@ import liquibase.LabelExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
+import liquibase.changelog.definition.ChangeLogTableDefinition;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -94,18 +95,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         Database database = getDatabase();
 
-        String charTypeName = getCharTypeName();
-
         Table changeLogTable = getChangelogTable(database);
 
         List<SqlStatement> statementsToExecute = new ArrayList<>();
 
-        boolean changeLogCreateAttempted = false;
-
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         if (changeLogTable != null) {
-            statementsToExecute.addAll(sqlGenerator.changeLogTableUpdate(database, changeLogTable));
+            statementsToExecute.addAll(sqlGenerator.changeLogTableUpdate(database, changeLogTable, new ChangeLogTableDefinition()));
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new
                     SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
@@ -124,7 +121,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 }
             }
 
-        } else if (!changeLogCreateAttempted) {
+        } else {
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
@@ -146,8 +143,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 executor.execute(sql);
                 getDatabase().commit();
             } else {
-                LogService.getLog(getClass()).info(LogType.LOG, "Cannot run " + sql.getClass().getSimpleName() + " on" +
-                    " " + getDatabase().getShortName() + " when checking databasechangelog table");
+                LogService.getLog(getClass()).info(LogType.LOG, "Cannot run " + sql.getClass().getSimpleName() + " on " + getDatabase().getShortName() + " when checking databasechangelog table");
             }
         }
         serviceInitialized = true;
