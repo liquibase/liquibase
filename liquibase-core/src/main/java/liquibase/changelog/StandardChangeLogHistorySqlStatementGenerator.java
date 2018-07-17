@@ -19,7 +19,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
     static final String LABELS_SIZE = "255";
     static final String CONTEXTS_SIZE = "255";
 
-    List<SqlStatement> changeLogTableUpdate(Database database, String charTypeName, Table changeLogTable) throws DatabaseException {
+    List<SqlStatement> changeLogTableUpdate(Database database, Table changeLogTable) throws DatabaseException {
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
@@ -28,6 +28,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
         String liquibaseCatalogName = database.getLiquibaseCatalogName();
         String liquibaseSchemaName = database.getLiquibaseSchemaName();
         String databaseChangeLogTableName = database.getDatabaseChangeLogTableName();
+        String charTypeName = database.getCharTypeName();
 
         boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
         if (!hasDescription) {

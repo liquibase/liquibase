@@ -32,7 +32,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
         Table table = new Table(null, null, databaseChangeLogTableName);
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), table);
 
         //then
         assertThat(sqlStatements).isNotEmpty();
@@ -85,7 +85,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
         table.addColumn(column);
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().contains(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, columnName, charTypeName + "(" + finalSize + ")"));
@@ -119,7 +119,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
         table.addColumn(column);
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().doesNotContain(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, liquibase, charTypeName + s));
@@ -148,7 +148,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
         Table table = new Table(null, null, databaseChangeLogTableName);
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new SQLiteDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new SQLiteDatabase(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().doesNotContain(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, liquibase, charTypeName + "(" + s + ")"));
@@ -195,7 +195,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
 
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().doesNotContain(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, "CONTEXTS", charTypeName + "("+CONTEXTS_SIZE+")"));
@@ -221,7 +221,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
 
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().doesNotContain(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, columnName, charTypeName + "(" + size + ")"));
@@ -247,7 +247,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
 
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().contains(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, "CONTEXTS", charTypeName + "("+CONTEXTS_SIZE+")"));
@@ -274,7 +274,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
 
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().doesNotContain(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, "LABELS", charTypeName + "("+LABELS_SIZE+")"));
@@ -300,7 +300,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
 
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new MockDatabase(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().contains(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, "LABELS", charTypeName + "("+LABELS_SIZE+")"));
@@ -319,7 +319,7 @@ public class StandardChangeLogHistorySqlStatementGeneratorTest {
         Table table = new Table(null, null, databaseChangeLogTableName);
 
         //when
-        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new DB2Database(), charTypeName, table);
+        List<SqlStatement> sqlStatements = generator.changeLogTableUpdate(new DB2Database(), table);
 
         //then
         assertThat(sqlStatements).usingFieldByFieldElementComparator().contains(new ReorganizeTableStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName));

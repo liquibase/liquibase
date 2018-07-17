@@ -105,7 +105,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         if (changeLogTable != null) {
-            statementsToExecute.addAll(sqlGenerator.changeLogTableUpdate(database, charTypeName, changeLogTable));
+            statementsToExecute.addAll(sqlGenerator.changeLogTableUpdate(database, changeLogTable));
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new
                     SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
