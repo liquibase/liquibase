@@ -72,6 +72,8 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     private boolean dropFirst;
 
+    private boolean clearCheckSums;
+
     private boolean shouldRun = true;
 
     private File rollbackFile;
@@ -154,6 +156,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		liquibase.setContexts(contexts);
         liquibase.setLabels(labels);
 		liquibase.setDropFirst(dropFirst);
+		liquibase.setClearCheckSums(clearCheckSums);
 		liquibase.setShouldRun(shouldRun);
 		liquibase.setRollbackFile(rollbackFile);
 		liquibase.setResourceLoader(resourceLoader);
@@ -253,6 +256,14 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
 	public void setDropFirst(boolean dropFirst) {
 		this.dropFirst = dropFirst;
+	}
+
+	public boolean isClearCheckSums() {
+		return clearCheckSums;
+	}
+
+	public void setClearCheckSums(boolean clearCheckSums) {
+		this.clearCheckSums = clearCheckSums;
 	}
 
 	public boolean isShouldRun() {
