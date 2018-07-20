@@ -816,4 +816,9 @@ public class MockDatabase implements Database, InternalDatabase {
     public String getCharTypeName() {
         return "varchar";
     }
+
+    @Override
+    public String getDateTimeTypeString() {
+        return "datetime";
+    }
 }

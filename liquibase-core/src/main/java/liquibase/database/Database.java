@@ -455,5 +455,7 @@ public interface Database extends PrioritizedService {
     ValidationErrors validate();
 
     String getCharTypeName();
+
+    String getDateTimeTypeString();
 }
 

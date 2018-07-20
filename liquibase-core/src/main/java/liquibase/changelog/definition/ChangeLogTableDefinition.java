@@ -1,6 +1,8 @@
 package liquibase.changelog.definition;
 
+import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.DateTimeType;
 import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.VarcharType;
 import liquibase.statement.NotNullConstraint;
@@ -33,11 +35,19 @@ public class ChangeLogTableDefinition {
     private static final String EXECTYPE = "EXECTYPE";
     private static final String LABELS = "LABELS";
     private static final String CONTEXTS = "CONTEXTS";
+    private static final String ID = "ID";
+    private static final String AUTHOR = "AUTHOR";
+    private static final String FILENAME = "FILENAME";
+    private static final String DATEEXECUTED = "DATEEXECUTED";
 
     private List<AlterChangeLogTableSqlStatementProvider> updateTableSqlStatementProviders = new ArrayList<>();
     private Map<String, ChangeLogColumnDefinition> columnDefinitions = new HashMap<>();
 
     public ChangeLogTableDefinition() {
+        columnDefinitions.put(ID, new ChangeLogColumnDefinition(ID, getVarchar(255), null, new NotNullConstraint()));
+        columnDefinitions.put(AUTHOR, new ChangeLogColumnDefinition(AUTHOR, getVarchar(255), null, new NotNullConstraint()));
+        columnDefinitions.put(FILENAME, new ChangeLogColumnDefinition(FILENAME, getVarchar(255), null, new NotNullConstraint()));
+        columnDefinitions.put(DATEEXECUTED, new ChangeLogColumnDefinition(DATEEXECUTED, getDateTime(), null, new NotNullConstraint()));
         columnDefinitions.put(ORDEREXECUTED, new ChangeLogColumnDefinition(ORDEREXECUTED, getInt(), ORDEREXECUTED_DEFAULT_VALUE, new NotNullConstraint()));
         columnDefinitions.put(DEPLOYMENT_ID, new ChangeLogColumnDefinition(DEPLOYMENT_ID, getVarchar(DEPLOYMENT_COLUMN_SIZE)));
         columnDefinitions.put(LIQUIBASE, new ChangeLogColumnDefinition(LIQUIBASE, getVarchar(LIQUIBASE_SIZE)));
@@ -59,6 +69,10 @@ public class ChangeLogTableDefinition {
         updateTableSqlStatementProviders.add(new ColumnWithDefaultValueSqlStatementProvider(columnDefinitions.get(EXECTYPE)));
         updateTableSqlStatementProviders.add(new SimpleTextColumnIgnoreDifferentTypeDefinition(columnDefinitions.get(LABELS)));
         updateTableSqlStatementProviders.add(new SimpleTextColumnIgnoreDifferentTypeDefinition(columnDefinitions.get(CONTEXTS)));
+    }
+
+    private DateTimeType getDateTime() {
+        return new DateTimeType();
     }
 
     public List<AlterChangeLogTableSqlStatementProvider> getUpdateTableSqlStatementProviders() {

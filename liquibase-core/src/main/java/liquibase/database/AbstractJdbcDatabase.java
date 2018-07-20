@@ -1599,4 +1599,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String getCharTypeName() {
         return "varchar";
     }
+
+    public String getDateTimeTypeString() {
+        return "datetime";
+    }
 }

@@ -598,6 +598,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String getDateTimeTypeString() {
+        return "datetime2(3)";
+    }
+
+    @Override
     protected String getQuotingStartCharacter() {
         return "[";
     }
