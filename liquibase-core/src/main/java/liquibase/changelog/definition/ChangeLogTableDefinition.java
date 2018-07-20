@@ -3,6 +3,7 @@ package liquibase.changelog.definition;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.VarcharType;
+import liquibase.statement.NotNullConstraint;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,14 +38,14 @@ public class ChangeLogTableDefinition {
     private Map<String, ChangeLogColumnDefinition> columnDefinitions = new HashMap<>();
 
     public ChangeLogTableDefinition() {
-        columnDefinitions.put(ORDEREXECUTED, new ChangeLogColumnDefinition(ORDEREXECUTED, getInt(), ORDEREXECUTED_DEFAULT_VALUE));
+        columnDefinitions.put(ORDEREXECUTED, new ChangeLogColumnDefinition(ORDEREXECUTED, getInt(), ORDEREXECUTED_DEFAULT_VALUE, new NotNullConstraint()));
         columnDefinitions.put(DEPLOYMENT_ID, new ChangeLogColumnDefinition(DEPLOYMENT_ID, getVarchar(DEPLOYMENT_COLUMN_SIZE)));
         columnDefinitions.put(LIQUIBASE, new ChangeLogColumnDefinition(LIQUIBASE, getVarchar(LIQUIBASE_SIZE)));
         columnDefinitions.put(MD_5_SUM, new ChangeLogColumnDefinition(MD_5_SUM, getVarchar(MD5SUM_SIZE)));
         columnDefinitions.put(DESCRIPTION, new ChangeLogColumnDefinition(DESCRIPTION, getVarchar(DESCRIPTON_SIZE)));
         columnDefinitions.put(TAG, new ChangeLogColumnDefinition(TAG, getVarchar(TAG_SIZE)));
         columnDefinitions.put(COMMENTS, new ChangeLogColumnDefinition(COMMENTS, getVarchar(COMMENTS_SIZE)));
-        columnDefinitions.put(EXECTYPE, new ChangeLogColumnDefinition(EXECTYPE, getVarchar(EXECTYPE_SIZE), "EXECUTED"));
+        columnDefinitions.put(EXECTYPE, new ChangeLogColumnDefinition(EXECTYPE, getVarchar(EXECTYPE_SIZE), "EXECUTED", new NotNullConstraint()));
         columnDefinitions.put(LABELS, new ChangeLogColumnDefinition(LABELS, getVarchar(LABELS_SIZE)));
         columnDefinitions.put(CONTEXTS, new ChangeLogColumnDefinition(CONTEXTS, getVarchar(CONTEXTS_SIZE)));
 
@@ -72,5 +73,9 @@ public class ChangeLogTableDefinition {
 
     private LiquibaseDataType getInt() {
         return new IntType();
+    }
+
+    public Map<String, ChangeLogColumnDefinition> getColumnDefinitions() {
+        return columnDefinitions;
     }
 }

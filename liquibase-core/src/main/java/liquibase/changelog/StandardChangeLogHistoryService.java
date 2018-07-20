@@ -84,10 +84,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return hasDatabaseChangeLogTable;
     }
 
-    protected String getCharTypeName() {
-        return getDatabase().getCharTypeName();
-    }
-
     public void init() throws DatabaseException {
         if (serviceInitialized) {
             return;
