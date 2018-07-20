@@ -2,6 +2,7 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.changelog.definition.ChangeLogTableDefinition;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
@@ -29,6 +30,10 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     @Override
     public void reset() {
 
+    }
+
+    ChangeLogTableDefinition getChangeLogTableDefinition() {
+        return new ChangeLogTableDefinition();
     }
 
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet)

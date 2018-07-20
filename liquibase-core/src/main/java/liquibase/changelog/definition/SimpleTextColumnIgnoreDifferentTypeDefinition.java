@@ -12,34 +12,36 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleTextColumnIgnoreDifferentTypeDefinition implements ChangeLogColumnDefinition {
+public class SimpleTextColumnIgnoreDifferentTypeDefinition implements AlterChangeLogTableSqlStatementProvider {
 
-    private final String columnName;
-    private final int desiredColumnSize;
+    private final ChangeLogColumnDefinition columnDefinition;
 
-    public SimpleTextColumnIgnoreDifferentTypeDefinition(String columnName, int desiredColumnSize) {
-        this.columnName = columnName;
-        this.desiredColumnSize = desiredColumnSize;
+    public SimpleTextColumnIgnoreDifferentTypeDefinition(ChangeLogColumnDefinition columnDefinition) {
+        this.columnDefinition = columnDefinition;
     }
 
-    public List<SqlStatement> complementChangeLogTable(Database database, Table changeLogTable) throws DatabaseException {
+    public List<SqlStatement> createSqlStatements(Database database, Table changeLogTable) throws DatabaseException {
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
         String liquibaseCatalogName = database.getLiquibaseCatalogName();
         String liquibaseSchemaName = database.getLiquibaseSchemaName();
         String databaseChangeLogTableName = database.getDatabaseChangeLogTableName();
-        String charTypeName = database.getCharTypeName();
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
+        String columnName = columnDefinition.getColumnName();
+        Integer desiredColumnSize = (Integer) columnDefinition.getDataType().getParameters()[0];
+        String charType = columnDefinition.getDataType().toDatabaseDataType(database).getType();
+
         boolean hasContexts = changeLogTable.getColumn(columnName) != null;
+
         if (hasContexts) {
             Integer columnSize = changeLogTable.getColumn(columnName).getType().getColumnSize();
             if ((columnSize != null) && (columnSize < desiredColumnSize)) {
                 executor.comment("Modifying size of databasechangelog." + columnName + " column");
-                sqlStatements.add(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, columnName, charTypeName + "(" + desiredColumnSize + ")"));
+                sqlStatements.add(new ModifyDataTypeStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, columnName, charType));
             }
         } else {
             executor.comment("Adding missing databasechangelog." + columnName + " column");
-            sqlStatements.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, columnName, charTypeName + "(" + desiredColumnSize + ")", null));
+            sqlStatements.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, columnName, charType, null));
         }
 
         return sqlStatements;

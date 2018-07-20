@@ -1,14 +1,34 @@
 package liquibase.changelog.definition;
 
-import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import liquibase.statement.SqlStatement;
-import liquibase.structure.core.Table;
+import liquibase.datatype.LiquibaseDataType;
 
-import java.util.List;
+public class ChangeLogColumnDefinition {
 
-public interface ChangeLogColumnDefinition {
+    private final String columnName;
+    private final LiquibaseDataType dataType;
+    private final Object defaultValue;
 
-    List<SqlStatement> complementChangeLogTable(Database database, Table changeLogTable) throws DatabaseException;
+    public ChangeLogColumnDefinition(String columnName, LiquibaseDataType dataType, Object defaultValue) {
+        this.columnName = columnName;
+        this.dataType = dataType;
+        this.defaultValue = defaultValue;
+    }
 
+    public ChangeLogColumnDefinition(String columnName, LiquibaseDataType dataType) {
+        this.columnName = columnName;
+        this.dataType = dataType;
+        this.defaultValue = null;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public LiquibaseDataType getDataType() {
+        return dataType;
+    }
+
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
 }

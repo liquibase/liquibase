@@ -11,24 +11,23 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleTextColumnDefinition implements ChangeLogColumnDefinition {
+public class SimpleTextColumnDefinition implements AlterChangeLogTableSqlStatementProvider {
 
-    private final String columnName;
-    private final int desiredColumnSize;
+    private final ChangeLogColumnDefinition columnDefinition;
 
-    public SimpleTextColumnDefinition(String columnName, int desiredColumnSize) {
-        this.columnName = columnName;
-        this.desiredColumnSize = desiredColumnSize;
+    public SimpleTextColumnDefinition(ChangeLogColumnDefinition columnDefinition) {
+        this.columnDefinition = columnDefinition;
     }
 
-    public List<SqlStatement> complementChangeLogTable(Database database, Table changeLogTable) throws DatabaseException {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    public List<SqlStatement> createSqlStatements(Database database, Table changeLogTable) throws DatabaseException {
+        List<SqlStatement> statements = new ArrayList<>();
         String liquibaseCatalogName = database.getLiquibaseCatalogName();
         String liquibaseSchemaName = database.getLiquibaseSchemaName();
         String databaseChangeLogTableName = database.getDatabaseChangeLogTableName();
-        String charTypeName = database.getCharTypeName();
         Executor executor = ExecutorService.getInstance().getExecutor(database);
-        String columnType = charTypeName + "(" + desiredColumnSize + ")";
+
+        String columnType = columnDefinition.getDataType().toDatabaseDataType(database).getType();
+        String columnName = columnDefinition.getColumnName();
 
         boolean columnExists = changeLogTable.getColumn(columnName) != null;
         if (!columnExists) {

@@ -2,6 +2,8 @@ package liquibase.changelog.definition;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.VarcharType;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -13,29 +15,29 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeploymentColumnDefinition implements ChangeLogColumnDefinition {
+public class DeploymentColumnStatements implements AlterChangeLogTableSqlStatementProvider {
 
-    private final String columnName;
-    private final int desiredColumnSize;
+    private final ChangeLogColumnDefinition columnDefinition;
 
-    public DeploymentColumnDefinition(String columnName, int desiredColumnSize) {
-        this.columnName = columnName;
-        this.desiredColumnSize = desiredColumnSize;
+    public DeploymentColumnStatements(ChangeLogColumnDefinition columnDefinition) {
+        this.columnDefinition = columnDefinition;
     }
 
-    public List<SqlStatement> complementChangeLogTable(Database database, Table changeLogTable) throws DatabaseException {
-        List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
+    public List<SqlStatement> createSqlStatements(Database database, Table changeLogTable) throws DatabaseException {
+        List<SqlStatement> sqlStatements = new ArrayList<>();
         String liquibaseCatalogName = database.getLiquibaseCatalogName();
         String liquibaseSchemaName = database.getLiquibaseSchemaName();
         String databaseChangeLogTableName = database.getDatabaseChangeLogTableName();
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
+        String columnName = columnDefinition.getColumnName();
+        LiquibaseDataType dataType = columnDefinition.getDataType();
 
         boolean hasDeploymentIdColumn = changeLogTable.getColumn(columnName) != null;
         if (!hasDeploymentIdColumn) {
             executor.comment("Adding missing databasechangelog." + columnName + " column");
             sqlStatements.add(new AddColumnStatement(liquibaseCatalogName, liquibaseSchemaName,
-                    databaseChangeLogTableName, columnName, "VARCHAR(" + desiredColumnSize + ")", null));
+                    databaseChangeLogTableName, columnName, dataType.toDatabaseDataType(database).toSql(), null));
             if (database instanceof DB2Database) {
                 sqlStatements.add(new ReorganizeTableStatement(liquibaseCatalogName,
                         liquibaseSchemaName, databaseChangeLogTableName));

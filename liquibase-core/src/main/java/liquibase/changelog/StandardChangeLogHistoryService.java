@@ -123,7 +123,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         } else {
             executor.comment("Create Database Change Log Table");
-            SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
+            SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement(getChangeLogTableDefinition());
             if (!canCreateChangeLogTable()) {
                 throw new DatabaseException("Cannot create " + getDatabase().escapeTableName(getLiquibaseCatalogName
                     (), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your getDatabase()" +
