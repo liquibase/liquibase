@@ -48,18 +48,6 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                     columnDefinition.getConstraints().toArray(new ColumnConstraint[] {})
             );
         }
-
-//        createTableStatement.addColumn("ORDEREXECUTED", DataTypeFactory.getInstance().fromDescription("int", database), null, null, new NotNullConstraint());
-//        createTableStatement.addColumn("EXECTYPE", DataTypeFactory.getInstance().fromDescription(charTypeName + "(10)", database), null, null, new NotNullConstraint());
-//        createTableStatement.addColumn("MD5SUM", DataTypeFactory.getInstance().fromDescription(charTypeName + "(35)", database));
-//        createTableStatement.addColumn("DESCRIPTION", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database));
-//        createTableStatement.addColumn("COMMENTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database));
-//        createTableStatement.addColumn("TAG", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database));
-//        createTableStatement.addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription(charTypeName + "(20)", database));
-//        createTableStatement.addColumn("CONTEXTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(" + getContextsSize() + ")", database));
-//        createTableStatement.addColumn("LABELS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(" + getLabelsSize() + ")", database));
-//        createTableStatement.addColumn("DEPLOYMENT_ID", DataTypeFactory.getInstance().fromDescription(charTypeName + "(10)", database));
-
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
     }
 
