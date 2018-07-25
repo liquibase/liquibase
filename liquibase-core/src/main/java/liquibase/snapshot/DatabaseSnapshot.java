@@ -152,6 +152,31 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
     }
 
+    /**
+     *
+     *  Method which merges two object snapshot models into one
+     *
+     *  @param  snapshotToMerge            Another object snapshot model
+     *  @return DatabaseSnapshot           Merged object model
+     *
+     */
+    public DatabaseSnapshot merge(DatabaseSnapshot snapshotToMerge) {
+        DatabaseSnapshot returnSnapshot = this;
+        Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> allFoundMap = snapshotToMerge.allFound.toMap();
+        Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> referencedObjectsMap = snapshotToMerge.referencedObjects.toMap();
+        for (Set<? extends DatabaseObject> setOfDatabaseObject : allFoundMap.values()) {
+            for (DatabaseObject dbObject : setOfDatabaseObject) {
+                returnSnapshot.allFound.add(dbObject);
+            }
+        }
+        for (Set<? extends DatabaseObject> setOfDatabaseObject : referencedObjectsMap.values()) {
+            for (DatabaseObject dbObject : setOfDatabaseObject) {
+                returnSnapshot.referencedObjects.add(dbObject);
+            }
+        }
+        return returnSnapshot;
+    }
+
     public SnapshotControl getSnapshotControl() {
         return snapshotControl;
     }

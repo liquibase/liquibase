@@ -137,4 +137,16 @@ public class LiquibaseConfiguration {
 
         return StringUtils.join(reasons, " AND ");
     }
+
+    /**
+     * Convenience method to check if the object types should consider catalog name
+     * also during comparision (equals(), hashcode() and compareTo())
+     *
+     * @return
+     */
+    public boolean shouldIncludeCatalogInSpecification() {
+        Boolean includeCatalog = getConfiguration(GlobalConfiguration.class)
+                .getValue(GlobalConfiguration.INCLUDE_CATALOG_IN_SPECIFICATION, Boolean.class);
+        return includeCatalog != null ? includeCatalog : false;
+    }
 }

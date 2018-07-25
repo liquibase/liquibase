@@ -32,6 +32,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -192,14 +193,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
-                        String sql = getMSSQLSql(jdbcSchemaName);
+                        String sql = getMSSQLSql(jdbcSchemaName, tableName);
                         return executeAndExtract(sql, database);
                     } else {
                         throw new RuntimeException("Cannot bulk select");
                     }
                 }
 
-                protected String getMSSQLSql(String jdbcSchemaName) {
+                protected String getMSSQLSql(String jdbcSchemaName, String tableName) {
                     //comes from select object_definition(object_id('sp_fkeys'))
                     return "select " +
                             "convert(sysname,db_name()) AS PKTABLE_CAT, " +
@@ -231,8 +232,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "c2.object_id = f.parent_object_id and " +
                             "c1.column_id = k.referenced_column_id and " +
                             "c2.column_id = k.parent_column_id and " +
-                            "object_schema_name(o1.object_id)='" + jdbcSchemaName + "' " +
-                            "order by 5, 6, 7, 9, 8";
+                            "((object_schema_name(o1.object_id)='" + jdbcSchemaName + "'" +
+                            " and convert(sysname,schema_name(o2.schema_id))='" + jdbcSchemaName + "' and " +
+                            "convert(sysname,o2.name)='" + tableName + "' ) or ( convert(sysname,schema_name" +
+                            "(o2.schema_id))='" + jdbcSchemaName + "' and convert(sysname,o2.name)='" + tableName +
+                            "' )) order by 5, 6, 7, 9, 8";
                 }
 
                 protected String getDB2Sql(String jdbcSchemaName, String tableName) {
@@ -482,7 +486,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     ResultSet resultSet = null;
                     try {
                         stmt = ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement();
-                        resultSet = stmt.executeQuery("select name from sys.types where is_user_defined=1");
+                        resultSet = stmt.executeQuery("select name from " + (catalogName == null ? "" : "[" + catalogName + "].") + "sys.types where is_user_defined=1");
                         while (resultSet.next()) {
                             userDefinedTypes.add(resultSet.getString("name").toLowerCase());
                         }
@@ -651,9 +655,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
           protected List<CachedRow> mssqlQuery(boolean bulk) throws DatabaseException, SQLException {
             CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-            String sql = "select original_db_name() AS TABLE_CAT, " +
-                "object_schema_name(c.object_id) AS TABLE_SCHEM, " +
-                "object_name(c.object_id) AS TABLE_NAME, " +
+              String databaseName = StringUtils.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+              String dbIdParam;
+              String databasePrefix;
+              if (databaseName == null) {
+                  databasePrefix = "";
+                  dbIdParam = "";
+              } else {
+                  dbIdParam = ", db_id('"+databaseName+"')";
+                  databasePrefix = "[" + databaseName + "].";
+              }
+
+              String sql = "select " +
+                "db_name(" + (databaseName == null ? "" : "db_id('" + databaseName + "')") + ") AS TABLE_CAT, " +
+                "object_schema_name(c.object_id"+dbIdParam+") AS TABLE_SCHEM, " +
+                "object_name(c.object_id"+dbIdParam+") AS TABLE_NAME, " +
                 "c.name AS COLUMN_NAME, " +
                 "is_filestream, " +
                 "is_rowguidcol, " +
@@ -704,22 +720,22 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 "c.scale as DECIMAL_DIGITS, " +
                 "c.max_length as COLUMN_SIZE, " +
                 "c.precision as DATA_PRECISION " +
-                "FROM sys.columns c " +
-                "inner join sys.types t on c.user_type_id=t.user_type_id " +
+                "FROM "+databasePrefix+"sys.columns c " +
+                "inner join "+databasePrefix+"sys.types t on c.user_type_id=t.user_type_id " +
                 "{REMARKS_JOIN_PLACEHOLDER}" +
-                "left outer join sys.default_constraints dc on dc.parent_column_id = c.column_id AND dc.parent_object_id=c.object_id AND type_desc='DEFAULT_CONSTRAINT' " +
-                "WHERE object_schema_name(c.object_id)='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "'";
+                "left outer join "+databasePrefix+"sys.default_constraints dc on dc.parent_column_id = c.column_id AND dc.parent_object_id=c.object_id AND type_desc='DEFAULT_CONSTRAINT' " +
+                "WHERE object_schema_name(c.object_id"+dbIdParam+")='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "'";
 
 
             if (!bulk) {
               if (tableName != null) {
-                sql += " and object_name(c.object_id)='" + database.escapeStringForDatabase(tableName) + "'";
+                sql += " and object_name(c.object_id"+dbIdParam+")='" + database.escapeStringForDatabase(tableName) + "'";
               }
               if (columnName != null) {
                 sql += " and c.name='" + database.escapeStringForDatabase(columnName) + "'";
               }
             }
-            sql += "order by object_schema_name(c.object_id), object_name(c.object_id), c.column_id";
+            sql += "order by object_schema_name(c.object_id"+dbIdParam+"), object_name(c.object_id"+dbIdParam+"), c.column_id";
 
 
             // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
@@ -728,7 +744,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 // SQL Server 2005 or later
                 // https://technet.microsoft.com/en-us/library/ms177541.aspx
                 sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS], ");
-                sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "left outer join [sys].[extended_properties] AS [ep] ON [ep].[class] = 1 " +
+                sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "left outer join "+databasePrefix+"[sys].[extended_properties] AS [ep] ON [ep].[class] = 1 " +
                     "AND [ep].[major_id] = c.object_id " +
                     "AND [ep].[minor_id] = column_id " +
                     "AND [ep].[name] = 'MS_Description' ");
@@ -938,20 +954,32 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryMssql(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class);
 
+                    String databaseName = StringUtils.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+                    String dbIdParam;
+                    String databasePrefix;
+                    if (databaseName == null) {
+                        databasePrefix = "";
+                        dbIdParam = "";
+                    } else {
+                        dbIdParam = ", db_id('"+databaseName+"')";
+                        databasePrefix = "[" + databaseName + "].";
+                    }
+
+
                     //From select object_definition(object_id('sp_tables'))
                     String sql = "select " +
-                            "convert(sysname,db_name()) AS TABLE_QUALIFIER, " +
-                            "convert(sysname,schema_name(o.schema_id)) AS TABLE_SCHEM, " +
+                            "db_name(" + (databaseName == null ? "" : "db_id('" + databaseName + "')") + ") AS TABLE_CAT, " +
+                            "convert(sysname,object_schema_name(o.object_id" + dbIdParam + ")) AS TABLE_SCHEM, " +
                             "convert(sysname,o.name) AS TABLE_NAME, " +
                             "'TABLE' AS TABLE_TYPE, " +
                             "CAST(ep.value as varchar(max)) as REMARKS " +
-                            "from  sys.all_objects o " +
+                            "from " + databasePrefix + "sys.all_objects o " +
                             "left outer join sys.extended_properties ep on ep.name='MS_Description' and major_id=o.object_id and minor_id=0 " +
                             "where " +
                             "o.type in ('U') " +
-                            "and has_perms_by_name(quotename(schema_name(o.schema_id)) + '.' + quotename(o.name), 'object', 'select') = 1 " +
+                            "and has_perms_by_name(" + (databaseName == null ? "" : "quotename('" + databaseName + "') + '.' + ") + "quotename(object_schema_name(o.object_id" + dbIdParam + ")) + '.' + quotename(o.name), 'object', 'select') = 1 " +
                             "and charindex(substring(o.type,1,1),'U') <> 0 " +
-                            "and schema_name(o.schema_id)='" + database.escapeStringForDatabase(ownerName) + "'";
+                            "and object_schema_name(o.object_id" + dbIdParam + ")='" + database.escapeStringForDatabase(ownerName) + "'";
                     if (tableName != null) {
                         sql += " AND o.name='" + database.escapeStringForDatabase(tableName) + "' ";
                     }

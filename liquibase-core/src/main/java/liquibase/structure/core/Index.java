@@ -166,9 +166,9 @@ public class Index extends AbstractDatabaseObject {
 
         if (this.getTable() != null && o.getTable() != null) {
             returnValue = this.getTable().compareTo(o.getTable());
-            if (returnValue == 0 && this.getTable().getSchema() != null && o.getTable().getSchema() != null) {
-                returnValue = StringUtils.trimToEmpty(this.getTable().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getTable().getSchema().getName()));
-            }
+            /*if (returnValue == 0 && this.getTable().getSchema() != null && o.getTable().getSchema() != null) {
+                returnValue = this.getTable().getSchema().compareTo(o.getTable().getSchema());
+            }*/
         }
 
         if (returnValue == 0) {

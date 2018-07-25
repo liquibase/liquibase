@@ -20,6 +20,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String AUTO_REORG = "autoReorg";
     public static final String DIFF_COLUMN_ORDER = "diffColumnOrder";
     public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
+    public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -79,9 +80,12 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
                 .setDescription("Should Liquibase compare column order in diff operation?")
                 .setDefaultValue(true);
 
-
         getContainer().addProperty(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, Boolean.class)
                 .setDescription("Should Liquibase include the change description in the id when generating changeSets?")
+                .setDefaultValue(false);
+
+        getContainer().addProperty(INCLUDE_CATALOG_IN_SPECIFICATION, Boolean.class)
+                .setDescription("Should Liquibase include the catalog name when determining equality?")
                 .setDefaultValue(false);
     }
 
