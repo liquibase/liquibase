@@ -400,20 +400,20 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 database.setDefaultCatalogName(this.defaultSchema);
             }
         }
-        if (StringUtils.trimToNull(this.liquibaseSchema) != null) {
+        if (StringUtil.trimToNull(this.liquibaseSchema) != null) {
             if (database.supportsSchemas()) {
                 database.setLiquibaseSchemaName(this.liquibaseSchema);
             } else if (database.supportsCatalogs()) {
                 database.setLiquibaseCatalogName(this.liquibaseSchema);
             }
         }
-        if (StringUtils.trimToNull(this.liquibaseTablespace) != null && database.supportsTablespaces()) {
+        if (StringUtil.trimToNull(this.liquibaseTablespace) != null && database.supportsTablespaces()) {
             database.setLiquibaseTablespaceName(this.liquibaseTablespace);
         }
-        if (StringUtils.trimToNull(this.databaseChangeLogTable) != null) {
+        if (StringUtil.trimToNull(this.databaseChangeLogTable) != null) {
             database.setDatabaseChangeLogTableName(this.databaseChangeLogTable);
         }
-        if (StringUtils.trimToNull(this.databaseChangeLogLockTable) != null) {
+        if (StringUtil.trimToNull(this.databaseChangeLogLockTable) != null) {
             database.setDatabaseChangeLogLockTableName(this.databaseChangeLogLockTable);
         }
 		return database;

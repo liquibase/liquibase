@@ -109,7 +109,7 @@ public class StringUtil {
                     returnList.add(obj);
                 }
             } else {
-                String possibleMergeString = StringUtils.join(possibleMerge, "") + obj.toString();
+                String possibleMergeString = StringUtil.join(possibleMerge, "") + obj.toString();
                 if (endDelimiter.equals(possibleMergeString)) {
                     returnList.add(possibleMergeString);
                     possibleMerge.clear();

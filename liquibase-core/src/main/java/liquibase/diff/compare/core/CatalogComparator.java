@@ -59,11 +59,11 @@ public class CatalogComparator implements DatabaseObjectComparator {
         }
 
         if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
-            if (StringUtils.trimToEmpty(object1Name).equals(StringUtils.trimToEmpty(object2Name))){
+            if (StringUtil.trimToEmpty(object1Name).equals(StringUtil.trimToEmpty(object2Name))){
                 return true;
             }
         } else {
-            if (StringUtils.trimToEmpty(object1Name).equalsIgnoreCase(StringUtils.trimToEmpty(object2Name))) {
+            if (StringUtil.trimToEmpty(object1Name).equalsIgnoreCase(StringUtil.trimToEmpty(object2Name))) {
                 return true;
             }
         }

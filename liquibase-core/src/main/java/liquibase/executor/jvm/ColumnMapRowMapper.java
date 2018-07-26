@@ -1,7 +1,6 @@
 package liquibase.executor.jvm;
 
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
