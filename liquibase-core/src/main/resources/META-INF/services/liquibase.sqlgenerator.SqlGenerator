@@ -16,7 +16,7 @@ liquibase.sqlgenerator.core.AddDefaultValueGeneratorOracle
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorPostgres
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorSybase
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorSybaseASA
-liquibase.sqlgenerator.core.AddDefaultValueSQLite
+liquibase.sqlgenerator.core.AddDefaultValueGeneratorSQLite
 liquibase.sqlgenerator.core.AddForeignKeyConstraintGenerator
 liquibase.sqlgenerator.core.AddPrimaryKeyGenerator
 liquibase.sqlgenerator.core.AddPrimaryKeyGeneratorInformix
