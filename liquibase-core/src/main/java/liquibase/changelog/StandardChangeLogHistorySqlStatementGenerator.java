@@ -14,8 +14,8 @@ public class StandardChangeLogHistorySqlStatementGenerator {
 
     List<SqlStatement> changeLogTableUpdate(Database database, Table changeLogTable, ChangeLogTableDefinition tableDefinition) throws DatabaseException {
         List<SqlStatement> statementsToExecute = new ArrayList<>();
-        for(AlterChangeLogTableSqlStatementProvider columnDefinition : tableDefinition.getUpdateTableSqlStatementProviders()) {
-            statementsToExecute.addAll(columnDefinition.createSqlStatements(database, changeLogTable));
+        for(AlterChangeLogTableSqlStatementProvider alterTableStatementProvider : tableDefinition.getUpdateTableSqlStatementProviders()) {
+            statementsToExecute.addAll(alterTableStatementProvider.createSqlStatements(database, changeLogTable));
         }
         return statementsToExecute;
     }
