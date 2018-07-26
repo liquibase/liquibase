@@ -8,7 +8,9 @@ public class SpringBootFatJar {
             if (components[1].endsWith(".jar")){
                 return components[1].substring(1);
             }
-            return components[2].substring(1);
+            return components[1].substring(1) + components[2];
+        } else if (components.length == 2) {
+            return components[1].substring(1);
         }
         return path;
     }
@@ -27,7 +29,11 @@ public class SpringBootFatJar {
     public static String getSimplePathForResources(String entryName, String path) {
         String[] components = path.split("!");
         if (components.length == 3) {
-            return entryName.replaceFirst(components[1],"").substring(1);
+            if (components[1].endsWith(".jar")) {
+                return components[2].substring(1);
+            } else {
+                return entryName.replaceFirst(components[1], "").substring(1);
+            }
         }
         return entryName;
     }
