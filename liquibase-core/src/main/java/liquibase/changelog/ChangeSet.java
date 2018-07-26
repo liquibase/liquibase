@@ -238,13 +238,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     protected void setDbms(String dbmsList) {
-        if (StringUtil.trimToNull(dbmsList) != null) {
-            String[] strings = dbmsList.toLowerCase().split(",");
-            dbmsSet = new HashSet<>();
-            for (String string : strings) {
-                dbmsSet.add(string.trim().toLowerCase());
-            }
-        }
+        this.dbmsSet = DatabaseList.toDbmsSet(dbmsList);
     }
 
     public String getFilePath() {
@@ -502,7 +496,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             // set object quoting strategy
             database.setObjectQuotingStrategy(objectQuotingStrategy);
 
-            // set auto-commit based on runInTransaction if database supports DDL in transactions
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
             }

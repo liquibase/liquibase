@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.OfflineConnection;
@@ -15,8 +17,14 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
+
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
 
@@ -186,9 +194,9 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
     @Override
     public String generatePrimaryKeyName(String tableName) {
         if (tableName.equals(getDatabaseChangeLogTableName())) {
-            tableName = "DbChgLog".toUpperCase();
+            tableName = "DbChgLog".toUpperCase(Locale.US);
         } else if (tableName.equals(getDatabaseChangeLogLockTableName())) {
-            tableName = "DbChgLogLock".toUpperCase();
+            tableName = "DbChgLogLock".toUpperCase(Locale.US);
         }
 
         String pkName = super.generatePrimaryKeyName(tableName);
@@ -227,5 +235,25 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
             return true;
         }
         return super.isSystemObject(example);
+    }
+
+    @Override
+    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
+        return objectName;
+    }
+
+    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectType.isAssignableFrom(Schema.class) || objectType.isAssignableFrom(Catalog.class)) {
+            return true;
+        }
+        return super.mustQuoteObjectName(objectName, objectType);
+    }
+
+    /**
+     * DB2 database are not case sensitive. However schemas and catalogs are case sensitive
+     */
+    @Override
+    public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
+        return CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE;
     }
 }

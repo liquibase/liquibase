@@ -13,6 +13,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.*;
@@ -74,7 +76,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             for (Index index : SnapshotGeneratorFactory.getInstance().createSnapshot(
                     new CatalogAndSchema(catalogName, schemaName), database,
                     new SnapshotControl(database, Index.class)).get(Index.class)) {
-                if (index.getTable().getName().equalsIgnoreCase(tableName)) {
+                if (index.getRelation().getName().equalsIgnoreCase(tableName)) {
                     if (alterTableVisitor.createThisIndex(index)) {
                         newIndices.add(index);
                     }
@@ -122,6 +124,32 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             throw new UnexpectedLiquibaseException(e);
         }
 
+    }
+
+    /**
+     * Uses {@link SqlGeneratorFactory} to generate {@link Sql} for the specified visitor and db objects.
+     *
+     * @param database
+     * @param alterTableVisitor
+     * @param catalogName
+     * @param schemaName
+     * @param tableName
+     * @return
+     */
+    public static Sql[] getAlterTableSqls(Database database, SQLiteDatabase.AlterTableVisitor alterTableVisitor,
+                                          String catalogName, String schemaName, String tableName) {
+        Sql[] generatedSqls;
+        try {
+            List<SqlStatement> statements = SQLiteDatabase.getAlterTableStatements(alterTableVisitor, database,
+                    catalogName, schemaName, tableName);
+            // convert from SqlStatement to Sql
+            SqlStatement[] sqlStatements = new SqlStatement[statements.size()];
+            sqlStatements = statements.toArray(sqlStatements);
+            generatedSqls = SqlGeneratorFactory.getInstance().generateSql(sqlStatements, database);
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        return generatedSqls;
     }
 
     @Override

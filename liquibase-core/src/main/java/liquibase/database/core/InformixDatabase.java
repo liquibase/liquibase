@@ -22,7 +22,8 @@ import java.util.regex.Pattern;
 
 public class InformixDatabase extends AbstractJdbcDatabase {
 
-	private static final String PRODUCT_NAME = "Informix Dynamic Server";
+    private static final String PRODUCT_NAME = "Informix Dynamic Server"; // product name returned by Informix driver
+    private static final String PRODUCT_NAME_DB2JCC_PREFIX = "IDS"; // prefix of the product name (e.g. "IDS/UNIX64") returned by IBM DB2 Universal JDBC (jcc) driver.
     private static final String TIME_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
     private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
 
@@ -156,7 +157,12 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	@Override
     public boolean isCorrectDatabaseImplementation(final DatabaseConnection conn)
 			throws DatabaseException {
-		return PRODUCT_NAME.equals(conn.getDatabaseProductName());
+		Boolean correct = false;
+		String name = conn.getDatabaseProductName();
+		if (name != null && (name.equals(PRODUCT_NAME) || name.startsWith(PRODUCT_NAME_DB2JCC_PREFIX))) {
+				correct = true;
+		}
+		return correct;
 	}
 
 	@Override

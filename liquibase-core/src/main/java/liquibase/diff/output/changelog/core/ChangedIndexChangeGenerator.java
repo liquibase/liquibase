@@ -62,14 +62,14 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
 
         Index index = (Index) changedObject;
 
-        if (index.getTable() != null  && index.getTable() instanceof Table) {
-            if ((((Table) index.getTable()).getPrimaryKey() != null) && DatabaseObjectComparatorFactory.getInstance()
-                .isSameObject(((Table) index.getTable()).getPrimaryKey().getBackingIndex(), changedObject, differences
+        if (index.getRelation() != null  && index.getRelation() instanceof Table) {
+            if ((((Table) index.getRelation()).getPrimaryKey() != null) && DatabaseObjectComparatorFactory.getInstance()
+                .isSameObject(((Table) index.getRelation()).getPrimaryKey().getBackingIndex(), changedObject, differences
                     .getSchemaComparisons(), comparisonDatabase)) {
-                return ChangeGeneratorFactory.getInstance().fixChanged(((Table) index.getTable()).getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
+                return ChangeGeneratorFactory.getInstance().fixChanged(((Table) index.getRelation()).getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
             }
 
-            List<UniqueConstraint> uniqueConstraints = ((Table) index.getTable()).getUniqueConstraints();
+            List<UniqueConstraint> uniqueConstraints = ((Table) index.getRelation()).getUniqueConstraints();
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
                     if ((constraint.getBackingIndex() != null) && DatabaseObjectComparatorFactory.getInstance()
@@ -83,11 +83,11 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         }
 
         DropIndexChange dropIndexChange = createDropIndexChange();
-        dropIndexChange.setTableName(index.getTable().getName());
+        dropIndexChange.setTableName(index.getRelation().getName());
         dropIndexChange.setIndexName(index.getName());
 
         CreateIndexChange addIndexChange = createCreateIndexChange();
-        addIndexChange.setTableName(index.getTable().getName());
+        addIndexChange.setTableName(index.getRelation().getName());
         List<AddColumnConfig> columns = new ArrayList<>();
         for (Column col : index.getColumns()) {
             columns.add(new AddColumnConfig(col));
@@ -118,15 +118,15 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
                 }
             };
 
-            control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(referenceColumns));
+            control.setAlreadyHandledChanged(new Index().setRelation(index.getRelation()).setColumns(referenceColumns));
             if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, ",", formatter))) {
-                control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
+                control.setAlreadyHandledChanged(new Index().setRelation(index.getRelation()).setColumns(comparedColumns));
             }
 
             if ((index.isUnique() != null) && index.isUnique()) {
-                control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
+                control.setAlreadyHandledChanged(new UniqueConstraint().setRelation(index.getRelation()).setColumns(referenceColumns));
                 if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, ",", formatter))) {
-                    control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(comparedColumns));
+                    control.setAlreadyHandledChanged(new UniqueConstraint().setRelation(index.getRelation()).setColumns(comparedColumns));
                 }
             }
         }

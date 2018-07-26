@@ -1,6 +1,7 @@
 package liquibase.executor.jvm;
 
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -49,7 +50,7 @@ public class ColumnMapRowMapper implements RowMapper {
     /**
      * Determine the key to use for the given column in the column Map.
      *
-     * @param columnName the column name as returned by the ResultSet
+     * @param columnName the column name (uppercase) as returned by the ResultSet
      * @return the column key to use
      * @see java.sql.ResultSetMetaData#getColumnName
      */

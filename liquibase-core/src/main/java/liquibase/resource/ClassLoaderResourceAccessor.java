@@ -14,6 +14,7 @@ import java.net.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 
 /**
  * An implementation of {@link liquibase.resource.ResourceAccessor} that wraps a class loader.
@@ -60,19 +61,23 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        path = convertToPath(relativeTo, path);
+        String sanitizePath = convertToPath(relativeTo, path);
 
-        Enumeration<URL> fileUrls = classLoader.getResources(path);
+        Enumeration<URL> fileUrls = classLoader.getResources(sanitizePath);
 
         Set<String> returnSet = new HashSet<>();
 
-        if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:") || path.startsWith("wsjar:file:") || path.startsWith("zip:"))) {
-            fileUrls = new Vector<>(Arrays.asList(new URL(path))).elements();
+        if (!fileUrls.hasMoreElements() && (sanitizePath.startsWith("jar:") || sanitizePath.startsWith("file:") || sanitizePath.startsWith("wsjar:file:") || sanitizePath.startsWith("zip:"))) {
+            fileUrls = new Vector<>(Arrays.asList(new URL(sanitizePath))).elements();
         }
 
+        // Improve speed by removing duplicate file returned by getResources
+        Set<URL> elements = new HashSet<>();
         while (fileUrls.hasMoreElements()) {
-            URL fileUrl = fileUrls.nextElement();
+            elements.add(fileUrls.nextElement());
+        }
 
+        for (URL fileUrl : elements) {
             if (fileUrl.toExternalForm().startsWith("jar:file:")
                     || fileUrl.toExternalForm().startsWith("wsjar:file:")
                     || fileUrl.toExternalForm().startsWith("zip:")) {
@@ -86,12 +91,19 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 }
                 zipFilePath = URLDecoder.decode(zipFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
-                path = SpringBootFatJar.getPathForResource(path);
-                if (path.startsWith("classpath:")) {
-                    path = path.replaceFirst("classpath:", "");
+                sanitizePath = SpringBootFatJar.getPathForResource(sanitizePath);
+                if (sanitizePath.startsWith("classpath:")) {
+                    sanitizePath = sanitizePath.replaceFirst("classpath:", "");
                 }
-                if (path.startsWith("classpath*:")) {
-                    path = path.replaceFirst("classpath\\*:", "");
+                if (sanitizePath.startsWith("classpath*:")) {
+                    sanitizePath = sanitizePath.replaceFirst("classpath\\*:", "");
+                }
+                // if path is like 'jar:<url>!/{entry}', use the last part as resource path
+                if (sanitizePath.contains("!/")) {
+                    String[] components = sanitizePath.split("!/");
+                    if (components.length > 1) {
+                        sanitizePath = components[components.length - 1];
+                    }
                 }
 
                 // TODO:When we update to Java 7+, we can can create a FileSystem from the JAR (zip)
@@ -108,22 +120,39 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
 
-                        if (entry.getName().startsWith(path)) {
+                        if (entry.getName().startsWith(sanitizePath)) {
 
                             if (!recursive) {
-                                String pathAsDir = path.endsWith("/")
-                                        ? path
-                                        : path + "/";
+                                String pathAsDir = sanitizePath.endsWith("/") ? sanitizePath : sanitizePath + "/";
                                 if (!entry.getName().startsWith(pathAsDir)
                                  || entry.getName().substring(pathAsDir.length()).contains("/")) {
                                     continue;
                                 }
                             }
 
-                            if (entry.isDirectory() && includeDirectories) {
-                                returnSet.add(entry.getName());
-                            } else if (includeFiles) {
-                                returnSet.add(entry.getName());
+                            if ((entry.isDirectory() && includeDirectories) || (!entry.isDirectory() && includeFiles)) {
+                                String returnPath = SpringBootFatJar.getSimplePathForResources(entry.getName(), path);
+                                // Find changelog inside nested jar
+                                if (entry.getName().endsWith(".jar")) {
+                                    JarInputStream jarIS = null;
+                                    try {
+                                        jarIS = new JarInputStream(zipfile.getInputStream(entry));
+
+                                        JarEntry nestedEntry = jarIS.getNextJarEntry();
+                                        while (nestedEntry != null) {
+                                            if (nestedEntry.getName().startsWith(returnPath)) {
+                                                returnSet.add(nestedEntry.getName());
+                                            }
+                                            nestedEntry = jarIS.getNextJarEntry();
+                                        }
+                                    } finally {
+                                        if (jarIS != null) {
+                                            jarIS.close();
+                                        }
+                                    }
+                                } else {
+                                    returnSet.add(returnPath);
+                                }
                             }
                         }
                     }
@@ -134,18 +163,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 try {
                     File file = new File(fileUrl.toURI());
                     if (file.exists()) {
-                        getContents(file, recursive, includeFiles, includeDirectories, path, returnSet);
+                        getContents(file, recursive, includeFiles, includeDirectories, sanitizePath, returnSet);
                     }
                 } catch (URISyntaxException | IllegalArgumentException e) {
                     //not a local file
                 }
             }
 
-            Enumeration<URL> resources = classLoader.getResources(path);
+            Enumeration<URL> resources = classLoader.getResources(sanitizePath);
 
             while (resources.hasMoreElements()) {
                 String url = resources.nextElement().toExternalForm();
-                url = url.replaceFirst("^\\Q" + path + "\\E", "");
+                url = url.replaceFirst("^\\Q" + sanitizePath + "\\E", "");
                 returnSet.add(url);
             }
         }

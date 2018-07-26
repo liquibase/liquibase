@@ -18,6 +18,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Interface that every DBMS supported by this software must implement. Most methods belong into ont of these
@@ -30,8 +31,8 @@ import java.util.List;
  */
 public interface Database extends PrioritizedService {
 
-    String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
-    String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
+    String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase(Locale.US);
+    String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase(Locale.US);
 
     /**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
@@ -248,6 +249,8 @@ public interface Database extends PrioritizedService {
     boolean supportsTablespaces();
 
     boolean supportsCatalogs();
+
+    CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase();
 
     boolean supportsSchemas();
 

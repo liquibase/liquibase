@@ -98,9 +98,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                  * see https://liquibase.jira.com/browse/CORE-2192
                  */
                 if (conn instanceof JdbcConnection) {
-                    Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
-                    wrappedConn.setAccessible(true);
-                    sqlConn = (Connection) wrappedConn.invoke(conn);
+                    sqlConn = ((JdbcConnection) conn).getWrappedConnection();
                 }
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
@@ -209,10 +207,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public String generatePrimaryKeyName(String tableName) {
         if (tableName.length() > 27) {
             //noinspection HardCodedStringLiteral
-            return "PK_" + tableName.toUpperCase().substring(0, 27);
+            return "PK_" + tableName.toUpperCase(Locale.US).substring(0, 27);
         } else {
             //noinspection HardCodedStringLiteral
-            return "PK_" + tableName.toUpperCase();
+            return "PK_" + tableName.toUpperCase(Locale.US);
         }
     }
 
@@ -272,7 +270,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultCatalogName() {//NOPMD
-        return (super.getDefaultCatalogName() == null) ? null : super.getDefaultCatalogName().toUpperCase();
+        return (super.getDefaultCatalogName() == null) ? null : super.getDefaultCatalogName().toUpperCase(Locale.US);
     }
 
     /**

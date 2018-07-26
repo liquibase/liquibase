@@ -1,4 +1,5 @@
 package liquibase.change.core
+
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
@@ -47,14 +48,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         SqlStatement[] sqlStatement = refactoring.generateStatements(mssqlDb);
         then:
-        sqlStatement.length == 1
-        assert sqlStatement[0] instanceof InsertSetStatement
-
-        when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement)sqlStatement[0]).getStatementsArray();
-
-        then:
-        sqlStatements.length == 0
+        sqlStatement.length == 0
     }
 
     def "loadDataEmpty not using InsertSetStatement"() throws Exception {

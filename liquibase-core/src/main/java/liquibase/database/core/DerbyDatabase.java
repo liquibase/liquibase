@@ -18,6 +18,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Locale;
 
 public class DerbyDatabase extends AbstractJdbcDatabase {
 
@@ -80,7 +81,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         if (objectName == null) {
             return null;
         }
-        return objectName.toUpperCase();
+        return objectName.toUpperCase(Locale.US);
     }
 
     @Override

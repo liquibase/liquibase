@@ -115,7 +115,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                     return matches(((Column) object).getRelation());
                 }
                 if (object instanceof Index) {
-                    return matches(((Index) object).getTable());
+                    return matches(((Index) object).getRelation());
                 }
                 if (object instanceof ForeignKey) {
                     return matches(((ForeignKey) object).getForeignKeyTable());
@@ -124,7 +124,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                     return matches(((PrimaryKey) object).getTable());
                 }
                 if (object instanceof UniqueConstraint) {
-                    return matches(((UniqueConstraint) object).getTable());
+                    return matches(((UniqueConstraint) object).getRelation());
                 }
                 if (object instanceof Data) {
                     return matches(((Data) object).getTable());

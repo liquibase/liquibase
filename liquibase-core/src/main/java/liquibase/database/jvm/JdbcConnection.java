@@ -14,8 +14,6 @@ import java.util.Map;
 /**
  * A ConnectionWrapper implementation which delegates completely to an
  * underlying java.sql.connection.
- *
- * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;

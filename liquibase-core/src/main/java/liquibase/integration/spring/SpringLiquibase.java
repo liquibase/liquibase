@@ -79,10 +79,15 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     protected String tag;
 	protected Map<String, String> parameters;
 	protected String defaultSchema;
+	protected String liquibaseSchema;
+	protected String databaseChangeLogTable;
+	protected String databaseChangeLogLockTable;
+	protected String liquibaseTablespace;
 	protected boolean dropFirst;
 	protected boolean shouldRun = true;
 	protected File rollbackFile;
-    /**
+
+	/**
      * Ignores classpath prefix during changeset comparison.
      * This is particularly useful if Liquibase is run in different ways.
      *
@@ -116,6 +121,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      * To avoid this issue, just set ignoreClasspathPrefix to true.
      */
     private boolean ignoreClasspathPrefix = true;
+
+	protected boolean testRollbackOnUpdate = false;
+
 	public SpringLiquibase() {
 		super();
 	}
@@ -221,6 +229,54 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.defaultSchema = defaultSchema;
 	}
 
+    public String getLiquibaseTablespace() {
+        return liquibaseTablespace;
+    }
+
+    public void setLiquibaseTablespace(String liquibaseTablespace) {
+        this.liquibaseTablespace = liquibaseTablespace;
+    }
+
+    public String getLiquibaseSchema() {
+        return liquibaseSchema;
+    }
+
+    public void setLiquibaseSchema(String liquibaseSchema) {
+        this.liquibaseSchema = liquibaseSchema;
+    }
+
+    public String getDatabaseChangeLogTable() {
+        return databaseChangeLogTable;
+    }
+
+    public void setDatabaseChangeLogTable(String databaseChangeLogTable) {
+        this.databaseChangeLogTable = databaseChangeLogTable;
+    }
+
+    public String getDatabaseChangeLogLockTable() {
+        return databaseChangeLogLockTable;
+    }
+
+	public void setDatabaseChangeLogLockTable(String databaseChangeLogLockTable) {
+		this.databaseChangeLogLockTable = databaseChangeLogLockTable;
+	}
+
+	/**
+	 * Returns whether a rollback should be tested at update time or not.
+	 */
+	public boolean isTestRollbackOnUpdate() {
+		return testRollbackOnUpdate;
+	}
+
+	/**
+	 * If testRollbackOnUpdate is set to true a rollback will be tested at tupdate time.
+	 * For doing so when the update is performed
+	 * @param testRollbackOnUpdate
+     */
+	public void setTestRollbackOnUpdate(boolean testRollbackOnUpdate) {
+		this.testRollbackOnUpdate = testRollbackOnUpdate;
+	}
+
 	/**
 	 * Executed automatically when the bean is initialized.
 	 */
@@ -284,11 +340,19 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-        if (tag != null) {
-            liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
-        } else {
-            liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
-        }
+		if (isTestRollbackOnUpdate()) {
+			if (tag != null) {
+				liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+			} else {
+				liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabels()));
+			}
+		} else {
+			if (tag != null) {
+				liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+			} else {
+				liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+			}
+		}
     }
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
@@ -330,8 +394,28 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
 		if (StringUtil.trimToNull(this.defaultSchema) != null) {
-			database.setDefaultSchemaName(this.defaultSchema);
-		}
+            if (database.supportsSchemas()) {
+                database.setDefaultSchemaName(this.defaultSchema);
+            } else if (database.supportsCatalogs()) {
+                database.setDefaultCatalogName(this.defaultSchema);
+            }
+        }
+        if (StringUtils.trimToNull(this.liquibaseSchema) != null) {
+            if (database.supportsSchemas()) {
+                database.setLiquibaseSchemaName(this.liquibaseSchema);
+            } else if (database.supportsCatalogs()) {
+                database.setLiquibaseCatalogName(this.liquibaseSchema);
+            }
+        }
+        if (StringUtils.trimToNull(this.liquibaseTablespace) != null && database.supportsTablespaces()) {
+            database.setLiquibaseTablespaceName(this.liquibaseTablespace);
+        }
+        if (StringUtils.trimToNull(this.databaseChangeLogTable) != null) {
+            database.setDatabaseChangeLogTableName(this.databaseChangeLogTable);
+        }
+        if (StringUtils.trimToNull(this.databaseChangeLogLockTable) != null) {
+            database.setDatabaseChangeLogLockTableName(this.databaseChangeLogLockTable);
+        }
 		return database;
 	}
 

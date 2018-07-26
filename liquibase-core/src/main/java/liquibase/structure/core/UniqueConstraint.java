@@ -25,7 +25,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         this();
         setName(name);
         if ((tableName != null) && (columns != null)) {
-            setTable(new Table(tableCatalog, tableSchema, tableName));
+        	setRelation(new Table(tableCatalog, tableSchema, tableName));
             setColumns(new ArrayList<>(Arrays.asList(columns)));
         }
     }
@@ -49,19 +49,39 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     @Override
     public Schema getSchema() {
-        if (getTable() == null) {
+        if (getRelation() == null) {
             return null;
         }
 
-        return getTable().getSchema();
+        return getRelation().getSchema();
     }
-
-	public Relation getTable() {
-		return getAttribute("table", Relation.class);
+    
+    /**
+     * @deprecated Use {@link #getRelation()}
+     */
+    @Deprecated
+	public Table getTable() {
+		Relation relation = getRelation();
+		if (relation instanceof Table)
+			return (Table) relation;
+		else
+			return null;
 	}
 
-	public UniqueConstraint setTable(Relation table) {
-		this.setAttribute("table", table);
+    /**
+     * @deprecated Use {@link #setRelation(Relation)}
+     */
+    @Deprecated
+	public UniqueConstraint setTable(Table table) {
+		return setRelation(table);
+    }
+    
+    public Relation getRelation() {
+    	return getAttribute("table", Relation.class);
+    }
+    
+    public UniqueConstraint setRelation(Relation relation) {
+    	this.setAttribute("table", relation);
         return this;
     }
 
@@ -73,7 +93,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setAttribute("columns", columns);
         if (getAttribute("table", Object.class) instanceof Table) {
             for (Column column : getColumns()) {
-                column.setRelation(getTable());
+                column.setRelation(getRelation());
             }
         }
 
@@ -183,13 +203,13 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		// Need check for nulls here due to NullPointerException using
 		// Postgres
 		if (result) {
-			if (null == this.getTable()) {
-				result = null == that.getTable();
-			} else if (null == that.getTable()) {
+			if (null == this.getRelation()) {
+				result = null == that.getRelation();
+			} else if (null == that.getRelation()) {
 				result = false;
 			} else {
-				result = this.getTable().getName().equals(
-						that.getTable().getName());
+				result = this.getRelation().getName().equals(
+						that.getRelation().getName());
 			}
 		}
 
@@ -203,8 +223,8 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		// Need check for nulls here due to NullPointerException using Postgres
 		String thisTableName;
 		String thatTableName;
-        thisTableName = (null == this.getTable()) ? "" : this.getTable().getName();
-        thatTableName = (null == o.getTable()) ? "" : o.getTable().getName();
+        thisTableName = (null == this.getRelation()) ? "" : this.getRelation().getName();
+        thatTableName = (null == o.getRelation()) ? "" : o.getRelation().getName();
 		int returnValue = thisTableName.compareTo(thatTableName);
 		if (returnValue == 0) {
 			returnValue = this.getName().compareTo(o.getName());
@@ -223,8 +243,8 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     @Override
 	public int hashCode() {
 		int result = 0;
-		if (this.getTable() != null) {
-			result = this.getTable().hashCode();
+		if (this.getRelation() != null) {
+			result = this.getRelation().hashCode();
 		}
 		if (this.getName() != null) {
             result = (31 * result) + this.getName().toUpperCase().hashCode();
@@ -237,10 +257,10 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
 	@Override
 	public String toString() {
-        if (getTable() == null) {
+        if (getRelation() == null) {
             return getName();
         } else {
-            return getName() + " on " + getTable().getName() + "("
+            return getName() + " on " + getRelation().getName() + "("
                     + getColumnNames() + ")";
         }
     }

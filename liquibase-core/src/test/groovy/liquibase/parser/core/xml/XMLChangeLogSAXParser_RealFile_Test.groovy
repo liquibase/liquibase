@@ -22,6 +22,8 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.ObjectQuotingStrategy
+import liquibase.database.core.H2Database
+import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
@@ -697,5 +699,25 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
         cleanup:
         Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample")
+    }
+
+    def "change sets with matching dbms are parsed"() {
+        when:
+        def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
+        def database = new MSSQLDatabase()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 4
+    }
+
+    def "change sets with non-matching dbms are skipped"() {
+        when:
+        def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
+        def database = new H2Database()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
     }
 }

@@ -60,13 +60,13 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             if (statement.isDeferrable()) {
                 sql += " DEFERRABLE";
             }
-
             if (statement.isInitiallyDeferred()) {
                 sql += " INITIALLY DEFERRED";
             }
-            if (statement.isDisabled()) {
-                sql += " DISABLE";
-            }
+        }
+
+        if ((database instanceof OracleDatabase) &&  statement.isDisabled()) {
+            sql += " DISABLE";
         }
 
         boolean isInUsingIndexClause = false;
@@ -115,7 +115,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     protected UniqueConstraint getAffectedUniqueConstraint(AddUniqueConstraintStatement statement) {
         UniqueConstraint uniqueConstraint = new UniqueConstraint()
                 .setName(statement.getConstraintName())
-                .setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+                .setRelation((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
         int i = 0;
         for (Column column : Column.listFromNames(statement.getColumnNames())) {
             uniqueConstraint.addColumn(i++, column);

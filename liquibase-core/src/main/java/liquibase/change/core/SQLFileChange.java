@@ -22,8 +22,6 @@ import java.io.InputStream;
  * To create an instance call the constructor as normal and then call
  * {@link AbstractSQLChange#setResourceAccessor(ResourceAccessor)} before calling setPath, otherwise the
  * file will likely not be found.
- *
- * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  */
 @DatabaseChange(name = "sqlFile",
         description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a " +

@@ -6,11 +6,10 @@
 	<parent>
 		<groupId>org.liquibase</groupId>
 		<artifactId>liquibase-parent</artifactId>
-		<version>3.6.0-SNAPSHOT</version>
+		<version>3.7.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>liquibase-rpm</artifactId>
-    <version>3.6.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
     <url>http://www.liquibase.org/</url>
 

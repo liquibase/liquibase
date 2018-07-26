@@ -10,6 +10,8 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtil;
 
+import java.util.Locale;
+
 @DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit", "bool"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BooleanType extends LiquibaseDataType {
 
@@ -21,7 +23,7 @@ public class BooleanType extends LiquibaseDataType {
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
         } else if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("bit")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
             return new DatabaseDataType("BIT", 1);
@@ -38,7 +40,7 @@ public class BooleanType extends LiquibaseDataType {
         } else if (database instanceof HsqlDatabase) {
             return new DatabaseDataType("BOOLEAN");
         } else if (database instanceof PostgresDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("bit")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
     }
@@ -48,17 +50,16 @@ public class BooleanType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         }
 
         String returnValue;
         if (value instanceof String) {
-            if ("true".equalsIgnoreCase((String) value) || "1".equals(value) || "b'1'".equalsIgnoreCase((String)
-                value) || "t".equals(value) || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
+            if ("true".equals(((String) value).toLowerCase(Locale.US)) || "1".equals(value) || "b'1'".equals(((String) value).toLowerCase(Locale.US)) || "t".equals(((String) value).toLowerCase(Locale.US)) || ((String) value).toLowerCase(Locale.US).equals(this.getTrueBooleanValue(database).toLowerCase(Locale.US))) {
                 returnValue = this.getTrueBooleanValue(database);
-            } else if ("false".equalsIgnoreCase((String) value) || "0".equals(value) || "b'0'".equalsIgnoreCase(
-                (String) value) || "f".equals(value) || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
+            } else if ("false".equals(((String) value).toLowerCase(Locale.US)) || "0".equals(value) || "b'0'".equals(
+                    ((String) value).toLowerCase(Locale.US)) || "f".equals(((String) value).toLowerCase(Locale.US)) || ((String) value).toLowerCase(Locale.US).equals(this.getFalseBooleanValue(database).toLowerCase(Locale.US))) {
                 returnValue = this.getFalseBooleanValue(database);
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);

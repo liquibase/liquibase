@@ -13,11 +13,12 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private String constraintName;
     private String tablespace;
 
+    private boolean clustered;
+    private boolean shouldValidate = true; //only Oracle PL/SQL feature
+
     private boolean deferrable;
     private boolean initiallyDeferred;
     private boolean disabled;
-    private boolean clustered;
-    private boolean shouldValidate = true; //only Oracle PL/SQL feature
 
     private String forIndexName;
     private String forIndexSchemaName;
@@ -68,6 +69,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         this.tablespace = tablespace;
         return this;
     }
+
     public boolean isDeferrable() {
         return deferrable;
     }
@@ -86,13 +88,13 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public AddUniqueConstraintStatement setDisabled(boolean disabled) {
-        this.disabled= disabled;
-        return this;
-    }
-
     public boolean isDisabled() {
         return disabled;
+    }
+
+    public AddUniqueConstraintStatement setDisabled(boolean disabled) {
+        this.disabled = disabled;
+        return this;
     }
 
     public AddUniqueConstraintStatement setClustered(boolean clustered) {

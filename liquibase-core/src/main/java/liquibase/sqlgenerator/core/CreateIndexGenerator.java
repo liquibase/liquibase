@@ -152,6 +152,6 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
     }
 
     protected Index getAffectedIndex(CreateIndexStatement statement) {
-        return new Index().setName(statement.getIndexName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName()));
+        return new Index().setName(statement.getIndexName()).setRelation((Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName()));
     }
 }

@@ -16,6 +16,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
+import java.util.Locale;
 
 /**
  * Makes an existing column into an auto-increment column.
@@ -113,7 +114,7 @@ public class AddAutoIncrementChange extends AbstractChange {
             if ((escapedTableName != null) && (escapedColumnName != null) && !escapedTableName.startsWith("\"") &&
                 !escapedColumnName.startsWith("\"")
             ) {
-                sequenceName = sequenceName.toLowerCase();
+                sequenceName = sequenceName.toLowerCase(Locale.US);
             }
 
             String schemaPrefix;

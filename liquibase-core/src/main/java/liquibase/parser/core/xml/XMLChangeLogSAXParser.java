@@ -11,20 +11,40 @@ import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
 import org.xml.sax.*;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     
     public static final String LIQUIBASE_SCHEMA_VERSION = "3.6";
+    private static final boolean PREFER_INTERNAL_XSD = Boolean.getBoolean("liquibase.prefer.internal.xsd");
+    private static final String XSD_FILE = "dbchangelog-" + LIQUIBASE_SCHEMA_VERSION + ".xsd";
     private SAXParserFactory saxParserFactory;
 
     public XMLChangeLogSAXParser() {
         saxParserFactory = SAXParserFactory.newInstance();
         saxParserFactory.setValidating(true);
         saxParserFactory.setNamespaceAware(true);
+        
+        if (PREFER_INTERNAL_XSD) {
+            InputStream xsdInputStream = XMLChangeLogSAXParser.class.getResourceAsStream(XSD_FILE);
+            if (xsdInputStream != null) {
+                try {
+                    SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                    Schema schema = schemaFactory.newSchema(new StreamSource(xsdInputStream));
+                    saxParserFactory.setSchema(schema);
+                    saxParserFactory.setValidating(false);
+                } catch (SAXException e) {
+                    LogService.getLog(XMLChangeLogSAXParser.class).warning("Could not load " + XSD_FILE + ", enabling parser validator", e);
+                }
+            }
+        }
     }
 
     @Override

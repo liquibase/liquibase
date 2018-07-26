@@ -29,21 +29,21 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter expression="${liquibase.diffTypes}"
      */
-    private String diffTypes;
+    protected String diffTypes;
 
     /**
      * Directory where insert statement csv files will be kept.
      *
      * @parameter expression="${liquibase.dataDir}"
      */
-    private String dataDir;
+    protected String dataDir;
 
     /**
      * The author to be specified for Change Sets in the generated Change Log.
      *
      * @parameter expression="${liquibase.changeSetAuthor}"
      */
-    private String changeSetAuthor;
+    protected String changeSetAuthor;
 
     /**
      * are required. If no context is specified then ALL contexts will be executed.
@@ -56,7 +56,7 @@ public class LiquibaseGenerateChangeLogMojo extends
      *
      * @parameter expression="${liquibase.changeSetContext}"
      */
-    private String changeSetContext;
+    protected String changeSetContext;
 
     /**
      * The target change log file to output to. If this is null then the output will be to the screen.

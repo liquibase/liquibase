@@ -62,6 +62,6 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         if (statement.getTableName() != null) {
             table = (Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName());
         }
-        return new Index().setName(statement.getIndexName()).setTable(table);
+        return new Index().setName(statement.getIndexName()).setRelation(table);
     }
 }

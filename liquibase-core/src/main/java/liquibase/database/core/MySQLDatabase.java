@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -34,9 +35,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
-        // objects in mysql are always case sensitive
-        super.quotingStartCharacter = "`";
-        super.quotingEndCharacter = "`";
         setHasJdbcConstraintDeferrableBug(null);
     }
 
@@ -55,7 +53,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 return null;
             }
             if (!this.isCaseSensitive()) {
-                return name.toLowerCase();
+                return name.toLowerCase(Locale.US);
             }
             return name;
         }
@@ -342,6 +340,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 0;
     }
 
+    @Override
+    protected String getQuotingStartCharacter() {
+        return "`"; // objects in mysql are always case sensitive
+
+    }
+
+    @Override
+    protected String getQuotingEndCharacter() {
+        return "`"; // objects in mysql are always case sensitive
+    }
+
     /**
      * <p>Returns the default timestamp fractional digits if nothing is specified.</p>
      * https://dev.mysql.com/doc/refman/5.7/en/fractional-seconds.html :
@@ -362,7 +371,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     private static Set<String> createReservedWords() {
         return new HashSet<String>(Arrays.asList("ACCESSIBLE",
             "ADD",
-            "ALL",
+            "ADMIN",
+                "ALL",
             "ALTER",
             "ANALYZE",
             "AND",
@@ -375,6 +385,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "BINARY",
             "BLOB",
             "BOTH",
+                "BUCKETS",
             "BY",
             "CALL",
             "CASCADE",
@@ -391,6 +402,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "CONVERT",
             "CREATE",
             "CROSS",
+                "CLONE",
+                "COMPONENT",
+                "CUME_DIST",
             "CURRENT_DATE",
             "CURRENT_TIME",
             "CURRENT_TIMESTAMP",
@@ -406,10 +420,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "DECIMAL",
             "DECLARE",
             "DEFAULT",
+                "DEFINITION",
             "DELAYED",
             "DELETE",
+                "DENSE_RANK",
             "DESC",
             "DESCRIBE",
+                "DESCRIPTION",
             "DETERMINISTIC",
             "DISTINCT",
             "DISTINCTROW",
@@ -420,27 +437,38 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "EACH",
             "ELSE",
             "ELSEIF",
+                "EMPTY",
             "ENCLOSED",
             "ESCAPED",
+                "EXCEPT",
+                "EXCLUDE",
             "EXISTS",
             "EXIT",
             "EXPLAIN",
             "FALSE",
             "FETCH",
+                "FIRST_VALUE",
             "FLOAT",
             "FLOAT4",
             "FLOAT8",
+                "FOLLOWING",
             "FOR",
             "FORCE",
             "FOREIGN",
             "FROM",
             "FULLTEXT",
+                "GEOMCOLLECTION",
             "GENERATED",
             "GET",
+                "GET_MASTER_PUBLIC_KEY",
             "GRANT",
             "GROUP",
-            "HAVING",
+            "GROUPING",
+                "GROUPS",
+                "HAVING",
             "HIGH_PRIORITY",
+                "HISTOGRAM",
+                "HISTORY",
             "HOUR_MICROSECOND",
             "HOUR_MINUTE",
             "HOUR_SECOND",
@@ -464,11 +492,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "INTO",
             "IS",
             "ITERATE",
+                "INVISIBLE",
             "JOIN",
+                "JSON_TABLE",
             "KEY",
             "KEYS",
             "KILL",
-            "LEADING",
+            "LAG",
+                "LAST_VALUE",
+                "LEAD",
+                "LEADING",
             "LEAVE",
             "LEFT",
             "LIKE",
@@ -479,11 +512,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "LOCALTIME",
             "LOCALTIMESTAMP",
             "LOCK",
-            "LONG",
+            "LOCKED",
+                "LONG",
             "LONGBLOB",
             "LONGTEXT",
             "LOOP",
             "LOW_PRIORITY",
+                "MASTER_PUBLIC_KEY_PATH",
             "MASTER_SSL_VERIFY_SERVER_CERT",
             "MATCH",
             "MAXVALUE",
@@ -496,43 +531,69 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "MOD",
             "MODIFIES",
             "NATURAL",
+                "NESTED",
             "NOT",
-            "NO_WRITE_TO_BINLOG",
-            "NULL",
-            "NUMERIC",
-            "ON",
+            "NOWAIT",
+                "NO_WRITE_TO_BINLOG",
+            "NTH_VALUE",
+                "NTILE",
+                "NULL",
+            "NULLS",
+                "NUMERIC",
+            "OF",
+                "ON",
             "OPTIMIZE",
             "OPTIMIZER_COSTS",
             "OPTION",
             "OPTIONALLY",
             "OR",
             "ORDER",
+                "ORDINALITY",
+                "ORGANIZATION",
             "OUT",
             "OUTER",
             "OUTFILE",
+                "OTHERS",
+                "OVER",
             "PARTITION",
-            "PRECISION",
+            "PATH",
+                "PERCENT_RANK",
+                "PERSIST",
+                "PERSIST_ONLY",
+                "PRECEDING",
+                "PRECISION",
             "PRIMARY",
             "PROCEDURE",
+                "PROCESS",
             "PURGE",
             "RANGE",
-            "READ",
+            "RANK",
+                "READ",
             "READS",
             "READ_WRITE",
             "REAL",
-            "REFERENCES",
+            "RECURSIVE",
+                "REFERENCE",
+                "REFERENCES",
             "REGEXP",
             "RELEASE",
+                "REMOTE",
             "RENAME",
             "REPEAT",
             "REPLACE",
             "REQUIRE",
             "RESIGNAL",
+                "RESOURCE",
+                "RESPECT",
+                "RESTART",
             "RESTRICT",
             "RETURN",
+                "REUSE",
             "REVOKE",
             "RIGHT",
             "RLIKE",
+                "ROLE",
+                "ROW_NUMBER",
             "SCHEMA",
             "SCHEMAS",
             "SECOND_MICROSECOND",
@@ -542,6 +603,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "SET",
             "SHOW",
             "SIGNAL",
+                "SKIP",
             "SMALLINT",
             "SPATIAL",
             "SPECIFIC",
@@ -552,13 +614,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "SQL_BIG_RESULT",
             "SQL_CALC_FOUND_ROWS",
             "SQL_SMALL_RESULT",
-            "SSL",
+            "SRID",
+                "SSL",
             "STARTING",
             "STORED",
             "STRAIGHT_JOIN",
-            "TABLE",
+            "SYSTEM",
+                "TABLE",
             "TERMINATED",
             "THEN",
+                "THREAD_PRIORITY",
+                "TIES",
             "TINYBLOB",
             "TINYINT",
             "TINYTEXT",
@@ -566,7 +632,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "TRAILING",
             "TRIGGER",
             "TRUE",
-            "UNDO",
+            "UNBOUNDED",
+                "UNDO",
             "UNION",
             "UNIQUE",
             "UNLOCK",
@@ -583,10 +650,13 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "VARCHAR",
             "VARCHARACTER",
             "VARYING",
-            "VIRTUAL",
+            "VCPU",
+                "VISIBLE",
+                "VIRTUAL",
             "WHEN",
             "WHERE",
             "WHILE",
+                "WINDOW",
             "WITH",
             "WRITE",
             "XOR",

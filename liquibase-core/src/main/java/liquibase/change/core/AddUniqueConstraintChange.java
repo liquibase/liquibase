@@ -21,15 +21,16 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private String constraintName;
     private String tablespace;
 
-    private Boolean deferrable;
-    private Boolean initiallyDeferred;
-    private Boolean disabled;
     private Boolean clustered;
     private Boolean shouldValidate;
 
     private String forIndexName;
     private String forIndexSchemaName;
     private String forIndexCatalogName;
+
+    private Boolean deferrable;
+    private Boolean initiallyDeferred;
+    private Boolean disabled;
 
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getCatalogName() {
@@ -88,6 +89,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
+    @DatabaseChangeProperty(description = "True if this constraint is deferrable, False otherwise")
     public Boolean getDeferrable() {
         return deferrable;
     }
@@ -96,6 +98,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.deferrable = deferrable;
     }
 
+    @DatabaseChangeProperty(description = "True if this constraint is initially deferred, False otherwise")
     public Boolean getInitiallyDeferred() {
         return initiallyDeferred;
     }
@@ -104,6 +107,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
+    @DatabaseChangeProperty(description = "True if this constraint is disabled, False otherwise")
     public Boolean getDisabled() {
         return disabled;
     }

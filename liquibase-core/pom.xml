@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.liquibase</groupId>
 		<artifactId>liquibase-parent</artifactId>
-		<version>3.6.0-SNAPSHOT</version>
+		<version>3.7.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>liquibase-core</artifactId>
@@ -18,7 +17,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<bundle.namespace>liquibase.*</bundle.namespace>
-        <project.version>3.6.0-SNP</project.version>
+        <project.version>3.7.0</project.version>
 	</properties>
 
 	<dependencies>
@@ -175,11 +174,11 @@
 						<configuration>
 							<target>
 								<!-- Safety -->
-								<mkdir dir="${project.build.directory}"/>
+								<mkdir dir="${project.build.directory}" />
 								<tstamp>
-									<format property="last.updated" pattern="yyyy-MM-dd hh:mm:ss"/>
+									<format property="last.updated" pattern="yyyy-MM-dd hh:mm:ss" />
 								</tstamp>
-								<echo file="${basedir}/target/filter.properties" message="build.time=${last.updated}"/>
+								<echo file="${basedir}/target/filter.properties" message="build.time=${last.updated}" />
 							</target>
 						</configuration>
 					</execution>
@@ -333,7 +332,7 @@
 				<artifactId>gmaven-plugin</artifactId>
 				<configuration>
 					<providerSelection>2.0</providerSelection>
-					<source/>
+					<source />
 				</configuration>
 				<executions>
 					<execution>

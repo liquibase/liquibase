@@ -33,7 +33,7 @@ public class IndexComparator implements DatabaseObjectComparator {
             hashes.add(databaseObject.getName().toLowerCase());
         }
 
-        Relation table = ((Index) databaseObject).getTable();
+        Relation table = ((Index) databaseObject).getRelation();
         if (table != null) {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }
@@ -54,8 +54,8 @@ public class IndexComparator implements DatabaseObjectComparator {
         int thisIndexSize = thisIndex.getColumns().size();
         int otherIndexSize = otherIndex.getColumns().size();
 
-        if ((thisIndex.getTable() != null) && (otherIndex.getTable() != null)) {
-            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), chain.getSchemaComparisons(), accordingTo)) {
+        if ((thisIndex.getRelation() != null) && (otherIndex.getRelation() != null)) {
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getRelation(), otherIndex.getRelation(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
             if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null) &&

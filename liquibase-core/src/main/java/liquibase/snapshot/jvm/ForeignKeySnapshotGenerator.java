@@ -209,7 +209,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 setValidateOptionIfAvailable(database, foreignKey, row);
                 if (database.createsIndexesForForeignKeys()) {
-                    Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
+                    Index exampleIndex = new Index().setRelation(foreignKey.getForeignKeyTable());
                     exampleIndex.getColumns().addAll(foreignKey.getForeignKeyColumns());
                     exampleIndex.addAssociatedWith(Index.MARK_FOREIGN_KEY);
                     foreignKey.setBackingIndex(exampleIndex);

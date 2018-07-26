@@ -155,6 +155,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", FirebirdDatabase.class);
 
         assertCorrect("alter table [liquibaseb].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", HsqlDatabase.class);
+        assertCorrect("alter table \"liquibasec\".[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", DB2Database.class, Db2zDatabase.class);
         assertCorrectOnRest("alter table [liquibasec].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
 
     }
@@ -186,7 +187,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq) DEFERRABLE INITIALLY " +
                 "DEFERRED DISABLE", OracleDatabase.class);
         assertCorrect("ALTER TABLE \"adduqtest\" ADD CONSTRAINT uq_test unique (\"coltomakeuq\") DEFERRABLE INITIALLY" +
-                " DEFERRED DISABLE", PostgresDatabase.class);
+                " DEFERRED", PostgresDatabase.class);
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
     }

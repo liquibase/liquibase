@@ -69,9 +69,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     protected String sequenceNextValueFunction;
     protected String sequenceCurrentValueFunction;
-    protected String quotingStartCharacter = "\"";
-    protected String quotingEndCharacter = "\"";
-    protected String quotingEndReplacement = "\"\"";
+
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<>();
     protected List<String> unmodifiableDataTypes = new ArrayList<>();
@@ -269,13 +267,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
         if ((quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
-            (objectName == null) || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith
-            (quotingEndCharacter))) {
+                ( objectName == null) || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
-            return objectName.toUpperCase();
+            return objectName.toUpperCase(Locale.US);
         } else {
-            return objectName.toLowerCase();
+            return objectName.toLowerCase(Locale.US);
         }
     }
 
@@ -818,7 +815,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         } else if (object instanceof Column) {
             return isLiquibaseObject(((Column) object).getRelation());
         } else if (object instanceof Index) {
-            return isLiquibaseObject(((Index) object).getTable());
+            return isLiquibaseObject(((Index) object).getRelation());
         } else if (object instanceof PrimaryKey) {
             return isLiquibaseObject(((PrimaryKey) object).getTable());
         }
@@ -950,7 +947,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
                 return quoteObject(objectName, objectType);
             }
-            objectName = objectName.trim();
         }
         return objectName;
     }
@@ -959,14 +955,23 @@ public abstract class AbstractJdbcDatabase implements Database {
         return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.matches(".*\\W.*");
     }
 
+    protected String getQuotingStartCharacter() {
+        return "\"";
+    }
+
+    protected String getQuotingEndCharacter() {
+        return "\"";
+    }
+
+    protected String getQuotingEndReplacement() {
+        return "\"\"";
+    }
+
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;
         }
-
-        return quotingStartCharacter
-                + objectName.replace(quotingEndCharacter, quotingEndReplacement)
-                + quotingEndCharacter;
+        return getQuotingStartCharacter() + objectName.replace(getQuotingEndCharacter(), getQuotingEndReplacement()) + getQuotingEndCharacter();
     }
 
     @Override
@@ -1048,7 +1053,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String generatePrimaryKeyName(final String tableName) {
-        return "PK_" + tableName.toUpperCase();
+        return "PK_" + tableName.toUpperCase(Locale.US);
     }
 
     @Override
@@ -1579,5 +1584,15 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public boolean requiresExplicitNullForColumns() {
         return false;
+    }
+
+
+    /**
+     * This logic is used when db support catalogs
+     * @return UPPER_CASE by default
+     */
+    @Override
+    public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
+        return CatalogAndSchema.CatalogAndSchemaCase.UPPER_CASE;
     }
 }

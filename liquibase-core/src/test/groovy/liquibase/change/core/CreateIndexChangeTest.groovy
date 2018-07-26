@@ -30,7 +30,7 @@ public class CreateIndexChangeTest extends StandardChangeTest {
 
         def change = new CreateIndexChange()
         change.indexName = index.name
-        change.tableName = index.table.name
+        change.tableName = index.relation.name
         change.columns = [new AddColumnConfig().setName("test_col")]
 
         then:
@@ -63,7 +63,7 @@ public class CreateIndexChangeTest extends StandardChangeTest {
 
         def change = new CreateIndexChange()
         change.indexName = index.name
-        change.tableName = index.table.name
+        change.tableName = index.relation.name
         change.columns = [new AddColumnConfig().setName(null)]
 
         then:

@@ -73,9 +73,7 @@ public class CustomChangeWrapper extends AbstractChange {
         this.classLoader = classLoader;
     }
 
-    public CustomChangeWrapper setClassName(String className) throws CustomChangeException {
-        return setClass(className);
-    }
+
 
     /**
      * Specify the name of the class to use as the CustomChange. This method instantiates the class using {@link #getClassLoader()} or fallback methods
@@ -83,6 +81,9 @@ public class CustomChangeWrapper extends AbstractChange {
      * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link liquibase.change.Change#generateStatements(liquibase.database.Database)}
      */
     public CustomChangeWrapper setClass(String className) throws CustomChangeException {
+        if (className == null) {
+            return this;
+        }
         if (classLoader == null) {
             throw new CustomChangeException("CustomChangeWrapper classLoader not set");
         }

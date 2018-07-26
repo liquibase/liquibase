@@ -111,14 +111,14 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
         StringUtil.ToStringFormatter formatter = new StringUtil.ToStringFormatter();
 
-        control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(referenceColumns));
+        control.setAlreadyHandledChanged(new Index().setRelation(pk.getTable()).setColumns(referenceColumns));
         if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, ",", formatter))) {
-            control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(comparedColumns));
+            control.setAlreadyHandledChanged(new Index().setRelation(pk.getTable()).setColumns(comparedColumns));
         }
 
-        control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
+        control.setAlreadyHandledChanged(new UniqueConstraint().setRelation(pk.getTable()).setColumns(referenceColumns));
         if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, "," , formatter))) {
-            control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
+            control.setAlreadyHandledChanged(new UniqueConstraint().setRelation(pk.getTable()).setColumns(comparedColumns));
         }
 
         return returnList.toArray(new Change[returnList.size()]);

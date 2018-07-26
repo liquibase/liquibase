@@ -105,7 +105,7 @@ public abstract class HTMLWriter {
     private void writeHeader(Object object, Writer fileWriter) throws IOException {
         String title = createTitle(object);
         fileWriter.append("<head>")
-                .append("<title>").append(title).append("</title>")
+                .append("<meta charset=\"utf-8\"/><title>").append(title).append("</title>")
                 .append("<LINK REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"../../stylesheet.css\" TITLE=\"Style\">")
                 .append("<SCRIPT type=\"text/javascript\">")
                 .append("function windowTitle()")

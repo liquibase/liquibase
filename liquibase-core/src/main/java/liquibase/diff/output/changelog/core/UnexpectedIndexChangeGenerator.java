@@ -41,12 +41,12 @@ public class UnexpectedIndexChangeGenerator extends AbstractChangeGenerator impl
 //        }
 
         DropIndexChange change = new DropIndexChange();
-        change.setTableName(index.getTable().getName());
+        change.setTableName(index.getRelation().getName());
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(index.getTable().getSchema().getCatalogName());
+            change.setCatalogName(index.getRelation().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(index.getTable().getSchema().getName());
+            change.setSchemaName(index.getRelation().getSchema().getName());
         }
         change.setIndexName(index.getName());
         change.setAssociatedWith(index.getAssociatedWithAsString());

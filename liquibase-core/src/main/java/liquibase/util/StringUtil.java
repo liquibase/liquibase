@@ -63,7 +63,8 @@ public class StringUtil {
         StringBuilder currentString = new StringBuilder();
         String previousPiece = null;
         boolean previousDelimiter = false;
-        for (Object piece : parsed.toArray(true)) {
+        List<Object> parsedArray = Arrays.asList(parsed.toArray(true));
+        for (Object piece : mergeTokens(parsedArray, endDelimiter)) {
             if (splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
                 String trimmedString = StringUtil.trimToNull(currentString.toString());
                 if (trimmedString != null) {
@@ -88,6 +89,42 @@ public class StringUtil {
         }
 
         return returnArray.toArray(new String[returnArray.size()]);
+    }
+
+    /**
+     * Delimiters like "//" may span multiple tokens. Look for them and combine them
+     */
+    private static List<Object> mergeTokens(List<Object> parsedArray, String endDelimiter) {
+        if (endDelimiter == null) {
+            return parsedArray;
+        }
+
+        List<Object> returnList = new ArrayList<>();
+        List<String> possibleMerge = new ArrayList<>();
+        for (Object obj : parsedArray) {
+            if (possibleMerge.size() == 0) {
+                if ((obj instanceof String) && endDelimiter.startsWith((String) obj)) {
+                    possibleMerge.add((String) obj);
+                } else {
+                    returnList.add(obj);
+                }
+            } else {
+                String possibleMergeString = StringUtils.join(possibleMerge, "") + obj.toString();
+                if (endDelimiter.equals(possibleMergeString)) {
+                    returnList.add(possibleMergeString);
+                    possibleMerge.clear();
+                } else if (endDelimiter.startsWith(possibleMergeString)) {
+                    possibleMerge.add(obj.toString());
+                } else {
+                    returnList.addAll(possibleMerge);
+                    returnList.add(obj);
+                    possibleMerge.clear();
+                }
+            }
+        }
+
+        return returnList;
+
     }
 
     /**

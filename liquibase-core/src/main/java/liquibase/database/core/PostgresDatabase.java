@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -142,12 +143,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDatabaseChangeLogTableName() {
-        return super.getDatabaseChangeLogTableName().toLowerCase();
+        return super.getDatabaseChangeLogTableName().toLowerCase(Locale.US);
     }
 
     @Override
     public String getDatabaseChangeLogLockTableName() {
-        return super.getDatabaseChangeLogLockTableName().toLowerCase();
+        return super.getDatabaseChangeLogLockTableName().toLowerCase(Locale.US);
     }
 
     @Override
@@ -244,7 +245,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 || isReservedWord(objectName)) {
             return objectName;
         } else {
-            return objectName.toLowerCase();
+            return objectName.toLowerCase(Locale.US);
         }
     }
 
@@ -276,7 +277,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String generatePrimaryKeyName(final String tableName) {
-        return tableName.toUpperCase() + "_PKEY";
+        return tableName.toUpperCase(Locale.US) + "_PKEY";
     }
 
     @Override
@@ -306,5 +307,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
+        return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
 }
