@@ -42,6 +42,11 @@ public class ChangeLogIterator {
             public List<ChangeSet> getChangeSets() {
                 return changeSets;
             }
+            // Prevent NPE (CORE-3231)
+            @Override
+            public String toString() {
+                return "";
+            }
         });
 
         this.changeSetFilters = Arrays.asList(changeSetFilters);
