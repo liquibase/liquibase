@@ -357,7 +357,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
 		SpringResourceOpener resourceAccessor = createResourceOpener();
-		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
+		Liquibase liquibase = getLiquibase(c, resourceAccessor);
         liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
 		if (parameters != null) {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
@@ -372,7 +372,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		return liquibase;
 	}
 
-	/**
+    protected Liquibase getLiquibase(Connection c, SpringResourceOpener resourceAccessor) throws DatabaseException {
+        return new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
+    }
+
+    /**
 	 * Subclasses may override this method add change some database settings such as
 	 * default schema before returning the database object.
 	 *

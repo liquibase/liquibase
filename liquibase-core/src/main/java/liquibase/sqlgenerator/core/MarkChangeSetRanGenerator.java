@@ -12,25 +12,14 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.changelog.values.ChangeLogColumnValueProvider.AuthorProvider;
-import liquibase.changelog.values.ChangeLogColumnValueProvider.IdProvider;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import static liquibase.changelog.values.ChangeLogColumnValueProvider.*;
-
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
-
-    public static final String AND = " AND ";
-    public static final String OPEN_BRACKET = "(";
-    public static final String CLOSE_BRACKET = ")";
-    public static final String WHITESPACE = " ";
-    public static final String COMMA = ",";
 
     @Override
     public ValidationErrors validate(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -44,7 +33,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     public Sql[] generateSql(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ChangeSet changeSet = statement.getChangeSet();
 
-        Map<String, ChangeLogColumnValueProvider> columnValuesProviders = getColumnValuesProviders();
+        Map<String, ChangeLogColumnValueProvider> columnValuesProviders = statement.getColumnValuesProviders();
 
         SqlStatement runStatement;
         try {
@@ -96,26 +85,6 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         }
 
         return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
-    }
-
-    protected Map<String, ChangeLogColumnValueProvider> getColumnValuesProviders() {
-        HashMap<String, ChangeLogColumnValueProvider> columnValueProviders = new HashMap<>();
-
-        columnValueProviders.put("ID", new IdProvider());
-        columnValueProviders.put("AUTHOR", new AuthorProvider());
-        columnValueProviders.put("FILENAME", new FileNameProvider());
-        columnValueProviders.put("DATEEXECUTED", new DateExecutedProvider());
-        columnValueProviders.put("ORDEREXECUTED", new OrderExecutedProvider());
-        columnValueProviders.put("MD5SUM", new MD5SUMProvider());
-        columnValueProviders.put("DESCRIPTION", new DescriptionProvider());
-        columnValueProviders.put("COMMENTS", new CommentsProvider());
-        columnValueProviders.put("EXECTYPE", new ExecTypeProvider());
-        columnValueProviders.put("CONTEXTS", new ContextsProvider());
-        columnValueProviders.put("LABELS", new LabelsProvider());
-        columnValueProviders.put("LIQUIBASE", new LiquibaseVersionProvider());
-        columnValueProviders.put("DEPLOYMENT_ID", new DeploymentIdProvider());
-
-        return columnValueProviders;
     }
 
 }

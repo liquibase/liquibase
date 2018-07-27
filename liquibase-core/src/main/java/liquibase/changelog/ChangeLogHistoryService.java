@@ -60,4 +60,5 @@ public interface ChangeLogHistoryService extends PrioritizedService {
 
     public void generateDeploymentId();
 
+    boolean isDatabaseChecksumsCompatible();
     }

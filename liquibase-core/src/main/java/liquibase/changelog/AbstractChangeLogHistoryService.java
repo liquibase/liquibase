@@ -120,5 +120,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         }
     }
 
-
+    public boolean isDatabaseChecksumsCompatible() {
+        return true;
+    }
 }

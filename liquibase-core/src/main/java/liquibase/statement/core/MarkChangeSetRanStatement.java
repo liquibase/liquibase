@@ -1,10 +1,13 @@
 package liquibase.statement.core;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.values.ChangeLogColumnValueProvider;
 import liquibase.statement.AbstractSqlStatement;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MarkChangeSetRanStatement extends AbstractSqlStatement {
 
@@ -20,26 +23,27 @@ public class MarkChangeSetRanStatement extends AbstractSqlStatement {
         this.execType = execType;
 
         columnsForUpdate = new ArrayList<>();
-        columnsForUpdate.add("DATEEXECUTED");
-        columnsForUpdate.add("ORDEREXECUTED");
-        columnsForUpdate.add("MD5SUM");
-        columnsForUpdate.add("EXECTYPE");
-        columnsForUpdate.add("DEPLOYMENT_ID");
-
         columnsForInsert = new ArrayList<>();
-        columnsForInsert.add("ID");
-        columnsForInsert.add("AUTHOR");
-        columnsForInsert.add("FILENAME");
-        columnsForInsert.add("DATEEXECUTED");
-        columnsForInsert.add("ORDEREXECUTED");
-        columnsForInsert.add("MD5SUM");
-        columnsForInsert.add("DESCRIPTION");
-        columnsForInsert.add("COMMENTS");
-        columnsForInsert.add("EXECTYPE");
-        columnsForInsert.add("CONTEXTS");
-        columnsForInsert.add("LABELS");
-        columnsForInsert.add("LIQUIBASE");
-        columnsForInsert.add("DEPLOYMENT_ID");
+
+        addColumnForUpdate("DATEEXECUTED");
+        addColumnForUpdate("ORDEREXECUTED");
+        addColumnForUpdate("MD5SUM");
+        addColumnForUpdate("EXECTYPE");
+        addColumnForUpdate("DEPLOYMENT_ID");
+
+        addColumnForInsert("ID");
+        addColumnForInsert("AUTHOR");
+        addColumnForInsert("FILENAME");
+        addColumnForInsert("DATEEXECUTED");
+        addColumnForInsert("ORDEREXECUTED");
+        addColumnForInsert("MD5SUM");
+        addColumnForInsert("DESCRIPTION");
+        addColumnForInsert("COMMENTS");
+        addColumnForInsert("EXECTYPE");
+        addColumnForInsert("CONTEXTS");
+        addColumnForInsert("LABELS");
+        addColumnForInsert("LIQUIBASE");
+        addColumnForInsert("DEPLOYMENT_ID");
     }
 
     public ChangeSet getChangeSet() {
@@ -56,5 +60,33 @@ public class MarkChangeSetRanStatement extends AbstractSqlStatement {
 
     public List<String> getColumnsForInsert() {
         return columnsForInsert;
+    }
+
+    public Map<String, ChangeLogColumnValueProvider> getColumnValuesProviders() {
+        HashMap<String, ChangeLogColumnValueProvider> columnValueProviders = new HashMap<>();
+
+        columnValueProviders.put("ID", new ChangeLogColumnValueProvider.IdProvider());
+        columnValueProviders.put("AUTHOR", new ChangeLogColumnValueProvider.AuthorProvider());
+        columnValueProviders.put("FILENAME", new ChangeLogColumnValueProvider.FileNameProvider());
+        columnValueProviders.put("DATEEXECUTED", new ChangeLogColumnValueProvider.DateExecutedProvider());
+        columnValueProviders.put("ORDEREXECUTED", new ChangeLogColumnValueProvider.OrderExecutedProvider());
+        columnValueProviders.put("MD5SUM", new ChangeLogColumnValueProvider.MD5SUMProvider());
+        columnValueProviders.put("DESCRIPTION", new ChangeLogColumnValueProvider.DescriptionProvider());
+        columnValueProviders.put("COMMENTS", new ChangeLogColumnValueProvider.CommentsProvider());
+        columnValueProviders.put("EXECTYPE", new ChangeLogColumnValueProvider.ExecTypeProvider());
+        columnValueProviders.put("CONTEXTS", new ChangeLogColumnValueProvider.ContextsProvider());
+        columnValueProviders.put("LABELS", new ChangeLogColumnValueProvider.LabelsProvider());
+        columnValueProviders.put("LIQUIBASE", new ChangeLogColumnValueProvider.LiquibaseVersionProvider());
+        columnValueProviders.put("DEPLOYMENT_ID", new ChangeLogColumnValueProvider.DeploymentIdProvider());
+
+        return columnValueProviders;
+    }
+
+    public void addColumnForUpdate(String columnName){
+        columnsForUpdate.add(columnName);
+    }
+
+    public void addColumnForInsert(String columnName){
+        columnsForInsert.add(columnName);
     }
 }

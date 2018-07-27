@@ -60,12 +60,12 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return true;
     }
 
-    private RanChangeSetDAO<? extends RanChangeSet> getRanChangeSetDao() {
-        return new RanChangeSetDAOImpl(getRanChangeSetFactory());
+    private RanChangeSetService<? extends RanChangeSet> getRanChangeSetService() {
+        return new RanChangeSetService<>(getStandardRanChangeSetFactory());
     }
 
-    private RanChangeSetFactory<? extends RanChangeSet> getRanChangeSetFactory() {
-        return new RanChangeSetFactoryImpl();
+    private RanChangeSetFactory<? extends RanChangeSet> getStandardRanChangeSetFactory() {
+        return new StandardRanChangeSetFactory();
     }
 
     @Override
@@ -89,7 +89,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         if (changeLogTable != null) {
-            statementsToExecute.addAll(sqlGenerator.changeLogTableUpdate(database, changeLogTable, new ChangeLogTableDefinition()));
+            statementsToExecute.addAll(sqlGenerator.changeLogTableUpdate(database, changeLogTable, getTableDefinition()));
 
             databaseChecksumsCompatible = !isMd5SumIncompatible(database);
 
@@ -130,6 +130,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         serviceInitialized = true;
     }
 
+    protected ChangeLogTableDefinition getTableDefinition() {
+        return new ChangeLogTableDefinition();
+    }
+
     private boolean isMd5SumIncompatible(Database database) throws DatabaseException {
         List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new
                 SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
@@ -168,7 +172,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         if (this.ranChangeSetList == null) {
             this.ranChangeSetList = new ArrayList<>();
-            this.ranChangeSetList.addAll(getRanChangeSetDao().prepareRanChangeSets(getDatabase(), databaseChecksumsCompatible));
+            this.ranChangeSetList.addAll(getRanChangeSetService().prepareRanChangeSets(getDatabase()));
         }
         return Collections.unmodifiableList(ranChangeSetList);
     }
@@ -206,12 +210,16 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
         Database database = getDatabase();
 
-        ExecutorService.getInstance().getExecutor(database).execute(new MarkChangeSetRanStatement(changeSet, execType));
+        ExecutorService.getInstance().getExecutor(database).execute(getMarkChangeSetRanStatement(changeSet, execType));
         getDatabase().commit();
         if (this.ranChangeSetList != null) {
-            this.ranChangeSetList.add(getRanChangeSetFactory().create(changeSet, execType));
+            this.ranChangeSetList.add(getRanChangeSetService().create(changeSet, execType));
         }
 
+    }
+
+    protected MarkChangeSetRanStatement getMarkChangeSetRanStatement(ChangeSet changeSet, ChangeSet.ExecType execType) {
+        return new MarkChangeSetRanStatement(changeSet, execType);
     }
 
     @Override
@@ -295,5 +303,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    public boolean isDatabaseChecksumsCompatible() {
+        return databaseChecksumsCompatible;
     }
 }

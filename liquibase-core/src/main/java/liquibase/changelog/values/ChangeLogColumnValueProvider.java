@@ -5,13 +5,19 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.sqlgenerator.core.MarkChangeSetRanGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
 public interface ChangeLogColumnValueProvider {
+
+    String AND = " AND ";
+    String OPEN_BRACKET = "(";
+    String CLOSE_BRACKET = ")";
+    String WHITESPACE = " ";
+    String COMMA = ",";
+
     Object getValue(MarkChangeSetRanStatement statement, Database database) throws LiquibaseException;
 
     class IdProvider implements ChangeLogColumnValueProvider {
@@ -118,16 +124,16 @@ public interface ChangeLogColumnValueProvider {
         }
 
         private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {
-            boolean complexExpression = contextToAppend.contains(MarkChangeSetRanGenerator.COMMA) || contextToAppend.contains(MarkChangeSetRanGenerator.WHITESPACE);
+            boolean complexExpression = contextToAppend.contains(COMMA) || contextToAppend.contains(WHITESPACE);
             if (notFirstContext) {
-                contextExpression.append(MarkChangeSetRanGenerator.AND);
+                contextExpression.append(AND);
             }
             if (complexExpression) {
-                contextExpression.append(MarkChangeSetRanGenerator.OPEN_BRACKET);
+                contextExpression.append(OPEN_BRACKET);
             }
             contextExpression.append(contextToAppend);
             if (complexExpression) {
-                contextExpression.append(MarkChangeSetRanGenerator.CLOSE_BRACKET);
+                contextExpression.append(CLOSE_BRACKET);
             }
         }
     }

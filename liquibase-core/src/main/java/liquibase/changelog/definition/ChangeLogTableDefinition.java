@@ -1,6 +1,5 @@
 package liquibase.changelog.definition;
 
-import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.DateTimeType;
 import liquibase.datatype.core.IntType;
@@ -44,31 +43,20 @@ public class ChangeLogTableDefinition {
     private Map<String, ChangeLogColumnDefinition> columnDefinitions = new HashMap<>();
 
     public ChangeLogTableDefinition() {
-        columnDefinitions.put(ID, new ChangeLogColumnDefinition(ID, getVarchar(255), null, new NotNullConstraint()));
-        columnDefinitions.put(AUTHOR, new ChangeLogColumnDefinition(AUTHOR, getVarchar(255), null, new NotNullConstraint()));
-        columnDefinitions.put(FILENAME, new ChangeLogColumnDefinition(FILENAME, getVarchar(255), null, new NotNullConstraint()));
-        columnDefinitions.put(DATEEXECUTED, new ChangeLogColumnDefinition(DATEEXECUTED, getDateTime(), null, new NotNullConstraint()));
-        columnDefinitions.put(ORDEREXECUTED, new ChangeLogColumnDefinition(ORDEREXECUTED, getInt(), ORDEREXECUTED_DEFAULT_VALUE, new NotNullConstraint()));
-        columnDefinitions.put(DEPLOYMENT_ID, new ChangeLogColumnDefinition(DEPLOYMENT_ID, getVarchar(DEPLOYMENT_COLUMN_SIZE)));
-        columnDefinitions.put(LIQUIBASE, new ChangeLogColumnDefinition(LIQUIBASE, getVarchar(LIQUIBASE_SIZE)));
-        columnDefinitions.put(MD_5_SUM, new ChangeLogColumnDefinition(MD_5_SUM, getVarchar(MD5SUM_SIZE)));
-        columnDefinitions.put(DESCRIPTION, new ChangeLogColumnDefinition(DESCRIPTION, getVarchar(DESCRIPTON_SIZE)));
-        columnDefinitions.put(TAG, new ChangeLogColumnDefinition(TAG, getVarchar(TAG_SIZE)));
-        columnDefinitions.put(COMMENTS, new ChangeLogColumnDefinition(COMMENTS, getVarchar(COMMENTS_SIZE)));
-        columnDefinitions.put(EXECTYPE, new ChangeLogColumnDefinition(EXECTYPE, getVarchar(EXECTYPE_SIZE), "EXECUTED", new NotNullConstraint()));
-        columnDefinitions.put(LABELS, new ChangeLogColumnDefinition(LABELS, getVarchar(LABELS_SIZE)));
-        columnDefinitions.put(CONTEXTS, new ChangeLogColumnDefinition(CONTEXTS, getVarchar(CONTEXTS_SIZE)));
-
-        updateTableSqlStatementProviders.add(new DeploymentColumnStatements(columnDefinitions.get(DEPLOYMENT_ID)));
-        updateTableSqlStatementProviders.add(new ShortTextColumnDefinition(columnDefinitions.get(LIQUIBASE)));
-        updateTableSqlStatementProviders.add(new ShortTextColumnDefinition(columnDefinitions.get(MD_5_SUM)));
-        updateTableSqlStatementProviders.add(new SimpleTextColumnDefinition(columnDefinitions.get(DESCRIPTION)));
-        updateTableSqlStatementProviders.add(new SimpleTextColumnDefinition(columnDefinitions.get(TAG)));
-        updateTableSqlStatementProviders.add(new SimpleTextColumnDefinition(columnDefinitions.get(COMMENTS)));
-        updateTableSqlStatementProviders.add(new ColumnWithDefaultValueSqlStatementProvider(columnDefinitions.get(ORDEREXECUTED)));
-        updateTableSqlStatementProviders.add(new ColumnWithDefaultValueSqlStatementProvider(columnDefinitions.get(EXECTYPE)));
-        updateTableSqlStatementProviders.add(new SimpleTextColumnIgnoreDifferentTypeDefinition(columnDefinitions.get(LABELS)));
-        updateTableSqlStatementProviders.add(new SimpleTextColumnIgnoreDifferentTypeDefinition(columnDefinitions.get(CONTEXTS)));
+        addColumn(new ChangeLogColumnDefinition(ID, getVarchar(255), null, new NotNullConstraint()));
+        addColumn(new ChangeLogColumnDefinition(AUTHOR, getVarchar(255), null, new NotNullConstraint()));
+        addColumn(new ChangeLogColumnDefinition(FILENAME, getVarchar(255), null, new NotNullConstraint()));
+        addColumn(new ChangeLogColumnDefinition(DATEEXECUTED, getDateTime(), null, new NotNullConstraint()));
+        addColumn(new ChangeLogColumnDefinition(ORDEREXECUTED, getInt(), ORDEREXECUTED_DEFAULT_VALUE, new NotNullConstraint()), ColumnWithDefaultValueSqlStatementProvider.class);
+        addColumn(new ChangeLogColumnDefinition(DEPLOYMENT_ID, getVarchar(DEPLOYMENT_COLUMN_SIZE)), DeploymentColumnStatements.class);
+        addColumn(new ChangeLogColumnDefinition(LIQUIBASE, getVarchar(LIQUIBASE_SIZE)), ShortTextColumnDefinition.class);
+        addColumn(new ChangeLogColumnDefinition(MD_5_SUM, getVarchar(MD5SUM_SIZE)), ShortTextColumnDefinition.class);
+        addColumn(new ChangeLogColumnDefinition(DESCRIPTION, getVarchar(DESCRIPTON_SIZE)), SimpleTextColumnDefinition.class);
+        addColumn(new ChangeLogColumnDefinition(TAG, getVarchar(TAG_SIZE)), SimpleTextColumnDefinition.class);
+        addColumn(new ChangeLogColumnDefinition(COMMENTS, getVarchar(COMMENTS_SIZE)), SimpleTextColumnDefinition.class);
+        addColumn(new ChangeLogColumnDefinition(EXECTYPE, getVarchar(EXECTYPE_SIZE), "EXECUTED", new NotNullConstraint()), ColumnWithDefaultValueSqlStatementProvider.class);
+        addColumn(new ChangeLogColumnDefinition(LABELS, getVarchar(LABELS_SIZE)), SimpleTextColumnIgnoreDifferentTypeDefinition.class);
+        addColumn(new ChangeLogColumnDefinition(CONTEXTS, getVarchar(CONTEXTS_SIZE)), SimpleTextColumnIgnoreDifferentTypeDefinition.class);
     }
 
     private DateTimeType getDateTime() {
@@ -91,5 +79,18 @@ public class ChangeLogTableDefinition {
 
     public Map<String, ChangeLogColumnDefinition> getColumnDefinitions() {
         return columnDefinitions;
+    }
+
+    public void addColumn(ChangeLogColumnDefinition definition) {
+        columnDefinitions.put(definition.getColumnName(), definition);
+    }
+
+    public void addColumn(ChangeLogColumnDefinition definition, Class<? extends AlterChangeLogTableSqlStatementProvider> alterProviderClass) {
+        try {
+            updateTableSqlStatementProviders.add(alterProviderClass.getConstructor(ChangeLogColumnDefinition.class).newInstance(definition));
+            columnDefinitions.put(definition.getColumnName(), definition);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
