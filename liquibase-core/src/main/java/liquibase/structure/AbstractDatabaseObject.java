@@ -71,7 +71,16 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             }
         }
 
-        return this.getName().compareTo(that.getName());
+        String thisName = this.getName();
+        String thatName = that.getName();
+        if (thisName != null && thatName != null) {
+            return thisName.compareTo(thatName);
+        } else if (thisName != null) {
+            return 1;
+        } else if (thatName != null) {
+            return -1;
+        }
+        return 0;
     }
 
     @Override
