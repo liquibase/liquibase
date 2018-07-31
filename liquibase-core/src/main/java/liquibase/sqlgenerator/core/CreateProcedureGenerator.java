@@ -133,17 +133,6 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     }
 
     /**
-     * Convenience method for when the catalogName is set but we don't want to parse the body
-     */
-    public static void surroundWithCatalogSets(List<Sql> sql, String catalogName, Database database) {
-        if (database instanceof MSSQLDatabase) {
-            String defaultCatalogName = database.getDefaultCatalogName();
-            sql.add(0, new UnparsedSql("USE [" + catalogName + "]"));
-            sql.add(new UnparsedSql("USE [" + defaultCatalogName + "]"));
-        }
-    }
-
-    /**
      * Convenience method for other classes similar to this that want to be able to modify the procedure text to add the schema
      */
     public static String addSchemaToText(String procedureText, String schemaName, String keywordBeforeName, Database database) {
