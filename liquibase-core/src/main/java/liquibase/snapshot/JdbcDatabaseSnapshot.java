@@ -80,7 +80,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             final String fkName) throws DatabaseException {
             GetForeignKeysResultSetCache getForeignKeysResultSetCache = new GetForeignKeysResultSetCache(database, catalogName, schemaName, tableName, fkName);
             ResultSetCache importedKeys = getResultSetCache("getImportedKeys");
-            importedKeys.setBulkTracking(false);
+            importedKeys.setBulkTracking(!(database instanceof MSSQLDatabase));
 
             return importedKeys.get(getForeignKeysResultSetCache);
         }
