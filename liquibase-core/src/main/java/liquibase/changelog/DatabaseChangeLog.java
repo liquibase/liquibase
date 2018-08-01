@@ -54,8 +54,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private ContextExpression contexts;
     private ContextExpression includeContexts;
 
-    private Warnings warnings = new Warnings();
-
     public DatabaseChangeLog() {
     }
 
@@ -258,7 +256,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
             LogFactory.getLogger().warning(message);
-            warnings.addWarning(message);
         }
 
         if (!validatingVisitor.validationPassed()) {
@@ -540,10 +537,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         for (ChangeSet changeSet : getChangeSets()) {
             changeSet.clearCheckSum();
         }
-    }
-
-    public Warnings getWarnings() {
-        return warnings;
     }
 
 }
