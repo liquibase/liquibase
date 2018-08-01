@@ -10,11 +10,7 @@ import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.UnknownChangelogFormatException;
-import liquibase.exception.ValidationFailedException;
+import liquibase.exception.*;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
@@ -57,6 +53,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     private ContextExpression contexts;
     private ContextExpression includeContexts;
+
+    private Warnings warnings = new Warnings();
 
     public DatabaseChangeLog() {
     }
@@ -260,6 +258,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
             LogFactory.getLogger().warning(message);
+            warnings.addWarning(message);
         }
 
         if (!validatingVisitor.validationPassed()) {
@@ -541,6 +540,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         for (ChangeSet changeSet : getChangeSets()) {
             changeSet.clearCheckSum();
         }
+    }
+
+    public Warnings getWarnings() {
+        return warnings;
     }
 
 }
