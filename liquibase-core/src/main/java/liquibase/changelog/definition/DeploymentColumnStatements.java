@@ -3,7 +3,6 @@ package liquibase.changelog.definition;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.datatype.core.VarcharType;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -15,7 +14,7 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeploymentColumnStatements implements AlterChangeLogTableSqlStatementProvider {
+public class DeploymentColumnStatements implements ChangeLogTableChangesProvider {
 
     private final ChangeLogColumnDefinition columnDefinition;
 

@@ -12,11 +12,11 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleTextColumnIgnoreDifferentTypeDefinition implements AlterChangeLogTableSqlStatementProvider {
+public class SimpleTextColumnIgnoringDifferentTypeChangesProvider implements ChangeLogTableChangesProvider {
 
     private final ChangeLogColumnDefinition columnDefinition;
 
-    public SimpleTextColumnIgnoreDifferentTypeDefinition(ChangeLogColumnDefinition columnDefinition) {
+    public SimpleTextColumnIgnoringDifferentTypeChangesProvider(ChangeLogColumnDefinition columnDefinition) {
         this.columnDefinition = columnDefinition;
     }
 

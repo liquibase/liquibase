@@ -7,7 +7,7 @@ import liquibase.structure.core.Table;
 
 import java.util.List;
 
-public interface AlterChangeLogTableSqlStatementProvider {
+public interface ChangeLogTableChangesProvider {
 
     List<SqlStatement> createSqlStatements(Database database, Table changeLogTable) throws DatabaseException;
 

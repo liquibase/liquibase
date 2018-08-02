@@ -4,7 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.column.LiquibaseColumn;
-import liquibase.changelog.values.ChangeLogColumnValueProvider;
+import liquibase.changelog.value.ChangeLogColumnValueProvider;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;

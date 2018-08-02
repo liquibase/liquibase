@@ -25,7 +25,7 @@ public class RanChangeSetService<T extends RanChangeSet> {
     }
 
     public List<T> prepareRanChangeSets(Database database) throws DatabaseException {
-        boolean databaseChecksumsCompatible = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).isDatabaseChecksumsCompatible();
+        boolean databaseChecksumsCompatible = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).isDatabaseCheckSumCompatible();
         String databaseChangeLogTableName = database.escapeTableName(database.getLiquibaseCatalogName(),
                 database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
         List<T> ranChangeSets = new ArrayList<>();

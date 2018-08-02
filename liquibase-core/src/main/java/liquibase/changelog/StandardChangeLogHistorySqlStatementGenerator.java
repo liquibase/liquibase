@@ -1,6 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.changelog.definition.AlterChangeLogTableSqlStatementProvider;
+import liquibase.changelog.definition.ChangeLogTableChangesProvider;
 import liquibase.changelog.definition.ChangeLogTableDefinition;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -14,7 +14,7 @@ public class StandardChangeLogHistorySqlStatementGenerator {
 
     List<SqlStatement> changeLogTableUpdate(Database database, Table changeLogTable, ChangeLogTableDefinition tableDefinition) throws DatabaseException {
         List<SqlStatement> statementsToExecute = new ArrayList<>();
-        for(AlterChangeLogTableSqlStatementProvider alterTableStatementProvider : tableDefinition.getUpdateTableSqlStatementProviders()) {
+        for(ChangeLogTableChangesProvider alterTableStatementProvider : tableDefinition.getUpdateTableSqlStatementProviders()) {
             statementsToExecute.addAll(alterTableStatementProvider.createSqlStatements(database, changeLogTable));
         }
         return statementsToExecute;

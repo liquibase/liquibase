@@ -14,6 +14,9 @@ import java.util.Map;
 public class ChangeLogTableDefinition {
 
     private static final int DESCRIPTON_SIZE = 255;
+    private static final int ID_SIZE = 255;
+    private static final int AUTHOR_SIZE = 255;
+    private static final int FILENAME_SIZE = 255;
     private static final int TAG_SIZE = 255;
     private static final int COMMENTS_SIZE = 255;
     private static final int LIQUIBASE_SIZE = 20;
@@ -24,46 +27,46 @@ public class ChangeLogTableDefinition {
     private static final int LABELS_SIZE = 255;
     private static final int CONTEXTS_SIZE = 255;
 
-    private static final String ORDEREXECUTED = "ORDEREXECUTED";
-    private static final String DEPLOYMENT_ID = "DEPLOYMENT_ID";
-    private static final String LIQUIBASE = "LIQUIBASE";
-    private static final String MD_5_SUM = "MD5SUM";
-    private static final String DESCRIPTION = "DESCRIPTION";
-    private static final String TAG = "TAG";
-    private static final String COMMENTS = "COMMENTS";
-    private static final String EXECTYPE = "EXECTYPE";
-    private static final String LABELS = "LABELS";
-    private static final String CONTEXTS = "CONTEXTS";
-    private static final String ID = "ID";
-    private static final String AUTHOR = "AUTHOR";
-    private static final String FILENAME = "FILENAME";
-    private static final String DATEEXECUTED = "DATEEXECUTED";
+    public static final String ORDEREXECUTED = "ORDEREXECUTED";
+    public static final String DEPLOYMENT_ID = "DEPLOYMENT_ID";
+    public static final String LIQUIBASE = "LIQUIBASE";
+    public static final String MD_5_SUM = "MD5SUM";
+    public static final String DESCRIPTION = "DESCRIPTION";
+    public static final String TAG = "TAG";
+    public static final String COMMENTS = "COMMENTS";
+    public static final String EXECTYPE = "EXECTYPE";
+    public static final String LABELS = "LABELS";
+    public static final String CONTEXTS = "CONTEXTS";
+    public static final String ID = "ID";
+    public static final String AUTHOR = "AUTHOR";
+    public static final String FILENAME = "FILENAME";
+    public static final String DATEEXECUTED = "DATEEXECUTED";
 
-    private List<AlterChangeLogTableSqlStatementProvider> updateTableSqlStatementProviders = new ArrayList<>();
+    private List<ChangeLogTableChangesProvider> updateTableSqlStatementProviders = new ArrayList<>();
     private Map<String, ChangeLogColumnDefinition> columnDefinitions = new HashMap<>();
 
     public ChangeLogTableDefinition() {
-        addColumn(new ChangeLogColumnDefinition(ID, getVarchar(255), null, new NotNullConstraint()));
-        addColumn(new ChangeLogColumnDefinition(AUTHOR, getVarchar(255), null, new NotNullConstraint()));
-        addColumn(new ChangeLogColumnDefinition(FILENAME, getVarchar(255), null, new NotNullConstraint()));
+        addColumn(new ChangeLogColumnDefinition(ID, getVarchar(ID_SIZE), null, new NotNullConstraint()));
+        addColumn(new ChangeLogColumnDefinition(AUTHOR, getVarchar(AUTHOR_SIZE), null, new NotNullConstraint()));
+        addColumn(new ChangeLogColumnDefinition(FILENAME, getVarchar(FILENAME_SIZE), null, new NotNullConstraint()));
         addColumn(new ChangeLogColumnDefinition(DATEEXECUTED, getDateTime(), null, new NotNullConstraint()));
-        addColumn(new ChangeLogColumnDefinition(ORDEREXECUTED, getInt(), ORDEREXECUTED_DEFAULT_VALUE, new NotNullConstraint()), ColumnWithDefaultValueSqlStatementProvider.class);
+        addColumn(new ChangeLogColumnDefinition(ORDEREXECUTED, getInt(), ORDEREXECUTED_DEFAULT_VALUE, new NotNullConstraint()), DefaultValueColumnChangesProvider.class);
         addColumn(new ChangeLogColumnDefinition(DEPLOYMENT_ID, getVarchar(DEPLOYMENT_COLUMN_SIZE)), DeploymentColumnStatements.class);
-        addColumn(new ChangeLogColumnDefinition(LIQUIBASE, getVarchar(LIQUIBASE_SIZE)), ShortTextColumnDefinition.class);
-        addColumn(new ChangeLogColumnDefinition(MD_5_SUM, getVarchar(MD5SUM_SIZE)), ShortTextColumnDefinition.class);
-        addColumn(new ChangeLogColumnDefinition(DESCRIPTION, getVarchar(DESCRIPTON_SIZE)), SimpleTextColumnDefinition.class);
-        addColumn(new ChangeLogColumnDefinition(TAG, getVarchar(TAG_SIZE)), SimpleTextColumnDefinition.class);
-        addColumn(new ChangeLogColumnDefinition(COMMENTS, getVarchar(COMMENTS_SIZE)), SimpleTextColumnDefinition.class);
-        addColumn(new ChangeLogColumnDefinition(EXECTYPE, getVarchar(EXECTYPE_SIZE), "EXECUTED", new NotNullConstraint()), ColumnWithDefaultValueSqlStatementProvider.class);
-        addColumn(new ChangeLogColumnDefinition(LABELS, getVarchar(LABELS_SIZE)), SimpleTextColumnIgnoreDifferentTypeDefinition.class);
-        addColumn(new ChangeLogColumnDefinition(CONTEXTS, getVarchar(CONTEXTS_SIZE)), SimpleTextColumnIgnoreDifferentTypeDefinition.class);
+        addColumn(new ChangeLogColumnDefinition(LIQUIBASE, getVarchar(LIQUIBASE_SIZE)), ShortTextColumnChangesProvider.class);
+        addColumn(new ChangeLogColumnDefinition(MD_5_SUM, getVarchar(MD5SUM_SIZE)), ShortTextColumnChangesProvider.class);
+        addColumn(new ChangeLogColumnDefinition(DESCRIPTION, getVarchar(DESCRIPTON_SIZE)), SimpleTextColumnChangesProvider.class);
+        addColumn(new ChangeLogColumnDefinition(TAG, getVarchar(TAG_SIZE)), SimpleTextColumnChangesProvider.class);
+        addColumn(new ChangeLogColumnDefinition(COMMENTS, getVarchar(COMMENTS_SIZE)), SimpleTextColumnChangesProvider.class);
+        addColumn(new ChangeLogColumnDefinition(EXECTYPE, getVarchar(EXECTYPE_SIZE), "EXECUTED", new NotNullConstraint()), DefaultValueColumnChangesProvider.class);
+        addColumn(new ChangeLogColumnDefinition(LABELS, getVarchar(LABELS_SIZE)), SimpleTextColumnIgnoringDifferentTypeChangesProvider.class);
+        addColumn(new ChangeLogColumnDefinition(CONTEXTS, getVarchar(CONTEXTS_SIZE)), SimpleTextColumnIgnoringDifferentTypeChangesProvider.class);
     }
 
     private DateTimeType getDateTime() {
         return new DateTimeType();
     }
 
-    public List<AlterChangeLogTableSqlStatementProvider> getUpdateTableSqlStatementProviders() {
+    public List<ChangeLogTableChangesProvider> getUpdateTableSqlStatementProviders() {
         return updateTableSqlStatementProviders;
     }
 
@@ -85,7 +88,7 @@ public class ChangeLogTableDefinition {
         columnDefinitions.put(definition.getColumnName(), definition);
     }
 
-    public void addColumn(ChangeLogColumnDefinition definition, Class<? extends AlterChangeLogTableSqlStatementProvider> alterProviderClass) {
+    public void addColumn(ChangeLogColumnDefinition definition, Class<? extends ChangeLogTableChangesProvider> alterProviderClass) {
         try {
             updateTableSqlStatementProviders.add(alterProviderClass.getConstructor(ChangeLogColumnDefinition.class).newInstance(definition));
             columnDefinitions.put(definition.getColumnName(), definition);

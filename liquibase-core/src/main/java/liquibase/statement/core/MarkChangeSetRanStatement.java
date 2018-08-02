@@ -1,7 +1,8 @@
 package liquibase.statement.core;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.values.ChangeLogColumnValueProvider;
+import liquibase.changelog.definition.ChangeLogColumnDefinition;
+import liquibase.changelog.value.*;
 import liquibase.statement.AbstractSqlStatement;
 
 import java.util.ArrayList;
@@ -9,41 +10,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static liquibase.changelog.definition.ChangeLogTableDefinition.*;
+
 public class MarkChangeSetRanStatement extends AbstractSqlStatement {
 
-    private ChangeSet changeSet;
+    private final ChangeSet changeSet;
 
-    private ChangeSet.ExecType execType;
+    private final ChangeSet.ExecType execType;
 
-    private List<String> columnsForUpdate;
-    private List<String> columnsForInsert;
+    private final List<String> columnsForUpdate;
+
+    private final List<String> columnsForInsert;
+
+    private final Map<String, ChangeLogColumnValueProvider> columnValuesProviders;
 
     public MarkChangeSetRanStatement(ChangeSet changeSet, ChangeSet.ExecType execType) {
         this.changeSet = changeSet;
         this.execType = execType;
+        this.columnsForInsert = createColumnsForInsert();
+        this.columnsForUpdate = createColumnsForUpdate();
+        this.columnValuesProviders = createColumnValueProviders();
+    }
 
-        columnsForUpdate = new ArrayList<>();
-        columnsForInsert = new ArrayList<>();
+    public final void addColumnForUpdate(ChangeLogColumnDefinition columnDefinition, ChangeLogColumnValueProvider columnValueProvider) {
+        this.columnsForUpdate.add(columnDefinition.getColumnName());
+        addColumnValueProviderIfMissing(columnDefinition, columnValueProvider);
+    }
 
-        addColumnForUpdate("DATEEXECUTED");
-        addColumnForUpdate("ORDEREXECUTED");
-        addColumnForUpdate("MD5SUM");
-        addColumnForUpdate("EXECTYPE");
-        addColumnForUpdate("DEPLOYMENT_ID");
+    public final void addColumnForInsert(ChangeLogColumnDefinition columnDefinition, ChangeLogColumnValueProvider columnValueProvider) {
+        this.columnsForInsert.add(columnDefinition.getColumnName());
+        addColumnValueProviderIfMissing(columnDefinition, columnValueProvider);
+    }
 
-        addColumnForInsert("ID");
-        addColumnForInsert("AUTHOR");
-        addColumnForInsert("FILENAME");
-        addColumnForInsert("DATEEXECUTED");
-        addColumnForInsert("ORDEREXECUTED");
-        addColumnForInsert("MD5SUM");
-        addColumnForInsert("DESCRIPTION");
-        addColumnForInsert("COMMENTS");
-        addColumnForInsert("EXECTYPE");
-        addColumnForInsert("CONTEXTS");
-        addColumnForInsert("LABELS");
-        addColumnForInsert("LIQUIBASE");
-        addColumnForInsert("DEPLOYMENT_ID");
+    private void addColumnValueProviderIfMissing(ChangeLogColumnDefinition columnDefinition, ChangeLogColumnValueProvider columnValueProvider) {
+        String columnName = columnDefinition.getColumnName();
+        if (!this.columnValuesProviders.containsKey(columnName)) {
+            this.columnValuesProviders.put(columnName, columnValueProvider);
+        }
     }
 
     public ChangeSet getChangeSet() {
@@ -63,30 +66,58 @@ public class MarkChangeSetRanStatement extends AbstractSqlStatement {
     }
 
     public Map<String, ChangeLogColumnValueProvider> getColumnValuesProviders() {
+        return this.columnValuesProviders;
+    }
+
+    private static List<String> createColumnsForInsert() {
+        List<String> columnsForInsert = new ArrayList<>();
+
+        columnsForInsert.add(ID);
+        columnsForInsert.add(AUTHOR);
+        columnsForInsert.add(FILENAME);
+        columnsForInsert.add(DATEEXECUTED);
+        columnsForInsert.add(ORDEREXECUTED);
+        columnsForInsert.add(MD_5_SUM);
+        columnsForInsert.add(DESCRIPTION);
+        columnsForInsert.add(COMMENTS);
+        columnsForInsert.add(EXECTYPE);
+        columnsForInsert.add(CONTEXTS);
+        columnsForInsert.add(LABELS);
+        columnsForInsert.add(LIQUIBASE);
+        columnsForInsert.add(DEPLOYMENT_ID);
+
+        return columnsForInsert;
+    }
+
+    private static List<String> createColumnsForUpdate() {
+        List<String> columnsForUpdate = new ArrayList<>();
+
+        columnsForUpdate.add(DATEEXECUTED);
+        columnsForUpdate.add(ORDEREXECUTED);
+        columnsForUpdate.add(MD_5_SUM);
+        columnsForUpdate.add(EXECTYPE);
+        columnsForUpdate.add(DEPLOYMENT_ID);
+
+        return columnsForUpdate;
+    }
+
+    private static Map<String, ChangeLogColumnValueProvider> createColumnValueProviders() {
         HashMap<String, ChangeLogColumnValueProvider> columnValueProviders = new HashMap<>();
 
-        columnValueProviders.put("ID", new ChangeLogColumnValueProvider.IdProvider());
-        columnValueProviders.put("AUTHOR", new ChangeLogColumnValueProvider.AuthorProvider());
-        columnValueProviders.put("FILENAME", new ChangeLogColumnValueProvider.FileNameProvider());
-        columnValueProviders.put("DATEEXECUTED", new ChangeLogColumnValueProvider.DateExecutedProvider());
-        columnValueProviders.put("ORDEREXECUTED", new ChangeLogColumnValueProvider.OrderExecutedProvider());
-        columnValueProviders.put("MD5SUM", new ChangeLogColumnValueProvider.MD5SUMProvider());
-        columnValueProviders.put("DESCRIPTION", new ChangeLogColumnValueProvider.DescriptionProvider());
-        columnValueProviders.put("COMMENTS", new ChangeLogColumnValueProvider.CommentsProvider());
-        columnValueProviders.put("EXECTYPE", new ChangeLogColumnValueProvider.ExecTypeProvider());
-        columnValueProviders.put("CONTEXTS", new ChangeLogColumnValueProvider.ContextsProvider());
-        columnValueProviders.put("LABELS", new ChangeLogColumnValueProvider.LabelsProvider());
-        columnValueProviders.put("LIQUIBASE", new ChangeLogColumnValueProvider.LiquibaseVersionProvider());
-        columnValueProviders.put("DEPLOYMENT_ID", new ChangeLogColumnValueProvider.DeploymentIdProvider());
+        columnValueProviders.put(ID, new IdProvider());
+        columnValueProviders.put(AUTHOR, new AuthorProvider());
+        columnValueProviders.put(FILENAME, new FileNameProvider());
+        columnValueProviders.put(DATEEXECUTED, new DateExecutedProvider());
+        columnValueProviders.put(ORDEREXECUTED, new OrderExecutedProvider());
+        columnValueProviders.put(MD_5_SUM, new MD5SUMProvider());
+        columnValueProviders.put(DESCRIPTION, new DescriptionProvider());
+        columnValueProviders.put(COMMENTS, new CommentsProvider());
+        columnValueProviders.put(EXECTYPE, new ExecTypeProvider());
+        columnValueProviders.put(CONTEXTS, new ContextsProvider());
+        columnValueProviders.put(LABELS, new LabelsProvider());
+        columnValueProviders.put(LIQUIBASE, new LiquibaseVersionProvider());
+        columnValueProviders.put(DEPLOYMENT_ID, new DeploymentIdProvider());
 
         return columnValueProviders;
-    }
-
-    public void addColumnForUpdate(String columnName){
-        columnsForUpdate.add(columnName);
-    }
-
-    public void addColumnForInsert(String columnName){
-        columnsForInsert.add(columnName);
     }
 }

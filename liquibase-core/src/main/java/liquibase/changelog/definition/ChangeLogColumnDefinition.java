@@ -5,6 +5,7 @@ import liquibase.statement.ColumnConstraint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ChangeLogColumnDefinition {
@@ -35,7 +36,7 @@ public class ChangeLogColumnDefinition {
         this.columnName = columnName;
         this.dataType = dataType;
         this.defaultValue = defaultValue;
-        this.constraints = new ArrayList<>();
+        this.constraints = Collections.emptyList();
         this.remarks = null;
     }
 
@@ -43,7 +44,7 @@ public class ChangeLogColumnDefinition {
         this.columnName = columnName;
         this.dataType = dataType;
         this.defaultValue = null;
-        this.constraints = new ArrayList<>();
+        this.constraints = Collections.emptyList();
         this.remarks = null;
     }
 

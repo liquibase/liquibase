@@ -4,7 +4,6 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
-import liquibase.changelog.definition.ChangeLogTableDefinition;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -25,11 +24,13 @@ import liquibase.structure.core.Table;
 
 import java.util.*;
 
+import static liquibase.changelog.definition.ChangeLogTableDefinition.MD_5_SUM;
+
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private List<RanChangeSet> ranChangeSetList;
     private boolean serviceInitialized;
-    private Boolean hasDatabaseChangeLogTable;
+    private Boolean databaseContainsChangeLogTable;
     private boolean databaseChecksumsCompatible = true;
     private Integer lastChangeSetSequenceValue;
     private StandardChangeLogHistorySqlStatementGenerator sqlGenerator = new StandardChangeLogHistorySqlStatementGenerator();
@@ -72,7 +73,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void reset() {
         this.ranChangeSetList = null;
         this.serviceInitialized = false;
-        this.hasDatabaseChangeLogTable = null;
+        this.databaseContainsChangeLogTable = null;
     }
 
     public void init() throws DatabaseException {
@@ -133,13 +134,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     private boolean isMd5SumIncompatible(Database database) throws DatabaseException {
         List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new
                 SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
-                new ColumnConfig().setName("MD5SUM")).setLimit(1));
+                new ColumnConfig().setName(MD_5_SUM)).setLimit(1));
 
         boolean isResultSetNotEmpty = !md5sumRS.isEmpty();
         boolean md5SumIncompatible = false;
 
         if (isResultSetNotEmpty) {
-            String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
+            String md5sum = md5sumRS.get(0).get(MD_5_SUM).toString();
             md5SumIncompatible = !md5sum.startsWith(CheckSum.getCurrentVersion() + ":");
         }
         return md5SumIncompatible;
@@ -182,20 +183,20 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         reset();
     }
 
-    private boolean hasDatabaseChangeLogTable() {
-        if (hasDatabaseChangeLogTable == null) {
+    private boolean doesDatabaseContainChangeLogTable() {
+        if (databaseContainsChangeLogTable == null) {
             try {
-                hasDatabaseChangeLogTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(getDatabase());
+                databaseContainsChangeLogTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(getDatabase());
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
-        return hasDatabaseChangeLogTable;
+        return databaseContainsChangeLogTable;
     }
 
     @Override
     public RanChangeSet getRanChangeSet(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        if (!hasDatabaseChangeLogTable()) {
+        if (!doesDatabaseContainChangeLogTable()) {
             return null;
         }
 
@@ -301,7 +302,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         }
     }
 
-    public boolean isDatabaseChecksumsCompatible() {
+    @Override
+    public boolean isDatabaseCheckSumCompatible() {
         return databaseChecksumsCompatible;
     }
 }

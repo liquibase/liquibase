@@ -13,11 +13,11 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColumnWithDefaultValueSqlStatementProvider implements AlterChangeLogTableSqlStatementProvider {
+public class DefaultValueColumnChangesProvider implements ChangeLogTableChangesProvider {
 
     private final ChangeLogColumnDefinition columnDefinition;
 
-    public ColumnWithDefaultValueSqlStatementProvider(ChangeLogColumnDefinition columnDefinition) {
+    public DefaultValueColumnChangesProvider(ChangeLogColumnDefinition columnDefinition) {
         this.columnDefinition = columnDefinition;
     }
 
