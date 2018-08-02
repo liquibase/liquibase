@@ -32,7 +32,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
 
     }
 
-    ChangeLogTableDefinition getChangeLogTableDefinition() {
+    protected ChangeLogTableDefinition getChangeLogTableDefinition() {
         return new ChangeLogTableDefinition();
     }
 

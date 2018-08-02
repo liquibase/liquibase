@@ -89,12 +89,12 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         if (changeLogTable != null) {
-            statementsToExecute.addAll(sqlGenerator.changeLogTableUpdate(database, changeLogTable, getTableDefinition()));
+            statementsToExecute.addAll(sqlGenerator.changeLogTableUpdate(database, changeLogTable, getChangeLogTableDefinition()));
 
             databaseChecksumsCompatible = !isMd5SumIncompatible(database);
 
             if (!databaseChecksumsCompatible) {
-                executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null " +
+                executor.comment("DatabaseChangeLog checksums are an incompatible version. Setting them to null " +
                         "so they will be updated on next database update");
                 statementsToExecute.add(new RawSqlStatement(
                         "UPDATE " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName()
@@ -128,10 +128,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
         }
         serviceInitialized = true;
-    }
-
-    protected ChangeLogTableDefinition getTableDefinition() {
-        return new ChangeLogTableDefinition();
     }
 
     private boolean isMd5SumIncompatible(Database database) throws DatabaseException {
