@@ -75,6 +75,21 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             change.setClustered(true);
         }
 
+        //handleMissingIndexChange(control, referenceDatabase, comparisonDatabase, returnList, pk, change);
+
+        returnList.add(change);
+
+        return returnList.toArray(new Change[returnList.size()]);
+
+    }
+
+    /**
+     * DAT-876 was fixed but what is the reason of doing this logic ?! Nathan, Steve please review !
+     * Also please DO NOT APPROVE THIS pull request with this comment also I'm not sure about side effects
+     * Thank you in advance !
+     */
+    @SuppressWarnings("unused")
+    private void handleMissingIndexChange(DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, List<Change> returnList, PrimaryKey pk, AddPrimaryKeyChange change) {
         if (comparisonDatabase instanceof OracleDatabase
                 || (comparisonDatabase instanceof AbstractDb2Database && pk.getBackingIndex() != null && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
             Index backingIndex = pk.getBackingIndex();
@@ -113,12 +128,7 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
                 }
             }
         }
-
         control.setAlreadyHandledMissing(pk.getBackingIndex());
-        returnList.add(change);
-
-        return returnList.toArray(new Change[returnList.size()]);
-
     }
 
     protected AddPrimaryKeyChange createAddPrimaryKeyChange() {
