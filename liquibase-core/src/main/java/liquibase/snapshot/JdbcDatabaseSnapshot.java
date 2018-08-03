@@ -78,223 +78,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName,
             final String fkName) throws DatabaseException {
-            return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
+            GetForeignKeysResultSetCache getForeignKeysResultSetCache = new GetForeignKeysResultSetCache(database, catalogName, schemaName, tableName, fkName);
+            ResultSetCache importedKeys = getResultSetCache("getImportedKeys");
+            importedKeys.setBulkTracking(!(database instanceof MSSQLDatabase));
 
-                @Override
-                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
-                    return new ResultSetCache.RowData(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM"), database, row.getString("FKTABLE_NAME"), row.getString("FK_NAME"));
-                }
-
-                @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
-                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, fkName);
-                }
-
-                @Override
-                public boolean bulkContainsSchema(String schemaKey) {
-                    return database instanceof OracleDatabase;
-                }
-
-                @Override
-                public String getSchemaKey(CachedRow row) {
-                    return row.getString("FKTABLE_SCHEM");
-                }
-
-                @Override
-                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
-                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                    List<CachedRow> returnList = new ArrayList<CachedRow>();
-
-                    List<String> tables = new ArrayList<String>();
-                    String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
-                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
-                    if (database instanceof DB2Database) {
-                        return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
-                    } else if (database instanceof Db2zDatabase) {
-                       return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, tableName), database);
-                    } else {
-                        if (tableName == null) {
-                            for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
-                                tables.add(row.getString("TABLE_NAME"));
-                            }
-                        } else {
-                            tables.add(tableName);
-                        }
-
-                        for (String foundTable : tables) {
-                            if (database instanceof OracleDatabase) {
-                                throw new RuntimeException("Should have bulk selected");
-                            } else {
-                                returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
-                            }
-                        }
-
-                        return returnList;
-                    }
-                }
-
-                @Override
-                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
-                    if (database instanceof OracleDatabase) {
-                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
-                        String sql = "SELECT  /*+rule*/" +
-                                "  NULL AS pktable_cat,  " +
-                                "  p.owner as pktable_schem,  " +
-                                "  p.table_name as pktable_name,  " +
-                                "  pc.column_name as pkcolumn_name,  " +
-                                "  NULL as fktable_cat,  " +
-                                "  f.owner as fktable_schem,  " +
-                                "  f.table_name as fktable_name,  " +
-                                "  fc.column_name as fkcolumn_name,  " +
-                                "  fc.position as key_seq,  " +
-                                "  NULL as update_rule,  " +
-                                "  decode (f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,  " +
-                                "  f.constraint_name as fk_name,  " +
-                                "  p.constraint_name as pk_name,  " +
-                                "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,  " +
-                                "  f.validated as fk_validate " +
-                                "FROM " +
-                                "all_cons_columns pc " +
-                                "INNER JOIN all_constraints p " +
-                                "ON pc.owner = p.owner " +
-                                "AND pc.constraint_name = p.constraint_name " +
-                                "INNER JOIN all_constraints f " +
-                                "ON pc.owner = f.r_owner " +
-                                "AND pc.constraint_name = f.r_constraint_name " +
-                                "INNER JOIN all_cons_columns fc " +
-                                "ON fc.owner = f.owner " +
-                                "AND fc.constraint_name = f.constraint_name " +
-                                "AND fc.position = pc.position ";
-                        if (getAllCatalogsStringScratchData() == null) {
-                            sql += "WHERE f.owner = '" + jdbcSchemaName + "' ";
-                        } else {
-                            sql += "WHERE f.owner IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") ";
-                        }
-                        sql += "AND p.constraint_type in ('P', 'U') " +
-                                "AND f.constraint_type = 'R' " +
-                                "AND p.table_name NOT LIKE 'BIN$%' " +
-                                "ORDER BY fktable_schem, fktable_name, key_seq";
-                        return executeAndExtract(sql, database);
-                    } else if (database instanceof DB2Database) {
-                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                        return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
-                    } else if (database instanceof Db2zDatabase) {
-                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                        return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, null), database);
-                    } else if (database instanceof MSSQLDatabase) {
-                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
-                        String sql = getMSSQLSql(jdbcSchemaName, tableName);
-                        return executeAndExtract(sql, database);
-                    } else {
-                        throw new RuntimeException("Cannot bulk select");
-                    }
-                }
-
-                protected String getMSSQLSql(String jdbcSchemaName, String tableName) {
-                    //comes from select object_definition(object_id('sp_fkeys'))
-                    return "select " +
-                            "convert(sysname,db_name()) AS PKTABLE_CAT, " +
-                            "convert(sysname,schema_name(o1.schema_id)) AS PKTABLE_SCHEM, " +
-                            "convert(sysname,o1.name) AS PKTABLE_NAME, " +
-                            "convert(sysname,c1.name) AS PKCOLUMN_NAME, " +
-                            "convert(sysname,db_name()) AS FKTABLE_CAT, " +
-                            "convert(sysname,schema_name(o2.schema_id)) AS FKTABLE_SCHEM, " +
-                            "convert(sysname,o2.name) AS FKTABLE_NAME, " +
-                            "convert(sysname,c2.name) AS FKCOLUMN_NAME, " +
-                            "isnull(convert(smallint,k.constraint_column_id), convert(smallint,0)) AS KEY_SEQ, " +
-                            "convert(smallint, case ObjectProperty(f.object_id, 'CnstIsUpdateCascade') when 1 then 0 else 1 end) AS UPDATE_RULE, " +
-                            "convert(smallint, case ObjectProperty(f.object_id, 'CnstIsDeleteCascade') when 1 then 0 else 1 end) AS DELETE_RULE, " +
-                            "convert(sysname,object_name(f.object_id)) AS FK_NAME, " +
-                            "convert(sysname,i.name) AS PK_NAME, " +
-                            "convert(smallint, 7) AS DEFERRABILITY " +
-                            "from " +
-                            "sys.objects o1, " +
-                            "sys.objects o2, " +
-                            "sys.columns c1, " +
-                            "sys.columns c2, " +
-                            "sys.foreign_keys f inner join " +
-                            "sys.foreign_key_columns k on (k.constraint_object_id = f.object_id) inner join " +
-                            "sys.indexes i on (f.referenced_object_id = i.object_id and f.key_index_id = i.index_id) " +
-                            "where " +
-                            "o1.object_id = f.referenced_object_id and " +
-                            "o2.object_id = f.parent_object_id and " +
-                            "c1.object_id = f.referenced_object_id and " +
-                            "c2.object_id = f.parent_object_id and " +
-                            "c1.column_id = k.referenced_column_id and " +
-                            "c2.column_id = k.parent_column_id and " +
-                            "((object_schema_name(o1.object_id)='" + jdbcSchemaName + "'" +
-                            " and convert(sysname,schema_name(o2.schema_id))='" + jdbcSchemaName + "' and " +
-                            "convert(sysname,o2.name)='" + tableName + "' ) or ( convert(sysname,schema_name" +
-                            "(o2.schema_id))='" + jdbcSchemaName + "' and convert(sysname,o2.name)='" + tableName +
-                            "' )) order by 5, 6, 7, 9, 8";
-                }
-
-                protected String getDB2Sql(String jdbcSchemaName, String tableName) {
-                    return "SELECT  " +
-                            "  pk_col.tabschema AS pktable_cat,  " +
-                            "  pk_col.tabname as pktable_name,  " +
-                            "  pk_col.colname as pkcolumn_name, " +
-                            "  fk_col.tabschema as fktable_cat,  " +
-                            "  fk_col.tabname as fktable_name,  " +
-                            "  fk_col.colname as fkcolumn_name, " +
-                            "  fk_col.colseq as key_seq,  " +
-                            "  decode (ref.updaterule, 'A', 3, 'R', 1, 1) as update_rule,  " +
-                            "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
-                            "  ref.constname as fk_name,  " +
-                            "  ref.refkeyname as pk_name,  " +
-                            "  7 as deferrability  " +
-                            "FROM " +
-                            "syscat.references ref " +
-                            "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
-                            "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
-                            "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
-                            "and pk_col.colseq=fk_col.colseq " +
-                            (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") +
-                            "ORDER BY fk_col.colseq";
-                }
-
-                protected String getDB2ZOSSql(String jdbcSchemaName, String tableName) {
-                    return "SELECT  " +
-                            "  ref.REFTBCREATOR AS pktable_cat,  " +
-                            "  ref.REFTBNAME as pktable_name,  " +
-                            "  pk_col.colname as pkcolumn_name, " +
-                            "  ref.CREATOR as fktable_cat,  " +
-                            "  ref.TBNAME as fktable_name,  " +
-                            "  fk_col.colname as fkcolumn_name, " +
-                            "  fk_col.colseq as key_seq,  " +
-                            "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
-                            "  ref.relname as fk_name,  " +
-                            "  pk_col.colname as pk_name,  " +
-                            "  7 as deferrability  " +
-                            "FROM " +
-                            "SYSIBM.SYSRELS ref " +
-                            "join SYSIBM.SYSFOREIGNKEYS fk_col on ref.relname = fk_col.RELNAME and ref.CREATOR = fk_col.CREATOR and ref.TBNAME = fk_col.TBNAME " +
-                            "join SYSIBM.SYSKEYCOLUSE pk_col on ref.REFTBCREATOR = pk_col.TBCREATOR and ref.REFTBNAME = pk_col.TBNAME " +
-                            "WHERE ref.CREATOR = '" + jdbcSchemaName + "' " +
-                            "and pk_col.colseq=fk_col.colseq " +
-                            (tableName != null ? " AND ref.TBNAME='" + tableName + "' " : "") +
-                            "ORDER BY fk_col.colseq";
-                }
-
-                @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    if (database instanceof AbstractDb2Database || database instanceof MSSQLDatabase) {
-                        return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
-                    } else {
-                        return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
-                    }
-                }
-            });
+            return importedKeys.get(getForeignKeysResultSetCache);
         }
 
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException, SQLException {
@@ -794,6 +582,236 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return rows;
           }
 
+        }
+
+        private class GetForeignKeysResultSetCache extends ResultSetCache.UnionResultSetExtractor {
+            final String catalogName;
+            final String schemaName;
+            final String tableName;
+            final String fkName;
+
+            private GetForeignKeysResultSetCache(Database database, String catalogName, String schemaName, String tableName, String fkName) {
+                super(database);
+                this.catalogName = catalogName;
+                this.schemaName = schemaName;
+                this.tableName = tableName;
+                this.fkName = fkName;
+            }
+
+            @Override
+            public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                return new ResultSetCache.RowData(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM"), database, row.getString("FKTABLE_NAME"), row.getString("FK_NAME"));
+            }
+
+            @Override
+            public ResultSetCache.RowData wantedKeyParameters() {
+                return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, fkName);
+            }
+
+            @Override
+            public boolean bulkContainsSchema(String schemaKey) {
+                return database instanceof OracleDatabase;
+            }
+
+            @Override
+            public String getSchemaKey(CachedRow row) {
+                return row.getString("FKTABLE_SCHEM");
+            }
+
+            @Override
+            public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                List<CachedRow> returnList = new ArrayList<CachedRow>();
+
+                List<String> tables = new ArrayList<String>();
+                String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+
+                if (database instanceof DB2Database) {
+                    return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
+                } else if (database instanceof Db2zDatabase) {
+                    return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, tableName), database);
+                } else {
+                    if (tableName == null) {
+                        for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
+                            tables.add(row.getString("TABLE_NAME"));
+                        }
+                    } else {
+                        tables.add(tableName);
+                    }
+
+                    for (String foundTable : tables) {
+                        if (database instanceof OracleDatabase) {
+                            throw new RuntimeException("Should have bulk selected");
+                        } else {
+                            returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
+                        }
+                    }
+
+                    return returnList;
+                }
+            }
+
+            @Override
+            public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+                if (database instanceof OracleDatabase) {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+
+                    String sql = "SELECT  /*+rule*/" +
+                            "  NULL AS pktable_cat,  " +
+                            "  p.owner as pktable_schem,  " +
+                            "  p.table_name as pktable_name,  " +
+                            "  pc.column_name as pkcolumn_name,  " +
+                            "  NULL as fktable_cat,  " +
+                            "  f.owner as fktable_schem,  " +
+                            "  f.table_name as fktable_name,  " +
+                            "  fc.column_name as fkcolumn_name,  " +
+                            "  fc.position as key_seq,  " +
+                            "  NULL as update_rule,  " +
+                            "  decode (f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,  " +
+                            "  f.constraint_name as fk_name,  " +
+                            "  p.constraint_name as pk_name,  " +
+                            "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,  " +
+                            "  f.validated as fk_validate " +
+                            "FROM " +
+                            "all_cons_columns pc " +
+                            "INNER JOIN all_constraints p " +
+                            "ON pc.owner = p.owner " +
+                            "AND pc.constraint_name = p.constraint_name " +
+                            "INNER JOIN all_constraints f " +
+                            "ON pc.owner = f.r_owner " +
+                            "AND pc.constraint_name = f.r_constraint_name " +
+                            "INNER JOIN all_cons_columns fc " +
+                            "ON fc.owner = f.owner " +
+                            "AND fc.constraint_name = f.constraint_name " +
+                            "AND fc.position = pc.position ";
+                    if (getAllCatalogsStringScratchData() == null) {
+                        sql += "WHERE f.owner = '" + jdbcSchemaName + "' ";
+                    } else {
+                        sql += "WHERE f.owner IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") ";
+                    }
+                    sql += "AND p.constraint_type in ('P', 'U') " +
+                            "AND f.constraint_type = 'R' " +
+                            "AND p.table_name NOT LIKE 'BIN$%' " +
+                            "ORDER BY fktable_schem, fktable_name, key_seq";
+                    return executeAndExtract(sql, database);
+                } else if (database instanceof DB2Database) {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
+                } else if (database instanceof Db2zDatabase) {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, null), database);
+                } else if (database instanceof MSSQLDatabase) {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+
+                    String sql = getMSSQLSql(jdbcSchemaName, tableName);
+                    return executeAndExtract(sql, database);
+                } else {
+                    throw new RuntimeException("Cannot bulk select");
+                }
+            }
+
+            protected String getMSSQLSql(String jdbcSchemaName, String tableName) {
+                //comes from select object_definition(object_id('sp_fkeys'))
+                return "select " +
+                        "convert(sysname,db_name()) AS PKTABLE_CAT, " +
+                        "convert(sysname,schema_name(o1.schema_id)) AS PKTABLE_SCHEM, " +
+                        "convert(sysname,o1.name) AS PKTABLE_NAME, " +
+                        "convert(sysname,c1.name) AS PKCOLUMN_NAME, " +
+                        "convert(sysname,db_name()) AS FKTABLE_CAT, " +
+                        "convert(sysname,schema_name(o2.schema_id)) AS FKTABLE_SCHEM, " +
+                        "convert(sysname,o2.name) AS FKTABLE_NAME, " +
+                        "convert(sysname,c2.name) AS FKCOLUMN_NAME, " +
+                        "isnull(convert(smallint,k.constraint_column_id), convert(smallint,0)) AS KEY_SEQ, " +
+                        "convert(smallint, case ObjectProperty(f.object_id, 'CnstIsUpdateCascade') when 1 then 0 else 1 end) AS UPDATE_RULE, " +
+                        "convert(smallint, case ObjectProperty(f.object_id, 'CnstIsDeleteCascade') when 1 then 0 else 1 end) AS DELETE_RULE, " +
+                        "convert(sysname,object_name(f.object_id)) AS FK_NAME, " +
+                        "convert(sysname,i.name) AS PK_NAME, " +
+                        "convert(smallint, 7) AS DEFERRABILITY " +
+                        "from " +
+                        "sys.objects o1, " +
+                        "sys.objects o2, " +
+                        "sys.columns c1, " +
+                        "sys.columns c2, " +
+                        "sys.foreign_keys f inner join " +
+                        "sys.foreign_key_columns k on (k.constraint_object_id = f.object_id) inner join " +
+                        "sys.indexes i on (f.referenced_object_id = i.object_id and f.key_index_id = i.index_id) " +
+                        "where " +
+                        "o1.object_id = f.referenced_object_id and " +
+                        "o2.object_id = f.parent_object_id and " +
+                        "c1.object_id = f.referenced_object_id and " +
+                        "c2.object_id = f.parent_object_id and " +
+                        "c1.column_id = k.referenced_column_id and " +
+                        "c2.column_id = k.parent_column_id and " +
+                        "((object_schema_name(o1.object_id)='" + jdbcSchemaName + "'" +
+                        " and convert(sysname,schema_name(o2.schema_id))='" + jdbcSchemaName + "' and " +
+                        "convert(sysname,o2.name)='" + tableName + "' ) or ( convert(sysname,schema_name" +
+                        "(o2.schema_id))='" + jdbcSchemaName + "' and convert(sysname,o2.name)='" + tableName +
+                        "' )) order by 5, 6, 7, 9, 8";
+            }
+
+            protected String getDB2Sql(String jdbcSchemaName, String tableName) {
+                return "SELECT  " +
+                        "  pk_col.tabschema AS pktable_cat,  " +
+                        "  pk_col.tabname as pktable_name,  " +
+                        "  pk_col.colname as pkcolumn_name, " +
+                        "  fk_col.tabschema as fktable_cat,  " +
+                        "  fk_col.tabname as fktable_name,  " +
+                        "  fk_col.colname as fkcolumn_name, " +
+                        "  fk_col.colseq as key_seq,  " +
+                        "  decode (ref.updaterule, 'A', 3, 'R', 1, 1) as update_rule,  " +
+                        "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
+                        "  ref.constname as fk_name,  " +
+                        "  ref.refkeyname as pk_name,  " +
+                        "  7 as deferrability  " +
+                        "FROM " +
+                        "syscat.references ref " +
+                        "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
+                        "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
+                        "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
+                        "and pk_col.colseq=fk_col.colseq " +
+                        (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") +
+                        "ORDER BY fk_col.colseq";
+            }
+
+            protected String getDB2ZOSSql(String jdbcSchemaName, String tableName) {
+                return "SELECT  " +
+                        "  ref.REFTBCREATOR AS pktable_cat,  " +
+                        "  ref.REFTBNAME as pktable_name,  " +
+                        "  pk_col.colname as pkcolumn_name, " +
+                        "  ref.CREATOR as fktable_cat,  " +
+                        "  ref.TBNAME as fktable_name,  " +
+                        "  fk_col.colname as fkcolumn_name, " +
+                        "  fk_col.colseq as key_seq,  " +
+                        "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
+                        "  ref.relname as fk_name,  " +
+                        "  pk_col.colname as pk_name,  " +
+                        "  7 as deferrability  " +
+                        "FROM " +
+                        "SYSIBM.SYSRELS ref " +
+                        "join SYSIBM.SYSFOREIGNKEYS fk_col on ref.relname = fk_col.RELNAME and ref.CREATOR = fk_col.CREATOR and ref.TBNAME = fk_col.TBNAME " +
+                        "join SYSIBM.SYSKEYCOLUSE pk_col on ref.REFTBCREATOR = pk_col.TBCREATOR and ref.REFTBNAME = pk_col.TBNAME " +
+                        "WHERE ref.CREATOR = '" + jdbcSchemaName + "' " +
+                        "and pk_col.colseq=fk_col.colseq " +
+                        (tableName != null ? " AND ref.TBNAME='" + tableName + "' " : "") +
+                        "ORDER BY fk_col.colseq";
+            }
+
+            @Override
+            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                if (database instanceof AbstractDb2Database || database instanceof MSSQLDatabase) {
+                    return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
+                } else {
+                    return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
+                }
+            }
         }
 
         private class GetNotNullConstraintsResultSetCache extends ResultSetCache.SingleResultSetExtractor {
