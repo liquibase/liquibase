@@ -60,7 +60,7 @@ public class CatalogComparator extends CommonCatalogSchemaComparator {
             return otherSchema.getCatalogName() == null;
         }
 
-        if (!equalsSchemas(accordingTo,object1Name,  object2Name)) return false;
+        if (equalsSchemas(accordingTo,object1Name,  object2Name)) return true;
 
         //check with schemaComparisons
         if (chain.getSchemaComparisons() != null && chain.getSchemaComparisons().length > 0) {
