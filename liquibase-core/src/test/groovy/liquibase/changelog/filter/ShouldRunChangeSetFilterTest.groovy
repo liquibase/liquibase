@@ -83,6 +83,18 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         assertFalse(filter.accepts(changeSet).isAccepted());
     }
 
+    public void does_NOT_accept_a_changeset_added_during_execution() throws DatabaseException {
+        when:
+        given_a_database_that_marks_change_set_exec_status();
+        ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
+
+        ChangeSet changeSet = new ChangeSet("runtime_executed", "testAuthor", false, false, "path/changelog", null, null, null);
+        database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
+
+        then:
+        assertFalse(filter.accepts(changeSet).isAccepted());
+    }
+
 //    public void should_decline_not_changed_changeset_when_has_run_on_change() throws DatabaseException {
 //        when:
 //        given_a_database_with_one_twice_executed_changeset();
@@ -93,6 +105,18 @@ public class ShouldRunChangeSetFilterTest extends Specification {
 //        assertFalse("RunOnChange not changed changeset should NOT be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)).isAccepted());
 //    }
 
+    private Database given_a_database_that_marks_change_set_exec_status() throws DatabaseException {
+        ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
+
+        mock_database(ranChanges);
+
+        database.markChangeSetExecStatus(_ as ChangeSet, _ as ChangeSet.ExecType) >> {
+            ChangeSet changeSet, ChangeSet.ExecType execType ->
+                RanChangeSet ranChangeSet = new RanChangeSet(changeSet, execType, null, null);
+                ranChanges.add(ranChangeSet);
+        }
+        return database;
+    }
 
     private Database given_a_database_with_two_executed_changesets() throws DatabaseException {
         ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
