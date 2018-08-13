@@ -19,6 +19,7 @@ import java.util.*;
 class ResultSetCache {
     private Map<String, Integer> timesSingleQueried = new HashMap<String, Integer>();
     private Map<String, Boolean> didBulkQuery = new HashMap<String, Boolean>();
+    private boolean bulkTracking = true;
 
     private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<String, Map<String, List<CachedRow>>>();
 
@@ -59,7 +60,7 @@ class ResultSetCache {
                 }
 
                 results = resultSetExtractor.bulkFetch();
-                didBulkQuery.put(schemaKey, true);
+                didBulkQuery.put(schemaKey, bulkTracking);
                 bulkQueried = true;
             } else {
                 cache = new HashMap<String, List<CachedRow>>(); //don't store results in real cache to prevent confusion if later fetching all items.
@@ -375,5 +376,14 @@ class ResultSetCache {
         protected UnionResultSetExtractor(Database database) {
             super(database);
         }
+    }
+
+    /**
+     * Method to control bulk fetching. By default it is true. Mostly this
+     * flag is used when the database supports multi catalog/schema
+     * @param bulkTracking - boolean flag to control bulk operation
+     */
+    public void setBulkTracking(boolean bulkTracking) {
+        this.bulkTracking = bulkTracking;
     }
 }
