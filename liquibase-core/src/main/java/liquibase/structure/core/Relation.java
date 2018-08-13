@@ -106,7 +106,7 @@ public abstract class Relation extends AbstractDatabaseObject {
         Relation that = (Relation) o;
         int returnValue = 0;
         if (this.getSchema() != null && that.getSchema() != null) {
-            returnValue = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            returnValue = this.getSchema().compareTo(that.getSchema());
         }
 
         if (returnValue == 0) {
