@@ -92,8 +92,9 @@
 						<xsd:attribute name="value" type="xsd:string" />
 						<xsd:attribute name="dbms" type="xsd:string" />
 						<xsd:attribute name="context" type="xsd:string" />
-                        <xsd:attribute name="labels" type="xsd:string" />
-                        <xsd:attribute name="global" type="xsd:boolean"/>
+            <xsd:attribute name="labels" type="xsd:string" />
+            <xsd:attribute name="global" type="xsd:boolean"/>
+            <xsd:anyAttribute namespace="##other" processContents="lax"/>
 					</xsd:complexType>
 				</xsd:element>
 
