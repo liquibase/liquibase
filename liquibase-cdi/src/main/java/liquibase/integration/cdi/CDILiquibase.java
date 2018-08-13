@@ -115,6 +115,10 @@ public class CDILiquibase implements Extension {
             ));
             return;
         }
+        if (!config.getShouldRun()) {
+            log.info(LogType.LOG, String.format("Liquibase did not run on %s because CDILiquibaseConfig.shouldRun was set to false.", hostName));
+            return;
+        }
         initialized = true;
         try {
             performUpdate();
