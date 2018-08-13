@@ -78,11 +78,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName,
             final String fkName) throws DatabaseException {
-            GetForeignKeysResultSetCache getForeignKeysResultSetCache = new GetForeignKeysResultSetCache(database, catalogName, schemaName, tableName, fkName);
+            ForeignKeysResultSetCache foreignKeysResultSetCache = new ForeignKeysResultSetCache(database, catalogName, schemaName, tableName, fkName);
             ResultSetCache importedKeys = getResultSetCache("getImportedKeys");
             importedKeys.setBulkTracking(!(database instanceof MSSQLDatabase));
 
-            return importedKeys.get(getForeignKeysResultSetCache);
+            return importedKeys.get(foreignKeysResultSetCache);
         }
 
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException, SQLException {
@@ -584,13 +584,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         }
 
-        private class GetForeignKeysResultSetCache extends ResultSetCache.UnionResultSetExtractor {
+        private class ForeignKeysResultSetCache extends ResultSetCache.UnionResultSetExtractor {
             final String catalogName;
             final String schemaName;
             final String tableName;
             final String fkName;
 
-            private GetForeignKeysResultSetCache(Database database, String catalogName, String schemaName, String tableName, String fkName) {
+            private ForeignKeysResultSetCache(Database database, String catalogName, String schemaName, String tableName, String fkName) {
                 super(database);
                 this.catalogName = catalogName;
                 this.schemaName = schemaName;
@@ -657,46 +657,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                 if (database instanceof OracleDatabase) {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
-                    String sql = "SELECT  /*+rule*/" +
-                            "  NULL AS pktable_cat,  " +
-                            "  p.owner as pktable_schem,  " +
-                            "  p.table_name as pktable_name,  " +
-                            "  pc.column_name as pkcolumn_name,  " +
-                            "  NULL as fktable_cat,  " +
-                            "  f.owner as fktable_schem,  " +
-                            "  f.table_name as fktable_name,  " +
-                            "  fc.column_name as fkcolumn_name,  " +
-                            "  fc.position as key_seq,  " +
-                            "  NULL as update_rule,  " +
-                            "  decode (f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,  " +
-                            "  f.constraint_name as fk_name,  " +
-                            "  p.constraint_name as pk_name,  " +
-                            "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,  " +
-                            "  f.validated as fk_validate " +
-                            "FROM " +
-                            "all_cons_columns pc " +
-                            "INNER JOIN all_constraints p " +
-                            "ON pc.owner = p.owner " +
-                            "AND pc.constraint_name = p.constraint_name " +
-                            "INNER JOIN all_constraints f " +
-                            "ON pc.owner = f.r_owner " +
-                            "AND pc.constraint_name = f.r_constraint_name " +
-                            "INNER JOIN all_cons_columns fc " +
-                            "ON fc.owner = f.owner " +
-                            "AND fc.constraint_name = f.constraint_name " +
-                            "AND fc.position = pc.position ";
-                    if (getAllCatalogsStringScratchData() == null) {
-                        sql += "WHERE f.owner = '" + jdbcSchemaName + "' ";
-                    } else {
-                        sql += "WHERE f.owner IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") ";
-                    }
-                    sql += "AND p.constraint_type in ('P', 'U') " +
-                            "AND f.constraint_type = 'R' " +
-                            "AND p.table_name NOT LIKE 'BIN$%' " +
-                            "ORDER BY fktable_schem, fktable_name, key_seq";
+                    String sql = getOracleSql(jdbcSchemaName);
                     return executeAndExtract(sql, database);
                 } else if (database instanceof DB2Database) {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
@@ -708,9 +670,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, null), database);
                 } else if (database instanceof MSSQLDatabase) {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
                     String sql = getMSSQLSql(jdbcSchemaName, tableName);
                     return executeAndExtract(sql, database);
                 } else {
@@ -718,7 +678,48 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             }
 
-            protected String getMSSQLSql(String jdbcSchemaName, String tableName) {
+          protected String getOracleSql(String jdbcSchemaName) {
+            String sql = "SELECT  /*+rule*/" +
+                    "  NULL AS pktable_cat,  " +
+                    "  p.owner as pktable_schem,  " +
+                    "  p.table_name as pktable_name,  " +
+                    "  pc.column_name as pkcolumn_name,  " +
+                    "  NULL as fktable_cat,  " +
+                    "  f.owner as fktable_schem,  " +
+                    "  f.table_name as fktable_name,  " +
+                    "  fc.column_name as fkcolumn_name,  " +
+                    "  fc.position as key_seq,  " +
+                    "  NULL as update_rule,  " +
+                    "  decode (f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,  " +
+                    "  f.constraint_name as fk_name,  " +
+                    "  p.constraint_name as pk_name,  " +
+                    "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,  " +
+                    "  f.validated as fk_validate " +
+                    "FROM " +
+                    "all_cons_columns pc " +
+                    "INNER JOIN all_constraints p " +
+                    "ON pc.owner = p.owner " +
+                    "AND pc.constraint_name = p.constraint_name " +
+                    "INNER JOIN all_constraints f " +
+                    "ON pc.owner = f.r_owner " +
+                    "AND pc.constraint_name = f.r_constraint_name " +
+                    "INNER JOIN all_cons_columns fc " +
+                    "ON fc.owner = f.owner " +
+                    "AND fc.constraint_name = f.constraint_name " +
+                    "AND fc.position = pc.position ";
+            if (getAllCatalogsStringScratchData() == null) {
+                sql += "WHERE f.owner = '" + jdbcSchemaName + "' ";
+            } else {
+                sql += "WHERE f.owner IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") ";
+            }
+            sql += "AND p.constraint_type in ('P', 'U') " +
+                    "AND f.constraint_type = 'R' " +
+                    "AND p.table_name NOT LIKE 'BIN$%' " +
+                    "ORDER BY fktable_schem, fktable_name, key_seq";
+            return sql;
+          }
+
+          protected String getMSSQLSql(String jdbcSchemaName, String tableName) {
                 //comes from select object_definition(object_id('sp_fkeys'))
                 return "select " +
                         "convert(sysname,db_name()) AS PKTABLE_CAT, " +

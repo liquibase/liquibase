@@ -379,8 +379,8 @@ class ResultSetCache {
     }
 
     /**
-     * Method to control bulk fetching. By default it's true. Mostly this
-     * flag uses if object support multi catalog/schema
+     * Method to control bulk fetching. By default it is true. Mostly this
+     * flag is used when the database supports multi catalog/schema
      * @param bulkTracking - boolean flag to control bulk operation
      */
     public void setBulkTracking(boolean bulkTracking) {
