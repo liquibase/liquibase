@@ -674,7 +674,7 @@ public class Main {
         stream.println("                                            include objects from in comparison");
         stream.println("                                            only needed if different than");
         stream.println("                                            --schemas");
-        stream.println(" --outputSchemaAs=<name1,name2>             On diffChangeLog/generateChangeLog,");
+        stream.println(" --outputSchemasAs=<name1,name2>             On diffChangeLog/generateChangeLog,");
         stream.println("                                            use these names as schemaName");
         stream.println("                                            instead of the real names.");
         stream.println(" --includeCatalog=<true|false>              If true, the catalog will be");
