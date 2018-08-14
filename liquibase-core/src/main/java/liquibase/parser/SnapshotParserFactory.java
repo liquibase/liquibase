@@ -1,5 +1,6 @@
 package liquibase.parser;
 
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownFormatException;
@@ -19,11 +20,11 @@ public class SnapshotParserFactory {
     private Comparator<SnapshotParser> snapshotParserComparator;
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SnapshotParserFactory();
     }
 
-    public static SnapshotParserFactory getInstance() {
+    public static synchronized SnapshotParserFactory getInstance() {
         if (instance == null) {
              instance = new SnapshotParserFactory();
         }
@@ -38,7 +39,6 @@ public class SnapshotParserFactory {
     }
 
     private SnapshotParserFactory() {
-        Class<? extends SnapshotParser>[] classes;
         snapshotParserComparator = new Comparator<SnapshotParser>() {
             @Override
             public int compare(SnapshotParser o1, SnapshotParser o2) {
@@ -46,12 +46,10 @@ public class SnapshotParserFactory {
             }
         };
 
-        parsers = new ArrayList<SnapshotParser>();
+        parsers = new ArrayList<>();
         try {
-            classes = ServiceLocator.getInstance().findClasses(SnapshotParser.class);
-
-            for (Class<? extends SnapshotParser> clazz : classes) {
-                    register((SnapshotParser) clazz.getConstructor().newInstance());
+            for (SnapshotParser parser : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotParser.class)) {
+                    register(parser);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

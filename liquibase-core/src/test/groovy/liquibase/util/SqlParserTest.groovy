@@ -35,6 +35,31 @@ class SqlParserTest extends Specification {
         "select 5 from test"                                                                               | ["select", "5", "from", "test"]
         "insert a1.b2.c3 from d4.e5"                                                                       | ["insert", "a1.b2.c3", "from", "d4.e5"]
         "select * from dual\ngo\ninsert into test\ngo"                                                     | ["select", "*", "from", "dual", "go", "insert", "into", "test", "go"]
+        "create procedure test.name as select * from dual go"                                              | ["create", "procedure", "test.name", "as", "select", "*", "from", "dual", "go"]
+        "create procedure \"test.name\" as select * from dual go"                                          | ["create", "procedure", "\"test.name\"", "as", "select", "*", "from", "dual", "go"]
+        "create procedure \"test\".\"name\" as select * from dual go"                                      | ["create", "procedure", "\"test\".\"name\"", "as", "select", "*", "from", "dual", "go"]
+        "create procedure [test].[name] as select * from dual go"                                          | ["create", "procedure", "[test].[name]", "as", "select", "*", "from", "dual", "go"]
+        "a test.[name] b"                                                                                  | ["a", "test.[name]", "b"]
+        "a [test].name b"                                                                                  | ["a", "[test].name", "b"]
+        "a [test].\"name\".[here].[four] b"                                                                | ["a", "[test].\"name\".[here].[four]", "b"]
+        "a + b"                                                                                            | ["a", "+", "b"]
+        "a ~ b"                                                                                            | ["a", "~", "b"]
+        "a > b"                                                                                            | ["a", ">", "b"]
+        "a <> b"                                                                                           | ["a", "<", ">", "b"]
+
+    }
+
+    @Unroll
+    def "parse with unicode"() {
+        expect:
+        SqlParser.parse(input).toArray(true) == output
+
+        where:
+        input                                               | output
+        "\u2002word regular\u2002unicode"                   | ["word", "regular", "unicode"]
+        "x\u0282abc"                                        | ["x\u0282abc"] //unicode letter
+        "x \u2013 abc"                                      | ["x", "\u2013", "abc"] //ndash synmbol
+        "x 'quote with unicode punctuation \u2013 in it' y" | ["x", "'quote with unicode punctuation \u2013 in it'", "y"]
     }
 
     @Unroll("#featureName `#input`")
@@ -74,7 +99,7 @@ class SqlParserTest extends Specification {
         "a string /* with a comment */ here"                                                               | ["a", "string", "/* with a comment */", "here"]
         "a string /* with a 'quoted' comment */ here"                                                      | ["a", "string", "/* with a 'quoted' comment */", "here"]
         "'a quoted semicolon; here' and /* a commented semicolon; here */"                                 | ["'a quoted semicolon; here'", "and", "/* a commented semicolon; here */"]
-        "--here is a comment\nand a statement;\nand another --followed by a comment"                       | ["--here is a comment", "and", "a", "statement", ";", "and", "another", "--followed by a comment"]
+        "--here is a comment\nand a statement;\nand another --followed by a comment"                       | ["--here is a comment\n", "and", "a", "statement", ";", "and", "another", "--followed by a comment\n"]
         "/*\nLets start a multiline comment\n\nThat actually covers multiple lines\nhere\n*/ then regular" | ["/*\nLets start a multiline comment\n\nThat actually covers multiple lines\nhere\n*/", "then", "regular"]
     }
 }

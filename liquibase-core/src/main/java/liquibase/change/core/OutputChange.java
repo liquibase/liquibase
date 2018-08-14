@@ -7,14 +7,13 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogFactory;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 @DatabaseChange(name="output", description = "Logs a message and continues execution.", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "3.3")
 public class OutputChange extends AbstractChange {
@@ -35,7 +34,7 @@ public class OutputChange extends AbstractChange {
     }
 
     public void setMessage(String message) {
-        this.message = StringUtils.trimToNull(message);
+        this.message = StringUtil.trimToNull(message);
     }
 
     @DatabaseChangeProperty(description = "Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default value: STDERR", exampleValue = "STDERR")
@@ -47,7 +46,7 @@ public class OutputChange extends AbstractChange {
     }
 
     public void setTarget(String target) {
-        this.target = StringUtils.trimToNull(target);
+        this.target = StringUtil.trimToNull(target);
     }
 
 
@@ -57,18 +56,19 @@ public class OutputChange extends AbstractChange {
             @Override
             public Sql[] generate(Database database) {
                 String target = getTarget();
-                if (target.equalsIgnoreCase("STDOUT")) {
+                if ("STDOUT".equalsIgnoreCase(target)) {
                     System.out.println(getMessage());
-                } else if (target.equalsIgnoreCase("STDERR")) {
+                } else if ("STDERR".equalsIgnoreCase(target)) {
                     System.err.println(getMessage());
-                } else if (target.equalsIgnoreCase("DEBUG")) {
-                    LogFactory.getInstance().getLog().debug(getMessage());
-                } else if (target.equalsIgnoreCase("INFO")) {
-                    LogFactory.getInstance().getLog().info(getMessage());
-                } else if (target.equalsIgnoreCase("WARN") || target.equalsIgnoreCase("WARNING")) {
-                    LogFactory.getInstance().getLog().warning(getMessage());
-                } else if (target.equalsIgnoreCase("SEVERE") || target.equalsIgnoreCase("FATAL") || target.equalsIgnoreCase("ERROR")) {
-                    LogFactory.getInstance().getLog().severe(getMessage());
+                } else if ("DEBUG".equalsIgnoreCase(target)) {
+                    LogService.getLog(getClass()).debug(LogType.LOG, getMessage());
+                } else if ("INFO".equalsIgnoreCase(target)) {
+                    LogService.getLog(getClass()).info(LogType.LOG, getMessage());
+                } else if ("WARN".equalsIgnoreCase(target) || "WARNING".equalsIgnoreCase(target)) {
+                    LogService.getLog(getClass()).warning(LogType.LOG, getMessage());
+                } else if ("SEVERE".equalsIgnoreCase(target) || "FATAL".equalsIgnoreCase(target) || "ERROR"
+                    .equalsIgnoreCase(target)) {
+                    LogService.getLog(getClass()).severe(LogType.LOG, getMessage());
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown target: "+target);
                 }
@@ -90,7 +90,7 @@ public class OutputChange extends AbstractChange {
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if (field.equals("target") && value.equals("")) {
+        if ("target".equals(field) && "".equals(value)) {
             return null;
         }
         return value;

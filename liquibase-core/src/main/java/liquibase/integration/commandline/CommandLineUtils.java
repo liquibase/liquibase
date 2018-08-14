@@ -2,38 +2,46 @@ package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
 import liquibase.command.CommandExecutionException;
-import liquibase.command.DiffCommand;
-import liquibase.command.DiffToChangeLogCommand;
-import liquibase.command.GenerateChangeLogCommand;
+import liquibase.command.CommandFactory;
+import liquibase.command.core.DiffCommand;
+import liquibase.command.core.DiffToChangeLogCommand;
+import liquibase.command.core.GenerateChangeLogCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.*;
-import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.exception.*;
+import liquibase.diff.output.ObjectChangeFilter;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.ResourceBundle;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
+import static java.util.ResourceBundle.getBundle;
 
 /**
- * Common Utilitiy methods used in the CommandLine application and the Maven plugin.
- * These methods were orignally moved from {@link Main} so they could be shared.
+ * Common Utility methods used in the CommandLine application and the Maven plugin.
+ * These methods were originally moved from {@link Main} so they could be shared.
  *
  * @author Peter Murray
  */
 public class CommandLineUtils {
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     /**
      * @deprecated Use ResourceAccessor version
@@ -55,10 +63,13 @@ public class CommandLineUtils {
                                                 String databaseChangeLogTableName,
                                                 String databaseChangeLogLockTableName) throws DatabaseException {
 
-            return createDatabaseObject(new ClassLoaderResourceAccessor(classLoader), url, username, password, driver, defaultCatalogName, defaultSchemaName, outputDefaultCatalog, outputDefaultSchema, databaseClass, driverPropertiesFile, propertyProviderClass, liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, databaseChangeLogLockTableName);
+        return createDatabaseObject(new ClassLoaderResourceAccessor(classLoader), url, username, password, driver,
+                defaultCatalogName, defaultSchemaName, outputDefaultCatalog, outputDefaultSchema, databaseClass,
+                driverPropertiesFile, propertyProviderClass, liquibaseCatalogName, liquibaseSchemaName,
+                databaseChangeLogTableName, databaseChangeLogLockTableName);
     }
 
-        public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
+    public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
                                                 String url,
                                                 String username,
                                                 String password,
@@ -75,26 +86,27 @@ public class CommandLineUtils {
                                                 String databaseChangeLogTableName,
                                                 String databaseChangeLogLockTableName) throws DatabaseException {
         try {
-            liquibaseCatalogName = StringUtils.trimToNull(liquibaseCatalogName);
-            liquibaseSchemaName = StringUtils.trimToNull(liquibaseSchemaName);
-            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
-            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
-            databaseChangeLogTableName = StringUtils.trimToNull(databaseChangeLogTableName);
-            databaseChangeLogLockTableName = StringUtils.trimToNull(databaseChangeLogLockTableName);
+            liquibaseCatalogName = StringUtil.trimToNull(liquibaseCatalogName);
+            liquibaseSchemaName = StringUtil.trimToNull(liquibaseSchemaName);
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
+            databaseChangeLogTableName = StringUtil.trimToNull(databaseChangeLogTableName);
+            databaseChangeLogLockTableName = StringUtil.trimToNull(databaseChangeLogLockTableName);
 
-            Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
+            Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
+                    databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
             if (!database.supportsSchemas()) {
-                if (defaultSchemaName != null && defaultCatalogName == null) {
+                if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
                 }
-                if (liquibaseSchemaName != null && liquibaseCatalogName == null) {
+                if ((liquibaseSchemaName != null) && (liquibaseCatalogName == null)) {
                     liquibaseCatalogName = liquibaseSchemaName;
                 }
             }
-            
-            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
-            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
+
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
 
             database.setDefaultCatalogName(defaultCatalogName);
             database.setDefaultSchemaName(defaultSchemaName);
@@ -102,68 +114,78 @@ public class CommandLineUtils {
             database.setOutputDefaultSchema(outputDefaultSchema);
             database.setLiquibaseCatalogName(liquibaseCatalogName);
             database.setLiquibaseSchemaName(liquibaseSchemaName);
-            if (databaseChangeLogTableName!=null) {
+            if (databaseChangeLogTableName != null) {
                 database.setDatabaseChangeLogTableName(databaseChangeLogTableName);
-                if (databaseChangeLogLockTableName!=null) {
+                if (databaseChangeLogLockTableName != null) {
                     database.setDatabaseChangeLogLockTableName(databaseChangeLogLockTableName);
                 } else {
-                    database.setDatabaseChangeLogLockTableName(databaseChangeLogTableName+"LOCK");
+                    database.setDatabaseChangeLogLockTableName(databaseChangeLogTableName + "LOCK");
                 }
             }
-            
-            //Todo: move to database object methods in 4.0
-            if ((defaultCatalogName != null || defaultSchemaName != null) && !(database.getConnection() instanceof OfflineConnection)) {
-                if (database instanceof OracleDatabase) {
-                    String schema = defaultCatalogName;
-                    if (schema == null) {
-                        schema = defaultSchemaName;
-                    }
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+schema));
-                } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
-                    boolean sql2005OrLater = true;
-                    try {
-                        sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
-                    } catch (DatabaseException e) {
-                        // Assume SQL Server 2005 or later
-                    }
-                    if (sql2005OrLater) {
-                        ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
-                                "IF USER_NAME() <> N'dbo'\r\n" +
-                                "BEGIN\r\n" +
-                                "	DECLARE @sql [nvarchar](MAX)\r\n" +
-                                "	SELECT @sql = N'ALTER USER ' + QUOTENAME(USER_NAME()) + N' WITH DEFAULT_SCHEMA = " + database.escapeStringForDatabase(database.escapeObjectName(username, DatabaseObject.class)) + "'\r\n" +
-                                "	EXEC sp_executesql @sql\r\n" +
-                                "END"));
-                    }
-                } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
-                } else if (database instanceof DB2Database) {
-                    String schema = defaultCatalogName;
-                    if (schema == null) {
-                        schema = defaultSchemaName;
-                    }
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET CURRENT SCHEMA "+schema));
-                } else if (database instanceof MySQLDatabase) {
-                    String schema = defaultCatalogName;
-                    if (schema == null) {
-                        schema = defaultSchemaName;
-                    }
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("USE "+schema));
-                }
 
-            }
+            //Todo: move to database object methods in 4.0
+            initializeDatabase(username, defaultCatalogName, defaultSchemaName, database);
+
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
     }
 
-    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes) throws LiquibaseException {
+    /**
+     * Executes RawSqlStatements particular to each database engine to set the default schema for the given Database
+     *
+     * @param username           The username used for the connection. Used with MSSQL databases
+     * @param defaultCatalogName Catalog name and schema name are similar concepts.
+     *                           Used if defaultCatalogName is null.
+     * @param defaultSchemaName  Catalog name and schema name are similar concepts.
+     *                           Catalog is used with Oracle, DB2 and MySQL, and takes
+     *                           precedence over the schema name.
+     * @param database           Which Database object is affected by the initialization.
+     * @throws DatabaseException
+     */
+    public static void initializeDatabase(String username, String defaultCatalogName, String defaultSchemaName,
+                                          Database database) throws DatabaseException {
+        if (((defaultCatalogName != null) || (defaultSchemaName != null)) && !(database.getConnection() instanceof
+            OfflineConnection)) {
+            if (database instanceof OracleDatabase) {
+                String schema = defaultCatalogName;
+                if (schema == null) {
+                    schema = defaultSchemaName;
+                }
+                ExecutorService.getInstance().getExecutor(database).execute(
+                    new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
+                        database.escapeObjectName(schema, Schema.class)));
+            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
+            } else if (database instanceof AbstractDb2Database) {
+                String schema = defaultCatalogName;
+                if (schema == null) {
+                    schema = defaultSchemaName;
+                }
+                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET CURRENT SCHEMA "
+                        + schema));
+            } else if (database instanceof MySQLDatabase) {
+                String schema = defaultCatalogName;
+                if (schema == null) {
+                    schema = defaultSchemaName;
+                }
+                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("USE " + schema));
+            }
+
+        }
+    }
+
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes) throws
+            LiquibaseException {
         doDiff(referenceDatabase, targetDatabase, snapshotTypes, null);
     }
 
-    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes, CompareControl.SchemaComparison[] schemaComparisons) throws LiquibaseException {
-        DiffCommand diffCommand = new DiffCommand()
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+                              CompareControl.SchemaComparison[] schemaComparisons) throws LiquibaseException {
+        DiffCommand diffCommand = (DiffCommand) CommandFactory.getInstance().getCommand("diff");
+
+        diffCommand
                 .setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
                 .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
@@ -171,7 +193,7 @@ public class CommandLineUtils {
                 .setOutputStream(System.out);
 
         System.out.println("");
-        System.out.println("Diff Results:");
+        System.out.println(coreBundle.getString("diff.results"));
         try {
             diffCommand.execute();
         } catch (CommandExecutionException e) {
@@ -183,24 +205,29 @@ public class CommandLineUtils {
                                          Database referenceDatabase,
                                          Database targetDatabase,
                                          DiffOutputControl diffOutputControl,
+                                         ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes)
             throws LiquibaseException, IOException, ParserConfigurationException {
-        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, diffOutputControl, snapshotTypes, null);
+        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, diffOutputControl, objectChangeFilter,
+                snapshotTypes, null);
     }
 
-        public static void doDiffToChangeLog(String changeLogFile,
+    public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase,
                                          DiffOutputControl diffOutputControl,
+                                         ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes,
                                          CompareControl.SchemaComparison[] schemaComparisons)
             throws LiquibaseException, IOException, ParserConfigurationException {
 
-        DiffToChangeLogCommand command = new DiffToChangeLogCommand();
+        DiffToChangeLogCommand command = (DiffToChangeLogCommand) CommandFactory.getInstance().getCommand
+                ("diffChangeLog");
         command.setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
                 .setSnapshotTypes(snapshotTypes)
                 .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
+                .setObjectChangeFilter(objectChangeFilter)
                 .setOutputStream(System.out);
         command.setChangeLogFile(changeLogFile)
                 .setDiffOutputControl(diffOutputControl);
@@ -213,20 +240,28 @@ public class CommandLineUtils {
 
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException, LiquibaseException {
-        doGenerateChangeLog(changeLogFile, originalDatabase, new CatalogAndSchema[] {new CatalogAndSchema(catalogName, schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl);
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName,
+                                           String schemaName, String snapshotTypes, String author, String context,
+                                           String dataDir, DiffOutputControl diffOutputControl) throws
+            IOException, ParserConfigurationException, LiquibaseException {
+        doGenerateChangeLog(changeLogFile, originalDatabase, new CatalogAndSchema[]{new CatalogAndSchema(catalogName,
+                schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl);
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[] schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException, LiquibaseException {
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[]
+            schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl
+                                                   diffOutputControl) throws IOException, ParserConfigurationException,
+            LiquibaseException {
         CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[schemas.length];
-        int i=0;
+        int i = 0;
         for (CatalogAndSchema schema : schemas) {
             comparisons[i++] = new CompareControl.SchemaComparison(schema, schema);
         }
         CompareControl compareControl = new CompareControl(comparisons, snapshotTypes);
         diffOutputControl.setDataDir(dataDir);
 
-        GenerateChangeLogCommand command = new GenerateChangeLogCommand();
+        GenerateChangeLogCommand command = (GenerateChangeLogCommand) CommandFactory.getInstance().getCommand
+                ("generateChangeLog");
 
         command.setReferenceDatabase(originalDatabase)
                 .setSnapshotTypes(snapshotTypes)
@@ -245,14 +280,38 @@ public class CommandLineUtils {
 
     }
 
-    private static class OutDiffStatusListener implements DiffStatusListener {
+    public static String getBanner() {
+        String myVersion = "";
+        String buildTimeString = "";
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
-        @Override
-        public void statusUpdate(String message) {
-            LogFactory.getLogger().info(message);
-
+        Class clazz = CommandLineUtils.class;
+        String className = clazz.getSimpleName() + ".class";
+        String classPath = clazz.getResource(className).toString();
+        if (classPath.startsWith("jar")) {
+            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) +
+                    "/META-INF/MANIFEST.MF";
+            Manifest manifest = null;
+            try {
+                manifest = new Manifest(new URL(manifestPath).openStream());
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file.");
+            }
+            Attributes attr = manifest.getMainAttributes();
+            myVersion = attr.getValue("Bundle-Version");
+            buildTimeString = attr.getValue("Build-Time");
         }
+        StringBuffer banner = new StringBuffer();
 
+        banner.append(String.format(
+            coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
+        ));
+        if (!myVersion.isEmpty() && !buildTimeString.isEmpty()) {
+            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion,
+                buildTimeString));
+        }
+        return banner.toString();
     }
 
 }

@@ -4,6 +4,8 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet.ExecType;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
@@ -20,11 +22,10 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.csv.CSVReader;
 import liquibase.util.csv.CSVWriter;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @LiquibaseService(skip = true)
 public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryService {
@@ -35,7 +36,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
      * Output CREATE TABLE LIQUIBASECHANGELOG or not
      */
     private boolean executeDdlAgainstDatabase = true;
-    private int COLUMN_ID = 0;
+    private int COLUMN_ID;
     private int COLUMN_AUTHOR = 1;
     private int COLUMN_FILENAME = 2;
     private int COLUMN_DATEEXECUTED = 3;
@@ -48,6 +49,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     private int COLUMN_LIQUIBASE = 10;
     private int COLUMN_CONTEXTS = 11;
     private int COLUMN_LABELS = 12;
+    private int DEPLOYMENT_ID = 13;
     private Integer lastChangeSetSequenceValue;
 
     public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeDmlAgainstDatabase, boolean executeDdlAgainstDatabase) {
@@ -66,7 +68,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public boolean supports(Database database) {
-        return database.getConnection() != null && database.getConnection() instanceof OfflineConnection;
+        return (database.getConnection() != null) && (database.getConnection() instanceof OfflineConnection);
     }
 
     public boolean isExecuteDmlAgainstDatabase() {
@@ -88,7 +90,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public void reset() {
-
+        // nothing to do.
     }
 
     @Override
@@ -112,9 +114,12 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     }
 
     protected void writeHeader(File file) throws IOException {
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(file);
+        
+        try (
+            FileOutputStream outputStream = new FileOutputStream(file);
+            Writer writer = new OutputStreamWriter(outputStream, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+        )
+        {
             CSVWriter csvWriter = new CSVWriter(writer);
             csvWriter.writeNext(new String[]{
                     "ID",
@@ -131,11 +136,6 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                     "CONTEXTS",
                     "LABELS"                    
             });
-        } finally {
-            if (writer != null) {
-                writer.flush();
-                writer.close();
-            }
         }
     }
 
@@ -155,16 +155,22 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
-        FileReader reader = null;
-        try {
-            reader = new FileReader(this.changeLogFile);
+        try (
+                    Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+        )
+        {
             CSVReader csvReader = new CSVReader(reader);
             String[] line = csvReader.readNext();
-            if (!line[COLUMN_ID].equals("ID")) {
+
+            if (line == null) { //empty file
+                writeHeader(this.changeLogFile);
+                return new ArrayList<>();
+            }
+            if (!"ID".equals(line[COLUMN_ID])) {
                 throw new DatabaseException("Missing header in file "+this.changeLogFile.getAbsolutePath());
             }
 
-            List<RanChangeSet> returnList = new ArrayList<RanChangeSet>();
+            List<RanChangeSet> returnList = new ArrayList<>();
             while ((line = csvReader.readNext()) != null) {
                 ContextExpression contexts = new ContextExpression();
                 if (line.length > COLUMN_CONTEXTS) {
@@ -173,6 +179,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 Labels labels = new Labels();
                 if (line.length > COLUMN_LABELS) {
                     labels = new Labels(line[COLUMN_LABELS]);
+                }
+
+                String deploymentId = null;
+                if (line.length > DEPLOYMENT_ID) {
+                    deploymentId = line[DEPLOYMENT_ID];
                 }
 
                 returnList.add(new RanChangeSet(
@@ -186,18 +197,13 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                         line[COLUMN_DESCRIPTION],
                         line[COLUMN_COMMENTS],
                         contexts,
-                        labels));
+                        labels,
+                        deploymentId));
             }
 
             return returnList;
         } catch (Exception e) {
             throw new DatabaseException(e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) { }
-            }
         }
     }
 
@@ -205,48 +211,27 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         File oldFile = this.changeLogFile;
         File newFile = new File(oldFile.getParentFile(), oldFile.getName()+".new");
 
-        FileReader reader = null;
-        FileWriter writer = null;
-
-        try {
-            reader = new FileReader(oldFile);
-            writer = new FileWriter(newFile);
+        try (
+            Reader reader = new InputStreamReader(new FileInputStream(oldFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             CSVReader csvReader = new CSVReader(reader);
             CSVWriter csvWriter = new CSVWriter(writer);
+        )
+        {
             String[] line;
             while ((line = csvReader.readNext()) != null) {
-                if (changeSet == null || (line[COLUMN_ID].equals(changeSet.getId()) && line[COLUMN_AUTHOR].equals(changeSet.getAuthor()) && line[COLUMN_FILENAME].equals(changeSet.getFilePath()))) {
+                if ((changeSet == null) || (line[COLUMN_ID].equals(changeSet.getId()) && line[COLUMN_AUTHOR].equals
+                    (changeSet.getAuthor()) && line[COLUMN_FILENAME].equals(changeSet.getFilePath()))) {
                     line = replaceLogic.execute(line);
                 }
                 if (line != null) {
                     csvWriter.writeNext(line);
                 }
             }
-
-            csvWriter.flush();
-            csvWriter.close();
-            writer = null;
-
-            csvReader.close();
-            reader = null;
-
-
             oldFile.delete();
             newFile.renameTo(oldFile);
         } catch (Exception e) {
             throw new DatabaseException(e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) { }
-            }
-            if (writer != null) {
-                try {
-                    writer.flush();
-                    writer.close();
-                } catch (IOException ignore) {}
-            }
         }
     }
 
@@ -254,20 +239,19 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         File oldFile = this.changeLogFile;
         File newFile = new File(oldFile.getParentFile(), oldFile.getName()+".new");
 
-        FileReader reader = null;
-        FileWriter writer = null;
-
-        try {
-            reader = new FileReader(oldFile);
-            writer = new FileWriter(newFile);
+        try (
+            Reader reader = new InputStreamReader(new FileInputStream(oldFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             CSVReader csvReader = new CSVReader(reader);
             CSVWriter csvWriter = new CSVWriter(writer);
+        )
+        {
             String[] line;
             while ((line = csvReader.readNext()) != null) {
                 csvWriter.writeNext(line);
             }
 
-            String[] newLine = new String[13];
+            String[] newLine = new String[14];
             newLine[COLUMN_ID] = changeSet.getId();
             newLine[COLUMN_AUTHOR] = changeSet.getAuthor();
             newLine[COLUMN_FILENAME] =  changeSet.getFilePath();
@@ -280,35 +264,20 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[COLUMN_TAG] = "";
             newLine[COLUMN_LIQUIBASE] = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
             if (newLine.length > 11) {
-                newLine[COLUMN_CONTEXTS] = changeSet.getContexts() == null ? null : changeSet.getContexts().toString();
-                newLine[COLUMN_LABELS] = changeSet.getLabels() == null ? null : changeSet.getLabels().toString();
+                newLine[COLUMN_CONTEXTS] = (changeSet.getContexts() == null) ? null : changeSet.getContexts().toString();
+                newLine[COLUMN_LABELS] = (changeSet.getLabels() == null) ? null : changeSet.getLabels().toString();
+            }
+
+            if (newLine.length > 13) {
+                newLine[DEPLOYMENT_ID] = getDeploymentId();
             }
 
             csvWriter.writeNext(newLine);
-
-            csvWriter.flush();
-            csvWriter.close();
-            writer = null;
-
-            csvReader.close();
-            reader = null;
 
             oldFile.delete();
             newFile.renameTo(oldFile);
         } catch (Exception e) {
             throw new DatabaseException(e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) { }
-            }
-            if (writer != null) {
-                try {
-                    writer.flush();
-                    writer.close();
-                } catch (IOException ignore) {}
-            }
         }
     }
 
@@ -356,27 +325,25 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         if (lastChangeSetSequenceValue == null) {
             lastChangeSetSequenceValue = 0;
 
-            FileReader reader = null;
-            try {
-                reader = new FileReader(this.changeLogFile);
+            try (
+                Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            )
+            {
+                
                 CSVReader csvReader = new CSVReader(reader);
                 String[] line = csvReader.readNext(); //skip header line
 
-                List<RanChangeSet> returnList = new ArrayList<RanChangeSet>();
+                List<RanChangeSet> returnList = new ArrayList<>();
                 while ((line = csvReader.readNext()) != null) {
                     try {
                         lastChangeSetSequenceValue = Integer.valueOf(line[COLUMN_ORDEREXECUTED]);
-                    } catch (NumberFormatException ignore) { }
+                    } catch (NumberFormatException ignore) {
+                        // ignore.
+                    }
                 }
             } catch (Exception ignore) {
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException ignore) { }
-                }
+                // ignore
             }
-
         }
 
         return ++lastChangeSetSequenceValue;

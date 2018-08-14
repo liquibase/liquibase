@@ -1,32 +1,105 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
+import liquibase.util.JdbcUtils;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class H2Database extends AbstractJdbcDatabase {
 
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
+    private static List keywords = Arrays.asList(
+            "CROSS",
+            "CURRENT_DATE",
+            "CURRENT_TIME",
+            "CURRENT_TIMESTAMP",
+            "DISTINCT",
+            "EXCEPT",
+            "EXISTS",
+            "FALSE",
+            "FETCH",
+            "FOR",
+            "FROM",
+            "FULL",
+            "GROUP",
+            "HAVING",
+            "INNER",
+            "INTERSECT",
+            "IS",
+            "JOIN",
+            "LIKE",
+            "LIMIT",
+            "MINUS",
+            "NATURAL",
+            "NOT",
+            "NULL",
+            "OFFSET",
+            "ON",
+            "ORDER",
+            "PRIMARY",
+            "ROWNUM",
+            "SELECT",
+            "SYSDATE",
+            "SYSTIME",
+            "SYSTIMESTAMP",
+            "TODAY",
+            "TRUE",
+            "UNION",
+            "UNIQUE",
+            "WHERE");
+    private String connectionSchemaName = "PUBLIC";
+
+    private static final int MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES = 1;
+    private static final int MINOR_VERSION_FOR_MINMAX_IN_SEQUENCES = 3;
+    private static final int BUILD_VERSION_FOR_MINMAX_IN_SEQUENCES = 175;
 
     public H2Database() {
         super.unquotedObjectsAreUppercased=true;
         super.setCurrentDateTimeFunction("NOW()");
-        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
+        // for current date
+        this.dateFunctions.add(new DatabaseFunction("CURRENT_DATE"));
+        this.dateFunctions.add(new DatabaseFunction("CURDATE"));
+        this.dateFunctions.add(new DatabaseFunction("SYSDATE"));
+        this.dateFunctions.add(new DatabaseFunction("TODAY"));
+        // for current time
+        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIME"));
+        this.dateFunctions.add(new DatabaseFunction("CURTIME"));
+        // for current timestamp
+        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP"));
+        this.dateFunctions.add(new DatabaseFunction("NOW"));
+
         super.sequenceNextValueFunction = "NEXTVAL('%s')";
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
+        // According to http://www.h2database.com/html/datatypes.html, retrieved on 2017-06-05
+        super.unmodifiableDataTypes.addAll(Arrays.asList("int", "integer", "mediumint", "int4", "signed", "boolean",
+                "bit", "bool", "tinyint", "smallint", "int2", "year", "bigint", "int8", "identity", "float", "float8",
+                "real", "float4", "time", "date", "timestamp", "datetime", "smalldatetime", "timestamp with time zone",
+                "other", "uuid", "array", "geometry"));
     }
 
     @Override
@@ -62,31 +135,6 @@ public class H2Database extends AbstractJdbcDatabase {
         return "H2".equals(conn.getDatabaseProductName());
     }
 
-    //    public void dropDatabaseObjects(String schema) throws DatabaseException {
-//        DatabaseConnection conn = getConnection();
-//        Statement dropStatement = null;
-//        try {
-//            dropStatement = conn.createStatement();
-//            dropStatement.executeUpdate("DROP ALL OBJECTS");
-//            changeLogTableExists = false;
-//            changeLogLockTableExists = false;
-//            changeLogCreateAttempted = false;
-//            changeLogLockCreateAttempted = false;
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        } finally {
-//            try {
-//                if (dropStatement != null) {
-//                    dropStatement.close();
-//                }
-//                conn.commit();
-//            } catch (SQLException e) {
-//                ;
-//            }
-//        }
-//
-//    }
-
     @Override
     public boolean supportsTablespaces() {
         return false;
@@ -103,19 +151,10 @@ public class H2Database extends AbstractJdbcDatabase {
         return definition;
     }
 
-
     @Override
     public Date parseDate(String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(' ') > 0) {
-                return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS").parse(dateAsString);
-            } else {
-                if (dateAsString.indexOf(':') > 0) {
-                    return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
-                } else {
-                    return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
-                }
-            }
+            return new ISODateFormat().parse(dateAsString);
         } catch (ParseException e) {
             throw new DateParseException(dateAsString);
         }
@@ -137,11 +176,6 @@ public class H2Database extends AbstractJdbcDatabase {
         return isLocalURL;
     }
 
-//    @Override
-//    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-//        return super.convertRequestedSchemaToSchema(requestedSchema).toLowerCase();
-//    }
-
     @Override
     public boolean supportsSequences() {
         return true;
@@ -149,7 +183,7 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
-        return "PUBLIC";
+        return connectionSchemaName;
     }
 
     @Override
@@ -177,63 +211,13 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public String getDateLiteral(String isoDate) {
-        String returnString = isoDate;
-        try {
-            if (isDateTime(isoDate)) {
-                ISODateFormat isoTimestampFormat = new ISODateFormat();
-                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                returnString = dbTimestampFormat.format(isoTimestampFormat.parse(isoDate));
-            }
-        } catch (ParseException e) {
-            throw new RuntimeException("Unexpected date format: " + isoDate, e);
-        }
-        return "'" + returnString + "'";
+        return "'" + isoDate.replace('T', ' ') + "'";
     }
-
-
 
     @Override
     public boolean isReservedWord(String objectName) {
-        return keywords.contains(objectName.toUpperCase());
+        return keywords.contains(objectName.toUpperCase(Locale.US));
     }
-
-    private static List keywords = Arrays.asList(
-            "CROSS",
-            "CURRENT_DATE",
-            "CURRENT_TIME",
-            "CURRENT_TIMESTAMP",
-            "DISTINCT",
-            "EXCEPT",
-            "EXISTS",
-            "FALSE",
-            "FOR",
-            "FROM",
-            "FULL",
-            "GROUP",
-            "HAVING",
-            "INNER",
-            "INTERSECT",
-            "IS",
-            "JOIN",
-            "LIKE",
-            "LIMIT",
-            "MINUS",
-            "NATURAL",
-            "NOT",
-            "NULL",
-            "ON",
-            "ORDER",
-            "PRIMARY",
-            "ROWNUM",
-            "SELECT",
-            "SYSDATE",
-            "SYSTIME",
-            "SYSTIMESTAMP",
-            "TODAY",
-            "TRUE",
-            "UNION",
-            "UNIQUE",
-            "WHERE");
 
     @Override
     public boolean supportsInitiallyDeferrableColumns() {
@@ -263,5 +247,86 @@ public class H2Database extends AbstractJdbcDatabase {
     @Override
     public boolean supportsDropTableCascadeConstraints() {
         return true;
+    }
+
+    @Override
+    public void setConnection(DatabaseConnection conn) {
+        Connection sqlConn = null;
+
+        if (!(conn instanceof OfflineConnection)) {
+            try {
+                if (conn instanceof JdbcConnection) {
+                    Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
+                    wrappedConn.setAccessible(true);
+                    sqlConn = (Connection) wrappedConn.invoke(conn);
+                }
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+
+            if (sqlConn != null) {
+                Statement statement = null;
+                ResultSet resultSet = null;
+                try {
+                    statement = sqlConn.createStatement();
+                    resultSet = statement.executeQuery("SELECT SCHEMA()");
+                    String schemaName = null;
+                    if (resultSet.next()) {
+                        schemaName = resultSet.getString(1);
+                    }
+                    if (schemaName != null) {
+                        this.connectionSchemaName = schemaName;
+                    }
+                } catch (SQLException e) {
+                    LogService.getLog(getClass()).info(LogType.LOG, "Could not read current schema name: "+e.getMessage());
+                } finally {
+                    JdbcUtils.close(resultSet, statement);
+                }
+            }
+        }
+        super.setConnection(conn);
+    }
+
+    public boolean supportsMinMaxForSequences() {
+
+        try {
+            if (getDatabaseMajorVersion() > MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES) {
+
+                return true;
+            } else if (getDatabaseMajorVersion() == MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES
+                       && getDatabaseMinorVersion() > MINOR_VERSION_FOR_MINMAX_IN_SEQUENCES) {
+
+                return true;
+            } else if (getDatabaseMajorVersion() == MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES
+                       && getDatabaseMinorVersion() == MINOR_VERSION_FOR_MINMAX_IN_SEQUENCES
+                       && getBuildVersion() >= BUILD_VERSION_FOR_MINMAX_IN_SEQUENCES) {
+                return true;
+            }
+
+        } catch (DatabaseException e) {
+            LogFactory.getInstance().getLog().warning("Failed to determine database version, reported error: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private int getBuildVersion() throws DatabaseException {
+
+        Pattern patchVersionPattern = Pattern.compile("^(?:\\d+\\.)(?:\\d+\\.)(\\d+).*$");
+        Matcher matcher = patchVersionPattern.matcher(getDatabaseProductVersion());
+
+        if (matcher.matches()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+        else {
+            LogFactory.getInstance().getLog().warning("Failed to determine H2 build number from product version: " + getDatabaseProductVersion());
+            return -1;
+        }
+
+    }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        // http://www.h2database.com/html/datatypes.html seems to imply 9 digits
+        return 9;
     }
 }

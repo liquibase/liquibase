@@ -1,13 +1,12 @@
 package liquibase.change;
 
-import liquibase.structure.DatabaseObject;
-
 import java.lang.annotation.*;
 
 /**
  * Annotation used by {@link AbstractChange } to declare {@link ChangeMetaData} information.
  * This annotation should not be checked for outside AbstractChange, if any code is trying to determine the
- * metadata provided by this annotation, it should get it from {@link liquibase.change.Change#getChangeMetaData()}
+ * metadata provided by this annotation, it should get it from
+ * {@link liquibase.change.ChangeFactory#getChangeMetaData(Change)}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

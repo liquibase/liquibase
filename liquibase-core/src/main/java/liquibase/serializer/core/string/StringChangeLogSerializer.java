@@ -5,9 +5,11 @@ import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 public class StringChangeLogSerializer implements ChangeLogSerializer {
@@ -39,7 +41,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             StringBuffer buffer = new StringBuffer();
             buffer.append("[");
 
-            SortedSet<String> values = new TreeSet<String>();
+            SortedSet<String> values = new TreeSet<>();
             for (String field : objectToSerialize.getSerializableFields()) {
                 Object value = objectToSerialize.getSerializableFieldValue(field);
                 if (value == null) {
@@ -60,7 +62,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                             values.add(indent(indent) + field + "=" + serializeObject((Object[]) value, indent + 1));
                         } else {
                             String valueString = value.toString();
-                            if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
+                            if ((value instanceof Double) || (value instanceof Float)) { //java 6 adds additional zeros to the end of doubles and floats
                                 if (valueString.contains(".")) {
                                     valueString = valueString.replaceFirst("(\\.[0-9]+)0+$","$1");
                                     valueString = valueString.replaceFirst("\\.0+$", "");
@@ -72,9 +74,9 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                 }
             }
 
-            if (values.size() > 0) {
+            if (!values.isEmpty()) {
                 buffer.append("\n");
-                buffer.append(StringUtils.join(values, "\n"));
+                buffer.append(StringUtil.join(values, "\n"));
                 buffer.append("\n");
             }
             buffer.append(indent(indent - 1)).append("]");
@@ -87,7 +89,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private String indent(int indent) {
-        return StringUtils.repeat(" ", INDENT_LENGTH * indent);
+        return StringUtil.repeat(" ", INDENT_LENGTH * indent);
     }
 
     private String serializeObject(Object[] collection, int indent) {
@@ -111,7 +113,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private String serializeObject(Collection collection, int indent) {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "[]";
         }
 
@@ -131,7 +133,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private String serializeObject(Map collection, int indent) {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "[]";
         }
 

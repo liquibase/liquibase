@@ -10,6 +10,7 @@ import com.example.liquibase.change.PrimaryKeyConfig
 import com.example.liquibase.change.UniqueConstraintConfig
 
 import liquibase.Contexts
+import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
@@ -21,7 +22,9 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.ObjectQuotingStrategy
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.H2Database
+import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
 import liquibase.precondition.core.*
@@ -85,7 +88,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeSet.getFilePath() == path
         changeSet.getComments() == "Some comments go here"
 
-        ChangeFactory.getInstance().getChangeMetaData(change).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
         assert change instanceof CreateTableChange
         change.tableName == "person"
         change.columns.size() == 3
@@ -126,7 +129,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSets()[0].shouldAlwaysRun()
         assert !changeLog.getChangeSets()[0].shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets()[0].getChanges()[0]).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSets()[0].getChanges()[0]).getName() == "createTable"
         assert changeLog.getChangeSets()[0].getChanges()[0] instanceof CreateTableChange
 
         then:
@@ -141,10 +144,10 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         assert changeLog.getChangeSets().get(1).rollback.changes[0] instanceof RawSQLChange
         assert changeLog.getChangeSets().get(1).rollback.changes[1] instanceof RawSQLChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(1).getChanges()[0]).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSets().get(1).getChanges()[0]).getName() == "addColumn"
         assert changeLog.getChangeSets().get(1).getChanges()[0] instanceof AddColumnChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(1).getChanges().get(1)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSets().get(1).getChanges().get(1)).getName() == "addColumn"
         assert changeLog.getChangeSets().get(1).getChanges().get(1) instanceof AddColumnChange
 
         changeLog.getChangeSets().get(2).getAuthor() == "bob"
@@ -155,7 +158,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSets().get(2).shouldAlwaysRun()
         assert !changeLog.getChangeSets().get(2).shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(2).getChanges()[0]).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSets().get(2).getChanges()[0]).getName() == "createTable"
         assert changeLog.getChangeSets().get(2).getChanges()[0] instanceof CreateTableChange
 
 
@@ -186,7 +189,9 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "changelog with preconditions can be parsed: preconditionsChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/preconditionsChangeLog.xml"
-        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        def params = new ChangeLogParameters()
+        params.set("loginUser", "testUser")
+        def changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor());
 
         then:
         changeLog.getLogicalFilePath() == path
@@ -318,7 +323,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeSet.getComments() == "Some comments go here"
 
         Change change = changeSet.getChanges()[0];
-        ChangeFactory.getInstance().getChangeMetaData(change).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
         assert change instanceof CreateTableChange
     }
 
@@ -505,7 +510,9 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "tests for particular features and edge conditions part 3 testCasesChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        def params = new ChangeLogParameters()
+        params.set("loginUser", "sa")
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor());
 
 
         then: "complex preconditions are parsed"
@@ -614,7 +621,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     def "nested objects are parsed"() {
         setup:
-        ChangeFactory.getInstance().register(CreateTableExampleChange)
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).register(new CreateTableExampleChange())
 
         when:
         def path = "liquibase/parser/core/xml/nestedObjectsChangeLog.xml"
@@ -691,6 +698,26 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getDescending() == true
 
         cleanup:
-        ChangeFactory.getInstance().unregister("createTableExample")
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample")
+    }
+
+    def "change sets with matching dbms are parsed"() {
+        when:
+        def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
+        def database = new MSSQLDatabase()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 4
+    }
+
+    def "change sets with non-matching dbms are skipped"() {
+        when:
+        def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
+        def database = new H2Database()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
     }
 }

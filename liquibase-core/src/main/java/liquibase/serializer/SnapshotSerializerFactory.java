@@ -1,5 +1,6 @@
 package liquibase.serializer;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.servicelocator.ServiceLocator;
@@ -9,13 +10,13 @@ import java.util.*;
 public class SnapshotSerializerFactory {
     private static SnapshotSerializerFactory instance;
 
-    private Map<String, List<SnapshotSerializer>> serializers = new HashMap<String, List<SnapshotSerializer>>();
+    private Map<String, List<SnapshotSerializer>> serializers = new HashMap<>();
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SnapshotSerializerFactory();
     }
 
-    public static SnapshotSerializerFactory getInstance() {
+    public static synchronized SnapshotSerializerFactory getInstance() {
         if (instance == null) {
             instance = new SnapshotSerializerFactory();
         }
@@ -24,12 +25,9 @@ public class SnapshotSerializerFactory {
     }
 
     private SnapshotSerializerFactory() {
-        Class<? extends SnapshotSerializer>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SnapshotSerializer.class);
-
-            for (Class<? extends SnapshotSerializer> clazz : classes) {
-                register((SnapshotSerializer) clazz.getConstructor().newInstance());
+            for (SnapshotSerializer serializer : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotSerializer.class)) {
+                register(serializer);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -61,7 +59,7 @@ public class SnapshotSerializerFactory {
         for (String extension : snapshotSerializer.getValidFileExtensions()) {
             List<SnapshotSerializer> snapshotSerializers = serializers.get(extension);
             if (snapshotSerializers == null) {
-                snapshotSerializers = new ArrayList<SnapshotSerializer>();
+                snapshotSerializers = new ArrayList<>();
                 serializers.put(extension, snapshotSerializers);
             }
             snapshotSerializers.add(snapshotSerializer);

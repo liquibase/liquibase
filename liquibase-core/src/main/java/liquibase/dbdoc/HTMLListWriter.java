@@ -1,11 +1,10 @@
 package liquibase.dbdoc;
 
-import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.util.StringUtil;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.SortedSet;
 
 public class HTMLListWriter {
@@ -25,10 +24,10 @@ public class HTMLListWriter {
     }
 
     public void writeHTML(SortedSet objects) throws IOException {
-        FileWriter fileWriter = new FileWriter(new File(outputDir, filename));
+        Writer fileWriter = new OutputStreamWriter(new FileOutputStream(new File(outputDir, filename)), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
         try {
-            fileWriter.append("<HTML>\n" + "<HEAD>\n" + "<TITLE>\n");
+            fileWriter.append("<HTML>\n" + "<HEAD><meta charset=\"utf-8\"/>\n" + "<TITLE>\n");
             fileWriter.append(title);
             fileWriter.append("\n" + "</TITLE>\n" + "<LINK REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"stylesheet.css\" TITLE=\"Style\">\n" + "</HEAD>\n" + "<BODY BGCOLOR=\"white\">\n" + "<FONT size=\"+1\" CLASS=\"FrameHeadingFont\">\n" + "<B>");
             fileWriter.append(title);
@@ -42,7 +41,7 @@ public class HTMLListWriter {
                 fileWriter.append(DBDocUtil.toFileName(object.toString().endsWith(".xml") ? object.toString() : object.toString().toLowerCase()));
                 fileWriter.append(getTargetExtension());
                 fileWriter.append("\" target=\"objectFrame\">");
-                fileWriter.append(StringUtils.escapeHtml(object.toString()));
+                fileWriter.append(StringUtil.escapeHtml(object.toString()));
                 fileWriter.append("</A><BR>\n");
             }
 

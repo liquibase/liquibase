@@ -1,11 +1,12 @@
 package liquibase.change;
 
+import liquibase.Scope;
 import liquibase.change.core.*;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.database.core.MockDatabase;
 import liquibase.serializer.LiquibaseSerializable;
 import org.junit.Test;
 
@@ -133,42 +134,42 @@ public class ChangeParameterMetaDataTest {
 
     @Test
     public void computedDatabasesCorrect(){
-        ChangeParameterMetaData catalogName = ChangeFactory.getInstance().getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("catalogName");
+        ChangeParameterMetaData catalogName = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("catalogName");
         assertSetsEqual(new String[]{}, catalogName.analyzeRequiredDatabases(new String[] {ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, catalogName.analyzeSupportedDatabases(new String[] {ChangeParameterMetaData.COMPUTE}));
 
 
-        ChangeParameterMetaData tableName = ChangeFactory.getInstance().getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("tableName");
+        ChangeParameterMetaData tableName = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("tableName");
         assertSetsEqual(new String[]{"all"}, tableName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, tableName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
-        ChangeParameterMetaData columnDataType = ChangeFactory.getInstance().getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("columnDataType");
+        ChangeParameterMetaData columnDataType = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("columnDataType");
         assertSetsEqual(new String[]{"informix","mssql","h2","mysql","mariadb"}, columnDataType.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, columnDataType.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
-        ChangeParameterMetaData column = ChangeFactory.getInstance().getChangeMetaData(new AddColumnChange()).getParameters().get("columns");
+        ChangeParameterMetaData column = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new AddColumnChange()).getParameters().get("columns");
         assertSetsEqual(new String[]{"all"}, column.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, column.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
-        tableName = ChangeFactory.getInstance().getChangeMetaData(new AddColumnChange()).getParameters().get("tableName");
+        tableName = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new AddColumnChange()).getParameters().get("tableName");
         assertSetsEqual(new String[]{"all"}, tableName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, tableName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
-        catalogName = ChangeFactory.getInstance().getChangeMetaData(new DropPrimaryKeyChange()).getParameters().get("catalogName");
+        catalogName = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new DropPrimaryKeyChange()).getParameters().get("catalogName");
         assertSetsEqual(new String[]{}, catalogName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, catalogName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
-        ChangeParameterMetaData columns  = ChangeFactory.getInstance().getChangeMetaData(new AddColumnChange()).getParameters().get("columns");
+        ChangeParameterMetaData columns  = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new AddColumnChange()).getParameters().get("columns");
         assertSetsEqual(new String[]{"all"}, columns.analyzeRequiredDatabases(new String[]{"all"}));
         assertSetsEqual(new String[]{"all"}, columns.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
-        ChangeParameterMetaData baseTableCatalogName  = ChangeFactory.getInstance().getChangeMetaData(new DropAllForeignKeyConstraintsChange()).getParameters().get("baseTableCatalogName");
+        ChangeParameterMetaData baseTableCatalogName  = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new DropAllForeignKeyConstraintsChange()).getParameters().get("baseTableCatalogName");
         assertSetsEqual(new String[]{}, baseTableCatalogName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, baseTableCatalogName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
-        ChangeParameterMetaData replaceIfExists  = ChangeFactory.getInstance().getChangeMetaData(new CreateViewChange()).getParameters().get("replaceIfExists");
+        ChangeParameterMetaData replaceIfExists  = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new CreateViewChange()).getParameters().get("replaceIfExists");
         assertSetsEqual(new String[]{}, replaceIfExists.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
-        assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
+        assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2","hsqldb","db2"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
     }
 
 

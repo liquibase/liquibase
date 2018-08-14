@@ -1,16 +1,15 @@
 package liquibase.parser;
 
-import liquibase.exception.LiquibaseException;
 import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import static org.junit.Assert.*;
-
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class ChangeLogParserFactoryTest {
 
@@ -69,7 +68,7 @@ public class ChangeLogParserFactoryTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void builtInGeneratorsAreFound() {
         List<ChangeLogParser> generators = ChangeLogParserFactory.getInstance().getParsers();
         assertEquals(5, generators.size());

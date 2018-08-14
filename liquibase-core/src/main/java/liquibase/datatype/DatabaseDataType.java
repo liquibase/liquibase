@@ -1,7 +1,14 @@
 package liquibase.datatype;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
+import java.util.Locale;
+
+/**
+ * This class represents a native data type used by a specific RDBMS. This is in contrast of
+ * {@link LiquibaseDataType}, which represents data types used in changeSets (which will later be translated into
+ * the RDBMS-specific data type if required).
+ */
 public class DatabaseDataType {
 
     private String type;
@@ -10,25 +17,28 @@ public class DatabaseDataType {
         this.type = type;
     }
 
-    public void addAdditionalInformation(String additionalInformation) {
-        if (additionalInformation != null) {
-            this.type += " "+additionalInformation;
-        }
-    }
-    
     public DatabaseDataType(String name, Object... parameters) {
+        if (parameters == null) {
+            parameters = new Object[0];
+        }
         this.type = name;
 
         String[] stringParams = new String[parameters.length];
         if (parameters.length > 0) {
-            for (int i=0; i<parameters.length; i++){
+            for (int i = 0; i<parameters.length; i++){
                 if (parameters[i] == null) {
                     stringParams[i] = "NULL";
                 } else {
                     stringParams[i] = parameters[i].toString();
                 }
             }
-            type += "("+ StringUtils.join(stringParams, ", ")+")";
+            type += "("+ StringUtil.join(stringParams, ", ")+")";
+        }
+    }
+
+    public void addAdditionalInformation(String additionalInformation) {
+        if (additionalInformation != null) {
+            this.type += " " + additionalInformation;
         }
     }
 
@@ -37,13 +47,14 @@ public class DatabaseDataType {
      * @return Whether the type is serial
      */
     public boolean isAutoIncrement() {
-        return type.equalsIgnoreCase("serial") || type.equalsIgnoreCase("bigserial");
+        return "serial".equals(type.toLowerCase(Locale.US)) || "bigserial".equals(type.toLowerCase(Locale.US)) || "smallserial"
+            .equals(type.toLowerCase(Locale.US));
     }
 
     public String toSql() {
         return toString();
     }
-    
+
     @Override
     public String toString() {
         return type;

@@ -53,4 +53,25 @@ class ExecuteShellCommandChangeTest extends Specification {
         that change.getOs(), Matchers.contains(["linux", "mac"].toArray())
         that change.args, Matchers.contains("-out", "-test")
     }
+
+    def "test getTimoutInMillis"() {
+        when:
+        def change = new ExecuteShellCommandChange()
+        try {
+            change.load(new liquibase.parser.core.ParsedNode(null, "executeCommand")
+                    .addChildren([executable: "/usr/bin/test", os: "linux,mac", timeout:"10s"])
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "args")
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-out"))
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test"))
+            ), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        change.executable == "/usr/bin/test"
+        change.timeout == "10s"
+        that change.getOs(), Matchers.contains(["linux", "mac"].toArray())
+        that change.args, Matchers.contains("-out", "-test")
+    }
 }

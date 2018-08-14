@@ -2,6 +2,7 @@ package liquibase.precondition.core;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -9,9 +10,8 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.precondition.Precondition;
 import liquibase.statement.core.TableRowCountStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class RowCountPrecondition extends AbstractPrecondition {
 
@@ -33,7 +33,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = StringUtil.trimToNull(schemaName);
     }
 
     public String getTableName() {
@@ -67,7 +67,8 @@ public class RowCountPrecondition extends AbstractPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         try {
             TableRowCountStatement statement = new TableRowCountStatement(catalogName, schemaName, tableName);
 

@@ -3,23 +3,29 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MissingDataChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingDataChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -61,12 +67,12 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
             stmt.setFetchSize(1000);
             rs = stmt.executeQuery(sql);
 
-            List<String> columnNames = new ArrayList<String>();
-            for (int i=0; i< rs.getMetaData().getColumnCount(); i++) {
-                columnNames.add(rs.getMetaData().getColumnName(i+1));
+            List<String> columnNames = new ArrayList<>();
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+                columnNames.add(rs.getMetaData().getColumnName(i + 1));
             }
 
-            List<Change> changes = new ArrayList<Change>();
+            List<Change> changes = new ArrayList<>();
             while (rs.next()) {
                 InsertDataChange change = new InsertDataChange();
                 if (outputControl.getIncludeCatalog()) {
@@ -91,14 +97,12 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                         column.setValueBoolean((Boolean) value);
                     } else if (value instanceof Date) {
                         column.setValueDate((Date) value);
-                    } else { // string
+                    } else if (value instanceof byte[]) {
                         if (referenceDatabase instanceof InformixDatabase) {
-                            if (value instanceof byte[]) {
-                                byte[] bytes = (byte[]) value;
-                                value = new String(bytes);
-                            }
+                            column.setValue(new String((byte[]) value, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                         }
-
+                        column.setValueComputed(new DatabaseFunction("UNSUPPORTED FOR DIFF: BINARY DATA"));
+                    } else { // fall back to simple string
                         column.setValue(value.toString().replace("\\", "\\\\"));
                     }
 
@@ -118,12 +122,14 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
             if (rs != null) {
                 try {
                     rs.close();
-                } catch (SQLException ignore) { }
+                } catch (SQLException ignore) {
+                }
             }
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException ignore) { }
+                } catch (SQLException ignore) {
+                }
             }
         }
     }

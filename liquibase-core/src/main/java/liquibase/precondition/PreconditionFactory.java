@@ -1,5 +1,6 @@
 package liquibase.precondition;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -14,27 +15,24 @@ public class PreconditionFactory {
 
     @SuppressWarnings("unchecked")
     private PreconditionFactory() {
-        preconditions = new HashMap<String, Class<? extends Precondition>>();
-        Class[] classes;
+        preconditions = new HashMap<>();
         try {
-            classes = ServiceLocator.getInstance().findClasses(Precondition.class);
-
-            for (Class<? extends Precondition> clazz : classes) {
-                    register(clazz);
+            for (Precondition precondition : Scope.getCurrentScope().getServiceLocator().findInstances(Precondition.class)) {
+                register(precondition);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
 
-    public static PreconditionFactory getInstance() {
+    public static synchronized PreconditionFactory getInstance() {
         if (instance == null) {
-             instance = new PreconditionFactory();
+            instance = new PreconditionFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new PreconditionFactory();
     }
 
@@ -42,9 +40,9 @@ public class PreconditionFactory {
         return preconditions;
     }
 
-    public void register(Class<? extends Precondition> clazz) {
+    public void register(Precondition precondition) {
         try {
-            preconditions.put(clazz.newInstance().getName(), clazz);
+            preconditions.put(precondition.getName(), precondition.getClass());
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

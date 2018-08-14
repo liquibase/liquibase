@@ -1,12 +1,16 @@
 package liquibase.parser;
 
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class ChangeLogParserFactory {
 
@@ -16,11 +20,11 @@ public class ChangeLogParserFactory {
     private Comparator<ChangeLogParser> changelogParserComparator;
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new ChangeLogParserFactory();
     }
 
-    public static ChangeLogParserFactory getInstance() {
+    public static synchronized ChangeLogParserFactory getInstance() {
         if (instance == null) {
              instance = new ChangeLogParserFactory();
         }
@@ -35,20 +39,12 @@ public class ChangeLogParserFactory {
     }
 
     private ChangeLogParserFactory() {
-        Class<? extends ChangeLogParser>[] classes;
-        changelogParserComparator = new Comparator<ChangeLogParser>() {
-            @Override
-            public int compare(ChangeLogParser o1, ChangeLogParser o2) {
-                return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
-            }
-        };
+        changelogParserComparator = (o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority());
 
-        parsers = new ArrayList<ChangeLogParser>();
+        parsers = new ArrayList<>();
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
-
-            for (Class<? extends ChangeLogParser> clazz : classes) {
-                    register((ChangeLogParser) clazz.getConstructor().newInstance());
+            for (ChangeLogParser parser : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogParser.class)) {
+                    register(parser);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

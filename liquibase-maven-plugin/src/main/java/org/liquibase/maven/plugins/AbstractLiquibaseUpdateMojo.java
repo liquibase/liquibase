@@ -1,7 +1,7 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 
 /**
  * Liquibase Update Maven plugin. This plugin allows for DatabaseChangeLogs to be

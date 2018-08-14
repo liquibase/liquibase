@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
     <preConditions>
         <dbms type="sqlite"/>
         <sqlCheck expectedResult="1">select 1</sqlCheck>
@@ -184,9 +184,10 @@
                 <!--deleteCascade="true"/>-->
     <!--</changeSet>-->
 
-    <changeSet id="24" author="nvoxland">
-        <dropForeignKeyConstraint baseTableName="person" constraintName="fk_person_employer"/>
-    </changeSet>
+	<!-- not directly supported on SQLite ATM (need to reactivate the support code for table recreation)
+	<changeSet id="24" author="nvoxland">
+			<dropForeignKeyConstraint baseTableName="person" constraintName="fk_person_employer"/>
+	</changeSet> -->
     <changeSet id="25" author="nvoxland">
         <createTable tableName="address">
             <column name="id" type="int"/>

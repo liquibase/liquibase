@@ -1,6 +1,6 @@
 package liquibase.diff.compare.core
 
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.structure.core.Table
 import spock.lang.Specification
@@ -17,8 +17,8 @@ class TableComparatorTest extends Specification {
         database.caseSensitive = caseSensitive
 
         then:
-        assert DatabaseObjectComparatorFactory.instance.isSameObject(table1, table2, database) == isSame
-        assert DatabaseObjectComparatorFactory.instance.isSameObject(table2, table1, database) == isSame
+        assert DatabaseObjectComparatorFactory.instance.isSameObject(table1, table2, null, database) == isSame
+        assert DatabaseObjectComparatorFactory.instance.isSameObject(table2, table1, null, database) == isSame
 
         where:
         table1 | table2 | caseSensitive | supportsCatalogs | supportsSchemas | isSame | reason

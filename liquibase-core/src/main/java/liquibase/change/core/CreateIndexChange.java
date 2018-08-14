@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
@@ -26,14 +27,14 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private String tablespace;
     private List<AddColumnConfig> columns;
 
-	// Contain associations of index
-	// for example: foreignKey, primaryKey or uniqueConstraint
-	private String associatedWith;
+    // Contain associations of index
+    // for example: foreignKey, primaryKey or uniqueConstraint
+    private String associatedWith;
     private Boolean clustered;
 
 
     public CreateIndexChange() {
-        columns = new ArrayList<AddColumnConfig>();
+        columns = new ArrayList<>();
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to create")
@@ -67,7 +68,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) to add to the index", requiredForDatabase = "all")
     public List<AddColumnConfig> getColumns() {
         if (columns == null) {
-            return new ArrayList<AddColumnConfig>();
+            return new ArrayList<>();
         }
         return columns;
     }
@@ -94,18 +95,18 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-	    return new SqlStatement[]{
+        return new SqlStatement[]{
                 new CreateIndexStatement(
-					    getIndexName(),
+                        getIndexName(),
                         getCatalogName(),
-					    getSchemaName(),
-					    getTableName(),
-					    this.isUnique(),
-					    getAssociatedWith(),
-					    getColumns().toArray(new AddColumnConfig[getColumns().size()]))
-					    .setTablespace(getTablespace())
+                        getSchemaName(),
+                        getTableName(),
+                        this.isUnique(),
+                        getAssociatedWith(),
+                        getColumns().toArray(new AddColumnConfig[getColumns().size()]))
+                        .setTablespace(getTablespace())
                         .setClustered(getClustered())
-	    };
+        };
     }
 
     @Override
@@ -164,21 +165,21 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return this.unique;
     }
 
-	/**
-	 * @return Index associations. Valid values:<br>
-	 * <li>primaryKey</li>
-	 * <li>foreignKey</li>
-	 * <li>uniqueConstraint</li>
-	 * <li>none</li>
-	 * */
+    /**
+     * @return Index associations. Valid values:<br>
+     * <li>primaryKey</li>
+     * <li>foreignKey</li>
+     * <li>uniqueConstraint</li>
+     * <li>none</li>
+     * */
     @DatabaseChangeProperty(isChangeProperty = false)
-	public String getAssociatedWith() {
-		return associatedWith;
-	}
+    public String getAssociatedWith() {
+        return associatedWith;
+    }
 
-	public void setAssociatedWith(String associatedWith) {
-		this.associatedWith = associatedWith;
-	}
+    public void setAssociatedWith(String associatedWith) {
+        this.associatedWith = associatedWith;
+    }
 
 
     @DatabaseChangeProperty(since = "3.0")
@@ -206,7 +207,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if (value != null && field.equals("columns")) {
+        if ((value != null) && "columns".equals(field)) {
             for (ColumnConfig config : (Collection<ColumnConfig>) value) {
                 config.setType(null);
                 config.setAutoIncrement(null);
@@ -221,5 +222,20 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
         }
         return value;
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.addAll(super.validate(database));
+
+        if (columns != null) {
+            for (ColumnConfig columnConfig : columns) {
+                if (columnConfig.getName() == null) {
+                    validationErrors.addError("column 'name' is required for all columns in an index");
+                }
+            }
+        }
+        return validationErrors;
     }
 }

@@ -1,24 +1,22 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
+import liquibase.serializer.AbstractLiquibaseSerializable;
+
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import liquibase.serializer.AbstractLiquibaseSerializable;
 
 public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String path;
     private Boolean errorIfMissingOrEmpty;
     private Boolean relativeToChangelogFile;
     private String resourceFilter;
+    private ContextExpression context;
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<String>(Arrays.asList(
-                "path",
-                "errorIfMissingOrEmpty",
-                "relativeToChangelogFile",
-                "resourceFilter"));
+        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context"));
     }
 
     @Override
@@ -61,5 +59,13 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
 
     public void setResourceFilter(String resourceFilter) {
         this.resourceFilter = resourceFilter;
+    }
+
+    public ContextExpression getContext() {
+        return context;
+    }
+
+    public void setContext(ContextExpression context) {
+        this.context = context;
     }
 }

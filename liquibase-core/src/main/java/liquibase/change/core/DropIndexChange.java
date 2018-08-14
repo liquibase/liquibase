@@ -5,7 +5,6 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
-import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Index;
 
 /**
@@ -39,7 +38,7 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name fo the indexed table.")
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name fo the indexed table.", requiredForDatabase = { "sybase","mysql","mssql","mariadb", "asany" })
     public String getTableName() {
         return tableName;
     }

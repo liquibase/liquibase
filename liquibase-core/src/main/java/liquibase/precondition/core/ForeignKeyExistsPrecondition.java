@@ -1,16 +1,19 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.ForeignKey;
-import liquibase.exception.*;
-import liquibase.precondition.Precondition;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
@@ -66,18 +69,22 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener) throws PreconditionFailedException, PreconditionErrorException {
         try {
             ForeignKey example = new ForeignKey();
             example.setName(getForeignKeyName());
             example.setForeignKeyTable(new Table());
-            if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
+            if (StringUtil.trimToNull(getForeignKeyTableName()) != null) {
                 example.getForeignKeyTable().setName(getForeignKeyTableName());
             }
             example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
-                    throw new PreconditionFailedException("Foreign Key "+database.escapeIndexName(catalogName, schemaName, foreignKeyName)+" does not exist", changeLog, this);
+                throw new PreconditionFailedException("Foreign Key " +
+                    database.escapeIndexName(catalogName, schemaName, foreignKeyName) + " does not exist",
+                    changeLog,
+                    this
+                );
             }
         } catch (PreconditionFailedException e) {
             throw e;

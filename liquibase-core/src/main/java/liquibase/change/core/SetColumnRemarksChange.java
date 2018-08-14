@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
-import liquibase.statement.core.SetTableRemarksStatement;
 
 @DatabaseChange(name="setColumnRemarks", description = "Set remarks on a column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SetColumnRemarksChange extends AbstractChange {

@@ -1,15 +1,16 @@
 package liquibase.util;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.Set;
-
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Set;
 
 /**
  * Utilities for working with streams.
@@ -49,25 +50,29 @@ public class StreamUtil {
             throw new IOException("No stream to open");
         }
 
-		if (charsetName == null) {
-			reader = new UtfBomAwareReader(ins);
-		} else {
-			String charsetCanonicalName = Charset.forName(charsetName).name();
-			String encoding;
+        try {
+            if (charsetName == null) {
+                reader = new UtfBomAwareReader(ins);
+            } else {
+                String charsetCanonicalName = Charset.forName(charsetName).name();
+                String encoding;
 
-			reader = new UtfBomAwareReader(ins, charsetName);
-			encoding = Charset.forName(reader.getEncoding()).name();
+                reader = new UtfBomAwareReader(ins, charsetName);
+                encoding = Charset.forName(reader.getEncoding()).name();
 
-			if (charsetCanonicalName.startsWith("UTF")
-					&& !charsetCanonicalName.equals(encoding)) {
-				reader.close();
-				throw new IllegalArgumentException("Expected encoding was '"
-						+ charsetCanonicalName + "' but a BOM was detected for '"
-						+ encoding + "'");
-			}
-		}
-		return getReaderContents(reader);
-	}
+                if (charsetCanonicalName.startsWith("UTF")
+                        && !charsetCanonicalName.equals(encoding)) {
+                    reader.close();
+                    throw new IllegalArgumentException("Expected encoding was '"
+                            + charsetCanonicalName + "' but a BOM was detected for '"
+                            + encoding + "'");
+                }
+            }
+            return getReaderContents(reader);
+        } finally {
+            ins.close();
+        }
+    }
     
     /**
      * Reads all the characters into a String.
@@ -161,7 +166,7 @@ public class StreamUtil {
         if (resourceAccessor == null) {
             return null;
         }
-        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+        if ((relativeToChangelogFile != null) && relativeToChangelogFile) {
             String base;
             if (changeSet.getChangeLog() == null) {
                 base = changeSet.getFilePath();
@@ -179,14 +184,27 @@ public class StreamUtil {
 
     public static InputStream singleInputStream(String path, ResourceAccessor resourceAccessor) throws IOException {
         Set<InputStream> streams = resourceAccessor.getResourcesAsStream(path);
-        if (streams == null || streams.size() == 0) {
+        if ((streams == null) || streams.isEmpty()) {
             return null;
         }
         if (streams.size() != 1) {
-            for (InputStream stream : streams) {
-                stream.close();
+            if ((streams.size() > 1) && (path != null) && path.startsWith("liquibase/parser/core/xml/") && path
+                .endsWith(".xsd")) {
+                LogService.getLog(StreamUtil.class).debug(LogType.LOG, "Found " + streams.size() + " files that match " + path+", but choosing one at random.");
+                InputStream returnStream = null;
+                for (InputStream stream : streams) {
+                    if (returnStream == null) {
+                        returnStream = stream;
+                    } else {
+                        stream.close();
+                    }
+                }
+            } else {
+                for (InputStream stream : streams) {
+                    stream.close();
+                }
+                throw new IOException("Found " + streams.size() + " files that match " + path);
             }
-            throw new IOException("Found "+streams.size()+" files that match "+path);
         }
 
         return streams.iterator().next();
@@ -206,14 +224,14 @@ public class StreamUtil {
             return null;
         }
 
-        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+        if ((relativeToChangelogFile != null) && relativeToChangelogFile) {
             String base;
             if (changeSet.getChangeLog() == null) {
                 base = changeSet.getFilePath();
             } else {
                 base = changeSet.getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
             }
-            if (base == null || !base.contains("/")) {
+            if ((base == null) || !base.contains("/")) {
                 base = ".";
             }
 

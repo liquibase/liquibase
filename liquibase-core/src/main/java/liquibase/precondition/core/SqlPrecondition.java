@@ -1,17 +1,13 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.precondition.Precondition;
-import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.core.RawSqlStatement;
 
 public class SqlPrecondition extends AbstractPrecondition {
@@ -47,10 +43,12 @@ public class SqlPrecondition extends AbstractPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         DatabaseConnection connection = database.getConnection();
         try {
-            String result = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
+            Object oResult = ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
+            String result = oResult.toString();
             if (result == null) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }
@@ -77,7 +75,7 @@ public class SqlPrecondition extends AbstractPrecondition {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("sql")) {
+        if ("sql".equals(field)) {
             return SerializationType.DIRECT_VALUE;
         }
         return super.getSerializableFieldType(field);

@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.InternalDatabase;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.H2Database;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
 import liquibase.structure.DatabaseObject;
@@ -18,19 +19,21 @@ import java.util.Set;
 
 public class DiffOutputControl {
 
-    private Set<CatalogAndSchema> includeSchemas = new HashSet<CatalogAndSchema>();
+    private Set<CatalogAndSchema> includeSchemas = new HashSet<>();
 
     private boolean includeSchema;
     private boolean includeCatalog;
     private boolean includeTablespace;
 
+    private CompareControl.SchemaComparison[] schemaComparisons;
+
     private DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
-    private ObjectQuotingStrategy objectQuotingStrategy = null;
+    private ObjectQuotingStrategy objectQuotingStrategy;
 
-    private ContextExpression context = null;
-    private Labels labels = null;
+    private ContextExpression context;
+    private Labels labels;
 
     private ObjectChangeFilter objectChangeFilter;
 
@@ -40,10 +43,15 @@ public class DiffOutputControl {
         includeTablespace = true;
     }
 
-    public DiffOutputControl(boolean includeCatalog, boolean includeSchema, boolean includeTablespace) {
+    public DiffOutputControl(boolean includeCatalog, boolean includeSchema, boolean includeTablespace, CompareControl.SchemaComparison[] schemaComparisons) {
         this.includeSchema = includeSchema;
         this.includeCatalog = includeCatalog;
         this.includeTablespace = includeTablespace;
+        this.schemaComparisons = schemaComparisons;
+    }
+
+    public CompareControl.SchemaComparison[] getSchemaComparisons() {
+        return schemaComparisons;
     }
 
     public boolean getIncludeSchema() {
@@ -86,7 +94,7 @@ public class DiffOutputControl {
     }
 
     public boolean alreadyHandledMissing(DatabaseObject missingObject, Database accordingTo) {
-        return alreadyHandledMissing.contains(missingObject);
+        return alreadyHandledMissing.contains(missingObject, schemaComparisons);
     }
 
     public void setAlreadyHandledUnexpected(DatabaseObject unexpectedObject) {
@@ -94,14 +102,15 @@ public class DiffOutputControl {
     }
 
     public boolean alreadyHandledUnexpected(DatabaseObject unexpectedObject, Database accordingTo) {
-        return alreadyHandledUnexpected.contains(unexpectedObject);    }
+        return alreadyHandledUnexpected.contains(unexpectedObject, schemaComparisons);
+    }
 
     public void setAlreadyHandledChanged(DatabaseObject changedObject) {
         this.alreadyHandledChanged.add(changedObject);
     }
 
     public boolean alreadyHandledChanged(DatabaseObject changedObject, Database accordingTo) {
-        return alreadyHandledChanged.contains(changedObject);
+        return alreadyHandledChanged.contains(changedObject, schemaComparisons);
     }
 
     public DiffOutputControl addIncludedSchema(Schema schema) {
@@ -115,7 +124,7 @@ public class DiffOutputControl {
     }
 
     public boolean shouldOutput(DatabaseObject object, Database accordingTo) {
-        if (includeSchemas.size() > 0) {
+        if (!includeSchemas.isEmpty()) {
             Schema schema = object.getSchema();
             if (schema == null) {
                 return true;

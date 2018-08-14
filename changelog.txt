@@ -1,6 +1,426 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.6.2 (2018.06.30)
+
+- [CORE-3129] - PostgreSQL dropPrimaryKey with objectQuotingStrategy="QUOTE_ALL_OBJECTS"
+- [CORE-3206] - Liquibase 3.6.x is binary api-incompatible with 3.5.x
+- [CORE-3213] - Changelog with includeAll will not find child changelogs in multi-modules Spring Boot's executable JAR
+- [CORE-3229] - Oracle 11g doesn't support TIMESTAMP WITHOUT TIME ZONE data type
+
+Changes in version 3.6.1 (2018.04.11)
+
+- [CORE-3200] - Wrong SQL generator is selected
+- [CORE-3201] - Command line missing required dependencies in 3.6.0 tarball
+- [CORE-3198] - Configuration option to prefer internal XSD usage
+
+Changes in version 3.6.0 (2018.04.5)
+
+- [CORE-1609] - Command Prompt: Can't connect to database with a special character in pwd
+- [CORE-1852] - checksums depend on environment
+- [CORE-1888] - Sybase error for TINYINT, INT, BIGINT: Can’t specify a length, scale or storage property on type ‘int/tinyint/bigint’.
+- [CORE-2008] - H2 Supports minValue and maxValue in Sequences since Version 1.3.175, but Liquibase does not
+- [CORE-2033] - NPE during Diff when case sensitive table missing
+- [CORE-2135] - liquibase corrupting UTF-8 changesets
+- [CORE-2162] - MSSQL: Multiple inserts in sqlFile do not fail as expected
+- [CORE-2191] - Update on SQL Azure database fails due to unavailable sys.extended_properties
+- [CORE-2527] - Sybase create table fails because column name is too long
+- [CORE-2631] - dbdoc does not specify content type
+- [CORE-2739] - --delimiter parameter in liquibase --help
+- [CORE-2747] - CreateView / Oracle: Keyword REPLACE in view definition prohibits "or replace" in DDL statement
+- [CORE-2772] - primaryKeyExists check fails on Turkish locale for some chars
+- [CORE-2773] - DB2 AS/400 - generateChangeLog throwing Exception
+- [CORE-2796] - Handle TimeStamps with nano second precision correctly
+- [CORE-2797] - Determine the DB2 data server type correctly
+- [CORE-2820] - Unsupported ReorganizeTable for DB2 z/OS causes changelog validation to fail
+- [CORE-2821] - AddForeignKey statement generates incorrect SQL for DB2 z/OS
+- [CORE-2826] - indexExists precondition fails on AS400 + JDBCDatabaseSnapshot/Snapshot generator code is not coded generically?
+- [CORE-2843] - Sql wrong lexical analysis for string literals - escaped single quotes are misparsed
+- [CORE-2875] - UTF-8 character not understood
+- [CORE-2894] - Oracle snapshot not detecting custom datatypes in different schemas
+- [CORE-2909] - column remarks for mysql should be escaped
+- [CORE-2911] - Oracle: generateChangeLog on RAW types not including the size param
+- [CORE-2928] - Invalid snapshot of "duplicate" foreign keys
+- [CORE-2929] - Views with definitions that start with a comment are not captured correctly in generateChangeLog
+- [CORE-2940] - Do not print warning when DBA_RECYCLEBIN is not available
+- [CORE-2944] - outputDefaultSchema and outputDefaultCatalog command line parameters not respected
+- [CORE-2953] - update with valueSequenceNext and schema produces wrong SQL on oracle
+- [CORE-2965] - Custom Properties XML Changelog
+- [CORE-2992] - liquibase.util.grammar.TokenMgrError: Lexical error at line 1, column 71. Encountered: "\u00b4" (180), after : ""
+- [CORE-2993] - createSequence with order denied on DB2
+- [CORE-3002] - SQLAnywhere: Revert Unique Index failed
+- [CORE-3006] - Oracle CSV-Import: "String index out of range: -1"
+- [CORE-3009] - SQLAnywhere: Drop Default Value failed
+- [CORE-3020] - No warning when included file doesn't exist (missing extension)
+- [CORE-3033] - typo in postgresql reserverd word
+- [CORE-3040] - onlyUpdate="true" flag generates empty statements for MySQL DB
+- [CORE-3046] - Fix faulty snakeyaml class-path entry after upgrade to 1.17
+- [CORE-3051] - SQLAnywhere: Drop Table does not support CASCADE
+- [CORE-3054] - SQLAnywhere: java-coredump on changeSet-SQL
+- [CORE-3055] - SQLAnywhere: supports Sequences
+- [CORE-3063] - Integration tests failing on master
+- [CORE-3069] - Checksum: line endings not standardized on windows if multiple lines
+- [CORE-3072] - Add usePreparedStatements="true|false" flag to loadData
+- [CORE-3076] - SUM is not reserved word for HsqlDB
+- [CORE-3099] - Non English environment; invalid tablename and column name can be generated because of toUpperCase toLowerCase method which is dependent to locale in java
+- [CORE-3101] - dropPrimaryKey TABLE_SCHEMA = 'null'
+- [CORE-3106] - SQLAnywhere: DROP INDEX should use tablename
+- [CORE-3115] - Prefix space in column type causing the Unknown LiquibaseDataType with the latest release
+- [CORE-3117] - TIMESTAMP WITH TIME ZONE datatype is changed to TIMESTAMP in H2
+- [CORE-3119] - Maven failing to use driverPropertiesFile from Liquibase Properties File
+- [CORE-3135] - Column t1.tgconstrname does not exist
+- [CORE-3138] - SQLAnywhere: AddAutoIncrement-Statement is wrong
+- [CORE-3140] - MSSQL2005 doesn't support built-in function original_db_name()
+- [CORE-3155] - CSV line content behind inline comment character doesn't contribute to checksum
+- [CORE-3162] - Diff problem with MSSQL case sensitive database
+- [CORE-3171] - LoadUpdateData doesn't work on SAP SQLAnywhere
+- [CORE-3180] - A DBMS-specific change set referencing a DBMS-specific rollback can't be parsed on a different DBMS
+- [CORE-2735] - Add possibility to test rollback with SpringLiquibase
+- [CORE-1225] - Add support for tablespace assigned to liquibase metadata tables
+- [CORE-2628] - defaultSchema parameter doesn't do Connection.setCatalog() for SpringLiquibase
+- [CORE-2842] - MSSQL: Support creating clustered unique constraints
+- [CORE-2891] - Liquibase "Command" objects can be extended and overridden
+- [CORE-2919] - Make all variants of Liquibase.listUnrunChangeSets public
+- [CORE-2952] - Use the clustered index if duplicate indexes are defined
+- [CORE-2955] - MSSQL: Capture explicit null default values on snapshot and generate/diffChangeLog
+- [CORE-2970] - MSSQL: Support default value constraint names
+- [CORE-2977] - Generated primary key constraint name doesn't match Postgres default
+- [CORE-2985] - MSSQL Snapshot performance improvements
+- [CORE-3000] - Oracle JDBC batch for load_data
+- [CORE-3005] - Consideration of DB2/400 system views
+- [CORE-3017] - Add path attribute to createView
+- [CORE-3018] - Oracle: support remarks on createView
+- [CORE-3045] - Support indexes on views
+- [CORE-3079] - Make includeObjects and excludeObjects affect which objects are snapshotted
+- [CORE-3094] - HSQLDB UUID support
+- [CORE-2920] - Using "//" as an endDelimiter stopped working 3.5.0
+
+Changes in version 3.5.5 (2018.02.5)
+
+-  [CORE-2851] - includeAll tag with a relative path duplicates the database changes with an absolute and with a relative changelog
+
+Changes in version 3.5.4 (2018.02.5)
+
+- [CORE-2863] - Issue with Spring boot 1.4.0 - 1.4.3
+- [CORE-2898] - includeAll broken in 3.5.1
+- [CORE-2948] - Changelog with includeAll will not find child changelogs in Spring Boot's executable JAR
+- [CORE-2978] - AddAutoIncrement on Postgres does not work when no schema is specified
+- [CORE-3123] - ResourceComparator is not applied for includeAll
+- [CORE-3139] - ClassLoaderResourceAccessor cannot read jar path resources from SpringLiquibase
+- [CORE-3015] - Oracle: diffChangeLog TIMESTAMP WITH LOCAL TIME ZONE correctly
+
+Changes in version 3.5.3 (2016.10.13)
+
+- No changes
+
+Changes in version 3.5.2 (2016.09.21)
+
+-  [CORE-1863] - PostgreSQL blob is mapped to bytea instead of oid
+-  [CORE-2693] - Postgresql dropAll with serial columns fails because tables are dropped then sequences which no longer exist
+-  [CORE-2698] - <sqlFile> Oracle scripts with ending / are not actually getting executed even with splitStatements="false"
+-  [CORE-2752] - Jtds has silent exceptions in db.getConnectionSchemaName
+-  [CORE-2753] - defaultValueSequenceNext forgets schema name
+-  [CORE-2754] - update table columns are not quoted when requested
+-  [CORE-2756] - Null pointer exception from FileSystemResourceAccessor
+-  [CORE-2757] - Databasechangelog ORDEREXECUTED and DEPLOYMENT_ID not updated when a changeSet is reran
+-  [CORE-2758] - Debian package shouldn't symlink liquibase binary to absolute path
+-  [CORE-2761] - 3.5.1: includeAll from the command line uses the absolute path as the changeSet path
+-  [CORE-2763] - Postgresql schemas should default to lower case
+-  [CORE-2765] - dbms in preConditions yaml changelog causes parsing error
+-  [CORE-2770] - Can't read remarks from mssql 2000
+-  [CORE-2774] - Can't read all columns from mssql2000
+-  [CORE-2775] - Oracle Sequences not Generated in generateChangeLog after 3.4.1
+-  [CORE-2778] - Sybase ASE: Incorrect syntax near the keyword 'ALTER'
+-  [CORE-2780] - java.sql.SQLException: PooledConnection has already been closed
+-  [CORE-2781] - DB2: custom-generated indexes for primary keys are not preserved in diff/generateChangeLog
+-  [CORE-2784] - REGRESSION: Column creation of type 'TIMESTAMP WITHOUT TIMEZONE' fails on PostgreSQL
+-  [CORE-2785] - Status command inconsistent with databasechangelog table
+-  [CORE-2786] - Incorrect xml scheme for changlog file
+-  [CORE-2787] - YAML Snapshot parser not handling strings that get stored as binary
+-  [CORE-2789] - Postgres does not have a type "BINARY"
+-  [CORE-2791] - Strip off trailing end delimiter in createProcedure on update, include on updateSql
+-  [CORE-2793] - using property as startWith attribute
+-  [CORE-2794] - Make CSV files created by Liquibase readable by Liquibase
+-  [CORE-2795] - Fix a NullPointerException in DiffToChangeLog.sortMissingObjects
+-  [CORE-2804] - defaultValueSequenceNext forgets schema name H2/PG/etc
+-  [CORE-2805] - Multiple calls to generateChecksum() impacting deploy performance
+-  [CORE-2806] - JsonSnapshotParser does not close stream after parsing
+-  [CORE-2807] - Column data type "real" incorrectly translated to "double precision" for PostgreSQL, should be "real"
+-  [CORE-2810] - defaultValueBoolean="false" generates wrong SQL for MySQL
+-  [CORE-2811] - FileSystemResourceAccessor basepath/includeAll
+-  [CORE-2813] - java.lang.NullPointerException when creating new ClassLoaderResourceAccessor();
+-  [CORE-2814] - DB2: Quoting strategy not respected, objects are always saved as upper case
+-  [CORE-2815] - Rollback by tag doesn't roll back tagDatabase changeSet
+-  [CORE-2816] - Snapshot error when snapshotting an index or primary key against a case-sensitive column
+-  [CORE-2818] - DEPLOYMENT_ID not created for Sybase in DATABASECHANGELOG, liquibase 3.5.1
+-  [CORE-2819] - AbstractJdbcData getConnectionSchemaName() methods fails for Sybase
+-  [CORE-2823] - DROP PRIMARY KEY fails for Sybase database update
+-  [CORE-2827] - MSSQL: misc default value fixes
+-  [CORE-2828] - MSSQL not capturing that primary key are non-clustered in generateChangeLog
+-  [CORE-2830] - GenerateChangeLog does not handle tables with compound primary keys
+-  [CORE-2831] - MySql BIT(1) defaultValue not snapshotted as Boolean
+-  [CORE-2835] - GenerateChangeLog doesn't correctly "numeric DEFAULT '" " columns
+-  [CORE-2836] - addAutoIncrement generates inconsistent sequence name for mixed-case table
+-  [CORE-2837] - addAutoIncrement doesn't apply default schema in nextval call (PostgreSQL)
+-  [CORE-2838] - createProcedure schema in the changelog is overwritten by defaultSchemaName
+-  [CORE-2840] - MSSQL createProcedure for CREATE MERGE AS procedures need a trailing semicolon
+-  [CORE-2843] - Sql wrong lexical analysis for string literals - escaped single quotes are misparsed
+-  [CORE-2846] - DATABASECHANGELOG table query failed on postgres on first run
+-  [CORE-2849] - Fail to execute with sequences
+-  [CORE-2853] - Diff comparisions reporting differences between '0.0' and '0' in decimals
+-  [CORE-2863] - Issue with Spring boot 1.4.0
+-  [CORE-2864] - Regression for defaultSchemaName on MSSQL
+-  [CORE-2867] - liquibase with MySQL raises exception "Table 'DATABASECHANGELOG' already exists" when using separate liquibase schema
+-  [CORE-2868] - <createProcedure> Adds schema/username to package and package body in oracle making them invalid
+-  [CORE-2869] - Without a specified classpath, using includeAll with relativeToChangelogFile="true" fails
+-  [CORE-2872] - "ON DELETE" not supported for FK constraints in Sybase
+-  [CORE-2876] - Issue with Spring boot 1.4.0 Repackaged
+-  [CORE-2878] - MSSQL setTableRemarks limited to 200 chars
+-  [CORE-2881] - DiffChangeLog unnecessarily includes referenceTableCatalogName attribute if comparing Schema with different names
+-  [CORE-2885] - AddColumn with defaultValueSequenceNext generated incorrect SQL for PostgreSQL
+-  [CORE-2788] - handle VARBINARY type in Oracle and H2
+-  [CORE-2800] - Add flag to diff command that suppresses reporting of column order difference in tables
+-  [CORE-1984] - Support for non-split rollback statements in Formatted SQL
+-  [CORE-2768] - Have the .deb and .rpm part of the release on github
+-  [CORE-2782] - Update SnakeYAML version to 1.17
+-  [CORE-2801] - Add method to Logger to allow closing of the output file stream
+-  [CORE-2844] - Traverse parent changelogs for rollbacks
+-  [CORE-2848] - Oracle: primary keys that use a pre-existing index drop the index along with the primary key on rollback
+-  [CORE-2852] - Postgresql snapshots not correctly handling serial-backing sequences
+-  [CORE-2857] - Support clustered primary keys in postgresql
+-  [CORE-2873] - Postgresql custom types are snapshotted as having length 2147483647
+-  [CORE-2874] - Ensure consistent charset encoding usage
+
+Changes in version 3.5.1 (2016.05.10)
+
+- [CORE-2727] - NPE in DiffToReport.print() method
+- [CORE-2728] - Classloading broken in 3.5.0 with nested jars
+- [CORE-2729] - NullPointerException on Diff
+- [CORE-2731] - diff fails with NullPointerException
+- [CORE-2732] - releaseLock fails because ObjectQuotingStrategy is reset to LEGACY
+- [CORE-2733] - relativeToChangelogFile fails with FileSystemResourceAccessor
+- [CORE-2734] - Liquibase no longer handle newline correctly in endDelimiter when using sqlFile change
+- [CORE-2743] - CSV whitespace trimmed in 3.5.0
+- [CORE-2744] - changeset with loadUpdateData changes checksum in 3.5.0
+- [CORE-2745] - Performance degradation of sqlFile change
+- [CORE-2746] - Oracle: handle case when schema name contains a hyphen
+- [CORE-2750] - MSSQL catalog/database included all the time
+
+Changes in version 3.5.0 (2016.04.21)
+
+- New "created" attribute on changeSet
+- New runOrder="first|last" attribute on changeSet to override where in the changelog it is ran
+- New "context" attribute on <include> and <includeAll> to control when changelogs are included
+- Support for AND/OR context expressions in formatted SQL changelogs
+- Support for changelog parameters in formatted SQL chagnelogs
+- Improved multi-schema snapshot and comparison
+- Improved SQL parsing
+- Performance improvements
+- Lots of bug fixes
+
+- [CORE-155] - Default-context attribute in databaseChangeLog tag
+- [CORE-575] - foreign key constraint is generated with onUpdate and onDelete restrict
+- [CORE-910] - Lock is not released if nocount is on for sql server 2008
+- [CORE-1166] - Diff doesn't detect 'on delete cascade' statements
+- [CORE-1447] - Inconsistent line endings in updateSQL produced files
+- [CORE-1468] - Number / Numeric handling must differ between different database systems
+- [CORE-1679] - Changelog SQL routines are partially aware of Database quoting strategy
+- [CORE-1690] - OSGiPackageScanClassResolver does not search extensions in Fragment bundles
+- [CORE-1836] - Oracle Integer mapping
+- [CORE-1839] - H2 multicolumn unique constraints
+- [CORE-1883] - Performance issue with large datamodels
+- [CORE-1887] - Including the same ChangeSet twice causes ValidationFailedException
+- [CORE-1897] - stripComments from SQL is trimming quoted string
+- [CORE-1935] - Formatted SQL generateChangeLog failed
+- [CORE-1966] - Invalid object name 'INFORMATION_SCHEMA.SEQUENCES' when running generateChangeLog with SQL Azure
+- [CORE-1985] - constraints tag is missing referencedTableSchemaName
+- [CORE-2024] - Move SDK to its own module
+- [CORE-2056] - generateChangeLog generates too many 'constraints'
+- [CORE-2059] - escapeObjectName has no respect for quotingStrategy QUOTE_ONLY_RESERVED_WORDS on Postgres
+- [CORE-2184] - diff doesn't write correct Changesets for foreign key constraints with ON DELETE CASCADE
+- [CORE-2211] - Liquibase tries to execute commented lines in custom SQL file
+- [CORE-2213] - Liquibase does not support comments in a line after the semicolon
+- [CORE-2333] - loadData fails with quoted string containing a comma
+- [CORE-2376] - LiquibaseCatalogName in commandLine not working correctly
+- [CORE-2438] - DeleteGenerator does not handle parameter names and values with $ or \ properly
+- [CORE-2456] - includeObjects/excludeObjects not work for UniqueConstraint
+- [CORE-2474] - dropFirst does not drop objects in not default schemas on Postgres 9+ using sql format with multiple schemas
+- [CORE-2483] - Liquibase does not delete unzip directories from temporary directory
+- [CORE-2501] - Derby sequenceCurrentValue Incorrect SQL
+- [CORE-2502] - Handle single-tag <databaseChangeLog/> tag on diffChangeLog
+- [CORE-2504] - NumberFormatException while checking precondition
+- [CORE-2508] - GlobalConfiguration liquibase.should.run alias is incorrect
+- [CORE-2512] - Both defautValueComputed and defaultValue included in addColumn diffChangeLog outputs if value is a computed value
+- [CORE-2513] - DiffChangeLog fixing changed indexes misses "unique" attribute
+- [CORE-2514] - bad Maven documentation for outputDefaultCatalog and outputDefaultSchema
+- [CORE-2517] - Foreign key snapshot improvements for DB2
+- [CORE-2518] - DB2: snapshot sees DATE types as TIMESTAMP
+- [CORE-2520] - Spurious warning with includeAll: file is not a recognized file type
+- [CORE-2521] - addAutoIncrement on Postgres generates invalid SQL when specific schema is used
+- [CORE-2522] - Derby: support for findForeignKeyConstraints
+- [CORE-2523] - H2: use "REAL" as datatype for "FLOAT"
+- [CORE-2524] - MSSQL: need to escape default value constraint names
+- [CORE-2525] - Error on dropping sequence
+- [CORE-2526] - Oracle 12: TIMESTAMP(3) not handled
+- [CORE-2528] - Oracle: improve unique constraint snapshot query performance
+- [CORE-2529] - MSSQL auto_increment numeric is 1 smaller in generateChangeLog
+- [CORE-2531] - Wrong type mapping of BINARY type in MySQL, H2, HSQLDB and Postgresql
+- [CORE-2533] - Poor runtime performance
+- [CORE-2538] - regenerate maven documentation for liqubase on website
+- [CORE-2545] - MSSQL: createProcedure fails if replaceIfExists=true and body uses "create proc" rather than "create procedure"
+- [CORE-2547] - liquibase.database.core.DB2Database - Improper Resource Shutdown or Release
+- [CORE-2548] - primaryKeyTablespace is ignored in PostgreSQL
+- [CORE-2550] - Proper handling BINARY type in MySQL and H2
+- [CORE-2552] - Oracle performance: fetch view definition along with original view to reduce the number of needed queries
+- [CORE-2553] - DB2: add ability to disable automatic reorg statements
+- [CORE-2556] - Cannot execute update code including quoted strings containing semicolons
+- [CORE-2558] - includeAll incorrectly sorting by including WEB-INF/classes when running in an ear
+- [CORE-2561] - Add "cycle" attribute to alterSequence
+- [CORE-2562] - MSSQL: Snapshot errors if table names have single quote marks in them
+- [CORE-2563] - DiffChangeLog that adds columns does not preserve column order
+- [CORE-2565] - Escaping of the sequence names with schema generates invalid statements for Oracle DB
+- [CORE-2581] - mysql update emits incorrect sql for BIT(1) when default specified
+- [CORE-2587] - Validation not performed before rollback
+- [CORE-2591] - autoincrement problem with ORA 12c + COMPATIBLE param to 11
+- [CORE-2595] - DefaultPackageScanClassResolver fails if "fat" jar has dirs and files with same name
+- [CORE-2599] - generateChangelog produces incorrect values for binary type
+- [CORE-2601] - ORDER keyword isn't escaped for Oracle
+- [CORE-2602] - StackOverflowError generating snapshot
+- [CORE-2604] - PostgreSQL datatype bit(n) column gives BOOLEAN(n) type for CreateTableChange genearated sql statement
+- [CORE-2605] - addColumn with multiple columns, does not create the constraints
+- [CORE-2606] - PostgreSQL : Table creation with datatype smallserial fails.
+- [CORE-2609] - Liquibase command line fails when using JTDS driver with SSO
+- [CORE-2611] - Sybase ASE generated table name is wrong. Roll back CORE-2447
+- [CORE-2615] - Multi-schema snapshot bugfixes
+- [CORE-2623] - Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+- [CORE-2624] - MSSQL: better support for user defined types
+- [CORE-2625] - Diff: should not be case sensitive in column default value functions
+- [CORE-2629] - SQL syntax doesn't allow commenting indepenrent parts.
+- [CORE-2632] - Postgres index drop needs schema
+- [CORE-2635] - Applied changeset not detected
+- [CORE-2636] - includeAll uses full file path
+- [CORE-2637] - Creating column with tinyint(1) instead created as default tinyint
+- [CORE-2641] - runOnChange change set runs every time even if there wasn't changed
+- [CORE-2642] - Xsd files are not resolved from classpath when resolving from resourceAccessor fails.
+- [CORE-2643] - loadData
+- [CORE-2645] - Rollback referencing a change set in current child file cannot be parsed
+- [CORE-2653] - Liquibase show difference for some UniqueConstraint and Views in SQL SERVER databases but Actually there is NO difference when i compare the SQL scripts manually
+- [CORE-2660] - Multiple contexts not recognized in formatted SQL when using AND
+- [CORE-2662] - NumberFormatException with default values of type 'real' in postgresql
+- [CORE-2663] - New MySQL 5.7.x reserved keywords are not being escaped
+- [CORE-2664] - createChangeLog has incorrect nesting of constraints in YAML format
+- [CORE-2666] - InsertSetGenerator hard-codes the InsertGenerator
+- [CORE-2669] - Impossible to extend BaseLiquibaseTask in a non-deprecated way
+- [CORE-2670] - Impossible to create table on mssql with remarks containing apostrophes
+- [CORE-2671] - oracle timestamps with time zone
+- [CORE-2672] - createSequence with order produces invalid statement on postgresql
+- [CORE-2673] - includeAll relativeToChangelogFile doesn't work for FileSystemResourceAccessor
+- [CORE-2674] - LoadUpdateData with onlyUpdate="true" generates invalid statements for Oracle DB
+- [CORE-2677] - Dropping a postgres index fails
+- [CORE-2679] - Hibernate diffChangeLog NullPointerException @ MissingPrimaryKeyChangeGenerator.fixMissing(MissingPrimaryKeyChangeGenerator.java:76)
+- [CORE-2680] - Generating a futureRollbackSql when using "classpath:" prefix doesn't recognise any of the ran change sets.
+- [CORE-2681] - H2 (automatic mixed mode): createTable: columns remarks ignored
+- [CORE-2683] - dropAll dropping sequences that have been dropped via earlier cascade
+- [CORE-2684] - Context is ignored with runOnChange and including file (sqlFile/loadUpdateData)
+- [CORE-2686] - StandardChangeLogHistoryService.hasDatabaseChangeLogTable value is cached too aggressively
+- [CORE-2687] - <sqlFile endDelimiter="go" if endDelimiter has whitespace in my sql it is not spliting
+- [CORE-2688] - Loading data from csv with number of rows dividable by 51
+- [CORE-2689] - TIMESTAMP parameters dropped for DB2
+- [CORE-2690] - SetTableRemarksGenerator double escapes remark
+- [CORE-2693] - Postgresql dropAll with serial columns fails because tables are dropped then sequences which no longer exist
+- [CORE-2694] - "national character varying" type is not recognized
+- [CORE-2698] - <sqlFile> Oracle scripts with ending / are not actually getting executed even with splitStatements="false"
+- [CORE-2699] - concurrency causes NullPointerException in DatabaseObjectComparatorFactory.getInstance()
+- [CORE-2705] - diffChangeLog generates dropColumn when dropping an index with a computed column
+- [CORE-2706] - Two sides of equal are the same
+- [CORE-2709] - endDelimiter regexp problem
+- [CORE-2711] - Cannot load CSV via loadData
+- [CORE-2713] - CreateView disregards replaceIfExists=true when fullDefinition=true
+- [CORE-2715] - tableExists and columnExists preconditions fail on MySQL
+- [CORE-2718] - H2 Database should query for default schema instead always use PUBLIC
+- [CORE-2719] - Oracle: Cannot snapshot primary keys on lower-case tables
+- [CORE-2720] - DB2: Capture full view definition in snapshot/generateChangeLog to support column options
+- [CORE-2721] - endDelimiter regex does not work in SQL changelogs/changesets
+- [CORE-2725] - DB2: Don't include system-generated indexes
+- [CORE-521] - Handle Timestamp with Time Zone types where supported
+- [CORE-2448] - New "created" attribute on changeSet
+- [CORE-2478] - Liquibase dropAll command line does not allow dropping multiple schemas
+- [CORE-2540] - Allow vendor independent SEQUENCE definition
+- [CORE-2541] - Add support for registering a Change Exec Listener on command line
+- [CORE-2560] - Add new runOrder="first|last" attribute to control when a changeSet is ran
+- [CORE-2577] - Add resourceComparator attribute to includeAll to override sorting
+- [CORE-2578] - Added addUniqueConstraint deferrable"support for Postgresql
+- [CORE-449] - Same changeLog can be included multiple times
+- [CORE-1969] - Support for AND/OR context expressions in formatted sql
+- [CORE-2100] - formatted sql validCheckSum
+- [CORE-2115] - Really slow when using fat jars
+- [CORE-2225] - please add the OLD check sum to the validation error message
+- [CORE-2336] - Use a grammer for parsing SQL rather than regexps
+- [CORE-2419] - Support fluent/builder-style change properties
+- [CORE-2455] - Improve messages in databasechangelog.description column
+- [CORE-2463] - Don't include liquibase tables in dbdoc
+- [CORE-2493] - ExecuteShellCommand improvements
+- [CORE-2497] - Support setColumnRemarks and setTableRemarks on MSSQL
+- [CORE-2499] - Support for commenting lines in csv files
+- [CORE-2539] - Ensure each data row in CSV has same # cols as header
+- [CORE-2584] - ValidCheckSum is valid for both stored database values and current changeSet checksum
+- [CORE-2589] - Output xml changelogs as xml version="1.1"
+- [CORE-2612] - Oracle: include BYTE in CHAR and VARCHAR types from snapshot/generateChangeLog
+- [CORE-2619] - Make changeLogFile optional for changeSetExecuted
+- [CORE-2622] - Maven: Support ISO date syntax for rollback
+- [CORE-2626] - Use schemaName in createProcedure
+- [CORE-2638] - GenerateChangeLog should include replaceIfExists=true for changed views
+- [CORE-2640] - Better handling of replaceIfExists in createProcedure
+- [CORE-2651] - Derby: Default unknown version to 10.6 to support sequences
+- [CORE-2652] - Formatted sql precondition not expanding changelog parameters
+- [CORE-2657] - Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
+- [CORE-2658] - Move the liquibase-debian module to a separate profile
+- [CORE-2703] - MySQL NCLOB should conver to LONGTEXT CHARACTER SET utf8
+- [CORE-2724] - Support offline databases in ant-tasks
+
+Changes in version 3.4.2 (2015.11.24)
+
+- [CORE-2328] - AbstractExecutor should implement execute(Change)
+- [CORE-2475] - Informix: Insert valueComputed not used correctly
+- [CORE-2543] - Improved support for time stamps in oracle insert change data types
+- [CORE-1778] - createSequence doesn't work on MSSQL
+- [CORE-1840] - Liquibase fails when run on a computer that can't connect to the internet
+- [CORE-2273] - Oracle char column snapshot not differentiating between a default value of 0 and '0'
+- [CORE-2285] - Code in Liquibase class inconsistent
+- [CORE-2317] - Custom ConfigurationValueProvider not working
+- [CORE-2349] - loadUpdateData does not escape column names in "ON DUPLICATE" clause
+- [CORE-2407] - Derby keywords not escaped when used as column/table names
+- [CORE-2447] - In sybase, schema is bad preixed
+- [CORE-2466] - Rollback referencing a change set in another file cannot be parsed
+- [CORE-2467] - SSO with jtds MSSQL doesn't work after 3.3.5 for update - null user error
+- [CORE-2469] - Error in method ColumnConfig.setValueNumeric(String)
+- [CORE-2470] - MSSQL: FindForeignKeyConstraintsGeneratorMSSQL doesn't honor specified schema
+- [CORE-2480] - Primary key exist works fine with 3.3.3 not with 3.4.0 in SQL SERVER
+- [CORE-2481] - Primary key creation issue with informix
+- [CORE-2482] - Number type issue with informix
+- [CORE-2484] - dropAll command crashes because it drops sequences before tables
+- [CORE-2487] - updateSql does not output anything for prepared statements
+- [CORE-2490] - If you have more than one :name token in the where clause of a delete change, you get an Exception
+- [CORE-2491] - Shouldn't a custom change produce a warning if run in updateSql mode
+- [CORE-2492] - Logger extension liquibase-slf4j no longer usable with 3.4.1
+- [CORE-2494] - Pgsql: Exporting/generating badly formatted SQL
+- [CORE-2498] - Generation of TIMESTAMP(29) causing error in PSQL log TIMESTAMP(6) WITHOUT TIME ZONE
+- [CORE-2500] - Fast check of ColumnExistsPrecondition causing transaction abort on PostgreSQL database
+- [CORE-2505] - Missing keywords for H2 database
+- [CORE-2510] - loadData on MySQL with > 50 rows fails
+- [CORE-2544] - LogFactory does not get reset
+- [CORE-2549] - Performance regression in resolving local host
+- [CORE-2554] - updateSql command fails on validation when upgrading (2.0.5 ->3.4.1)
+- [CORE-2566] - Maven - setting skip= true does not work
+- [CORE-2571] - primaryKeyExists precondition generating wrong query
+- [CORE-2576] - The 'dbms' attribute on <createProcedure> is not not taken into account when parsing changes
+- [CORE-2579] - dropAll failed for Oracle 12c
+- [CORE-2580] - Escape column, table and schema on ColumnExistsPrecondition
+- [CORE-2588] - Bad cast
+- [CORE-2590] - Default constraint names are not quoted
+- [CORE-2596] - DatabaseChangeLogLock race condition exists if two nodes both try to create the table
+- [CORE-2598] - Postgres generateChangeLog: "length for type varchar cannot exceed 10485760"
+
 Changes in version 3.4.1 (2015.07.28)
 
 - [CORE-998] - Changing index columns leads to wrong output order in the change log xml file.
@@ -159,60 +579,60 @@ Changes in version 3.4.0 (2015.06.24)
 
 Changes in version 3.3.5 (2015.05.28)
 
-[CORE-2379] - Project.version set to 3.3.4-SNAPSHOT in 3.3.4 final
+-  [CORE-2379] - Project.version set to 3.3.4-SNAPSHOT in 3.3.4 final
 
 
 Changes in version 3.3.4 (2015.05.27)
 
-[CORE-2360] - Maven - Skip is active by default
-[CORE-2199] - Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
-[CORE-2344] - Unknown host exception on OS RHEL 6.5
-[CORE-2346] - IncludeAll does not work when runing liquibase from inside a jar
-[CORE-2357] - alterSequence does not work as expected when you need to change the cache size
-[CORE-2366] - Derby Network server works with command line but not with maven "Liquibase skipped due to maven configuration"
-[CORE-2368] - No SQL outputted for <update> change
+-  [CORE-2360] - Maven - Skip is active by default
+-  [CORE-2199] - Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
+-  [CORE-2344] - Unknown host exception on OS RHEL 6.5
+-  [CORE-2346] - IncludeAll does not work when runing liquibase from inside a jar
+-  [CORE-2357] - alterSequence does not work as expected when you need to change the cache size
+-  [CORE-2366] - Derby Network server works with command line but not with maven "Liquibase skipped due to maven configuration"
+-  [CORE-2368] - No SQL outputted for <update> change
 
 Changes in version 3.3.3 (2015.04.28)
 
-[CORE-1768] - Oracle dropAll fails on spatial tables and sequences
-[CORE-1840] - Liquibase fails when run on a computer that can't connect to the internet
-[CORE-1857] - Wrong column size detection on varchar2 fields with char as datatype
-[CORE-1866] - Filtering changelog list by includeAll tag is not working
-[CORE-1943] - Handle Error: InetAddress.getLocalHost().getHostName() UnknownHostException results in NoClassDefFoundError
-[CORE-1958] - Column type of "TIMESTAMP(6)" under MySql converted to TIMESTAMP dropping fractional seconds
-[CORE-1967] - includeAll uses full file path for sql changelogs
-[CORE-2023] - Problem using includeAll with SpringLiquibase
-[CORE-2126] - Postgres 9.3 - Drop table With Cascade - Not Supported
-[CORE-2156] - Resource loader can't load changelog file
-[CORE-2186] - AbstractResourceAccessor#convertToPath(String, String) fails for processing includeAll from Classpath
-[CORE-2192] - NoSuchMethodException when generating offline Oracle migration script
-[CORE-2199] - Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
-[CORE-2202] - liquibase.should.run inverted boolean
-[CORE-2204] - valueNumeric not being set when using prepared statements
-[CORE-2206] - diffChangeLog with JPA-annotated entities causes ConcurrentModificationException
-[CORE-2208] - Typo in message
-[CORE-2210] - java.lang.NullPointerException when file is empty
-[CORE-2214] - When inserting string value starting and ending with apostrophes (quotes) the value is not quoted in the generated SQL
-[CORE-2218] - Regression on modifyDataType : VARCHAR2 was supported on 3.2...and fails on 3.3
-[CORE-2239] - Remarks attribute in renameColumn causes parse error
-[CORE-2240] - setDropFirst(true) still broken on empty database
-[CORE-2262] - 3.3.2 ant task dies on NPE in ChangeLogParameters
-[CORE-2263] - Index Snapshot - doesn't include upper cased name indexes when db is NOT case sensitive
-[CORE-2274] - Ant Upade Task does not consider changeLogFile correctly if it is contained in a JAR
-[CORE-2279] - Rollback fails in MS SQL 2008 using liquibase 3.3.2
-[CORE-2284] - Creating a DatabaseChangeLog() results in NPE
-[CORE-2290] - Liquibase gives different results from Ant and the command line
-[CORE-2301] - Regression from 3.2.3 in mssql 2000 unsupported usage of varchar(max) and sys.extenden_properties
-[CORE-2304] - Autoincrement on type INT4 fails
-[CORE-2310] - IncludeAll Fails with Unknown Reason Error
-[CORE-2315] - NPE in CommandlineResourceAccessor
-[CORE-2325] - Liquibase - New versions break DB create
-[CORE-2329] - Escaped reserved keywords in HSQL are stored in lower case instead of upper case.
-[CORE-2330] - includeAll uses full file path with includeAll
-[CORE-2261] - UpdateSQL needs to append a "/" to the end of createProcedure for Oracle
-[CORE-2287] - Improve support for Groovy-based tests in Eclipse
-[CORE-2296] - Upgrade Groovy and Spock to maintained versions
-[CORE-2318] - Add support for converting BigDecimal objects to a SQL string via DataTypeFactory
+-  [CORE-1768] - Oracle dropAll fails on spatial tables and sequences
+-  [CORE-1840] - Liquibase fails when run on a computer that can't connect to the internet
+-  [CORE-1857] - Wrong column size detection on varchar2 fields with char as datatype
+-  [CORE-1866] - Filtering changelog list by includeAll tag is not working
+-  [CORE-1943] - Handle Error: InetAddress.getLocalHost().getHostName() UnknownHostException results in NoClassDefFoundError
+-  [CORE-1958] - Column type of "TIMESTAMP(6)" under MySql converted to TIMESTAMP dropping fractional seconds
+-  [CORE-1967] - includeAll uses full file path for sql changelogs
+-  [CORE-2023] - Problem using includeAll with SpringLiquibase
+-  [CORE-2126] - Postgres 9.3 - Drop table With Cascade - Not Supported
+-  [CORE-2156] - Resource loader can't load changelog file
+-  [CORE-2186] - AbstractResourceAccessor#convertToPath(String, String) fails for processing includeAll from Classpath
+-  [CORE-2192] - NoSuchMethodException when generating offline Oracle migration script
+-  [CORE-2199] - Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
+-  [CORE-2202] - liquibase.should.run inverted boolean
+-  [CORE-2204] - valueNumeric not being set when using prepared statements
+-  [CORE-2206] - diffChangeLog with JPA-annotated entities causes ConcurrentModificationException
+-  [CORE-2208] - Typo in message
+-  [CORE-2210] - java.lang.NullPointerException when file is empty
+-  [CORE-2214] - When inserting string value starting and ending with apostrophes (quotes) the value is not quoted in the generated SQL
+-  [CORE-2218] - Regression on modifyDataType : VARCHAR2 was supported on 3.2...and fails on 3.3
+-  [CORE-2239] - Remarks attribute in renameColumn causes parse error
+-  [CORE-2240] - setDropFirst(true) still broken on empty database
+-  [CORE-2262] - 3.3.2 ant task dies on NPE in ChangeLogParameters
+-  [CORE-2263] - Index Snapshot - doesn't include upper cased name indexes when db is NOT case sensitive
+-  [CORE-2274] - Ant Upade Task does not consider changeLogFile correctly if it is contained in a JAR
+-  [CORE-2279] - Rollback fails in MS SQL 2008 using liquibase 3.3.2
+-  [CORE-2284] - Creating a DatabaseChangeLog() results in NPE
+-  [CORE-2290] - Liquibase gives different results from Ant and the command line
+-  [CORE-2301] - Regression from 3.2.3 in mssql 2000 unsupported usage of varchar(max) and sys.extenden_properties
+-  [CORE-2304] - Autoincrement on type INT4 fails
+-  [CORE-2310] - IncludeAll Fails with Unknown Reason Error
+-  [CORE-2315] - NPE in CommandlineResourceAccessor
+-  [CORE-2325] - Liquibase - New versions break DB create
+-  [CORE-2329] - Escaped reserved keywords in HSQL are stored in lower case instead of upper case.
+-  [CORE-2330] - includeAll uses full file path with includeAll
+-  [CORE-2261] - UpdateSQL needs to append a "/" to the end of createProcedure for Oracle
+-  [CORE-2287] - Improve support for Groovy-based tests in Eclipse
+-  [CORE-2296] - Upgrade Groovy and Spock to maintained versions
+-  [CORE-2318] - Add support for converting BigDecimal objects to a SQL string via DataTypeFactory
 
 Changes in version 3.3.2 (2015.01.08)
 - Support for ignoring objects in diffChangeLog and generateChangeLog
@@ -811,8 +1231,8 @@ Changes in version 3.0.3 (2013.08.29)
 - [CORE-1375] - "group" is not included as a reserved word
 - [CORE-1377] - liquibase version says 3.0.0-SNP
 - [CORE-1380] - ^M present in liquibase unix running file (from jar on maven repo)
-- - - - [CORE-1381] - DropAll: Not working with MsSql
-- [CORE-1383] - Error attempting to re-create databasechangeloglock on second liquibase run if running in Oracle under SYSTEM user
+- - - - - [CORE-1381] - DropAll: Not working with MsSql
+- - [CORE-1383] - Error attempting to re-create databasechangeloglock on second liquibase run if running in Oracle under SYSTEM user
 - [CORE-1387] - dropAll fails with oracle since version 3.0.2
 - [CORE-1388] - MSSQLServer: 'REAL' dataype is returned with unnecessary size modifier during generateChangeLog
 - [CORE-1389] - AddLookupTable fails when using QUOTE_ALL_OBJECTS

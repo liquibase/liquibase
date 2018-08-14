@@ -3,14 +3,13 @@ package liquibase.sql.visitor;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -99,14 +98,14 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             try {
-               if (childNode.getName().equals("dbms")) {
-                    this.setApplicableDbms(new HashSet<String>(StringUtils.splitAndTrim((String) childNode.getValue(), ",")));
-                } else if (childNode.getName().equals("applyToRollback")) {
+               if ("dbms".equals(childNode.getName())) {
+                    this.setApplicableDbms(new HashSet<>(StringUtil.splitAndTrim((String) childNode.getValue(), ",")));
+                } else if ("applyToRollback".equals(childNode.getName())) {
                    Boolean value = childNode.getValue(Boolean.class);
                    if (value != null) {
                        setApplyToRollback(value);
                    }
-               } else if (childNode.getName().equals("context") || childNode.getName().equals("contexts")) {
+               } else if ("context".equals(childNode.getName()) || "contexts".equals(childNode.getName())) {
                    setContexts(new ContextExpression((String) childNode.getValue()));
                 } else  if (ObjectUtil.hasWriteProperty(this, childNode.getName())) {
                    Object value = childNode.getValue();

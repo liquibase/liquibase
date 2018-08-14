@@ -45,6 +45,7 @@ else
   for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
     CP="$CP""$CP_SEPARATOR""$i"
   done
+  CP="$CP""$CP_SEPARATOR""$LIQUIBASE_HOME/lib/"
   for i in "$LIQUIBASE_HOME"/lib/*.jar; do
     CP="$CP""$CP_SEPARATOR""$i"
   done

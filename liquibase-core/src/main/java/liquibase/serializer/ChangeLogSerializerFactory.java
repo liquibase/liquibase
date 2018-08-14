@@ -1,5 +1,6 @@
 package liquibase.serializer;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.servicelocator.ServiceLocator;
@@ -9,13 +10,13 @@ import java.util.*;
 public class ChangeLogSerializerFactory {
     private static ChangeLogSerializerFactory instance;
 
-    private Map<String, List<ChangeLogSerializer>> serializers = new HashMap<String, List<ChangeLogSerializer>>();
+    private Map<String, List<ChangeLogSerializer>> serializers = new HashMap<>();
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new ChangeLogSerializerFactory();
     }
 
-    public static ChangeLogSerializerFactory getInstance() {
+    public static synchronized ChangeLogSerializerFactory getInstance() {
         if (instance == null) {
             instance = new ChangeLogSerializerFactory();
         }
@@ -24,12 +25,9 @@ public class ChangeLogSerializerFactory {
     }
 
     private ChangeLogSerializerFactory() {
-        Class<? extends ChangeLogSerializer>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogSerializer.class);
-
-            for (Class<? extends ChangeLogSerializer> clazz : classes) {
-                register((ChangeLogSerializer) clazz.getConstructor().newInstance());
+            for (ChangeLogSerializer serializer : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogSerializer.class)) {
+                register(serializer);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -61,7 +59,7 @@ public class ChangeLogSerializerFactory {
         for (String extension : changeLogSerializer.getValidFileExtensions()) {
             List<ChangeLogSerializer> changeLogSerializers = serializers.get(extension);
             if (changeLogSerializers == null) {
-                changeLogSerializers = new ArrayList<ChangeLogSerializer>();
+                changeLogSerializers = new ArrayList<>();
                 serializers.put(extension, changeLogSerializers);
             }
             changeLogSerializers.add(changeLogSerializer);

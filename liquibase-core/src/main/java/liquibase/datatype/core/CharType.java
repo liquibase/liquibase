@@ -1,8 +1,6 @@
 package liquibase.datatype.core;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -10,9 +8,13 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
-@DataTypeInfo(name="char", aliases = "java.sql.Types.CHAR", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Locale;
+
+@DataTypeInfo(name="char", aliases = {"java.sql.Types.CHAR", "bpchar"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class CharType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -20,8 +22,7 @@ public class CharType extends LiquibaseDataType {
             Object[] parameters = getParameters();
             if (parameters.length > 0) {
                 String param1 = parameters[0].toString();
-                if (!param1.matches("\\d+")
-                        || new BigInteger(param1).compareTo(BigInteger.valueOf(8000)) > 0) {
+                if (!param1.matches("\\d+") || (new BigInteger(param1).compareTo(BigInteger.valueOf(8000)) > 0)) {
 
                     DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("char"), 8000);
                     type.addAdditionalInformation(getAdditionalInformation());
@@ -36,13 +37,22 @@ public class CharType extends LiquibaseDataType {
             DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("char"), parameters);
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
+        } else if (database instanceof PostgresDatabase){
+            if ((getParameters() != null) && (getParameters().length == 1) && "2147483647".equals(getParameters()[0]
+                .toString())) {
+                DatabaseDataType type = new DatabaseDataType("CHARACTER");
+                type.addAdditionalInformation("VARYING");
+                return type;
+            }
+            return super.toDatabaseDataType(database);
         }
+
         return super.toDatabaseDataType(database);
     }
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         }
 
@@ -51,7 +61,7 @@ public class CharType extends LiquibaseDataType {
         }
 
         String val = String.valueOf(value);
-        if (database instanceof MSSQLDatabase && !StringUtils.isAscii(val)) {
+        if ((database instanceof MSSQLDatabase) && !StringUtil.isAscii(val)) {
             return "N'"+database.escapeStringForDatabase(val)+"'";
         }
 
@@ -67,7 +77,7 @@ public class CharType extends LiquibaseDataType {
         }
 
         if (getParameters()[0] instanceof String) {
-            return Integer.valueOf((String) getParameters()[0]);
+            return Integer.parseInt((String) getParameters()[0]);
         }
 
         if (getParameters()[0] instanceof Number) {
@@ -77,5 +87,9 @@ public class CharType extends LiquibaseDataType {
         return -1;
     }
 
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.STRING;
+    }
 
 }

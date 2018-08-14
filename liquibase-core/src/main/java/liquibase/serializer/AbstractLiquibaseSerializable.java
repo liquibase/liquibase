@@ -7,9 +7,12 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializable {
 
@@ -32,16 +35,15 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                             } else if (dataTypeClassParameters[0] instanceof ParameterizedType) {
                                 collectionType = (Class) ((ParameterizedType) dataTypeClassParameters[0]).getRawType();
                             }
-                            if (collectionType != null
-                                    && LiquibaseSerializable.class.isAssignableFrom(collectionType)
-                                    && !collectionType.isInterface()
-                                    && !Modifier.isAbstract(collectionType.getModifiers())) {
+                            if ((collectionType != null) && LiquibaseSerializable.class.isAssignableFrom
+                                (collectionType) && !collectionType.isInterface() && !Modifier.isAbstract
+                                (collectionType.getModifiers())) {
 
                                 String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
                                 List<ParsedNode> elementNodes = Collections.emptyList();
                                 if (childNode.getName().equals(elementName)) {
                                     elementNodes = Collections.singletonList(childNode);
-                                } else if (childNode.getName().equals(childNode.getName())) {
+                                } else {
                                     elementNodes = childNode.getChildren(null, elementName);
                                 }
                                 if (!elementNodes.isEmpty()) {
@@ -77,10 +79,9 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                 } else if (dataTypeClassParameters[0] instanceof ParameterizedType) {
                                     collectionType = (Class) ((ParameterizedType) dataTypeClassParameters[0]).getRawType();
                                 }
-                                if (collectionType != null
-                                        && LiquibaseSerializable.class.isAssignableFrom(collectionType)
-                                        && !collectionType.isInterface()
-                                        && !Modifier.isAbstract(collectionType.getModifiers())) {
+                                if ((collectionType != null) && LiquibaseSerializable.class.isAssignableFrom
+                                    (collectionType) && !collectionType.isInterface() && !Modifier.isAbstract
+                                    (collectionType.getModifiers())) {
 
                                     String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
                                     List<ParsedNode> elementNodes = Collections.emptyList();
@@ -109,11 +110,17 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
 
         if (parsedNode.getValue() != null) {
             for (String field : this.getSerializableFields()) {
-                if (this.getSerializableFieldType(field) == SerializationType.DIRECT_VALUE) {
+                SerializationType type = this.getSerializableFieldType(field);
+                if (type == SerializationType.DIRECT_VALUE) {
                     Object value = parsedNode.getValue(String.class);
 
                     value = convertEscaped(value);
 
+
+                    ObjectUtil.setProperty(this, field, value);
+                } else if (type == SerializationType.NAMED_FIELD) {
+                    Object value = parsedNode.getChildValue(null, field, Object.class);
+                    value = convertEscaped(value);
 
                     ObjectUtil.setProperty(this, field, value);
                 }
@@ -122,6 +129,9 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
     }
 
     protected Object convertEscaped(Object value) {
+        if (value == null) {
+            return null;
+        }
         Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) value);
         if (matcher.matches()) {
             String stringValue = matcher.group(1);
@@ -159,7 +169,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
             SerializationType type = getSerializableFieldType(field);
             if (type == SerializationType.DIRECT_VALUE) {
                 node.setValue(fieldValue);
-            } else if (type == SerializationType.NAMED_FIELD || type == SerializationType.NESTED_OBJECT) {
+            } else if ((type == SerializationType.NAMED_FIELD) || (type == SerializationType.NESTED_OBJECT)) {
                 if (fieldValue instanceof ParsedNode) {
                     node.addChild((ParsedNode) fieldValue);
                 } else {
@@ -208,7 +218,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                     returnList.add(objValue);
                 }
             }
-            if (((Collection) value).size() == 0) {
+            if (((Collection) value).isEmpty()) {
                 return null;
             } else {
                 return returnList;

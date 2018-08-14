@@ -1,7 +1,6 @@
 package liquibase.sql.visitor;
 
 import liquibase.ContextExpression;
-import liquibase.Contexts;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;

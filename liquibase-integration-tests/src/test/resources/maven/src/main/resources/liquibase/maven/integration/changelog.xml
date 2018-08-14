@@ -17,13 +17,13 @@
             </column>
         </createTable>
 
-	<!-- Load a custom change to checkConstraint that loading classes from maven project works correctly-->
+    <!-- Load a custom change to checkConstraint that loading classes from maven project works correctly-->
         <customChange class="liquibase.maven.integration.CustomChange"/>              	
     </changeSet>
-	
-	<!-- Include from project classpath-->
-	<include file="liquibase/maven/integration/classpathchangelog.xml"/>
-	<!-- Include from project test classpath-->
-	<include file="liquibase/maven/integration/testclasspathchangelog.xml"/>	
-	
+
+    <!-- Include from project classpath-->
+    <include file="liquibase/maven/integration/classpathchangelog.xml"/>
+    <!-- Include from project test classpath-->
+    <include file="liquibase/maven/integration/testclasspathchangelog.xml"/>
+
 </databaseChangeLog>

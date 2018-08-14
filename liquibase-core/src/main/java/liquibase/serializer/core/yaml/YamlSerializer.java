@@ -1,5 +1,6 @@
 package liquibase.serializer.core.yaml;
 
+import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
@@ -11,14 +12,14 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.GenericProperty;
 import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.Type;
@@ -33,28 +34,29 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     }
 
     protected Yaml createYaml() {
+        DumperOptions dumperOptions = new DumperOptions();
+
         if (isJson()) {
-            DumperOptions dumperOptions = new DumperOptions();
             dumperOptions.setPrettyFlow(true);
             dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
             dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
             dumperOptions.setWidth(Integer.MAX_VALUE);
-
-            return new Yaml(getLiquibaseRepresenter(), dumperOptions);
+        } else {
+            dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         }
-
-
-        DumperOptions dumperOptions = new DumperOptions();
-        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        return new Yaml(getLiquibaseRepresenter(), dumperOptions);
+        return new Yaml(new Constructor(), getLiquibaseRepresenter(), dumperOptions, getLiquibaseResolver());
     }
 
     protected LiquibaseRepresenter getLiquibaseRepresenter() {
         return new LiquibaseRepresenter();
     }
 
+    protected LiquibaseResolver getLiquibaseResolver() {
+        return new LiquibaseResolver();
+    }
+
     protected boolean isJson() {
-        return getValidFileExtensions()[0].equals("json");
+        return "json".equals(getValidFileExtensions()[0]);
     }
 
     @Override
@@ -69,11 +71,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         if (isJson()) {
             String out = yaml.dumpAs(toMap(object), Tag.MAP, DumperOptions.FlowStyle.FLOW);
-            out = out.replaceAll("!!int \"(\\d+)\"", "$1");
-            out = out.replaceAll("!!bool \"(\\w+)\"", "$1");
-            out = out.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
-            out = out.replaceAll("!!float \"([^\"]*)\"", "$1");
-            return out;
+            return removeClassTypeMarksFromSerializedJson(out);
         } else {
             return yaml.dumpAsMap(toMap(object));
         }
@@ -82,7 +80,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     protected Object toMap(LiquibaseSerializable object) {
         Comparator<String> comparator;
         comparator = getComparator(object);
-        Map<String, Object> objectMap = new TreeMap<String, Object>(comparator);
+        Map<String, Object> objectMap = new TreeMap<>(comparator);
 
         for (String field : object.getSerializableFields()) {
             Object value = object.getSerializableFieldValue(field);
@@ -93,12 +91,15 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                 if (value instanceof Column.AutoIncrementInformation) {
                     value = ((Map) toMap((Column.AutoIncrementInformation) value)).values().iterator().next();
                 }
+                if (value instanceof ConstraintsConfig) {
+                    value = ((Map) toMap((ConstraintsConfig) value)).values().iterator().next();
+                }
                 if (value instanceof LiquibaseSerializable) {
                     value = toMap((LiquibaseSerializable) value);
                 }
                 if (value instanceof Collection) {
                     List valueAsList = new ArrayList((Collection) value);
-                    if (valueAsList.size() == 0) {
+                    if (valueAsList.isEmpty()) {
                         continue;
                     }
                     for (int i = 0; i < valueAsList.size(); i++) {
@@ -110,7 +111,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
 
                 }
                 if (value instanceof Map) {
-                    if  (((Map) value).size() == 0) {
+                    if  (((Map) value).isEmpty()) {
                         continue;
                     }
 
@@ -120,7 +121,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                             ((Map) value).put(key, toMap((LiquibaseSerializable) mapValue));
                         } else if (mapValue instanceof Collection) {
                             List valueAsList = new ArrayList((Collection) mapValue);
-                            if (valueAsList.size() == 0) {
+                            if (valueAsList.isEmpty()) {
                                 continue;
                             }
                             for (int i = 0; i < valueAsList.size(); i++) {
@@ -138,7 +139,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             }
         }
 
-        Map<String, Object> containerMap = new HashMap<String, Object>();
+        Map<String, Object> containerMap = new HashMap<>();
         containerMap.put(object.getSerializedObjectName(), objectMap);
         return containerMap;
     }
@@ -150,6 +151,18 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                 return o1.compareTo(o2);
             }
         };
+    }
+
+    private String removeClassTypeMarksFromSerializedJson(String json) {
+        json = json.replaceAll("!!int \"(\\d+)\"", "$1");
+        json = json.replaceAll("!!bool \"(\\w+)\"", "$1");
+        json = json.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
+        json = json.replaceAll("!!float \"([^\"]*)\"", "$1");
+        json = json.replaceAll("!!liquibase.[^\\s]+ (\"\\w+\")", "$1");
+        if (json.contains("!!")) {
+            throw new IllegalStateException(String.format("Serialize failed. Illegal char on %s position: %s", json.indexOf("!!"), json));
+        }
+        return json;
     }
 
     public static class LiquibaseRepresenter extends Representer {
@@ -165,29 +178,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         }
 
         @Override
-        protected Tag getTag(Class<?> clazz, Tag defaultTag) {
-            return super.getTag(clazz, defaultTag);    //To change body of overridden methods use File | Settings | File Templates.
-        }
-
-        @Override
-        protected MappingNode representJavaBean(Set<Property> properties, Object javaBean) {
-            return super.representJavaBean(properties, javaBean);    //To change body of overridden methods use File | Settings | File Templates.
-        }
-
-        @Override
-        protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
-            return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);    //To change body of overridden methods use File | Settings | File Templates.
-        }
-
-        @Override
-        public Node represent(Object data) {
-            return super.represent(data);    //To change body of overridden methods use File | Settings | File Templates.
-        }
-
-
-        @Override
         protected Set<Property> getProperties(Class<? extends Object> type) throws IntrospectionException {
-            Set<Property> returnSet = new HashSet<Property>();
+            Set<Property> returnSet = new HashSet<>();
             LiquibaseSerializable serialzableType = null;
             try {
                 if (type.equals(ChangeSet.class)) {
@@ -197,13 +189,10 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                 } else {
                     return super.getProperties(type);
                 }
-            } catch (InstantiationException e) {
-                throw new UnexpectedLiquibaseException(e);
-            } catch (IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
             for (String property : serialzableType.getSerializableFields()) {
-                LiquibaseSerializable.SerializationType fieldType = serialzableType.getSerializableFieldType(property);
                 returnSet.add(new LiquibaseProperty(property, String.class, String.class));
             }
             return returnSet;
@@ -231,6 +220,24 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             public Node representData(Object data) {
                 return representScalar(Tag.STR, data.toString());
             }
+        }
+    }
+
+    public static class LiquibaseResolver extends Resolver {
+
+        // Adapted from: CustomResolver.java (YAML Sources)
+        @Override
+        protected void addImplicitResolvers() {
+            // This adds all the YAML standard resolvers except for the one that resolves Date and Timestamp
+            // values automatically.
+            addImplicitResolver(Tag.BOOL, BOOL, "yYnNtTfFoO");
+            addImplicitResolver(Tag.INT, INT, "-+0123456789");
+            addImplicitResolver(Tag.FLOAT, FLOAT, "-+0123456789.");
+            addImplicitResolver(Tag.MERGE, MERGE, "<");
+            addImplicitResolver(Tag.NULL, NULL, "~nN\0");
+            addImplicitResolver(Tag.NULL, EMPTY, null);
+            // Do not "resolve" (read: mess with) dates and timestamps (Tag.TIMESTAMP removed)
+            addImplicitResolver(Tag.YAML, YAML, "!&*");
         }
     }
 }

@@ -1,7 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,11 +11,15 @@ import java.util.Map;
 /**
  * Provides unified management of configuration properties within Liquibase core and in extensions.
  * <p>
- * This class is the top level container used to access {@link ConfigurationContainer} implementations which contain the actual configuration properties.
- * Normal use is to call LiquibaseConfiguration.getInstance().getConfiguration(NEEDED_CONFIGURATION.class).getYOUR_PROPERTY()
+ * This class is the top level container used to access {@link ConfigurationContainer} implementations which contain
+ * the actual configuration properties.
+ * Normal use is to call
+ * LiquibaseConfiguration.getInstance().getConfiguration(NEEDED_CONFIGURATION.class).getYOUR_PROPERTY()
  * <p>
- * This class is implemented as a singleton with a single global set of configuration objects, but the {@link #setInstance(LiquibaseConfiguration)} method can be used to replace
- * the singleton with an alternate implementation that uses ThreadLocal objects or any other way of managing configurations.
+ * This class is implemented as a singleton with a single global set of configuration objects, but the
+ * {@link #setInstance(LiquibaseConfiguration)} method can be used to replace
+ * the singleton with an alternate implementation that uses ThreadLocal objects or any other way of managing
+ * configurations.
  */
 public class LiquibaseConfiguration {
 
@@ -28,7 +32,7 @@ public class LiquibaseConfiguration {
     /**
      * Returns the singleton instance, creating it if necessary. On creation, the configuration is initialized with {@link liquibase.configuration.SystemPropertyProvider}
      */
-    public static LiquibaseConfiguration getInstance() {
+    public static synchronized LiquibaseConfiguration getInstance() {
         if (instance == null) {
             instance = new LiquibaseConfiguration();
             instance.init(new SystemPropertyProvider());
@@ -39,9 +43,10 @@ public class LiquibaseConfiguration {
 
     /**
      * Overrides the standard singleton instance created by getInstance().
-     * Useful for alternate implementations with more complex AbstractConfigurationContainer lookup logic such as different configurations per thread.
+     * Useful for alternate implementations with more complex AbstractConfigurationContainer lookup logic such
+     * as different configurations per thread.
      */
-    public static void setInstance(LiquibaseConfiguration instance) {
+    public static synchronized void setInstance(LiquibaseConfiguration instance) {
         LiquibaseConfiguration.instance = instance;
     }
 
@@ -54,8 +59,8 @@ public class LiquibaseConfiguration {
 
 
     /**
-     * Re-initialize the configuration with the given ConfigurationProviders. Any existing AbstractConfigurationContainer instances are reset to
-     * defaults.
+     * Re-initialize the configuration with the given ConfigurationProviders. Any existing
+     * AbstractConfigurationContainer instances are reset to defaults.
      */
     public void init(ConfigurationValueProvider... configurationValueProviders) {
         if (configurationValueProviders == null) {
@@ -70,7 +75,7 @@ public class LiquibaseConfiguration {
      * Resets existing AbstractConfigurationContainer instances to their default values.
      */
     public void reset() {
-        this.configurations = new HashMap<Class, ConfigurationContainer>();
+        this.configurations = new HashMap<>();
     }
 
 
@@ -86,6 +91,21 @@ public class LiquibaseConfiguration {
         return (T) configurations.get(type);
     }
 
+    public ConfigurationContainer getConfiguration(String typeName) {
+        for (Map.Entry<Class, ConfigurationContainer> entry : configurations.entrySet()) {
+            if (entry.getKey().getName().equals(typeName)) {
+                return entry.getValue();
+            }
+        }
+        try {
+            Class typeClass = Class.forName(typeName);
+            configurations.put(typeClass, createConfiguration(typeClass));
+            return configurations.get(typeClass);
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     /**
      * Convenience method for liquibaseConfiguration.getConfiguration(type).getProperty(property)
      */
@@ -97,7 +117,7 @@ public class LiquibaseConfiguration {
     protected  <T extends ConfigurationContainer> T createConfiguration(Class<T> type) {
         try {
             T configuration = type.newInstance();
-            configuration.init(new SystemPropertyProvider());
+            configuration.init(configurationValueProviders);
             return configuration;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Cannot create default configuration "+type.getName(), e);
@@ -112,14 +132,15 @@ public class LiquibaseConfiguration {
     }
 
     /**
-     * Generates a human consumable description of how the configured ConfigurationValueProvider(s) will attempt to set a default value.
+     * Generates a human consumable description of how the configured ConfigurationValueProvider(s) will
+     * attempt to set a default value.
      */
     public String describeValueLookupLogic(ConfigurationProperty property) {
-        List<String> reasons = new ArrayList<String>();
+        List<String> reasons = new ArrayList<>();
         for (ConfigurationValueProvider container : configurationValueProviders) {
             reasons.add(container.describeValueLookupLogic(property));
         }
 
-        return StringUtils.join(reasons, " AND ");
+        return StringUtil.join(reasons, " AND ");
     }
 }

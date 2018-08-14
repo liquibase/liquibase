@@ -128,9 +128,6 @@ public class AddPrimaryKeyChange extends AbstractChange {
                     statement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
             };
-//todo        } else if (database instanceof SQLiteDatabase) {
-//            // return special statements for SQLite databases
-//            return generateStatementsForSQLiteDatabase(database);
         }
 
         return new SqlStatement[]{
@@ -154,56 +151,16 @@ public class AddPrimaryKeyChange extends AbstractChange {
         }
     }
 
-    //    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-//        // SQLite does not support this ALTER TABLE operation until now.
-//        // or more information: http://www.sqlite.org/omitted.html
-//        // This is a small work around...
-//
-//        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-//
-//        // define alter table logic
-//        AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-//            public ColumnConfig[] getColumnsToAdd() {
-//                return new ColumnConfig[0];
-//            }
-//
-//            public boolean copyThisColumn(ColumnConfig column) {
-//                return true;
-//            }
-//
-//            public boolean createThisColumn(ColumnConfig column) {
-//                String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
-//                for (String split_column : split_columns) {
-//                    if (column.getName().equals(split_column)) {
-//                        column.getConstraints().setPrimaryKey(true);
-//                    }
-//                }
-//                return true;
-//            }
-//
-//            public boolean createThisIndex(Index index) {
-//                return true;
-//            }
-//        };
-//
-//        try {
-//            // alter table
-//            statements.addAll(SQLiteDatabase.getAlterTableStatements(
-//                    rename_alter_visitor,
-//                    database, getCatalogName(),  getSchemaName(), getTableName()));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        return statements.toArray(new SqlStatement[statements.size()]);
-//    }
-
     @Override
     protected Change[] createInverses() {
         DropPrimaryKeyChange inverse = new DropPrimaryKeyChange();
         inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setConstraintName(getConstraintName());
+
+        if (this.getForIndexName() != null) {
+            inverse.setDropIndex(false);
+        }
 
         return new Change[]{
                 inverse,

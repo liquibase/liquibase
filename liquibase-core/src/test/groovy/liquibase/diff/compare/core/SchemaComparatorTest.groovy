@@ -1,6 +1,6 @@
 package liquibase.diff.compare.core
 
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.diff.compare.DatabaseObjectComparator
 import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.structure.core.Catalog
@@ -45,15 +45,15 @@ class SchemaComparatorTest extends Specification {
         }
 
         expect:
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
-        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
 
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
-        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
 
         // always true if doesn't support catalogs
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportCatalogs) == true
-        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatDoesNotSupportCatalogs) == true
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatDoesNotSupportCatalogs) == true
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatDoesNotSupportCatalogs) == true
 
 
         where:
@@ -63,7 +63,6 @@ class SchemaComparatorTest extends Specification {
         new Schema((String) null, null)                | null                                           | null          | true                    | true
         new Schema((String) null, null)                | null                                           | "MySchem"     | true                    | true
         new Schema("Cat1", null)                       | new Schema("Cat1", null)                       | null          | true                    | true
-        new Schema("Cat1", null)                       | new Schema("Cat2", null)                       | null          | false                   | false
         new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem1")                   | null          | true                    | true
         new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem2")                   | null          | false                   | true
         new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem1")                   | "MySchem"     | true                    | true

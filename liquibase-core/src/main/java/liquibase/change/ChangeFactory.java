@@ -1,8 +1,12 @@
 package liquibase.change;
 
+import javafx.scene.layout.Priority;
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
+import liquibase.plugin.AbstractPluginFactory;
+import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
@@ -15,76 +19,33 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @see liquibase.change.Change
  */
-public class ChangeFactory {
+public class ChangeFactory extends AbstractPluginFactory<Change>{
 
-    private static ChangeFactory instance;
-
-    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
-    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
+    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
 
     private Logger log;
 
     private ChangeFactory() {
-      log = LogFactory.getInstance().getLog();
+      log = LogService.getLog(getClass());
     }
 
     protected Logger getLogger() {
       return log;
     }
-    
-    private void init() {
-        Class<? extends Change>[] classes;
-        classes = ServiceLocator.getInstance().findClasses(Change.class);
 
-        for (Class<? extends Change> clazz : classes) {
-            //noinspection unchecked
-            register(clazz);
-        }
+    @Override
+    protected Class<Change> getPluginClass() {
+        return Change.class;
     }
 
-    /**
-     * Return the singleton ChangeFactory instance.
-     */
-    public static synchronized ChangeFactory getInstance() {
-        if (instance == null) {
-            instance = new ChangeFactory();
-            instance.init();
-        }
-        return instance;
-    }
-
-    /**
-     * Reset the ChangeFactory so it reloads the registry on the next call to @{link #getInstance()}. Mainly used in testing
-     */
-    public static void reset() {
-        instance = null;
-    }
-
-
-    /**
-     * Register a new Change class.
-     * Normally called automatically by ChangeFactory on all Change implementations found by the ServiceLocator, but it can be called manually if needed.
-     */
-    public void register(Class<? extends Change> changeClass) {
-        try {
-            Change instance = changeClass.newInstance();
-            ChangeMetaData metaData = getChangeMetaData(instance);
-            String name = metaData.getName();
-            if (registry.get(name) == null) {
-                registry.put(name, new TreeSet<Class<? extends Change>>(new Comparator<Class<? extends Change>>() {
-                    @Override
-                    public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
-                        try {
-                            return -1 * new Integer(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
-                        } catch (Exception e) {
-                            throw new UnexpectedLiquibaseException(e);
-                        }
-                    }
-                }));
-            }
-            registry.get(name).add(changeClass);
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+    @Override
+    protected int getPriority(Change obj, Object... args) {
+        String commandName = (String) args[0];
+        ChangeMetaData changeMetaData = getChangeMetaData(obj);
+        if (commandName.equals(changeMetaData.getName())) {
+            return changeMetaData.getPriority();
+        } else {
+            return Plugin.PRIORITY_NOT_APPLICABLE;
         }
     }
 
@@ -103,35 +64,27 @@ public class ChangeFactory {
         return metaDataByClass.get(change.getClass());
     }
 
+
     /**
      * Unregister all instances of a given Change name. Normally used for testing, but can be called manually if needed.
      */
     public void unregister(String name) {
-        registry.remove(name);
+        for (Change change : new ArrayList<>(findAllInstances())) {
+            if (getChangeMetaData(change).getName().equals(name)) {
+                this.removeInstance(change);
+            }
+        }
     }
-
-    /**
-     * Return the registry of all Changes found. Key is the change name and the values are a sorted set of implementations, ordered by Priority descending.
-     * Normally used only for information/debugging purposes. The returned map is read only.
-     */
-    public Map<String, SortedSet<Class<? extends Change>>> getRegistry() {
-        return Collections.unmodifiableMap(registry);
-    }
-
 
     /**
      * Returns all defined changes in the registry. Returned set is not modifiable.
      */
-    public Set<String> getDefinedChanges() {
-        return Collections.unmodifiableSet(registry.keySet());
-    }
-
-    /**
-     * Clear the registry of all Changes found. Normally used for testing.
-     */
-    public void clear() {
-        registry.clear();
-        metaDataByClass.clear();
+    public SortedSet<String> getDefinedChanges() {
+        SortedSet<String> names = new TreeSet<>();
+        for (Change change : findAllInstances()) {
+            names.add(getChangeMetaData(change).getName());
+        }
+        return Collections.unmodifiableSortedSet(names);
     }
 
     /**
@@ -139,31 +92,19 @@ public class ChangeFactory {
      * Each call to create will return a new instance of the Change.
      */
     public Change create(String name) {
-        SortedSet<Class<? extends Change>> classes = registry.get(name);
-
-        if (classes == null) {
+        Change plugin = getPlugin(name);
+        if (plugin == null) {
             return null;
         }
-
         try {
-            return classes.iterator().next().newInstance();
+            return plugin.getClass().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
 
-    public String[] getAllChangeNamespaces() {
-        Set<String> namespaces = new HashSet<String>();
-        for (String changeName : getDefinedChanges()) {
-            Change change = create(changeName);
-            namespaces.add(change.getSerializedObjectNamespace());
-        }
-
-        return namespaces.toArray(new String[namespaces.size()]);
-    }
-
     public Map<String, Object> getParameters(Change change) {
-        Map<String, Object> returnMap = new HashMap<String, Object>();
+        Map<String, Object> returnMap = new HashMap<>();
         ChangeMetaData changeMetaData = getChangeMetaData(change);
         for (ChangeParameterMetaData param : changeMetaData.getParameters().values()) {
             Object currentValue = param.getCurrentValue(change);

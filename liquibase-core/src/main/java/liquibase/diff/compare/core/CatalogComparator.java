@@ -9,7 +9,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Set;
 
@@ -24,12 +24,12 @@ public class CatalogComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-       return null;
+        return null;
     }
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Catalog && databaseObject2 instanceof Catalog)) {
+        if (!((databaseObject1 instanceof Catalog) && (databaseObject2 instanceof Catalog))) {
             return false;
         }
 
@@ -58,7 +58,60 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return otherSchema.getCatalogName() == null;
         }
 
-        return thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName());
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
+            if (StringUtil.trimToEmpty(object1Name).equals(StringUtil.trimToEmpty(object2Name))){
+                return true;
+            }
+        } else {
+            if (StringUtil.trimToEmpty(object1Name).equalsIgnoreCase(StringUtil.trimToEmpty(object2Name))) {
+                return true;
+            }
+        }
+        if (accordingTo.supportsSchemas()) { //no need to check schema mappings
+            return false;
+        }
+
+        //check with schemaComparisons
+        if ((chain.getSchemaComparisons() != null) && (chain.getSchemaComparisons().length > 0)) {
+            for (CompareControl.SchemaComparison comparison : chain.getSchemaComparisons()) {
+                String comparisonCatalog1;
+                String comparisonCatalog2;
+                if (accordingTo.supportsSchemas()) {
+                    comparisonCatalog1 = comparison.getComparisonSchema().getSchemaName();
+                    comparisonCatalog2 = comparison.getReferenceSchema().getSchemaName();
+                } else if (accordingTo.supportsCatalogs()) {
+                    comparisonCatalog1 = comparison.getComparisonSchema().getCatalogName();
+                    comparisonCatalog2 = comparison.getReferenceSchema().getCatalogName();
+                } else {
+                    break;
+                }
+
+                String finalCatalog1 = thisSchema.getCatalogName();
+                String finalCatalog2 = otherSchema.getCatalogName();
+
+                if ((comparisonCatalog1 != null) && comparisonCatalog1.equalsIgnoreCase(finalCatalog1)) {
+                    finalCatalog1 = comparisonCatalog2;
+                } else if ((comparisonCatalog2 != null) && comparisonCatalog2.equalsIgnoreCase(finalCatalog1)) {
+                    finalCatalog1 = comparisonCatalog1;
+                }
+
+                if (StringUtil.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtil.trimToEmpty(finalCatalog2))) {
+                    return true;
+                }
+
+                if ((comparisonCatalog1 != null) && comparisonCatalog1.equalsIgnoreCase(finalCatalog2)) {
+                    finalCatalog2 = comparisonCatalog2;
+                } else if ((comparisonCatalog2 != null) && comparisonCatalog2.equalsIgnoreCase(finalCatalog2)) {
+                    finalCatalog2 = comparisonCatalog1;
+                }
+
+                if (StringUtil.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtil.trimToEmpty(finalCatalog2))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override

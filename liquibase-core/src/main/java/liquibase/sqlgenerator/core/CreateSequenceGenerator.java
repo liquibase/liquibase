@@ -5,7 +5,6 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.structure.core.Sequence;
@@ -28,10 +27,17 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
         validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database, FirebirdDatabase.class);
 
-        validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
-        validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
+        if (isH2WithMinMaxSupport(database)) {
 
-        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class, HsqlDatabase.class);
+            validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, HsqlDatabase.class);
+            validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, HsqlDatabase.class);
+        } else {
+
+            validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
+            validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
+        }
+
+        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class);
 
 
         return validationErrors;
@@ -42,7 +48,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
-        if (database instanceof HsqlDatabase) {
+        if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             buffer.append(" AS BIGINT ");
         }
         if (statement.getStartValue() != null) {
@@ -58,21 +64,27 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             buffer.append(" MAXVALUE ").append(statement.getMaxValue());
         }
 
-        if (statement.getCacheSize() != null && database instanceof OracleDatabase) {
-            if (statement.getCacheSize().equals(BigInteger.ZERO)) {
-                buffer.append(" NOCACHE ");
-            } else {
-                buffer.append(" CACHE ").append(statement.getCacheSize());
+        if (statement.getCacheSize() != null) {
+            if (database instanceof OracleDatabase || database instanceof Db2zDatabase) {
+                if (BigInteger.ZERO.equals(statement.getCacheSize())) {
+                    if (database instanceof OracleDatabase) {
+                        buffer.append(" NOCACHE ");
+                    }
+                } else {
+                    buffer.append(" CACHE ").append(statement.getCacheSize());
+                }
             }
         }
 
         if (statement.getOrdered() != null) {
-            if (statement.getOrdered()) {
-                buffer.append(" ORDER");
-            } else {
-               if (database instanceof OracleDatabase) {
-                   buffer.append(" NOORDER");
-               }
+            if (!(database instanceof SybaseASADatabase)) {
+                if (statement.getOrdered()) {
+                    buffer.append(" ORDER");
+                } else {
+                   if (database instanceof OracleDatabase) {
+                       buffer.append(" NOORDER");
+                   }
+                }
             }
         }
         if (statement.getCycle() != null) {
@@ -86,5 +98,10 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
 
     protected Sequence getAffectedSequence(CreateSequenceStatement statement) {
         return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+    }
+
+    private boolean isH2WithMinMaxSupport(Database database) {
+        return H2Database.class.isAssignableFrom(database.getClass())
+                && ((H2Database) database).supportsMinMaxForSequences();
     }
 }

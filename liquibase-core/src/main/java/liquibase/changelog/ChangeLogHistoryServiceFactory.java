@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
@@ -11,9 +12,9 @@ public class ChangeLogHistoryServiceFactory {
 
     private static ChangeLogHistoryServiceFactory instance;
 
-    private List<ChangeLogHistoryService> registry = new ArrayList<ChangeLogHistoryService>();
+    private List<ChangeLogHistoryService> registry = new ArrayList<>();
 
-    private Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<Database, ChangeLogHistoryService>();
+    private Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<>();
 
     public static synchronized ChangeLogHistoryServiceFactory getInstance() {
         if (instance == null) {
@@ -25,22 +26,19 @@ public class ChangeLogHistoryServiceFactory {
     /**
      * Set the instance used by this singleton. Used primarily for testing.
      */
-    public static void setInstance(ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory) {
+    public static synchronized void setInstance(ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory) {
         ChangeLogHistoryServiceFactory.instance = changeLogHistoryServiceFactory;
     }
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 
     private ChangeLogHistoryServiceFactory() {
-        Class<? extends ChangeLogHistoryService>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogHistoryService.class);
-
-            for (Class<? extends ChangeLogHistoryService> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (ChangeLogHistoryService service : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogHistoryService.class)) {
+                register(service);
             }
 
         } catch (Exception e) {
@@ -56,10 +54,10 @@ public class ChangeLogHistoryServiceFactory {
             if (services.containsKey(database)) {
                 return services.get(database);
             }
-            SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<ChangeLogHistoryService>(new Comparator<ChangeLogHistoryService>() {
+            SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<>(new Comparator<ChangeLogHistoryService>() {
                 @Override
                 public int compare(ChangeLogHistoryService o1, ChangeLogHistoryService o2) {
-                    return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
+                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
                 }
             });
 
@@ -69,8 +67,9 @@ public class ChangeLogHistoryServiceFactory {
                 }
             }
 
-            if (foundServices.size() == 0) {
-                throw new UnexpectedLiquibaseException("Cannot find ChangeLogHistoryService for " + database.getShortName());
+            if (foundServices.isEmpty()) {
+                throw new UnexpectedLiquibaseException("Cannot find ChangeLogHistoryService for " +
+                    database.getShortName());
             }
 
             try {
@@ -93,7 +92,7 @@ public class ChangeLogHistoryServiceFactory {
             }
     }
 
-    public void resetAll() {
+    public synchronized void resetAll() {
         for (ChangeLogHistoryService changeLogHistoryService : registry) {
             changeLogHistoryService.reset();
         }

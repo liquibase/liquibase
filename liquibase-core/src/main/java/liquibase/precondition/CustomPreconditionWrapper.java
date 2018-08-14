@@ -1,7 +1,8 @@
 package liquibase.precondition;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
@@ -19,14 +20,18 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     private String className;
     private ClassLoader classLoader;
 
-    private SortedSet<String> params = new TreeSet<String>();
-    private Map<String, String> paramValues = new HashMap<String, String>();
+    private SortedSet<String> params = new TreeSet<>();
+    private Map<String, String> paramValues = new HashMap<>();
 
     public String getClassName() {
         return className;
     }
 
     public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public void setClass(String className) {
         this.className = className;
     }
 
@@ -58,7 +63,8 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     }
     
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
         try {
 //            System.out.println(classLoader.toString());
@@ -100,7 +106,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     @Override
     protected boolean shouldAutoLoad(ParsedNode node) {
-        if (node.getName().equals("params")) {
+        if ("params".equals(node.getName())) {
             return false;
         }
         return super.shouldAutoLoad(node);

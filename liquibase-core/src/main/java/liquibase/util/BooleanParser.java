@@ -29,29 +29,29 @@ public class BooleanParser {
         catch(NumberFormatException ex){
             // it's not a number
             // cast it as a String
-            String test = s.toString().trim().toLowerCase();
-            if(test.equalsIgnoreCase("true")){
+            String test = s.trim().toLowerCase();
+            if("true".equalsIgnoreCase(test)){
                 return true;
             }
-            else if(test.equalsIgnoreCase("t")){
+            else if("t".equalsIgnoreCase(test)){
                 return true;
             }
-            else if(test.equalsIgnoreCase("yes")){
+            else if("yes".equalsIgnoreCase(test)){
                 return true;
             }
-            else if(test.equalsIgnoreCase("y")){
+            else if("y".equalsIgnoreCase(test)){
                 return true;
             }
-            else if(test.equalsIgnoreCase("false")){
+            else if("false".equalsIgnoreCase(test)){
                 return false;
             }
-            else if(test.equalsIgnoreCase("f")){
+            else if("f".equalsIgnoreCase(test)){
                 return false;
             }
-            else if(test.equalsIgnoreCase("no")){
+            else if("no".equalsIgnoreCase(test)){
                 return false;
             }
-            else if(test.equalsIgnoreCase("n")){
+            else if("n".equalsIgnoreCase(test)){
                 return false;
             }
             else{

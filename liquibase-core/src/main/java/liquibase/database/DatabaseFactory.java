@@ -1,71 +1,62 @@
 package liquibase.database;
 
+import liquibase.Scope;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.*;
 
 public class DatabaseFactory {
+    private static final Logger LOG = LogService.getLog(DatabaseFactory.class);
     private static DatabaseFactory instance;
-    private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<String, SortedSet<Database>>();
-    private Map<String, SortedSet<Database>> internalDatabases = new HashMap<String, SortedSet<Database>>();
-    private Logger log;
+    private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
+    private Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
 
     private DatabaseFactory() {
-        log = new LogFactory().getLog();
         try {
-            Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
-
-            //noinspection unchecked
-            for (Class<? extends Database> clazz : classes) {
-                try {
-                    register(clazz.getConstructor().newInstance());
-                } catch (Throwable e) {
-                    throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
-                }
+            for (Database database : Scope.getCurrentScope().getServiceLocator().findInstances(Database.class)) {
+                register(database);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    public static DatabaseFactory getInstance() {
+    public static synchronized DatabaseFactory getInstance() {
         if (instance == null) {
             instance = new DatabaseFactory();
         }
         return instance;
     }
 
-    public static void reset() {
-        instance = new DatabaseFactory();
-    }
-
     /**
      * Set singleton instance. Primarily used in testing
      */
-    public static void setInstance(DatabaseFactory databaseFactory) {
+    public static synchronized void setInstance(DatabaseFactory databaseFactory) {
         instance = databaseFactory;
+    }
+
+    public static synchronized void reset() {
+        instance = new DatabaseFactory();
     }
 
     /**
      * Returns instances of all implemented database types.
      */
     public List<Database> getImplementedDatabases() {
-        List<Database> returnList = new ArrayList<Database>();
+        List<Database> returnList = new ArrayList<>();
         for (SortedSet<Database> set : implementedDatabases.values()) {
             returnList.add(set.iterator().next());
         }
@@ -76,7 +67,7 @@ public class DatabaseFactory {
      * Returns instances of all "internal" database types.
      */
     public List<Database> getInternalDatabases() {
-        List<Database> returnList = new ArrayList<Database>();
+        List<Database> returnList = new ArrayList<>();
         for (SortedSet<Database> set : internalDatabases.values()) {
             returnList.add(set.iterator().next());
         }
@@ -93,14 +84,14 @@ public class DatabaseFactory {
         }
 
         if (!map.containsKey(database.getShortName())) {
-            map.put(database.getShortName(), new TreeSet<Database>(new TreeSet<Database>(new DatabaseComparator())));
+            map.put(database.getShortName(), new TreeSet<>(new TreeSet<>(new DatabaseComparator())));
         }
         map.get(database.getShortName()).add(database);
     }
 
     public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException {
 
-        SortedSet<Database> foundDatabases = new TreeSet<Database>(new DatabaseComparator());
+        SortedSet<Database> foundDatabases = new TreeSet<>(new DatabaseComparator());
 
         for (Database implementedDatabase : getImplementedDatabases()) {
             if (connection instanceof OfflineConnection) {
@@ -114,8 +105,8 @@ public class DatabaseFactory {
             }
         }
 
-        if (foundDatabases.size() == 0) {
-            log.warning("Unknown database: " + connection.getDatabaseProductName());
+        if (foundDatabases.isEmpty()) {
+            LOG.warning(LogType.LOG, "Unknown database: " + connection.getDatabaseProductName());
             UnsupportedDatabase unsupportedDB = new UnsupportedDatabase();
             unsupportedDB.setConnection(connection);
             return unsupportedDB;
@@ -168,11 +159,14 @@ public class DatabaseFactory {
                                              String driverPropertiesFile,
                                              String propertyProviderClass,
                                              ResourceAccessor resourceAccessor) throws DatabaseException {
+
         if (url.startsWith("offline:")) {
-            return new OfflineConnection(url, resourceAccessor);
+            OfflineConnection offlineConnection = new OfflineConnection(url, resourceAccessor);
+            offlineConnection.setConnectionUserName(username);
+            return offlineConnection;
         }
 
-        driver = StringUtils.trimToNull(driver);
+        driver = StringUtil.trimToNull(driver);
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }
@@ -199,6 +193,10 @@ public class DatabaseFactory {
                 throw new RuntimeException("Cannot find database driver: " + e.getMessage());
             }
 
+            if (driverObject instanceof LiquibaseExtDriver) {
+                ((LiquibaseExtDriver)driverObject).setResourceAccessor(resourceAccessor);
+            }
+
             Properties driverProperties;
             if (propertyProviderClass == null) {
                 driverProperties = new Properties();
@@ -215,7 +213,9 @@ public class DatabaseFactory {
             if (null != driverPropertiesFile) {
                 File propertiesFile = new File(driverPropertiesFile);
                 if (propertiesFile.exists()) {
-//                    System.out.println("Loading properties from the file:'" + driverPropertiesFile + "'");
+                    LOG.debug(
+                            LogType.LOG, "Loading properties from the file:'" + driverPropertiesFile + "'"
+                    );
                     FileInputStream inputStream = new FileInputStream(propertiesFile);
                     try {
                         driverProperties.load(inputStream);
@@ -229,15 +229,15 @@ public class DatabaseFactory {
             }
 
 
-//            System.out.println("Properties:");
-//            for (Map.Entry entry : driverProperties.entrySet()) {
-//                System.out.println("Key:'"+entry.getKey().toString()+"' Value:'"+entry.getValue().toString()+"'");
-//            }
+            LOG.debug(LogType.LOG, "Properties:");
+            for (Map.Entry entry : driverProperties.entrySet()) {
+                LOG.debug(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+            }
 
 
-//            System.out.println("Connecting to the URL:'"+url+"' using driver:'"+driverObject.getClass().getName()+"'");
+            LOG.debug(LogType.LOG, "Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
             Connection connection = driverObject.connect(url, driverProperties);
-//            System.out.println("Connection has been created");
+            LOG.debug(LogType.LOG, "Connection has been created");
             if (connection == null) {
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }
@@ -248,6 +248,13 @@ public class DatabaseFactory {
         }
     }
 
+    /**
+     * Returns the Java class name of the JDBC driver class (e.g. "org.mariadb.jdbc.Driver")
+     * for the specified JDBC URL, if any Database class supports that URL.
+     *
+     * @param url the JDBC URL to analyse
+     * @return a Database object supporting the URL. May also return null if the JDBC URL is unknown to all handlers.
+     */
     public String findDefaultDriver(String url) {
         for (Database database : this.getImplementedDatabases()) {
             String defaultDriver = database.getDefaultDriver(url);
@@ -277,7 +284,7 @@ public class DatabaseFactory {
     private static class DatabaseComparator implements Comparator<Database> {
         @Override
         public int compare(Database o1, Database o2) {
-            return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
+            return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
         }
     }
 }

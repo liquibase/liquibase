@@ -3,7 +3,7 @@ package liquibase.change.core
 import liquibase.change.AddColumnConfig
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
@@ -30,7 +30,7 @@ public class CreateIndexChangeTest extends StandardChangeTest {
 
         def change = new CreateIndexChange()
         change.indexName = index.name
-        change.tableName = index.table.name
+        change.tableName = index.relation.name
         change.columns = [new AddColumnConfig().setName("test_col")]
 
         then:
@@ -51,5 +51,22 @@ public class CreateIndexChangeTest extends StandardChangeTest {
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.complete
 
+    }
+
+    def "validationErrorOnEmptyColumn"(){
+        when:
+        def database = new MockDatabase()
+        def snapshotFactory = new MockSnapshotGeneratorFactory()
+        SnapshotGeneratorFactory.instance = snapshotFactory
+
+        def index = new Index("idx_test", null, null, "test_table", new Column("test_col"))
+
+        def change = new CreateIndexChange()
+        change.indexName = index.name
+        change.tableName = index.relation.name
+        change.columns = [new AddColumnConfig().setName(null)]
+
+        then:
+        assert change.validate(database).getErrorMessages().size() == 1
     }
 }

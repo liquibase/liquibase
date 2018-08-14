@@ -3,17 +3,15 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -31,40 +29,15 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<CachedRow> rs = null;
         try {
-            JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+            JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache();
             rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), objectName);
 
             Table table;
-            if (rs.size() > 0) {
+            if (!rs.isEmpty()) {
                 table = readTable(rs.get(0), database);
             } else {
                 return null;
             }
-
-            if (table != null && database instanceof MSSQLDatabase) {
-                String schemaName;
-                Schema tableSchema = table.getSchema();
-                if (tableSchema == null) {
-                    schemaName = database.getDefaultSchemaName();
-                } else {
-                    schemaName = tableSchema.getName();
-                }
-
-                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
-                        " CAST(value as varchar(max)) as REMARKS\n" +
-                        " FROM\n" +
-                        " sys.extended_properties\n" +
-                        "  WHERE\n" +
-                        " name='MS_Description' " +
-                        " AND major_id = OBJECT_ID('" + schemaName+"."+table.getName() + "')\n" +
-                        " AND\n" +
-                        " minor_id = 0"), String.class);
-
-                if (remarks != null && remarks.size() > 0) {
-                    table.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
-                }
-            }
-
 
             return table;
         } catch (SQLException e) {
@@ -85,7 +58,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
             List<CachedRow> tableMetaDataRs = null;
             try {
-                tableMetaDataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
+                tableMetaDataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : tableMetaDataRs) {
                     String tableName = row.getString("TABLE_NAME");
                     Table tableExample = (Table) new Table().setName(cleanNameFromDatabase(tableName, database)).setSchema(schema);
@@ -102,15 +75,18 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
         String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
-        String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
-        String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
-        String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));
+        String rawSchemaName = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
+        String rawCatalogName = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
+        String remarks = StringUtil.trimToNull(tableMetadataResultSet.getString("REMARKS"));
+        String tablespace = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLESPACE_NAME"));
+        
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
 
         Table table = new Table().setName(cleanNameFromDatabase(rawTableName, database));
         table.setRemarks(remarks);
+        table.setTablespace(tablespace);
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
@@ -119,9 +95,9 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             table.setAttribute("temporary", "GLOBAL");
 
             String duration = tableMetadataResultSet.getString("DURATION");
-            if (duration != null && duration.equals("SYS$TRANSACTION")) {
+            if ((duration != null) && "SYS$TRANSACTION".equals(duration)) {
                 table.setAttribute("duration", "ON COMMIT DELETE ROWS");
-            } else if (duration != null && duration.equals("SYS$SESSION")) {
+            } else if ((duration != null) && "SYS$SESSION".equals(duration)) {
                 table.setAttribute("duration", "ON COMMIT PRESERVE ROWS");
             }
         }
@@ -129,53 +105,4 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         return table;
     }
 
-    //code from SqlLiteSnapshotGenerator
-    //    protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
-//
-//        Database database = snapshot.getDatabase();
-//
-//        updateListeners("Reading tables for " + database.toString() + " ...");
-//        ResultSet rs = databaseMetaData.getTables(
-//                database.convertRequestedSchemaToCatalog(schema),
-//                database.convertRequestedSchemaToSchema(schema),
-//                null,
-//                new String[]{"TABLE", "VIEW"});
-//
-//        try {
-//            while (rs.next()) {
-//                String type = rs.getString("TABLE_TYPE");
-//                String name = rs.getString("TABLE_NAME");
-//                String schemaName = rs.getString("TABLE_SCHEM");
-//                String catalogName = rs.getString("TABLE_CAT");
-//                String remarks = rs.getString("REMARKS");
-//
-//                if (database.isSystemTable(catalogName, schemaName, name) ||
-//                        database.isLiquibaseTable(name) ||
-//                        database.isSystemView(catalogName, schemaName, name)) {
-//                    continue;
-//                }
-//
-//                if ("TABLE".equals(type)) {
-//                    Table table = new Table(name);
-//                    table.setRemarks(StringUtils.trimToNull(remarks));
-//                    table.setDatabase(database);
-//                    table.setSchema(schemaName);
-//                    snapshot.getTables().add(table);
-//                } else if ("VIEW".equals(type)) {
-//                    View view = new View(name);
-//                    view.setSchema(schemaName);
-//                    try {
-//                        view.setDefinition(database.
-//                                getViewDefinition(schema, name));
-//                    } catch (DatabaseException e) {
-//                        System.out.println("Error getting view with " + new GetViewDefinitionStatement(schema, name));
-//                        throw e;
-//                    }
-//                    snapshot.getViews().add(view);
-//                }
-//            }
-//        } finally {
-//            rs.close();
-//        }
-//    }
 }

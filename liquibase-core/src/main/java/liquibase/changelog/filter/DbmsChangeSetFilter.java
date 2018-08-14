@@ -4,7 +4,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         if (database == null) {
             return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass());
         }
-         List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
+         List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
             if (!DatabaseList.definitionMatches(visitor.getApplicableDbms(), database, true)) {
                 visitorsToRemove.add(visitor);
@@ -31,10 +31,10 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
         String dbmsList;
-        if (changeSet.getDbmsSet() == null || changeSet.getDbmsSet().size() == 0) {
+        if ((changeSet.getDbmsSet() == null) || changeSet.getDbmsSet().isEmpty()) {
             dbmsList = "all databases";
         } else {
-            dbmsList = "'"+StringUtils.join(changeSet.getDbmsSet(), ", ") + "'";
+            dbmsList = "'"+ StringUtil.join(changeSet.getDbmsSet(), ", ") + "'";
         }
 
         if (DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true)) {
