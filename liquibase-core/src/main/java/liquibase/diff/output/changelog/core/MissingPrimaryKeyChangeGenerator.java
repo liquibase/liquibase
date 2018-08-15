@@ -75,6 +75,46 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             change.setClustered(true);
         }
 
+        if (comparisonDatabase instanceof OracleDatabase
+                || (comparisonDatabase instanceof AbstractDb2Database && pk.getBackingIndex() != null && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
+            Index backingIndex = pk.getBackingIndex();
+            if (backingIndex != null && backingIndex.getName() != null) {
+                try {
+                    if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
+                        CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);
+                        backingIndex.getTable().setSchema(schema.getCatalogName(), schema.getSchemaName()); //set table schema so it is found in the correct schema
+                    }
+                    if (referenceDatabase.equals(comparisonDatabase) || !SnapshotGeneratorFactory.getInstance().has(backingIndex, comparisonDatabase)) {
+                        Change[] fixes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+
+                        if (fixes != null) {
+                            for (Change fix : fixes) {
+                                if (fix != null) {
+                                    returnList.add(fix);
+                                }
+                            }
+                        }
+
+                    }
+                } catch (Exception e) {
+                    throw new UnexpectedLiquibaseException(e);
+                }
+
+
+                change.setForIndexName(backingIndex.getName());
+                Schema schema = backingIndex.getSchema();
+                if (schema != null) {
+                    if (control.getIncludeCatalog()) {
+                        change.setForIndexCatalogName(schema.getCatalogName());
+                    }
+                    if (control.getIncludeSchema()) {
+                        change.setForIndexSchemaName(schema.getName());
+                    }
+                }
+            }
+        }
+
+        control.setAlreadyHandledMissing(pk.getBackingIndex());
         returnList.add(change);
 
         return returnList.toArray(new Change[returnList.size()]);
