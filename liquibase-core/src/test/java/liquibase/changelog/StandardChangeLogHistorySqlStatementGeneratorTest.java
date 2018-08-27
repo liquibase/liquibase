@@ -2,9 +2,9 @@ package liquibase.changelog;
 
 import liquibase.changelog.definition.ChangeLogTableDefinition;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.sdk.database.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Column;

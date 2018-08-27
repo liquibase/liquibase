@@ -3,7 +3,7 @@ package liquibase.changelog.value;
 import liquibase.database.Database;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 
-import static liquibase.util.StringUtils.trimToEmpty;
+import static liquibase.util.StringUtil.trimToEmpty;
 
 abstract class LimittableValueProvider implements ChangeLogColumnValueProvider {
 
