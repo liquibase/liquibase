@@ -11,6 +11,7 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
@@ -361,7 +362,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                 if ("NULL".equalsIgnoreCase(value.toString())) {
                                     valueConfig.setValue(null);
                                 } else {
-                                    valueConfig.setValueDate(value.toString());
+                                    try {
+                                        // Need the column type for handling 'NOW' or 'TODAY' type column value
+                                        valueConfig.setType(columnConfig.getType());
+                                        valueConfig.setValueDate(value.toString());
+                                    } catch (DateParseException e) {
+                                        throw new UnexpectedLiquibaseException(e);
+                                    }
                                 }
                             } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.STRING.toString())) {
                                 if ("NULL".equalsIgnoreCase(value.toString())) {
