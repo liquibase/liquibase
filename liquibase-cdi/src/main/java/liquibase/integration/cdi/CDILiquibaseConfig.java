@@ -15,6 +15,7 @@ public class CDILiquibaseConfig {
     private Map<String,String> parameters;
     private boolean dropFirst;
     private String defaultSchema;
+    private boolean shouldRun = true;
 
     public String getContexts() {
         return contexts;
@@ -62,5 +63,13 @@ public class CDILiquibaseConfig {
 
     public void setDefaultSchema(String defaultSchema) {
         this.defaultSchema = defaultSchema;
+    }
+
+    public boolean getShouldRun() {
+        return shouldRun;
+    }
+
+    public void setShouldRun(boolean shouldRun) {
+        this.shouldRun = shouldRun;
     }
 }

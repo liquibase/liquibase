@@ -20,26 +20,39 @@ public class CDILiquibaseTest {
     @After
     public void clearProperty() {
         System.clearProperty("liquibase.shouldRun");
+        System.clearProperty("liquibase.config.shouldRun");
         LiquibaseConfiguration.getInstance().reset();
+    }
+
+    private void validateRunningState(boolean shouldBeRunning) {
+        WeldContainer weld = new Weld().initialize();
+        CDILiquibase cdiLiquibase = weld.instance().select(CDILiquibase.class).get();
+        assertNotNull(cdiLiquibase);
+        assertEquals(shouldBeRunning, cdiLiquibase.isInitialized());
+        assertEquals(shouldBeRunning, cdiLiquibase.isUpdateSuccessful());
     }
 
     @Test
     public void shouldntRunWhenShouldRunIsFalse() {
         System.setProperty("liquibase.shouldRun", "false");
-        WeldContainer weld = new Weld().initialize();
-        CDILiquibase cdiLiquibase = weld.instance().select(CDILiquibase.class).get();
-        assertNotNull(cdiLiquibase);
-        assertFalse(cdiLiquibase.isInitialized());
-        assertFalse(cdiLiquibase.isUpdateSuccessful());
+        validateRunningState(false);
     }
 
     @Test
     public void shouldRunWhenShouldRunIsTrue() {
         System.setProperty("liquibase.shouldRun", "true");
-        WeldContainer weld = new Weld().initialize();
-        CDILiquibase cdiLiquibase = weld.instance().select(CDILiquibase.class).get();
-        assertNotNull(cdiLiquibase);
-        assertTrue(cdiLiquibase.isInitialized());
-        assertTrue(cdiLiquibase.isUpdateSuccessful());
+        validateRunningState(true);
+    }
+
+    @Test
+    public void shouldntRunWhenConfigShouldRunIsFalse() {
+        System.setProperty("liquibase.config.shouldRun", "false");
+        validateRunningState(false);
+    }
+
+    @Test
+    public void shouldRunWhenConfigShouldRunIsTrue() {
+        System.setProperty("liquibase.config.shouldRun", "true");
+        validateRunningState(true);
     }
 }
