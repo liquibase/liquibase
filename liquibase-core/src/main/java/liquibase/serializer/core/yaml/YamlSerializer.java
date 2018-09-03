@@ -22,6 +22,7 @@ import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.beans.IntrospectionException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -178,7 +179,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         }
 
         @Override
-        protected Set<Property> getProperties(Class<? extends Object> type) throws IntrospectionException {
+        protected Set<Property> getProperties(Class<? extends Object> type) {
             Set<Property> returnSet = new HashSet<>();
             LiquibaseSerializable serialzableType = null;
             try {
@@ -212,6 +213,16 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             @Override
             public Object get(Object object) {
                 return ((LiquibaseSerializable) object).getSerializableFieldValue(getName());
+            }
+
+            @Override
+            public List<Annotation> getAnnotations() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+                throw new UnsupportedOperationException();
             }
         }
 
