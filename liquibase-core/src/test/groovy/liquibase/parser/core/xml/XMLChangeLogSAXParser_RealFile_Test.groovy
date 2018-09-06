@@ -719,4 +719,30 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         then:
         changeLog.getChangeSets().size() == 2
     }
+
+    def "change sets exclude matching-excluded dbms"() {
+        when:
+        def path = "liquibase/parser/core/xml/excludeDbmsChangeLog.xml"
+        def database = new MSSQLDatabase()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
+        def change1 = changeLog.getChangeSets().get(0).getChanges().get(0)
+        change1.getTableName() == "a"
+        change1.getColumns().get(0).getType() == "varchar(50)"
+    }
+
+    def "change sets include non-matching-excluded dbms"() {
+        when:
+        def path = "liquibase/parser/core/xml/excludeDbmsChangeLog.xml"
+        def database = new H2Database()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
+        def change1 = changeLog.getChangeSets().get(0).getChanges().get(0)
+        change1.getTableName() == "a"
+        change1.getColumns().get(0).getType() == "int"
+    }
 }
