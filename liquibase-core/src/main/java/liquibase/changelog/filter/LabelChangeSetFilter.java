@@ -37,8 +37,8 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
         }
 
         Collection<LabelExpression> inheritableLabels = changeSet.getInheritableLabels();
-        if (changeSet.getLabels() == null || changeSet.getLabels().isEmpty() &&
-            inheritableLabels == null || inheritableLabels.isEmpty()) {
+        if ((changeSet.getLabels() == null || changeSet.getLabels().isEmpty()) &&
+            (inheritableLabels == null || inheritableLabels.isEmpty())) {
             return new ChangeSetFilterResult(true, "Change set runs under all labels", this.getClass());
         }
 
