@@ -134,7 +134,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                     "TAG",
                     "LIQUIBASE",
                     "CONTEXTS",
-                    "LABELS"                    
+                    "LABELS",
+                    "DEPLOYMENT_ID"
             });
         }
     }
