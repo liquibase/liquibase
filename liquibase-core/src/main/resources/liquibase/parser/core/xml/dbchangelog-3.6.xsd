@@ -178,9 +178,14 @@
 					<!-- include -->
 					<xsd:element name="include" minOccurs="0" maxOccurs="unbounded">
 						<xsd:complexType>
+		          <xsd:attribute name="id" type="xsd:string" />
+          		<xsd:attribute name="author" type="xsd:string" />
 							<xsd:attribute name="file" type="xsd:string" use="required" />
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
 							<xsd:attribute name="context" type="xsd:string" />
+							<xsd:attribute name="labels" type="xsd:string" />
+              <xsd:attribute name="ignore" type="xsd:string" />
+              <xsd:attribute name="created" type="xsd:string"/>
 							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
