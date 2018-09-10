@@ -507,7 +507,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
                 for (String foundPackage : liquibasePackages) {
                     for (Resource res : getResources(foundPackage)) {
-                        addRootPath(res.getURL());
+                        if (res.exists()) {
+                            addRootPath(res.getURL());
+                        }
                     }
                 }
 
