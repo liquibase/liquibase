@@ -1,11 +1,14 @@
 package liquibase.diff.compare.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 
 import java.util.Set;
@@ -33,6 +36,15 @@ public class SchemaComparator extends CommonCatalogSchemaComparator {
         String schemaName1 = null;
         String schemaName2 = null;
 
+        // the flag will be set true in multi catalog environments
+        boolean shouldIncludeCatalog = LiquibaseConfiguration.getInstance().shouldIncludeCatalogInSpecification();
+        if (shouldIncludeCatalog) {
+            Catalog catalog1 = ((Schema) databaseObject1).getCatalog();
+            Catalog catalog2 = ((Schema) databaseObject2).getCatalog();
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(catalog1, catalog2, chain.getSchemaComparisons(), accordingTo)) {
+                return false;
+            }
+        }
         if (accordingTo.supportsSchemas()) {
             schemaName1 = databaseObject1.getName();
             schemaName2 = databaseObject2.getName();
