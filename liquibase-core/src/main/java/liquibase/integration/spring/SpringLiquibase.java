@@ -523,17 +523,54 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 return null;
             }
 
-            Set<String> returnSet = new HashSet<>();
+            //
+            // Possible Resources Types
+            //
 
+            // Standalone Jar
+            // Root Path: jar:file:/Projects/my-project/second-module/target/second-module-1.0.0-SNAPSHOT-exec.jar!/BOOT-INF/lib/first-module-1.0.0-SNAPSHOT.jar!/
+            // +Resource: jar:file:/Projects/my-project/second-module/target/second-module-1.0.0-SNAPSHOT-exec.jar!/BOOT-INF/lib/first-module-1.0.0-SNAPSHOT.jar!/db/changelog/0-initial-schema.xml
+
+            // Standalone War
+            // Root Path: jar:file:/Projects/my-project/second-module/target/second-module-1.0.0-SNAPSHOT-exec.war!/WEB-INF/lib/first-module-1.0.0-SNAPSHOT.jar!/
+            // +Resource: jar:file:/Projects/my-project/second-module/target/second-module-1.0.0-SNAPSHOT-exec.war!/WEB-INF/lib/first-module-1.0.0-SNAPSHOT.jar!/-db/changelog/0-initial-schema.xml
+
+            // Openned Jar Dependency
+            // Root Path: file:/Projects/my-project/first-module/target/classes/
+            // +Resource: file:/Projects/my-project/first-module/target/classes/db/changelog/0-initial-schema.xml
+
+            // War Wild-Fly Exploded
+            // Root Path: vfs:/Projects/my-project/second-module/target/second-module-1.0.0-SNAPSHOT/WEB-INF/lib/first-module-1.0.0-SNAPSHOT.jar/
+            // +Resource: vfs:/Projects/my-project/second-module/target/second-module-1.0.0-SNAPSHOT/WEB-INF/lib/first-module-1.0.0-SNAPSHOT.jar/db/changelog/0-initial-schema.xml
+
+            // War Wild-Fly Artifact
+            // Root Path: vfs:/content/second-module-1.0.0-SNAPSHOT.war/WEB-INF/lib/first-module-1.0.0-SNAPSHOT.jar/
+            // +Resource: vfs:/content/second-module-1.0.0-SNAPSHOT.war/WEB-INF/lib/first-module-1.0.0-SNAPSHOT.jar/db/changelog/0-initial-schema.xml
+
+            Set<String> returnSet = new HashSet<>();
+            path = path + '*'; // All files inside!
             String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeTo), path);
 
             Resource[] resources = getResources(adjustClasspath(tempFile));
+            for (Resource resource : resources) {
+                String resourceStr = resource.getURL().toExternalForm();
+                String resourcePath = convertToPath(resourceStr);
+                if (resourceStr.endsWith(resourcePath) && !resourceStr.equals(resourcePath)) {
+                    returnSet.add(resourcePath);
+                } else {
+                    // Closed Jar Dependency
+                    // Root Path:     file:/.m2/repository/org/liquibase/test/first-module/1.0.0-SNAPSHOT/first-module-1.0.0-SNAPSHOT.jar/
+                    // +Resource: jar:file:/.m2/repository/org/liquibase/test/first-module/1.0.0-SNAPSHOT/first-module-1.0.0-SNAPSHOT.jar!/db/changelog/0-initial-schema.xml
 
-            for (Resource res : resources) {
-                Set<String> list = super.list(null, res.getURL().toExternalForm(), includeFiles, includeDirectories,
-                    recursive);
-                if (list != null) {
-                    returnSet.addAll(list);
+                    String newResourceStr = resource.getURL().getFile(); // Remove "jar:" from begining.
+                    newResourceStr = newResourceStr.replaceAll("!", "");
+                    String newResourcePath = convertToPath(newResourceStr);
+                    if (newResourceStr.endsWith(newResourcePath) && !newResourceStr.equals(newResourcePath)) {
+                        returnSet.add(newResourcePath);
+                    } else {
+                        LogService.getLog(getClass()).warning(
+                            LogType.LOG, "Not a valid resource entry: " + resourceStr);
+                    }
                 }
             }
 
