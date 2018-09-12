@@ -1,11 +1,15 @@
 package liquibase.resource;
 
+import com.google.common.base.Predicate;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.util.StringUtils;
 import liquibase.util.SpringBootFatJar;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.util.ConfigurationBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,8 +71,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         Set<String> returnSet = new HashSet<>();
 
-        if (!fileUrls.hasMoreElements() && (sanitizePath.startsWith("jar:") || sanitizePath.startsWith("file:") || sanitizePath.startsWith("wsjar:file:") || sanitizePath.startsWith("zip:"))) {
-            fileUrls = new Vector<>(Arrays.asList(new URL(sanitizePath))).elements();
+        if (!fileUrls.hasMoreElements() && (sanitizePath.startsWith("jar:") || sanitizePath.startsWith("file:") || sanitizePath.startsWith("wsjar:file:") || sanitizePath.startsWith("zip:") || sanitizePath.startsWith("vfs:"))) {
+            fileUrls = new Vector<>(Collections.singletonList(new URL(sanitizePath))).elements();
         }
 
         // Improve speed by removing duplicate file returned by getResources
@@ -84,8 +88,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
                 String[] zipAndFile = fileUrl.getFile().split("!");
                 String zipFilePath = zipAndFile[0];
-                if (zipFilePath.matches("file:\\/[A-Za-z]:\\/.*")) {
-                    zipFilePath = zipFilePath.replaceFirst("file:\\/", "");
+                if (zipFilePath.matches("file:/[A-Za-z]:/.*")) {
+                    zipFilePath = zipFilePath.replaceFirst("file:/", "");
                 } else {
                     zipFilePath = zipFilePath.replaceFirst("file:", "");
                 }
@@ -158,6 +162,47 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     }
                 } finally {
                     zipfile.close();
+                }
+            } else if (fileUrl.toExternalForm().startsWith("vfs:")) {
+                String[] pathParts = fileUrl.toExternalForm().split(".jar/");
+                if (pathParts.length > 1) {
+                    // We are looking for resources inside a Jar file.
+                    String jarPath = pathParts[0] + ".jar";
+                    ConfigurationBuilder cb = new ConfigurationBuilder()
+                        .setUrls(new URL(jarPath))
+                        .setScanners(new ResourcesScanner());
+
+                    Reflections ref = new Reflections(cb);
+                    Set<String> resources = ref.getResources(new Predicate<String>() {
+                        @Override
+                        public boolean apply(String s) {
+                            return true;
+                        }
+                    });
+
+                    String resourcePath = pathParts[1];
+                    for (String resource : resources) {
+                        if (resource.startsWith(resourcePath)) {
+                            returnSet.add(resource);
+                        }
+                    }
+                } else {
+                    String completeResourcePath = pathParts[0];
+                    ConfigurationBuilder cb = new ConfigurationBuilder()
+                        .setUrls(new URL(completeResourcePath))
+                        .setScanners(new ResourcesScanner());
+
+                    Reflections ref = new Reflections(cb);
+                    Set<String> resources = ref.getResources(new Predicate<String>() {
+                        @Override
+                        public boolean apply(String s) {
+                            return true;
+                        }
+                    });
+
+                    for (String resource : resources) {
+                        returnSet.add(convertToPath(completeResourcePath + resource));
+                    }
                 }
             } else {
                 try {

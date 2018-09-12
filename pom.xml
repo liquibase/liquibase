@@ -110,6 +110,7 @@
         <org.codehaus.groovy.version>2.4.11</org.codehaus.groovy.version>
         <org.spockframework.version>1.1-groovy-2.4</org.spockframework.version>
         <system-rules.version>1.16.0</system-rules.version>
+        <reflections.version>0.9.11</reflections.version>
 
         <!-- Code coverage settings for the combination JaCoCo (offline instrumentation) and SONAR (cloud) -->
         <jacoco.version>0.7.9</jacoco.version>
@@ -404,6 +405,13 @@
                 <groupId>org.xerial</groupId>
                 <artifactId>sqlite-jdbc</artifactId>
                 <version>${sqlite-jdbc.version}</version>
+            </dependency>
+
+            <!-- Google Reflections -->
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

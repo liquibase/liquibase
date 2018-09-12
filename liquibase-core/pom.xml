@@ -144,6 +144,11 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
+		<!-- Google Reflections -->
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+		</dependency>
     </dependencies>
 
 	<build>
