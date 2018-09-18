@@ -136,7 +136,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
     }
 
     private void setPropertyIgnoreSchemaAndCatalogCase(Change change, String field, String value, CompareControl.SchemaComparison comparison) {
-        if ("catalogName".equalsIgnoreCase(field)) {
+        if (field.toLowerCase().contains("catalogname")) {
             return;
         }
         if (comparison.getOutputSchemaAs() != null && comparison.getComparisonSchema() != null
@@ -148,7 +148,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
     }
 
     private void setProperty(Change change, String field, String value, CompareControl.SchemaComparison comparison) {
-        if ("catalogName".equalsIgnoreCase(field)) {
+        if (field.toLowerCase().contains("catalogname")) {
             return;
         }
         if (comparison.getOutputSchemaAs() != null && comparison.getComparisonSchema() != null
