@@ -112,6 +112,7 @@ public class Main {
     protected String logFile;
     protected Map<String, Object> changeLogParameters = new HashMap<>();
     protected String outputFile;
+    protected String verbose;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -784,6 +785,9 @@ public class Main {
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
+        if(arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
+        	return;
+        
         String[] splitArg = splitArg(arg);
 
         String attributeName = splitArg[0];
