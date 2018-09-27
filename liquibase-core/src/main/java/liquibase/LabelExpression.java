@@ -88,6 +88,32 @@ public class LabelExpression {
         return false;
     }
 
+    /**
+     *
+     * Return true if any of the LabelExpression objects match the runtime
+     *
+     * @param   expressions    Expressions to match against
+     * @param   labels         Runtime labels
+     * @return  boolean        True if match
+     *
+     */
+    public static boolean matchesAll(Collection<LabelExpression> expressions, LabelExpression labels) {
+        if (expressions == null || expressions.isEmpty()) {
+            return true;
+        }
+        if (labels == null || labels.isEmpty()) {
+            return true;
+        }
+        Set<String> labelStrings = labels.getLabels();
+        Labels runtimeLabels = new Labels(labelStrings);
+        for (LabelExpression expression : expressions) {
+            if (!expression.matches(runtimeLabels)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private boolean matches(String expression, Labels runtimeLabels) {
         if (runtimeLabels.isEmpty()) {
             return true;

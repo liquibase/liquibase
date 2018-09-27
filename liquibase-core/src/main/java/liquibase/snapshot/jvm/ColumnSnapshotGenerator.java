@@ -314,7 +314,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //                }
 //            type.setRadix(10);
             } else {
-                type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
+                if ("FLOAT".equalsIgnoreCase(dataType)) { //FLOAT [(precision)]
+                    type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
+                } else {
+                    type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
+                }
 
                 boolean isTimeStampDataType = dataType.toUpperCase().contains("TIMESTAMP");
 
