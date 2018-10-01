@@ -92,9 +92,10 @@
 						<xsd:attribute name="value" type="xsd:string" />
 						<xsd:attribute name="dbms" type="xsd:string" />
 						<xsd:attribute name="context" type="xsd:string" />
-            <xsd:attribute name="labels" type="xsd:string" />
-            <xsd:attribute name="global" type="xsd:boolean"/>
-            <xsd:anyAttribute namespace="##other" processContents="lax"/>
+                        <xsd:attribute name="labels" type="xsd:string" />
+                        <xsd:attribute name="global" type="xsd:boolean"/>
+						<xsd:attribute name="target" type="xsd:string" />
+						<xsd:anyAttribute namespace="##other" processContents="lax"/>
 					</xsd:complexType>
 				</xsd:element>
 
@@ -405,9 +406,9 @@
 		<xsd:attribute name="incrementBy" type="xsd:string" />
 		<xsd:attribute name="maxValue" type="xsd:string" />
 		<xsd:attribute name="minValue" type="xsd:string" />
-		<xsd:attribute name="ordered" type="booleanExp" />
+		<xsd:attribute name="ordered" type="xsd:string" />
     <xsd:attribute name="cacheSize" type="xsd:string" />
-		<xsd:attribute name="cycle" type="booleanExp">
+		<xsd:attribute name="cycle" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation>
 					true for a cycling sequence, false for a non-cycling sequence.
