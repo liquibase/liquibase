@@ -581,21 +581,21 @@ public class Main {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
-            } else if ((COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
-                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
-            )
-                && (!commandParams.isEmpty())) {
-                for (String cmdParm : commandParams) {
-                    if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                        && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)) {
-                        messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
-                    }
+            }
+        } else if ((COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
+            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
+        )
+            && (!commandParams.isEmpty())) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
+                    && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
+                    && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
+                    && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         }
-
+        
     }
 
     /**
