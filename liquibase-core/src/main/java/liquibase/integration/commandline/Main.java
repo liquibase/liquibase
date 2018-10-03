@@ -116,6 +116,14 @@ public class Main {
     protected String logFile;
     protected Map<String, Object> changeLogParameters = new HashMap<>();
     protected String outputFile;
+    protected String excludeObjects;
+    protected Boolean includeCatalog;
+    protected String includeObjects;
+    protected Boolean includeSchema;
+    protected Boolean includeTablespace;
+    protected String outputSchemasAs;
+    protected String referenceSchemas;
+    protected String schemas;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -848,6 +856,16 @@ public class Main {
         if (this.defaultsFile == null) {
             this.defaultsFile = "liquibase.properties";
         }
+        if (this.includeSchema == null){
+            this.includeSchema = false;
+        }
+        if (this.includeCatalog == null){
+            this.includeCatalog = false;
+        }
+        if (this.includeTablespace == null){
+            this.includeTablespace = false;
+        }
+
     }
 
     protected void configureClassLoader() throws CommandLineParsingException {
@@ -962,9 +980,6 @@ public class Main {
         database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
         try {
 
-            String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
-            String includeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
-
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
                     String.format(coreBundle.getString("cannot.specify.both"),
@@ -972,18 +987,15 @@ public class Main {
             }
 
             ObjectChangeFilter objectChangeFilter = null;
-            boolean includeSchema = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_SCHEMA, "false"));
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
-                getCommandParam(OPTIONS.SCHEMAS, null),
-                getCommandParam(OPTIONS.REFERENCE_SCHEMAS, null),
-                getCommandParam(OPTIONS.OUTPUT_SCHEMAS_AS, null),
+                schemas,
+                referenceSchemas,
+                outputSchemasAs,
                 defaultCatalogName, defaultSchemaName,
                 referenceDefaultCatalogName, referenceDefaultSchemaName,
                 database);
 
             CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
-            boolean includeCatalog = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_CATALOG, "false"));
-            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "false"));
             DiffOutputControl diffOutputControl = new DiffOutputControl(
                 includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
 
