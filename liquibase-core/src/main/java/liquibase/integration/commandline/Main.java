@@ -965,7 +965,6 @@ public class Main {
             this.databaseChangeLogLockTableName);
         database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
         try {
-
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
                     String.format(coreBundle.getString("cannot.specify.both"),
