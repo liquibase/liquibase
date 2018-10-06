@@ -232,15 +232,17 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 column.setNullable(false);
             }
         } else {
-            int nullable = columnMetadataResultSet.getInt("NULLABLE");
-            if (nullable == DatabaseMetaData.columnNoNulls) {
-                column.setNullable(false);
-            } else if (nullable == DatabaseMetaData.columnNullable) {
-                column.setNullable(true);
-            } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-                LogService.getLog(getClass()).info(LogType.LOG, "Unknown nullable state for column "
-                    + column.toString() + ". Assuming nullable");
-                column.setNullable(true);
+            Integer nullable = columnMetadataResultSet.getInt("NULLABLE");
+            if (nullable != null) {
+                if (nullable == DatabaseMetaData.columnNoNulls) {
+                    column.setNullable(false);
+                } else if (nullable == DatabaseMetaData.columnNullable) {
+                    column.setNullable(true);
+                } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
+                    LogService.getLog(getClass()).info(LogType.LOG, "Unknown nullable state for column "
+                            + column.toString() + ". Assuming nullable");
+                    column.setNullable(true);
+                }
             }
         }
 
