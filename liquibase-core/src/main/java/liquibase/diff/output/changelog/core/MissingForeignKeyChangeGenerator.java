@@ -54,7 +54,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
 
         String missingPrimaryKeyCatalogName = StringUtils.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         if (referenceDatabase.supportsCatalogs()) {
-            if (control.getIncludeCatalog() || control.isNeedConceptOfCatalogBehaviour()) {
+            if (control.getIncludeCatalog() || control.considerCatalogsAsSchemas()) {
                 change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
                 includedCatalog = true;
             } else if (!defaultCatalogName.equalsIgnoreCase(missingPrimaryKeyCatalogName)) {
