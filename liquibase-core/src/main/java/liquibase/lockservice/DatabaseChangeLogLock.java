@@ -9,11 +9,13 @@ import java.util.Date;
 public class DatabaseChangeLogLock {
     private final int id;
     private final Date lockGranted;
+    private final Date lockProlonged;
     private final String lockedBy;
 
-    public DatabaseChangeLogLock(int id, Date lockGranted, String lockedBy) {
+    public DatabaseChangeLogLock(int id, Date lockGranted, Date lockProlonged, String lockedBy) {
         this.id = id;
         this.lockGranted = new Date(lockGranted.getTime());
+        this.lockProlonged = lockProlonged;
         this.lockedBy = lockedBy;
     }
 
@@ -27,5 +29,9 @@ public class DatabaseChangeLogLock {
 
     public String getLockedBy() {
         return lockedBy;
+    }
+
+    public Date getLockProlonged() {
+        return lockProlonged;
     }
 }
