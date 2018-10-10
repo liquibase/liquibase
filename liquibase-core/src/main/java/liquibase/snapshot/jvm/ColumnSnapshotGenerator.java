@@ -218,9 +218,20 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database.supportsAutoIncrement()) {
             if (table instanceof Table) {
                 if (database instanceof OracleDatabase) {
+                    Column.AutoIncrementInformation autoIncrementInfo = new Column.AutoIncrementInformation();
                     String data_default = StringUtils.trimToEmpty((String) columnMetadataResultSet.get("DATA_DEFAULT")).toLowerCase();
                     if (data_default.contains("iseq$$") && data_default.endsWith("nextval")) {
-                        column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                        column.setAutoIncrementInformation(autoIncrementInfo);
+                    }
+
+                    Boolean isIdentityColumn = columnMetadataResultSet.yesNoToBoolean("IDENTITY_COLUMN");
+                    if (Boolean.TRUE.equals(isIdentityColumn)) { // Oracle 12+
+                        Boolean defaultOnNull = columnMetadataResultSet.yesNoToBoolean("DEFAULT_ON_NULL");
+                        String generationType = columnMetadataResultSet.getString("GENERATION_TYPE");
+                        autoIncrementInfo.setDefaultOnNull(defaultOnNull);
+                        autoIncrementInfo.setGenerationType(generationType);
+
+                        column.setAutoIncrementInformation(autoIncrementInfo);
                     }
                 } else {
                     if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {

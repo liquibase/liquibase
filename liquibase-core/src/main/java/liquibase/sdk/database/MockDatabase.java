@@ -259,7 +259,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
+    public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy, final String generationType, final Boolean defaultOnNull) {
     	return "AUTO_INCREMENT_CLAUSE"
     			+ startWith != null ? (" " + startWith) : ""
     		    + incrementBy != null ? (" " + incrementBy) : "";

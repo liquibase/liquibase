@@ -13,6 +13,8 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     private String columnDataType;
     private BigInteger startWith;
     private BigInteger incrementBy;
+    private Boolean defaultOnNull;
+    private String generationType;
     
     public AddAutoIncrementStatement(
             String catalogName,
@@ -21,7 +23,9 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     		String columnName,
     		String columnDataType,
     		BigInteger startWith,
-    		BigInteger incrementBy) {
+    		BigInteger incrementBy,
+            Boolean defaultOnNull,
+            String generationType) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -29,6 +33,8 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
         this.columnDataType = columnDataType;
         this.startWith = startWith;
         this.incrementBy = incrementBy;
+        this.defaultOnNull = defaultOnNull;
+        this.generationType = generationType;
     }
 
     public String getCatalogName() {
@@ -57,5 +63,13 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     
     public BigInteger getIncrementBy() {
     	return incrementBy;
+    }
+
+    public Boolean getDefaultOnNull() {
+        return defaultOnNull;
+    }
+
+    public String getGenerationType() {
+        return generationType;
     }
 }

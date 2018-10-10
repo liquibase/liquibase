@@ -406,6 +406,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
             boolean getMapDateToTimestamp = true;
             String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+            boolean collectIdentityData = database.getDatabaseMajorVersion() >= OracleDatabase.ORACLE_V_12;
 
             String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS," +
                 "OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE AS DATA_TYPE_NAME, DATA_TYPE_MOD, DATA_TYPE_OWNER, " +
@@ -416,9 +417,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 "DATA_DEFAULT, " +
                 "NUM_BUCKETS, CHARACTER_SET_NAME, " +
                 "CHAR_COL_DECL_LENGTH, CHAR_LENGTH, " +
-                "CHAR_USED, VIRTUAL_COLUMN " +
-                "FROM ALL_TAB_COLS c " +
+                "CHAR_USED, VIRTUAL_COLUMN ";
+            if (collectIdentityData) {
+                sql += ", DEFAULT_ON_NULL, IDENTITY_COLUMN, ic.GENERATION_TYPE ";
+            }
+            sql += "FROM ALL_TAB_COLS c " +
                 "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) ";
+            if (collectIdentityData) {
+                sql += "LEFT JOIN ALL_TAB_IDENTITY_COLS ic USING (OWNER, TABLE_NAME, COLUMN_NAME ) ";
+            }
             if (!bulk || getAllCatalogsStringScratchData() == null) {
               sql += "WHERE OWNER='" + jdbcSchemaName + "' AND hidden_column='NO'";
             } else {

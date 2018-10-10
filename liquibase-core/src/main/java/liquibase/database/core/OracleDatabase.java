@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "oracle";
-
+    public static final int ORACLE_V_12 = 12;
 
     private Set<String> reservedWords = new HashSet<String>();
     private Set<String> userDefinedTypes = null;
@@ -154,6 +154,20 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         return correctObjectName(schema.getCatalogName() == null ? schema.getSchemaName() : schema.getCatalogName(), Schema.class);
+    }
+
+    @Override
+    protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
+        if (StringUtils.isEmpty(generationType)) {
+            return "";
+        }
+
+        String autoIncrementClause = "GENERATED %s AS IDENTITY"; // %s -- [ ALWAYS | BY DEFAULT [ ON NULL ] ]
+        String generationStrategy = generationType;
+        if (Boolean.TRUE.equals(defaultOnNull) && generationType.toUpperCase().equals("BY DEFAULT")) {
+            generationStrategy += " ON NULL";
+        }
+        return String.format(autoIncrementClause, generationStrategy);
     }
 
     @Override

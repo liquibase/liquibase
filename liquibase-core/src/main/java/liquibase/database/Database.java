@@ -110,7 +110,7 @@ public interface Database extends PrioritizedService {
 
     String getLineComment();
 
-    String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy);
+    String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy, String generationType, Boolean defaultOnNull);
 
     String getDatabaseChangeLogTableName();
 
