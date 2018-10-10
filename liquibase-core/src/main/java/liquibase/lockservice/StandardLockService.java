@@ -1,5 +1,11 @@
 package liquibase.lockservice;
 
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -18,14 +24,14 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.DropTableStatement;
+import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.structure.core.Table;
-
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 public class StandardLockService implements LockService {
 
@@ -212,11 +218,14 @@ public class StandardLockService implements LockService {
             } else {
 
                 executor.comment("Lock Database");
-                int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
-                if (rowsUpdated == -1 && database instanceof MSSQLDatabase) {
+
+                int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement(false));
+                if ((rowsUpdated == -1) && (database instanceof MSSQLDatabase)) {
                     LogFactory.getLogger().debug("Database did not return a proper row count (Might have NOCOUNT enabled)");
                     database.rollback();
-                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(new LockDatabaseChangeLogStatement(), database);
+                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(
+                            new LockDatabaseChangeLogStatement(false), database
+                    );
                     if (sql.length != 1) {
                         throw new UnexpectedLiquibaseException("Did not expect "+sql.length+" statements");
                     }
@@ -305,8 +314,11 @@ public class StandardLockService implements LockService {
                 return new DatabaseChangeLogLock[0];
             }
 
-            List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
-            SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY");
+            List<DatabaseChangeLogLock> allLocks = new ArrayList<>();
+            SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement(
+                    "ID", "LOCKED", "LOCKGRANTED", "LOCKPROLONGED", "LOCKEDBY"
+            );
+
             List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(sqlStatement);
             for (Map columnMap : rows) {
                 Object lockedValue = columnMap.get("LOCKED");
@@ -316,8 +328,16 @@ public class StandardLockService implements LockService {
                 } else {
                     locked = (Boolean) lockedValue;
                 }
-                if (locked != null && locked) {
-                    allLocks.add(new DatabaseChangeLogLock(((Number) columnMap.get("ID")).intValue(), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
+                if ((locked != null) && locked) {
+                    allLocks.add(
+                            new DatabaseChangeLogLock(
+                                    ((Number) columnMap.get("ID")).intValue(),
+                                    (Date) columnMap.get("LOCKGRANTED"),
+                                    // will be NULL if lock was created with this service, otherwise can have a timestamp
+                                    (Date) columnMap.get("LOCKPROLONGED"),
+                                    (String) columnMap.get("LOCKEDBY")
+                            )
+                    );
                 }
             }
             return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
