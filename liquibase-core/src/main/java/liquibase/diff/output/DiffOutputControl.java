@@ -37,6 +37,7 @@ public class DiffOutputControl {
 
     private ObjectChangeFilter objectChangeFilter;
     private boolean respectSchemaAndCatalogCase = false;
+    private boolean needConceptOfCatalogBehaviour = false;
 
     public DiffOutputControl() {
         includeSchema = true;
@@ -192,5 +193,13 @@ public class DiffOutputControl {
 
     public void setRespectSchemaAndCatalogCase(boolean respectSchemaAndCatalogCase) {
         this.respectSchemaAndCatalogCase = respectSchemaAndCatalogCase;
+    }
+
+    public boolean isNeedConceptOfCatalogBehaviour() {
+        return needConceptOfCatalogBehaviour;
+    }
+
+    public void setNeedConceptOfCatalogBehaviour(boolean needConceptOfCatalogBehaviour) {
+        this.needConceptOfCatalogBehaviour = needConceptOfCatalogBehaviour;
     }
 }
