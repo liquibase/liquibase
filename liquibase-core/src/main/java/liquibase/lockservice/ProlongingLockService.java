@@ -59,6 +59,7 @@ public class ProlongingLockService implements LockService {
 
     private Long changeLogLockPollRate;
     private Long changeLogLockRecheckTime;
+    private Long changeLogLockProlongingRateInSeconds;
 
     private Boolean hasDatabaseChangeLogLockTable;
     private boolean isDatabaseChangeLogLockTableInitialized;
@@ -73,7 +74,7 @@ public class ProlongingLockService implements LockService {
     @Override
     public int getPriority() {
         // which priority to use here?
-        return 0;
+        return 2;
     }
 
     @Override
@@ -112,6 +113,18 @@ public class ProlongingLockService implements LockService {
     @Override
     public void setChangeLogLockRecheckTime(long changeLogLockRecheckTime) {
         this.changeLogLockRecheckTime = changeLogLockRecheckTime;
+    }
+
+    public Long getChangeLogLockProlongingRateInSeconds() {
+        if (changeLogLockProlongingRateInSeconds != null) {
+            return changeLogLockProlongingRateInSeconds;
+        }
+
+        return 30L;
+    }
+
+    public void setChangeLogLockProlongingRateInSeconds(Long changeLogLockProlongingRateInSeconds) {
+        this.changeLogLockProlongingRateInSeconds = changeLogLockProlongingRateInSeconds;
     }
 
     @Override
@@ -288,7 +301,7 @@ public class ProlongingLockService implements LockService {
 
             // Remove all locks that should get actively prolonged (aka, have a value in the
             // LOCKPROLONGED field) and are stale
-            executor.update(new RemoveStaleLocksStatement(changeLogLockRecheckTime));
+            executor.update(new RemoveStaleLocksStatement(getChangeLogLockRecheckTime()));
 
             Boolean locked = executor.queryForObject(
                 new SelectFromDatabaseChangeLogLockStatement("LOCKED"),
@@ -337,7 +350,10 @@ public class ProlongingLockService implements LockService {
 
                 logProlonger = Optional.of(
                     executorService.scheduleAtFixedRate(
-                        this::prolongLock, 30, 30, TimeUnit.SECONDS));
+                        this::prolongLock,
+                        getChangeLogLockProlongingRateInSeconds(),
+                        getChangeLogLockProlongingRateInSeconds(),
+                        TimeUnit.SECONDS));
 
                 return true;
             }
@@ -361,7 +377,7 @@ public class ProlongingLockService implements LockService {
     }
 
     private void prolongLock() {
-        // TODO BST: implement
+        System.out.println("prolonging lock");
     }
 
     @Override
