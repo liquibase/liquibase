@@ -82,6 +82,7 @@ liquibase.sqlgenerator.core.ModifyDataTypeGenerator
 liquibase.sqlgenerator.core.RawSqlGenerator
 liquibase.sqlgenerator.core.ReindexGeneratorSQLite
 liquibase.sqlgenerator.core.RemoveChangeSetRanStatusGenerator
+liquibase.sqlgenerator.core.RemoveStaleLocksGenerator
 liquibase.sqlgenerator.core.RenameColumnGenerator
 liquibase.sqlgenerator.core.RenameSequenceGenerator
 liquibase.sqlgenerator.core.RenameTableGenerator

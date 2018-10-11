@@ -27,6 +27,7 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
                 .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("int", database), null, null, null, new NotNullConstraint())
                 .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("boolean", database), null, null, new NotNullConstraint())
                 .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription(dateTimeTypeString, database))
+                .addColumn("LOCKPROLONGED", DataTypeFactory.getInstance().fromDescription(dateTimeTypeString, database))
                 .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database));
 
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);

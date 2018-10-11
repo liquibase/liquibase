@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator.core;
 
+import java.sql.Timestamp;
+
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -10,8 +12,6 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
-
-import java.sql.Timestamp;
 
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
 
@@ -42,6 +42,12 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         UpdateStatement updateStatement = new UpdateStatement(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogLockTableName());
         updateStatement.addNewColumnValue("LOCKED", true);
         updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
+
+        if (statement.isProlongedLock()) {
+            // If this lock gets actively prolonged, fill this column, otherwise leave NULL
+            updateStatement.addNewColumnValue("LOCKPROLONGED", new Timestamp(new java.util.Date().getTime()));
+        }
+
         updateStatement.addNewColumnValue("LOCKEDBY", hostname + hostDescription + " (" + hostaddress + ")");
         updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(false, database));
 
