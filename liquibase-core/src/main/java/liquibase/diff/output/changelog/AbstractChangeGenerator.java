@@ -136,24 +136,34 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
     }
 
     private void setPropertyIgnoreSchemaAndCatalogCase(Change change, String field, String value, CompareControl.SchemaComparison comparison) {
-        if (comparison.getOutputSchemaAs() != null
-                && comparison.getComparisonSchema() != null
+
+        if (comparison.getOutputSchemaAs() != null && comparison.getComparisonSchema() != null
                 && (comparison.getComparisonSchema().getSchemaName().equalsIgnoreCase(value)
-                || comparison.getComparisonSchema().getCatalogName().equalsIgnoreCase(value))
-                ) {
+                || comparison.getComparisonSchema().getCatalogName().equalsIgnoreCase(value))) {
             String newValue = valueToSet(field, comparison.getOutputSchemaAs());
-            ObjectUtil.setProperty(change, field, newValue);
+            if (field.toLowerCase().contains("catalogname")) {
+                if (!newValue.equalsIgnoreCase(comparison.getOutputSchemaAs())) {
+                    ObjectUtil.setProperty(change, field, newValue);
+                }
+            } else {
+                ObjectUtil.setProperty(change, field, newValue);
+            }
+
         }
     }
 
     private void setProperty(Change change, String field, String value, CompareControl.SchemaComparison comparison) {
-        if (comparison.getOutputSchemaAs() != null
-                && comparison.getComparisonSchema() != null
+        if (comparison.getOutputSchemaAs() != null && comparison.getComparisonSchema() != null
                 && (comparison.getComparisonSchema().getSchemaName().equals(value)
-                || comparison.getComparisonSchema().getCatalogName().equals(value))
-                ) {
+                || comparison.getComparisonSchema().getCatalogName().equals(value))) {
             String newValue = valueToSet(field, comparison.getOutputSchemaAs());
-            ObjectUtil.setProperty(change, field, newValue);
+            if (field.toLowerCase().contains("catalogname")) {
+                if (!newValue.equals(comparison.getOutputSchemaAs())) {
+                    ObjectUtil.setProperty(change, field, newValue);
+                }
+            } else {
+                ObjectUtil.setProperty(change, field, newValue);
+            }
         }
     }
 
