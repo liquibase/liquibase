@@ -147,7 +147,7 @@ public abstract class AbstractExecuteTest {
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {
-        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null));
+        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null, null, null));
     }
 
     private boolean shouldTestDatabase(Database database, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) {
