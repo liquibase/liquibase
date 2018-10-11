@@ -314,7 +314,7 @@ public class StandardLockService implements LockService {
                 return new DatabaseChangeLogLock[0];
             }
 
-            List<DatabaseChangeLogLock> allLocks = new ArrayList<>();
+            List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement(
                     "ID", "LOCKED", "LOCKGRANTED", "LOCKPROLONGED", "LOCKEDBY"
             );

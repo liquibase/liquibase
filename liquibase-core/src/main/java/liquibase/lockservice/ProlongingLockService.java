@@ -24,8 +24,7 @@ import liquibase.exception.LockException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
+import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -51,7 +50,6 @@ import liquibase.structure.core.Table;
  * Must <b>not</b> be used in junction with the {@link StandardLockService}!
  */
 public class ProlongingLockService implements LockService {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
 
@@ -66,7 +64,7 @@ public class ProlongingLockService implements LockService {
     private ObjectQuotingStrategy quotingStrategy;
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-    private Optional<ScheduledFuture<?>> logProlonger = Optional.empty();
+    private Optional<? extends ScheduledFuture<?>> logProlonger = Optional.empty();
 
     public ProlongingLockService() {
     }
@@ -137,8 +135,7 @@ public class ProlongingLockService implements LockService {
                 executor.comment("Create Database Lock Table");
                 executor.execute(new CreateDatabaseChangeLogLockTableStatement());
                 database.commit();
-                LogService.getLog(getClass()).debug(
-                    LogType.LOG, "Created database lock table with name: " +
+                LogFactory.getLogger().debug("Created database lock table with name: " +
                         database.escapeTableName(
                             database.getLiquibaseCatalogName(),
                             database.getLiquibaseSchemaName(),
@@ -148,9 +145,7 @@ public class ProlongingLockService implements LockService {
             } catch (DatabaseException e) {
                 if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
                     //hit a race condition where the table got created by another node.
-                    LogService
-                        .getLog(getClass())
-                        .debug(LogType.LOG, "Database lock table already appears to exist " +
+                    LogFactory.getLogger().debug("Database lock table already appears to exist " +
                             "due to exception: " + e.getMessage() + ". Continuing on");
                 } else {
                     throw e;
@@ -258,7 +253,7 @@ public class ProlongingLockService implements LockService {
         while (!locked && (new Date().getTime() < timeToGiveUp)) {
             locked = acquireLock();
             if (!locked) {
-                LogService.getLog(getClass()).info(LogType.LOG, "Waiting for changelog lock....");
+                LogFactory.getLogger().info("Waiting for changelog lock....");
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
@@ -297,7 +292,9 @@ public class ProlongingLockService implements LockService {
             database.rollback();
             this.init();
 
-            logProlonger.map(future -> future.cancel(false));
+            if (logProlonger.isPresent()){
+                logProlonger.get().cancel(false);
+            }
 
             // Remove all locks that should get actively prolonged (aka, have a value in the
             // LOCKPROLONGED field) and are stale
@@ -315,8 +312,7 @@ public class ProlongingLockService implements LockService {
                 executor.comment("Lock Database");
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement(true));
                 if ((rowsUpdated == -1) && (database instanceof MSSQLDatabase)) {
-                    LogService.getLog(getClass()).debug(
-                        LogType.LOG, "Database did not return a proper row count (Might have " +
+                    LogFactory.getLogger().debug("Database did not return a proper row count (Might have " +
                             "NOCOUNT enabled)"
                     );
                     database.rollback();
@@ -339,9 +335,7 @@ public class ProlongingLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                LogService
-                    .getLog(getClass())
-                    .info(LogType.LOG, coreBundle.getString("successfully.acquired.change.log" +
+                LogFactory.getLogger().info(coreBundle.getString("successfully.acquired.change.log" +
                         ".lock"));
 
                 hasChangeLogLock = true;
@@ -350,7 +344,12 @@ public class ProlongingLockService implements LockService {
 
                 logProlonger = Optional.of(
                     executorService.scheduleAtFixedRate(
-                        this::prolongLock,
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                prolongLock();
+                            }
+                        },
                         getChangeLogLockProlongingRateInSeconds(),
                         getChangeLogLockProlongingRateInSeconds(),
                         TimeUnit.SECONDS));
@@ -377,6 +376,7 @@ public class ProlongingLockService implements LockService {
     }
 
     private void prolongLock() {
+        // TODO BST: in case we had lost the lock, is there any way to cancel the operation?
         System.out.println("prolonging lock");
     }
 
@@ -399,8 +399,7 @@ public class ProlongingLockService implements LockService {
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
                 if ((updatedRows == -1) && (database instanceof MSSQLDatabase)) {
-                    LogService.getLog(getClass()).debug(
-                        LogType.LOG, "Database did not return a proper row count (Might have " +
+                    LogFactory.getLogger().debug("Database did not return a proper row count (Might have " +
                             "NOCOUNT enabled.)"
                     );
                     database.rollback();
@@ -443,9 +442,7 @@ public class ProlongingLockService implements LockService {
                 hasChangeLogLock = false;
 
                 database.setCanCacheLiquibaseTableInfo(false);
-                LogService
-                    .getLog(getClass())
-                    .info(LogType.LOG, "Successfully released change log lock");
+                LogFactory.getLogger().info("Successfully released change log lock");
                 database.rollback();
             } catch (DatabaseException e) {
             }
@@ -455,8 +452,13 @@ public class ProlongingLockService implements LockService {
         }
     }
 
-    private void cancelLogProlonging() {
-        logProlonger.map(future -> future.cancel(false));
+    /**
+     * Visible for tests
+     */
+     void cancelLogProlonging() {
+        if (logProlonger.isPresent()){
+            logProlonger.get().cancel(false);
+        }
         logProlonger = Optional.empty();
     }
 
@@ -467,7 +469,7 @@ public class ProlongingLockService implements LockService {
                 return new DatabaseChangeLogLock[0];
             }
 
-            List<DatabaseChangeLogLock> allLocks = new ArrayList<>();
+            List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement(
                 "ID", "LOCKED", "LOCKGRANTED", "LOCKPROLONGED", "LOCKEDBY"
             );
