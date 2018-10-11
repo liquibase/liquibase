@@ -377,6 +377,7 @@ public class ProlongingLockService implements LockService {
     }
 
     private void prolongLock() {
+        // TODO BST: in case we had lost the lock, is there any way to cancel the operation?
         System.out.println("prolonging lock");
     }
 
@@ -455,7 +456,10 @@ public class ProlongingLockService implements LockService {
         }
     }
 
-    private void cancelLogProlonging() {
+    /**
+     * Visible for tests
+     */
+     void cancelLogProlonging() {
         logProlonger.map(future -> future.cancel(false));
         logProlonger = Optional.empty();
     }
