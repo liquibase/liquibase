@@ -1,11 +1,8 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.core.AddForeignKeyConstraintChange;
 import liquibase.database.Database;
-import liquibase.diff.compare.CompareControl;
-import liquibase.diff.compare.core.SchemaComparator;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -57,7 +54,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
 
         String missingPrimaryKeyCatalogName = StringUtils.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         if (referenceDatabase.supportsCatalogs()) {
-            if (control.getIncludeCatalog()) {
+            if (control.getIncludeCatalog() || control.considerCatalogsAsSchemas()) {
                 change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
                 includedCatalog = true;
             } else if (!defaultCatalogName.equalsIgnoreCase(missingPrimaryKeyCatalogName)) {
