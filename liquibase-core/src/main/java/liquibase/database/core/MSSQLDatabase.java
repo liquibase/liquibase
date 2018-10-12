@@ -57,6 +57,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     private Boolean sendsStringParametersAsUnicode;
 
+    private static final List<String> RESERVED_WORDS = createReservedWords();
+
     // "Magic numbers" are ok here because we populate a lot of self-explaining metadata.
     @SuppressWarnings("squid:S109")
     public MSSQLDatabase() {
@@ -603,10 +605,15 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return "]]";
     }
 
+    @Override
+    public boolean isReservedWord(String string) {
+        return RESERVED_WORDS.contains(string.toUpperCase()) || super.isReservedWord(string);
+    }
+
     /*
     Source: https://docs.microsoft.com/en-us/sql/t-sql/language-elements/reserved-keywords-transact-sql?view=sql-server-2017
      */
-    private static List<String> createReservedWordsCollection() {
+    private static List<String> createReservedWords() {
         return Arrays.asList("ADD", "ALL", "ALTER", "AND", "ANY", "AS", "ASC", "AUTHORIZATION",
                 "BACKUP", "BEGIN", "BETWEEN", "BREAK", "BROWSE", "BULK", "BY",
                 "CASCADE", "CASE", "CHECK", "CHECKPOINT", "CLOSE", "CLUSTERED", "COALESCE", "COLLATE",
