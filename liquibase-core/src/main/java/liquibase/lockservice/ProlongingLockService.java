@@ -104,7 +104,6 @@ public class ProlongingLockService implements LockService {
             return changeLogLockRecheckTime;
         }
 
-        // recheck every 100 seconds
         return getChangeLogLockProlongingRateInSeconds() * 4;
     }
 
@@ -118,8 +117,7 @@ public class ProlongingLockService implements LockService {
             return changeLogLockProlongingRateInSeconds;
         }
 
-        return 1L;
-//        return 30L;
+        return 30L;
     }
 
     public void setChangeLogLockProlongingRateInSeconds(Long changeLogLockProlongingRateInSeconds) {
@@ -135,6 +133,7 @@ public class ProlongingLockService implements LockService {
             try {
                 executor.comment("Create Database Lock Table");
                 executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+
                 database.commit();
                 LogFactory.getLogger().debug("Created database lock table with name: " +
                         database.escapeTableName(
@@ -391,7 +390,45 @@ public class ProlongingLockService implements LockService {
             this.init();
 
             executor.comment("Prolonging change log lock");
-            executor.update(new ProlongDatabaseChangeLogLockStatement());
+            int rowsUpdated = executor.update(new ProlongDatabaseChangeLogLockStatement());
+
+
+            //
+
+            if ((rowsUpdated == -1) && (database instanceof MSSQLDatabase)) {
+                LogFactory.getLogger().debug("Database did not return a proper row count (Might have " +
+                    "NOCOUNT enabled)"
+                );
+                database.rollback();
+                Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(
+                    new ProlongDatabaseChangeLogLockStatement(), database
+                );
+                if (sql.length != 1) {
+                    throw new UnexpectedLiquibaseException("Did not expect " + sql.length +
+                        " statements");
+                }
+                rowsUpdated = executor.update(new RawSqlStatement("EXEC sp_executesql N'SET " +
+                    "NOCOUNT OFF " +
+                    sql[0].toSql().replace("'", "''") + "'"));
+            }
+
+            if (rowsUpdated > 1) {
+                throw new LockException("Did not prolong change log lock correctly");
+            }
+            if (rowsUpdated == 0) {
+                // we lost our lock, cancel updating
+                if (logProlonger.isPresent()) {
+                    logProlonger.get().cancel(false);
+                }
+
+                // TODO BST: How to cancel updating? Is that necessary at all?
+                // scenario A - other updater meanwhile got lock, updated everything and is done
+                // scenario B - other updater meanwhile got lock, and is in the process of updating
+                // --> necessary for scenario B!
+
+                return;
+            }
+
 
             database.commit();
             LogFactory.getLogger().info("Successfully prolonged change log lock");
