@@ -1,14 +1,11 @@
 package liquibase.lockservice;
 
-import static java.util.ResourceBundle.getBundle;
-
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -34,6 +31,7 @@ import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.ProlongDatabaseChangeLogLockStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.RemoveStaleLocksStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
@@ -56,6 +54,8 @@ public class ProlongingLockService implements LockService {
     protected boolean hasChangeLogLock;
 
     private Long changeLogLockPollRate;
+    /** Must be > {@link #changeLogLockProlongingRateInSeconds}, ideally a multiple of it. */
+    // TODO BST: add validation
     private Long changeLogLockRecheckTime;
     private Long changeLogLockProlongingRateInSeconds;
 
@@ -105,7 +105,7 @@ public class ProlongingLockService implements LockService {
         }
 
         // recheck every 100 seconds
-        return 100L;
+        return getChangeLogLockProlongingRateInSeconds() * 4;
     }
 
     @Override
@@ -118,7 +118,8 @@ public class ProlongingLockService implements LockService {
             return changeLogLockProlongingRateInSeconds;
         }
 
-        return 30L;
+        return 1L;
+//        return 30L;
     }
 
     public void setChangeLogLockProlongingRateInSeconds(Long changeLogLockProlongingRateInSeconds) {
@@ -335,8 +336,7 @@ public class ProlongingLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                LogFactory.getLogger().info(coreBundle.getString("successfully.acquired.change.log" +
-                        ".lock"));
+                LogFactory.getLogger().info("Successfully acquired change log lock");
 
                 hasChangeLogLock = true;
 
@@ -376,8 +376,36 @@ public class ProlongingLockService implements LockService {
     }
 
     private void prolongLock() {
-        // TODO BST: in case we had lost the lock, is there any way to cancel the operation?
-        System.out.println("prolonging lock");
+
+        if (!hasChangeLogLock) {
+            if (logProlonger.isPresent()) {
+                logProlonger.get().cancel(false);
+            }
+            return;
+        }
+
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
+
+        try {
+            database.rollback();
+            this.init();
+
+            executor.comment("Prolonging change log lock");
+            executor.update(new ProlongDatabaseChangeLogLockStatement());
+
+            database.commit();
+            LogFactory.getLogger().info("Successfully prolonged change log lock");
+
+        } catch (Exception e) {
+
+           // TODO BST: cancel prolonging?
+
+        } finally {
+            try {
+                database.rollback();
+            } catch (DatabaseException e) {
+            }
+        }
     }
 
     @Override
