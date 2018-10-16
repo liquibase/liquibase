@@ -1,7 +1,14 @@
 package liquibase.change.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.CheckSum;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
@@ -14,6 +21,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
@@ -31,6 +39,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertSetStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
@@ -42,10 +51,15 @@ import liquibase.util.csv.CSVReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 
+@SuppressWarnings("ALL")
 @DatabaseChange(name = "loadData",
         description = "Loads data from a CSV file into an existing table. A value of NULL in a cell will be " +
                 "converted to a database NULL rather than the string 'NULL'.\n" +
@@ -75,6 +89,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
      * CSV Lines starting with that sign(s) will be treated as comments by default
      */
     public static final String DEFAULT_COMMENT_PATTERN = "#";
+
+    private static String NO_INSERT = "NO_INSERT_RESULT";
+
     private static final Logger LOG = LogService.getLog(LoadDataChange.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private String catalogName;
@@ -87,6 +104,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
     private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
     private List<LoadDataColumnConfig> columns = new ArrayList<>();
+    private List<VariableConfig> variables = new ArrayList<>();
 
     private Boolean usePreparedStatements;
 
@@ -250,6 +268,19 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.columns = columns;
     }
 
+    public void addVariable(VariableConfig variable) {
+        variables.add(variable);
+    }
+
+    @DatabaseChangeProperty(description = "Defines a data column for Select handling", requiredForDatabase = "none")
+    public List<VariableConfig> getVariables() {
+        return variables;
+    }
+
+    public void setVariables(List<VariableConfig> variables) {
+        this.variables = variables;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         boolean databaseSupportsBatchUpdates = false;
@@ -319,14 +350,21 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     needsPreparedStatement = true;
                 }
 
+                boolean doInsertStatement = true;
+
                 List<ColumnConfig> columnsFromCsv = new ArrayList<>();
+
                 for (int i = 0; i < headers.length; i++) {
                     Object value = line[i];
                     String columnName = headers[i].trim();
 
+                    if (isVariable(columnName)) {
+                        continue;
+                    }
+
                     ColumnConfig valueConfig = new ColumnConfig();
 
-                    ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
+                    LoadDataColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
                     if (columnConfig != null) {
                         if ("skip".equalsIgnoreCase(columnConfig.getType())) {
                             continue;
@@ -340,6 +378,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         valueConfig.setName(columnName);
 
                         if (columnConfig.getType() != null) {
+                            if (columnConfig.getSelect() != null) {
+                                value = handleSelect(columnConfig, headers, line, database, value);
+                                if (NO_INSERT.equals(value)) {
+                                    doInsertStatement = false;
+                                    continue; // no need to handle any other columns - we're not doing this insert.
+                                }
+                            }
                             if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BOOLEAN.toString())) {
                                 if ("NULL".equalsIgnoreCase(value.toString())) {
                                     valueConfig.setValue(null);
@@ -439,6 +484,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     columnsFromCsv.add(valueConfig);
                 }
                 // end of: iterate through all the columns of a CSV line
+
+                if (!doInsertStatement) {
+                    // Found a reason to NOT do this insert.  Go to next line in csv.
+                    continue;
+                }
 
                 // Try to use prepared statements if any of the two following conditions apply:
                 // 1. There is no other option than using a prepared statement (e.g. in cases of LOBs)
@@ -686,6 +736,20 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return result;
     }
 
+    /**
+     * Determines if columnName (e.g. from header) is a Variable or not.
+     * @param columnName column name to check
+     * @return true if 'column' is defined as a Variable, false otherwise.
+     */
+    private boolean isVariable(String columnName) {
+        for (VariableConfig variableConfig : variables) {
+            if (variableConfig.getName().equalsIgnoreCase(columnName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isLineCommented(String[] line) {
         return StringUtil.startsWith(line[0], commentLineStartsWith);
     }
@@ -694,6 +758,135 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public boolean generateStatementsVolatile(Database database) {
         return true;
     }
+
+    /**
+     * Handles 'select' functionality (i.e. populate a data value with the results of a select statement)
+     * @param columnConfig ColumnConfig for the column - must have getSelect() != null
+     * @param headers Header names from CSV file
+     * @param line current line from CSV
+     * @param database Database object
+     * @param value value from CSV for this column, for this line.
+     * @return value returned from Select to use in Insert statement, or if there is a SQL error, "NULL", "NO_INSERT",
+     * or throws Unexpected LiquibaseException, depending on the value in the CSV ("IGNORE", "NOINSERT", or "ERROR) or
+     * from the Column Config if the CSV value isn't one of those values.  (Default is "ERROR" if neither place
+     * specifies what to do)
+     */
+    Object handleSelect(LoadDataColumnConfig columnConfig, String[] headers, String[] line, Database database, Object value)
+    {
+        // If value for this column is set to string value of "NULL" (case insensitive), then don't run the SQL
+        // command - just insert NULL into this column.
+        String strVal = value.toString();
+        if ("NULL".equalsIgnoreCase(strVal)) {
+            return "NULL";
+        }
+
+        String sql = formulateSelectSql(columnConfig, headers, line);
+
+        String selectResult = null;
+        try {
+            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            if (executor instanceof LoggingExecutor) {
+                executor.comment("Will execute following select to determine data value for column " + columnConfig.getName());
+                executor.comment(sql);
+                selectResult =  "selectResult";
+            } else {
+                selectResult = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(sql), String.class);
+            }
+        } catch (DatabaseException e) {
+
+            // Just set a 'bad' result.  Will throw exception during real insert...
+
+            //'ignore' will insert "null" if it doesn't find anything.
+            //'noinsert' will bypass the insertion of the row altogether if it doesn't find anything.
+            //'error' will throw UnexpectedLiquibaseException
+
+            //first see if the column data has overrides the default column behavior,
+            //then check the default column behavior
+            //ultimately, default to "ERROR".
+            if("IGNORE".equalsIgnoreCase(strVal)) {
+                selectResult = "NULL";
+            } else if ("NOINSERT".equalsIgnoreCase(strVal)) {
+                selectResult = NO_INSERT;
+            } else if ("ERROR".equalsIgnoreCase(strVal)) {
+                throw new UnexpectedLiquibaseException("'select' statement >" + sql + "< failed, message " + e.getMessage(), e);
+            } else if ("IGNORE".equalsIgnoreCase(columnConfig.getSelectNoResults())) {
+                selectResult = "NULL";
+            } else if ("NOINSERT".equalsIgnoreCase(columnConfig.getSelectNoResults())) {
+                selectResult = NO_INSERT;
+            } else {
+                throw new UnexpectedLiquibaseException("'select' statement >" + sql + "< failed, message " + e.getMessage(), e);
+            }
+        }
+        return selectResult;
+    }
+
+    /**
+     * Takes Column Select Statement and does parameter (e.g. ${xxx}) replacement with Variable data values.
+     * @param columnConfig ColumnConfig for the column - must have getSelect() != null
+     * @param headers Header names from CSV file
+     * @param line current line from CSV
+     * @return SQL statement ready for execution.
+     * @hrows UnexpectedLiquibaseException if Select Statement references a Variable that doesn't match the
+     * CSV header names.
+     */
+    protected String formulateSelectSql(LoadDataColumnConfig columnConfig, String[] headers, String[] line) {
+        String workingSql = columnConfig.getSelect();
+        StringBuffer sql = new StringBuffer();
+        int pos;
+        while ((pos = workingSql.indexOf("${")) > 0)
+        {
+            String chunk1 = "";
+            String repl = null;
+            if (pos > 0)
+            {
+                chunk1 = workingSql.substring(0, pos);
+                sql.append(chunk1);
+                if (pos < workingSql.length())
+                {
+                    workingSql = workingSql.substring(pos+2);
+                }
+                else
+                {
+                    workingSql = "";
+                }
+            }
+            pos = workingSql.indexOf("}");
+            if (pos >= 0)
+            {
+                repl = workingSql.substring(0, pos);
+                if (pos < workingSql.length())
+                {
+                    workingSql = workingSql.substring(pos+1);
+                }
+                else
+                {
+                    workingSql = "";
+                }
+                boolean found = false;
+                for (int i = 0; i < headers.length; i++)
+                {
+                    if (repl.equalsIgnoreCase(headers[i]))
+                    {
+                        sql.append(line[i]);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    throw new UnexpectedLiquibaseException("'select' Statement "+columnConfig.getSelect()+" references Variable " + repl +", which was not found in the data.");
+                }
+            }
+            else
+            {
+                sql.append("${").append(workingSql);
+                workingSql = "";
+            }
+        }
+        sql.append(workingSql);
+        return sql.toString();
+    }
+
 
     public CSVReader getCSVReader() throws IOException {
         ResourceAccessor resourceAccessor = getResourceAccessor();
@@ -741,7 +934,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return new InsertSetStatement(catalogName, schemaName, tableName);
     }
 
-    protected ColumnConfig getColumnConfig(int index, String header) {
+    protected LoadDataColumnConfig getColumnConfig(int index, String header) {
         for (LoadDataColumnConfig config : columns) {
             if ((config.getIndex() != null) && config.getIndex().equals(index)) {
                 return config;

@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
-    
-    public static final String LIQUIBASE_SCHEMA_VERSION = "3.6";
+
+    public static final String LIQUIBASE_SCHEMA_VERSION = "3.7";
     private static final boolean PREFER_INTERNAL_XSD = Boolean.getBoolean("liquibase.prefer.internal.xsd");
     private static final String XSD_FILE = "dbchangelog-" + LIQUIBASE_SCHEMA_VERSION + ".xsd";
     private SAXParserFactory saxParserFactory;
@@ -31,7 +31,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         saxParserFactory = SAXParserFactory.newInstance();
         saxParserFactory.setValidating(true);
         saxParserFactory.setNamespaceAware(true);
-        
+
         if (PREFER_INTERNAL_XSD) {
             InputStream xsdInputStream = XMLChangeLogSAXParser.class.getResourceAsStream(XSD_FILE);
             if (xsdInputStream != null) {
@@ -71,7 +71,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             InputStream inputStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor)) {
             SAXParser parser = saxParserFactory.newSAXParser();
             trySetSchemaLanguageProperty(parser);
-    
+
             XMLReader xmlReader = parser.getXMLReader();
             LiquibaseEntityResolver resolver=new LiquibaseEntityResolver(this);
             resolver.useResoureAccessor(resourceAccessor,FilenameUtils.getFullPath(physicalChangeLogLocation));
@@ -95,7 +95,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                     throw exception;
                 }
             });
-        	
+
             if (inputStream == null) {
                 if (physicalChangeLogLocation.startsWith("WEB-INF/classes/")) {
                     // Correct physicalChangeLogLocation and try again.
@@ -144,7 +144,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             throw new ChangeLogParseException(e);
         }
     }
-    
+
     /**
      * Try to set the parser property "schemaLanguage", but do not mind if the parser does not understand it.
      * @todo If we do not mind, why do we set it in the first place? Need to resarch in git...

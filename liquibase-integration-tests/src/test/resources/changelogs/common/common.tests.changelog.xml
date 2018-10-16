@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.7.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -222,7 +222,7 @@
         </preConditions>
         <sql>More invalid SQL. should not run due to "continue"</sql>
     </changeSet>
-    
+
     <changeSet id="add-column-test1" author="alan">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -499,10 +499,20 @@
             <column header="security_level" type="NUMERIC"/>
         </loadData>
     </changeSet>
+    <changeSet id="sampleCSVSelect" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data.variable.csv">
+            <column name="name" type="STRING" select="select distinct '${var}' from csvdata" selectNoResults=""/>
+            <column name="username" type="STRING"/>
+            <variable name="var"/>
+            <column name="security_level" type="NUMERIC"/>
+            <column name="last_login" type="DATE"/>
+            <column name="locked" type="BOOLEAN"/>
+        </loadData>
+    </changeSet>
 
     <changeSet id="sampleCSVData3" author="nvoxland">
         <preConditions>
-            <sqlCheck expectedResult="6">select count(*) from csvdata</sqlCheck>
+            <sqlCheck expectedResult="8">select count(*) from csvdata</sqlCheck>
         </preConditions>
         <loadData tableName="csvdata" file="changelogs/sample.data3.csv">
             <column index="0" name="name" type="STRING"/>
@@ -998,7 +1008,7 @@
 
 
     <sql>
-      <![CDATA[  
+      <![CDATA[
         insert into testutf8insert (stringvalue) values ('€');
         insert into testutf8insert (stringvalue) values ('£');
         ]]>

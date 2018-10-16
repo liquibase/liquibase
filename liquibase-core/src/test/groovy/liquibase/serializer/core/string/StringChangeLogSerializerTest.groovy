@@ -1,44 +1,27 @@
 package liquibase.serializer.core.string
 
 import liquibase.Scope
+import liquibase.change.*
+import liquibase.change.core.*
+import liquibase.change.custom.CustomChangeWrapper
+import liquibase.change.custom.CustomSqlChange
+import liquibase.change.custom.ExampleCustomSqlChange
+import liquibase.changelog.ChangeLogParameters
+import liquibase.logging.Logger
+import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.resource.ResourceAccessor
+import liquibase.statement.DatabaseFunction
+import liquibase.statement.SequenceCurrentValueFunction
+import liquibase.statement.SequenceNextValueFunction
 import spock.lang.Specification
-import spock.lang.Unroll;
+import spock.lang.Unroll
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import liquibase.change.*;
-import liquibase.change.DatabaseChangeProperty;
-import liquibase.change.core.*;
-import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.change.custom.CustomSqlChange;
-import liquibase.change.custom.ExampleCustomSqlChange;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.statement.DatabaseFunction;
-
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import org.junit.Test;
+import static org.junit.Assert.fail
 
 public class StringChangeLogSerializerTest extends Specification {
 
@@ -317,6 +300,8 @@ public class StringChangeLogSerializerTest extends Specification {
                 field.set(object, createBoolean());
             } else if (field.getType().equals(ColumnConfig.class)) {
                 field.set(object, createColumnConfig());
+            } else if (field.getType().equals(VariableConfig.class)) {
+                field.set(object, createVariableConfig());
             } else if (field.getType().equals(SequenceNextValueFunction.class)) {
                 field.set(object, createSequenceNextValueFunction());
             } else if (field.getType().equals(SequenceCurrentValueFunction.class)) {
@@ -348,6 +333,9 @@ public class StringChangeLogSerializerTest extends Specification {
                         if (typeToCreate.equals(ColumnConfig.class)) {
                             collection.add(createColumnConfig());
                             collection.add(createColumnConfig());
+                        } else if (typeToCreate.equals(VariableConfig.class)) {
+                            collection.add(createVariableConfig());
+                            collection.add(createVariableConfig());
                         } else if (typeToCreate.equals(AddColumnConfig.class)) {
                             collection.add(createAddColumnConfig());
                             collection.add(createAddColumnConfig());
@@ -415,6 +403,12 @@ public class StringChangeLogSerializerTest extends Specification {
 
     private ColumnConfig createColumnConfig() throws Exception {
         ColumnConfig config = new ColumnConfig();
+        setFields(config);
+        return config;
+    }
+
+    private VariableConfig createVariableConfig() throws Exception {
+        VariableConfig config = new VariableConfig();
         setFields(config);
         return config;
     }
