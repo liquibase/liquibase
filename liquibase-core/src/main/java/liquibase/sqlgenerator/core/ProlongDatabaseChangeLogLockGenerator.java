@@ -12,19 +12,19 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.ProlongDatabaseChangeLogLockStatement;
 import liquibase.statement.core.UpdateStatement;
 
-public class ProlongDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
+public class ProlongDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<ProlongDatabaseChangeLogLockStatement> {
 
     @Override
-    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, Database database,
+    public ValidationErrors validate(ProlongDatabaseChangeLogLockStatement statement, Database database,
                                      SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database,
+    public Sql[] generateSql(ProlongDatabaseChangeLogLockStatement statement, Database database,
                              SqlGeneratorChain sqlGeneratorChain) {
         String liquibaseSchema = database.getLiquibaseSchemaName();
         String liquibaseCatalog = database.getLiquibaseCatalogName();
@@ -42,7 +42,7 @@ public class ProlongDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<
             .getDatabaseChangeLogTableName(), "LOCKED") + " = " + DataTypeFactory
             .getInstance()
             .fromDescription("boolean", database)
-            .objectToSql(true, database) + " AND LOCKPROLONGED IS NOT NULL AND  LOCKEDBY = '" + hostname + hostDescription + " (" + hostaddress + ")" +
+            .objectToSql(true, database) + " AND LOCKPROLONGED IS NOT NULL AND LOCKEDBY = '" + hostname + hostDescription + " (" + hostaddress + ")" +
             "';" );
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
