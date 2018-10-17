@@ -319,14 +319,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             int seppos = normalLiteral.lastIndexOf('.');
             if (seppos != -1) {
                 normalLiteral = normalLiteral.substring(0, seppos) + "'";
-                StringBuffer val = new StringBuffer(26);
-                //noinspection HardCodedStringLiteral
-                val.append("TO_DATE(");
-                val.append(normalLiteral);
-                //noinspection HardCodedStringLiteral
-                val.append(", 'YYYY-MM-DD HH24:MI:SS')");
-                return val.toString();
             }
+            StringBuffer val = new StringBuffer(26);
+            //noinspection HardCodedStringLiteral
+            val.append("TO_DATE(");
+            val.append(normalLiteral);
+            //noinspection HardCodedStringLiteral
+            val.append(", 'YYYY-MM-DD HH24:MI:SS')");
+            return val.toString();
         }
         //noinspection HardCodedStringLiteral
         return "UNSUPPORTED:" + isoDate;
