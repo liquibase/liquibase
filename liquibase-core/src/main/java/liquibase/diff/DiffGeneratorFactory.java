@@ -86,6 +86,8 @@ public class DiffGeneratorFactory {
 
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, CompareControl compareControl) throws DatabaseException {
         Database referenceDatabase = referenceSnapshot.getDatabase();
+        referenceDatabase.setDefaultCatalogName(comparisonSnapshot.getDatabase().getDefaultCatalogName());
+        referenceDatabase.setDefaultSchemaName(comparisonSnapshot.getDatabase().getDefaultSchemaName());
         Database comparisonDatabase;
         if (comparisonSnapshot == null) {
             comparisonDatabase = referenceSnapshot.getDatabase();
