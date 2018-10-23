@@ -194,6 +194,64 @@ create view sql_view as select * from sql_table;'''
         ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
     }
 
+    def "included changelogs inherit contexts, labels, and ignores via load()"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.xml", context: "context1", labels: "label1"]])
+                .addChildren([include: [file: "com/example/test2.xml", context: "context2", labels: "label2", ignore: true]])
+                , resourceAccessor)
+
+        def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
+        def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
+
+        then:
+        test1ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test1ChangeLog.getIncludeLabels().getLabels()[0] == "label1"
+        test1ChangeLog.getIncludeContexts().getContexts().size() == 1
+        test1ChangeLog.getIncludeContexts().getContexts()[0] == "context1"
+        test1ChangeLog.isIncludeIgnore() == false
+
+        test2ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test2ChangeLog.getIncludeLabels().getLabels()[0] == "label2"
+        test2ChangeLog.getIncludeContexts().getContexts().size() == 1
+        test2ChangeLog.getIncludeContexts().getContexts()[0] == "context2"
+        test2ChangeLog.isIncludeIgnore() == true
+
+    }
+
+    def "included changelogs inherit contexts, labels, and ignores via include()"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/test1.xml": test1Xml,
+                "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")
+        ])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/test1.xml", false, resourceAccessor, new ContextExpression("context1"), new LabelExpression("label1"), false)
+        rootChangeLog.include("com/example/test2.xml", false, resourceAccessor, new ContextExpression("context2"), new LabelExpression("label2"), true)
+
+        def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
+        def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
+
+        then:
+        test1ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test1ChangeLog.getIncludeLabels().getLabels()[0] == "label1"
+        test1ChangeLog.getIncludeContexts().getContexts().size() == 1
+        test1ChangeLog.getIncludeContexts().getContexts()[0] == "context1"
+        test1ChangeLog.isIncludeIgnore() == false
+
+        test2ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test2ChangeLog.getIncludeLabels().getLabels()[0] == "label2"
+        test2ChangeLog.getIncludeContexts().getContexts().size() == 1
+        test2ChangeLog.getIncludeContexts().getContexts()[0] == "context2"
+        test2ChangeLog.isIncludeIgnore() == true
+    }
+
     def "includeAll executes include in alphabetical order"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
