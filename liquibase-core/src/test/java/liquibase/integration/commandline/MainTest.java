@@ -205,6 +205,8 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
 
+        assertEquals("Option --promptForNonLocalDatabase was parsed correctly",
+                Boolean.FALSE, cli.promptForNonLocalDatabase);
         assertEquals("Main command 'migrate' was parsed correctly as 'update'", "update", cli.command);
     }
 
@@ -219,6 +221,22 @@ public class MainTest {
         cli.parseOptions(args);
 
         assertEquals("Option --promptForNonLocalDatabase=true was parsed correctly",
+                Boolean.TRUE, cli.promptForNonLocalDatabase);
+        assertEquals("Main command 'update' was parsed correctly", "update", cli.command);
+
+    }
+
+    @Test
+    public void trueBooleanParametersWithoutValue() throws Exception {
+        String[] args = new String[]{
+                "--promptForNonLocalDatabase",
+                "update",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals("Option --promptForNonLocalDatabase was parsed correctly",
                 Boolean.TRUE, cli.promptForNonLocalDatabase);
         assertEquals("Main command 'update' was parsed correctly", "update", cli.command);
 
@@ -276,6 +294,64 @@ public class MainTest {
 
         Main cli = new Main();
         cli.parseOptions(args);
+    }
+
+    @Test
+    public void statusVerbose() throws Exception {
+        String[] args = new String[]{
+                "status",
+                "--verbose",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
+        assertTrue(cli.verbose);
+    }
+
+    @Test
+    public void statusVerboseTrue() throws Exception {
+        String[] args = new String[]{
+                "status",
+                "--verbose=true",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
+        assertTrue("Expect verbose=true option to be parsed as true", cli.verbose);
+    }
+
+
+    @Test
+    public void statusVerboseFalse() throws Exception {
+        String[] args = new String[]{
+                "status",
+                "--verbose=false",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
+        assertFalse("Expect verbose=false option to be parsed as false", cli.verbose);
+    }
+
+
+    @Test
+    public void statusVerboseOtherValue() throws Exception {
+        String[] args = new String[]{
+                "status",
+                "--verbose=yo",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
+        assertFalse("Expect verbose option to be false on wrong boolean value", cli.verbose);
     }
 
     @Test(expected = CommandLineParsingException.class)
