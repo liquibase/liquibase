@@ -229,7 +229,7 @@ public class MainTest {
     @Test
     public void trueBooleanParametersWithoutValue() throws Exception {
         String[] args = new String[]{
-                "--promptForNonLocalDatabase",
+                "--promptForNonLocalDatabase=true",
                 "update",
         };
 
@@ -299,6 +299,8 @@ public class MainTest {
     @Test
     public void statusVerbose() throws Exception {
         String[] args = new String[]{
+                "--url=URL",
+                "--changeLogFile=FILE",
                 "status",
                 "--verbose",
         };
@@ -307,12 +309,16 @@ public class MainTest {
         cli.parseOptions(args);
 
         assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
-        assertTrue(cli.verbose);
+
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals(0,errMsgs.size()); // verbose option parsed correctly
     }
 
     @Test
-    public void statusVerboseTrue() throws Exception {
+    public void statusVerboseWithValue() throws Exception {
         String[] args = new String[]{
+                "--url=URL",
+                "--changeLogFile=FILE",
                 "status",
                 "--verbose=true",
         };
@@ -321,28 +327,36 @@ public class MainTest {
         cli.parseOptions(args);
 
         assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
-        assertTrue("Expect verbose=true option to be parsed as true", cli.verbose);
+
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals(1,errMsgs.size()); // value is not expected and will raise an error message
+
     }
 
 
     @Test
-    public void statusVerboseFalse() throws Exception {
+    public void statusWithoutVerbose() throws Exception {
         String[] args = new String[]{
+                "--url=URL",
+                "--changeLogFile=FILE",
                 "status",
-                "--verbose=false",
         };
 
         Main cli = new Main();
         cli.parseOptions(args);
 
         assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
-        assertFalse("Expect verbose=false option to be parsed as false", cli.verbose);
+
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals(0,errMsgs.size());
     }
 
 
     @Test
     public void statusVerboseOtherValue() throws Exception {
         String[] args = new String[]{
+                "--url=URL",
+                "--changeLogFile=FILE",
                 "status",
                 "--verbose=yo",
         };
@@ -351,7 +365,10 @@ public class MainTest {
         cli.parseOptions(args);
 
         assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
-        assertFalse("Expect verbose option to be false on wrong boolean value", cli.verbose);
+//        assertFalse("Expect verbose option to be false on wrong boolean value", cli.verbose);
+
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals(1,errMsgs.size());
     }
 
     @Test(expected = CommandLineParsingException.class)

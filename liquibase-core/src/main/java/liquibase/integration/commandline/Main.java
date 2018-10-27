@@ -116,7 +116,6 @@ public class Main {
     protected String logFile;
     protected Map<String, Object> changeLogParameters = new HashMap<>();
     protected String outputFile;
-    protected Boolean verbose;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -271,24 +270,11 @@ public class Main {
      * @return An array of exactly 2 entries
      * @throws CommandLineParsingException if the string cannot be split into exactly 2 parts
      */
-    private static String[] splitArg(String arg) throws CommandLineParsingException {
-        return splitArg(arg, true);
-    }
-
-        /**
-         * Splits a String of the form "key=value" into the respective parts if value is present.
-         *
-         * @param arg The String expression to split
-         * @param expectValue When set to true a value has to be present in the form of key=value, when false it will
-         *                    be lenient to missing values supporting boolean flags like --verbose without an explicit value.
-         * @return An array of exactly 2 entries
-         * @throws CommandLineParsingException if the string cannot be split into exactly 2 parts and a value is expected.
-         */
     // What the number 2 stands for is obvious from the context
     @SuppressWarnings("squid:S109")
-    private static String[] splitArg(String arg, boolean expectValue) throws CommandLineParsingException {
+    private static String[] splitArg(String arg) throws CommandLineParsingException {
         String[] splitArg = arg.split("=", 2);
-        if (expectValue && splitArg.length < 2) {
+        if (splitArg.length < 2) {
             throw new CommandLineParsingException(
                     String.format(coreBundle.getString("could.not.parse.expression"), arg)
             );
@@ -800,10 +786,13 @@ public class Main {
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
-        String[] splitArg = splitArg(arg, false);
+        if(arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
+            return;
+
+        String[] splitArg = splitArg(arg);
 
         String attributeName = splitArg[0];
-        String value = splitArg.length > 1 ? splitArg[1] : null; // boolean options don't need a value
+        String value = splitArg[1];
 
         if (PROMPT_FOR_VALUE.equalsIgnoreCase(StringUtils.trimToEmpty(value))) {
             Console c = System.console();
@@ -824,18 +813,8 @@ public class Main {
         try {
             Field field = getClass().getDeclaredField(attributeName);
             if (field.getType().equals(Boolean.class)) {
-                if ( value == null ) { // boolean options are considered true when provided without a value like --verbose
-                    field.set(this, Boolean.TRUE);
-                } else {
-                    field.set(this, Boolean.valueOf(value));
-                }
+                field.set(this, Boolean.valueOf(value));
             } else {
-                if (splitArg.length < 2) {
-                    // non boolean options should throw an exception when the value is missing
-                    throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("could.not.parse.expression"), arg)
-                    );
-                }
                 field.set(this, value);
             }
         } catch (IllegalAccessException | NoSuchFieldException e) {
