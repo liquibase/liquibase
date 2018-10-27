@@ -226,22 +226,6 @@ public class MainTest {
 
     }
 
-    @Test
-    public void trueBooleanParametersWithoutValue() throws Exception {
-        String[] args = new String[]{
-                "--promptForNonLocalDatabase=true",
-                "update",
-        };
-
-        Main cli = new Main();
-        cli.parseOptions(args);
-
-        assertEquals("Option --promptForNonLocalDatabase was parsed correctly",
-                Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals("Main command 'update' was parsed correctly", "update", cli.command);
-
-    }
-
     @Test(expected = CommandLineParsingException.class)
     public void parameterWithoutDash() throws Exception {
         String[] args = new String[]{
@@ -351,25 +335,6 @@ public class MainTest {
         assertEquals(0,errMsgs.size());
     }
 
-
-    @Test
-    public void statusVerboseOtherValue() throws Exception {
-        String[] args = new String[]{
-                "--url=URL",
-                "--changeLogFile=FILE",
-                "status",
-                "--verbose=yo",
-        };
-
-        Main cli = new Main();
-        cli.parseOptions(args);
-
-        assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
-//        assertFalse("Expect verbose option to be false on wrong boolean value", cli.verbose);
-
-        List<String> errMsgs = cli.checkSetup();
-        assertEquals(1,errMsgs.size());
-    }
 
     @Test(expected = CommandLineParsingException.class)
     public void configureNonExistantClassloaderLocation() throws Exception {
