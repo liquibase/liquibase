@@ -17,10 +17,6 @@ public class RemoveStaleLocksGenerator extends AbstractSqlGenerator<RemoveStaleL
 
         ValidationErrors validationErrors = new ValidationErrors();
 
-        if (statement.getMaxTTLInSeconds() < 1) {
-            validationErrors.addError("maxTTL in seconds must be > 1");
-        }
-
         return validationErrors;
     }
 

@@ -462,7 +462,7 @@ public class ProlongingLockService implements LockService {
             // Remove all locks that should get actively prolonged (aka, have a value in the
             // LOCKEXPIRES field) and are stale
             executor.comment("Attempting to remove stale locks from database");
-            executor.update(new RemoveStaleLocksStatement(getChangeLogLockRecheckTime()));
+            executor.update(new RemoveStaleLocksStatement());
 
             database.commit();
 
