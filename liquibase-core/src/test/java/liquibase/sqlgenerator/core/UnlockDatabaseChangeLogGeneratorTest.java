@@ -11,6 +11,6 @@ public class UnlockDatabaseChangeLogGeneratorTest extends AbstractSqlGeneratorTe
 
     @Override
     protected UnlockDatabaseChangeLogStatement createSampleSqlStatement() {
-        return new UnlockDatabaseChangeLogStatement();
+        return new UnlockDatabaseChangeLogStatement(null);
     }
 }

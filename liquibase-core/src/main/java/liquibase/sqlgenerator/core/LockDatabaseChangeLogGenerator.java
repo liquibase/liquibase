@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator.core;
 
+import static liquibase.statement.DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER;
+
 import java.sql.Timestamp;
 
 import liquibase.database.Database;
@@ -9,6 +11,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
@@ -47,13 +50,22 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
 
         updateStatement.addNewColumnValue("LOCKED", true);
         updateStatement.addNewColumnValue("LOCKGRANTED",
-            new Timestamp(new java.util.Date().getTime()));
+            new DatabaseFunction(CURRENT_DATE_TIME_PLACE_HOLDER));
 
+        // If this lock gets actively prolonged, fill this column, otherwise leave NULL
         if (statement.isProlongedLock()) {
-            // If this lock gets actively prolonged, fill this column, otherwise leave NULL
-            updateStatement.addNewColumnValue("LOCKPROLONGED",
-                new Timestamp(new java.util.Date().getTime()));
+
+            updateStatement.addNewColumnValue("LOCKEXPIRES",
+                new Timestamp(statement.getLockExpiresOnServer().getTime()));
+
+        } else {
+            // for standard lock service, set to NULL
+            updateStatement.addNewColumnValue("LOCKEXPIRES", null);
         }
+
+        // also add ID of this instance (can be NULL)
+        updateStatement.addNewColumnValue("LOCKEDBYID",
+            statement.getLockedById());
 
         updateStatement.addNewColumnValue("LOCKEDBY",
             hostname + hostDescription + " (" + hostaddress + ")");

@@ -1,8 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -31,9 +28,6 @@ public class RemoveStaleLocksGenerator extends AbstractSqlGenerator<RemoveStaleL
     public Sql[] generateSql(RemoveStaleLocksStatement statement, Database database,
                              SqlGeneratorChain sqlGeneratorChain) {
 
-        long now = new Date().getTime();
-        long maxTTLSecondsAgo = now - statement.getMaxTTLInSeconds() * 1000;
-
         String liquibaseSchema = database.getLiquibaseSchemaName();
 
         UpdateStatement updateStatement = new UpdateStatement(
@@ -43,17 +37,19 @@ public class RemoveStaleLocksGenerator extends AbstractSqlGenerator<RemoveStaleL
 
         updateStatement.addNewColumnValue("LOCKED", false);
         updateStatement.addNewColumnValue("LOCKGRANTED", null);
-        updateStatement.addNewColumnValue("LOCKPROLONGED", null);
+        updateStatement.addNewColumnValue("LOCKEXPIRES", null);
         updateStatement.addNewColumnValue("LOCKEDBY", null);
+        updateStatement.addNewColumnValue("LOCKEDBYID", null);
 
         updateStatement
-            // remove where lock has expired ...
-            .setWhereClause("ID = 1 AND LOCKED = :value AND LOCKPROLONGED < :value" +
-                // ... but only when lock was set by ProlongingLockService, otherwise do not remove
-                // in order to stay compatible
-                " AND LOCKPROLONGED IS NOT NULL");
+            // remove lock ...
+            .setWhereClause("ID = 1 AND " +
+                " LOCKED = :value " +
+                // ... when lock has expired AND was set by ProlongingLockService,
+                // otherwise do not remove in order to stay compatible
+                " AND LOCKEXPIRES < " + database.getCurrentDateTimeFunction() +
+                " AND LOCKEDBYID IS NOT NULL");
         updateStatement.addWhereParameter(true);
-        updateStatement.addWhereParameter(new Timestamp(maxTTLSecondsAgo));
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
     }

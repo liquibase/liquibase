@@ -1,9 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import static liquibase.sqlgenerator.core.LockDatabaseChangeLogGenerator.hostDescription;
-import static liquibase.sqlgenerator.core.LockDatabaseChangeLogGenerator.hostaddress;
-import static liquibase.sqlgenerator.core.LockDatabaseChangeLogGenerator.hostname;
-
 import java.sql.Timestamp;
 
 import liquibase.database.Database;
@@ -18,7 +14,8 @@ import liquibase.statement.core.UpdateStatement;
 public class ProlongDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<ProlongDatabaseChangeLogLockStatement> {
 
     @Override
-    public ValidationErrors validate(ProlongDatabaseChangeLogLockStatement statement, Database database,
+    public ValidationErrors validate(ProlongDatabaseChangeLogLockStatement statement,
+                                     Database database,
                                      SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
@@ -31,21 +28,57 @@ public class ProlongDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<
 
         UpdateStatement updateStatement = new UpdateStatement(liquibaseCatalog, liquibaseSchema,
             database
-            .getDatabaseChangeLogLockTableName());
+                .getDatabaseChangeLogLockTableName());
 
-        updateStatement.addNewColumnValue("LOCKPROLONGED",
-            new Timestamp(new java.util.Date().getTime()));
+        updateStatement.addNewColumnValue("LOCKEXPIRES",
+            new Timestamp(statement.getLockExpiresOnServer().getTime()));
 
-        updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog,
-            liquibaseSchema, database
-            .getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database
-            .getDatabaseChangeLogTableName(), "LOCKED") + " = " + DataTypeFactory
-            .getInstance()
-            .fromDescription("boolean", database)
-            .objectToSql(true, database) + " AND LOCKPROLONGED IS NOT NULL AND LOCKEDBY = '" + hostname + hostDescription + " (" + hostaddress + ")" +
-            "';" );
+        setWhere(statement, database, liquibaseSchema, liquibaseCatalog, updateStatement);
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
 
+    }
+
+    private void setWhere(ProlongDatabaseChangeLogLockStatement statement, Database database,
+                          String liquibaseSchema, String liquibaseCatalog,
+                          UpdateStatement updateStatement) {
+
+        String idColumnName = database.escapeColumnName(
+            liquibaseCatalog,
+            liquibaseSchema,
+            database.getDatabaseChangeLogTableName(),
+            "ID");
+
+        String lockedColumnName = database.escapeColumnName(
+            liquibaseCatalog,
+            liquibaseSchema,
+            database.getDatabaseChangeLogTableName(),
+            "LOCKED");
+
+        String lockExpiresColumnName = database.escapeColumnName(
+            liquibaseCatalog,
+            liquibaseSchema,
+            database.getDatabaseChangeLogTableName(),
+            "LOCKEXPIRES");
+
+        String lockedByIdColumnName = database.escapeColumnName(
+            liquibaseCatalog,
+            liquibaseSchema,
+            database.getDatabaseChangeLogTableName(),
+            "LOCKEDBYID");
+
+        String convertedTrue = DataTypeFactory
+            .getInstance()
+            .fromDescription("boolean", database)
+            .objectToSql(true, database);
+
+        updateStatement.setWhereClause(
+            idColumnName + " = 1 AND "
+                // and is still locked
+                + lockedColumnName + " = " + convertedTrue + " AND "
+                // and is locked by a prolonging lock service (otherwise this field is NULL)
+                + lockExpiresColumnName + " IS NOT NULL AND "
+                // and is actually locked by us
+                + lockedByIdColumnName + " = '" + statement.getLockedById() + "';");
     }
 }

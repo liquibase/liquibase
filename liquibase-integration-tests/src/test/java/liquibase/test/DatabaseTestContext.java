@@ -1,19 +1,28 @@
 package liquibase.test;
 
-import liquibase.database.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DB2Database;
-import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.resource.ResourceAccessor;
 import liquibase.exception.DatabaseException;
-
-import java.util.*;
-import java.sql.SQLException;
-import java.sql.Driver;
-import java.sql.Connection;
+import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.database.MockDatabase;
 
 public class DatabaseTestContext {
     private static DatabaseTestContext instance = new DatabaseTestContext();
@@ -27,7 +36,9 @@ public class DatabaseTestContext {
             new DatabaseTestURL("DB2","jdbc:db2://"+AbstractIntegrationTest.getDatabaseServerHostname("DB2")+":50000/liquibas"),
             new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
             new DatabaseTestURL("FireBird","jdbc:firebirdsql:"+AbstractIntegrationTest.getDatabaseServerHostname("Firebird")+"/3050:c:\\firebird\\liquibase.fdb"),
-            new DatabaseTestURL("H2","jdbc:h2:mem:liquibase"),
+        // TODO BST: change back!
+        new DatabaseTestURL("H2","jdbc:h2:mem:liquibase;TRACE_LEVEL_SYSTEM_OUT=3"),
+//            new DatabaseTestURL("H2","jdbc:h2:mem:liquibase;TRACE_LEVEL_SYSTEM_OUT=3"),
             new DatabaseTestURL("Hsql","jdbc:hsqldb:mem:liquibase"),
             new DatabaseTestURL("MssqlJtds","jdbc:jtds:sqlserver://"+AbstractIntegrationTest.getDatabaseServerHostname("MSSQL")+";databaseName=liquibase"),
 //            "jdbc:sqlserver://localhost;databaseName=liquibase",
