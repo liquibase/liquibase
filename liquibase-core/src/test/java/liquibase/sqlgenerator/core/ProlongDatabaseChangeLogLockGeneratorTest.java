@@ -7,6 +7,8 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -21,7 +23,7 @@ import liquibase.statement.core.ProlongDatabaseChangeLogLockStatement;
 public class ProlongDatabaseChangeLogLockGeneratorTest extends AbstractSqlGeneratorTest<ProlongDatabaseChangeLogLockStatement> {
 
     private static final String LOCKED_BY_ID = UUID.randomUUID().toString().toLowerCase();
-    private static final Date LOCK_EXPIRES_ON_SERVER = new Date(1540639852624L);
+    private static final Date LOCK_EXPIRES_ON_SERVER = parse("2018-10-27T14:38:01Z");
 
     public ProlongDatabaseChangeLogLockGeneratorTest() throws Exception {
         super(new ProlongDatabaseChangeLogLockGenerator());
@@ -44,8 +46,6 @@ public class ProlongDatabaseChangeLogLockGeneratorTest extends AbstractSqlGenera
     @Test
     public void testGeneratedSQL() {
 
-        System.out.println(new Date().getTime());
-
         Sql[] results = generatorUnderTest
             .generateSql(createSampleSqlStatement(), new MySQLDatabase(),
                 new MockSqlGeneratorChain());
@@ -56,11 +56,24 @@ public class ProlongDatabaseChangeLogLockGeneratorTest extends AbstractSqlGenera
         String sql = results[0].toSql();
 
         assertThat(sql, startsWith("UPDATE DATABASECHANGELOGLOCK"));
-        assertThat(sql, containsString("SET LOCKEXPIRES = '2018-10-27 13:30:52.624'"));
+        assertThat(sql, containsString("SET LOCKEXPIRES = '2018-10-27 14:38:01.000'"));
         assertThat(sql, containsString("ID = 1"));
         assertThat(sql, containsString("`LOCKED` = 1"));
         assertThat(sql, containsString("LOCKEXPIRES IS NOT NULL"));
         assertThat(sql, containsString("LOCKEDBYID = '" + LOCKED_BY_ID + "';"));
 
     }
+
+    private static Date parse(String dateString)   {
+
+        try {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                .parse(dateString);
+
+        } catch (ParseException e) {
+            // not expected
+            throw new RuntimeException(e);
+        }
+    }
+
 }
