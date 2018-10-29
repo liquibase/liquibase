@@ -2,15 +2,15 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * A Liquibase MOJO that requires the user to provide a DatabaseChangeLogFile to be able
@@ -75,10 +75,11 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
   }
 
   @Override
-  protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
+  protected Liquibase createLiquibase(ResourceAccessor fo, Database database,
+                                      Database lockDatabase) throws MojoExecutionException {
         try {
             String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
-            return new Liquibase(changeLog, fo, db);
+            return new Liquibase(changeLog, fo, database, lockDatabase);
         } catch (LiquibaseException ex) {
             throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(), ex);
         }

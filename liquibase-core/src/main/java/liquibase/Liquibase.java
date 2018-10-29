@@ -60,6 +60,7 @@ import liquibase.util.StringUtils;
  */
 public class Liquibase {
 
+    private final Database lockDatabase;
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
     private ResourceAccessor resourceAccessor;
@@ -78,11 +79,17 @@ public class Liquibase {
      *
      * @See DatabaseConnection
      * @See Database
-     * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database)
+     * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database, liquibase.database.Database)
      * @see ResourceAccessor
      */
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws LiquibaseException {
-        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+    public Liquibase(String changeLogFile,
+                     ResourceAccessor resourceAccessor,
+                     DatabaseConnection conn,
+                     DatabaseConnection lockConnection) throws LiquibaseException {
+        this(changeLogFile,
+            resourceAccessor,
+            DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn),
+            DatabaseFactory.getInstance().findCorrectDatabaseImplementation(lockConnection));
     }
 
     /**
@@ -93,7 +100,7 @@ public class Liquibase {
      * @See Database
      * @see ResourceAccessor
      */
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws LiquibaseException {
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database, Database lockDatabase) throws LiquibaseException {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
@@ -103,9 +110,10 @@ public class Liquibase {
         this.resourceAccessor = resourceAccessor;
         this.changeLogParameters = new ChangeLogParameters(database);
         this.database = database;
+        this.lockDatabase = lockDatabase;
     }
 
-    public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
+    public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database, Database lockDatabase) {
         log = LogFactory.getLogger();
         this.databaseChangeLog = changeLog;
 
@@ -117,6 +125,7 @@ public class Liquibase {
         }
         this.resourceAccessor = resourceAccessor;
         this.database = database;
+        this.lockDatabase = lockDatabase;
         this.changeLogParameters = new ChangeLogParameters(database);
     }
 
@@ -146,6 +155,16 @@ public class Liquibase {
      */
     public Database getDatabase() {
         return database;
+    }
+
+    /**
+     * Returns the Database used by this Liquibase instance for locking.
+     * <p>
+     * Should be a separate one as some lock services might commit transactions asynchronously,
+     * and hence should not rollback or commit what the actual updates is doing.
+     */
+    public Database getLockDatabase() {
+        return lockDatabase;
     }
 
     /**
@@ -192,7 +211,7 @@ public class Liquibase {
     	update(contexts, labelExpression, true);
     }
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         changeLogParameters.setContexts(contexts);
@@ -269,7 +288,7 @@ public class Liquibase {
 
         outputHeader("Update Database Script");
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -292,7 +311,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -338,7 +357,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -504,7 +523,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -647,7 +666,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -730,7 +749,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -804,7 +823,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -866,7 +885,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -946,7 +965,7 @@ public class Liquibase {
 
         outputHeader("SQL to roll back currently unexecuted changes");
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -1047,19 +1066,20 @@ public class Liquibase {
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
         try {
-            LockServiceFactory.getInstance().getLockService(database).waitForLock();
+            LockServiceFactory.getInstance().getLockService(lockDatabase).waitForLock();
 
             for (CatalogAndSchema schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + schema);
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 getDatabase().dropDatabaseObjects(schema);
+                LockServiceFactory.getInstance().getLockService(getLockDatabase()).destroy();
             }
         } catch (DatabaseException e) {
             throw e;
         } catch (Exception e) {
             throw new DatabaseException(e);
         } finally {
-            LockServiceFactory.getInstance().getLockService(database).destroy();
+            LockServiceFactory.getInstance().getLockService(lockDatabase).destroy();
             resetServices();
         }
     }
@@ -1068,7 +1088,7 @@ public class Liquibase {
      * 'Tags' the database for future rollback
      */
     public void tag(String tagString) throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -1086,7 +1106,7 @@ public class Liquibase {
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -1125,7 +1145,7 @@ public class Liquibase {
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
         }
-        LockServiceFactory.getInstance().getLockService(getDatabase()).init();
+        LockServiceFactory.getInstance().getLockService(getLockDatabase()).init();
     }
 
     /**
@@ -1144,7 +1164,7 @@ public class Liquibase {
     public DatabaseChangeLogLock[] listLocks() throws LiquibaseException {
         checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
 
-        return LockServiceFactory.getInstance().getLockService(database).listLocks();
+        return LockServiceFactory.getInstance().getLockService(lockDatabase).listLocks();
     }
 
     public void reportLocks(PrintStream out) throws LiquibaseException {
@@ -1162,7 +1182,7 @@ public class Liquibase {
     public void forceReleaseLocks() throws LiquibaseException {
         checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
 
-        LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
+        LockServiceFactory.getInstance().getLockService(lockDatabase).forceReleaseLock();
     }
 
     /**
@@ -1331,7 +1351,7 @@ public class Liquibase {
      */
     public void clearCheckSums() throws LiquibaseException {
         log.info("Clearing database change log checksums");
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -1391,7 +1411,7 @@ public class Liquibase {
         log.info("Generating Database Documentation");
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -1482,7 +1502,7 @@ public class Liquibase {
     }
 
     private LockService getLockService() {
-        return LockServiceFactory.getInstance().getLockService(database);
+        return LockServiceFactory.getInstance().getLockService(lockDatabase);
     }
 
     public void setChangeExecListener(ChangeExecListener listener) {

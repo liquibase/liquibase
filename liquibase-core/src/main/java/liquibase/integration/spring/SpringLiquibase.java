@@ -1,5 +1,29 @@
 package liquibase.integration.spring;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.URLConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternUtils;
+
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -19,23 +43,6 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.ResourcePatternUtils;
-
-import javax.sql.DataSource;
-import java.io.*;
-import java.net.URLConnection;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * A Spring-ified wrapper for Liquibase.
@@ -380,22 +387,36 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		}
 
 		Connection c = null;
+		Connection lockC = null;
 		Liquibase liquibase = null;
 		try {
 			c = getDataSource().getConnection();
-            liquibase = createLiquibase(c);
+			lockC = getDataSource().getConnection();
+            liquibase = createLiquibase(c, lockC);
 			generateRollbackFile(liquibase);
 			performUpdate(liquibase);
 		} catch (SQLException e) {
 			throw new DatabaseException(e);
 		} finally {
-			Database database = null;
-			if (liquibase != null) {
-				database = liquibase.getDatabase();
+
+			try {
+				Database database = null;
+				if (liquibase != null) {
+					database = liquibase.getDatabase();
+				}
+				if (database != null) {
+					database.close();
+				}
+
+			}finally {
+				Database database = null;
+				if (liquibase != null) {
+					database = liquibase.getLockDatabase();
+				}
+				if (database != null) {
+					database.close();
+				}
 			}
-			if (database != null) {
-                database.close();
-            }
         }
 
 	}
@@ -432,9 +453,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
     }
 
-	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
+	protected Liquibase createLiquibase(Connection c, Connection lockC) throws LiquibaseException {
 		SpringResourceOpener resourceAccessor = createResourceOpener();
-		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
+		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor), createDatabase(lockC, resourceAccessor));
         liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
 		if (parameters != null) {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {

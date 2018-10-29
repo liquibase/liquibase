@@ -58,9 +58,10 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	}
 
 	@Override
-	protected Liquibase createLiquibase(ResourceAccessor fo, Database db)
+	protected Liquibase createLiquibase(ResourceAccessor fo, Database database,
+                                        Database db)
 			throws MojoExecutionException {
-		Liquibase liquibase = super.createLiquibase(fo, db);
+		Liquibase liquibase = super.createLiquibase(fo, database, db);
 
 		// Setup the output file writer
 		try {

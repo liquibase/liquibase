@@ -1,20 +1,8 @@
 package liquibase.integration.servlet;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
-import liquibase.configuration.*;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.util.NetUtil;
-import liquibase.util.StringUtils;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Enumeration;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -23,9 +11,26 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Enumeration;
+
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
+import liquibase.configuration.ConfigurationProperty;
+import liquibase.configuration.ConfigurationValueProvider;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.util.NetUtil;
+import liquibase.util.StringUtils;
 
 /**
  * Servlet listener than can be added to web.xml to allow Liquibase to run on every application server startup.
@@ -207,11 +212,14 @@ public class LiquibaseServletListener implements ServletContextListener {
         this.defaultSchema = StringUtils.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
 
         Connection connection = null;
+        Connection lockConnection = null;
         Database database = null;
+        Database lockDatabase = null;
         try {
             DataSource dataSource = (DataSource) ic.lookup(this.dataSourceName);
 
             connection = dataSource.getConnection();
+            lockConnection = dataSource.getConnection();
 
             Thread currentThread = Thread.currentThread();
             ClassLoader contextClassLoader = currentThread.getContextClassLoader();
@@ -223,7 +231,11 @@ public class LiquibaseServletListener implements ServletContextListener {
 
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             database.setDefaultSchemaName(getDefaultSchema());
-            Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
+
+            lockDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(lockConnection));
+            lockDatabase.setDefaultSchemaName(getDefaultSchema());
+
+            Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO, fsFO, threadClFO), database, lockDatabase);
 
             @SuppressWarnings("unchecked")
             Enumeration<String> initParameters = servletContext.getInitParameterNames();
@@ -237,11 +249,23 @@ public class LiquibaseServletListener implements ServletContextListener {
             liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
         }
         finally {
-            if (database != null) {
-                database.close();
-            } else if (connection != null) {
-                connection.close();
+
+            try {
+                closeDbAndConnection(database, connection);
+
+            } finally {
+                closeDbAndConnection(lockDatabase, lockConnection);
             }
+
+        }
+    }
+
+    private void closeDbAndConnection(Database database, Connection connection) throws SQLException, DatabaseException {
+
+        if (database != null) {
+            database.close();
+        } else if (connection != null) {
+            connection.close();
         }
     }
 

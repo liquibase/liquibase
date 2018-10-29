@@ -73,16 +73,16 @@ public class LockServiceExecuteTest {
                 DatabaseConnection connection2 = DatabaseTestContext.getInstance().openDatabaseConnection(url);
                 Database database2 = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection2);
 
-                assertTrue(LockServiceFactory.getInstance().getLockService(database).acquireLock());
-                assertTrue(LockServiceFactory.getInstance().getLockService(database).hasChangeLogLock());
+                assertTrue(LockServiceFactory.getInstance().getLockService(lockDatabase).acquireLock());
+                assertTrue(LockServiceFactory.getInstance().getLockService(lockDatabase).hasChangeLogLock());
                 assertFalse(LockServiceFactory.getInstance().getLockService(database2).hasChangeLogLock());
 
                 assertFalse(LockServiceFactory.getInstance().getLockService(database2).acquireLock());
                 assertFalse(LockServiceFactory.getInstance().getLockService(database2).acquireLock());
 
-                LockServiceFactory.getInstance().getLockService(database).releaseLock();
+                LockServiceFactory.getInstance().getLockService(lockDatabase).releaseLock();
                 assertTrue(LockServiceFactory.getInstance().getLockService(database2).acquireLock());
-                assertFalse(LockServiceFactory.getInstance().getLockService(database).hasChangeLogLock());
+                assertFalse(LockServiceFactory.getInstance().getLockService(lockDatabase).hasChangeLogLock());
                 assertTrue(LockServiceFactory.getInstance().getLockService(database2).hasChangeLogLock());
 
             }

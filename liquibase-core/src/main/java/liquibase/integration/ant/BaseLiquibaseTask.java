@@ -1,5 +1,22 @@
 package liquibase.integration.ant;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Writer;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+
+import org.apache.tools.ant.AntClassLoader;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.taskdefs.Property;
+import org.apache.tools.ant.types.Path;
+import org.apache.tools.ant.types.Reference;
+import org.apache.tools.ant.types.resources.FileResource;
+
 import liquibase.Liquibase;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -16,22 +33,6 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ui.UIFactory;
-import org.apache.tools.ant.AntClassLoader;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
-import org.apache.tools.ant.taskdefs.Property;
-import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.Reference;
-import org.apache.tools.ant.types.resources.FileResource;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Writer;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 
 /**
  * Base class for all Ant Liquibase tasks.  This class sets up Liquibase and defines parameters
@@ -65,10 +66,12 @@ public abstract class BaseLiquibaseTask extends Task {
         classLoader.setThreadContextLoader();
         validateParameters();
         Database database = null;
+        Database lockDatabase = null;
         try {
             ResourceAccessor resourceAccessor = createResourceAccessor(classLoader);
             database = createDatabaseFromType(databaseType);
-            liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database);
+            lockDatabase = createDatabaseFromType(databaseType);
+            liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database, lockDatabase);
             if(changeLogParameters != null) {
                 changeLogParameters.applyParameters(liquibase);
             }
@@ -84,6 +87,7 @@ public abstract class BaseLiquibaseTask extends Task {
             throw new BuildException("Unable to initialize Liquibase. " + e.toString(), e);
         } finally {
             closeDatabase(database);
+            closeDatabase(lockDatabase);
             classLoader.resetThreadContextLoader();
             classLoader.cleanup();
             classLoader = null;

@@ -10,28 +10,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.After;
+
 import liquibase.CatalogAndSchema;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.lockservice.LockServiceFactory;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Table;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.database.example.ExampleCustomDatabase;
-import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
+import liquibase.database.example.ExampleCustomDatabase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.lockservice.LockServiceFactory;
+import liquibase.sdk.database.MockDatabase;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.test.TestContext;
+import liquibase.structure.core.Table;
 import liquibase.test.DatabaseTestContext;
-import liquibase.exception.DatabaseException;
-
-import org.junit.After;
+import liquibase.test.TestContext;
 
 public abstract class AbstractExecuteTest {
 
@@ -92,6 +92,7 @@ public abstract class AbstractExecuteTest {
 
                     if (database.getConnection() != null) {
                         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
+                        // in tests, its ok to use the same database for locking
                         LockServiceFactory.getInstance().getLockService(database).init();
                     }
 
@@ -197,6 +198,7 @@ public abstract class AbstractExecuteTest {
 
             try {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+                LockServiceFactory.getInstance().getLockService(database).destroy();
             } catch (Throwable e) {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }

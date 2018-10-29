@@ -1,12 +1,9 @@
 package org.liquibase.maven.plugins;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -48,9 +45,10 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 	}
 
 	@Override
-	protected Liquibase createLiquibase(ResourceAccessor fo, Database db)
+	protected Liquibase createLiquibase(ResourceAccessor fo, Database database,
+                                        Database db)
 			throws MojoExecutionException {
-		Liquibase liquibase = super.createLiquibase(fo, db);
+		Liquibase liquibase = super.createLiquibase(fo, database, db);
 
 		// Setup the output file writer
 		try {

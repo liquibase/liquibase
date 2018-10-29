@@ -119,6 +119,9 @@ public class ProlongingLockService implements LockService {
      */
     private Long staleChangeLogLockRemovalTimeInSeconds;
 
+    // TODO BST: second db connection for locks
+    // TODO BST: transactions per change set? rollback?
+
     private Boolean hasDatabaseChangeLogLockTable;
     private boolean isDatabaseChangeLogLockTableInitialized;
     private ObjectQuotingStrategy quotingStrategy;

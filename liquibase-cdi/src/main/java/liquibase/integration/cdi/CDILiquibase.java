@@ -1,5 +1,15 @@
 package liquibase.integration.cdi;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.spi.Extension;
+import javax.inject.Inject;
+import javax.sql.DataSource;
+
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -17,15 +27,6 @@ import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.NetUtil;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.Extension;
-import javax.inject.Inject;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
 
 /**
  * A CDI wrapper for Liquibase.
@@ -121,10 +122,12 @@ public class CDILiquibase implements Extension {
 
     private void performUpdate() throws LiquibaseException {
         Connection c = null;
+        Connection lockC = null;
         Liquibase liquibase = null;
         try {
             c = dataSource.getConnection();
-            liquibase = createLiquibase(c);
+            lockC = dataSource.getConnection();
+            liquibase = createLiquibase(c, lockC);
             liquibase.getDatabase();
             liquibase.update(new Contexts(config.getContexts()), new LabelExpression(config.getLabels()));
             updateSuccessful = true;
@@ -136,10 +139,25 @@ public class CDILiquibase implements Extension {
         } finally {
             if (liquibase != null && liquibase.getDatabase() != null) {
                 liquibase.getDatabase().close();
-            } else if (c != null) {
+            }
+
+            if (liquibase != null && liquibase.getLockDatabase() != null) {
+                liquibase.getLockDatabase().close();
+            }
+
+            if (c != null) {
                 try {
                     c.rollback();
                     c.close();
+                } catch (SQLException e) {
+                    //nothing to do
+                }
+            }
+
+            if (lockC != null) {
+                try {
+                    lockC.rollback();
+                    lockC.close();
                 } catch (SQLException e) {
                     //nothing to do
                 }
@@ -149,8 +167,8 @@ public class CDILiquibase implements Extension {
         }
     }
 
-    protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-        Liquibase liquibase = new Liquibase(config.getChangeLog(), resourceAccessor, createDatabase(c));
+    protected Liquibase createLiquibase(Connection c, Connection lockC) throws LiquibaseException {
+        Liquibase liquibase = new Liquibase(config.getChangeLog(), resourceAccessor, createDatabase(c), createDatabase(lockC));
         if (config.getParameters() != null) {
             for(Map.Entry<String, String> entry: config.getParameters().entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());

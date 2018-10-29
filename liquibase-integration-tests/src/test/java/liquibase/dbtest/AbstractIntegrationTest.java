@@ -1,5 +1,29 @@
 package liquibase.dbtest;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertFalse;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -35,23 +59,16 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.DropTableStatement;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.test.DatabaseTestContext;
 import liquibase.test.DiffResultAssert;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.RegexMatcher;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.*;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
-
-import static junit.framework.Assert.*;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -73,6 +90,7 @@ public abstract class AbstractIntegrationTest {
 
     protected String contexts = "test, context-b";
     private Database database;
+    private Database lockDatabase;
     private String url;
 
     protected AbstractIntegrationTest(String changelogDir, String url) throws Exception {
@@ -115,7 +133,7 @@ public abstract class AbstractIntegrationTest {
             ExecutorService.getInstance().reset();
 
             LockServiceFactory.getInstance().resetAll();
-            LockServiceFactory.getInstance().getLockService(database).init();
+            LockServiceFactory.getInstance().getLockService(lockDatabase).init();
 
 
             ChangeLogHistoryServiceFactory.getInstance().resetAll();
@@ -126,7 +144,6 @@ public abstract class AbstractIntegrationTest {
             }
 
             SnapshotGeneratorFactory.resetAll();
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
 
             if (database.supportsSchemas()) {
@@ -140,6 +157,9 @@ public abstract class AbstractIntegrationTest {
                     database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_SCHEMA, null));
                 }
             }
+
+            LockServiceFactory.getInstance().getLockService(lockDatabase).destroy();
+
             database.commit();
             SnapshotGeneratorFactory.resetAll();
 
@@ -183,7 +203,8 @@ public abstract class AbstractIntegrationTest {
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws LiquibaseException {
         ExecutorService.getInstance().clearExecutor(database);
         database.resetInternalState();
-        return new Liquibase(changeLogFile, resourceAccessor, database);
+        LockServiceFactory.getInstance().getLockService(lockDatabase).reset();
+        return new Liquibase(changeLogFile, resourceAccessor, database, lockDatabase);
     }
 
     @Test
@@ -540,7 +561,7 @@ public abstract class AbstractIntegrationTest {
 
         database.setDefaultSchemaName("lbcat2");
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.forceReleaseLock();
 
         liquibase.update(includedChangeLog);
@@ -878,7 +899,7 @@ public abstract class AbstractIntegrationTest {
             //expected
         }
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         assertFalse(lockService.hasChangeLogLock());
     }
 
