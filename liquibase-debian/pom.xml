@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-parent</artifactId>
-        <version>3.5.5.3-LOCKS</version>
+        <version>3.5.5.4-LOCKS-SNAPSHOT</version>
     </parent>
 
     <artifactId>liquibase-debian</artifactId>
