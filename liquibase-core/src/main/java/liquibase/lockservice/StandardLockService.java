@@ -85,17 +85,6 @@ public class StandardLockService implements LockService {
         this.changeLogLockRecheckTime = changeLogLockRecheckTime;
     }
 
-    @Override
-    public void setChangeLogLockProlongingRateInSeconds(long changeLogLockProlongingRateInSeconds) {
-        // we are not interested in that
-    }
-
-    @Override
-    public void setStaleChangeLogLockRemovalTimeInSeconds(
-        Long staleChangeLogLockRemovalTimeInSeconds) {
-        // we are not interested in that
-    }
-
     public Long getChangeLogLockRecheckTime() {
         if (changeLogLockRecheckTime != null) {
             return changeLogLockRecheckTime;

@@ -80,7 +80,7 @@ public class ProlongingLockService implements LockService {
      */
     private volatile Date lockExpires = null;
 
-    private volatile ScheduledFuture<?> logProlonger = null;
+    private volatile ScheduledFuture<?> lockProlonger = null;
 
     /**
      * How long shall we wait for a lock before we give up?
@@ -118,9 +118,6 @@ public class ProlongingLockService implements LockService {
      * Unit: seconds
      */
     private Long staleChangeLogLockRemovalTimeInSeconds;
-
-    // TODO BST: second db connection for locks
-    // TODO BST: transactions per change set? rollback?
 
     private Boolean hasDatabaseChangeLogLockTable;
     private boolean isDatabaseChangeLogLockTableInitialized;
@@ -194,6 +191,8 @@ public class ProlongingLockService implements LockService {
             .getChangeLogLockProlongingRateInSeconds();
     }
 
+
+    /** For lock services that actively prolong the lock, specify the rate here. */
     public void setChangeLogLockProlongingRateInSeconds(long changeLogLockProlongingRateInSeconds) {
         this.changeLogLockProlongingRateInSeconds = changeLogLockProlongingRateInSeconds;
     }
@@ -209,6 +208,16 @@ public class ProlongingLockService implements LockService {
             .getStaleChangeLogLockRemovalTimeInSeconds();
     }
 
+    /**
+     * For lock services that actively prolong the lock, specify after what time a stale lock
+     * should be removed.
+     * <p>
+     * Must be a good amount larger than the time set in
+     * {@link #setChangeLogLockProlongingRateInSeconds(long)},
+     * otherwise you will remove a lock that another service is about to prolong.
+     * <p>
+     * Ideally add 40 seconds to the prolonging rate for the staleChangeLogLockRemovalTime.
+     */
     public void setStaleChangeLogLockRemovalTimeInSeconds(
         Long staleChangeLogLockRemovalTimeInSeconds) {
         this.staleChangeLogLockRemovalTimeInSeconds = staleChangeLogLockRemovalTimeInSeconds;
@@ -303,7 +312,7 @@ public class ProlongingLockService implements LockService {
                 database.getLiquibaseSchemaName(),
                 database.getDatabaseChangeLogLockTableName(),
                 "LOCKEXPIRES",
-                getCharTypeName(database) + "(255)",
+                getDateTimeTypeString(database),
                 null);
 
         AddColumnStatement addLockedById =
@@ -318,6 +327,19 @@ public class ProlongingLockService implements LockService {
         executor.execute(addLockedById);
 
         database.commit();
+    }
+
+    protected String getDateTimeTypeString(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            try {
+                if (database.getDatabaseMajorVersion() >= 10) { // 2008 or later
+                    return "datetime2(3)";
+                }
+            } catch (DatabaseException e) {
+                // ignore
+            }
+        }
+        return "datetime";
     }
 
     private boolean newColumnsExist(Executor executor) throws DatabaseException {
@@ -460,6 +482,7 @@ public class ProlongingLockService implements LockService {
             database.rollback();
             this.init();
 
+            logWarningsIfAlreadyRunning();
             cancelLogProlonging();
 
             // Remove all locks that should get actively prolonged (aka, have a value in the
@@ -529,7 +552,7 @@ public class ProlongingLockService implements LockService {
 
                 database.setCanCacheLiquibaseTableInfo(false);
 
-                logProlonger = executorService.scheduleAtFixedRate(
+                lockProlonger = executorService.scheduleAtFixedRate(
                     new Runnable() {
                         @Override
                         public void run() {
@@ -558,6 +581,20 @@ public class ProlongingLockService implements LockService {
             }
         }
 
+    }
+
+    private void logWarningsIfAlreadyRunning() {
+        if (lockProlonger != null && !lockProlonger.isDone()){
+            LogFactory
+                .getLogger()
+                .warning("Lock prolonging unexpectedly still active.");
+        }
+
+        if (lockExpires != null) {
+            LogFactory
+                .getLogger()
+                .warning("Local lock has not been removed, removing now.");
+        }
     }
 
     private Date currentTimeOnDatabaseServer(Executor executor)
@@ -649,6 +686,7 @@ public class ProlongingLockService implements LockService {
 
         } catch (Exception e) {
 
+            // TODO BST: log exception
             cancelLogProlonging();
 
         } finally {
@@ -744,10 +782,10 @@ public class ProlongingLockService implements LockService {
      * Visible for tests
      */
     void cancelLogProlonging() {
-        if (logProlonger != null) {
-            logProlonger.cancel(false);
+        if (lockProlonger != null) {
+            lockProlonger.cancel(false);
         }
-        logProlonger = null;
+        lockProlonger = null;
         lockExpires = null;
     }
 

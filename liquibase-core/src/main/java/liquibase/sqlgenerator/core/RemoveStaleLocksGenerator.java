@@ -44,7 +44,7 @@ public class RemoveStaleLocksGenerator extends AbstractSqlGenerator<RemoveStaleL
                 // ... when lock has expired AND was set by ProlongingLockService,
                 // otherwise do not remove in order to stay compatible
                 " AND LOCKEXPIRES < " + database.getCurrentDateTimeFunction() +
-                " AND LOCKEDBYID IS NOT NULL");
+                " AND LOCKEXPIRES IS NOT NULL");
         updateStatement.addWhereParameter(true);
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
