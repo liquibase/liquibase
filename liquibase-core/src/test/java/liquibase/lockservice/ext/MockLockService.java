@@ -34,17 +34,6 @@ public class MockLockService implements LockService {
     }
 
     @Override
-    public void setChangeLogLockProlongingRateInSeconds(long changeLogLockProlongingRateInSeconds) {
-
-    }
-
-    @Override
-    public void setStaleChangeLogLockRemovalTimeInSeconds(
-        Long staleChangeLogLockRemovalTimeInSeconds) {
-
-    }
-
-    @Override
     public boolean hasChangeLogLock() {
         return false;
     }
