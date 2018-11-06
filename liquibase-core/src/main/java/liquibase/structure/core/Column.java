@@ -384,6 +384,8 @@ public class Column extends AbstractDatabaseObject {
     public static class AutoIncrementInformation extends AbstractLiquibaseSerializable {
         private BigInteger startWith;
         private BigInteger incrementBy;
+        private Boolean defaultOnNull;
+        private String generationType;
 
         public AutoIncrementInformation() {
             this(1, 1);
@@ -402,9 +404,26 @@ public class Column extends AbstractDatabaseObject {
             return incrementBy;
         }
 
+        public void setDefaultOnNull(Boolean defaultOnNull) {
+            this.defaultOnNull = defaultOnNull;
+        }
+
+        public Boolean getDefaultOnNull() {
+            return defaultOnNull;
+        }
+
+        public void setGenerationType(String generationType) {
+            this.generationType = generationType;
+        }
+
+        public String getGenerationType() {
+            return generationType;
+        }
+
         @Override
         public String toString() {
-            return "AUTO INCREMENT START WITH " + startWith + " INCREMENT BY " + incrementBy;
+            return String.format("GENERATED %s %sAUTO INCREMENT START WITH %d INCREMENT BY %d",
+                    this.generationType, Boolean.TRUE.equals(this.defaultOnNull) ? "ON NULL " : "", startWith, incrementBy);
         }
 
         @Override
@@ -421,6 +440,8 @@ public class Column extends AbstractDatabaseObject {
         public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
             this.startWith = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "startWith"));
             this.incrementBy = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "incrementBy"));
+            this.defaultOnNull = parsedNode.getChildValue(null, "defaultOnNull", Boolean.class);
+            this.generationType = parsedNode.getChildValue(null, "generationType", String.class);
         }
     }
 }
