@@ -114,7 +114,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             }
 
             if (isAutoIncrement) {
-                statement.addColumnConstraint(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
+                statement.addColumnConstraint(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy(), column.getGenerationType(), column.getDefaultOnNull()));
             }
         }
 

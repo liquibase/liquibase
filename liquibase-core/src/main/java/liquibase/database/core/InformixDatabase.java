@@ -183,7 +183,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	}
 
 	@Override
-	public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
+	public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy, final String generationType, final Boolean defaultOnNull) {
 		return "";
 	}
 
