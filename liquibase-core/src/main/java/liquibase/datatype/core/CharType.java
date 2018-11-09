@@ -8,7 +8,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -61,7 +61,7 @@ public class CharType extends LiquibaseDataType {
         }
 
         String val = String.valueOf(value);
-        if ((database instanceof MSSQLDatabase) && !StringUtils.isAscii(val)) {
+        if ((database instanceof MSSQLDatabase) && !StringUtil.isAscii(val)) {
             return "N'"+database.escapeStringForDatabase(val)+"'";
         }
 

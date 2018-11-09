@@ -3,7 +3,7 @@ package liquibase.structure.core;
 import liquibase.CatalogAndSchema;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -18,7 +18,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public Schema(Catalog catalog, String schemaName) {
-        schemaName = StringUtils.trimToNull(schemaName);
+        schemaName = StringUtil.trimToNull(schemaName);
 
         setAttribute("name", schemaName);
         setAttribute("catalog", catalog);
@@ -76,7 +76,7 @@ public class Schema extends AbstractDatabaseObject {
         // catalog or name different?
         return (
             (Objects.equals(getCatalog(), otherSchema.getCatalog())) &&
-                (StringUtils.equalsIgnoreCaseAndEmpty(getName(), otherSchema.getName())));
+                (StringUtil.equalsIgnoreCaseAndEmpty(getName(), otherSchema.getName())));
     }
 
     @Override

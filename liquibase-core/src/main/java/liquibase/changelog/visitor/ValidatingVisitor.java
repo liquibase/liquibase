@@ -12,7 +12,7 @@ import liquibase.logging.LogType;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -115,13 +115,13 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                                 (ChangeSet.ValidationFailOption.MARK_RAN))) {
                             LogService.getLog(getClass()).info(
                                     LogType.LOG, "Skipping change set " + changeSet + " due to validation error(s): " +
-                                            StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                                            StringUtil.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                         } else {
                             if (!foundErrors.getWarningMessages().isEmpty())
                                 LogService.getLog(getClass()).warning(
                                         LogType.LOG, "Change set " + changeSet + ": " +
-                                                StringUtils.join(foundErrors.getWarningMessages(), ", "));
+                                                StringUtil.join(foundErrors.getWarningMessages(), ", "));
                             validationErrors.addAll(foundErrors, changeSet);
                         }
                     }

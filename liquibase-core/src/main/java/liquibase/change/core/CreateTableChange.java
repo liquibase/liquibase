@@ -16,7 +16,7 @@ import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,7 +88,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
                 if ((constraints.getReferences() != null) || ((constraints.getReferencedTableName() != null) &&
                     (constraints.getReferencedColumnNames() != null))) {
-                    if (StringUtils.trimToNull(constraints.getForeignKeyName()) == null) {
+                    if (StringUtil.trimToNull(constraints.getForeignKeyName()) == null) {
                         throw new UnexpectedLiquibaseException("createTable with references requires foreignKeyName");
                     }
                     ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(),
@@ -115,12 +115,12 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             }
         }
 
-        statement.setTablespace(StringUtils.trimToNull(getTablespace()));
+        statement.setTablespace(StringUtil.trimToNull(getTablespace()));
 
         List<SqlStatement> statements = new ArrayList<>();
         statements.add(statement);
 
-        if (StringUtils.trimToNull(remarks) != null) {
+        if (StringUtil.trimToNull(remarks) != null) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);
@@ -128,7 +128,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         }
 
         for (ColumnConfig column : getColumns()) {
-            String columnRemarks = StringUtils.trimToNull(column.getRemarks());
+            String columnRemarks = StringUtil.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
                 if (!(database instanceof MySQLDatabase) && SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {

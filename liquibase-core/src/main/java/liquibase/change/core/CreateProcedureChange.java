@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.configuration.GlobalConfiguration;
@@ -15,7 +16,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -175,17 +176,17 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public ValidationErrors validate(Database database) {
         // Not falling back to default because of path/procedureText option group. Need to specify everything.
         ValidationErrors validate = new ValidationErrors();
-        if ((StringUtils.trimToNull(getProcedureText()) != null) && (StringUtils.trimToNull(getPath()) != null)) {
+        if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
             validate.addError(
                 "Cannot specify both 'path' and a nested procedure text in " +
-                    ChangeFactory.getInstance().getChangeMetaData(this).getName()
+                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
             );
         }
 
-        if ((StringUtils.trimToNull(getProcedureText()) == null) && (StringUtils.trimToNull(getPath()) == null)) {
+        if ((StringUtil.trimToNull(getProcedureText()) == null) && (StringUtil.trimToNull(getPath()) == null)) {
             validate.addError(
                 "Cannot specify either 'path' or a nested procedure text in " +
-                    ChangeFactory.getInstance().getChangeMetaData(this).getName()
+                    Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
             );
         }
 
@@ -210,7 +211,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             return StreamUtil.openStream(getPath(), isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
         } catch (IOException e) {
             throw new IOException(
-                "<" + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " path=" +
+                "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
                 path +
                 "> -Unable to read file",
                 e
@@ -282,7 +283,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         String procedureText;
         String path = getPath();
         if (path == null) {
-            procedureText = StringUtils.trimToNull(getProcedureText());
+            procedureText = StringUtil.trimToNull(getProcedureText());
         } else {
             try {
                 InputStream stream = openSqlStream();

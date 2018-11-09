@@ -1,7 +1,7 @@
 package liquibase;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -42,12 +42,12 @@ public class ContextExpression {
     }
 
     private void parseContextString(String contexts) {
-        contexts = StringUtils.trimToNull(contexts);
+        contexts = StringUtil.trimToNull(contexts);
 
         if (contexts == null) {
             return;
         }
-        for (String context : StringUtils.splitAndTrim(contexts, ",")) {
+        for (String context : StringUtil.splitAndTrim(contexts, ",")) {
             this.contexts.add(context.toLowerCase());
         }
 
@@ -66,7 +66,7 @@ public class ContextExpression {
         if (originalString != null) {
             return originalString;
         }
-        return "(" + StringUtils.join(new TreeSet<String>(this.contexts), "), (") + ")";
+        return "(" + StringUtil.join(new TreeSet<String>(this.contexts), "), (") + ")";
     }
 
     /**

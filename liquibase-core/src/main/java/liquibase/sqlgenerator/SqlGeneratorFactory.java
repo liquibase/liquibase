@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -30,12 +31,9 @@ public class SqlGeneratorFactory {
     private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
 
     private SqlGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SqlGenerator) clazz.getConstructor().newInstance());
+            for (SqlGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SqlGenerator.class)) {
+                register(generator);
             }
 
         } catch (Exception e) {

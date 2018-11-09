@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml;
 
+import liquibase.Scope;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
@@ -11,7 +12,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -49,7 +50,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             this.changeLogParameters = changeLogParameters;
         }
 
-        changeFactory = ChangeFactory.getInstance();
+        changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
         preconditionFactory = PreconditionFactory.getInstance();
         sqlVisitorFactory = SqlVisitorFactory.getInstance();
         changeLogParserFactory = ChangeLogParserFactory.getInstance();
@@ -100,7 +101,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         ParsedNode node = nodeStack.pop();
         try {
             String seenText = this.textStack.pop().toString();
-            if (!"".equals(StringUtils.trimToEmpty(seenText))) {
+            if (!"".equals(StringUtil.trimToEmpty(seenText))) {
                 node.setValue(seenText.trim());
             }
         } catch (ParsedNodeException e) {

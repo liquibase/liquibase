@@ -5,7 +5,7 @@ import liquibase.command.core.SnapshotCommand;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandLineParsingException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
@@ -659,11 +659,11 @@ public class MainTest {
         Main liquibase = new Main();
         String[] fixedArgs = liquibase.fixupArgs(new String[]{"--defaultsFile", "liquibase.properties", "migrate"});
         assertEquals("--defaultsFile=liquibase.properties migrate",
-                StringUtils.join(Arrays.asList(fixedArgs), " "));
+                StringUtil.join(Arrays.asList(fixedArgs), " "));
 
         fixedArgs = liquibase.fixupArgs(new String[] {"--defaultsFile=liquibase.properties", "migrate"});
         assertEquals("--defaultsFile=liquibase.properties migrate",
-                StringUtils.join(Arrays.asList(fixedArgs), " "));
+                StringUtil.join(Arrays.asList(fixedArgs), " "));
 
         fixedArgs = liquibase.fixupArgs(new String[] {"--driver=DRIVER",
                 "--username=USERNAME",
@@ -677,7 +677,7 @@ public class MainTest {
         });
         assertEquals("--driver=DRIVER --username=USERNAME --password=PASSWORD --url=URL --changeLogFile=FILE " +
                 "--classpath=CLASSPATH;CLASSPATH2 --contexts=CONTEXT1,CONTEXT2 " +
-                "--promptForNonLocalDatabase=true migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
+                "--promptForNonLocalDatabase=true migrate", StringUtil.join(Arrays.asList(fixedArgs), " "));
     }
 
     @Test

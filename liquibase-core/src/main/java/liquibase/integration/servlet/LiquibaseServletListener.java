@@ -18,7 +18,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.NetUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -208,7 +208,7 @@ public class LiquibaseServletListener implements ServletContextListener {
 
         setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS));
         setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS));
-        this.defaultSchema = StringUtils.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
+        this.defaultSchema = StringUtil.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
 
         Connection connection = null;
         Database database = null;

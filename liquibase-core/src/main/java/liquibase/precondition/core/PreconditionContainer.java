@@ -11,14 +11,13 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.changelog.visitor.ChangeExecListener;
-import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +102,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             for (FailOption option : FailOption.values()) {
                 possibleOptions.add(option.key);
             }
-            throw new RuntimeException("Unknown onFail attribute value '"+onFail+"'.  Possible values: " + StringUtils.join(possibleOptions, ", "));
+            throw new RuntimeException("Unknown onFail attribute value '"+onFail+"'.  Possible values: " + StringUtil.join(possibleOptions, ", "));
         }
     }
 
@@ -129,7 +128,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             for (ErrorOption option : ErrorOption.values()) {
                 possibleOptions.add(option.key);
             }
-            throw new RuntimeException("Unknown onError attribute value '"+onError+"'.  Possible values: " + StringUtils.join(possibleOptions, ", "));
+            throw new RuntimeException("Unknown onError attribute value '"+onError+"'.  Possible values: " + StringUtil.join(possibleOptions, ", "));
         }
     }
 
@@ -157,7 +156,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         for (OnSqlOutputOption option : OnSqlOutputOption.values()) {
             possibleOptions.add(option.key);
         }
-        throw new RuntimeException("Unknown onSqlOutput attribute value '" + onSqlOutput + "'.  Possible values: " + StringUtils.join(possibleOptions, ", "));
+        throw new RuntimeException("Unknown onSqlOutput attribute value '" + onSqlOutput + "'.  Possible values: " + StringUtil.join(possibleOptions, ", "));
     }
 
     public void setOnSqlOutput(OnSqlOutputOption onSqlOutput) {

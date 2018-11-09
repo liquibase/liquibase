@@ -13,7 +13,7 @@ import liquibase.statement.*;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     isSinglePrimaryKeyColumn &&
                     isPrimaryKeyColumn &&
                     isAutoIncrementColumn) {
-                String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
+                String pkName = StringUtil.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
                 if (pkName == null) {
                     pkName = database.generatePrimaryKeyName(statement.getTableName());
                 }
@@ -155,7 +155,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 } else {
                     /* Determine if the NOT NULL constraint has a name. */
                     NotNullConstraint nnConstraintForThisColumn = statement.getNotNullColumns().get(column);
-                    String nncName = StringUtils.trimToNull(nnConstraintForThisColumn.getName());
+                    String nncName = StringUtil.trimToNull(nnConstraintForThisColumn.getName());
                     if (nncName == null) {
                         buffer.append(" NOT NULL");
                     } else {
@@ -190,7 +190,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if ((statement.getPrimaryKeyConstraint() != null) && !statement.getPrimaryKeyConstraint().getColumns()
                 .isEmpty()) {
                 if (database.supportsPrimaryKeyNames()) {
-                    String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
+                    String pkName = StringUtil.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
                     if (pkName == null) {
                         // TODO ORA-00972: identifier is too long
                         // If tableName lenght is more then 28 symbols
@@ -203,7 +203,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     }
                 }
                 buffer.append(" PRIMARY KEY (");
-                buffer.append(database.escapeColumnNameList(StringUtils.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
+                buffer.append(database.escapeColumnNameList(StringUtil.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
                 buffer.append(")");
                 // Setting up table space for PK's index if it exist
                 if (((database instanceof OracleDatabase) || (database instanceof PostgresDatabase)) && (statement
@@ -265,7 +265,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
-            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
+            buffer.append(database.escapeColumnNameList(StringUtil.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
             buffer.append(",");
         }

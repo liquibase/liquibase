@@ -12,7 +12,7 @@ import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -54,7 +54,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             String ascOrDesc = (String) col.get("ASC_OR_DESC");
             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean.FALSE : null);
             if (database instanceof H2Database) {
-                for (String columnName : StringUtils.splitAndTrim((String) col.get("COLUMN_NAME"), ",")) {
+                for (String columnName : StringUtil.splitAndTrim((String) col.get("COLUMN_NAME"), ",")) {
                     constraint.getColumns().add(new Column(columnName).setDescending(descending).setRelation(table));
                 }
             } else {
@@ -247,7 +247,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     Map rowData = rows.get(0);
                     String descriptor = rowData.get("DESCRIPTOR").toString();
                     descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
-                    for (String columnNumber : StringUtils.splitAndTrim(descriptor, ",")) {
+                    for (String columnNumber : StringUtil.splitAndTrim(descriptor, ",")) {
                         String columnName = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
                                 "select c.columnname from sys.syscolumns c "
                                         + "join sys.systables t on t.tableid=c.referenceid "

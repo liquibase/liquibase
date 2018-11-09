@@ -11,7 +11,7 @@ import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.statement.core.TableRowCountStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class RowCountPrecondition extends AbstractPrecondition {
 
@@ -33,7 +33,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = StringUtil.trimToNull(schemaName);
     }
 
     public String getTableName() {

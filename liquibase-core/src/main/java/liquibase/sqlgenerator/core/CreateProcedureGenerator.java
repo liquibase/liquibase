@@ -17,7 +17,7 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.SqlParser;
 import liquibase.util.StringClauses;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,10 +107,10 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         endDelimiter = endDelimiter.replace("\\r", "\r").replace("\\n", "\n");
         // DVONE-5036
-        String endCommentsTrimmedText = StringUtils.stripSqlCommentsAndWhitespacesFromTheEnd(procedureText);
+        String endCommentsTrimmedText = StringUtil.stripSqlCommentsAndWhitespacesFromTheEnd(procedureText);
         // Note: need to trim the delimiter since the return of the above call trims whitespaces, and to match
         // we have to trim the endDelimiter as well.
-        String trimmedDelimiter = StringUtils.trimRight(endDelimiter);
+        String trimmedDelimiter = StringUtil.trimRight(endDelimiter);
         if (endCommentsTrimmedText.endsWith(trimmedDelimiter)) {
             return endCommentsTrimmedText.substring(0, endCommentsTrimmedText.length() - trimmedDelimiter.length());
         } else {
@@ -122,7 +122,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
      * Convenience method for when the schemaName is set but we don't want to parse the body
      */
     public static void surroundWithSchemaSets(List<Sql> sql, String schemaName, Database database) {
-        if ((StringUtils.trimToNull(schemaName) != null) && !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
+        if ((StringUtil.trimToNull(schemaName) != null) && !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
             String defaultSchema = database.getDefaultSchemaName();
             if (database instanceof OracleDatabase) {
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
@@ -141,7 +141,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         if (schemaName == null) {
             return procedureText;
         }
-        if ((StringUtils.trimToNull(schemaName) != null) && LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
+        if ((StringUtil.trimToNull(schemaName) != null) && LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
             StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";

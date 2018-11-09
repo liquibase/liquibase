@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.util.MD5Util;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +67,7 @@ public final class CheckSum {
         return new CheckSum(MD5Util.computeMD5(
                 //remove "Unknown" unicode char 65533
                 Normalizer.normalize(
-                    StringUtils.standardizeLineEndings(valueToChecksum)
+                    StringUtil.standardizeLineEndings(valueToChecksum)
                             .replaceAll("\\uFFFD", "")
                         , Normalizer.Form.NFC)
         ), getCurrentVersion());

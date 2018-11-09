@@ -22,7 +22,7 @@ import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -87,7 +87,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 for (Catalog catalog : catalogs) {
                     quotedCatalogs.add("'" + catalog.getName() + "'");
                 }
-                this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", ").toUpperCase());
+                this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtil.join(quotedCatalogs, ", ").toUpperCase());
             }
 
             if (getDatabase().supportsCatalogs()) {

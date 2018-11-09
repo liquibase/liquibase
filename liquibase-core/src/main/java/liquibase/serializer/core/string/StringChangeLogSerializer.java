@@ -5,7 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
             if (!values.isEmpty()) {
                 buffer.append("\n");
-                buffer.append(StringUtils.join(values, "\n"));
+                buffer.append(StringUtil.join(values, "\n"));
                 buffer.append("\n");
             }
             buffer.append(indent(indent - 1)).append("]");
@@ -89,7 +89,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private String indent(int indent) {
-        return StringUtils.repeat(" ", INDENT_LENGTH * indent);
+        return StringUtil.repeat(" ", INDENT_LENGTH * indent);
     }
 
     private String serializeObject(Object[] collection, int indent) {

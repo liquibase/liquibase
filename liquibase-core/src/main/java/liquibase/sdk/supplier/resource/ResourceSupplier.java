@@ -1,5 +1,6 @@
 package liquibase.sdk.supplier.resource;
 
+import liquibase.Scope;
 import liquibase.change.ChangeFactory;
 import liquibase.change.core.CreateProcedureChange;
 import liquibase.configuration.GlobalConfiguration;
@@ -38,7 +39,7 @@ public class ResourceSupplier {
             if (path.toLowerCase().endsWith("csv")) {
                 stream = new ByteArrayInputStream(USERS_CSV.getBytes(encoding));
             } else if (path.toLowerCase().endsWith("my-logic.sql")) {
-                stream = new ByteArrayInputStream(((String) ChangeFactory.getInstance().getChangeMetaData(
+                stream = new ByteArrayInputStream(((String) Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(
                         new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(
                         new HsqlDatabase())).getBytes(encoding)
                 );

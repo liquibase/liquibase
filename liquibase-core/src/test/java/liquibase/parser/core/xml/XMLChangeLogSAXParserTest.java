@@ -12,7 +12,7 @@ import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
 import org.junit.Test;

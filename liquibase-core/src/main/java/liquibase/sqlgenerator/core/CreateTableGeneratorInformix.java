@@ -14,7 +14,7 @@ import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -134,10 +134,10 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         PrimaryKeyConstraint pkConstraint = statement.getPrimaryKeyConstraint();
         if ((statement.getPrimaryKeyConstraint() != null) && !statement.getPrimaryKeyConstraint().getColumns().isEmpty()) {
             buffer.append(" PRIMARY KEY (");
-            buffer.append(StringUtils.join(primaryKeyColumns, ", "));
+            buffer.append(StringUtil.join(primaryKeyColumns, ", "));
             buffer.append(")");
 
-            if (! StringUtils.isEmpty(pkConstraint.getConstraintName() )) {
+            if (! StringUtil.isEmpty(pkConstraint.getConstraintName() )) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(pkConstraint.getConstraintName()));
             }
@@ -178,7 +178,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
-            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
+            buffer.append(database.escapeColumnNameList(StringUtil.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
             if ((uniqueConstraint.getConstraintName() != null) && constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");

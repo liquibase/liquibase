@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.exception.DateParseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -9,10 +10,15 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
+import liquibase.util.NowAndTodayUtil;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -185,7 +191,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (names == null) {
             return null;
         }
-        List<String> nameArray = StringUtils.splitAndTrim(names, ",");
+        List<String> nameArray = StringUtil.splitAndTrim(names, ",");
         ColumnConfig[] returnArray = new ColumnConfig[nameArray.size()];
         for (int i = 0; i < nameArray.size(); i++) {
             returnArray[i] = fromName(nameArray.get(i));
@@ -310,7 +316,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
     public ColumnConfig setValueBoolean(String valueBoolean) {
-        valueBoolean = StringUtils.trimToNull(valueBoolean);
+        valueBoolean = StringUtil.trimToNull(valueBoolean);
         if ((valueBoolean == null) || "null".equalsIgnoreCase(valueBoolean)) {
             this.valueBoolean = null;
         } else {
@@ -380,10 +386,14 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * Set the date this column should be set to. Supports any of the date or datetime formats handled by {@link ISODateFormat}.
      * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a date.
      * If the string "null" is passed, it will set a null value.
+     * @param valueDate the Date Value to use (may be null or "null", or start with "now" or "today".
+     * @throws DateParseException if the columnType isn't supported for "now" or "today" values.
      */
-    public ColumnConfig setValueDate(String valueDate) {
+    public ColumnConfig setValueDate(String valueDate) throws DateParseException {
         if ((valueDate == null) || "null".equalsIgnoreCase(valueDate)) {
             this.valueDate = null;
+        } else if (NowAndTodayUtil.isNowOrTodayFormat(valueDate)) {
+            this.valueDate = NowAndTodayUtil.doNowOrToday(valueDate, this.getType());
         } else {
             try {
                 this.valueDate = new ISODateFormat().parse(valueDate);
@@ -434,7 +444,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public String getEncoding() {
         return encoding;
     }
-    
+
     public ColumnConfig setEncoding(String encoding) {
         this.encoding = encoding;
         return this;
@@ -549,7 +559,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If the string "null" or an empty string is passed, it will set a null value.
      */
     public ColumnConfig setDefaultValueDate(String defaultValueDate) {
-        defaultValueDate = StringUtils.trimToNull(defaultValueDate);
+        defaultValueDate = StringUtil.trimToNull(defaultValueDate);
         if ((defaultValueDate == null) || "null".equalsIgnoreCase(defaultValueDate)) {
             this.defaultValueDate = null;
         } else {
@@ -579,7 +589,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
     public ColumnConfig setDefaultValueBoolean(String defaultValueBoolean) {
-        defaultValueBoolean = StringUtils.trimToNull(defaultValueBoolean);
+        defaultValueBoolean = StringUtil.trimToNull(defaultValueBoolean);
         if ((defaultValueBoolean == null) || "null".equalsIgnoreCase(defaultValueBoolean)) {
             this.defaultValueBoolean = null;
         } else {
@@ -774,7 +784,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         value = parsedNode.getChildValue(null, "value", String.class);
         if (value == null) {
-            value = StringUtils.trimToNull((String) parsedNode.getValue());
+            value = StringUtil.trimToNull((String) parsedNode.getValue());
         }
 
         setValueNumeric(parsedNode.getChildValue(null, "valueNumeric", String.class));

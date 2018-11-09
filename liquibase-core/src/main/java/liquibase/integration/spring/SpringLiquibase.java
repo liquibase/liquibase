@@ -18,7 +18,7 @@ import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -393,27 +393,27 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
-		if (StringUtils.trimToNull(this.defaultSchema) != null) {
+		if (StringUtil.trimToNull(this.defaultSchema) != null) {
             if (database.supportsSchemas()) {
                 database.setDefaultSchemaName(this.defaultSchema);
             } else if (database.supportsCatalogs()) {
                 database.setDefaultCatalogName(this.defaultSchema);
             }
         }
-        if (StringUtils.trimToNull(this.liquibaseSchema) != null) {
+        if (StringUtil.trimToNull(this.liquibaseSchema) != null) {
             if (database.supportsSchemas()) {
                 database.setLiquibaseSchemaName(this.liquibaseSchema);
             } else if (database.supportsCatalogs()) {
                 database.setLiquibaseCatalogName(this.liquibaseSchema);
             }
         }
-        if (StringUtils.trimToNull(this.liquibaseTablespace) != null && database.supportsTablespaces()) {
+        if (StringUtil.trimToNull(this.liquibaseTablespace) != null && database.supportsTablespaces()) {
             database.setLiquibaseTablespaceName(this.liquibaseTablespace);
         }
-        if (StringUtils.trimToNull(this.databaseChangeLogTable) != null) {
+        if (StringUtil.trimToNull(this.databaseChangeLogTable) != null) {
             database.setDatabaseChangeLogTableName(this.databaseChangeLogTable);
         }
-        if (StringUtils.trimToNull(this.databaseChangeLogLockTable) != null) {
+        if (StringUtil.trimToNull(this.databaseChangeLogLockTable) != null) {
             database.setDatabaseChangeLogLockTableName(this.databaseChangeLogLockTable);
         }
 		return database;

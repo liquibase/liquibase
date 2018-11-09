@@ -20,7 +20,7 @@ import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -67,7 +67,7 @@ public class JdbcExecutor extends AbstractExecutor {
             } else {
                 url = con.getURL();
             }
-            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ url)+": "+ex.getMessage(), ex);
+            throw new DatabaseException("Error executing SQL " + StringUtil.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ url)+": "+ex.getMessage(), ex);
         }
         finally {
             JdbcUtils.closeStatement(stmt);
@@ -97,7 +97,7 @@ public class JdbcExecutor extends AbstractExecutor {
             // in the case when the exception translator hasn't been initialized yet.
             JdbcUtils.closeStatement(stmt);
             stmt = null;
-            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
+            throw new DatabaseException("Error executing SQL " + StringUtil.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
         }
         finally {
             JdbcUtils.closeStatement(stmt);

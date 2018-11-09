@@ -2,7 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -62,7 +62,7 @@ public class Index extends AbstractDatabaseObject {
         
         return getRelation().getSchema();
     }
-    
+
     /**
      * @deprecated Use {@link #getRelation()}
      */
@@ -82,11 +82,11 @@ public class Index extends AbstractDatabaseObject {
 	public Index setTable(Table table) {
 		return setRelation(table);
     }
-    
+
     public Relation getRelation() {
     	return getAttribute("table", Relation.class);
     }
-    
+
     public Index setRelation(Relation relation) {
     	this.setAttribute("table", relation);
         return this;
@@ -123,7 +123,7 @@ public class Index extends AbstractDatabaseObject {
     }
 
     public String getColumnNames() {
-        return StringUtils.join(getColumns(), ", ", new StringUtils.ToStringFormatter());
+        return StringUtil.join(getColumns(), ", ", new StringUtil.ToStringFormatter());
     }
 
     public Index setUnique(Boolean value) {
@@ -140,7 +140,7 @@ public class Index extends AbstractDatabaseObject {
 	}
 
 	public String getAssociatedWithAsString() {
-		return StringUtils.join(getAssociatedWith(), ",");
+		return StringUtil.join(getAssociatedWith(), ",");
 	}
 
 	public void addAssociatedWith(String item) {
@@ -185,13 +185,13 @@ public class Index extends AbstractDatabaseObject {
         if ((this.getRelation() != null) && (o.getRelation() != null)) {
             returnValue = this.getRelation().compareTo(o.getRelation());
             if ((returnValue == 0) && (this.getRelation().getSchema() != null) && (o.getRelation().getSchema() != null)) {
-                returnValue = StringUtils.trimToEmpty(this.getRelation().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
+                returnValue = StringUtil.trimToEmpty(this.getRelation().getSchema().getName()).compareToIgnoreCase(StringUtil.trimToEmpty(o.getRelation().getSchema().getName()));
             }
         }
 
         if (returnValue == 0) {
-            String thisName = StringUtils.trimToEmpty(this.getName());
-            String oName = StringUtils.trimToEmpty(o.getName());
+            String thisName = StringUtil.trimToEmpty(this.getName());
+            String oName = StringUtil.trimToEmpty(o.getName());
             returnValue = thisName.compareTo(oName);
         }
 

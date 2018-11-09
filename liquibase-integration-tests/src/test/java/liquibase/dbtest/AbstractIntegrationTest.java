@@ -1,9 +1,6 @@
 package liquibase.dbtest;
 
-import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
+import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -123,7 +120,7 @@ public abstract class AbstractIntegrationTest {
         }
         this.setJdbcUrl(url);
 
-        ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
+        Scope.setScopeManager(new TestScopeManager());
     }
 
     public static DatabaseTestURL getDatabaseTestURL(String databaseManager) {

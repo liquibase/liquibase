@@ -1,5 +1,6 @@
 package liquibase.database;
 
+import liquibase.Scope;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -8,8 +9,7 @@ import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,16 +25,9 @@ public class DatabaseFactory {
 
     private DatabaseFactory() {
         try {
-            Class<? extends Database>[] classes = ServiceLocator.getInstance().findClasses(Database.class);
-
-            for (Class<? extends Database> clazz : classes) {
-                try {
-                    register(clazz.getConstructor().newInstance());
-                } catch (Exception e) {
-                    throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
-                }
+            for (Database database : Scope.getCurrentScope().getServiceLocator().findInstances(Database.class)) {
+                register(database);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -173,7 +166,7 @@ public class DatabaseFactory {
             return offlineConnection;
         }
 
-        driver = StringUtils.trimToNull(driver);
+        driver = StringUtil.trimToNull(driver);
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }

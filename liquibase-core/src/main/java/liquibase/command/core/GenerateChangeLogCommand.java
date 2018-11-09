@@ -9,7 +9,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
@@ -51,7 +51,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         changeLogWriter.setChangeSetContext(context);
         changeLogWriter.setChangeSetPath(getChangeLogFile());
 
-        if (StringUtils.trimToNull(getChangeLogFile()) != null) {
+        if (StringUtil.trimToNull(getChangeLogFile()) != null) {
             changeLogWriter.print(getChangeLogFile());
         } else {
             PrintStream outputStream = getOutputStream();

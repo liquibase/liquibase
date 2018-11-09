@@ -11,7 +11,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -130,7 +130,7 @@ public class SQLFileChange extends AbstractSQLChange {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (StringUtils.trimToNull(getPath()) == null) {
+        if (StringUtil.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");
         }
         return validationErrors;

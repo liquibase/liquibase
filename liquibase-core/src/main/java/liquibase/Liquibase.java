@@ -45,7 +45,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
@@ -1466,7 +1466,7 @@ public class Liquibase {
         if (changeSetIdentifier == null) {
             throw new LiquibaseException(new IllegalArgumentException("changeSetIdentifier"));
         }
-        final List<String> parts = StringUtils.splitAndTrim(changeSetIdentifier, "::");
+        final List<String> parts = StringUtil.splitAndTrim(changeSetIdentifier, "::");
         if ((parts == null) || (parts.size() < CHANGESET_ID_NUM_PARTS)) {
             throw new LiquibaseException(
                 new IllegalArgumentException("Invalid changeSet identifier: " + changeSetIdentifier)

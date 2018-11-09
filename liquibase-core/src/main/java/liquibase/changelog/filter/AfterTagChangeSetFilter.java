@@ -3,7 +3,7 @@ package liquibase.changelog.filter;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.exception.RollbackFailedException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.HashSet;
 import java.util.List;

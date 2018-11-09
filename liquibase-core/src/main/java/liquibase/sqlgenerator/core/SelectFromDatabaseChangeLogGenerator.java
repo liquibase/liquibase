@@ -9,7 +9,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -28,7 +28,7 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
     @Override
     public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, final Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<ColumnConfig> columnsToSelect = Arrays.asList(statement.getColumnsToSelect());
-        String sql = "SELECT " + (database instanceof MSSQLDatabase && statement.getLimit() != null ? "TOP "+statement.getLimit()+" " : "") + StringUtils.join(columnsToSelect, ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+        String sql = "SELECT " + (database instanceof MSSQLDatabase && statement.getLimit() != null ? "TOP "+statement.getLimit()+" " : "") + StringUtil.join(columnsToSelect, ",", new StringUtil.StringUtilFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig column) {
                 if ((column.getComputed() != null) && column.getComputed()) {

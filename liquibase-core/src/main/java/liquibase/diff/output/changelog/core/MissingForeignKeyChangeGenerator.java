@@ -9,7 +9,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -43,16 +43,16 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
         change.setConstraintName(fk.getName());
 
-        String defaultSchemaName = StringUtils.trimToEmpty(referenceDatabase.getDefaultSchemaName());
-        String defaultCatalogName = StringUtils.trimToEmpty(referenceDatabase.getDefaultCatalogName());
+        String defaultSchemaName = StringUtil.trimToEmpty(referenceDatabase.getDefaultSchemaName());
+        String defaultCatalogName = StringUtil.trimToEmpty(referenceDatabase.getDefaultCatalogName());
 
-        String compDefaultSchemaName = StringUtils.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
-        String compDefaultCatalogName = StringUtils.trimToEmpty(comparisonDatabase.getDefaultCatalogName());
+        String compDefaultSchemaName = StringUtil.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
+        String compDefaultCatalogName = StringUtil.trimToEmpty(comparisonDatabase.getDefaultCatalogName());
 
         boolean includedCatalog = false;
         change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
 
-        String missingPrimaryKeyCatalogName = StringUtils.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getCatalogName());
+        String missingPrimaryKeyCatalogName = StringUtil.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         if (referenceDatabase.supportsCatalogs()) {
             if (control.getIncludeCatalog()) {
                 change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
@@ -65,7 +65,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
             }
         }
 
-        String missingPrimaryKeySchemaName = StringUtils.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getName());
+        String missingPrimaryKeySchemaName = StringUtil.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getName());
         if (referenceDatabase.supportsSchemas()) {
             if (includedCatalog || control.getIncludeSchema()) {
                 change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
@@ -76,7 +76,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
             }
         }
 
-        change.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
+        change.setReferencedColumnNames(StringUtil.join(fk.getPrimaryKeyColumns(), ",", new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.getName();
@@ -90,7 +90,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
         if (control.getIncludeSchema()) {
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
         }
-        change.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
+        change.setBaseColumnNames(StringUtil.join(fk.getForeignKeyColumns(), ",", new StringUtil.StringUtilFormatter<Column>() {
             @Override
             public String toString(Column obj) {
                 return obj.getName();

@@ -9,7 +9,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
 import liquibase.parser.ChangeLogParserCofiguration;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -52,7 +52,7 @@ public class ChangeLogParameters {
             }
             this.set("database.defaultCatalogName", database.getDefaultCatalogName());
             this.set("database.defaultSchemaName", database.getDefaultSchemaName());
-            this.set("database.defaultSchemaNamePrefix", (StringUtils.trimToNull(database.getDefaultSchemaName()) ==
+            this.set("database.defaultSchemaNamePrefix", (StringUtil.trimToNull(database.getDefaultSchemaName()) ==
                 null) ? "" : ("." + database.getDefaultSchemaName()));
             this.set("database.lineComment", database.getLineComment());
             this.set("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
@@ -237,12 +237,12 @@ public class ChangeLogParameters {
         public ChangeLogParameter(String key, Object value, String validContexts, String labels, String validDatabases,
                                   boolean globalParam, DatabaseChangeLog changeLog) {
             this(key, value, new ContextExpression(validContexts), new Labels(labels),
-                StringUtils.splitAndTrim(validDatabases, ","), globalParam, changeLog);
+                StringUtil.splitAndTrim(validDatabases, ","), globalParam, changeLog);
         }
 
         private ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels,
                                    String validDatabases, boolean globalParam, DatabaseChangeLog changeLog) {
-            this(key, value, validContexts, labels, StringUtils.splitAndTrim(validDatabases, ","),
+            this(key, value, validContexts, labels, StringUtil.splitAndTrim(validDatabases, ","),
                 globalParam, changeLog);
         }
 

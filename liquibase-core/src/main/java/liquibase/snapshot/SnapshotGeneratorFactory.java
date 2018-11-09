@@ -1,6 +1,7 @@
 package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -24,12 +25,9 @@ public class SnapshotGeneratorFactory {
     private List<SnapshotGenerator> generators = new ArrayList<>();
 
     protected SnapshotGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SnapshotGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SnapshotGenerator) clazz.getConstructor().newInstance());
+            for (SnapshotGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SnapshotGenerator.class)) {
+                register(generator);
             }
 
         } catch (Exception e) {

@@ -8,7 +8,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -31,7 +31,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 
         // Default filter of index creation:
         // creation of all indexes with associations are switched off.
-        List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
+        List<String> associatedWith = StringUtil.splitAndTrim(statement.getAssociatedWith(), ",");
         if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains
             (Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
             return new Sql[0];
@@ -69,7 +69,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
         }
         buffer.append(")");
 
-        if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
+        if ((StringUtil.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
             if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
                 buffer.append(" ON ").append(statement.getTablespace());
             } else if ((database instanceof AbstractDb2Database) || (database instanceof InformixDatabase)) {

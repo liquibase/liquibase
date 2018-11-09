@@ -1,13 +1,13 @@
 package liquibase.diff.compare;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -21,12 +21,9 @@ public class DatabaseObjectComparatorFactory {
     private Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<>();
 
     private DatabaseObjectComparatorFactory() {
-        Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(DatabaseObjectComparator.class);
-
-            for (Class clazz : classes) {
-                register((DatabaseObjectComparator) clazz.getConstructor().newInstance());
+            for (DatabaseObjectComparator comparator : Scope.getCurrentScope().getServiceLocator().findInstances(DatabaseObjectComparator.class)) {
+                register(comparator);
             }
 
         } catch (Exception e) {
@@ -157,7 +154,7 @@ public class DatabaseObjectComparatorFactory {
         }
 
         for (int i=0; i<hash.length; i++) {
-            if (StringUtils.trimToNull(hash[i]) == null) {
+            if (StringUtil.trimToNull(hash[i]) == null) {
                 hash[i] = "null";
             }
         }

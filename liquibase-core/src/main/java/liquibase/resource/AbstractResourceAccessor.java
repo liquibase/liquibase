@@ -1,7 +1,7 @@
 package liquibase.resource;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.SystemUtils;
 
 import java.io.File;
@@ -134,7 +134,7 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
     }
 
     protected String convertToPath(String relativeTo, String path) {
-        if (StringUtils.trimToNull(relativeTo) == null) {
+        if (StringUtil.trimToNull(relativeTo) == null) {
             return path;
         }
         URL baseUrl = toClassLoader().getResource(relativeTo);

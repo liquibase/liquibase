@@ -15,7 +15,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 import java.util.Set;
@@ -71,7 +71,7 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
             return this;
         }
 
-        Set<Class<? extends DatabaseObject>> types = DatabaseObjectFactory.getInstance().parseTypes(StringUtils.join(snapshotTypes, ","));
+        Set<Class<? extends DatabaseObject>> types = DatabaseObjectFactory.getInstance().parseTypes(StringUtil.join(snapshotTypes, ","));
         this.snapshotTypes = new Class[types.size()];
         int i = 0;
         for (Class<? extends DatabaseObject> type : types) {

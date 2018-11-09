@@ -13,7 +13,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.*;
@@ -60,7 +60,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     private static Reader createReader(InputStream in, String encoding) {
-        return new BufferedReader((StringUtils.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
+        return new BufferedReader((StringUtil.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
             UtfBomAwareReader(in, encoding));
     }
 

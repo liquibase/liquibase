@@ -15,7 +15,7 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
 import org.w3c.dom.*;
@@ -344,7 +344,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         if (columnConfig.getValueSequenceCurrent() != null) {
             element.setAttribute("valueSequenceNext", columnConfig.getValueSequenceCurrent().toString());
         }
-        if (StringUtils.trimToNull(columnConfig.getRemarks()) != null) {
+        if (StringUtil.trimToNull(columnConfig.getRemarks()) != null) {
             element.setAttribute("remarks", columnConfig.getRemarks());
         }
 
@@ -422,7 +422,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (indent > 0) {
                 buffer.append("\n");
             }
-            buffer.append(StringUtils.repeat(" ", indent));
+            buffer.append(StringUtil.repeat(" ", indent));
         }
         buffer.append("<").append(node.getNodeName());
         SortedMap<String, String> attributeMap = new TreeMap<>();
@@ -436,7 +436,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             String value = (String) entry.getValue();
             if (value != null) {
                 if ((indent >= 0) && !firstAttribute && (attributeMap.size() > 2)) {
-                    buffer.append("\n").append(StringUtils.repeat(" ", indent)).append("        ");
+                    buffer.append("\n").append(StringUtil.repeat(" ", indent)).append("        ");
                 } else {
                     buffer.append(" ");
                 }
@@ -444,7 +444,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 firstAttribute = false;
             }
         }
-        String textContent = StringUtils.trimToEmpty(XMLUtil.getTextContent(node));
+        String textContent = StringUtil.trimToEmpty(XMLUtil.getTextContent(node));
         buffer.append(">").append(textContent);
 
         boolean sawChildren = false;
@@ -462,7 +462,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
         if (indent >= 0) {
             if (sawChildren) {
-                buffer.append("\n").append(StringUtils.repeat(" ", indent));
+                buffer.append("\n").append(StringUtil.repeat(" ", indent));
             }
         }
 

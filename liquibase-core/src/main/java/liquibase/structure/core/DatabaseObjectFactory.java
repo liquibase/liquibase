@@ -1,12 +1,12 @@
 package liquibase.structure.core;
 
+import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,7 +28,7 @@ public class DatabaseObjectFactory {
     }
 
     public Set<Class<? extends DatabaseObject>> parseTypes(String typesString) {
-        if (StringUtils.trimToNull(typesString) == null) {
+        if (StringUtil.trimToNull(typesString) == null) {
             return getStandardTypes();
         } else {
             Set<Class<? extends DatabaseObject>> returnSet = new HashSet<>();
@@ -36,8 +36,8 @@ public class DatabaseObjectFactory {
             Set<String> typesToInclude = new HashSet<>(Arrays.asList(typesString.toLowerCase().split("\\s*,\\s*")));
             Set<String> typesNotFound = new HashSet<>(typesToInclude);
 
-            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
-            for (Class<? extends DatabaseObject> clazz : classes) {
+            for (DatabaseObject object : Scope.getCurrentScope().getServiceLocator().findInstances(DatabaseObject.class)) {
+                Class<? extends DatabaseObject> clazz = object.getClass();
                 if (typesToInclude.contains(clazz.getSimpleName().toLowerCase())
                         || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"s")
                         || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"es") //like indexes
@@ -49,7 +49,7 @@ public class DatabaseObjectFactory {
                 }
             }
             if (!typesNotFound.isEmpty()) {
-                throw new UnexpectedLiquibaseException("Unknown snapshot type(s) "+StringUtils.join(typesNotFound, ", "));
+                throw new UnexpectedLiquibaseException("Unknown snapshot type(s) "+ StringUtil.join(typesNotFound, ", "));
             }
             return returnSet;
         }
@@ -59,14 +59,9 @@ public class DatabaseObjectFactory {
         if (standardTypes == null) {
             Set<Class<? extends DatabaseObject>> set = new HashSet<>();
 
-            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
-            for (Class<? extends DatabaseObject> clazz : classes) {
-                try {
-                    if (!clazz.equals(LiquibaseColumn.class) && clazz.newInstance().snapshotByDefault()) {
-                        set.add(clazz);
-                    }
-                } catch (Exception e) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
+            for (DatabaseObject databaseObject : Scope.getCurrentScope().getServiceLocator().findInstances(DatabaseObject.class)) {
+                if (!databaseObject.getClass().equals(LiquibaseColumn.class) && databaseObject.snapshotByDefault()) {
+                    set.add(databaseObject.getClass());
                 }
             }
 

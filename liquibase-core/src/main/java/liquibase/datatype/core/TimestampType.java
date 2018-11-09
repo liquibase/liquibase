@@ -13,7 +13,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseIncapableOfOperation;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.grammar.ParseException;
 
 import java.util.Locale;
@@ -33,7 +33,7 @@ public class TimestampType extends DateTimeType {
      */
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         // If a fractional precision is given, check is the DBMS supports the length
         if (getParameters().length > 0) {
             Integer desiredLength = null;

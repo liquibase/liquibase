@@ -4,7 +4,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.SpringBootFatJar;
 
 import java.io.File;
@@ -198,7 +198,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             for (URL url : ((URLClassLoader) classLoader).getURLs()) {
                 urls.add(url.toExternalForm());
             }
-            description = StringUtils.join(urls, ",");
+            description = StringUtil.join(urls, ",");
         } else {
             description = classLoader.getClass().getName();
         }

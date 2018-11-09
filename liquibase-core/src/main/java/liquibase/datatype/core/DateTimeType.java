@@ -9,7 +9,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -45,7 +45,7 @@ public class DateTimeType extends LiquibaseDataType {
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP, getParameters());
         }
 
-        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
             if (originalDefinition.matches("(?i)^\\[?smalldatetime.*")) {

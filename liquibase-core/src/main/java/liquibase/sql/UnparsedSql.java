@@ -1,7 +1,7 @@
 package liquibase.sql;
 
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -17,7 +17,7 @@ public class UnparsedSql implements Sql {
     }
 
     public UnparsedSql(String sql, String endDelimiter, DatabaseObject... affectedDatabaseObjects) {
-        this.sql = StringUtils.trimToEmpty(sql.trim());
+        this.sql = StringUtil.trimToEmpty(sql.trim());
         this.endDelimiter = endDelimiter;
 
         this.affectedDatabaseObjects.addAll(Arrays.asList(affectedDatabaseObjects));

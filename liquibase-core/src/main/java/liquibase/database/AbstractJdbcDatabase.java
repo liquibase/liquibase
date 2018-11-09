@@ -3,11 +3,19 @@ package liquibase.database;
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
-import liquibase.changelog.*;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.database.core.*;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -15,7 +23,12 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.DateParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
@@ -34,10 +47,20 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.View;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
+import liquibase.util.NowAndTodayUtil;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -45,7 +68,15 @@ import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 
@@ -451,44 +482,50 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /***
-     * Returns true if the String conforms to an ISO 8601 date, e.g. 2016-12-31
-     * @param isoDate
+     * Returns true if the String conforms to an ISO 8601 date, e.g. 2016-12-31.  (Or, if it is a "NOW" or "TODAY" type
+     * value)
+     * @param isoDate value to check.
      */
     protected boolean isDateOnly(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}$");
+        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}$")
+                || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
     /***
-     * Returns true if the String conforms to an ISO 8601 date
-     * plus a time (hours, minutes, whole seconds and optionally fraction of a second) in UTC, e.g. 2016-12-31T18:43:59
+     * Returns true if the String conforms to an ISO 8601 date plus a time (hours, minutes, whole seconds
+     * and optionally fraction of a second) in UTC, e.g. 2016-12-31T18:43:59.  (Or, if it is a "NOW" or "TODAY" type
+     * value.)
      * The "T" may be replaced by a space.
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
-     * @param isoDate
+     * @param isoDate value to check.
      */
     protected boolean isDateTime(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$");
+        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$")
+                || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
     /***
      * Returns true if the String conforms to an ISO 8601 date
      * plus a timestamp (hours, minutes, seconds and at least one decimal fraction) in UTC,
-     * e.g. 2016-12-31T18:43:59.3 or 2016-12-31T18:43:59.345
+     * e.g. 2016-12-31T18:43:59.3 or 2016-12-31T18:43:59.345.  (Or, if it is a "NOW" or "TODAY" type value.
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
      * The "T" may be replaced by a space.
-     * @param isoDate
+     * @param isoDate value to check
      */
     protected boolean isTimestamp(final String isoDate) {
-        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$");
+        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$")
+                || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
     /***
      * Returns true if the String conforms to an ISO 8601 time (hours, minutes and whole seconds) in UTC,
-     * e.g. 18:43:59
+     * e.g. 18:43:59.  (Or, if it is a "NOW" or "TODAY" type value.
      * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
-     * @param isoDate
+     * @param isoDate value to check
      */
     protected boolean isTimeOnly(final String isoDate) {
-        return isoDate.matches("^\\d{2}:\\d{2}:\\d{2}$");
+        return isoDate.matches("^\\d{2}:\\d{2}:\\d{2}$")
+                || NowAndTodayUtil.isNowOrTodayFormat(isoDate);
     }
 
     /**
@@ -860,8 +897,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String escapeObjectName(String catalogName, String schemaName, final String objectName,
                                    final Class<? extends DatabaseObject> objectType) {
         if (supportsSchemas()) {
-            catalogName = StringUtils.trimToNull(catalogName);
-            schemaName = StringUtils.trimToNull(schemaName);
+            catalogName = StringUtil.trimToNull(catalogName);
+            schemaName = StringUtil.trimToNull(schemaName);
 
             if (catalogName == null) {
                 catalogName = this.getDefaultCatalogName();
@@ -892,8 +929,8 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
         } else if (supportsCatalogs()) {
-            catalogName = StringUtils.trimToNull(catalogName);
-            schemaName = StringUtils.trimToNull(schemaName);
+            catalogName = StringUtil.trimToNull(catalogName);
+            schemaName = StringUtil.trimToNull(schemaName);
 
             if (catalogName != null) {
                 if (getOutputDefaultCatalog()) {
@@ -1013,7 +1050,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeColumnNameList(final String columnNames) {
         StringBuilder sb = new StringBuilder();
-        for (String columnName : StringUtils.splitAndTrim(columnNames, ",")) {
+        for (String columnName : StringUtil.splitAndTrim(columnNames, ",")) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }

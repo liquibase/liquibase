@@ -22,7 +22,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.SqlUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -202,9 +202,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         throws SQLException, DatabaseException {
         String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
         String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
-        String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
-        String rawCatalogName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
-        String remarks = StringUtils.trimToNull((String) columnMetadataResultSet.get("REMARKS"));
+        String rawSchemaName = StringUtil.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
+        String rawCatalogName = StringUtil.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
+        String remarks = StringUtil.trimToNull((String) columnMetadataResultSet.get("REMARKS"));
         if (remarks != null) {
             // Comes back escaped sometimes
             remarks = remarks.replace("''", "'");
@@ -213,7 +213,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
         Column column = new Column();
-        column.setName(StringUtils.trimToNull(rawColumnName));
+        column.setName(StringUtil.trimToNull(rawColumnName));
         column.setRelation(table);
         column.setRemarks(remarks);
         column.setOrder(position);
@@ -247,14 +247,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database.supportsAutoIncrement()) {
             if (table instanceof Table) {
                 if (database instanceof OracleDatabase) {
-                    String data_default = StringUtils.trimToEmpty((String) columnMetadataResultSet.get("DATA_DEFAULT")).toLowerCase();
+                    String data_default = StringUtil.trimToEmpty((String) columnMetadataResultSet.get("DATA_DEFAULT")).toLowerCase();
                     if (data_default.contains("iseq$$") && data_default.endsWith("nextval")) {
                         column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
                     }
                 } else {
                     if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
                         String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
-                        isAutoincrement = StringUtils.trimToNull(isAutoincrement);
+                        isAutoincrement = StringUtil.trimToNull(isAutoincrement);
                         if (isAutoincrement == null) {
                             column.setAutoIncrementInformation(null);
                         } else if (isAutoincrement.equals("YES")) {

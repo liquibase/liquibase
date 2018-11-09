@@ -6,7 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -16,7 +16,7 @@ public class FloatType  extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
             if ("real".equals(originalDefinition.toLowerCase(Locale.US))
                     || "[real]".equals(originalDefinition.toLowerCase(Locale.US))

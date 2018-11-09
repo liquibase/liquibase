@@ -16,7 +16,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
@@ -369,10 +369,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
             String name = this.escapeObjectName(objectName, objectType);
-            if (StringUtils.isEmpty(schemaName)) {
+            if (StringUtil.isEmpty(schemaName)) {
                 schemaName = this.getDefaultSchemaName();
             }
-            if ((!StringUtils.isEmpty(schemaName) && (!schemaName.equals(getConnectionSchemaName())))) {
+            if ((!StringUtil.isEmpty(schemaName) && (!schemaName.equals(getConnectionSchemaName())))) {
                 name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
             }
             return name;

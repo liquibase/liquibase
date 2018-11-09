@@ -8,7 +8,7 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import org.junit.Before;
 import org.junit.Test;
 

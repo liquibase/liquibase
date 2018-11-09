@@ -3,7 +3,7 @@ package liquibase.change.core
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.OracleDatabase
 import liquibase.parser.core.ParsedNode
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory

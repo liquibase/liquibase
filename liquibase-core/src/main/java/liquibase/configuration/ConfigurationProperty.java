@@ -1,7 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -99,7 +99,7 @@ public class ConfigurationProperty {
             } else if (type.equals(Long.class)) {
             	return Long.valueOf((String) value);
             } else if (type.equals(List.class)) {
-                return StringUtils.splitAndTrim((String) value, ",");
+                return StringUtil.splitAndTrim((String) value, ",");
             } else {
                 throw new UnexpectedLiquibaseException("Cannot parse property "+value.getClass().getSimpleName()+" to a "+type.getSimpleName());
             }

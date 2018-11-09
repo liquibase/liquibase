@@ -4,13 +4,12 @@ import liquibase.database.*;
 import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 
 import java.sql.Connection;
 import java.sql.Driver;

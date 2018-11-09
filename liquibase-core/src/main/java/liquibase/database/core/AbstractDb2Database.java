@@ -19,7 +19,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -95,9 +95,9 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
             if (rs.next()) {
                 String result = rs.getString(1);
                 if (result != null) {
-                    this.defaultSchemaName = StringUtils.trimToNull(result);
+                    this.defaultSchemaName = StringUtil.trimToNull(result);
                 } else {
-                    this.defaultSchemaName = StringUtils.trimToNull(super.getDefaultSchemaName());
+                    this.defaultSchemaName = StringUtil.trimToNull(super.getDefaultSchemaName());
                 }
             }
         } catch (Exception e) {

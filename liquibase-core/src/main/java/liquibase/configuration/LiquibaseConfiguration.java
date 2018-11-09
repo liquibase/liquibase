@@ -1,7 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,6 +141,6 @@ public class LiquibaseConfiguration {
             reasons.add(container.describeValueLookupLogic(property));
         }
 
-        return StringUtils.join(reasons, " AND ");
+        return StringUtil.join(reasons, " AND ");
     }
 }

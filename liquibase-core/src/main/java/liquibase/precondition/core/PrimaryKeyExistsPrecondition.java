@@ -13,7 +13,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
@@ -74,7 +74,7 @@ public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
             PrimaryKey example = new PrimaryKey();
             Table table = new Table();
             table.setSchema(new Schema(getCatalogName(), getSchemaName()));
-            if (StringUtils.trimToNull(getTableName()) != null) {
+            if (StringUtil.trimToNull(getTableName()) != null) {
                 table.setName(getTableName());
             }
             example.setTable(table);

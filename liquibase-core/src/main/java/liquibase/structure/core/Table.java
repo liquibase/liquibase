@@ -1,7 +1,7 @@
 package liquibase.structure.core;
 
 import liquibase.statement.NotNullConstraint;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +56,7 @@ public class Table extends Relation {
         Table that = (Table) o;
 
         if ((this.getSchema() != null) && (that.getSchema() != null)) {
-            boolean schemasTheSame = StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            boolean schemasTheSame = StringUtil.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtil.trimToEmpty(that.getSchema().getName()));
             if (!schemasTheSame) {
                 return false;
             }
@@ -68,7 +68,7 @@ public class Table extends Relation {
 
     @Override
     public int hashCode() {
-        return StringUtils.trimToEmpty(getName()).toUpperCase().hashCode();
+        return StringUtil.trimToEmpty(getName()).toUpperCase().hashCode();
     }
 
     @Override

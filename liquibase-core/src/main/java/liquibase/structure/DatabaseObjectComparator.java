@@ -1,7 +1,7 @@
 package liquibase.structure;
 
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Comparator;
 
@@ -20,12 +20,12 @@ public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
 
         }
 
-        String name1 = StringUtils.trimToEmpty(o1.getName());
-        String name2 = StringUtils.trimToEmpty(o2.getName());
+        String name1 = StringUtil.trimToEmpty(o1.getName());
+        String name2 = StringUtil.trimToEmpty(o2.getName());
 
         int i = name1.compareTo(name2);
         if (i == 0) {
-            return StringUtils.trimToEmpty(o1.toString()).compareTo(StringUtils.trimToEmpty(o2.toString()));
+            return StringUtil.trimToEmpty(o1.toString()).compareTo(StringUtil.trimToEmpty(o2.toString()));
         }
 
         return i;
