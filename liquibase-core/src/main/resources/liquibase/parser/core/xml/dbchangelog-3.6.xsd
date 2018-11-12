@@ -322,6 +322,8 @@
 		<xsd:attribute name="autoIncrement" type="booleanExp" />
 		<xsd:attribute name="startWith" type="xsd:long" />
 		<xsd:attribute name="incrementBy" type="xsd:long" />
+		<xsd:attribute name="generationType" type="xsd:string" />
+		<xsd:attribute name="defaultOnNull" type="booleanExp" />
 		<xsd:attribute name="remarks" type="xsd:string" />
         <xsd:attribute name="encoding" type="xsd:string">
             <xsd:annotation>

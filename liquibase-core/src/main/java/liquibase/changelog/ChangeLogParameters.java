@@ -33,7 +33,7 @@ public class ChangeLogParameters {
         }
 
         if (database != null) {
-            this.set("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
+            this.set("database.autoIncrementClause", database.getAutoIncrementClause(null, null, null, null));
             this.set("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
             this.set("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
             this.set("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());

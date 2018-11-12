@@ -50,7 +50,7 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
             			statement.getColumnName())
             		+ " SET "
             		+ database.getAutoIncrementClause(
-            			statement.getStartWith(), statement.getIncrementBy()),
+            			statement.getStartWith(), statement.getIncrementBy(), statement.getGenerationType(), statement.getDefaultOnNull()),
                 getAffectedColumn(statement))
         };
     }

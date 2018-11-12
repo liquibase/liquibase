@@ -86,7 +86,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             if (isAutoIncrementColumn) {
                 // TODO: check if database supports auto increment on non primary key column
                 if (database.supportsAutoIncrement()) {
-                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
                 
                     if (autoIncrementClause.length() > 0) {
                         buffer.append(" ").append(autoIncrementClause);

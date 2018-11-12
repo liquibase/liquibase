@@ -49,6 +49,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
+    private String generationType;
+    private Boolean defaultOnNull;
     private BigInteger startWith;
     private BigInteger incrementBy;
     private String remarks;
@@ -754,6 +756,24 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public Boolean getDefaultOnNull() {
+        return defaultOnNull;
+    }
+
+    public ColumnConfig setDefaultOnNull(Boolean defaultOnNull) {
+        this.defaultOnNull = defaultOnNull;
+        return this;
+    }
+
+    public String getGenerationType() {
+        return generationType;
+    }
+
+    public ColumnConfig setGenerationType(String generationType) {
+        this.generationType = generationType;
+        return this;
+    }
+
     @Override
     public String getSerializedObjectName() {
         return "column";
@@ -856,6 +876,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (defaultValueSequenceNextString != null) {
             defaultValueSequenceNext = new SequenceNextValueFunction(defaultValueSequenceNextString);
         }
+
+        defaultOnNull = parsedNode.getChildValue(null, "defaultOnNull", Boolean.class);
+        generationType = parsedNode.getChildValue(null, "generationType", String.class);
 
         loadConstraints(parsedNode.getChild(null, "constraints"));
     }
