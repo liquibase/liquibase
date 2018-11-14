@@ -141,7 +141,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
                 && (comparison.getComparisonSchema().getSchemaName().equalsIgnoreCase(value)
                 || comparison.getComparisonSchema().getCatalogName().equalsIgnoreCase(value))) {
             String newValue = valueToSet(field, comparison.getOutputSchemaAs());
-            if (field.toLowerCase().contains("catalogname")) {
+            if (field.toLowerCase().equalsIgnoreCase("catalogname")) {
                 if (!newValue.equalsIgnoreCase(comparison.getOutputSchemaAs())) {
                     ObjectUtil.setProperty(change, field, newValue);
                 }
@@ -157,7 +157,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
                 && (comparison.getComparisonSchema().getSchemaName().equals(value)
                 || comparison.getComparisonSchema().getCatalogName().equals(value))) {
             String newValue = valueToSet(field, comparison.getOutputSchemaAs());
-            if (field.toLowerCase().contains("catalogname")) {
+            if (field.toLowerCase().equalsIgnoreCase("catalogname")) {
                 if (!newValue.equals(comparison.getOutputSchemaAs())) {
                     ObjectUtil.setProperty(change, field, newValue);
                 }
