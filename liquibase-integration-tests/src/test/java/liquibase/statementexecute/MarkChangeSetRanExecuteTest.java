@@ -72,11 +72,17 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
                         " null)",
                 SybaseASADatabase.class);
         assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
+                        "md5sum, `description`, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
+                        "('a', 'b', 'c', now(), 1, " +
+                        "'8:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
+                        " null)",
+                MySQLDatabase.class, MariaDBDatabase.class);
+        assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', now(), 1, " +
                         "'8:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
                         " null)",
-                MySQLDatabase.class, MariaDBDatabase.class, PostgresDatabase.class, H2Database.class);
+                PostgresDatabase.class, H2Database.class);
         assertCorrectOnRest("insert into databasechangelog (id, author, filename, dateexecuted, " +
                 "orderexecuted, md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) " +
                 "values ('a', 'b', 'c', " +

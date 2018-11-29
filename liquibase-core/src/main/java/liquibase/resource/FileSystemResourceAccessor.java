@@ -3,6 +3,7 @@ package liquibase.resource;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -48,10 +49,10 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     @Override
     protected void addRootPath(URL path) {
         try {
-            File pathAsFile = new File(path.toURI());
+            URI pathAsUri = path.toURI();
 
             for (File fileSystemRoot : File.listRoots()) {
-                if (pathAsFile.equals(fileSystemRoot)) { //don't include root
+                if (pathAsUri.equals(fileSystemRoot.toURI())) { //don't include root
                     return;
                 }
             }
