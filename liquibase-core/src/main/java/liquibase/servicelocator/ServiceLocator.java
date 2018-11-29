@@ -132,6 +132,7 @@ public class ServiceLocator {
                 if (packagesToScan.isEmpty()) {
                     addPackageToScan("liquibase.change");
                     addPackageToScan("liquibase.changelog");
+                    addPackageToScan("liquibase.command");
                     addPackageToScan("liquibase.database");
                     addPackageToScan("liquibase.parser");
                     addPackageToScan("liquibase.precondition");
