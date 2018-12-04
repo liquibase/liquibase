@@ -50,10 +50,10 @@ public class RowMapperNotNullConstraintsResultSetExtractor extends RowMapperResu
             if (searchConditionString.contains(" or ") || searchConditionString.contains(" and ")) {
                 continue;
             }
-            if (!searchCondition.toString().toLowerCase().contains(SEARCH_CONDITION)) {
+            if (!searchConditionString.contains(SEARCH_CONDITION)) {
                 continue;
             }
-            
+
             resultList.add(mapOfColValues);
         }
         return resultList;
