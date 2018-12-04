@@ -43,13 +43,18 @@ public class RowMapperNotNullConstraintsResultSetExtractor extends RowMapperResu
             Map mapOfColValues = (Map) this.rowMapper.mapRow(resultSet, rowNum++);
             Object searchCondition = mapOfColValues.get(SEARCH_CONDITION_FIELD);
 
-            if (searchCondition == null || searchCondition.toString().isEmpty()) {
+            if (searchCondition == null) {
                 continue;
             }
-            if (searchCondition.toString().toLowerCase().contains(SEARCH_CONDITION)) {
-                resultList.add(mapOfColValues);
+            String searchConditionString = searchCondition.toString();
+            if (searchConditionString.contains(" or ") || searchConditionString.contains(" and ")) {
+                continue;
             }
-
+            if (!searchCondition.toString().toLowerCase().contains(SEARCH_CONDITION)) {
+                continue;
+            }
+            
+            resultList.add(mapOfColValues);
         }
         return resultList;
     }
