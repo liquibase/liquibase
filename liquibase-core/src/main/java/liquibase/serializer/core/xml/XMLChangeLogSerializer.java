@@ -453,6 +453,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         }
         String textContent = StringUtils.trimToEmpty(XMLUtil.getTextContent(node));
+        textContent = escapeXml(textContent);
         buffer.append(">").append(textContent);
 
         boolean sawChildren = false;
@@ -484,6 +485,10 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
+    }
+
+    public String escapeXml(String valueToEscape) {
+        return valueToEscape;
     }
 
 }
