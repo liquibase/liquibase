@@ -243,6 +243,44 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "21" == ((InsertStatement) sqlStatements[1]).getColumnValue("age").toString()
         Boolean.FALSE == ((InsertStatement) sqlStatements[1]).getColumnValue("active")
     }
+    
+        def "generateStatement_uuid not using InsertStatement"() throws Exception {
+        when:
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/sample.data3.csv");
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        LoadDataColumnConfig idConfig = new LoadDataColumnConfig();
+        idConfig.setHeader("id");
+        idConfig.setType("UUID");
+        refactoring.addColumn(idConfig);
+
+        LoadDataColumnConfig parentIdConfig = new LoadDataColumnConfig();
+        parentIdConfig.setHeader("parent_id");
+        parentIdConfig.setType("UUID");
+        refactoring.addColumn(parentIdConfig);
+
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+
+        then:
+        sqlStatements.length == 2
+        assert sqlStatements[0] instanceof InsertStatement
+        assert sqlStatements[1] instanceof InsertStatement
+        println sqlStatements[0]
+        println sqlStatements[1]
+        
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+        "c7ac2480-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[0]).getColumnValue("id")
+        "NULL" == ((InsertStatement) sqlStatements[0]).getColumnValue("parent_id")
+        
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+        "c801be90-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[1]).getColumnValue("id")
+        "3c39ee40-ac78-11e4-aca7-78acc0c3521f" == ((InsertStatement) sqlStatements[1]).getColumnValue("parent_id")
+    }
 
 
     def getConfirmationMessage() throws Exception {
