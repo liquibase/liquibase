@@ -22,3 +22,5 @@ derby.log
 
 atlassian-ide-plugin.xml
 _issues
+**/original-pom.xml
+original-pom.xml
