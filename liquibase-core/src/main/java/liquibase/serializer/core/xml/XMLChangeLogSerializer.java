@@ -487,6 +487,10 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         return PRIORITY_DEFAULT;
     }
 
+    /**
+     * Provided as a way for sub-classes to override and be able to convert a string 
+     * that might have XML reserved characters to an XML-escaped version of that string.
+     */
     public String escapeXml(String valueToEscape) {
         return valueToEscape;
     }
