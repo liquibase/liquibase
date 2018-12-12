@@ -441,7 +441,7 @@ public class Main {
                 if (potentialPropertyFile.exists()) {
                     parseDefaultPropertyFileFromFile(potentialPropertyFile);
                 } else {
-                    parseDefaultPropertyFileFromResource(potentialPropertyFile);
+                    parseDefaultPropertyFileFromResource(potentialPropertyFile.getPath());
                 }
             } catch (IOException e) {
                 throw new CommandLineParsingException(e);
@@ -455,10 +455,10 @@ public class Main {
      * @throws IOException if the file cannot be opened
      * @throws CommandLineParsingException if an error occurs during parsing
      */
-    private void parseDefaultPropertyFileFromResource(File potentialPropertyFile) throws IOException,
+    private void parseDefaultPropertyFileFromResource(String potentialPropertyResource) throws IOException,
         CommandLineParsingException {
         try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream
-            (potentialPropertyFile.getAbsolutePath())) {
+            (potentialPropertyResource)) {
             if (resourceAsStream != null) {
                 parsePropertiesFile(resourceAsStream);
             }
