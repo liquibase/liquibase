@@ -895,7 +895,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 if (!bulk || getAllCatalogsStringScratchData() == null) {
                     sqlToSelectNotNullConstraints += " WHERE atc.OWNER='" + jdbcSchemaName + "' AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
                 } else {
-                    sqlToSelectNotNullConstraints += " WHERE c.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
+                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
                         + " AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
                 }
 
