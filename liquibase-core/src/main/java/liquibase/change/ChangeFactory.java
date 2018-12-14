@@ -146,7 +146,7 @@ public class ChangeFactory {
         }
 
         try {
-            return classes.iterator().next().getConstructor().newInstance();
+            return classes.iterator().next().getConstructor().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
