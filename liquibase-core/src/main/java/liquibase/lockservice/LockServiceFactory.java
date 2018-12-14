@@ -75,7 +75,7 @@ public class LockServiceFactory {
 			}
 
 			try {
-				LockService lockService = foundServices.iterator().next().getClass().newInstance();
+				LockService lockService = foundServices.iterator().next().getClass().getConstructor().newInstance();
 				lockService.setDatabase(database);
 				openLockServices.put(database, lockService);
 			} catch (Exception e) {

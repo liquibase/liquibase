@@ -60,7 +60,7 @@ public class CommandFactory  {
             throw new UnexpectedLiquibaseException("Could not find command class for "+commandName);
         }
         try {
-            LiquibaseCommand command = sortedCommands.iterator().next().getClass().newInstance();
+            LiquibaseCommand command = sortedCommands.iterator().next().getClass().getConstructor().newInstance();
 
             if (command.getPriority(commandName) <= 0) {
                 throw new UnexpectedLiquibaseException("Could not find command class for "+commandName);

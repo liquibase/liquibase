@@ -31,7 +31,7 @@ public class ChangeFactory {
     protected Logger getLogger() {
       return log;
     }
-    
+
     private void init() {
         Class<? extends Change>[] classes;
         classes = ServiceLocator.getInstance().findClasses(Change.class);
@@ -146,7 +146,7 @@ public class ChangeFactory {
         }
 
         try {
-            return classes.iterator().next().newInstance();
+            return classes.iterator().next().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

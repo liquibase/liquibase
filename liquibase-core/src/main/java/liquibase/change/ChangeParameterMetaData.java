@@ -107,7 +107,7 @@ public class ChangeParameterMetaData {
                 }
                 try {
                     if (!change.generateStatementsVolatile(database)) {
-                        Change testChange = change.getClass().newInstance();
+                        Change testChange = change.getClass().getConstructor().newInstance();
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
@@ -151,7 +151,7 @@ public class ChangeParameterMetaData {
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
                     if (!change.generateStatementsVolatile(database)) {
-                        Change testChange = change.getClass().newInstance();
+                        Change testChange = change.getClass().getConstructor().newInstance();
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);

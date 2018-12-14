@@ -78,7 +78,7 @@ public class DataTypeFactory {
                 @Override
                 public int compare(Class<? extends LiquibaseDataType> o1, Class<? extends LiquibaseDataType> o2) {
                     try {
-                        return -1 * Integer.valueOf(o1.newInstance().getPriority()).compareTo(o2.newInstance().getPriority());
+                        return -1 * Integer.valueOf(o1.getConstructor().newInstance().getPriority()).compareTo(o2.getConstructor().newInstance().getPriority());
                     } catch (Exception e) {
                         throw new UnexpectedLiquibaseException(e);
                     }
@@ -198,7 +198,7 @@ public class DataTypeFactory {
             Iterator<Class<? extends LiquibaseDataType>> iterator = classes.iterator();
             do {
                 try {
-                    liquibaseDataType = iterator.next().newInstance();
+                    liquibaseDataType = iterator.next().getConstructor().newInstance();
                 } catch (Exception e) {
                     throw new UnexpectedLiquibaseException(e);
                 }

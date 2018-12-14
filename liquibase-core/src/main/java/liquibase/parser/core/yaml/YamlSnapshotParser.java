@@ -41,7 +41,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
             String shortName = (String) ((Map) rootList.get("database")).get("shortName");
 
-            Database database = DatabaseFactory.getInstance().getDatabase(shortName).getClass().newInstance();
+            Database database = DatabaseFactory.getInstance().getDatabase(shortName).getClass().getConstructor().newInstance();
             database.setConnection(new OfflineConnection("offline:" + shortName, null));
 
             DatabaseSnapshot snapshot = new RestoredDatabaseSnapshot(database);

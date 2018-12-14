@@ -200,7 +200,7 @@ public class DatabaseTestContext {
         JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
         final Driver driver;
         try {
-            driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
+            driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).getConstructor().newInstance();
         } catch (Exception e) {
             System.out.println("Could not connect to " + url + ": Will not test against.  " + e.getMessage());
             return null; //could not connect

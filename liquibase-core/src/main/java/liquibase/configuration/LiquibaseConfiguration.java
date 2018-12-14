@@ -116,7 +116,7 @@ public class LiquibaseConfiguration {
 
     protected  <T extends ConfigurationContainer> T createConfiguration(Class<T> type) {
         try {
-            T configuration = type.newInstance();
+            T configuration = type.getConstructor().newInstance();
             configuration.init(configurationValueProviders);
             return configuration;
         } catch (Exception e) {

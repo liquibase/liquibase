@@ -54,7 +54,7 @@ public final class ChangeExecListenerUtils {
                             changeExecListener = (ChangeExecListener) cons.newInstance(properties);
                         } else {
                             logger.debug(LogType.LOG, "Create " + clazz.getSimpleName() + "()");
-                            changeExecListener = (ChangeExecListener) clazz.newInstance();
+                            changeExecListener = (ChangeExecListener) clazz.getConstructor().newInstance();
                         }
                     }
                 }

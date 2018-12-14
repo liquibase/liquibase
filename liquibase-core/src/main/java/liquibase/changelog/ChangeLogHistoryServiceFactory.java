@@ -80,7 +80,7 @@ public class ChangeLogHistoryServiceFactory {
                 ChangeLogHistoryService service;
                 try {
                     aClass.getConstructor();
-                    service = aClass.newInstance();
+                    service = aClass.getConstructor().newInstance();
                     service.setDatabase(database);
                 } catch (NoSuchMethodException e) {
                     // must have been manually added to the registry and so already configured.
