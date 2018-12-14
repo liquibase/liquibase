@@ -201,7 +201,7 @@ public class LockServiceExecuteTest {
 //
 //                        database.commit();
 //
-////                        Database clearDatabase = database.getClass().newInstance();
+////                        Database clearDatabase = database.getClass().getConstructor().newInstance();
 ////                        clearDatabase.setConnection(database.getConnection());
 //
 //                        Executor originalTemplate = ExecutorService.getInstance().getExecutor(database);

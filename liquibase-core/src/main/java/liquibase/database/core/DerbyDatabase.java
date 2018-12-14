@@ -142,7 +142,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
                 // this cleans up the lock files in the embedded derby database folder
                 JdbcConnection connection = (JdbcConnection) getConnection();
                 ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
-                Driver driver = (Driver) classLoader.loadClass(driverName).newInstance();
+                Driver driver = (Driver) classLoader.loadClass(driverName).getConstructor().newInstance();
                 // this cleans up the lock files in the embedded derby database folder
                 driver.connect(url, null);
             } catch (Exception e) {

@@ -58,7 +58,7 @@ public class DiffGeneratorFactory {
         }
 
         try {
-            return foundGenerators.iterator().next().getClass().newInstance();
+            return foundGenerators.iterator().next().getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

@@ -61,7 +61,7 @@ public class PreconditionFactory {
             return null;
         }
         try {
-            return (Precondition) aClass.newInstance();
+            return (Precondition) aClass.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
