@@ -2,6 +2,7 @@ package liquibase.parser.core.formattedsql
 
 import liquibase.change.core.EmptyChange
 import liquibase.change.core.RawSQLChange
+import liquibase.change.core.TagDatabaseChange
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
@@ -78,6 +79,19 @@ create table my_table (
 
 --changeset complexContext:1 context:"a or b"
 select 1
+
+--changeset morano:7 tagDatabase:"1.2.3"
+create table table5 (
+    id int primary key
+);
+--rollback drop table table5;
+
+--changeset morano:8 tagDatabase:1.2.4
+create table table5 (
+    id int primary key
+);
+--rollback drop table table5;
+
 """.trim()
 
 
@@ -118,7 +132,7 @@ select 1
 
         changeLog.getLogicalFilePath() == "asdf.sql"
 
-        changeLog.getChangeSets().size() == 10
+        changeLog.getChangeSets().size() == 12
 
         changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(0).getId() == "1"
@@ -231,6 +245,28 @@ select 1
 
 
         changeLog.getChangeSets().get(9).getContexts().toString() == "a or b"
+
+        changeLog.getChangeSets().get(10).getAuthor() == "morano"
+        changeLog.getChangeSets().get(10).getId() == "7"
+        changeLog.getChangeSets().get(10).getChanges().size() == 2
+        assert changeLog.getChangeSets().get(10).getChanges().get(0) instanceof RawSQLChange
+        ((RawSQLChange) changeLog.getChangeSets().get(10).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table5 (\n    id int primary key\n);"
+        assert changeLog.getChangeSets().get(10).getChanges().get(1) instanceof TagDatabaseChange
+        ((TagDatabaseChange) changeLog.getChangeSets().get(10).getChanges().get(1)).getTag() == "1.2.3"
+        changeLog.getChangeSets().get(10).rollback.changes.size() == 1
+        assert changeLog.getChangeSets().get(10).rollback.changes[0] instanceof RawSQLChange
+        ((RawSQLChange) changeLog.getChangeSets().get(10).rollback.changes[0]).getSql() == "drop table table5;"
+
+        changeLog.getChangeSets().get(11).getAuthor() == "morano"
+        changeLog.getChangeSets().get(11).getId() == "8"
+        changeLog.getChangeSets().get(11).getChanges().size() == 2
+        assert changeLog.getChangeSets().get(11).getChanges().get(0) instanceof RawSQLChange
+        ((RawSQLChange) changeLog.getChangeSets().get(11).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table5 (\n    id int primary key\n);"
+        assert changeLog.getChangeSets().get(11).getChanges().get(1) instanceof TagDatabaseChange
+        ((TagDatabaseChange) changeLog.getChangeSets().get(11).getChanges().get(1)).getTag() == "1.2.4"
+        changeLog.getChangeSets().get(11).rollback.changes.size() == 1
+        assert changeLog.getChangeSets().get(11).rollback.changes[0] instanceof RawSQLChange
+        ((RawSQLChange) changeLog.getChangeSets().get(11).rollback.changes[0]).getSql() == "drop table table5;"
 
     }
 
