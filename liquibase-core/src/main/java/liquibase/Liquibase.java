@@ -579,6 +579,14 @@ public class Liquibase {
             throw new LiquibaseException("Error reading rollbackScript "+executor+": "+e.getMessage());
         }
 
+        //
+        // Expand changelog properties
+        //
+        changeLogParameters.setContexts(contexts);
+        changeLogParameters.setLabels(labelExpression);
+        DatabaseChangeLog changelog = getDatabaseChangeLog();
+        rollbackScriptContents = changeLogParameters.expandExpressions(rollbackScriptContents, changelog);
+
         RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
 
         try {
