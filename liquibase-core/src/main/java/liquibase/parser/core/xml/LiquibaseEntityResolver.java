@@ -87,7 +87,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         log.debug(LogType.LOG, "Attempting to load "+systemId+" from resourceAccessor as "+path);
 
         try {
-            InputStream resourceAsStream = StreamUtil.singleInputStream(path, resourceAccessor);
+            InputStream resourceAsStream = resourceAccessor.openStream(path);
             if (resourceAsStream == null) {
                 log.debug(LogType.LOG, "Could not load "+systemId+" from resourceAccessor as "+path);
                 return null;

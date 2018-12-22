@@ -407,7 +407,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("  File: " + propertyFile);
             InputStream is;
             try {
-                is = StreamUtil.singleInputStream(propertyFile, fo);
+                is = fo.openStream(propertyFile);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -455,7 +455,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     protected ResourceAccessor getFileOpener(ClassLoader cl) {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
-        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
+        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
         return new CompositeResourceAccessor(mFO, fsFO);
     }
 

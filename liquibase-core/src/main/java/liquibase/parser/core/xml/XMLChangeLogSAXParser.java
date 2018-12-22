@@ -68,7 +68,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         try (
-            InputStream inputStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor)) {
+            InputStream inputStream = resourceAccessor.openStream(physicalChangeLogLocation)) {
             SAXParser parser = saxParserFactory.newSAXParser();
             trySetSchemaLanguageProperty(parser);
     

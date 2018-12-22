@@ -1,10 +1,12 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.InputStreamList;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Extension of {@link liquibase.resource.ClassLoaderResourceAccessor} for Maven which will use a default or user specified {@link ClassLoader} to load files/resources.
@@ -20,15 +22,15 @@ public class MavenResourceAccessor extends ClassLoaderResourceAccessor {
     }
 
     @Override
-    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
-        return super.getResourcesAsStream(path.replaceFirst("^target/classes/", ""));
+    public InputStreamList openStreams(String path) throws IOException {
+        return super.openStreams(path.replaceFirst("^target/classes/", ""));
     }
 
     @Override
-    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        Set<String> contents = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
+    public SortedSet<String> list(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        SortedSet<String> contents = super.list(path, includeFiles, includeDirectories, recursive);
         if ((contents == null) || contents.isEmpty()) {
-            contents = super.list(relativeTo, path.replaceFirst("^target/classes/", ""), includeFiles, includeDirectories, recursive);
+            contents = super.list(path.replaceFirst("^target/classes/", ""), includeFiles, includeDirectories, recursive);
         }
         return contents;
 

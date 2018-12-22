@@ -137,7 +137,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         FileInputStream in = new FileInputStream(changeLogFile);
         String existingChangeLog;
         try {
-            existingChangeLog = StreamUtil.getStreamContents(in);
+            existingChangeLog = StreamUtil.readStreamAsString(in);
         } finally {
             in.close();
         }

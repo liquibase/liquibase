@@ -14,6 +14,8 @@ import liquibase.servicelocator.StandardServiceLocator;
 import liquibase.util.SmartMap;
 
 import java.lang.reflect.Constructor;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.util.*;
 
 /**
@@ -36,7 +38,9 @@ public class Scope {
         changeLogHistoryService,
         lockService,
         executeMode,
-        lineSeparator, serviceLocator,
+        lineSeparator,
+        serviceLocator,
+        fileEncoding,
     }
 
     private static ScopeManager scopeManager;
@@ -234,7 +238,7 @@ public class Scope {
     }
 
     public ClassLoader getClassLoader() {
-        return get(Attr.classLoader, ClassLoader.class);
+        return get(Attr.classLoader, Thread.currentThread().getContextClassLoader());
     }
 
     public ClassLoader getClassLoader(boolean fallbackToContextClassLoader) {
@@ -257,6 +261,9 @@ public class Scope {
         return get(Attr.lineSeparator, System.lineSeparator());
     }
 
+    public Charset getFileEncoding() {
+        return get(Attr.fileEncoding, Charset.defaultCharset());
+    }
 
     /**
      * Returns {@link LiquibaseListener}s defined in this scope and/or all its parents that are of the given type.

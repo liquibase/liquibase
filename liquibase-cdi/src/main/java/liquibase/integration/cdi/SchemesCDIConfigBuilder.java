@@ -56,7 +56,7 @@ public class SchemesCDIConfigBuilder {
      * API method.
      */
     public ResourceAccessor createResourceAccessor() {
-        return new FileSystemResourceAccessor(ROOT_PATH);
+        return new FileSystemResourceAccessor(new File(ROOT_PATH));
     }
 
     /**
@@ -150,7 +150,7 @@ public class SchemesCDIConfigBuilder {
         log.debug(LogType.LOG, String.format("[id = %s] Resolved schemes: %n%s%n", id, schemes));
         log.debug(LogType.LOG, String.format("[id = %s] Generating root liquibase file...", id));
 
-        String template = StreamUtil.getStreamContents(is); // schema.template.xml
+        String template = StreamUtil.readStreamAsString(is); // schema.template.xml
 
         String xml = String.format(template, schemes);
 
@@ -244,7 +244,7 @@ public class SchemesCDIConfigBuilder {
             }
             log.debug(LogType.LOG, String.format("[id = %s] LiquibaseSchema file [path='%s'] is ready, copying data...", id, file.getAbsolutePath()));
 
-            FileUtil.write(StreamUtil.getStreamContents(is), file);
+            FileUtil.write(StreamUtil.readStreamAsString(is), file);
 
             String schemaPath = file.getAbsolutePath().replace(ROOT_PATH, "");
             log.info(LogType.LOG, String.format("[id = %s] Data copied, schema path is [path='%s'].", id, schemaPath));

@@ -23,7 +23,7 @@ public class ResourceAccessorXsdStreamResolver extends XsdStreamResolver {
 	public InputStream getResourceAsStream(String xsdFile) {
 		try {
 
-			InputStream resourceAsStream = StreamUtil.singleInputStream(xsdFile, resourceAccessor);
+			InputStream resourceAsStream = resourceAccessor.openStream(xsdFile);
 			if(resourceAsStream == null){
 				LOGGER.debug("Could not load "+xsdFile+" with the standard resource accessor.");
 				return getSuccessorValue(xsdFile);

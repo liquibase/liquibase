@@ -208,7 +208,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         try {
-            return StreamUtil.openStream(getPath(), isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            String path = getPath();
+            if (isRelativeToChangelogFile()) {
+                path = getResourceAccessor().getCanonicalPath(getChangeSet().getFilePath(), path);
+            }
+            return getResourceAccessor().openStream(path);
         } catch (IOException e) {
             throw new IOException(
                 "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
@@ -290,7 +294,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 if (stream == null) {
                     throw new IOException("File does not exist: " + path);
                 }
-                procedureText = StreamUtil.getStreamContents(stream, encoding);
+                procedureText = StreamUtil.readStreamAsString(stream, encoding);
                 if (getChangeSet() != null) {
                     ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
                     if (parameters != null) {

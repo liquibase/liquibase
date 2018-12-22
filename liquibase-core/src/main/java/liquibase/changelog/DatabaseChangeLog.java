@@ -401,7 +401,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     } else {
                         // read properties from the file
                         Properties props = new Properties();
-                        InputStream propertiesStream = StreamUtil.singleInputStream(file, resourceAccessor);
+                        InputStream propertiesStream = resourceAccessor.openStream(file);
                         if (propertiesStream == null) {
                             LogService.getLog(getClass()).info(LogType.LOG, "Could not open properties file " + file);
                         } else {
@@ -459,15 +459,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             LOG.debug(LogType.LOG, "includeAll for " + pathName);
             LOG.debug(LogType.LOG, "Using file opener for includeAll: " + resourceAccessor.toString());
 
-            String relativeTo = null;
             if (isRelativeToChangelogFile) {
-                relativeTo = this.getPhysicalFilePath();
+                pathName = resourceAccessor.getCanonicalPath(this.getPhysicalFilePath(), pathName);
             }
 
             Set<String> unsortedResources = null;
             try {
-                unsortedResources = resourceAccessor.list(relativeTo, pathName, true, false, true);
-            } catch (FileNotFoundException e) {
+                unsortedResources = resourceAccessor.list(pathName, true, true, false);
+            } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;
                 }

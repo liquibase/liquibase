@@ -7,23 +7,23 @@ class ClassLoaderResourceAccessorTest extends Specification {
 
     def "rootUrls populated"() {
         when:
-        def accessor = new ClassLoaderResourceAccessor(new URLClassLoader([
+        def accessor = new ClassLoaderResourceAccessor(this.getClass().getClassLoader(), new URLClassLoader([
                 new File(System.getProperty("java.io.tmpdir")).toURL()].toArray() as URL[]
         ))
 
         then:
         accessor.getRootPaths().size() >= 3
-        accessor.getRootPaths().findAll({ it.endsWith("/test-classes/") }).size() == 1
-        accessor.getRootPaths().findAll({ it.endsWith("/classes/") }).size() == 1
+        accessor.getRootPaths().findAll({ it.endsWith("test-classes") }).size() == 1
+        accessor.getRootPaths().findAll({ it.endsWith("classes") }).size() == 1
     }
 
     @Unroll("#featureName: #relativeTo / #path -> #expected")
-    def "convertToPath using relative paths"() {
+    def "getCanonicalPath"() {
         when:
-        def accessor = new ClassLoaderResourceAccessor(new URLClassLoader([].toArray() as URL[]))
+        def accessor = new ClassLoaderResourceAccessor(this.getClass().getClassLoader(), new URLClassLoader([].toArray() as URL[]))
 
         then:
-        accessor.convertToPath(relativeTo, path) == expected
+        accessor.getCanonicalPath(relativeTo, path) == expected
 
         where:
         relativeTo                         | path                             | expected
@@ -31,10 +31,8 @@ class ClassLoaderResourceAccessorTest extends Specification {
         ""                                 | "liquibase/Liquibase.class"      | "liquibase/Liquibase.class"
         "liquibase"                        | "Liquibase.class"                | "liquibase/Liquibase.class"
         "liquibase"                        | "Contexts.class"                 | "liquibase/Contexts.class"
-        "liquibase/Liquibase.class"        | "Contexts.class"                 | "liquibase/Contexts.class"
         "liquibase/"                       | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
         "liquibase"                        | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
-        "liquibase/Liquibase.class"        | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
         "liquibase/sql"                    | "../Liquibase.class"             | "liquibase/Liquibase.class"
     }
 
@@ -43,7 +41,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
         def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
 
         when:
-        def listedResources = accessor.list(null, "org/springframework/core/io", true, false, true)
+        def listedResources = accessor.list("org/springframework/core/io", true, true, false)
 
         then:
         listedResources.contains("org/springframework/core/io/Resource.class")
@@ -55,7 +53,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
         def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
 
         when:
-        def listedResources = accessor.list(null, "org/springframework/core/io", true, false, false)
+        def listedResources = accessor.list("org/springframework/core/io", false, true, false)
 
         then:
         listedResources.contains("org/springframework/core/io/Resource.class")

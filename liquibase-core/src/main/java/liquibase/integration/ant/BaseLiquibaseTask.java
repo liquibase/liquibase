@@ -25,10 +25,8 @@ import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.resources.FileResource;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -170,14 +168,14 @@ public abstract class BaseLiquibaseTask extends Task {
      */
     private ResourceAccessor createResourceAccessor(ClassLoader classLoader) {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
-        resourceAccessors.add(new FileSystemResourceAccessor());
+        resourceAccessors.add(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().getRoot().toFile()));
         resourceAccessors.add(new ClassLoaderResourceAccessor(classLoader));
         String changeLogDirectory = getChangeLogDirectory();
         if (changeLogDirectory != null) {
           changeLogDirectory = changeLogDirectory.trim().replace('\\', '/');  //convert to standard / if using absolute path on windows
-          resourceAccessors.add(new FileSystemResourceAccessor(changeLogDirectory));
+          resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
         }
-        return new CompositeResourceAccessor(resourceAccessors);
+        return new CompositeResourceAccessor(resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     /*

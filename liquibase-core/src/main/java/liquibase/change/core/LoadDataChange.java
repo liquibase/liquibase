@@ -11,6 +11,7 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
@@ -34,6 +35,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 import liquibase.util.BooleanParser;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
@@ -516,7 +518,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     return statementSet.getStatementsArray();
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | LiquibaseException e) {
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
@@ -688,12 +690,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return true;
     }
 
-    public CSVReader getCSVReader() throws IOException {
+    public CSVReader getCSVReader() throws IOException, LiquibaseException {
         ResourceAccessor resourceAccessor = getResourceAccessor();
         if (resourceAccessor == null) {
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
         }
-        InputStream stream = StreamUtil.openStream(file, isRelativeToChangelogFile(), getChangeSet(), resourceAccessor);
+        String relativeTo = getRelativeTo();
+        InputStream stream = resourceAccessor.openStream(resourceAccessor.getCanonicalPath(relativeTo, file));
         if (stream == null) {
             return null;
         }
@@ -717,6 +720,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
 
         return new CSVReader(streamReader, separator.charAt(0), quotchar);
+    }
+
+    protected String getRelativeTo() {
+        String relativeTo = null;
+        if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
+            relativeTo = getChangeSet().getFilePath();
+        }
+        return relativeTo;
     }
 
     protected ExecutablePreparedStatementBase createPreparedStatement(
@@ -764,7 +775,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = StreamUtil.openStream(file, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            stream = getResourceAccessor().openStream(getResourceAccessor().getCanonicalPath(getRelativeTo(), file));
             if (stream == null) {
                 throw new UnexpectedLiquibaseException(getFile() + " could not be found");
             }

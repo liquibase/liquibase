@@ -176,7 +176,7 @@ public class DatabaseFactory {
             DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
             if (databaseClass != null) {
                 databaseFactory.clearRegistry();
-                databaseFactory.register((Database) Class.forName(databaseClass, true, resourceAccessor.toClassLoader()).newInstance());
+                databaseFactory.register((Database) Class.forName(databaseClass, true, Scope.getCurrentScope().getClassLoader()).newInstance());
             }
 
             try {
@@ -188,7 +188,7 @@ public class DatabaseFactory {
                     throw new RuntimeException("Driver class was not specified and could not be determined from the url (" + url + ")");
                 }
 
-                driverObject = (Driver) Class.forName(driver, true, resourceAccessor.toClassLoader()).newInstance();
+                driverObject = (Driver) Class.forName(driver, true, Scope.getCurrentScope().getClassLoader()).newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("Cannot find database driver: " + e.getMessage());
             }
@@ -201,7 +201,7 @@ public class DatabaseFactory {
             if (propertyProviderClass == null) {
                 driverProperties = new Properties();
             } else {
-                driverProperties = (Properties) Class.forName(propertyProviderClass, true, resourceAccessor.toClassLoader()).newInstance();
+                driverProperties = (Properties) Class.forName(propertyProviderClass, true, Scope.getCurrentScope().getClassLoader()).newInstance();
             }
 
             if (username != null) {

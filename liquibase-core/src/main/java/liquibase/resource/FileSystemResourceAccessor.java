@@ -1,198 +1,213 @@
 package liquibase.resource;
 
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.CollectionUtil;
+import liquibase.util.StringUtil;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+import java.net.URI;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
- * A @{link ResourceAccessor} implementation which finds Files in the File System.
+ * A @{link ResourceAccessor} implementation for files on the file system.
+ * Will look for files in zip and jar files if they are added as root paths.
  */
 public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
-    private File baseDirectory;
-    private boolean readyForInit;
+    //Set to avoid duplicates but LinkedHashSet to preserve order. Kept private to control access through get/set since we are an ExtensibleObject
+    private LinkedHashSet<Path> rootPaths = new LinkedHashSet<>();
 
     /**
-     * Creates with no base directory. All files will be resolved exactly as they are given.
+     * Creates a FileSystemResourceAccessor with the given directories/files as the roots.
      */
-    public FileSystemResourceAccessor() {
-        baseDirectory = null;
-        readyForInit = true;
-        init();
-    }
-
-    /**
-     * Creates with base directory for relative path support.
-     */
-    public FileSystemResourceAccessor(String base) {
-        baseDirectory = new File(base);
-        if (!baseDirectory.isDirectory()) {
-            throw new IllegalArgumentException(base + " must be a directory");
-        }
-        readyForInit = true;
-        init();
-    }
-
-    @Override
-    protected void init() {
-        if (readyForInit) {
-            super.init();
-        }
-    }
-
-    @Override
-    protected void addRootPath(URL path) {
-        try {
-            File pathAsFile = new File(path.toURI());
-
-            for (File fileSystemRoot : File.listRoots()) {
-                if (pathAsFile.equals(fileSystemRoot)) { //don't include root
-                    return;
-                }
-            }
-        } catch (URISyntaxException e) {
-            //add like normal
-        }
-
-        super.addRootPath(path);
-    }
-
-    @Override
-    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
-        File absoluteFile = new File(path);
-        File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
-
-        InputStream fileStream = null;
-        if (absoluteFile.isAbsolute()) {
-            try {
-                fileStream = openStream(absoluteFile);
-            } catch (FileNotFoundException e) {
-                //will try relative
-            }
-        }
-
-        if (fileStream == null) {
-            try {
-                fileStream = openStream(relativeFile);
-            } catch (FileNotFoundException e2) {
-                return null;
-            }
-        }
-
-
-        Set<InputStream> returnSet = new HashSet<>();
-        returnSet.add(fileStream);
-        return returnSet;
-    }
-
-    private InputStream openStream(File file) throws IOException, FileNotFoundException {
-        if (file.getName().toLowerCase().endsWith(".gz")) {
-            return new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)));
-        } else {
-            return new BufferedInputStream(new FileInputStream(file));
-        }
-    }
-
-
-    @Override
-    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        File finalDir;
-
-        if (relativeTo == null) {
-            finalDir = new File(this.baseDirectory, path);
-        } else {
-            finalDir = new File(this.baseDirectory, relativeTo);
-            finalDir = new File(finalDir.getParentFile(), path);
-        }
-
-        if (finalDir.exists() && finalDir.isDirectory()) {
-            Set<String> returnSet = new HashSet<>();
-            getContents(finalDir, recursive, includeFiles, includeDirectories, path, returnSet);
-
-            SortedSet<String> rootPaths = new TreeSet<>(new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    int i = -1 * ((Integer) o1.length()).compareTo(o2.length());
-                    if (i == 0) {
-                        i = o1.compareTo(o2);
-                    }
-                    return i;
-                }
-            });
-
-            for (String rootPath : getRootPaths()) {
-                if (rootPath.matches("file:/[A-Za-z]:/.*")) {
-                    rootPath = rootPath.replaceFirst("file:/", "");
-                } else {
-                    rootPath = rootPath.replaceFirst("file:", "");
-                }
-                rootPaths.add(rootPath.replace("\\", "/"));
-            }
-
-            Set<String> finalReturnSet = new LinkedHashSet<>();
-            for (String returnPath : returnSet) {
-                returnPath = returnPath.replace("\\", "/");
-                for (String rootPath : rootPaths) {
-                    boolean matches = false;
-                    if (isCaseSensitive()) {
-                        matches = returnPath.startsWith(rootPath);
-                    } else {
-                        matches = returnPath.toLowerCase().startsWith(rootPath.toLowerCase());
-                    }
-                    if (matches) {
-                        returnPath = returnPath.substring(rootPath.length());
-                        break;
-                    }
-                }
-                finalReturnSet.add(returnPath);
-            }
-            return finalReturnSet;
-        }
-
-        return null;
-    }
-
-    @Override
-    protected String convertToPath(String string) {
-        if (this.baseDirectory == null) {
-            return string;
-        } else {
-            try {
-                return "file:" + new File(string).getCanonicalPath().substring(this.baseDirectory.getCanonicalPath().length());
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        }
-
-    }
-
-    @Override
-    public ClassLoader toClassLoader() {
-        try {
-            URL url;
-            if (baseDirectory == null) {
-                url = new File("/").toURI().toURL();
+    public FileSystemResourceAccessor(File... baseDirsAndFiles) {
+        for (File base : CollectionUtil.createIfNull(baseDirsAndFiles)) {
+            if (!base.exists()) {
+                log.warning("Non-existent path: " + base.getAbsolutePath());
+            } else if (base.isDirectory()) {
+                addRootPath(base.toPath());
+            } else if (base.getName().endsWith(".jar") || base.getName().toLowerCase().endsWith("zip")) {
+                addRootPath(base.toPath());
             } else {
-                url = baseDirectory.toURI().toURL();
+                throw new IllegalArgumentException(base.getAbsolutePath() + " must be a directory, jar or zip");
             }
-            return new URLClassLoader(new URL[]{url});
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+    }
+
+    protected void addRootPath(Path path) {
+        rootPaths.add(path);
+    }
+
+    protected LinkedHashSet<Path> getRootPaths() {
+        return rootPaths;
+    }
+
+    @Override
+    public String getCanonicalPath(String relativeTo, String path) throws IOException {
+        if (relativeTo == null) {
+            relativeTo = ".";
+        }
+
+        return new File(relativeTo).toPath().resolve(path).normalize().toString().replace("\\", "/");
+    }
+
+    @Override
+    public InputStreamList openStreams(String path) throws IOException {
+        path = path.replace("\\", "/");
+        path = path.replaceFirst("^[\\\\/]([a-zA-Z]:)", "$1");
+        final InputStreamList streams = new InputStreamList();
+
+        URI streamURI = null;
+        for (Path rootPath : rootPaths) {
+            InputStream stream = null;
+            if (isCompressedFile(rootPath)) {
+                try (ZipFile zipFile = new ZipFile(rootPath.toFile())) {
+                    ZipEntry entry = zipFile.getEntry(path);
+                    if (entry != null) {
+                        stream = zipFile.getInputStream(entry);
+                        streamURI = URI.create(rootPath.normalize().toUri()+"!"+entry.toString());
+                    }
+                }
+            } else {
+                try {
+                    if (Paths.get(path).startsWith(rootPath)) {
+                        path = rootPath.relativize(Paths.get(path)).toString();
+                    }
+                } catch (InvalidPathException ignored) {
+                    //that is ok
+                }
+
+                if (path.startsWith("/") || path.startsWith("\\")) {
+                    path = path.substring(1); //always relative to rootPath
+                }
+
+                if (Paths.get(path).isAbsolute()) {
+                    continue; //on a windows system with an absolute path that doesn't start with rootPath
+                }
+
+                File resolvedFile = rootPath.resolve(path).toFile();
+                if (resolvedFile.exists()) {
+                    streamURI = resolvedFile.getCanonicalFile().toURI();
+                    stream = new BufferedInputStream(new FileInputStream(resolvedFile));
+                }
+
+            }
+
+            if (stream != null) {
+                if (path.toLowerCase().endsWith(".gz")) {
+                    stream = new GZIPInputStream(stream);
+                }
+
+                streams.add(streamURI, stream);
+            }
+
+
+        }
+
+        return streams;
+    }
+
+    @Override
+    public SortedSet<String> list(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        final SortedSet<String> returnList = new TreeSet<>();
+
+        int maxDepth = recursive ? Integer.MAX_VALUE : 1;
+
+        for (final Path rootPath : getRootPaths()) {
+            SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    if (includeFiles && attrs.isRegularFile()) {
+                        addToReturnList(file);
+                    }
+                    if (includeDirectories && attrs.isDirectory()) {
+                        addToReturnList(file);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    if (includeDirectories) {
+                        addToReturnList(dir);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                protected void addToReturnList(Path file) {
+                    String pathToAdd;
+                    if (isCompressedFile(rootPath)) {
+                        pathToAdd = file.normalize().toString().substring(1);  //pull off leading /
+                    } else {
+                        pathToAdd = rootPath.relativize(file).normalize().toString().replace("\\", "/");
+                    }
+
+                    pathToAdd = pathToAdd.replaceFirst("/$", "");
+                    returnList.add(pathToAdd);
+                }
+
+            };
+
+
+            if (isCompressedFile(rootPath)) {
+                try (FileSystem fs = FileSystems.newFileSystem(rootPath, null)) {
+                    Path basePath = fs.getRootDirectories().iterator().next();
+
+                    if (path != null) {
+                        basePath = basePath.resolve(path);
+                    }
+
+                    Files.walkFileTree(basePath, Collections.singleton(FileVisitOption.FOLLOW_LINKS), maxDepth, fileVisitor);
+                } catch (NoSuchFileException e) {
+                    //nothing to do, return null
+                }
+            } else {
+                Path basePath = rootPath;
+
+                if (path != null) {
+                    if (path.startsWith("/") || path.startsWith("\\")) {
+                        path = path.substring(1);
+                    }
+
+                    basePath = basePath.resolve(path);
+                }
+
+                if (!basePath.toFile().exists()) {
+                    continue;
+                }
+                Files.walkFileTree(basePath, Collections.singleton(FileVisitOption.FOLLOW_LINKS), maxDepth, fileVisitor);
+            }
+        }
+
+        returnList.remove(path);
+        return returnList;
+    }
+
+    /**
+     * Returns true if the given path is a compressed file.
+     */
+    protected boolean isCompressedFile(Path path) {
+        return path != null && (path.toString().toLowerCase().endsWith(".jar") || path.toString().toLowerCase().endsWith(".zip"));
     }
 
     @Override
     public String toString() {
-        File dir = baseDirectory;
-        if (dir == null) {
-            dir = new File(".");
-        }
-        return getClass().getName() + "(" + dir.getAbsolutePath() + ")";
+        return getClass().getName() + " (" + StringUtil.join(getRootPaths(), ", ", new StringUtil.ToStringFormatter()) + ")";
     }
 
+    /**
+     * Encapsulates logic used by {@link ResourceAccessor#openStreams(String)} and {@link #list(String, boolean, boolean, boolean)} for each file.
+     */
+    public abstract class ResourceFileVisitor {
+
+        public abstract void visitFile(Path visitedFile, Path rootPath, BasicFileAttributes attrs) throws IOException;
+
+    }
 }

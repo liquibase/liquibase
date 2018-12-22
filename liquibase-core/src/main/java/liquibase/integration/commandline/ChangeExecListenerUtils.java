@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.Scope;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.logging.LogService;
@@ -29,7 +30,7 @@ public final class ChangeExecListenerUtils {
 
             logger.debug(LogType.LOG, "Setting ChangeExecListener: " + changeExecListenerClass);
 
-            ClassLoader classLoader = resourceAccessor.toClassLoader();
+            ClassLoader classLoader = Scope.getCurrentScope().getClassLoader();
             Class<?> clazz = Class.forName(changeExecListenerClass, true, classLoader);
 
             Properties properties = loadProperties(changeExecListenerPropertiesFile);

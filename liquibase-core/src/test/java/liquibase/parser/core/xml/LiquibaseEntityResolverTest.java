@@ -103,32 +103,6 @@ public class LiquibaseEntityResolverTest {
 		assertThat(result).isSameAs(inputSource);
 	}
 
-	@Test
-	public void whenSystemIdIsNotXsdLoadResourceFromBasepathWithResourceAccessor() throws IOException, SAXException {
-		PowerMockito.when(StreamUtil.singleInputStream(PATH_AND_SYSTEM_ID, resourceAccessor)).thenReturn(inputStream);
-
-		InputSource result = liquibaseEntityResolver.resolveEntity(NAME, PUBLIC_ID, BASE_URI, FILE_SYSTEM_ID);
-
-		assertThat(result.getByteStream()).isEqualTo(inputStream);
-	}
-
-	@Test
-	public void whenSystemIdIsNotXsdAndResourceCouldNotBeLoadedFromResourceAccessorReturnNull() throws IOException, SAXException {
-		PowerMockito.when(StreamUtil.singleInputStream(PATH_AND_SYSTEM_ID, resourceAccessor)).thenReturn(null);
-
-		InputSource result = liquibaseEntityResolver.resolveEntity(NAME, PUBLIC_ID, BASE_URI, FILE_SYSTEM_ID);
-
-		assertThat(result).isEqualTo(null);
-	}
-
-	@Test
-	public void whenSystemIdIsNotXsdAndResourceExceptionOccursReturnNull() throws IOException, SAXException {
-		PowerMockito.when(StreamUtil.singleInputStream(PATH_AND_SYSTEM_ID, resourceAccessor)).thenThrow(new RuntimeException());
-
-		InputSource result = liquibaseEntityResolver.resolveEntity(NAME, PUBLIC_ID, BASE_URI, FILE_SYSTEM_ID);
-
-		assertThat(result).isEqualTo(null);
-	}
 
 	@Test
 	public void resolveEntityWithOnlyPublicIdAndSystemIdDelegatesToSchemResolver() throws IOException, SAXException {

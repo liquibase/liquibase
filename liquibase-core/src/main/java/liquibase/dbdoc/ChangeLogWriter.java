@@ -23,12 +23,12 @@ public class ChangeLogWriter {
         
         BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile,
         false), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-        try (InputStream stylesheet = StreamUtil.singleInputStream(physicalFilePath, resourceAccessor);) {
+        try (InputStream stylesheet = resourceAccessor.openStream(physicalFilePath)) {
             if (stylesheet == null) {
                 throw new IOException("Can not find " + changeLog);
             }
             changeLogStream.write("<html><body><pre>\n");
-            changeLogStream.write(StreamUtil.getStreamContents(stylesheet).replace("<", "&lt;").replace(">", "&gt;"));
+            changeLogStream.write(StreamUtil.readStreamAsString(stylesheet).replace("<", "&lt;").replace(">", "&gt;"));
             changeLogStream.write("\n</pre></body></html>");
         } finally {
             changeLogStream.close();

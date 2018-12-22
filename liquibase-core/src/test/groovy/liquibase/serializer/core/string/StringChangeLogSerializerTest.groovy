@@ -1,6 +1,7 @@
 package liquibase.serializer.core.string
 
 import liquibase.Scope
+import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 import spock.lang.Unroll;
 
@@ -54,10 +55,7 @@ public class StringChangeLogSerializerTest extends Specification {
                 "]";
 
         CustomChangeWrapper wrapper = new CustomChangeWrapper();
-        wrapper.setResourceAccessor(new ClassLoaderResourceAccessor());
-        //wrapper.setFileOpener(new JUnitResourceAccessor());
-        //wrapper.setClassLoader(new JUnitResourceAccessor().toClassLoader());
-        wrapper.setClassLoader(getClass().getClassLoader());
+        wrapper.setResourceAccessor(new JUnitResourceAccessor());
         wrapper.setClass("liquibase.change.custom.ExampleCustomSqlChange");
         wrapper.setParam("columnName", "column_name");
         wrapper.setParam("newValue", "new_value");

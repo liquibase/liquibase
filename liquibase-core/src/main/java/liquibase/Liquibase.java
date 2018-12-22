@@ -33,6 +33,7 @@ import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
+import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -586,13 +587,13 @@ public class Liquibase {
         final Executor executor = ExecutorService.getInstance().getExecutor(database);
         String rollbackScriptContents;
         try {
-            Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
+            InputStreamList streams = resourceAccessor.openStreams(rollbackScript);
             if ((streams == null) || streams.isEmpty()) {
                 throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
             } else if (streams.size() > 1) {
                 throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
             }
-            rollbackScriptContents = StreamUtil.getStreamContents(streams.iterator().next());
+            rollbackScriptContents = StreamUtil.readStreamAsString(streams.iterator().next());
         } catch (IOException e) {
             throw new LiquibaseException("Error reading rollbackScript "+executor+": "+e.getMessage());
         }

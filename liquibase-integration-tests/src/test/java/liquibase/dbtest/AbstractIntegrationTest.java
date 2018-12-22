@@ -885,7 +885,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
 
-        Set<String> urls = new JUnitResourceAccessor().list(null, includedChangeLog, true, false, true);
+        Set<String> urls = new JUnitResourceAccessor().list(includedChangeLog, true, false, true);
         String absolutePathOfChangeLog = urls.iterator().next();
 
         absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/", "");

@@ -25,7 +25,7 @@ public abstract class AbstractLiquibaseMojoTest extends AbstractMojoTestCase {
           throws MojoExecutionException, MojoFailureException {
 
     File rootDir = new File(getBasedir(), "target/test-classes");
-    ResourceAccessor fo = new FileSystemResourceAccessor(rootDir.getAbsolutePath());
+    ResourceAccessor fo = new FileSystemResourceAccessor(rootDir);
     mojo.configureFieldsAndValues(fo);
   }
 
