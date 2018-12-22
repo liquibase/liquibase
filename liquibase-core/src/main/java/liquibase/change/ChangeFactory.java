@@ -1,7 +1,5 @@
 package liquibase.change;
 
-import javafx.scene.layout.Priority;
-import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
