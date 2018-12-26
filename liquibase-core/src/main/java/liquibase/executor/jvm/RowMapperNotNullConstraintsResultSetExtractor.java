@@ -46,7 +46,7 @@ public class RowMapperNotNullConstraintsResultSetExtractor extends RowMapperResu
             if (searchCondition == null) {
                 continue;
             }
-            String searchConditionString = searchCondition.toString();
+            String searchConditionString = searchCondition.toString().toLowerCase();
             if (searchConditionString.contains(" or ") || searchConditionString.contains(" and ")) {
                 continue;
             }
