@@ -26,6 +26,8 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.jvm.ColumnMapRowMapper;
+import liquibase.executor.jvm.RowMapperNotNullConstraintsResultSetExtractor;
 import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
@@ -591,7 +593,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         }
 
-        private class ForeignKeysResultSetCache extends ResultSetCache.UnionResultSetExtractor {
+      private class ForeignKeysResultSetCache extends ResultSetCache.UnionResultSetExtractor {
             final String catalogName;
             final String schemaName;
             final String tableName;
@@ -822,7 +824,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             }
         }
 
-        private class GetNotNullConstraintsResultSetCache extends ResultSetCache.SingleResultSetExtractor {
+      private class GetNotNullConstraintsResultSetCache extends ResultSetCache.SingleResultSetExtractor {
             final String catalogName;
             final String schemaName;
             final String tableName;
@@ -885,35 +887,55 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                 String jdbcTableName = database.escapeStringForDatabase(tableName);
-                String sql = "SELECT  NULL AS TABLE_CAT, c.OWNER AS TABLE_SCHEMA,c.OWNER, c.TABLE_NAME, c.COLUMN_NAME, NULLABLE,"
-                    + " ac.VALIDATED as VALIDATED FROM ALL_TAB_COLS c "
-                    + " JOIN ALL_COL_COMMENTS cc ON c.OWNER = cc.OWNER AND c.TABLE_NAME = cc.TABLE_NAME AND c.COLUMN_NAME = cc.COLUMN_NAME "
-                    + " LEFT JOIN all_cons_columns acc ON c.OWNER = acc.OWNER AND c.TABLE_NAME = acc.TABLE_NAME AND c.COLUMN_NAME = acc.COLUMN_NAME "
-                    + " LEFT JOIN all_constraints ac ON c.OWNER = ac.OWNER AND c.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
+                String sqlToSelectNotNullConstraints = "SELECT  NULL AS TABLE_CAT, atc.OWNER AS TABLE_SCHEMA, atc.OWNER, atc.TABLE_NAME, " +
+                        "atc.COLUMN_NAME, NULLABLE, ac.VALIDATED as VALIDATED, ac.SEARCH_CONDITION FROM ALL_TAB_COLS atc " +
+                        "JOIN all_cons_columns acc ON atc.OWNER = acc.OWNER AND atc.TABLE_NAME = acc.TABLE_NAME AND atc.COLUMN_NAME = acc.COLUMN_NAME " +
+                        "JOIN all_constraints ac ON atc.OWNER = ac.OWNER AND atc.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
 
                 if (!bulk || getAllCatalogsStringScratchData() == null) {
-                    sql += " WHERE c.OWNER='" + jdbcSchemaName + "' AND hidden_column='NO' AND CONSTRAINT_TYPE='C' "
-                        + " AND c.NULLABLE = 'Y' and search_condition is not null";
+                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER='" + jdbcSchemaName + "' AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
                 } else {
-                    sql += " WHERE c.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
-                        + " AND hidden_column='NO' AND CONSTRAINT_TYPE='C' AND c.NULLABLE = 'Y' and search_condition is not null";
+                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
+                        + " AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
                 }
 
-                if (!bulk) {
-                    if (tableName != null) {
-                        sql += " AND c.TABLE_NAME='" + jdbcTableName + "'";
-                    }
-                }
-                sql += " ORDER BY c.OWNER, c.TABLE_NAME, c.COLUMN_ID";
+                sqlToSelectNotNullConstraints += (!bulk && tableName != null && !tableName.isEmpty()) ? " AND atc.TABLE_NAME='" + jdbcTableName + "'":"";
 
-                return this.executeAndExtract(sql, database);
+                return this.executeAndExtract(sqlToSelectNotNullConstraints, database);
             }
 
             @Override
             protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
-                return super.extract(resultSet, informixIndexTrimHint);
+                List<CachedRow> cachedRowList = new ArrayList<CachedRow>();
+                if (!(database instanceof OracleDatabase)) {
+                    return cachedRowList;
+                }
+
+                resultSet.setFetchSize(database.getFetchSize());
+                List<Map> result;
+
+                try {
+                    result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper() {
+                        @Override
+                        protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+                            Object value = super.getColumnValue(rs, index);
+                            if (value == null || !(value instanceof String)) {
+                                return value;
+                            }
+                            return value.toString().trim();
+                        }
+                    }).extractData(resultSet);
+
+                    for (Map row : result) {
+                        cachedRowList.add(new CachedRow(row));
+                    }
+                } finally {
+                    JdbcUtils.closeResultSet(resultSet);
+                }
+                return cachedRowList;
+
             }
-        }
+      }
 
         public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws DatabaseException {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
