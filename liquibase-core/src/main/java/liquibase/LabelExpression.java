@@ -115,6 +115,7 @@ public class LabelExpression {
     }
 
     private boolean matches(String expression, Labels runtimeLabels) {
+        expression = StringUtils.trimToEmpty(expression);
         if (runtimeLabels.isEmpty()) {
             return true;
         }
@@ -163,10 +164,10 @@ public class LabelExpression {
         boolean notExpression = false;
         if (expression.startsWith("!")) {
             notExpression = true;
-            expression = expression.substring(1);
+            expression = expression.substring(1).trim();
         } else if (expression.toLowerCase().startsWith("not ")) {
             notExpression = true;
-            expression = expression.substring(4);
+            expression = expression.substring(4).trim();
         }
 
         if (expression.trim().equals(":TRUE")) {
@@ -182,8 +183,6 @@ public class LabelExpression {
             }
         }
         return notExpression;
-
-
     }
 
     public boolean isEmpty() {

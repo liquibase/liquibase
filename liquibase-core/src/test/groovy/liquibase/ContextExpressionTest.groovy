@@ -170,6 +170,24 @@ class ContextExpressionTest extends Specification {
         "a and b or c, d" | "e"             | false
     }
 
+    @Unroll("#featureName: testContexts '#testContexts' against: '#controlContexts'")
+    def "trim extra spaces"() {
+        expect:
+        assert new ContextExpression(testContexts).matches(new Contexts('a, b')) == new ContextExpression(controlContexts).matches(new Contexts('a, b'))
+        assert new ContextExpression(testContexts).matches(new Contexts('c'))    == new ContextExpression(controlContexts).matches(new Contexts('c'))
+
+        where:
+        testContexts                    | controlContexts
+        "   a  "                        | "a"
+        " ! a  "                        | "!a"
+        " a  and  b "                   | "a and b"
+        " ( a  and  b ) or ! c "        | "(a and b) or !c"
+        " a  and  b "                   | "a and b"
+        "a    and    b   or   c"        | "a and b or c"
+        " (a and  b ) or ( c and  d)"   | "(a and b) or (c and d)"
+        "! (a and  b ) or ( ! c and  d)"| "!(a and b) or (!c and d)"
+    }
+
     @Unroll
     def isEmpty() {
         expect:

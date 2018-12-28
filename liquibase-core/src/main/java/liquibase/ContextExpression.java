@@ -90,6 +90,7 @@ public class ContextExpression {
     }
 
     private boolean matches(String expression, Contexts runtimeContexts) {
+        expression = StringUtils.trimToEmpty(expression);
         if (runtimeContexts.isEmpty()) {
             return true;
         }
@@ -138,7 +139,7 @@ public class ContextExpression {
         boolean notExpression = false;
         if (expression.startsWith("!")) {
             notExpression = true;
-            expression = expression.substring(1);
+            expression = expression.substring(1).trim();
         }
 
         for (String context : runtimeContexts.getContexts()) {
@@ -155,8 +156,6 @@ public class ContextExpression {
         } else {
             return false;
         }
-
-
     }
 
     public boolean isEmpty() {
