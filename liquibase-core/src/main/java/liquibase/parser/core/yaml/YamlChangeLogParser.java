@@ -23,8 +23,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         Yaml yaml = new Yaml(new SafeConstructor());
 
-        try {
-            InputStream changeLogStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
+        try (InputStream changeLogStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor)) {
             if (changeLogStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
