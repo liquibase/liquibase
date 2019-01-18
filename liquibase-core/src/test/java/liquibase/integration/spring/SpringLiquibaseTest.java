@@ -3,12 +3,17 @@ package liquibase.integration.spring;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import static org.junit.Assert.*;
-import static  org.mockito.Mockito.*;
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 /**
  * Tests for {@link SpringLiquibase}
@@ -80,5 +85,26 @@ public class SpringLiquibaseTest {
         assertSame(labelCaptor.getValue().getLabels().size(),1);
         assertTrue(labelCaptor.getValue().getLabels().contains(TEST_LABELS));
         assertSame(stringCaptor.getValue(),TEST_TAG);
+    }
+
+    @Test
+    public void testUpdateNotRunWhenNotNeeded() throws Exception {
+        springLiquibase.performUpdateIfNeeded(liquibase);
+        verify(liquibase, never()).update(any(String.class), any(Contexts.class), any(LabelExpression.class));
+        verify(liquibase, never()).updateTestingRollback(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateRunWhenNeeded() throws Exception {
+        final DatabaseChangeLog changelog = new DatabaseChangeLog();
+        final ChangeSet changeSet = new ChangeSet(changelog);
+        changelog.addChangeSet(changeSet);
+        final ArrayList<ChangeSet> changeSets = new ArrayList<>();
+        changeSets.add(changeSet);
+
+        when(liquibase.listUnrunChangeSets(any(), any())).thenReturn(changeSets);
+
+        springLiquibase.performUpdateIfNeeded(liquibase);
+        verify(liquibase, times(1)).update(any(Contexts.class), any(LabelExpression.class));
     }
 }

@@ -3,6 +3,7 @@ package liquibase.integration.spring;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeSet;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -33,6 +34,7 @@ import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.Attributes;
@@ -302,7 +304,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             c = getDataSource().getConnection();
             liquibase = createLiquibase(c);
             generateRollbackFile(liquibase);
-            performUpdate(liquibase);
+            performUpdateIfNeeded(liquibase);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
@@ -353,6 +355,17 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
             }
         }
+    }
+
+    protected void performUpdateIfNeeded(final Liquibase liquibase) throws LiquibaseException {
+        if (updateNeeded(liquibase, new Contexts(getContexts()), new LabelExpression(getLabels()))) {
+            performUpdate(liquibase);
+        }
+    }
+
+    private static boolean updateNeeded(final Liquibase liquibase, final Contexts contexts, final LabelExpression labelExpression) throws LiquibaseException {
+        final List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets(contexts, labelExpression);
+        return !unrunChangeSets.isEmpty();
     }
 
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
