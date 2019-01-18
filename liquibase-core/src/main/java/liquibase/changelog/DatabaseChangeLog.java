@@ -437,8 +437,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return dbmsSet == null
                 || changeLogParameters == null
                 || changeLogParameters.getValue("database.typeName", this) == null
-                || dbmsSet.isEmpty()
-                || dbmsSet.contains(changeLogParameters.getValue("database.typeName", this).toString());
+                || DatabaseList.definitionMatches(dbmsSet, changeLogParameters.getValue("database.typeName", this).toString(), true);
     }
 
     public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter,
