@@ -307,7 +307,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
             try {
                 includeNestedObjects(object);
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (ReflectiveOperationException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
@@ -319,7 +319,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         return object;
     }
 
-    private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
+    private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, ReflectiveOperationException {
         for (String field : new HashSet<>(object.getAttributes())) {
             Object fieldValue = object.getAttribute(field, Object.class);
             if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index
@@ -343,7 +343,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
     }
 
-    private Object replaceObject(Object fieldValue) throws DatabaseException, InvalidExampleException, IllegalAccessException, InstantiationException {
+    private Object replaceObject(Object fieldValue) throws DatabaseException, InvalidExampleException, ReflectiveOperationException {
         if (fieldValue == null) {
             return null;
         }
@@ -416,14 +416,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 if (List.class.isAssignableFrom(collectionClass)) {
                     collectionClass = ArrayList.class;
                 }
-                newCollection = (Collection) collectionClass.newInstance();
+                newCollection = (Collection) collectionClass.getConstructor().newInstance();
             } catch (InstantiationException e) {
                 throw e;
             }
             newCollection.addAll(newValues);
             return newCollection;
         } else if (fieldValue instanceof Map) {
-            Map newMap = (Map) fieldValue.getClass().newInstance();
+            Map newMap = (Map) fieldValue.getClass().getConstructor().newInstance();
             for (Map.Entry entry : new HashSet<>((Set<Map.Entry>) ((Map) fieldValue).entrySet())) {
                 Object key = replaceObject(entry.getKey());
                 Object value = replaceObject(entry.getValue());
@@ -596,14 +596,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
     }
 
-    protected void loadObjects(Map<String, DatabaseObject> objectMap, Map<String, DatabaseObject> allObjects, ParsedNode node, ResourceAccessor resourceAccessor) throws ClassNotFoundException, InstantiationException, IllegalAccessException, ParsedNodeException {
+    protected void loadObjects(Map<String, DatabaseObject> objectMap, Map<String, DatabaseObject> allObjects, ParsedNode node, ResourceAccessor resourceAccessor) throws ReflectiveOperationException, ParsedNodeException {
         if (node == null) {
             return;
         }
         for (ParsedNode typeNode : node.getChildren()) {
             Class<? extends DatabaseObject> objectType = (Class<? extends DatabaseObject>) Class.forName(typeNode.getName());
             for (ParsedNode objectNode : typeNode.getChildren()) {
-                DatabaseObject databaseObject = objectType.newInstance();
+                DatabaseObject databaseObject = objectType.getConstructor().newInstance();
                 databaseObject.load(objectNode, resourceAccessor);
                 String key = objectType.getName() + "#" + databaseObject.getSnapshotId();
                 objectMap.put(key, databaseObject);
