@@ -30,7 +30,6 @@ import liquibase.logging.Logger;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -885,7 +884,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
 
-        Set<String> urls = new JUnitResourceAccessor().list(includedChangeLog, true, false, true);
+        Set<String> urls = new JUnitResourceAccessor().list(null, includedChangeLog, true, false, true);
         String absolutePathOfChangeLog = urls.iterator().next();
 
         absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/", "");

@@ -37,7 +37,6 @@ import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 import liquibase.util.BooleanParser;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 
@@ -703,7 +702,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
         }
         String relativeTo = getRelativeTo();
-        InputStream stream = resourceAccessor.openStream(resourceAccessor.getCanonicalPath(relativeTo, file));
+        InputStream stream = resourceAccessor.openStream(relativeTo, file);
         if (stream == null) {
             return null;
         }
@@ -782,7 +781,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = getResourceAccessor().openStream(getResourceAccessor().getCanonicalPath(getRelativeTo(), file));
+            stream = getResourceAccessor().openStream(getRelativeTo(), file);
             if (stream == null) {
                 throw new UnexpectedLiquibaseException(getFile() + " could not be found");
             }

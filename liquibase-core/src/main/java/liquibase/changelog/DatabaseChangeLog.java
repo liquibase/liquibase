@@ -22,12 +22,10 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -401,7 +399,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     } else {
                         // read properties from the file
                         Properties props = new Properties();
-                        InputStream propertiesStream = resourceAccessor.openStream(file);
+                        InputStream propertiesStream = resourceAccessor.openStream(null, file);
                         if (propertiesStream == null) {
                             LogService.getLog(getClass()).info(LogType.LOG, "Could not open properties file " + file);
                         } else {
@@ -459,13 +457,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             LOG.debug(LogType.LOG, "includeAll for " + pathName);
             LOG.debug(LogType.LOG, "Using file opener for includeAll: " + resourceAccessor.toString());
 
+            String relativeTo = null;
             if (isRelativeToChangelogFile) {
-                pathName = resourceAccessor.getCanonicalPath(this.getPhysicalFilePath(), pathName);
+                relativeTo = this.getPhysicalFilePath();
             }
 
             Set<String> unsortedResources = null;
             try {
-                unsortedResources = resourceAccessor.list(pathName, true, true, false);
+                unsortedResources = resourceAccessor.list(relativeTo, pathName, true, true, false);
             } catch (IOException e) {
                 if (errorIfMissingOrEmpty) {
                     throw e;

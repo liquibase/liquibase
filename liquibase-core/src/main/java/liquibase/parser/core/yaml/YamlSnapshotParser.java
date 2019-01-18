@@ -11,7 +11,6 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.RestoredDatabaseSnapshot;
-import liquibase.util.StreamUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -26,7 +25,7 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
         Yaml yaml = new Yaml(new SafeConstructor());
 
         try (
-            InputStream stream = resourceAccessor.openStream(path);
+                InputStream stream = resourceAccessor.openStream(null, path);
         ) {
             if (stream == null) {
                 throw new LiquibaseParseException(path + " does not exist");

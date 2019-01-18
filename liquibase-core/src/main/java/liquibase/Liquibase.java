@@ -587,7 +587,7 @@ public class Liquibase {
         final Executor executor = ExecutorService.getInstance().getExecutor(database);
         String rollbackScriptContents;
         try {
-            InputStreamList streams = resourceAccessor.openStreams(rollbackScript);
+            InputStreamList streams = resourceAccessor.openStreams(null, rollbackScript);
             if ((streams == null) || streams.isEmpty()) {
                 throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
             } else if (streams.size() > 1) {

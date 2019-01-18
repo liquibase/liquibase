@@ -14,7 +14,6 @@ import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.file.FilenameUtils;
 
@@ -290,7 +289,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
         String fileName = getFileName(valueLobFile);
-        InputStreamList streams = this.resourceAccessor.openStreams(fileName);
+        InputStreamList streams = this.resourceAccessor.openStreams(null, fileName);
         if ((streams == null) || streams.isEmpty()) {
             return null;
         }

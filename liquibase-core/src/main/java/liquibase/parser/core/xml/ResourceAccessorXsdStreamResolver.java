@@ -1,10 +1,8 @@
 package liquibase.parser.core.xml;
 
 import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +21,7 @@ public class ResourceAccessorXsdStreamResolver extends XsdStreamResolver {
 	public InputStream getResourceAsStream(String xsdFile) {
 		try {
 
-			InputStream resourceAsStream = resourceAccessor.openStream(xsdFile);
+			InputStream resourceAsStream = resourceAccessor.openStream(null, xsdFile);
 			if(resourceAsStream == null){
 				LOGGER.debug("Could not load "+xsdFile+" with the standard resource accessor.");
 				return getSuccessorValue(xsdFile);

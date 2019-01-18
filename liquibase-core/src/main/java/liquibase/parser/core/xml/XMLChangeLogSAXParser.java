@@ -7,7 +7,6 @@ import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomStripperInputStream;
-import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
 import org.xml.sax.*;
 
@@ -68,7 +67,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         try (
-            InputStream inputStream = resourceAccessor.openStream(physicalChangeLogLocation)) {
+            InputStream inputStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
             SAXParser parser = saxParserFactory.newSAXParser();
             trySetSchemaLanguageProperty(parser);
     

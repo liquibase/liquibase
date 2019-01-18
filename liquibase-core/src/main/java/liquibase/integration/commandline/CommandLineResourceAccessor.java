@@ -4,7 +4,6 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.InputStreamList;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -18,11 +17,11 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
     }
 
     @Override
-    public InputStreamList openStreams(String path) throws IOException {
-        InputStreamList resourcesAsStream = super.openStreams(path);
+    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
+        InputStreamList resourcesAsStream = super.openStreams(relativeTo, streamPath);
         if (resourcesAsStream == null) {
-            for (String altPath : getAlternatePaths(path)) {
-                resourcesAsStream = super.openStreams(altPath);
+            for (String altPath : getAlternatePaths(streamPath)) {
+                resourcesAsStream = super.openStreams(relativeTo, altPath);
                 if (resourcesAsStream != null) {
                     return resourcesAsStream;
                 }
@@ -33,14 +32,14 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
 
 
     @Override
-    public SortedSet<String> list(String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+    public SortedSet<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
         SortedSet<String> contents = new TreeSet<>();
-        Set<String> superList = super.list(path, includeFiles, includeDirectories, recursive);
+        Set<String> superList = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
         if (superList != null) {
             contents.addAll(superList);
         }
         for (String altPath : getAlternatePaths(path)) {
-            contents.addAll(super.list(altPath, includeFiles, includeDirectories, recursive));
+            contents.addAll(super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive));
         }
         if (contents.isEmpty()) {
             return null;

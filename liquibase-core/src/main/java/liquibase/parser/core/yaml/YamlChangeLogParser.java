@@ -10,7 +10,6 @@ import liquibase.logging.LogType;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -25,7 +24,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         Yaml yaml = new Yaml(new SafeConstructor());
 
         try {
-            InputStream changeLogStream = resourceAccessor.openStream(physicalChangeLogLocation);
+            InputStream changeLogStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
             if (changeLogStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
@@ -99,7 +98,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
         try (
-            InputStream propertiesStream = resourceAccessor.openStream((String) property.get("file")))
+            InputStream propertiesStream = resourceAccessor.openStream(null, (String) property.get("file")))
         {
             
             if (propertiesStream == null) {

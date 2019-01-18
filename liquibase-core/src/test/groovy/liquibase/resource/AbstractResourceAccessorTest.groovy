@@ -1,7 +1,6 @@
 package liquibase.resource
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class AbstractResourceAccessorTest extends Specification {
 
@@ -10,17 +9,12 @@ class AbstractResourceAccessorTest extends Specification {
 //        def rootUrlsSet = new ArrayList(rootUrls)
         new AbstractResourceAccessor() {
             @Override
-            InputStreamList openStreams(String path) throws IOException {
+            InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
                 return null
             }
 
             @Override
-            SortedSet<String> list(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
-                return null
-            }
-
-            @Override
-            String getCanonicalPath(String relativeTo, String path) throws IOException {
+            SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
                 return null
             }
         }

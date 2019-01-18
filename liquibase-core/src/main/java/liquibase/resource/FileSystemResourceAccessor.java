@@ -49,19 +49,21 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         return rootPaths;
     }
 
-    @Override
-    public String getCanonicalPath(String relativeTo, String path) throws IOException {
-        if (relativeTo == null) {
-            relativeTo = ".";
+    protected File toFile(String path) {
+        for (Path root : getRootPaths()) {
+            File file = root.resolve(path).toFile();
+            if (file.exists()) {
+                return file;
+            }
         }
 
-        return new File(relativeTo).toPath().resolve(path).normalize().toString().replace("\\", "/");
+        return new File(path);
     }
 
     @Override
-    public InputStreamList openStreams(String path) throws IOException {
-        path = path.replace("\\", "/");
-        path = path.replaceFirst("^[\\\\/]([a-zA-Z]:)", "$1");
+    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
+        streamPath = streamPath.replace("\\", "/");
+        streamPath = streamPath.replaceFirst("^[\\\\/]([a-zA-Z]:)", "$1");
         final InputStreamList streams = new InputStreamList();
 
         URI streamURI = null;
@@ -69,7 +71,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             InputStream stream = null;
             if (isCompressedFile(rootPath)) {
                 try (ZipFile zipFile = new ZipFile(rootPath.toFile())) {
-                    ZipEntry entry = zipFile.getEntry(path);
+                    ZipEntry entry = zipFile.getEntry(streamPath);
                     if (entry != null) {
                         stream = zipFile.getInputStream(entry);
                         streamURI = URI.create(rootPath.normalize().toUri()+"!"+entry.toString());
@@ -77,22 +79,22 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                 }
             } else {
                 try {
-                    if (Paths.get(path).startsWith(rootPath)) {
-                        path = rootPath.relativize(Paths.get(path)).toString();
+                    if (Paths.get(streamPath).startsWith(rootPath)) {
+                        streamPath = rootPath.relativize(Paths.get(streamPath)).toString();
                     }
                 } catch (InvalidPathException ignored) {
                     //that is ok
                 }
 
-                if (path.startsWith("/") || path.startsWith("\\")) {
-                    path = path.substring(1); //always relative to rootPath
+                if (streamPath.startsWith("/") || streamPath.startsWith("\\")) {
+                    streamPath = streamPath.substring(1); //always relative to rootPath
                 }
 
-                if (Paths.get(path).isAbsolute()) {
+                if (Paths.get(streamPath).isAbsolute()) {
                     continue; //on a windows system with an absolute path that doesn't start with rootPath
                 }
 
-                File resolvedFile = rootPath.resolve(path).toFile();
+                File resolvedFile = rootPath.resolve(streamPath).toFile();
                 if (resolvedFile.exists()) {
                     streamURI = resolvedFile.getCanonicalFile().toURI();
                     stream = new BufferedInputStream(new FileInputStream(resolvedFile));
@@ -101,7 +103,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             }
 
             if (stream != null) {
-                if (path.toLowerCase().endsWith(".gz")) {
+                if (streamPath.toLowerCase().endsWith(".gz")) {
                     stream = new GZIPInputStream(stream);
                 }
 
@@ -115,7 +117,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
-    public SortedSet<String> list(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+    public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         final SortedSet<String> returnList = new TreeSet<>();
 
         int maxDepth = recursive ? Integer.MAX_VALUE : 1;
@@ -202,12 +204,5 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         return getClass().getName() + " (" + StringUtil.join(getRootPaths(), ", ", new StringUtil.ToStringFormatter()) + ")";
     }
 
-    /**
-     * Encapsulates logic used by {@link ResourceAccessor#openStreams(String)} and {@link #list(String, boolean, boolean, boolean)} for each file.
-     */
-    public abstract class ResourceFileVisitor {
 
-        public abstract void visitFile(Path visitedFile, Path rootPath, BasicFileAttributes attrs) throws IOException;
-
-    }
 }

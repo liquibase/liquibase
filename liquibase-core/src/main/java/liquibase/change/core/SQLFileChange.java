@@ -116,10 +116,11 @@ public class SQLFileChange extends AbstractSQLChange {
 
         InputStream inputStream = null;
         try {
+            String relativeTo = null;
             if (isRelativeToChangelogFile()) {
-                path = getResourceAccessor().getCanonicalPath(getChangeSet().getFilePath(), path);
+                relativeTo = getChangeSet().getFilePath();
             }
-            inputStream = getResourceAccessor().openStream(path);
+            inputStream = getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException("Unable to read file '" + path + "'", e);
         }

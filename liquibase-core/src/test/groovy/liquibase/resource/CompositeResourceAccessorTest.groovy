@@ -40,9 +40,9 @@ class CompositeResourceAccessorTest extends Specification {
     @Unroll
     def "openStreams"() {
         when:
-        1 * first.openStreams("file") >> firstAccessorMock
-        1 * second.openStreams("file") >> secondAccessorMock
-        def is = composite.openStreams("file");
+        1 * first.openStreams(null, "file") >> firstAccessorMock
+        1 * second.openStreams(null, "file") >> secondAccessorMock
+        def is = composite.openStreams(null, "file");
 
         then:
         is.streams == expected;
@@ -58,9 +58,9 @@ class CompositeResourceAccessorTest extends Specification {
     @Unroll
     def "list"() {
         when:
-        1 * first.list("file", true, true, true) >> firstAccessorMock
-        1 * second.list("file", true, true, true) >> secondAccessorMock
-        def list = composite.list("file", true, true, true);
+        1 * first.list(null, "file", true, true, true) >> firstAccessorMock
+        1 * second.list(null, "file", true, true, true) >> secondAccessorMock
+        def list = composite.list(null, "file", true, true, true);
 
         then:
         list == expected
@@ -73,21 +73,4 @@ class CompositeResourceAccessorTest extends Specification {
         validResources    | validResources     | validResources
     }
 
-    @Unroll
-    def "getCanonicalPath"() {
-        when:
-        first.getCanonicalPath(null, "file") >> firstAccessorMock
-        second.getCanonicalPath(null, "file") >> secondAccessorMock
-
-        then:
-        composite.getCanonicalPath(null, "file") == expected
-
-        where:
-        firstAccessorMock | secondAccessorMock | expected
-        "x"               | null               | "x"
-        "x"               | "y"                | "x"
-        null              | "y"                | "y"
-        null              | null               | null
-
-    }
 }

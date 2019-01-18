@@ -32,7 +32,7 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
     }
 
     /**
-     * Called by constructor to create all the root paths fro the given classloader.
+     * Called by constructor to create all the root paths from the given classloader.
      * Works best if the passed classLoader is a {@link URLClassLoader} because it can get the root file/dirs directly.
      * If it is not a URLClassLoader, it still attempts to find files by looking up base packages and MANIFEST.MF files.
      * This may miss some roots, however, and so if you are not using a URLClassLoader consider using a custom subclass.

@@ -6,7 +6,6 @@ import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializer;
-import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -87,7 +86,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         log.debug(LogType.LOG, "Attempting to load "+systemId+" from resourceAccessor as "+path);
 
         try {
-            InputStream resourceAsStream = resourceAccessor.openStream(path);
+            InputStream resourceAsStream = resourceAccessor.openStream(null, path);
             if (resourceAsStream == null) {
                 log.debug(LogType.LOG, "Could not load "+systemId+" from resourceAccessor as "+path);
                 return null;

@@ -17,31 +17,12 @@ class ClassLoaderResourceAccessorTest extends Specification {
         accessor.getRootPaths().findAll({ it.endsWith("classes") }).size() == 1
     }
 
-    @Unroll("#featureName: #relativeTo / #path -> #expected")
-    def "getCanonicalPath"() {
-        when:
-        def accessor = new ClassLoaderResourceAccessor(this.getClass().getClassLoader(), new URLClassLoader([].toArray() as URL[]))
-
-        then:
-        accessor.getCanonicalPath(relativeTo, path) == expected
-
-        where:
-        relativeTo                         | path                             | expected
-        null                               | "liquibase/Liquibase.class"      | "liquibase/Liquibase.class"
-        ""                                 | "liquibase/Liquibase.class"      | "liquibase/Liquibase.class"
-        "liquibase"                        | "Liquibase.class"                | "liquibase/Liquibase.class"
-        "liquibase"                        | "Contexts.class"                 | "liquibase/Contexts.class"
-        "liquibase/"                       | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
-        "liquibase"                        | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
-        "liquibase/sql"                    | "../Liquibase.class"             | "liquibase/Liquibase.class"
-    }
-
     def "can recursively enumerate files inside JARs on the classpath"() {
         given:
         def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
 
         when:
-        def listedResources = accessor.list("org/springframework/core/io", true, true, false)
+        def listedResources = accessor.list(null, "org/springframework/core/io", true, true, false)
 
         then:
         listedResources.contains("org/springframework/core/io/Resource.class")
@@ -53,7 +34,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
         def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
 
         when:
-        def listedResources = accessor.list("org/springframework/core/io", false, true, false)
+        def listedResources = accessor.list(null, "org/springframework/core/io", false, true, false)
 
         then:
         listedResources.contains("org/springframework/core/io/Resource.class")

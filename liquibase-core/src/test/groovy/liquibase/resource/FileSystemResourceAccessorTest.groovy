@@ -1,14 +1,8 @@
 package liquibase.resource
 
 import liquibase.util.SystemUtils
-import org.junit.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import java.nio.file.Path
-import java.nio.file.Paths
-
-import static org.junit.Assume.assumeTrue
 
 class FileSystemResourceAccessorTest extends Specification {
 
@@ -61,7 +55,7 @@ class FileSystemResourceAccessorTest extends Specification {
     @Unroll("#featureName: #path")
     def "openStream can open a single file"() {
         expect:
-        simpleTestAccessor.openStream(path) != null
+        simpleTestAccessor.openStream(null, path) != null
 
         where:
         path << [
@@ -98,7 +92,7 @@ class FileSystemResourceAccessorTest extends Specification {
             return
         }
 
-        simpleTestAccessor.openStream(path) != null
+        simpleTestAccessor.openStream(null, path) != null
 
         where:
         path << [
@@ -109,7 +103,7 @@ class FileSystemResourceAccessorTest extends Specification {
 
     def "openStream throws an error if multiple files match"() {
         when:
-        simpleTestAccessor.openStream("com/example/everywhere/file-everywhere.txt")
+        simpleTestAccessor.openStream(null, "com/example/everywhere/file-everywhere.txt",)
 
         then:
         def e = thrown(IOException)
@@ -119,13 +113,13 @@ class FileSystemResourceAccessorTest extends Specification {
 
     def "openStream returns null if nothing matches"() {
         expect:
-        simpleTestAccessor.openStream("com/example/invalid.txt") == null
+        simpleTestAccessor.openStream(null, "com/example/invalid.txt") == null
     }
 
     @Unroll("#featureName: #path")
     def "openStreams can open files"() throws IOException {
         expect:
-        simpleTestAccessor.openStreams(path).size() == size
+        simpleTestAccessor.openStreams(null, path).size() == size
 
         where:
         path                                            | size
@@ -138,31 +132,10 @@ class FileSystemResourceAccessorTest extends Specification {
     }
 
 
-    @Unroll("#featureName: #path -> #expected")
-    def "getCanonicalPath creates correct paths"() {
-        when:
-        def accessor = new FileSystemResourceAccessor()
-
-        then:
-        accessor.getCanonicalPath(null, path) == expected
-
-        where:
-        relativeTo | path                          | expected
-        null       | "short.file"                  | "short.file"
-        null       | "/short.file"                 | "/short.file"
-        null       | "\\short.file"                | "/short.file"
-        null       | "some/path/Here.file"         | "some/path/Here.file"
-        null       | "some\\path\\Here.file"       | "some/path/Here.file"
-        null       | "some//path///Here.file"      | "some/path/Here.file"
-        null       | "some\\\\path\\\\\\Here.file" | "some/path/Here.file"
-        null       | "path/./with/./dirs"          | "path/with/dirs"
-        null       | "path/./with/.dirs"           | "path/with/.dirs"
-    }
-
     @Unroll
     def "list"() {
         expect:
-        simpleTestAccessor.list(path, recursive, includeFiles, includeDirectories) == expected as SortedSet
+        simpleTestAccessor.list(null, path, recursive, includeFiles, includeDirectories) == expected as SortedSet
 
         where:
         path          | recursive | includeFiles | includeDirectories | expected

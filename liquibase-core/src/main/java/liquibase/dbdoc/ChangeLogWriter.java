@@ -23,7 +23,7 @@ public class ChangeLogWriter {
         
         BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile,
         false), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-        try (InputStream stylesheet = resourceAccessor.openStream(physicalFilePath)) {
+        try (InputStream stylesheet = resourceAccessor.openStream(null, physicalFilePath)) {
             if (stylesheet == null) {
                 throw new IOException("Can not find " + changeLog);
             }

@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * A list of {@link InputStream}s. Custom class to allow try-with-resources using output from {@link ResourceAccessor#openStreams(String)}.
+ * A list of {@link InputStream}s. Custom class to allow try-with-resources using output from {@link ResourceAccessor#openStreams(String, String)}.
  */
 public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
