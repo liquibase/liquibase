@@ -637,7 +637,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
                 } else {
                     LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.convert.load.data.type"),
-                        columnConfig.toString(), snapshotOfTable.toString(), liquibaseDataType.toString()));
+                        columnConfig.toString(), snapshotOfTable.toString(), dataType.toString()));
                 }
             }
         }
