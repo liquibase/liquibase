@@ -61,9 +61,9 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
         try {
 //            System.out.println(classLoader.toString());
             try {
-                customPrecondition = (CustomPrecondition) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).newInstance();
+                customPrecondition = (CustomPrecondition) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
             } catch (ClassCastException e) { //fails in Ant in particular
-                customPrecondition = (CustomPrecondition) Class.forName(className).newInstance();
+                customPrecondition = (CustomPrecondition) Class.forName(className).getConstructor().newInstance();
             }
         } catch (Exception e) {
             throw new PreconditionFailedException("Could not open custom precondition class "+className, changeLog, this);

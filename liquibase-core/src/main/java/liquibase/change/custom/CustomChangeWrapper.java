@@ -70,12 +70,12 @@ public class CustomChangeWrapper extends AbstractChange {
         this.className = className;
             try {
                 try {
-                    customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).newInstance();
+                    customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
                 } catch (ClassCastException e) { //fails in Ant in particular
                     try {
-                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).newInstance();
+                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
                     } catch (ClassNotFoundException e1) {
-                        customChange = (CustomChange) Class.forName(className).newInstance();
+                        customChange = (CustomChange) Class.forName(className).getConstructor().newInstance();
                     }
                 }
         } catch (Exception e) {
@@ -311,7 +311,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
         CustomChange customChange = null;
         try {
-            customChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).newInstance();
+            customChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

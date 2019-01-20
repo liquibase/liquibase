@@ -269,7 +269,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
                 Object value = this.get(attr, Object.class);
                 if (value instanceof Collection) {
                     try {
-                        Collection valueClone = (Collection) value.getClass().newInstance();
+                        Collection valueClone = (Collection) value.getClass().getConstructor().newInstance();
                         for (Object obj : ((Collection) value)) {
                             valueClone.add(obj);
                         }
@@ -279,7 +279,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
                     }
                 } else if (value instanceof Map) {
                     try {
-                        Map valueClone = (Map) value.getClass().newInstance();
+                        Map valueClone = (Map) value.getClass().getConstructor().newInstance();
                         for (Map.Entry obj : ((Map<?, ?>) value).entrySet()) {
                             valueClone.put(obj.getKey(), obj.getValue());
                         }

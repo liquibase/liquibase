@@ -343,8 +343,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 IncludeAllFilter resourceFilter = null;
                 if (resourceFilterDef != null) {
                     try {
-                        resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).newInstance();
-                    } catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
+                        resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).getConstructor().newInstance();
+                    } catch (ReflectiveOperationException e) {
                         throw new SetupException(e);
                     }
                 }
@@ -353,8 +353,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 Comparator<String> resourceComparator = null;
                 if (resourceComparatorDef != null) {
                     try {
-                        resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).newInstance();
-                    } catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
+                        resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
+                    } catch (ReflectiveOperationException e) {
                         //take default comparator
                         LogService.getLog(getClass()).info(LogType.LOG, "no resourceComparator defined - taking default " +
                          "implementation");
@@ -435,8 +435,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return dbmsSet == null
                 || changeLogParameters == null
                 || changeLogParameters.getValue("database.typeName", this) == null
-                || dbmsSet.isEmpty()
-                || dbmsSet.contains(changeLogParameters.getValue("database.typeName", this).toString());
+                || DatabaseList.definitionMatches(dbmsSet, changeLogParameters.getValue("database.typeName", this).toString(), true);
     }
 
     public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter,

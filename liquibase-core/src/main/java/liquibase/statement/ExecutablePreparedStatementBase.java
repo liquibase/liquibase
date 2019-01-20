@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
+import liquibase.change.core.LoadDataChange;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
@@ -130,7 +131,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             DatabaseException {
         if (col.getValue() != null) {
             LOG.debug(LogType.LOG, "value is string = " + col.getValue());
-            stmt.setString(i, col.getValue());
+            if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
+                stmt.setObject(i, UUID.fromString(col.getValue()));
+            } else {
+                stmt.setString(i, col.getValue());
+            }
         } else if (col.getValueBoolean() != null) {
             LOG.debug(LogType.LOG, "value is boolean = " + col.getValueBoolean());
             stmt.setBoolean(i, col.getValueBoolean());

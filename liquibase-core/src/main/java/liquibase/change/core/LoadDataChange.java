@@ -68,7 +68,8 @@ import static java.util.ResourceBundle.getBundle;
             "Once the date format string is set, Liquibase will then call the SimpleDateFormat.parse() method " +
                 "attempting to parse the input string so that it can return a Date/Time. If problems occur, " +
                 "then a ParseException is thrown and the input string is treated as a String for the INSERT command " +
-                "to be generated.",
+                "to be generated.\n" +
+                "If UUID type is used UUID value is stored as string and NULL in cell is supported. Column config should be used in xml.",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
         since = "1.7")
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
@@ -415,6 +416,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                     valueConfig.setValueClobFile(value.toString());
                                     needsPreparedStatement = true;
                                 }
+                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.UUID.toString())) {
+                                valueConfig.setType(columnConfig.getType());
+                                if ("NULL".equalsIgnoreCase(value.toString())) {
+                                    valueConfig.setValue(null);
+                                } else {
+                                    valueConfig.setValue(value.toString());
+                                }                                
                             } else {
                                 throw new UnexpectedLiquibaseException(
                                     String.format(coreBundle.getString("loaddata.type.is.not.supported"),
@@ -812,6 +820,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP
+        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID
     }
 }
