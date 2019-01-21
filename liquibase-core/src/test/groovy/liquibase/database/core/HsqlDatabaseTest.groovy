@@ -1,15 +1,15 @@
-package liquibase.database.core;
+package liquibase.database.core
 
-import junit.framework.TestCase;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.ObjectQuotingStrategy;
-import liquibase.structure.core.Table;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import liquibase.database.Database
+import liquibase.database.DatabaseConnection
+import liquibase.database.ObjectQuotingStrategy
+import liquibase.structure.core.Table
+import spock.lang.Specification
 
-public class HsqlDatabaseTest extends TestCase {
+import static org.junit.Assert.*
+
+public class HsqlDatabaseTest extends Specification {
     public void testGetDefaultDriver() {
         Database database = new HsqlDatabase();
 
@@ -22,7 +22,7 @@ public class HsqlDatabaseTest extends TestCase {
         Database database = new HsqlDatabase();
         String expectedResult = "CONCAT(str1, CONCAT(str2, CONCAT(str3, str4)))";
         String value = "v";
-        String[] values = new String[]{"str1", "str2", "str3", "str4"};
+        String[] values = ["str1", "str2", "str3", "str4"] as String[];
 
         assertEquals(database.getConcatSql(value), value);
         assertEquals(database.getConcatSql(values), expectedResult);
@@ -37,25 +37,25 @@ public class HsqlDatabaseTest extends TestCase {
         Database databaseWithDefaultQuoting = new HsqlDatabase();
         databaseWithDefaultQuoting.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         assertEquals("Test", databaseWithDefaultQuoting.escapeObjectName("Test", Table.class));
-        
+
         Database databaseWithAllQuoting = new HsqlDatabase();
         databaseWithAllQuoting.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         assertEquals("\"Test\"", databaseWithAllQuoting.escapeObjectName("Test", Table.class));
     }
-    
-    public void testUsingOracleSyntax()  {
+
+    public void testUsingOracleSyntax() {
         HsqlDatabase database = new HsqlDatabase();
-        DatabaseConnection conn = mock(DatabaseConnection.class);
+        DatabaseConnection conn = Mock(DatabaseConnection.class);
         when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb;sql.syntax_ora=true;sql.enforce_names=true");
-        database.setConnection(conn );
+        database.setConnection(conn);
         assertTrue("Using oracle syntax", database.isUsingOracleSyntax());
     }
 
-    public void testNotUsingOracleSyntax()  {
+    public void testNotUsingOracleSyntax() {
         HsqlDatabase database = new HsqlDatabase();
-        DatabaseConnection conn = mock(DatabaseConnection.class);
+        DatabaseConnection conn = Mock(DatabaseConnection.class);
         when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb");
-        database.setConnection(conn );
+        database.setConnection(conn);
         assertFalse("Using oracle syntax", database.isUsingOracleSyntax());
     }
 }

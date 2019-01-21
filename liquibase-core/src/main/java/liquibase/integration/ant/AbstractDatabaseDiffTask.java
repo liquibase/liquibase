@@ -35,7 +35,7 @@ public abstract class AbstractDatabaseDiffTask extends BaseLiquibaseTask {
             referenceSnapshot = snapshotGeneratorFactory.createSnapshot(referenceDatabase.getDefaultSchema(),
                     referenceDatabase, new SnapshotControl(referenceDatabase, diffTypes));
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to create a DatabaseSnapshot. " + e.toString(), e);
+            throw new BuildException("Unable to create a DatabaseSnapshot: " + e.getMessage(), e);
         }
 
         CompareControl compareControl = new CompareControl(schemaComparisons, referenceSnapshot.getSnapshotControl().getTypesToInclude());
@@ -43,7 +43,7 @@ public abstract class AbstractDatabaseDiffTask extends BaseLiquibaseTask {
         try {
             return liquibase.diff(referenceDatabase, targetDatabase, compareControl);
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to diff databases. " + e.toString(), e);
+            throw new BuildException("Unable to diff databases: " + e.getMessage(), e);
         }
     }
 

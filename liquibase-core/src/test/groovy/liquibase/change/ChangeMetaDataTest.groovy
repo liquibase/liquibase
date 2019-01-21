@@ -13,7 +13,6 @@ import java.util.HashSet;
 
 import static liquibase.test.Assert.assertSetsEqual;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 
 public class ChangeMetaDataTest {
 
@@ -26,7 +25,7 @@ public class ChangeMetaDataTest {
         notes.put("db1", "note1");
         notes.put("db2", "note2");
 
-        String[] appliesTo = new String[] {"table", "column"};
+        String[] appliesTo = ["table", "column"];
         ChangeMetaData metaData = new ChangeMetaData("x", "y", 10, appliesTo, notes, params);
 
         assertEquals("x", metaData.getName());
@@ -76,34 +75,34 @@ public class ChangeMetaDataTest {
     @Test
     public void getRequiredParameters() {
         HashSet<ChangeParameterMetaData> parameters = new HashSet<ChangeParameterMetaData>();
-        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "noneRequired", "x", null, null, null, Integer.class, ["none"] as String[], null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "allRequired", "x", null, null, null, Integer.class, ["all"] as String[], null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "h2Required", "x", null, null, null, Integer.class, ["h2"] as String[], null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "oracleRequired", "x", null, null, null, Integer.class, ["oracle"] as String[], null, null, null));
         ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, parameters);
 
-        assertSetsEqual(new String[]{"allRequired", "h2Required"}, changeMetaData.getRequiredParameters(new H2Database()).keySet());
-        assertSetsEqual(new String[]{"allRequired", "oracleRequired"}, changeMetaData.getRequiredParameters(new OracleDatabase()).keySet());
-        assertSetsEqual(new String[]{"allRequired"}, changeMetaData.getRequiredParameters(new MySQLDatabase()).keySet());
+        assertSetsEqual(["allRequired", "h2Required"] as String[], changeMetaData.getRequiredParameters(new H2Database()).keySet());
+        assertSetsEqual(["allRequired", "oracleRequired"] as String[], changeMetaData.getRequiredParameters(new OracleDatabase()).keySet());
+        assertSetsEqual(["allRequired"] as String[], changeMetaData.getRequiredParameters(new MySQLDatabase()).keySet());
     }
 
     @Test
     public void getOptionalParameters() {
         HashSet<ChangeParameterMetaData> parameters = new HashSet<ChangeParameterMetaData>();
-        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "noneRequired", "x", null, null, null, Integer.class, ["none"] as String[], null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "allRequired", "x", null, null, null, Integer.class, ["all"] as String[], null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "h2Required", "x", null, null, null, Integer.class, ["h2"] as String[], null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "oracleRequired", "x", null, null, null, Integer.class, ["oracle"] as String[], null, null, null));
         ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, parameters);
 
-        assertSetsEqual(new String[]{"noneRequired", "oracleRequired"}, changeMetaData.getOptionalParameters(new H2Database()).keySet());
-        assertSetsEqual(new String[]{"noneRequired", "h2Required"}, changeMetaData.getOptionalParameters(new OracleDatabase()).keySet());
-        assertSetsEqual(new String[]{"noneRequired", "h2Required", "oracleRequired"}, changeMetaData.getOptionalParameters(new MySQLDatabase()).keySet());
+        assertSetsEqual(["noneRequired", "oracleRequired"] as String[], changeMetaData.getOptionalParameters(new H2Database()).keySet());
+        assertSetsEqual(["noneRequired", "h2Required"] as String[], changeMetaData.getOptionalParameters(new OracleDatabase()).keySet());
+        assertSetsEqual(["noneRequired", "h2Required", "oracleRequired"] as String[], changeMetaData.getOptionalParameters(new MySQLDatabase()).keySet());
     }
 
     @Test
     public void appliesTo() {
-        ChangeMetaData metaData = new ChangeMetaData("x", "y", 5, new String[] {"table", "column"}, null, null);
+        ChangeMetaData metaData = new ChangeMetaData("x", "y", 5, ["table", "column"] as String[], null, null);
         assertTrue(metaData.appliesTo(new Table()));
         assertTrue(metaData.appliesTo(new Column()));
         assertFalse(metaData.appliesTo(new View()));

@@ -12,7 +12,7 @@ public class CommandLineResourceAccessorTest extends Specification {
 
     def getResourcesAsStream() throws Exception {
         when:
-        def resourcesAsStream = createFileOpener().openStreams("liquibase/integration/ant/AntResourceAccessorTest.class");
+        def resourcesAsStream = createFileOpener().openStreams(null,"liquibase/integration/ant/AntResourceAccessorTest.class");
 
         then:
         resourcesAsStream.size() == 1
@@ -22,7 +22,7 @@ public class CommandLineResourceAccessorTest extends Specification {
 
     def "getResourcesAsStream when file does not exist"() throws Exception {
         expect:
-        createFileOpener().openStreams("non/existant/file.txt") == null
+        createFileOpener().openStreams(null,"non/existant/file.txt").empty
     }
 
     def "getContents"() throws Exception {

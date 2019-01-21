@@ -107,7 +107,7 @@ class FileSystemResourceAccessorTest extends Specification {
 
         then:
         def e = thrown(IOException)
-        e.message == "Found 2 files that match com/example/everywhere/file-everywhere.txt"
+        e.message == "Found 3 files that match com/example/everywhere/file-everywhere.txt"
 
     }
 
@@ -116,21 +116,31 @@ class FileSystemResourceAccessorTest extends Specification {
         simpleTestAccessor.openStream(null, "com/example/invalid.txt") == null
     }
 
-    @Unroll("#featureName: #path")
+    @Unroll("#featureName: #path relative to #relativeTo")
     def "openStreams can open files"() throws IOException {
         expect:
-        simpleTestAccessor.openStreams(null, path).size() == size
+        simpleTestAccessor.openStreams(relativeTo, path).size() == size
 
         where:
-        path                                            | size
-        "file-in-root.txt"                              | 2
-        "com/example/everywhere/file-everywhere.txt"    | 2
-        "com\\example\\everywhere\\file-everywhere.txt" | 2
-        "com/example/zip/file-in-zip.txt"               | 1
-        "com/example/jar/file-in-jar.txt"               | 1
-        "com/example/invalid.txt"                       | 0
+        relativeTo                                   | path                                            | size | notes
+        null                                         | "file-in-root.txt"                              | 3    | null
+        null                                         | "com/example/everywhere/file-everywhere.txt"    | 3    | null
+        null                                         | "com\\example\\everywhere\\file-everywhere.txt" | 3    | null
+        "com/example"                                | "everywhere/file-everywhere.txt"                | 3    | null
+        "/com/example/"                              | "/everywhere/file-everywhere.txt"               | 3    | null
+        "com\\example"                               | "everywhere\\file-everywhere.txt"               | 3    | null
+        "com/example/everywhere/file-everywhere.txt" | "other-file-everywhere.txt"                     | 3    | null
+        "com/example/everywhere/file-everywhere.txt" | "../everywhere/other-file-everywhere.txt"       | 3    | null
+        "com\\example\\users.csv"                    | "everywhere\\file-everywhere.txt"               | 1    | "users.csv is only on file system"
+        "com/example/everywhere/file-everywhere.txt" | "../jar/file-in-jar.txt"                        | 1    | "lookup file in jar based on file available everywhere"
+        "file-in-root.txt"                           | "com/example/everywhere/file-everywhere.txt"    | 3    | null
+        "/file-in-root.txt"                          | "com/example/everywhere/file-everywhere.txt"    | 3    | null
+        "\\file-in-root.txt"                         | "com/example/everywhere/file-everywhere.txt"    | 3    | null
+        "file-in-root.txt"                           | "com/example/zip/file-in-zip.txt"               | 1    | null
+        null                                         | "com/example/zip/file-in-zip.txt"               | 1    | null
+        null                                         | "com/example/jar/file-in-jar.txt"               | 1    | null
+        null                                         | "com/example/invalid.txt"                       | 0    | null
     }
-
 
     @Unroll
     def "list"() {

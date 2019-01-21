@@ -102,7 +102,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                         physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", ""),
                             changeLogParameters, resourceAccessor);
                 } else {
-                    throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
+                    throw new ChangeLogParseException(physicalChangeLogLocation + " not found");
                 }
             }
 

@@ -175,7 +175,7 @@
     </target>
 
 	<target name="testUpdateDatabaseChangeLogDirectoryDoesNotExist">
-        <au:expectfailure expectedmessage="${liquibase.test.ant.basedir}/bad_changelog must be a directory">
+        <au:expectfailure expectedmessage="Unable to update database: simple-changelog.xml not found">
 	        <lb:updateDatabase changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">
 	            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
 	        </lb:updateDatabase>

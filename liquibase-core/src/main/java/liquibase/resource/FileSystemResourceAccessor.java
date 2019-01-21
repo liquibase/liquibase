@@ -66,35 +66,80 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         streamPath = streamPath.replaceFirst("^[\\\\/]([a-zA-Z]:)", "$1");
         final InputStreamList streams = new InputStreamList();
 
-        URI streamURI = null;
+        streamPath = streamPath.replaceFirst("^/", ""); //Path is always relative to the file roots
+
+        if (relativeTo != null) {
+            relativeTo = relativeTo.replace("\\", "/");
+            relativeTo = relativeTo.replaceFirst("^[\\\\/]([a-zA-Z]:)", "$1");
+            relativeTo = relativeTo.replaceFirst("^/", ""); //Path is always relative to the file roots
+        }
+
         for (Path rootPath : rootPaths) {
+            URI streamURI = null;
+            if (rootPath == null) {
+                continue;
+            }
             InputStream stream = null;
             if (isCompressedFile(rootPath)) {
+                String finalPath = streamPath;
+
                 try (ZipFile zipFile = new ZipFile(rootPath.toFile())) {
-                    ZipEntry entry = zipFile.getEntry(streamPath);
+                    if (relativeTo != null) {
+                        ZipEntry relativeEntry = zipFile.getEntry(relativeTo);
+                        if (relativeEntry == null || relativeEntry.isDirectory()) {
+                            //not a file, maybe a directory
+                            finalPath = relativeTo + "/" + streamPath;
+                        } else {
+                            //is a file, find path relative to parent
+                            String actualRelativeTo = relativeTo;
+                            if (actualRelativeTo.contains("/")) {
+                                actualRelativeTo = relativeTo.replaceFirst("/[^/]+?$", "");
+                            } else {
+                                actualRelativeTo = "";
+                            }
+                            finalPath = actualRelativeTo + "/" + streamPath;
+                        }
+
+                    }
+
+
+                    //resolve any ..'s and duplicated /'s and convert back to standard '/' separator format
+                    finalPath = Paths.get(finalPath.replaceFirst("^/", "")).normalize().toString().replace("\\", "/");
+
+                    ZipEntry entry = zipFile.getEntry(finalPath);
                     if (entry != null) {
                         stream = zipFile.getInputStream(entry);
-                        streamURI = URI.create(rootPath.normalize().toUri()+"!"+entry.toString());
+                        streamURI = URI.create(rootPath.normalize().toUri() + "!" + entry.toString());
                     }
                 }
             } else {
+                Path finalRootPath = rootPath;
+                if (relativeTo != null) {
+                    finalRootPath = finalRootPath.resolve(relativeTo);
+                    File rootPathFile = finalRootPath.toFile();
+                    if (rootPathFile.exists()) {
+                        if (rootPathFile.isFile()) {
+                            //relative to directory
+                            finalRootPath = rootPathFile.getParentFile().toPath();
+                        }
+                    } else {
+                        log.debug("No relative path " + relativeTo + " in " + rootPath);
+                        continue;
+                    }
+                }
                 try {
-                    if (Paths.get(streamPath).startsWith(rootPath)) {
-                        streamPath = rootPath.relativize(Paths.get(streamPath)).toString();
+                    if (Paths.get(streamPath).startsWith(finalRootPath) || Paths.get(streamPath).startsWith("/" + finalRootPath)) {
+                        streamPath = finalRootPath.relativize(Paths.get(streamPath)).toString();
                     }
                 } catch (InvalidPathException ignored) {
                     //that is ok
-                }
-
-                if (streamPath.startsWith("/") || streamPath.startsWith("\\")) {
-                    streamPath = streamPath.substring(1); //always relative to rootPath
                 }
 
                 if (Paths.get(streamPath).isAbsolute()) {
                     continue; //on a windows system with an absolute path that doesn't start with rootPath
                 }
 
-                File resolvedFile = rootPath.resolve(streamPath).toFile();
+                File resolvedFile = finalRootPath.resolve(streamPath).toFile();
                 if (resolvedFile.exists()) {
                     streamURI = resolvedFile.getCanonicalFile().toURI();
                     stream = new BufferedInputStream(new FileInputStream(resolvedFile));

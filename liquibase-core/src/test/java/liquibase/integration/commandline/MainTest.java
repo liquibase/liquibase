@@ -10,11 +10,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.*;
 import java.net.URL;
@@ -24,48 +19,41 @@ import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.support.membermodification.MemberMatcher.method;
 
 
 /**
  * Tests for {@link Main}
  */
-@RunWith(PowerMockRunner.class)
-// PowerMockito tends to choke on these, and we do not really need to mock them anyway:
-@PowerMockIgnore({"javax.xml.*", "org.xml.sax.*", "org.w3c.dom.*", "org.springframework.context.*", "org.apache.log4j" +
-        ".*"})
-@PrepareForTest({Main.class, CommandFactory.class})
 public class MainTest {
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-    @Mock
-    private CommandFactory commandFactory;
-
-    @Mock
-    private SnapshotCommand snapshotCommand;
-
-    @Mock
-    private SnapshotCommand.SnapshotCommandResult snapshotCommandResult;
+//    @Mock
+//    private CommandFactory commandFactory;
+//
+//    @Mock
+//    private SnapshotCommand snapshotCommand;
+//
+//    @Mock
+//    private SnapshotCommand.SnapshotCommandResult snapshotCommandResult;
 
     public MainTest() throws Exception {
-        PowerMockito.mockStatic(CommandFactory.class);
-
-        commandFactory = PowerMockito.mock(CommandFactory.class);
-        snapshotCommand = PowerMockito.mock(SnapshotCommand.class);
-        snapshotCommandResult = PowerMockito.mock(SnapshotCommand.SnapshotCommandResult.class);
-
-        // Do not do actual database snapshots.
-        when(CommandFactory.getInstance()).thenReturn(commandFactory);
-        when(commandFactory.getCommand("snapshot")).thenReturn(snapshotCommand);
-        when(snapshotCommand.execute()).thenReturn(snapshotCommandResult);
-        when(snapshotCommandResult.print()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>...");
-
-        // This one is not so much for JUnit, but for people working with IntelliJ. It seems that IntelliJ's
-        // test runner can get confused badly if tests open an OutputStreamWriter in STDOUT.
-        PowerMockito.stub(method(Main.class, "getOutputWriter"))
-                .toReturn(new OutputStreamWriter(System.err));
+//        PowerMockito.mockStatic(CommandFactory.class);
+//
+//        commandFactory = PowerMockito.mock(CommandFactory.class);
+//        snapshotCommand = PowerMockito.mock(SnapshotCommand.class);
+//        snapshotCommandResult = PowerMockito.mock(SnapshotCommand.SnapshotCommandResult.class);
+//
+//        // Do not do actual database snapshots.
+//        when(CommandFactory.getInstance()).thenReturn(commandFactory);
+//        when(commandFactory.getCommand("snapshot")).thenReturn(snapshotCommand);
+//        when(snapshotCommand.execute()).thenReturn(snapshotCommandResult);
+//        when(snapshotCommandResult.print()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>...");
+//
+//        // This one is not so much for JUnit, but for people working with IntelliJ. It seems that IntelliJ's
+//        // test runner can get confused badly if tests open an OutputStreamWriter in STDOUT.
+//        PowerMockito.stub(method(Main.class, "getOutputWriter"))
+//                .toReturn(new OutputStreamWriter(System.err));
 
     }
 

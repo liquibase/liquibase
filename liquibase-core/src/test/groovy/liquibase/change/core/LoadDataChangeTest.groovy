@@ -250,7 +250,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data3.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
         LoadDataColumnConfig idConfig = new LoadDataColumnConfig();
         idConfig.setHeader("id");
@@ -354,7 +354,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
     def "relativeToChangelogFile works"() throws Exception {
         when:
         ChangeSet changeSet = new ChangeSet(null, null, true, false,
-                "liquibase/change/fakeChangeSet.xml",
+                "liquibase/empty.changelog.xml",
                 null, null, false, null, null);
 
         LoadDataChange relativeChange = new LoadDataChange();
@@ -363,7 +363,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         relativeChange.setTableName("TABLE_NAME");
         relativeChange.setRelativeToChangelogFile(Boolean.TRUE);
         relativeChange.setChangeSet(changeSet);
-        relativeChange.setFile("core/sample.data1.csv");
+        relativeChange.setFile("change/core/sample.data1.csv");
         relativeChange.setResourceAccessor(new JUnitResourceAccessor());
 
         SqlStatement[] relativeStatements = relativeChange.generateStatements(mockDb);

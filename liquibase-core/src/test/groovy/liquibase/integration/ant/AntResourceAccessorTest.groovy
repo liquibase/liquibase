@@ -16,7 +16,7 @@ public class AntResourceAccessorTest extends Specification {
 
     def getResourcesAsStream() throws Exception {
         expect:
-        def streams = createResourceAccessor().openStreams("liquibase/integration/ant/AntResourceAccessorTest.class")
+        def streams = createResourceAccessor().openStreams(null,"liquibase/integration/ant/AntResourceAccessorTest.class")
         streams.size() > 0
 
         for (stream in streams) {
@@ -27,7 +27,7 @@ public class AntResourceAccessorTest extends Specification {
 
     def "getResourceAsStream when file does not exist"() throws Exception {
         expect:
-        createResourceAccessor().openStreams("non/existant/file.txt") == null
+        createResourceAccessor().openStreams(null,"non/existant/file.txt").empty
     }
 
     def list() throws Exception {
