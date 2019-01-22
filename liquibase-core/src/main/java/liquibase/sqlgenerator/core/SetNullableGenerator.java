@@ -41,8 +41,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
 
-        if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof
-            InformixDatabase) || (database instanceof H2Database)) {
+        if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof InformixDatabase)) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
         }
         return validationErrors;
