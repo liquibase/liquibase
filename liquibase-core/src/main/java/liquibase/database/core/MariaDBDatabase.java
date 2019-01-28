@@ -39,4 +39,13 @@ public class MariaDBDatabase extends MySQLDatabase {
             .toLowerCase().contains("mariadb"));
         }
     }
+
+    @Override
+    protected String getMinimumVersionForFractionalDigitsForTimestamp() {
+        // Since MariaDB 5.3, the TIME, DATETIME, and TIMESTAMP types,
+        // along with the temporal functions, CAST and dynamic columns,
+        // have supported microseconds.
+        // https://mariadb.com/kb/en/library/microseconds-in-mariadb/
+        return "5.3.0";
+    }
 }
