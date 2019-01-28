@@ -307,7 +307,7 @@ public class CommandLineUtils {
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
         ));
-        if (!myVersion.isEmpty() && !buildTimeString.isEmpty()) {
+        if (StringUtils.isNotEmpty(myVersion) && StringUtils.isNotEmpty(buildTimeString)) {
             banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion,
                 buildTimeString));
         }
