@@ -138,6 +138,11 @@ public class TimestampType extends DateTimeType {
                     // https://docs.oracle.com/cd/B19306_01/server.102/b14225/ch4datetime.htm#sthref389
                     additionalInformation = null;
                 }
+
+                if ((database instanceof H2Database) && additionInformation.startsWith("WITHOUT")) {
+                    // http://www.h2database.com/html/datatypes.html
+                    additionalInformation = null;
+                }
             }
 
             type.addAdditionalInformation(additionalInformation);
