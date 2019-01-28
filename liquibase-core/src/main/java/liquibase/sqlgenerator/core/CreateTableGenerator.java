@@ -106,8 +106,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" DEFAULT ");
                 }
 
-                if (defaultValue instanceof SequenceNextValueFunction) {
-                    buffer.append(database.generateDatabaseFunctionValue((SequenceNextValueFunction) defaultValue));
+                if (defaultValue instanceof DatabaseFunction) {
+                    buffer.append(database.generateDatabaseFunctionValue((DatabaseFunction) defaultValue));
                 } else if (database instanceof Db2zDatabase) {
                     if (statement.getDefaultValue(column).toString().contains("CURRENT TIMESTAMP")) {
                         buffer.append("");

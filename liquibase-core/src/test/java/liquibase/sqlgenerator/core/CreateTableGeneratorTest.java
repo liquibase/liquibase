@@ -1,23 +1,35 @@
 package liquibase.sqlgenerator.core;
 
+import static org.junit.Assert.assertEquals;
+
+import java.math.BigInteger;
+
+import org.junit.Test;
+
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.IntType;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ColumnConstraint;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
-import org.junit.Test;
-
-import java.math.BigInteger;
-
-import static org.junit.Assert.assertEquals;
 
 public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTableStatement> {
 
@@ -355,6 +367,24 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 //                });
 //    }
 
+    @Test
+    public void testDefaultValueCurrentTimestampDB2Database() throws Exception {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof AbstractDb2Database) {
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(
+                    COLUMN_NAME1,
+                    DataTypeFactory.getInstance().fromDescription("datetime", database),
+                    new DatabaseFunction("current_timestamp")
+                );
+
+                Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+
+                assertEquals("CREATE TABLE \"CATALOG_NAME\".TABLE_NAME (COLUMN1_NAME TIMESTAMP DEFAULT CURRENT TIMESTAMP)", generatedSql[0].toSql());
+            }
+        }
+    }
+    
     @Test
     public void testAutoIncrementDB2Database() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
