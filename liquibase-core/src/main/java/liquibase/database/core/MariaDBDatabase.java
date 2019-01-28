@@ -1,5 +1,7 @@
 package liquibase.database.core;
 
+import java.util.Arrays;
+
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogService;
@@ -12,6 +14,15 @@ import liquibase.util.StringUtils;
  */
 public class MariaDBDatabase extends MySQLDatabase {
     private static final String PRODUCT_NAME = "MariaDB";
+
+    public MariaDBDatabase() {
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+        // According to https://mariadb.com/kb/en/library/data-types/, retrieved on 2019-02-12
+        super.unmodifiableDataTypes.addAll(Arrays.asList(
+           "boolean", "tinyint", "smallint", "mediumint", "int", "integer", "bigint", "dec", "numeric",
+           "fixed", "float", "bit"
+        ));
+    }
 
     @Override
     public String getShortName() {
@@ -79,5 +90,15 @@ public class MariaDBDatabase extends MySQLDatabase {
         // have supported microseconds.
         // https://mariadb.com/kb/en/library/microseconds-in-mariadb/
         return "5.3.0";
+    }
+
+    @Override
+    public boolean supportsSequences() {
+        try {
+            return getDatabaseMajorVersion() >= 10 && getDatabaseMinorVersion() >= 3;
+        } catch (DatabaseException e) {
+            LogService.getLog(getClass()).debug(LogType.LOG, "Cannot retrieve database version", e);
+            return false;
+        }
     }
 }

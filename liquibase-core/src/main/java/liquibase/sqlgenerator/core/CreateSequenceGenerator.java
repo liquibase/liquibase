@@ -51,7 +51,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             buffer.append(" AS BIGINT ");
         }
-        if (statement.getStartValue() != null) {
+        if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
             buffer.append(" START WITH ").append(statement.getStartValue());
         }
         if (statement.getIncrementBy() != null) {
@@ -62,6 +62,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
         if (statement.getMaxValue() != null) {
             buffer.append(" MAXVALUE ").append(statement.getMaxValue());
+        }
+        if (database instanceof MariaDBDatabase && statement.getStartValue() != null) {
+            buffer.append(" START WITH ").append(statement.getStartValue());
         }
 
         if (statement.getCacheSize() != null) {
@@ -76,7 +79,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
 
-        if (statement.getOrdered() != null) {
+        if (!(database instanceof MariaDBDatabase) && statement.getOrdered() != null) {
             if (!(database instanceof SybaseASADatabase)) {
                 if (statement.getOrdered()) {
                     buffer.append(" ORDER");
@@ -87,7 +90,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                 }
             }
         }
-        if (statement.getCycle() != null) {
+        if (!(database instanceof MariaDBDatabase) && statement.getCycle() != null) {
             if (statement.getCycle()) {
                 buffer.append(" CYCLE");
             }
