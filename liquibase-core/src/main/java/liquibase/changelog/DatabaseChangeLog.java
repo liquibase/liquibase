@@ -486,6 +486,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             for (String path : resources) {
+                LogService.getLog(getClass()).info(LogType.LOG, "Reading resource: " + path);
                 include(path, false, resourceAccessor, includeContexts, false);
             }
         } catch (Exception e) {

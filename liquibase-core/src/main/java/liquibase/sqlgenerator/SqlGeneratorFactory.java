@@ -35,11 +35,9 @@ public class SqlGeneratorFactory {
             for (SqlGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(SqlGenerator.class)) {
                 register(generator);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     /**
@@ -72,7 +70,6 @@ public class SqlGeneratorFactory {
                 toRemove = existingGenerator;
             }
         }
-
         unregister(toRemove);
     }
 
@@ -102,8 +99,11 @@ public class SqlGeneratorFactory {
 
         String key = statement.getClass().getName()+":"+ databaseName+":"+ version;
 
-        if (generatorsByKey.containsKey(key)) {
-            return generatorsByKey.get(key);
+        if (generatorsByKey.containsKey(key) && !generatorsByKey.get(key).isEmpty()) {
+            SortedSet<SqlGenerator> result = new TreeSet<>(new SqlGeneratorComparator());
+            result.addAll(generatorsByKey.get(key));
+            result.retainAll(getGenerators());
+            return result;
         }
 
         SortedSet<SqlGenerator> validGenerators = new TreeSet<>(new SqlGeneratorComparator());
@@ -130,7 +130,6 @@ public class SqlGeneratorFactory {
                 clazz = clazz.getSuperclass();
             }
         }
-
         generatorsByKey.put(key, validGenerators);
         return validGenerators;
     }
@@ -139,7 +138,6 @@ public class SqlGeneratorFactory {
         if(genericInterfacesCache.containsKey(clazz)) {
             return genericInterfacesCache.get(clazz);
         }
-
         Type[] genericInterfaces = clazz.getGenericInterfaces();
         genericInterfacesCache.put(clazz, genericInterfaces);
         return genericInterfaces;
@@ -149,7 +147,6 @@ public class SqlGeneratorFactory {
         if(genericSuperClassCache.containsKey(clazz)) {
             return genericSuperClassCache.get(clazz);
         }
-
         Type genericSuperclass = clazz.getGenericSuperclass();
         genericSuperClassCache.put(clazz, genericSuperclass);
         return genericSuperclass;
@@ -178,7 +175,6 @@ public class SqlGeneratorFactory {
                 }
             }
         }
-
     }
 
     private SqlGeneratorChain createGeneratorChain(SqlStatement statement, Database database) {
@@ -209,7 +205,6 @@ public class SqlGeneratorFactory {
               returnList.addAll(sqlList);
             }
         }
-
         return returnList.toArray(new Sql[returnList.size()]);
     }
 
@@ -274,9 +269,6 @@ public class SqlGeneratorFactory {
                 }
             }
         }
-
         return affectedObjects;
-
     }
-
 }

@@ -120,7 +120,7 @@ public class Main {
     protected String outputSchemasAs;
     protected String referenceSchemas;
     protected String schemas;
-        
+
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
      * a simple wrapper so that an errorlevel of != 0 is guaranteed in case of an uncaught exception.
@@ -603,7 +603,7 @@ public class Main {
                 }
             }
         }
-        
+
     }
 
     /**
@@ -792,6 +792,9 @@ public class Main {
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
+        if(arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
+            return;
+
         String[] splitArg = splitArg(arg);
 
         String attributeName = splitArg[0];
@@ -860,7 +863,7 @@ public class Main {
         if (this.includeTablespace == null){
             this.includeTablespace = false;
         }
-            
+
     }
 
     protected ClassLoader configureClassLoader() throws CommandLineParsingException {
@@ -975,7 +978,7 @@ public class Main {
             this.databaseChangeLogLockTableName);
         database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
         try {
-            
+
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
                     String.format(coreBundle.getString("cannot.specify.both"),
