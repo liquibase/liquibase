@@ -1,5 +1,6 @@
 package liquibase.exception;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.logging.LogService;
@@ -101,7 +102,7 @@ public class ValidationFailedException extends MigrationFailedException {
                     coreBundle.getString("changes.have.validation.errors"), changeValidationExceptions.size())
                 ).append(separator);
             for (Throwable invalid : changeValidationExceptions) {
-                LogService.getLog(getClass()).debug(LogType.LOG, coreBundle.getString("validation.exception"), invalid);
+                Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, coreBundle.getString("validation.exception"), invalid);
                 message.append("          ").append(invalid.toString());
                 message.append(separator);
             }

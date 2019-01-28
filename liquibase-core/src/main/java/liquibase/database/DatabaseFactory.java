@@ -18,7 +18,7 @@ import java.sql.Driver;
 import java.util.*;
 
 public class DatabaseFactory {
-    private static final Logger LOG = LogService.getLog(DatabaseFactory.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseFactory.class);
     private static DatabaseFactory instance;
     private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
     private Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();

@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.changelog.ChangeSet.RunStatus;
@@ -19,7 +20,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     private Database database;
 
-    private Logger log = LogService.getLog(getClass());
+    private Logger log = Scope.getCurrentScope().getLog(getClass());
     
     private ChangeExecListener execListener;
 

@@ -1,12 +1,12 @@
 package liquibase.parser.core.xml;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomStripperInputStream;
+import liquibase.util.BomAwareInputStream;
 import liquibase.util.file.FilenameUtils;
 import org.xml.sax.*;
 
@@ -40,7 +40,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                     saxParserFactory.setSchema(schema);
                     saxParserFactory.setValidating(false);
                 } catch (SAXException e) {
-                    LogService.getLog(XMLChangeLogSAXParser.class).warning("Could not load " + XSD_FILE + ", enabling parser validator", e);
+                    Scope.getCurrentScope().getLog(XMLChangeLogSAXParser.class).warning("Could not load " + XSD_FILE + ", enabling parser validator", e);
                 }
             }
         }
@@ -78,19 +78,19 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             xmlReader.setErrorHandler(new ErrorHandler() {
                 @Override
                 public void warning(SAXParseException exception) throws SAXException {
-                    LogService.getLog(getClass()).warning(LogType.LOG, exception.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, exception.getMessage());
                     throw exception;
                 }
 
                 @Override
                 public void error(SAXParseException exception) throws SAXException {
-                    LogService.getLog(getClass()).severe(LogType.LOG, exception.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, exception.getMessage());
                     throw exception;
                 }
 
                 @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
-                    LogService.getLog(getClass()).severe(LogType.LOG, exception.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, exception.getMessage());
                     throw exception;
                 }
             });
@@ -108,7 +108,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
             XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
-            xmlReader.parse(new InputSource(new UtfBomStripperInputStream(inputStream)));
+            xmlReader.parse(new InputSource(new BomAwareInputStream(inputStream)));
 
             return contentHandler.getDatabaseChangeLogTree();
         } catch (ChangeLogParseException e) {

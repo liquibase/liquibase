@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -24,7 +25,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
     private Logger log;
 
     private ChangeFactory() {
-      log = LogService.getLog(getClass());
+      log = Scope.getCurrentScope().getLog(getClass());
     }
 
     protected Logger getLogger() {

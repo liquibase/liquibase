@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml;
 
+import liquibase.Scope;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
@@ -14,7 +15,7 @@ import java.io.InputStream;
 
 class LiquibaseSchemaResolver {
 
-	private static final Logger LOGGER = LogService.getLog(LiquibaseSchemaResolver.class);
+	private static final Logger LOGGER = Scope.getCurrentScope().getLog(LiquibaseSchemaResolver.class);
 	private String systemId;
 	private String publicId;
 	private ResourceAccessorXsdStreamResolver resourceAccessorXsdStreamResolver;

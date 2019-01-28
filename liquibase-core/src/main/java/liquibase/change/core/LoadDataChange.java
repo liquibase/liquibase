@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.AbstractJdbcDatabase;
@@ -18,11 +19,9 @@ import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.BatchDmlExecutablePreparedStatement;
@@ -37,6 +36,7 @@ import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 import liquibase.util.BooleanParser;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
 
@@ -77,7 +77,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
      * CSV Lines starting with that sign(s) will be treated as comments by default
      */
     public static final String DEFAULT_COMMENT_PATTERN = "#";
-    private static final Logger LOG = LogService.getLog(LoadDataChange.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(LoadDataChange.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private String catalogName;
     private String schemaName;
@@ -714,12 +714,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         if (stream == null) {
             return null;
         }
-        Reader streamReader;
-        if (getEncoding() == null) {
-            streamReader = new UtfBomAwareReader(stream);
-        } else {
-            streamReader = new UtfBomAwareReader(stream, getEncoding());
-        }
+        Reader streamReader = StreamUtil.readStreamWithReader(stream, getEncoding());
 
         char quotchar;
         if (StringUtil.trimToEmpty(this.quotchar).isEmpty()) {

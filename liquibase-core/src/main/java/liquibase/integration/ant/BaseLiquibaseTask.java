@@ -1,15 +1,14 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.ant.logging.AntTaskLogFactory;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
@@ -57,7 +56,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
     @Override
     public void init() throws BuildException {
-        LogService.setLoggerFactory(new AntTaskLogFactory(this));
+//        LogService.setLoggerFactory(new AntTaskLogService(this));
         classpath = new Path(getProject());
     }
 
@@ -630,7 +629,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = LogService.getLog(getClass());
+            Logger logger = Scope.getCurrentScope().getLog(getClass());
         }
 
 

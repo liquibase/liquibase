@@ -1,24 +1,17 @@
 package liquibase.util;
 
 import liquibase.Scope;
-import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Set;
 
 /**
  * Utilities for working with streams.
  */
 public class StreamUtil {
-	
+
     public static String getLineSeparator() {
         return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
     }
@@ -33,7 +26,7 @@ public class StreamUtil {
     }
 
     public static byte[] readStream(InputStream stream) throws IOException {
-        try(ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
 
             copy(stream, buffer);
             buffer.flush();
@@ -54,7 +47,38 @@ public class StreamUtil {
      * If encoding is null, use {@link Scope#getFileEncoding()}
      */
     public static String readStreamAsString(InputStream stream, String encoding) throws IOException {
-        return new String(readStream(stream), ObjectUtil.defaultIfNull(encoding, Scope.getCurrentScope().getFileEncoding().toString()));
+        StringBuilder result = new StringBuilder();
+
+        try (Reader reader = readStreamWithReader(stream, encoding)) {
+
+            char[] buffer = new char[2048];
+            int read;
+            while ((read = reader.read(buffer)) > -1) {
+                result.append(buffer, 0, read);
+            }
+            return result.toString();
+        }
+    }
+
+    public static Reader readStreamWithReader(InputStream stream, String encoding) throws IOException {
+        BomAwareInputStream encodingAwareStream = new BomAwareInputStream(stream);
+        Charset detectedEncoding = encodingAwareStream.getDetectedCharset();
+
+        if (encoding == null) {
+            if (detectedEncoding != null) {
+                encoding = detectedEncoding.name();
+            }
+        } else {
+            String canonicalEncodingName = Charset.forName(encoding).name();
+
+            if (detectedEncoding != null && canonicalEncodingName.startsWith("UTF") && !canonicalEncodingName.equals(detectedEncoding.name())) {
+                throw new IllegalArgumentException("Expected encoding was '"
+                        + encoding + "' but a BOM was detected for '"
+                        + detectedEncoding + "'");
+            }
+        }
+
+        return new InputStreamReader(encodingAwareStream, ObjectUtil.defaultIfNull(encoding, Scope.getCurrentScope().getFileEncoding().toString()));
     }
 
 }

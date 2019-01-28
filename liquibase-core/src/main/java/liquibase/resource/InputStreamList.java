@@ -1,7 +1,7 @@
 package liquibase.resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import liquibase.Scope;
+import liquibase.logging.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
     private LinkedHashMap<URI, InputStream> streams = new LinkedHashMap<>();
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private Logger log = Scope.getCurrentScope().getLog(getClass());
 
     public InputStreamList() {
     }
@@ -31,7 +31,7 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                log.warn("Cannot close stream for "+uri, e);
+                log.warning("Cannot close stream for "+uri, e);
             }
         }
         return duplicate;
@@ -53,7 +53,7 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
             try {
                 stream.close();
             } catch (IOException e) {
-                LoggerFactory.getLogger(getClass()).error("Error closing stream. Logging error and continuing", e);
+                Scope.getCurrentScope().getLog(getClass()).severe("Error closing stream. Logging error and continuing", e);
             }
         }
     }

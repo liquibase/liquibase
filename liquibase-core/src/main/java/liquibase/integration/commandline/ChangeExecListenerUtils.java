@@ -26,7 +26,7 @@ public final class ChangeExecListenerUtils {
         ChangeExecListener changeExecListener = null;
 
         if (changeExecListenerClass != null) {
-            Logger logger = LogService.getLog(ChangeExecListenerUtils.class);
+            Logger logger = Scope.getCurrentScope().getLog(ChangeExecListenerUtils.class);
 
             logger.debug(LogType.LOG, "Setting ChangeExecListener: " + changeExecListenerClass);
 

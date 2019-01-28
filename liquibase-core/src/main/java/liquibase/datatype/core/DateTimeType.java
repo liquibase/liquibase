@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -136,7 +137,7 @@ public class DateTimeType extends LiquibaseDataType {
             Object[] params = getParameters();
             Integer precision = Integer.valueOf(params[0].toString());
             if (precision > 6) {
-                LogService.getLog(getClass()).warning(
+                Scope.getCurrentScope().getLog(getClass()).warning(
                         LogType.LOG, "MySQL does not support a timestamp precision"
                                 + " of '" + precision + "' - resetting to"
                                 + " the maximum of '6'");

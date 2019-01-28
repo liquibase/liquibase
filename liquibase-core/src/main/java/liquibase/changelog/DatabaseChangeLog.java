@@ -1,9 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.ContextExpression;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.RuntimeEnvironment;
+import liquibase.*;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
@@ -36,7 +33,7 @@ import java.util.*;
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditional {
     private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<>();
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
-    private static final Logger LOG = LogService.getLog(DatabaseChangeLog.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(DatabaseChangeLog.class);
 
     private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
@@ -267,7 +264,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
-            LogService.getLog(getClass()).warning(LogType.LOG, message);
+            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, message);
         }
 
         if (!validatingVisitor.validationPassed()) {
@@ -356,7 +353,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
                     } catch (ReflectiveOperationException e) {
                         //take default comparator
-                        LogService.getLog(getClass()).info(LogType.LOG, "no resourceComparator defined - taking default " +
+                        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "no resourceComparator defined - taking default " +
                          "implementation");
                         resourceComparator = getStandardChangeLogComparator();
                     }
@@ -401,7 +398,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         Properties props = new Properties();
                         InputStream propertiesStream = resourceAccessor.openStream(null, file);
                         if (propertiesStream == null) {
-                            LogService.getLog(getClass()).info(LogType.LOG, "Could not open properties file " + file);
+                            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not open properties file " + file);
                         } else {
                             props.load(propertiesStream);
 
@@ -535,7 +532,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             // This matches only an extension, but filename can be a full path, too. Is it right?
             boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
             if (matchesFileExtension || logEveryUnknownFileFormat) {
-                LogService.getLog(getClass()).warning(
+                Scope.getCurrentScope().getLog(getClass()).warning(
                         LogType.LOG, "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
                 );
             }

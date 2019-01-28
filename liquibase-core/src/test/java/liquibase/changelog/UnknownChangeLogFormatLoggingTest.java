@@ -1,13 +1,5 @@
 package liquibase.changelog;
 
-import liquibase.logging.*;
-import liquibase.logging.core.NoOpLoggerContext;
-import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.test.JUnitResourceAccessor;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 /**
  * CORE-3020 No warning when included file doesn't exist (missing extension)
  *

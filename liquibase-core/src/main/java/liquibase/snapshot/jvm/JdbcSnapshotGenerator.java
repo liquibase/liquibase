@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
@@ -107,7 +108,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (this.statusListeners == null) {
             return;
         }
-        LogService.getLog(getClass()).debug(LogType.LOG, message);
+        Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }

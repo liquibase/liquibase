@@ -1,5 +1,6 @@
 package liquibase.resource;
 
+import liquibase.Scope;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtil;
 
@@ -30,7 +31,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     public FileSystemResourceAccessor(File... baseDirsAndFiles) {
         for (File base : CollectionUtil.createIfNull(baseDirsAndFiles)) {
             if (!base.exists()) {
-                log.warning("Non-existent path: " + base.getAbsolutePath());
+                Scope.getCurrentScope().getLog(getClass()).warning("Non-existent path: " + base.getAbsolutePath());
             } else if (base.isDirectory()) {
                 addRootPath(base.toPath());
             } else if (base.getName().endsWith(".jar") || base.getName().toLowerCase().endsWith("zip")) {
@@ -123,7 +124,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                             finalRootPath = rootPathFile.getParentFile().toPath();
                         }
                     } else {
-                        log.debug("No relative path " + relativeTo + " in " + rootPath);
+                        Scope.getCurrentScope().getLog(getClass()).debug("No relative path " + relativeTo + " in " + rootPath);
                         continue;
                     }
                 }
@@ -207,6 +208,16 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                 try (FileSystem fs = FileSystems.newFileSystem(rootPath, null)) {
                     Path basePath = fs.getRootDirectories().iterator().next();
 
+                    if (relativeTo != null) {
+                        basePath = basePath.resolve(relativeTo);
+                        if (!Files.exists(basePath)) {
+                            Scope.getCurrentScope().getLog(getClass()).info("Relative path "+relativeTo+" in "+rootPath+" does not exist");
+                            continue;
+                        } else if (Files.isRegularFile(basePath)) {
+                            basePath = basePath.getParent();
+                        }
+                    }
+
                     if (path != null) {
                         basePath = basePath.resolve(path);
                     }
@@ -218,6 +229,17 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             } else {
                 Path basePath = rootPath;
 
+                if (relativeTo != null) {
+                    basePath = basePath.resolve(relativeTo);
+                    if (!Files.exists(basePath)) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Relative path "+relativeTo+" in "+rootPath+" does not exist");
+                        continue;
+                    } else if (Files.isRegularFile(basePath)) {
+                        basePath = basePath.getParent();
+                    }
+                }
+
+
                 if (path != null) {
                     if (path.startsWith("/") || path.startsWith("\\")) {
                         path = path.substring(1);
@@ -226,7 +248,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                     basePath = basePath.resolve(path);
                 }
 
-                if (!basePath.toFile().exists()) {
+                if (!Files.exists(basePath)) {
                     continue;
                 }
                 Files.walkFileTree(basePath, Collections.singleton(FileVisitOption.FOLLOW_LINKS), maxDepth, fileVisitor);

@@ -90,7 +90,7 @@ public abstract class AbstractIntegrationTest {
         this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
-        logger = LogService.getLog(getClass());
+        logger = Scope.getCurrentScope().getLog(getClass());
 
         // Get the integration test properties for both global settings and (if applicable) local overrides.
         Properties integrationTestProperties;
@@ -210,7 +210,7 @@ public abstract class AbstractIntegrationTest {
             try {
                 if (database.getConnection() != null) {
                     String sql = "DROP TABLE " + database.getDatabaseChangeLogLockTableName();
-                    LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
                     ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
                             sql
                     );
@@ -414,7 +414,7 @@ public abstract class AbstractIntegrationTest {
                 "tag VARCHAR(255)" + nullableKeyword + ", " +
                 "liquibase VARCHAR(10)" + nullableKeyword + ", " +
                 "PRIMARY KEY (id, author, filename))";
-        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+        Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
         boolean savedAcSetting = conn.getAutoCommit();
@@ -482,12 +482,12 @@ public abstract class AbstractIntegrationTest {
                                     database.getLiquibaseSchemaName(),
                                     database.getDatabaseChangeLogTableName()
                             );
-                    LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
                     statement.execute(sql);
                     database.commit();
                 }
             } catch (Exception e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangelog table");
+                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangelog table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -510,12 +510,12 @@ public abstract class AbstractIntegrationTest {
                                     database.getLiquibaseSchemaName(),
                                     database.getDatabaseChangeLogLockTableName()
                             );
-                    LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
                     statement.execute(sql);
                     database.commit();
                 }
             } catch (Exception e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangeloglock table");
+                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangeloglock table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -725,7 +725,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             liquibase = createLiquibase(tempFile.getName());
-            LogService.getLog(getClass()).info(LogType.LOG, "updating from "+tempFile.getCanonicalPath());
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "updating from "+tempFile.getCanonicalPath());
             try {
                 liquibase.update(this.contexts);
             } catch (LiquibaseException e) {

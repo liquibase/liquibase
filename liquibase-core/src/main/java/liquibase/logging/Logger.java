@@ -1,15 +1,20 @@
 package liquibase.logging;
 
+import liquibase.ExtensibleObject;
+import liquibase.plugin.Plugin;
+
+import java.util.logging.Level;
+
 /**
  * Interface to class that does the actual logging.
- * Instances will be created by {@link LoggerFactory} to know the class to log against.
+ * Instances will be created by {@link LogService} to know the class to log against.
  *
  * All log methods take a {@link LogType} to describe the type of message being logged.
  *
  * The hierarchy of log levels is:
  * (finest) DEBUG < INFO < WARN < ERROR (coarsest)
  */
-public interface Logger {
+public interface Logger extends ExtensibleObject {
 
     /**
      * Log an error that occurred, using the {@link LogType#LOG} type.
@@ -20,6 +25,10 @@ public interface Logger {
      * Log an error together with data from an error/exception, using the {@link LogType#LOG} type.
      */
     void severe(String message, Throwable e);
+
+    Level getLogLevel();
+
+    void setLogLevel(Level level);
 
     /**
      * Log an error that occurred.

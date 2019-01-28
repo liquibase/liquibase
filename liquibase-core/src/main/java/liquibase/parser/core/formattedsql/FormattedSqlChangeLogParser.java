@@ -1,19 +1,19 @@
 package liquibase.parser.core.formattedsql;
 
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.parser.ChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.SystemUtils;
 
@@ -35,7 +35,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (fileStream == null) {
                     return false;
                 }
-                reader = new BufferedReader(new UtfBomAwareReader(fileStream));
+                reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
 
                 String line = reader.readLine();
                 return (line != null) && line.matches("\\-\\-\\s*liquibase formatted.*");
@@ -43,14 +43,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 return false;
             }
         } catch (IOException e) {
-            LogService.getLog(getClass()).debug(LogType.LOG, "Exception reading " + changeLogFile, e);
+            Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Exception reading " + changeLogFile, e);
             return false;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    LogService.getLog(getClass()).debug(LogType.LOG, "Exception closing " + changeLogFile, e);
+                    Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Exception closing " + changeLogFile, e);
                 }
             }
         }
@@ -72,7 +72,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         BufferedReader reader = null;
 
         try {
-            reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
+            reader = new BufferedReader(StreamUtil.readStreamWithReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor), null));
             StringBuffer currentSql = new StringBuffer();
             StringBuffer currentRollbackSql = new StringBuffer();
 

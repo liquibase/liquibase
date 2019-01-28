@@ -16,6 +16,7 @@
  */
 package liquibase.util;
 
+import liquibase.Scope;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 
@@ -1269,7 +1270,7 @@ public class SystemUtils {
             return System.getProperty(property);
         } catch (SecurityException ex) {
             // we are not allowed to look at this property
-            LogService.getLog(SystemUtils.class).severe(
+            Scope.getCurrentScope().getLog(SystemUtils.class).severe(
                     LogType.LOG, "Caught a SecurityException reading the system property '" + property
                 + "'; the SystemUtils property value will default to null.",
                     ex

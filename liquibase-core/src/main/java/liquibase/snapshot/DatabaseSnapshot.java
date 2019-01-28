@@ -1,6 +1,7 @@
 package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -30,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
-    private static final Logger LOGGER = LogService.getLog(DatabaseSnapshot.class);
+    private static final Logger LOGGER = Scope.getCurrentScope().getLog(DatabaseSnapshot.class);
     public static final String ALL_CATALOGS_STRING_SCRATCH_KEY = "DatabaseSnapshot.allCatalogsString";
 
     private final DatabaseObject[] originalExamples;
@@ -295,11 +296,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
             if (example instanceof Schema) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    LogService.getLog(getClass()).warning(LogType.LOG, "Did not find schema '" + example + "' to snapshot");
+                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Did not find schema '" + example + "' to snapshot");
             }
             if (example instanceof Catalog) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    LogService.getLog(getClass()).warning(LogType.LOG, "Did not find catalog '" + example + "' to snapshot");
+                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Did not find catalog '" + example + "' to snapshot");
             }
 
         } else {

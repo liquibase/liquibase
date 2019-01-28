@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -130,7 +131,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     // from a table, but the table has no FOREIGN KEYs.
                                     if ((database instanceof SybaseASADatabase) && e.getSQLState().equalsIgnoreCase
                                         (ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE)) {
-                                        LogService.getLog(getClass()).debug(
+                                        Scope.getCurrentScope().getLog(getClass()).debug(
                                                 LogType.LOG, String.format("Ignored SAP SQL Anywhere SQL " +
                                                         "exception thrown when FOREIGN KEY list of table '%s' was " +
                                                         "empty.", foundTable));
@@ -504,7 +505,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         protected void warnAboutDbaRecycleBin() {
             if (!ignoreWarnAboutDbaRecycleBin && !warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
-                LogService.getLog(getClass()).warning(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
+                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
                 warnedAboutDbaRecycleBin = true;
             }
         }
@@ -1356,7 +1357,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        LogService.getLog(getClass()).warning(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
+                        Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
                         return null; //TODO: find sybase sql
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +

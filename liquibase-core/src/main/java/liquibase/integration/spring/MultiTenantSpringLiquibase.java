@@ -3,6 +3,7 @@
  */
 package liquibase.integration.spring;
 
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
@@ -43,7 +44,7 @@ import java.util.Map;
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
     private final List<DataSource> dataSources = new ArrayList<>();
-    private Logger log = LogService.getLog(MultiTenantSpringLiquibase.class);
+    private Logger log = Scope.getCurrentScope().getLog(MultiTenantSpringLiquibase.class);
 	/** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
 		/** Defines a single data source and several schemas for a multi-tenant environment. */

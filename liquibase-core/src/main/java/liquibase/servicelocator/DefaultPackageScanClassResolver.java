@@ -1,5 +1,6 @@
 package liquibase.servicelocator;
 
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogService;
@@ -22,7 +23,7 @@ import java.util.jar.JarInputStream;
  */
 public class DefaultPackageScanClassResolver implements PackageScanClassResolver {
 
-    protected final transient Logger log = LogService.getLog(getClass());
+    protected final transient Logger log = Scope.getCurrentScope().getLog(getClass());
     private Set<ClassLoader> classLoaders;
     private Set<PackageScanFilter> scanFilters;
     private Map<String, Set<Class>> allClassesByPackage = new HashMap<String, Set<Class>>();

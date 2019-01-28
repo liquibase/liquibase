@@ -1,5 +1,6 @@
 package liquibase.integration.cdi;
 
+import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
 import liquibase.logging.LogService;
@@ -33,7 +34,7 @@ import java.util.concurrent.Callable;
 @Singleton
 public class SchemesCDIConfigBuilder {
 
-    private static final Logger log = LogService.getLog(SchemesCDIConfigBuilder.class);
+    private static final Logger log = Scope.getCurrentScope().getLog(SchemesCDIConfigBuilder.class);
 
     private static final String ROOT_PATH = System.getProperty("java.io.tmpdir");
 

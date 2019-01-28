@@ -1,12 +1,14 @@
 package liquibase.logging.core;
 
+import liquibase.AbstractExtensibleObject;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+import liquibase.plugin.AbstractPlugin;
 
 /**
  * Convenience base implementation of a Logger.
  */
-public abstract class AbstractLogger implements Logger {
+public abstract class AbstractLogger extends AbstractExtensibleObject implements Logger {
 
     @Override
     public void severe(String message) {

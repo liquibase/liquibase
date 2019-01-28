@@ -3,6 +3,7 @@ package liquibase.integration.spring;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -67,7 +68,7 @@ import java.util.jar.Manifest;
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
 
-    protected final Logger log = LogService.getLog(SpringLiquibase.class);
+    protected final Logger log = Scope.getCurrentScope().getLog(SpringLiquibase.class);
     protected String beanName;
 
 	protected ResourceLoader resourceLoader;
@@ -286,12 +287,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             .getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run because " + LiquibaseConfiguration
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Liquibase did not run because " + LiquibaseConfiguration
                 .getInstance().describeValueLookupLogic(shouldRunProperty) + " was set to false");
             return;
 		}
 		if (!shouldRun) {
-            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run because 'shouldRun' " + "property was set " +
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Liquibase did not run because 'shouldRun' " + "property was set " +
                 "to false on " + getBeanName() + " Liquibase Spring bean.");
             return;
 		}

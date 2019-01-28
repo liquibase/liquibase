@@ -1,5 +1,6 @@
 package liquibase.integration.cdi;
 
+import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
 import liquibase.logging.LogService;
@@ -51,7 +52,7 @@ public class SchemesCDIConfigBuilderTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        log = LogService.getLog(SchemesCDIConfigBuilder.class);
+        log = Scope.getCurrentScope().getLog(SchemesCDIConfigBuilder.class);
 //        log.setLogLevel(LogLevel.WARNING); // you can change it to INFO or DEBUG level if you want to see them
 
         Class c1 = SchemesCDIConfigBuilder.class;

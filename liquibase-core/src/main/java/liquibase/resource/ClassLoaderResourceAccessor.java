@@ -1,9 +1,9 @@
 package liquibase.resource;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.Logger;
 import liquibase.util.CollectionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -43,7 +43,7 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
 
         }
 
-        Logger logger = LoggerFactory.getLogger(getClass());
+        Logger logger = Scope.getCurrentScope().getLog(getClass());
 
         List<URL> returnUrls = new ArrayList<>();
         if (classLoader instanceof URLClassLoader) {
@@ -68,7 +68,7 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
                     if (finalUrl.endsWith("!")) {
                         finalUrl = finalUrl.replaceFirst("^jar:", "").replaceFirst("!$", "");
                     } else {
-                        logger.warn("ClassLoader URL " + finalUrl + " starts with jar: but does not end with !, don't knnow how to handle it. Skipping");
+                        logger.warning("ClassLoader URL " + finalUrl + " starts with jar: but does not end with !, don't knnow how to handle it. Skipping");
                         continue;
                     }
                 }
@@ -102,7 +102,7 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
             case "file":
                 return FileSystems.getDefault().getPath(url.getFile().replace("%20", " ").replaceFirst("/(\\w)\\:/", "$1:/"));
             default:
-                LoggerFactory.getLogger(getClass()).warn("Unknown protocol '" + protocol + "' for ClassLoaderResourceAccessor on " + url.toExternalForm());
+                Scope.getCurrentScope().getLog(getClass()).warning("Unknown protocol '" + protocol + "' for ClassLoaderResourceAccessor on " + url.toExternalForm());
                 return null;
         }
     }

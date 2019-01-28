@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml;
 
+import liquibase.Scope;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -9,7 +10,7 @@ import java.io.InputStream;
 
 public class ResourceAccessorXsdStreamResolver extends XsdStreamResolver {
 
-	private static final Logger LOGGER = LogService.getLog(ResourceAccessorXsdStreamResolver.class);
+	private static final Logger LOGGER = Scope.getCurrentScope().getLog(ResourceAccessorXsdStreamResolver.class);
 
 	private ResourceAccessor resourceAccessor;
 

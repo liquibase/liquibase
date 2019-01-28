@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
@@ -119,7 +120,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : allColumnsMetadataRs) {
                     treeSet.put(row.getInt("ORDINAL_POSITION"), row);
                 }
-                Logger log = LogService.getLog(getClass());
+                Logger log = Scope.getCurrentScope().getLog(getClass());
 
                 // Now we can iterate through the sorted list and repair if needed.
                 int currentOrdinal = 0;
@@ -184,7 +185,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     snapshot.setScratchData("autoIncrementColumns", autoIncrementColumns);
                 } catch (DatabaseException e) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Could not read identity information", e);
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not read identity information", e);
                 }
             }
             if ((column.getRelation() != null) && (column.getSchema() != null)) {
@@ -239,7 +240,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else if (nullable == DatabaseMetaData.columnNullable) {
                     column.setNullable(true);
                 } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Unknown nullable state for column "
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Unknown nullable state for column "
                             + column.toString() + ". Assuming nullable");
                     column.setNullable(true);
                 }
@@ -264,7 +265,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         } else if (isAutoincrement.equals("NO")) {
                             column.setAutoIncrementInformation(null);
                         } else if (isAutoincrement.equals("")) {
-                            LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                            Scope.getCurrentScope().getLog(getClass()).info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                             column.setAutoIncrementInformation(null);
                         } else {
                             throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
@@ -274,16 +275,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         String selectStatement;
                         if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                            LogService.getLog(getClass()).debug("rawCatalogName : <" + rawCatalogName + ">");
-                            LogService.getLog(getClass()).debug("rawSchemaName : <" + rawSchemaName + ">");
-                            LogService.getLog(getClass()).debug("rawTableName : <" + rawTableName + ">");
-                            LogService.getLog(getClass()).debug("raw selectStatement : <" + selectStatement + ">");
+                            Scope.getCurrentScope().getLog(getClass()).debug("rawCatalogName : <" + rawCatalogName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).debug("rawSchemaName : <" + rawSchemaName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).debug("rawTableName : <" + rawTableName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).debug("raw selectStatement : <" + selectStatement + ">");
 
 
                         } else {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                         }
-                        LogService.getLog(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                        Scope.getCurrentScope().getLog(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                         Statement statement = null;
                         ResultSet columnSelectRS = null;
@@ -440,7 +441,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 enumClause = enumClause.replaceFirst(", $", "");
                 return new DataType(columnTypeName + "(" + enumClause + ")");
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Error fetching enum values", e);
+                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Error fetching enum values", e);
             }
         }
 

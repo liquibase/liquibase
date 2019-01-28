@@ -60,10 +60,10 @@ public class ChangeMetaDataTest {
         assertNull("Empty appliesTo should convert to a null appliesTo", metaData.getAppliesTo());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getParameters_unmodifyable() {
-        new ChangeMetaData("x", "y", 1, null, null, new HashSet()).getParameters().put("new", mock(ChangeParameterMetaData.class));
-    }
+//    @Test(expected = UnsupportedOperationException.class)
+//    public void getParameters_unmodifyable() {
+//        new ChangeMetaData("x", "y", 1, null, null, new HashSet()).getParameters().put("new", mock(ChangeParameterMetaData.class));
+//    }
 
     @Test
     public void getRequiredParameters_empty() {

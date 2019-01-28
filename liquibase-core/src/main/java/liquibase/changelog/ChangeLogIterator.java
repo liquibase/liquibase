@@ -3,14 +3,13 @@ package liquibase.changelog;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
+import liquibase.Scope;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
-import liquibase.logging.LoggerContext;
 import liquibase.util.StringUtil;
 
 import java.util.*;
@@ -48,42 +47,54 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
-        Logger log = LogService.getLog(getClass());
+        Logger log = Scope.getCurrentScope().getLog(getClass());
         databaseChangeLog.setRuntimeEnvironment(env);
-        try (LoggerContext ignored = LogService.pushContext("databaseChangeLog", databaseChangeLog)) {
-            List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
-            if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
-                Collections.reverse(changeSetList);
-            }
+        try {
+            Scope.child(Scope.Attr.databaseChangeLog, databaseChangeLog, new Scope.ScopedRunner() {
+                @Override
+                public void run() throws Exception {
 
-            for (ChangeSet changeSet : changeSetList) {
-                boolean shouldVisit = true;
-                Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
-                Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
-                if (changeSetFilters != null) {
-                    for (ChangeSetFilter filter : changeSetFilters) {
-                        ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
-                        if (acceptsResult.isAccepted()) {
-                            reasonsAccepted.add(acceptsResult);
-                        } else {
-                            shouldVisit = false;
-                            reasonsDenied.add(acceptsResult);
-                            break;
+                    List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
+                    if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
+                        Collections.reverse(changeSetList);
+                    }
+
+                    for (ChangeSet changeSet : changeSetList) {
+                        boolean shouldVisit = true;
+                        Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
+                        Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
+                        if (changeSetFilters != null) {
+                            for (ChangeSetFilter filter : changeSetFilters) {
+                                ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
+                                if (acceptsResult.isAccepted()) {
+                                    reasonsAccepted.add(acceptsResult);
+                                } else {
+                                    shouldVisit = false;
+                                    reasonsDenied.add(acceptsResult);
+                                    break;
+                                }
+                            }
                         }
+
+                        boolean finalShouldVisit = shouldVisit;
+                        Scope.child(Scope.Attr.changeSet, changeSet, new Scope.ScopedRunner() {
+                            @Override
+                            public void run() throws Exception {
+                                if (finalShouldVisit && !alreadySaw(changeSet)) {
+                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                                    markSeen(changeSet);
+                                } else {
+                                    if (visitor instanceof SkippedChangeSetVisitor) {
+                                        ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
+                                    }
+                                }
+                            }
+                        });
                     }
                 }
-
-                try (LoggerContext ignored2 = LogService.pushContext("changeSet", changeSet)) {
-                    if (shouldVisit && !alreadySaw(changeSet)) {
-                        visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                        markSeen(changeSet);
-                    } else {
-                        if (visitor instanceof SkippedChangeSetVisitor) {
-                            ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
-                        }
-                    }
-                }
-            }
+            });
+        } catch (Exception e) {
+            throw new LiquibaseException(e);
         } finally {
             databaseChangeLog.setRuntimeEnvironment(null);
         }

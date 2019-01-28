@@ -3,6 +3,7 @@ package liquibase.integration.cdi;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -78,7 +79,7 @@ public class CDILiquibase implements Extension {
     @Inject
     @LiquibaseType
     ResourceAccessor resourceAccessor;
-    private Logger log = LogService.getLog(CDILiquibase.class);
+    private Logger log = Scope.getCurrentScope().getLog(CDILiquibase.class);
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
     @Inject @LiquibaseType

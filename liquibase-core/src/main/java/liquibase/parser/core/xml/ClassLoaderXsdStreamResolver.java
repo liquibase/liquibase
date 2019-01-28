@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml;
 
+import liquibase.Scope;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
@@ -8,7 +9,7 @@ import java.io.InputStream;
 
 public class ClassLoaderXsdStreamResolver extends XsdStreamResolver {
 
-    private static final Logger LOGGER = LogService.getLog(ClassLoaderXsdStreamResolver.class);
+    private static final Logger LOGGER = Scope.getCurrentScope().getLog(ClassLoaderXsdStreamResolver.class);
 
     @Override
     public InputStream getResourceAsStream(String xsdFile) {

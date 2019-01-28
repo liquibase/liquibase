@@ -1,9 +1,6 @@
 package liquibase;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
-import liquibase.logging.LoggerFactory;
 import liquibase.util.ObjectUtil;
 import liquibase.util.SmartMap;
 import liquibase.util.StringUtil;
@@ -16,8 +13,6 @@ import java.util.*;
  * Convenience class implementing ExtensibleObject. It is usually easiest to extend this class rather than implement all of ExtensibleObject yourself.
  */
 public class AbstractExtensibleObject implements ExtensibleObject {
-
-    protected Logger log = LogService.getLog(getClass());
 
     /**
      * Additional non-standard attributes.

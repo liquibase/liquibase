@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml;
 
+import liquibase.Scope;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
@@ -25,7 +26,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     private ResourceAccessor resourceAccessor;
     private String basePath;
 
-    private Logger log= LogService.getLog(getClass());
+    private Logger log= Scope.getCurrentScope().getLog(getClass());
 
     public LiquibaseEntityResolver(LiquibaseSerializer serializer) {
         this.serializer = serializer;

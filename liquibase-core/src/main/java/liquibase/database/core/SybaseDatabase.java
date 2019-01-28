@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.statement.SqlStatement;
@@ -265,7 +266,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogService.getLog(getClass())
+        	Scope.getCurrentScope().getLog(getClass())
         		.warning(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
@@ -284,7 +285,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogService.getLog(getClass())
+        	Scope.getCurrentScope().getLog(getClass())
     			.warning(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }

@@ -1,5 +1,6 @@
 package liquibase.test;
 
+import liquibase.Scope;
 import liquibase.database.*;
 import liquibase.database.core.AbstractDb2Database;
 import liquibase.database.example.ExampleCustomDatabase;
@@ -72,7 +73,7 @@ public class DatabaseTestContext {
             // Close the JDBC connection
             databaseConnection.getUnderlyingConnection().close();
         } catch (SQLException e) {
-            LogService.getLog(DatabaseTestContext.class).warning(LogType.USER_MESSAGE,
+            Scope.getCurrentScope().getLog(DatabaseTestContext.class).warning(LogType.USER_MESSAGE,
                 "Could not close the following connection: " + databaseConnection.getURL(), e);
         }
     }
@@ -140,13 +141,13 @@ public class DatabaseTestContext {
         try {
             if (url.startsWith("jdbc:hsql")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA";
-                LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             } else if (url.startsWith("jdbc:sqlserver")
                 || url.startsWith("jdbc:postgresql")
                 || url.startsWith("jdbc:h2")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA;
-                LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             }
             if (!databaseConnection.getAutoCommit()) {

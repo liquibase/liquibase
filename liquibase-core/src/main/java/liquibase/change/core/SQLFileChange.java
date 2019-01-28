@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
@@ -10,6 +11,7 @@ import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -117,10 +119,10 @@ public class SQLFileChange extends AbstractSQLChange {
         InputStream inputStream = null;
         try {
             String relativeTo = null;
-            if (isRelativeToChangelogFile()) {
+            if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
                 relativeTo = getChangeSet().getFilePath();
             }
-            inputStream = getResourceAccessor().openStream(relativeTo, path);
+            inputStream = ObjectUtil.defaultIfNull(getResourceAccessor(), Scope.getCurrentScope().getResourceAccessor()).openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException("Unable to read file '" + path + "'", e);
         }

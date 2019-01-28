@@ -6,6 +6,8 @@ import liquibase.logging.core.AbstractLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
+import java.util.logging.Level;
+
 /**
  * An implementation of the Liquibase logger that logs to the given Ant task.
  */
@@ -15,6 +17,16 @@ public final class AntTaskLogger extends AbstractLogger {
 
     public AntTaskLogger(Task task) {
         this.task = task;
+    }
+
+    @Override
+    public Level getLogLevel() {
+        return null;
+    }
+
+    @Override
+    public void setLogLevel(Level level) {
+        //managed by ant
     }
 
     @Override

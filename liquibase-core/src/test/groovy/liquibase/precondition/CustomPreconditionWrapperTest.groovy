@@ -27,7 +27,6 @@ class CustomPreconditionWrapperTest extends Specification {
         }
 
         then:
-        precondition.classLoader != null
         precondition.className == "liquibase.precondition.ExampleCustomPrecondition"
         precondition.params.size() == 3
         precondition.getParamValue("param 1") == "param 1 value"
@@ -54,7 +53,6 @@ class CustomPreconditionWrapperTest extends Specification {
         }
 
         then:
-        precondition.classLoader != null
         precondition.className == "liquibase.precondition.ExampleCustomPrecondition"
         precondition.params.size() == 3
         precondition.getParamValue("param 1") == "param 1 value"

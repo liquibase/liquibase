@@ -61,7 +61,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class Liquibase {
 
-    private static final Logger LOG = LogService.getLog(Liquibase.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(Liquibase.class);
     protected static final int CHANGESET_ID_NUM_PARTS = 3;
     protected static final int CHANGESET_ID_AUTHOR_PART = 2;
     protected static final int CHANGESET_ID_CHANGESET_PART = 1;
@@ -609,7 +609,7 @@ public class Liquibase {
                 "Error executing rollback script. ChangeSets will still be marked as rolled back: " + e.getMessage(),
                 e
             );
-            LogService.getLog(getClass()).severe(LogType.LOG, ex.getMessage());
+            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, ex.getMessage());
             LOG.severe(LogType.LOG, "Error executing rollback script", ex);
             if (changeExecListener != null) {
                 changeExecListener.runFailed(null, databaseChangeLog, database, ex);

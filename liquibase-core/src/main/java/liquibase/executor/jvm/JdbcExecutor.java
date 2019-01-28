@@ -1,5 +1,6 @@
 package liquibase.executor.jvm;
 
+import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -37,7 +38,7 @@ import java.util.Map;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
-    private Logger log = LogService.getLog(getClass());
+    private Logger log = Scope.getCurrentScope().getLog(getClass());
 
     @Override
     public boolean updatesDatabase() {
@@ -269,7 +270,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        LogService.getLog(getClass()).debug(LogType.LOG, message);
+        Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, message);
     }
 
     private void executeDb2ZosComplexStatement(SqlStatement sqlStatement) throws DatabaseException {

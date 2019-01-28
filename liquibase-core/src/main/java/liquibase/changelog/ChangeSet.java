@@ -207,7 +207,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public ChangeSet(DatabaseChangeLog databaseChangeLog) {
         this.changes = new ArrayList<>();
-        log = LogService.getLog(getClass());
+        log = Scope.getCurrentScope().getLog(getClass());
         this.changeLog = databaseChangeLog;
     }
 
@@ -533,7 +533,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
 
-                    LogService.getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;

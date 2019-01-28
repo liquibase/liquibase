@@ -1,5 +1,6 @@
 package liquibase.statement;
 
+import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -7,14 +8,12 @@ import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.*;
@@ -30,7 +29,7 @@ import liquibase.change.core.LoadDataChange;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-    private static final Logger LOG = LogService.getLog(ExecutablePreparedStatementBase.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(ExecutablePreparedStatementBase.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
@@ -59,11 +58,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     private static InputStream createStream(InputStream in) {
         return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
-    }
-
-    private static Reader createReader(InputStream in, String encoding) {
-        return new BufferedReader((StringUtil.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
-            UtfBomAwareReader(in, encoding));
     }
 
     @Override
@@ -262,7 +256,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         Reader reader = null;
 
         try {
-            reader = createReader(in, encoding);
+            reader = StreamUtil.readStreamWithReader(in, encoding);
 
             if (reader.markSupported()) {
                 reader.mark(IN_MEMORY_THRESHOLD);
@@ -278,7 +272,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 } catch (IOException ignored) {
                 }
                 in = getResourceAsStream(valueLobFile);
-                reader = createReader(in, encoding);
+                reader = StreamUtil.readStreamWithReader(in, encoding);
             }
 
             return new LOBContent<>(reader, length);

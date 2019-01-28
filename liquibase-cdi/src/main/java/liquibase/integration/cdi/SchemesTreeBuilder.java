@@ -1,5 +1,6 @@
 package liquibase.integration.cdi;
 
+import liquibase.Scope;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
 import liquibase.integration.cdi.exceptions.CyclicDependencyException;
 import liquibase.integration.cdi.exceptions.DependencyNotFoundException;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 @ApplicationScoped
 public class SchemesTreeBuilder {
-    private static final Logger log = LogService.getLog(SchemesTreeBuilder.class);
+    private static final Logger log = Scope.getCurrentScope().getLog(SchemesTreeBuilder.class);
 
     private class SchemaNode {
         private final LiquibaseSchema item;
