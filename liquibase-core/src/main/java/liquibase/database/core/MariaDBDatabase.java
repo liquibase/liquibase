@@ -4,7 +4,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 
 /**
@@ -54,7 +54,7 @@ public class MariaDBDatabase extends MySQLDatabase {
         // https://mariadb.com/kb/en/library/microseconds-in-mariadb/
         String minimumVersion = "5.3.0";
 
-        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, patch))
+        if (StringUtil.isMinimumVersion(minimumVersion, major, minor, patch))
             return 6;
         else
             return 0;

@@ -95,7 +95,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
             return null;
         }
         try {
-            return plugin.getClass().getConstructor().getConstructor().newInstance();
+            return plugin.getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
