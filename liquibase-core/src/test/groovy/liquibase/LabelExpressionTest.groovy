@@ -178,6 +178,28 @@ class LabelExpressionTest extends Specification {
         "a and b or c, d" | "e"           | false
     }
 
+    @Unroll("#featureName: testLabels '#testLabels' against: '#controlLabels'")
+    def "trim extra spaces"() {
+        expect:
+        assert new LabelExpression(testLabels).matches(new Labels('a, b')) == new LabelExpression(controlLabels).matches(new Labels('a, b'))
+        assert new LabelExpression(testLabels).matches(new Labels('c'))    == new LabelExpression(controlLabels).matches(new Labels('c'))
+
+        where:
+        testLabels                      | controlLabels
+        "   a  "                        | "a"
+        " ! a  "                        | "not a"
+        " ! ( a )  "                    | "!a"
+        " ! ( ! a )  "                  | "a"
+        " not ( !a )  "                 | "a"
+        " a  and  b "                   | "a and b"
+        " ( (a )  and  ( b) ) "         | "a and b"
+        " ( a  and  b ) or ! c "        | "(a and b) or !c"
+        " a  and  b "                   | "a and b"
+        "a    and    b   or   c"        | "a and b or c"
+        " (a and  b ) or ( c and  d)"   | "(a and b) or (c and d)"
+        "! (a and  b ) or ( ! c and  d)"| "!(a and b) or (!c and d)"
+    }
+
     @Unroll
     def isEmpty() {
         expect:

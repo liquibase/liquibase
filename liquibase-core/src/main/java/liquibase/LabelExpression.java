@@ -1,11 +1,9 @@
 package liquibase;
 
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.ExpressionMatcher;
 import liquibase.util.StringUtils;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class LabelExpression {
 
@@ -115,75 +113,7 @@ public class LabelExpression {
     }
 
     private boolean matches(String expression, Labels runtimeLabels) {
-        if (runtimeLabels.isEmpty()) {
-            return true;
-        }
-
-        if (expression.trim().equals(":TRUE")) {
-            return true;
-        }
-        if (expression.trim().equals(":FALSE")) {
-            return false;
-        }
-
-        while (expression.contains("(")) {
-            Pattern pattern = Pattern.compile("(.*?)\\(([^\\(\\)]*?)\\)(.*)");
-            Matcher matcher = pattern.matcher(expression);
-            if (!matcher.matches()) {
-                throw new UnexpectedLiquibaseException("Cannot parse label pattern "+expression);
-            }
-            String parenExpression = matcher.group(2);
-
-            parenExpression = ":"+String.valueOf(matches(parenExpression, runtimeLabels)).toUpperCase();
-
-            expression = matcher.group(1)+" "+parenExpression+" "+matcher.group(3);
-        }
-
-        String[] orSplit = expression.split("\\s+or\\s+");
-        if (orSplit.length > 1) {
-            for (String split : orSplit) {
-                if (matches(split, runtimeLabels)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        String[] andSplit = expression.split("\\s+and\\s+");
-        if (andSplit.length > 1) {
-            for (String split : andSplit) {
-                if (!matches(split, runtimeLabels)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-
-        boolean notExpression = false;
-        if (expression.startsWith("!")) {
-            notExpression = true;
-            expression = expression.substring(1);
-        } else if (expression.toLowerCase().startsWith("not ")) {
-            notExpression = true;
-            expression = expression.substring(4);
-        }
-
-        if (expression.trim().equals(":TRUE")) {
-            return !notExpression;
-        }
-        if (expression.trim().equals(":FALSE")) {
-            return notExpression;
-        }
-
-        for (String label : runtimeLabels.getLabels()) {
-            if (label.equalsIgnoreCase(expression)) {
-                return !notExpression;
-            }
-        }
-        return notExpression;
-
-
+        return ExpressionMatcher.matches(expression, runtimeLabels.getLabels());
     }
 
     public boolean isEmpty() {
