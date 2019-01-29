@@ -84,8 +84,8 @@ jobs:
 
       - store_test_results:
           path: /home/circleci/circle_test_reports
-      - store_artifacts:
-          path: /home/circleci/circle_artifacts
+#      - store_artifacts:
+#          path: /home/circleci/circle_artifacts
       - save_cache:
           paths:
             - ~/.m2
