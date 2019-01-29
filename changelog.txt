@@ -1,6 +1,21 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.6.3 (2019.1.29)
+
+- [CORE-3100] - diff with uppercase reference database name
+- [CORE-3141] - ForeignKeySnapshotGenerator broken with recent SQL Server driver
+- [CORE-3192] - Error while including resources with includeAll directive
+- [CORE-3221] - Parsing valueDate Attribute of column Tag leads to precision loss and generating SQL for Oracle DB is broken
+- [CORE-3222] - Bin zip doesn't work due to missing slf4j-api JAR
+- [CORE-3231] - NPE in LogService.pushContext for MDCs that don't allow null values
+- [CORE-3242] - MS SQL Server 2008 support issue
+- [CORE-3256] - Verbose flag not getting interperated during 'status' command.
+- [CORE-3293] - Non global change log parameters are wrongly resolved in inner files
+- [CORE-3296] - CommandLineUtils::getBanner fails if manifest entries are missing
+- [CORE-3335] - Not possible to register/unregister SqlGenerators during execution of changeSet
+- [CORE-3348] - MSSQLDatabase class has a bug when connecting to SQL Server 2008 databases
+
 Changes in version 3.6.2 (2018.06.30)
 
 - [CORE-3129] - PostgreSQL dropPrimaryKey with objectQuotingStrategy="QUOTE_ALL_OBJECTS"
