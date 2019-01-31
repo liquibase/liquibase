@@ -41,6 +41,9 @@ import java.util.List;
 public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected CheckSum checkSum;
+    /**
+     * storedCheckSum uses in order to keep a last checksum calculation when a chageset was executed
+     */
     private CheckSum storedCheckSum;
 
     public enum RunStatus {
@@ -1182,10 +1185,18 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return this;
     }
 
+    /**
+     * Gets storedCheckSum
+     * @return storedCheckSum if it was executed otherwise null
+     */
     public CheckSum getStoredCheckSum() {
         return storedCheckSum;
     }
 
+    /**
+     * Sets storedCheckSum in ValidatingVisitor in case when changeset was executed
+     * @param storedCheckSum
+     */
     public void setStoredCheckSum(CheckSum storedCheckSum) {
         this.storedCheckSum = storedCheckSum;
     }
