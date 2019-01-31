@@ -42,7 +42,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected CheckSum checkSum;
     /**
-     * storedCheckSum uses in order to keep a last checksum calculation when a chageset was executed
+     * storedChecksum is used to make the checksum of a changeset that has already been run
+     * on a database available to liquibase extensions. This value might differ from the checkSum value that
+     * is calculated at run time when ValidatorVisitor is being called
      */
     private CheckSum storedCheckSum;
 
