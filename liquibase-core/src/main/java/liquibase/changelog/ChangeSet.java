@@ -41,6 +41,7 @@ import java.util.List;
 public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected CheckSum checkSum;
+    private CheckSum storedCheckSum;
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
@@ -1179,5 +1180,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.attributes.put(attribute, value);
 
         return this;
+    }
+
+    public CheckSum getStoredCheckSum() {
+        return storedCheckSum;
+    }
+
+    public void setStoredCheckSum(CheckSum storedCheckSum) {
+        this.storedCheckSum = storedCheckSum;
     }
 }
