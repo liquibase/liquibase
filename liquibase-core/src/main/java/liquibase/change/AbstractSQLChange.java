@@ -221,17 +221,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (database instanceof MSSQLDatabase) {
                  statement = statement.replaceAll("\\n", "\r\n");
              }
-
-            String escapedStatement = statement;
-            try {
-                if (database.getConnection() != null) {
-                    escapedStatement = database.getConnection().nativeSQL(statement);
-                }
-            } catch (DatabaseException e) {
-                escapedStatement = statement;
-            }
-
-            returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
+            returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
         }
 
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
