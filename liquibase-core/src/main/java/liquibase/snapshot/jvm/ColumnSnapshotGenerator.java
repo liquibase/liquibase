@@ -100,8 +100,20 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (validated== null) {
                     break;
                 }
-                column.setShouldValidateNullable(validated.toString().equalsIgnoreCase(VALIDATE));
-                return;
+                // Oracle returns NULLABLE=Y for columns that have not null constraints that are not validated
+                // we have to check the search_condition to verify if it is really nullable
+                String searchCondition = cachedRow.getString("SEARCH_CONDITION");
+                searchCondition = searchCondition == null ? "" : searchCondition.toUpperCase();
+                String nullable = cachedRow.getString("NULLABLE");
+                if ("NOT VALIDATED".equalsIgnoreCase(validated.toString())
+                        && "Y".equalsIgnoreCase(nullable)
+                        && searchCondition.matches("\"?\\w+\" IS NOT NULL")) {
+                        // not validated not null constraint found
+                        column.setNullable(false);
+                        column.setShouldValidateNullable(false);
+                } else {
+                    column.setShouldValidateNullable(validated.toString().equalsIgnoreCase(VALIDATE));
+                }
             }
         }
     }

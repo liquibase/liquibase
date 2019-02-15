@@ -204,6 +204,15 @@ public class Column extends AbstractDatabaseObject {
         return this;
     }
 
+    /**
+     * This returns false for Not Null constraints created with ENABLE NOVALIDATE mode,
+     * otherwise returns true.
+     * @return
+     */
+    public boolean shouldValidateNullable() {
+        return getAttribute("validateNullable", true);
+    }
+
     public String toString(boolean includeRelation) {
         if (includeRelation) {
             return toString();
