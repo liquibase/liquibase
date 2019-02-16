@@ -43,11 +43,11 @@ class ClassLoaderResourceAccessorTest extends Specification {
         def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
 
         when:
-        def listedResources = accessor.list(null, "org/apache/log4j", true, false, true)
+        def listedResources = accessor.list(null, "org/springframework/core/io", true, false, true)
 
         then:
-        listedResources.contains("org/apache/log4j/Logger.class") == true
-        listedResources.contains("org/apache/log4j/spi/Filter.class") == true
+        listedResources.contains("org/springframework/core/io/Resource.class")
+        listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
     }
 
     def "can non-recursively enumerate files inside JARs on the classpath"() {
@@ -55,10 +55,25 @@ class ClassLoaderResourceAccessorTest extends Specification {
         def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
 
         when:
-        def listedResources = accessor.list(null, "org/apache/log4j", true, false, false)
+        def listedResources = accessor.list(null, "org/springframework/core/io", true, false, false)
 
         then:
-        listedResources.contains("org/apache/log4j/Logger.class") == true
-        listedResources.contains("org/apache/log4j/spi/Filter.class") == false
+        listedResources.contains("org/springframework/core/io/Resource.class")
+        !listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
     }
+
+    // Test case for [CORE-3139]
+    def "can recursively enumerate files inside JARs using JAR file URL"() {
+        given:
+        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
+        def jarPkgURL = this.getClass().getClassLoader().getResource("org/springframework/core/io/").toExternalForm()
+
+        when:
+        def listedResources = accessor.list(null, jarPkgURL, true, false, true)
+
+        then:
+        listedResources.contains("org/springframework/core/io/Resource.class")
+        listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
+    }
+
 }

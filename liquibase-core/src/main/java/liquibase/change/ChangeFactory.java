@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -19,19 +19,19 @@ public class ChangeFactory {
 
     private static ChangeFactory instance;
 
-    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
-    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
+    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<>();
+    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
 
     private Logger log;
 
     private ChangeFactory() {
-      log = LogFactory.getInstance().getLog();
+      log = LogService.getLog(getClass());
     }
 
     protected Logger getLogger() {
       return log;
     }
-    
+
     private void init() {
         Class<? extends Change>[] classes;
         classes = ServiceLocator.getInstance().findClasses(Change.class);
@@ -71,7 +71,7 @@ public class ChangeFactory {
             ChangeMetaData metaData = getChangeMetaData(instance);
             String name = metaData.getName();
             if (registry.get(name) == null) {
-                registry.put(name, new TreeSet<Class<? extends Change>>(new Comparator<Class<? extends Change>>() {
+                registry.put(name, new TreeSet<>(new Comparator<Class<? extends Change>>() {
                     @Override
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
@@ -85,7 +85,7 @@ public class ChangeFactory {
             registry.get(name).add(changeClass);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
-		}
+        }
     }
 
     public ChangeMetaData getChangeMetaData(String change) {
@@ -146,14 +146,14 @@ public class ChangeFactory {
         }
 
         try {
-            return classes.iterator().next().newInstance();
+            return classes.iterator().next().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
 
     public String[] getAllChangeNamespaces() {
-        Set<String> namespaces = new HashSet<String>();
+        Set<String> namespaces = new HashSet<>();
         for (String changeName : getDefinedChanges()) {
             Change change = create(changeName);
             namespaces.add(change.getSerializedObjectNamespace());
@@ -163,7 +163,7 @@ public class ChangeFactory {
     }
 
     public Map<String, Object> getParameters(Change change) {
-        Map<String, Object> returnMap = new HashMap<String, Object>();
+        Map<String, Object> returnMap = new HashMap<>();
         ChangeMetaData changeMetaData = getChangeMetaData(change);
         for (ChangeParameterMetaData param : changeMetaData.getParameters().values()) {
             Object currentValue = param.getCurrentValue(change);

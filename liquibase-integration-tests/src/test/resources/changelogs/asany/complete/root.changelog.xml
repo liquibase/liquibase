@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
     <preConditions>
             <dbms type="asany"/>
-            <runningAs username="lbuser"/>
+            <runningAs username="${loginUser}"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
@@ -269,9 +269,9 @@
         <modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>
     </changeSet>
 
-    <include file="changelogs/sybase/complete/included.changelog.xml"/>
+    <include file="changelogs/asany/complete/included.changelog.xml"/>
 
-    <include file="changelogs/sybase/complete/renamed.changelog.xml"/>
+    <include file="changelogs/asany/complete/renamed.changelog.xml"/>
 
     <include file="changelogs/common/common.tests.changelog.xml" />
 
@@ -295,6 +295,22 @@
         <executeCommand executable="ping" os="Windows XP">
             <arg value="localhost"/>
         </executeCommand>
+    </changeSet>
+
+    <!-- To prevent the error described in CORE-3138 SQLAnywhere: AddAutoIncrement-Statement is wrong -->
+    <changeSet id="add_auto_increment_on_indexed_column" author="abuschka">
+        <createTable tableName="core_3138">
+            <column name="some_trivial_column" type="varchar(255)" />
+            <column name="soon_our_auto_increment_col" type="int" />
+        </createTable>
+        <insert tableName="core_3138" >
+            <column name="some_trivial_column">some_value</column>
+            <column name="soon_our_auto_increment_col">42</column>
+        </insert>
+        <createIndex tableName="core_3138" indexName="idx_core_3138" unique="true">
+            <column name="soon_our_auto_increment_col" />
+        </createIndex>
+        <addAutoIncrement tableName="core_3138" columnName="soon_our_auto_increment_col" columnDataType="int"/>
     </changeSet>
 
 </databaseChangeLog>

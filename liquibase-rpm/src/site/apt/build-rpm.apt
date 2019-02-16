@@ -144,7 +144,7 @@ Running Transaction Test
 Transaction Test Succeeded
 Running Transaction
 Warning: RPMDB altered outside of yum.
-  Erasing    : liquibase-3.3.0-SNAPSHOT20140618000252.noarch                                                                                                                   1/1 
+  Erasing    : liquibase-3.3.0-SNAPSHOT20140618000252.noarch                                                                                                                   1/1
   Verifying  : liquibase-3.3.0-SNAPSHOT20140618000252.noarch
 +-------------------------------------------
 

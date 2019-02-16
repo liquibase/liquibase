@@ -16,8 +16,6 @@ package liquibase.util.csv.opencsv;
  limitations under the License.
  */
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.opencsv.enums.CSVReaderNullFieldIndicator;
 
@@ -104,7 +102,7 @@ public class CSVParser {
     private final boolean ignoreQuotations;
     private final CSVReaderNullFieldIndicator nullFieldIndicator;
     private String pending;
-    private boolean inField = false;
+    private boolean inField;
 
     /**
      * Constructs CSVParser using a comma for the separator.
@@ -280,7 +278,7 @@ public class CSVParser {
      * @return true if both characters are the same and are not the defined NULL_CHARACTER
      */
     private boolean isSameCharacter(char c1, char c2) {
-        return c1 != NULL_CHARACTER && c1 == c2;
+        return (c1 != NULL_CHARACTER) && (c1 == c2);
     }
 
     /**
@@ -324,7 +322,7 @@ public class CSVParser {
      */
     protected String[] parseLine(String nextLine, boolean multi) throws IOException {
 
-        if (!multi && pending != null) {
+        if (!multi && (pending != null)) {
             pending = null;
         }
 
@@ -338,7 +336,7 @@ public class CSVParser {
             }
         }
 
-        List<String> tokensOnThisLine = new ArrayList<String>();
+        List<String> tokensOnThisLine = new ArrayList<>();
         StringBuilder sb = new StringBuilder(nextLine.length() + READ_BUFFER_SIZE);
         boolean inQuotes = false;
         boolean fromQuotedField = false;
@@ -366,13 +364,12 @@ public class CSVParser {
 
                     // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
                     if (!strictQuotes) {
-                        if (i > 2 //not on the beginning of the line
-                                && nextLine.charAt(i - 1) != this.separator //not at the beginning of an escape sequence
-                                && nextLine.length() > (i + 1) &&
-                                nextLine.charAt(i + 1) != this.separator //not at the	end of an escape sequence
+                        if ((i > 2) //not on the beginning of the line
+                            && (nextLine.charAt(i - 1) != this.separator) //not at the beginning of an escape sequence
+                            && (nextLine.length() > (i + 1)) && (nextLine.charAt(i + 1) != this.separator) //not at the	end of an escape sequence
                                 ) {
 
-                            if (ignoreLeadingWhiteSpace && sb.length() > 0 && isAllWhiteSpace(sb)) {
+                            if (ignoreLeadingWhiteSpace && (sb.length() > 0) && isAllWhiteSpace(sb)) {
                                 sb.setLength(0);
                             } else {
                                 sb.append(c);
@@ -382,7 +379,7 @@ public class CSVParser {
                     }
                 }
                 inField = !inField;
-            } else if (c == separator && !(inQuotes && !ignoreQuotations)) {
+            } else if ((c == separator) && !(inQuotes && !ignoreQuotations)) {
                 tokensOnThisLine.add(convertEmptyToNullIfNeeded(sb.toString(), fromQuotedField));
                 fromQuotedField = false;
                 sb.setLength(0);
@@ -481,8 +478,8 @@ public class CSVParser {
      */
     private boolean isNextCharacterEscapedQuote(String nextLine, boolean inQuotes, int i) {
         return inQuotes  // we are in quotes, therefore there can be escaped quotes in here.
-                && nextLine.length() > (i + 1)  // there is indeed another character to check.
-                && isCharacterQuoteCharacter(nextLine.charAt(i + 1));
+            && (nextLine.length() > (i + 1))  // there is indeed another character to check.
+            && isCharacterQuoteCharacter(nextLine.charAt(i + 1));
     }
 
     /**
@@ -530,8 +527,8 @@ public class CSVParser {
      */
     protected boolean isNextCharacterEscapable(String nextLine, boolean inQuotes, int i) {
         return inQuotes  // we are in quotes, therefore there can be escaped quotes in here.
-                && nextLine.length() > (i + 1)  // there is indeed another character to check.
-                && isCharacterEscapable(nextLine.charAt(i + 1));
+            && (nextLine.length() > (i + 1))  // there is indeed another character to check.
+            && isCharacterEscapable(nextLine.charAt(i + 1));
     }
 
     /**

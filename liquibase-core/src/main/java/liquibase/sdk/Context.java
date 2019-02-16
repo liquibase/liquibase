@@ -15,13 +15,12 @@ import java.util.*;
 public class Context {
 
     public static final String LIQUIBASE_SDK_PROPERTIES_FILENAME = "liquibase.sdk.properties";
-    private static Context instance;
     private static final List<Class<?>> extensionInterfaces = Arrays.asList(Change.class, SqlGenerator.class);
+    private static Context instance;
+    private boolean initialized;
 
-    private boolean initialized = false;
-
-    private Set<Class> allClasses = new HashSet<Class>();
-    private Map<Class, Set<Class>> seenExtensionClasses = new HashMap<Class, Set<Class>>();
+    private Set<Class> allClasses = new HashSet<>();
+    private Map<Class, Set<Class>> seenExtensionClasses = new HashMap<>();
 
     private Set<File> propertyFiles;
 
@@ -60,7 +59,7 @@ public class Context {
 
 
     protected void init() throws Exception {
-        propertyFiles = new HashSet<File>();
+        propertyFiles = new HashSet<>();
 
 
         Enumeration<URL> resourceUrls = Context.class.getClassLoader().getResources(LIQUIBASE_SDK_PROPERTIES_FILENAME);
@@ -124,7 +123,7 @@ public class Context {
             try {
                 foundClass = Class.forName(className);
                 allClasses.add(foundClass);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 System.out.println("Error loading class "+className+": "+e.getCause().getClass().getName()+": "+e.getCause().getMessage());
             }
         }

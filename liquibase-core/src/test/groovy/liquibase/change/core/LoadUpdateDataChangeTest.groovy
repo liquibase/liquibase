@@ -8,6 +8,10 @@ import liquibase.sdk.database.MockDatabase
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.test.JUnitResourceAccessor
+import liquibase.database.core.MSSQLDatabase
+
+
 import static org.junit.Assert.*
 
 public class LoadUpdateDataChangeTest extends StandardChangeTest {
@@ -22,6 +26,21 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         "Data loaded from FILE_NAME into TABLE_NAME" == refactoring.getConfirmationMessage()
     }
 
+	def "loadUpdateEmpty database agnostic"() throws Exception {
+		when:
+		LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
+		refactoring.setSchemaName("SCHEMA_NAME");
+		refactoring.setTableName("TABLE_NAME");
+		refactoring.setFile("liquibase/change/core/empty.data.csv");
+		refactoring.setSeparator(",");
+
+		refactoring.setResourceAccessor(new JUnitResourceAccessor());
+
+		SqlStatement[] sqlStatement = refactoring.generateRollbackStatements(new MSSQLDatabase());
+		
+		then:
+		sqlStatement.length == 0
+	}
 
     def "loadUpdate generates InsertOrUpdateStatements"() throws Exception {
         when:
@@ -39,6 +58,27 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         then:
         assert statements != null
         assert statements[0] instanceof InsertOrUpdateStatement
+        assert !statements[0].getOnlyUpdate()
+    }
+
+    def "loadUpdate generates InsertOrUpdateStatements with onlyUpdate"() throws Exception {
+        when:
+        MockDatabase database = new MockDatabase();
+
+        LoadUpdateDataChange change = new LoadUpdateDataChange();
+
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setFile("liquibase/change/core/sample.data1.csv");
+        change.setResourceAccessor(new ClassLoaderResourceAccessor());
+        change.setOnlyUpdate(true);
+
+        SqlStatement[] statements = change.generateStatements(database);
+
+        then:
+        assert statements != null
+        assert statements[0] instanceof InsertOrUpdateStatement
+        assert statements[0].getOnlyUpdate()
     }
 
     def "generateChecksum produces different values with each field"() {

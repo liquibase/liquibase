@@ -1,18 +1,14 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,12 +37,17 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
             return super.generateSql(statement, database, sqlGeneratorChain);
         }
 
-        List<Sql> commands = new ArrayList<Sql>(Arrays.asList(super.generateSql(statement, database, sqlGeneratorChain)));
+        List<Sql> commands = new ArrayList<>(Arrays.asList(super.generateSql(statement, database, sqlGeneratorChain)));
         // for postgres, we need to also set the sequence to be owned by this table for true serial like functionality.
         // this will allow a drop table cascade to remove the sequence as well.
         SequenceNextValueFunction sequenceFunction = (SequenceNextValueFunction) statement.getDefaultValue();
 
-        Sql alterSequenceOwner = new UnparsedSql("ALTER SEQUENCE " + sequenceFunction.getValue() + " OWNED BY " +
+        String sequenceName = sequenceFunction.getValue();
+        String sequenceSchemaName = sequenceFunction.getSequenceSchemaName();
+        String sequence = database.escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
+
+
+        Sql alterSequenceOwner = new UnparsedSql("ALTER SEQUENCE " + sequence + " OWNED BY " +
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "."
                 + database.escapeObjectName(statement.getColumnName(), Column.class),
                 getAffectedColumn(statement),

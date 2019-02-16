@@ -39,9 +39,9 @@ import java.util.Map;
 
 public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
    protected String[] header;
-   protected Map<String, Integer> indexLookup = new HashMap<String, Integer>();
-   protected Map<String, PropertyDescriptor> descriptorMap = null;
-   protected Map<String, BeanField> fieldMap = null;
+   protected Map<String, Integer> indexLookup = new HashMap<>();
+   protected Map<String, PropertyDescriptor> descriptorMap;
+   protected Map<String, BeanField> fieldMap;
    protected Class<T> type;
    protected boolean annotationDriven;
    protected boolean determinedIfAnnotationDriven;
@@ -133,7 +133,7 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
     * @return - the column name or null if the position is larger than the header array or there is no headers defined.
     */
    public String getColumnName(int col) {
-      return (null != header && col < header.length) ? header[col] : null;
+      return ((null != header) && (col < header.length)) ? header[col] : null;
    }
 
    /**
@@ -179,7 +179,7 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
     * @throws IntrospectionException - thrown on error getting information about the bean.
     */
    protected Map<String, PropertyDescriptor> loadDescriptorMap() throws IntrospectionException {
-      Map<String, PropertyDescriptor> map = new HashMap<String, PropertyDescriptor>();
+      Map<String, PropertyDescriptor> map = new HashMap<>();
 
       PropertyDescriptor[] descriptors;
       descriptors = loadDescriptors(getType());
@@ -196,7 +196,7 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
     * @return - a map of fields (and whether they're mandatory)
     */
    protected Map<String, BeanField> loadFieldMap() {
-      Map<String, BeanField> map = new HashMap<String, BeanField>();
+      Map<String, BeanField> map = new HashMap<>();
 
       for (Field field : loadFields(getType())) {
          boolean required = field.getAnnotation(CsvBind.class).required();
@@ -212,7 +212,7 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
    }
 
    private List<Field> loadFields(Class<T> cls) {
-      List<Field> fields = new ArrayList<Field>();
+      List<Field> fields = new ArrayList<>();
       for (Field field : cls.getDeclaredFields()) {
          if (field.isAnnotationPresent(CsvBind.class)) {
             fields.add(field);
@@ -224,12 +224,11 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
    /**
     * Creates an object to be mapped.
     * @return an object of type T.
-    * @throws InstantiationException - thrown on error creating object.
-    * @throws IllegalAccessException - thrown on error creating object.
+    * @throws ReflectiveOperationException - thrown on error creating object.
     */
    @Override
-   public T createBean() throws InstantiationException, IllegalAccessException {
-      return type.newInstance();
+   public T createBean() throws ReflectiveOperationException {
+      return type.getConstructor().newInstance();
    }
 
    /**

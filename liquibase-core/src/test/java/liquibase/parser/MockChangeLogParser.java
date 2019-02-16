@@ -1,7 +1,7 @@
 package liquibase.parser;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;

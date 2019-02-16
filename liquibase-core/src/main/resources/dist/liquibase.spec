@@ -7,17 +7,18 @@
 %define mssql        0
 %define sqlite       0
 # Liquibase Package
-%define lqver        2.0.0
+%define lqver        3.6.0
 %define buildnum     1
 ## MySQL Jar
-%define mysqljar     mysql-connector-java-5.1.10.jar
+%define mysqljar     mysql-connector-java-6.0.6.jar
 %define gpl2license  gpl-2.0.txt
 ## Oracle Files
 %define oraLicense   oracle-license.txt 
-%define orajarjdbc   ojdbc14.jar
+%define orajarjdbc   ojdbc8-12.1.0.2.jar
+%define orajarucp    ucp-12.1.0.2.jar
 %define orajari18n   orai18n.jar
 ## Postgresql
-%define pgsqljar     postgresql-8.4-701.jdbc4.jar
+%define pgsqljar     postgresql-42.1.1.jar
 %define bsdLicense   BSD-License.txt
 ## Microsoft SQL
 %define mssqljar     mssql-sqljdbc4-2.0.jar
@@ -36,14 +37,15 @@ Source0: %{name}-%{version}.tar.gz
 Source1: %{mysqljar}
 Source2: %{oraLicense}
 Source3: %{orajarjdbc}
-Source4: %{orajari18n}
-Source5: %{pgsqljar}
-Source6: %{bsdLicense}
-Source7: %{mssqljar}
-Source8: %{msLicense}
-Source9: %{gpl2license}
-Source10: %{sqlitejar}
-Source11: %{apache2license}
+Source4: %{orajarucp}
+Source5: %{orajari18n}
+Source6: %{pgsqljar}
+Source7: %{bsdLicense}
+Source8: %{mssqljar}
+Source9: %{msLicense}
+Source10: %{gpl2license}
+Source11: %{sqlitejar}
+Source12: %{apache2license}
 
 BuildRoot: %{_tmppath}/build-root-%{name}
 BuildArch: noarch
@@ -54,8 +56,8 @@ Provides: liquibase = %{version}-%{release}
 
 %description
 LiquiBase is an open source (Apache 2.0 License), database-independent library for tracking,
-managing and applying database changes. It is built on a simple premise: All 
-database changes are stored in a human readable yet trackable form and checked 
+managing and applying database changes. It is built on a simple premise: All
+database changes are stored in a human readable yet trackable form and checked
 into source control.
 
 %if %{mysql}
@@ -76,7 +78,7 @@ Summary:        Oracle Jar and license files
 Group:          Development/Languages
 Requires:       liquibase
 License:        Commerical
-Url:            http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/htdocs/jdbc_10201.html
+Url:            http://www.oracle.com/technetwork/database/features/jdbc/jdbc-ucp-122-3110062.html
 
 %description oracle
 This package includes the Oracle jar file required by liquibase
@@ -116,7 +118,7 @@ Summary:        Sqlite Jar file
 Group:          Development/Languages
 Requires:       liquibase
 License:        Apache License
-Url:            http://www.xerial.org/trac/Xerial/wiki/SQLiteJDBC
+Url:            https://github.com/xerial/sqlite-jdbc
 
 %description sqlite
 This package includes the Sqlite jar file required by liquibase as well
@@ -250,6 +252,8 @@ EOF
 %post
 
 %changelog
+* Thu Jul 13 2017 Andreas Buschka <kontakt@andreas-buschka.de>
+- Updated JDBC libraries and URLs.
 * Mon Jan 25 2010 William Lovins <rpmbuild@icainformatics.com> - 1.9.5-1
 - initial public version of spec
 

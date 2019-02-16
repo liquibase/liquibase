@@ -1,25 +1,22 @@
 package liquibase.change.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
-import liquibase.structure.core.Table;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.FindForeignKeyConstraintsStatement;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Table;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @DatabaseChange(name="dropAllForeignKeyConstraints", description = "Drops all foreign key constraints for a table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
@@ -57,14 +54,12 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
+        List<SqlStatement> sqlStatements = new ArrayList<>();
 
         List<DropForeignKeyConstraintChange> childDropChanges = generateChildren(database);
 
-        if (childDropChanges != null) {
-            for (DropForeignKeyConstraintChange change : childDropChanges) {
-                sqlStatements.addAll(Arrays.asList(change.generateStatements(database)));
-            }
+        for (DropForeignKeyConstraintChange change : childDropChanges) {
+            sqlStatements.addAll(Arrays.asList(change.generateStatements(database)));
         }
 
         return sqlStatements.toArray(new SqlStatement[sqlStatements.size()]);
@@ -75,25 +70,41 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         return "Foreign keys on base table " + getBaseTableName() + " dropped";
     }
 
+    /**
+     * Iterates through all the FOREIGN KEYs of the target table and outputs a list of DropForeignKeyConstraintChanges
+     * for a given database type.
+     *
+     * @param database the database type for which subchanges need to be generated
+     * @return the list of generated DropForeignKeyConstraintChanges
+     */
     private List<DropForeignKeyConstraintChange> generateChildren(Database database) {
         // Make a new list
-        List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
-
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
-
-        FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
+        List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<>();
 
         try {
-            List<Map<String, ?>> results = executor.queryForList(sql);
-            Set<String> handledConstraints = new HashSet<String>();
+            SnapshotControl control = new SnapshotControl(database);
+            control.getTypesToInclude().add(ForeignKey.class);
+            CatalogAndSchema catalogAndSchema =
+                    new CatalogAndSchema(getBaseTableCatalogName(), getBaseTableSchemaName());
+            catalogAndSchema = catalogAndSchema.standardize(database);
+            Table target = SnapshotGeneratorFactory.getInstance().createSnapshot(
+                    new Table(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName(),
+                            database.correctObjectName(getBaseTableName(), Table.class))
+                    , database);
 
-            if (results != null && results.size() > 0) {
-                for (Map result : results) {
-                    String baseTableName =
-                            (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME);
-                    String constraintName =
-                            (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME);
-                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(new Table().setName(getBaseTableName()), new Table().setName(baseTableName), null, database)) {
+            List<ForeignKey> results = ((target == null) ? null : target.getOutgoingForeignKeys());
+            Set<String> handledConstraints = new HashSet<>();
+
+            if ((results != null) && (!results.isEmpty())) {
+                for (ForeignKey fk : results) {
+                    Table baseTable = fk.getForeignKeyTable();
+                    String constraintName = fk.getName();
+                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(
+                            baseTable,
+                            target,
+                            null,
+                            database
+                    )) {
                         if( !handledConstraints.contains(constraintName)) {
                             DropForeignKeyConstraintChange dropForeignKeyConstraintChange =
                                     new DropForeignKeyConstraintChange();
@@ -106,15 +117,16 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
                             handledConstraints.add(constraintName);
                         }
                     } else {
-                        throw new IllegalStateException("Expected to return only foreign keys for base table name: " +
-                                getBaseTableName() + " and got results for table: " + baseTableName);
+                        throw new UnexpectedLiquibaseException(
+                                "Expected to return only foreign keys for base table name: " +
+                                        getBaseTableName() + " and got results for table: " + baseTableName);
                     }
                 }
             }
 
             return childDropChanges;
 
-        } catch (DatabaseException e) {
+        } catch (DatabaseException | InvalidExampleException e) {
             throw new UnexpectedLiquibaseException("Failed to find foreign keys for table: " + getBaseTableName(), e);
         }
     }

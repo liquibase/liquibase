@@ -1,7 +1,5 @@
 package liquibase.structure.core;
 
-import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
@@ -11,11 +9,11 @@ import java.util.*;
 public class Index extends AbstractDatabaseObject {
 
 	/** Marks Index as associated with Primary Key [PK] */
-	public final static String MARK_PRIMARY_KEY = "primaryKey";
+    public static final String MARK_PRIMARY_KEY = "primaryKey";
 	/** Marks Index as associated with Foreign Key [FK] */
-	public final static String MARK_FOREIGN_KEY = "foreignKey";
+    public static final String MARK_FOREIGN_KEY = "foreignKey";
 	/** Marks Index as associated with Unique Constraint [UC] */
-	public final static String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
+    public static final String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
 
     public Index() {
         setAttribute("columns", new ArrayList<String>());
@@ -31,8 +29,8 @@ public class Index extends AbstractDatabaseObject {
         this();
         setName(indexName);
         if (tableName != null) {
-            setTable(new Table(catalogName, schemaName, tableName));
-            if (columns != null && columns.length > 0) {
+            setRelation(new Table(catalogName, schemaName, tableName));
+            if ((columns != null) && (columns.length > 0)) {
                 setColumns(Arrays.asList(columns));
             }
         }
@@ -41,7 +39,7 @@ public class Index extends AbstractDatabaseObject {
     @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
-                getTable()
+        		getRelation()
         };
     }
 
@@ -58,19 +56,39 @@ public class Index extends AbstractDatabaseObject {
 
     @Override
     public Schema getSchema() {
-        if (getTable() == null) {
+        if (getRelation() == null) {
             return null;
         }
         
-        return getTable().getSchema();
+        return getRelation().getSchema();
     }
+    
+    /**
+     * @deprecated Use {@link #getRelation()}
+     */
+    @Deprecated
+	public Table getTable() {
+		Relation relation = getRelation();
+		if (relation instanceof Table)
+		return (Table) relation;
+	else
+		return null;
+	}
 
-    public Table getTable() {
-        return getAttribute("table", Table.class);
+    /**
+     * @deprecated Use {@link #setRelation(Relation)}
+     */
+    @Deprecated
+	public Index setTable(Table table) {
+		return setRelation(table);
     }
-
-    public Index setTable(Table table) {
-        this.setAttribute("table", table);
+    
+    public Relation getRelation() {
+    	return getAttribute("table", Relation.class);
+    }
+    
+    public Index setRelation(Relation relation) {
+    	this.setAttribute("table", relation);
         return this;
     }
 
@@ -88,7 +106,7 @@ public class Index extends AbstractDatabaseObject {
     }
 
     public Index addColumn(Column column) {
-        column.setRelation(getTable());
+        column.setRelation(getRelation());
         getColumns().add(column);
 
         return this;
@@ -97,7 +115,7 @@ public class Index extends AbstractDatabaseObject {
     public Index setColumns(List<Column> columns) {
         if (getAttribute("table", Object.class) instanceof Table) {
             for (Column column :columns) {
-                column.setRelation(getTable());
+                column.setRelation(getRelation());
             }
         }
         setAttribute("columns", columns);
@@ -164,10 +182,10 @@ public class Index extends AbstractDatabaseObject {
         Index o = (Index) other;
         int returnValue = 0;
 
-        if (this.getTable() != null && o.getTable() != null) {
-            returnValue = this.getTable().compareTo(o.getTable());
-            if (returnValue == 0 && this.getTable().getSchema() != null && o.getTable().getSchema() != null) {
-                returnValue = StringUtils.trimToEmpty(this.getTable().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getTable().getSchema().getName()));
+        if ((this.getRelation() != null) && (o.getRelation() != null)) {
+            returnValue = this.getRelation().compareTo(o.getRelation());
+            if ((returnValue == 0) && (this.getRelation().getSchema() != null) && (o.getRelation().getSchema() != null)) {
+                returnValue = StringUtils.trimToEmpty(this.getRelation().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
             }
         }
 
@@ -204,23 +222,32 @@ public class Index extends AbstractDatabaseObject {
         return this.compareTo(obj) == 0;
     }
 
+    /**
+     * (Try to) provide a human-readable name for the index.
+     * @return A (hopefully) human-readable name
+     */
     @Override
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(getName());
-        if (this.isUnique() != null && this.isUnique()) {
-            stringBuffer.append(" unique ");
+        stringBuffer.append( (getName() == null) ? "(unnamed index)" : getName());
+        if ((this.isUnique() != null) && this.isUnique()) {
+            stringBuffer.append(" UNIQUE ");
         }
-        if (getTable() != null && getColumns() != null) {
-            String tableName = getTable().getName();
-            if (getTable().getSchema() != null && getTable().getSchema().getName() != null) {
-                tableName = getTable().getSchema().getName()+"."+tableName;
+        if ((getRelation() != null) && (getColumns() != null)) {
+            String tableName = getRelation().getName();
+            if ((getRelation().getSchema() != null) && (getRelation().getSchema().getName() != null)) {
+                tableName = getRelation().getSchema().getName()+"."+tableName;
             }
-            stringBuffer.append(" on ").append(tableName);
-            if (getColumns() != null && getColumns().size() > 0) {
+            stringBuffer.append(" ON ").append(tableName);
+            if ((getColumns() != null) && !getColumns().isEmpty()) {
                 stringBuffer.append("(");
                 for (Column column : getColumns()) {
-                    stringBuffer.append(column.toString(false)).append(", ");
+                    if (column == null)
+                        // 0th entry of an index column list might be null if index only has
+                        // regular columns!
+                        stringBuffer.append("(null), ");
+                    else
+                        stringBuffer.append(column.toString(false)).append(", ");
                 }
                 stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
                 stringBuffer.append(")");

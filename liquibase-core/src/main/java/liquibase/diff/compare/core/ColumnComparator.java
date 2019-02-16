@@ -11,6 +11,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 
+import java.util.Locale;
 import java.util.Set;
 
 public class ColumnComparator implements DatabaseObjectComparator {
@@ -27,15 +28,15 @@ public class ColumnComparator implements DatabaseObjectComparator {
         Column column = (Column) databaseObject;
 
         if (column.getRelation() == null) {
-            return new String[] {(column.getName()).toLowerCase()};
+            return new String[] {(column.getName()).toLowerCase(Locale.US)};
         } else {
-            return new String[] {(column.getRelation().getName() + ":" + column.getName()).toLowerCase()};
+            return new String[] {(column.getRelation().getName() + ":" + column.getName()).toLowerCase(Locale.US)};
         }
     }
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Column && databaseObject2 instanceof Column)) {
+        if (!((databaseObject1 instanceof Column) && (databaseObject2 instanceof Column))) {
             return false;
         }
 

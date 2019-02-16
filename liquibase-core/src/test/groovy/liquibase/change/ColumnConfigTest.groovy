@@ -42,7 +42,7 @@ public class ColumnConfigTest extends Specification {
 
         then:
         config.getName() == "colName"
-        config.getDefaultValue() == "123"
+        config.getDefaultValueObject() == 123
         config.getRemarks() == "A Test Column"
         config.getType() == "BIGINT"
         assert !config.getConstraints().isNullable()
@@ -421,7 +421,7 @@ public class ColumnConfigTest extends Specification {
 
         def testValue = "value for ${field}"
         if (field in ["defaultValueDate", "valueDate"]) {
-            testValue = "2012-03-13 18:52:22.129"
+            testValue = "2012-03-13T18:52:22.12"
         } else if (field in ["defaultValueBoolean", "valueBoolean", "autoIncrement", "computed"]) {
             testValue = "true"
         } else if (field in ["startWith", "incrementBy"]) {
@@ -455,7 +455,7 @@ public class ColumnConfigTest extends Specification {
         def column = new ColumnConfig()
 
         def testValue = "value for ${field}"
-        if (field in ["unique", "deferrable", "nullable", "deleteCascade", "initiallyDeferred", "primaryKey"]) {
+        if (field in ["unique", "deferrable", "nullable", "deleteCascade", "initiallyDeferred", "primaryKey", "validate"]) {
             testValue = "true"
         }
         constraintNode.addChild(null, field, testValue)

@@ -5,14 +5,15 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 
 import java.util.Set;
 
 public class RollbackVisitor implements ChangeSetVisitor {
 
     private Database database;
-    
+
     private ChangeExecListener execListener;
 
     /**
@@ -24,10 +25,10 @@ public class RollbackVisitor implements ChangeSetVisitor {
     }
 
     public RollbackVisitor(Database database, ChangeExecListener listener) {
-      this(database);
-      this.execListener = listener;
-  }
-    
+        this(database);
+        this.execListener = listener;
+    }
+
     @Override
     public Direction getDirection() {
         return ChangeSetVisitor.Direction.REVERSE;
@@ -35,8 +36,8 @@ public class RollbackVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        LogFactory.getLogger().info("Rolling Back Changeset:" + changeSet);
-        changeSet.rollback(this.database);
+        LogService.getLog(getClass()).info(LogType.USER_MESSAGE, "Rolling Back Changeset:" + changeSet);
+        changeSet.rollback(this.database, this.execListener);
         this.database.removeRanStatus(changeSet);
         sendRollbackEvent(changeSet, databaseChangeLog, database);
         this.database.commit();
@@ -44,8 +45,8 @@ public class RollbackVisitor implements ChangeSetVisitor {
     }
 
     private void sendRollbackEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2) {
-      if (execListener != null) {
-        execListener.rolledBack(changeSet, databaseChangeLog, database);
-      }
+        if (execListener != null) {
+            execListener.rolledBack(changeSet, databaseChangeLog, database);
+        }
     }
 }

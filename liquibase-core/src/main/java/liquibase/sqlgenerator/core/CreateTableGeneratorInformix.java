@@ -1,24 +1,24 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -38,21 +38,37 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         return PRIORITY_DATABASE + 1;
     }
 
-	@Override
+    /**
+     * Informix SQL-specific implementation of the CREATE TABLE SQL generator.
+     * @param statement The properties of the statement that we will translate into SQL
+     * @param database For this implementation always an object of the InformixDatabase type
+     * @param sqlGeneratorChain Other generators in the pipeline for this command
+     * @return An array of Sql[] statements containing the requested SQL statements for Informix SQL
+     */
+    @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-		StringBuilder buffer = new StringBuilder();
+        StringBuilder buffer = new StringBuilder();
 
-        buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
+        // CREATE TABLE table_name ...
+        buffer.append("CREATE TABLE ")
+                .append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
+                .append(" ");
         buffer.append("(");
-        
-        boolean isSinglePrimaryKeyColumn = 
-        		statement.getPrimaryKeyConstraint() != null && 
-        		statement.getPrimaryKeyConstraint().getColumns().size() == 1;
-        
-        boolean isPrimaryKeyAutoIncrement = false;
-        
+
         Iterator<String> columnIterator = statement.getColumns().iterator();
-        List<String> primaryKeyColumns = new LinkedList<String>();
+        List<String> primaryKeyColumns = new LinkedList<>();
+
+        /*
+         * Build the list of columns and constraints in the form
+         * (
+         *   column1,
+         *   ...,
+         *   columnN,
+         *   constraint1,
+         *   ...,
+         *   constraintN
+         * )
+         */
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
             
@@ -69,16 +85,15 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             }
 
             boolean isAutoIncrementColumn = autoIncrementConstraint != null;            
-            boolean isPrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null && 
-            		statement.getPrimaryKeyConstraint().getColumns().contains(column);
-            isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement || isPrimaryKeyColumn && isAutoIncrementColumn;
-            
+            boolean isPrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && statement
+                .getPrimaryKeyConstraint().getColumns().contains(column);
+
             if (isPrimaryKeyColumn) {
-            	primaryKeyColumns.add(column);
+                primaryKeyColumns.add(column);
             }
             
             if (statement.getDefaultValue(column) != null) {
-            	Object defaultValue = statement.getDefaultValue(column);
+                Object defaultValue = statement.getDefaultValue(column);
                 buffer.append(" DEFAULT ");
                 buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
             }
@@ -88,15 +103,15 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 if (database.supportsAutoIncrement()) {
                     String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
                 
-                    if (autoIncrementClause.length() > 0) {
+                    if (!autoIncrementClause.isEmpty()) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
                 } else {
-                    LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    LogService.getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
-            if (statement.getNotNullColumns().contains(column)) {
+            if (statement.getNotNullColumns().get(column) != null) {
                 buffer.append(" NOT NULL");
             }
 
@@ -107,22 +122,32 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
         buffer.append(",");
 
-        // TODO informixdb
-        // Fix according to: https://liquibase.jira.com/browse/CORE-1775
-        if (isSinglePrimaryKeyColumn && isPrimaryKeyAutoIncrement) {
+        /*
+         * We only create a PRIMARY KEY constraint if one is defined and has at least 1 column.
+         * General Informix SQL syntax, according to the docs for 11.5
+         * https://www.ibm.com/support/knowledgecenter/SSGU8G_11.50.0/com.ibm.sqls.doc/ids_sqs_0100.htm
+         * is:
+         * ( columns ... --> PRIMARY KEY (column1, ..., columnN) [CONSTRAINT pk_name]
+          */
+        //
 
-            if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
-                buffer.append(" PRIMARY KEY (");
-                buffer.append(StringUtils.join(primaryKeyColumns, ", "));
-                buffer.append(")");
-                // Setting up table space for PK's index if it exist
-                buffer.append(",");
+        PrimaryKeyConstraint pkConstraint = statement.getPrimaryKeyConstraint();
+        if ((statement.getPrimaryKeyConstraint() != null) && !statement.getPrimaryKeyConstraint().getColumns().isEmpty()) {
+            buffer.append(" PRIMARY KEY (");
+            buffer.append(StringUtils.join(primaryKeyColumns, ", "));
+            buffer.append(")");
+
+            if (! StringUtils.isEmpty(pkConstraint.getConstraintName() )) {
+                buffer.append(" CONSTRAINT ");
+                buffer.append(database.escapeConstraintName(pkConstraint.getConstraintName()));
             }
+            // Setting up table space for PK's index if it exist
+            buffer.append(",");
         }
 
         for (ForeignKeyConstraint fkConstraint : statement.getForeignKeyConstraints()) {
             String referencesString = fkConstraint.getReferences();
-            if (!referencesString.contains(".") && database.getDefaultSchemaName() != null) {
+            if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null)) {
                 referencesString = database.getDefaultSchemaName()+"."+referencesString;
             }
             buffer.append(" FOREIGN KEY (")
@@ -146,31 +171,37 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             buffer.append(",");
         }
 
+        // TODO: code duplication. Maybe we can merge this whole class into CreateTableGenerator again.
         for (UniqueConstraint uniqueConstraint : statement.getUniqueConstraints()) {
-            if (uniqueConstraint.getConstraintName() != null && !constraintNameAfterUnique(database)) {
+            if ((uniqueConstraint.getConstraintName() != null) && !constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
-            if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
+            if ((uniqueConstraint.getConstraintName() != null) && constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(",");
         }
 
+        /*
+         * Here, the list of columns and constraints in the form
+         * ( column1, ..., columnN, constraint1, ..., constraintN,
+         * ends. We cannot leave an expression like ", )", so we remove the last comma.
+         */
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
-        if (statement.getTablespace() != null && database.supportsTablespaces()) {
+        if ((statement.getTablespace() != null) && database.supportsTablespaces()) {
             sql += " IN " + statement.getTablespace();
         }
 
         return new Sql[] { new UnparsedSql(sql, new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))) };
-	}
+    }
 
-	private boolean constraintNameAfterUnique(Database database) {
-		return true;
-	}
+    private boolean constraintNameAfterUnique(Database database) {
+        return true;
+    }
 }

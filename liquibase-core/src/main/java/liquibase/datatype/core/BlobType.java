@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -9,6 +10,7 @@ import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Locale;
 
 @DataTypeInfo(name = "blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image", "tinyblob", "mediumblob"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BlobType extends LiquibaseDataType {
@@ -17,10 +19,12 @@ public class BlobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
 
-        if (database instanceof H2Database || database instanceof HsqlDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
-                return new DatabaseDataType("LONGVARBINARY");
-            } else if (originalDefinition.toLowerCase().startsWith("binary")) {
+        if ((database instanceof H2Database) || (database instanceof HsqlDatabase)) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
+                return new DatabaseDataType("VARBINARY", getParameters());
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
+                return new DatabaseDataType("LONGVARBINARY", getParameters());
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("binary")) {
                 return new DatabaseDataType("BINARY", getParameters());
             } else {
                 return new DatabaseDataType("BLOB");
@@ -29,14 +33,14 @@ public class BlobType extends LiquibaseDataType {
 
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
-            if (originalDefinition.equalsIgnoreCase("varbinary")
-                    || originalDefinition.equals("[varbinary]")
+            if ("varbinary".equals(originalDefinition.toLowerCase(Locale.US))
+                    || "[varbinary]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)varbinary\\s*\\(.+")
                     || originalDefinition.matches("\\[varbinary\\]\\s*\\(.+")) {
 
                 return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
-            } else if (originalDefinition.equalsIgnoreCase("binary")
-                    || originalDefinition.equals("[binary]")
+            } else if ("binary".equals(originalDefinition.toLowerCase(Locale.US))
+                    || "[binary]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)binary\\s*\\(.+")
                     || originalDefinition.matches("\\[binary\\]\\s*\\(.+")) {
 
@@ -47,8 +51,8 @@ public class BlobType extends LiquibaseDataType {
                 }
                 return new DatabaseDataType(database.escapeDataTypeName("binary"), parameters);
             }
-            if (originalDefinition.equalsIgnoreCase("image")
-                    || originalDefinition.equals("[image]")
+            if ("image".equals(originalDefinition.toLowerCase(Locale.US))
+                    || "[image]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)image\\s*\\(.+")
                     || originalDefinition.matches("\\[image\\]\\s*\\(.+")) {
 
@@ -60,40 +64,50 @@ public class BlobType extends LiquibaseDataType {
                 return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
             }
         }
+
         if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition)) {
                 return new DatabaseDataType("BLOB");
-            } else if (originalDefinition.toLowerCase().startsWith("varbinary") || originalDefinition.equals("java.sql.Types.VARBINARY")) {
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("varbinary") || "java.sql.Types.VARBINARY".equals
+                (originalDefinition)) {
                 return new DatabaseDataType("VARBINARY", getParameters());
-            } else if (originalDefinition.toLowerCase().startsWith("tinyblob")) {
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("tinyblob")) {
                 return new DatabaseDataType("TINYBLOB");
-            } else if (originalDefinition.toLowerCase().startsWith("mediumblob")) {
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("mediumblob")) {
                 return new DatabaseDataType("MEDIUMBLOB");
-            } else if (originalDefinition.toLowerCase().startsWith("binary")) {
+            } else if (originalDefinition.toLowerCase(Locale.US).startsWith("binary")) {
                 return new DatabaseDataType("BINARY", getParameters());
             } else {
                 return new DatabaseDataType("LONGBLOB");
             }
         }
+
         if (database instanceof PostgresDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition)) {
+                // There are two ways of handling byte arrays ("BLOBs") in pgsql. For consistency with Hibernate ORM
+                // (see upstream bug https://liquibase.jira.com/browse/CORE-1863) we choose the oid variant.
+                // For a more thorough discussion of the two alternatives, see:
+                // https://stackoverflow.com/questions/3677380/proper-hibernate-annotation-for-byte
                 return new DatabaseDataType("OID");
             }
 
             return new DatabaseDataType("BYTEA");
         }
+
         if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG BINARY");
         }
+
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType("IMAGE");
         }
+
         if (database instanceof OracleDatabase) {
-            if (getRawDefinition().toLowerCase().startsWith("bfile")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("bfile")) {
                 return new DatabaseDataType("BFILE");
             }
 
-            if (originalDefinition.toLowerCase().startsWith("raw") || originalDefinition.toLowerCase().startsWith("binary")) {
+            if (originalDefinition.toLowerCase(Locale.US).startsWith("raw") || originalDefinition.toLowerCase(Locale.US).startsWith("binary") || originalDefinition.toLowerCase(Locale.US).startsWith("varbinary")) {
                 return new DatabaseDataType("RAW", getParameters());
             }
 
@@ -103,6 +117,7 @@ public class BlobType extends LiquibaseDataType {
         if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB");
         }
+
         return super.toDatabaseDataType(database);
     }
 
@@ -116,8 +131,7 @@ public class BlobType extends LiquibaseDataType {
         boolean max = true;
         if (parameters.length > 0) {
             String param1 = parameters[0].toString();
-            max = !param1.matches("\\d+")
-                    || new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0;
+            max = !param1.matches("\\d+") || (new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0);
         }
         if (max) {
             return new Object[]{"MAX"};
@@ -140,9 +154,8 @@ public class BlobType extends LiquibaseDataType {
         }
     }
 
-    //sqlite
-    //        } else if (columnTypeString.toLowerCase(Locale.ENGLISH).contains("blob") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("binary")) {
-//            type = new BlobType("BLOB");
-
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.BLOB;
+    }
 }

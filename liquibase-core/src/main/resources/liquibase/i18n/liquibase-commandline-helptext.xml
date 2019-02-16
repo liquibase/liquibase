@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <!-- IMPORTANT!
+         There are unit tests that ensure the help text does not exceed
+         80 characters per line. This may seem ancient, but still makes sense
+         for server text-only consoles and the default setting of the
+         infamous Windows command line window.
+ -->
+    <entry key="commandline-helptext">
+        <![CDATA[
+Usage: java -jar liquibase.jar [options] [command]
+
+Standard Commands:
+ update                         Updates database to current version
+ updateSQL                      Writes SQL to update database to current
+                                version to STDOUT
+ updateCount <num>              Applies next NUM changes to the database
+ updateCountSQL <num>           Writes SQL to apply next NUM changes
+                                to the database
+ updateToTag <tag>              Updates the database to the changeSet with the
+                                specified tag
+ updateToTagSQL <tag>           Writes (to standard out) the SQL to update to
+                                the changeSet with the specified tag
+ rollback <tag>                 Rolls back the database to the the state is was
+                                when the tag was applied
+ rollbackSQL <tag>              Writes SQL to roll back the database to that
+                                state it was in when the tag was applied
+                                to STDOUT
+ rollbackToDate <date/time>     Rolls back the database to the the state is was
+                                at the given date/time.
+                                Date Format: yyyy-MM-dd'T'HH:mm:ss
+ rollbackToDateSQL <date/time>  Writes SQL to roll back the database to that
+                                state it was in at the given date/time version
+                                to STDOUT
+ rollbackCount <value>          Rolls back the last <value> change sets
+                                applied to the database
+ rollbackCountSQL <value>       Writes SQL to roll back the last
+                                <value> change sets to STDOUT
+                                applied to the database
+ futureRollbackSQL              Writes SQL to roll back the database to the
+                                current state after the changes in the
+                                changeslog have been applied
+ futureRollbackSQL <value>      Writes SQL to roll back the database to the
+                                current state after <value> changes in the
+                                changeslog have been applied
+ futureRollbackFromTagSQL <tag> Writes (to standard out) the SQL to roll back
+                                the database to its current state after the
+                                changes up to the specified tag have been
+                                applied
+ updateTestingRollback          Updates database, then rolls back changes before
+                                updating again. Useful for testing
+                                rollback support
+ generateChangeLog              Writes Change Log XML to copy the current state
+                                of the database to standard out
+ snapshot                       Writes the current state
+                                of the database to standard out
+ snapshotReference              Writes the current state
+                                of the referenceUrl database to standard out
+
+Diff Commands
+ diff [diff parameters]          Writes description of differences
+                                 to standard out
+ diffChangeLog [diff parameters] Writes Change Log XML to update
+                                 the database
+                                 to the reference database to standard out
+
+Documentation Commands
+ dbDoc <outputDirectory>         Generates Javadoc-like documentation
+                                 based on current database and change log
+
+Maintenance Commands
+ tag <tag string>          'Tags' the current database state for future rollback
+ tagExists <tag string>    Checks whether the given tag is already existing
+ status [--verbose]        Outputs count (list if --verbose) of unrun changesets
+ unexpectedChangeSets [--verbose]
+                           Outputs count (list if --verbose) of changesets run
+                           in the database that do not exist in the changelog.
+ validate                  Checks changelog for errors
+ calculateCheckSum <id>    Calculates and prints a checksum for the changeset
+                           with the given id in the format filepath::id::author.
+ clearCheckSums            Removes all saved checksums from database log.
+                           Useful for 'MD5Sum Check Failed' errors
+ changelogSync             Mark all changes as executed in the database
+ changelogSyncSQL          Writes SQL to mark all changes as executed
+                           in the database to STDOUT
+ markNextChangeSetRan      Mark the next change changes as executed
+                           in the database
+ markNextChangeSetRanSQL   Writes SQL to mark the next change
+                           as executed in the database to STDOUT
+ listLocks                 Lists who currently has locks on the
+                           database changelog
+ releaseLocks              Releases all locks on the database changelog
+ dropAll                   Drop all database objects owned by user
+
+Required Parameters:
+ --changeLogFile=<path and filename>        Migration file
+ --username=<value>                         Database username
+ --password=<value>                         Database password. If values
+                                            is PROMPT, Liquibase will
+                                            prompt for a password
+ --url=<value>                              Database URL
+
+Optional Parameters:
+ --classpath=<value>                        Classpath containing
+                                            migration files and JDBC Driver
+ --driver=<jdbc.driver.ClassName>           Database driver class name
+ --databaseClass=<database.ClassName>       custom liquibase.database.Database
+                                            implementation to use
+ --propertyProviderClass=<properties.ClassName>  custom Properties
+                                            implementation to use
+ --defaultSchemaName=<name>                 Overwrites the default schema name
+                                            (returned by the RDBMS) with a
+                                            different database schema
+ --contexts=<value>                         ChangeSet contexts to execute
+ --labels=<expression>                      Expression defining labeled
+                                            ChangeSet to execute
+ --defaultsFile=</path/to/file.properties>  File with default option values
+                                            (default: ./liquibase.properties)
+ --delimiter=<string>                       Used with executeSql command to set
+                                            the string used to break up files
+                                            that consist of multiple statements.
+ --driverPropertiesFile=</path/to/file.properties>  File with custom properties
+                                            to be set on the JDBC connection
+                                            to be created
+ --changeExecListenerClass=<ChangeExecListener.ClassName>     Custom Change Exec
+                                            listener implementation to use
+ --changeExecListenerPropertiesFile=</path/to/file.properties> Properties for
+                                            Custom Change Exec listener
+ --liquibaseCatalogName=<name>              The name of the catalog with the
+                                            liquibase tables
+ --liquibaseSchemaName=<name>               The name of the schema with the
+                                            liquibase tables
+ --databaseChangeLogTableName=<name>        The name of the Liquibase ChangeLog
+                                            table (default: DATABASECHANGELOG)
+ --databaseChangeLogLockTableName=<name>    The name of the Liquibase ChangeLog
+                                            Lock table
+                                            (default: DATABASECHANGELOGLOCK)
+ --databaseChangeLogTablespaceName=<name>   name of the tablespace where the
+                                            DATABASECHANGELOG and -LOCK tables
+                                            will be created (if they do not
+                                            exist yet)
+ --liquibaseSchemaName=<name>               The name of the schema with the
+                                            liquibase tables
+ --includeSystemClasspath=<true|false>      Include the system classpath
+                                            in the Liquibase classpath
+                                            (default: true)
+ --overwriteOutputFile=true                 Force overwriting generated
+                                            changelog/SQL files
+ --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost
+                                            databases (default: false)
+ --logLevel=<level>                         Execution log level
+                                            (debug, sql, info, warning, severe
+                                             or off
+ --logFile=<file>                           Log file
+ --currentDateTimeFunction=<value>          Overrides current date time function
+                                            used in SQL.
+                                            Useful for unsupported databases
+ --outputDefaultSchema=<true|false>         If true, SQL object references
+                                            include the schema name, even if
+                                            it is the default schema.
+                                            Defaults to true
+ --outputDefaultCatalog=<true|false>        If true, SQL object references
+                                            include the catalog name, even if
+                                            it is the default catalog.
+                                            Defaults to true
+ --outputFile=<file>                        File to write output to for commands
+                                            that write output, e.g. updateSQL.
+                                            If not specified, writes to sysout.
+ --help                                     Prints this message
+ --version                                  Prints this version information
+
+Required Diff Parameters:
+ --referenceUsername=<value>                Reference Database username
+ --referencePassword=<value>                Reference Database password. If
+                                            value is PROMPT, Liquibase will
+                                            prompt for a password
+ --referenceUrl=<value>                     Reference Database URL
+
+Optional Diff Parameters:
+ --defaultCatalogName=<name>                Default database catalog to use
+ --defaultSchemaName=<name>                 Default database schema to use
+ --referenceDefaultCatalogName=<name>       Reference database catalog to use
+ --referenceDefaultSchemaName=<name>        Reference database schema to use
+ --schemas=<name1,name2>                    Database schemas to include
+                                            objects from in comparison
+ --referenceSchemas=<name1,name2>           Reference database schemas to
+                                            include objects from in comparison
+                                            only needed if different than
+                                            --schemas
+ --outputSchemaAs=<name1,name2>             On diffChangeLog/generateChangeLog,
+                                            use these names as schemaName
+                                            instead of the real names.
+ --includeCatalog=<true|false>              If true, the catalog will be
+                                            included in generated changeSets
+                                            Defaults to false
+ --includeSchema=<true|false>               If true, the schema will be
+                                            included in generated changeSets
+                                            Defaults to false
+ --includeTablespace=<true|false>           If true, the tablespace of tables
+                                            and indexes will be included.
+                                            Defaults to false
+ --referenceDriver=<jdbc.driver.ClassName>  Reference database driver class name
+ --dataOutputDirectory=DIR                  Output data as CSV in the given
+                                            directory
+ --diffTypes                                List of diff types to include in
+                                            Change Log expressed as a comma
+                                            separated list from: tables, views,
+                                            columns, indexes, foreignkeys,
+                                            primarykeys, uniqueconstraints
+                                            data.
+                                            If this is null then the default
+                                            types will be: tables, views,
+                                            columns, indexes, foreignkeys,
+                                             primarykeys, uniqueconstraints.
+
+Change Log Properties:
+ -D<property.name>=<property.value>         Pass a name/value pair for
+                                            substitution in the change log(s)
+
+Default value for parameters can be stored in a file called
+'liquibase.properties' that is read from the current working directory.
+
+Full documentation is available at
+http://www.liquibase.org
+]]>
+    </entry>
+</properties>

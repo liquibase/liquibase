@@ -3,6 +3,8 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -16,7 +18,9 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -63,12 +67,12 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
             stmt.setFetchSize(1000);
             rs = stmt.executeQuery(sql);
 
-            List<String> columnNames = new ArrayList<String>();
+            List<String> columnNames = new ArrayList<>();
             for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
                 columnNames.add(rs.getMetaData().getColumnName(i + 1));
             }
 
-            List<Change> changes = new ArrayList<Change>();
+            List<Change> changes = new ArrayList<>();
             while (rs.next()) {
                 InsertDataChange change = new InsertDataChange();
                 if (outputControl.getIncludeCatalog()) {
@@ -95,7 +99,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         column.setValueDate((Date) value);
                     } else if (value instanceof byte[]) {
                         if (referenceDatabase instanceof InformixDatabase) {
-                            column.setValue(new String((byte[]) value, "UTF-8"));
+                            column.setValue(new String((byte[]) value, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                         }
                         column.setValueComputed(new DatabaseFunction("UNSUPPORTED FOR DIFF: BINARY DATA"));
                     } else { // fall back to simple string

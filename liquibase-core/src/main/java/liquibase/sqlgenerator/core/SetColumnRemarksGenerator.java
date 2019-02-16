@@ -1,12 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.H2Database;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -24,8 +19,9 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 
     @Override
     public boolean supports(SetColumnRemarksStatement statement, Database database) {
-        return database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database || database instanceof MSSQLDatabase || database instanceof H2Database
-        		|| database instanceof SybaseASADatabase;
+        return (database instanceof OracleDatabase) || (database instanceof PostgresDatabase) || (database instanceof
+            AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof H2Database) || (database
+            instanceof SybaseASADatabase);
     }
 
     @Override
@@ -56,11 +52,11 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                     "set @FullTableName = N'" + schemaName+"."+statement.getTableName() + "'; " +
                     "DECLARE @ColumnName SYSNAME " +
                     "set @ColumnName = N'" + statement.getColumnName() + "'; " +
-                    "DECLARE @MS_DescriptionValue NVARCHAR(200); " +
+                    "DECLARE @MS_DescriptionValue NVARCHAR(3749); " +
                     "SET @MS_DescriptionValue = N'" + remarksEscaped + "';" +
-                    "DECLARE @MS_Description NVARCHAR(200) " +
+                    "DECLARE @MS_Description NVARCHAR(3749) " +
                     "set @MS_Description = NULL; " +
-                    "SET @MS_Description = (SELECT CAST(Value AS NVARCHAR(200)) AS [MS_Description] " +
+                    "SET @MS_Description = (SELECT CAST(Value AS NVARCHAR(3749)) AS [MS_Description] " +
                     "FROM sys.extended_properties AS ep " +
                     "WHERE ep.major_id = OBJECT_ID(@FullTableName) " +
                     "AND ep.minor_id=COLUMNPROPERTY(ep.major_id, @ColumnName, 'ColumnId') " +

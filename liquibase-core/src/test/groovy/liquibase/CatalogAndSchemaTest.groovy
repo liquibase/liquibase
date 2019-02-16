@@ -81,11 +81,11 @@ class CatalogAndSchemaTest extends Specification {
 
         where:
         schema                                  | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
-//        new CatalogAndSchema(null, null)        | null               | null              | "null.null"             | "null.null"
-//        new CatalogAndSchema(null, null)        | "MyCat"            | null              | "null.null"             | "null.null"
-//        new CatalogAndSchema(null, null)        | null               | "MySchema"        | "null.null"             | "null.null"
-//        new CatalogAndSchema(null, null)        | "MyCat"            | "MySchema"        | "null.null"             | "null.null"
-//        new CatalogAndSchema("Cat1", null)      | null               | null              | "CAT1.null"             | "CAT1.CAT1"
+        new CatalogAndSchema(null, null)        | null               | null              | "null.null"             | "null.null"
+        new CatalogAndSchema(null, null)        | "MyCat"            | null              | "null.null"             | "null.null"
+        new CatalogAndSchema(null, null)        | null               | "MySchema"        | "null.null"             | "null.null"
+        new CatalogAndSchema(null, null)        | "MyCat"            | "MySchema"        | "null.null"             | "null.null"
+        new CatalogAndSchema("Cat1", null)      | null               | null              | "CAT1.null"             | "CAT1.CAT1"
         new CatalogAndSchema("Cat1", null)      | "Cat1"             | null              | "null.null"             | "null.CAT1"
         new CatalogAndSchema("Cat1", "Schema1") | null               | null              | "CAT1.SCHEMA1"          | "CAT1.CAT1"
         new CatalogAndSchema("Cat1", "Schema2") | null               | null              | "CAT1.SCHEMA2"          | "CAT1.CAT1"

@@ -1,37 +1,40 @@
 package liquibase.change.custom
 
 import liquibase.database.Database
-import liquibase.sdk.database.MockDatabase
-import liquibase.exception.*
+import liquibase.exception.CustomChangeException
+import liquibase.exception.RollbackImpossibleException
+import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.exception.ValidationErrors
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
+import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.statement.SqlStatement
 import spock.lang.Shared
 import spock.lang.Specification
 
-import static junit.framework.Assert.assertSame
+import static org.junit.Assert.assertSame
 
-public class CustomChangeWrapperTest extends Specification {
+class CustomChangeWrapperTest extends Specification {
 
     @Shared
             resourceSupplier = new ResourceSupplier()
 
     def setClassLoader() {
         when:
-        URLClassLoader classLoader = new URLClassLoader(new URL[0]);
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.setClassLoader(classLoader);
+        URLClassLoader classLoader = new URLClassLoader(new URL[0])
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.setClassLoader(classLoader)
 
         then:
-        assertSame(classLoader, changeWrapper.getClassLoader());
+        assertSame(classLoader, changeWrapper.getClassLoader())
     }
 
     def setClass() throws CustomChangeException {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.setClassLoader(getClass().getClassLoader());
-        changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.setClassLoader(getClass().getClassLoader())
+        changeWrapper.setClass(ExampleCustomSqlChange.class.getName())
 
         then:
         assert changeWrapper.getCustomChange() instanceof ExampleCustomSqlChange
@@ -54,7 +57,7 @@ public class CustomChangeWrapperTest extends Specification {
 
     def setClass_classloaderNotSet() throws CustomChangeException {
         when:
-        new CustomChangeWrapper().setClass(ExampleCustomSqlChange.class.getName());
+        new CustomChangeWrapper().setClass(ExampleCustomSqlChange.class.getName())
 
         then:
         thrown(CustomChangeException.class)
@@ -62,13 +65,13 @@ public class CustomChangeWrapperTest extends Specification {
 
     def getParams() {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
         then:
         changeWrapper.getParams().size() == 0
 
         when:
-        changeWrapper.setParam("param1", "x");
-        changeWrapper.setParam("param2", "y");
+        changeWrapper.setParam("param1", "x")
+        changeWrapper.setParam("param2", "y")
 
         then:
         changeWrapper.getParams().size() == 2
@@ -78,13 +81,13 @@ public class CustomChangeWrapperTest extends Specification {
 
     def getParamValues() {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
         then:
         changeWrapper.getParamValue("notSet") == null
 
         when:
-        changeWrapper.setParam("param1", "x");
-        changeWrapper.setParam("param2", "y");
+        changeWrapper.setParam("param1", "x")
+        changeWrapper.setParam("param2", "y")
         then:
         changeWrapper.getParamValue("param1") == "x"
         changeWrapper.getParamValue("param2") == "y"
@@ -93,22 +96,22 @@ public class CustomChangeWrapperTest extends Specification {
 
     def validate() {
         when:
-        ValidationErrors errors = new ValidationErrors();
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
+        ValidationErrors errors = new ValidationErrors()
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
         Database database = new MockDatabase()
-        changeWrapper.customChange = Mock(CustomChange.class);
+        changeWrapper.customChange = Mock(CustomChange.class)
         changeWrapper.customChange.validate(database) >> errors
 
         then:
-        assertSame(errors, changeWrapper.validate(database));
+        assertSame(errors, changeWrapper.validate(database))
     }
 
     def validate_nullReturn() {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
         Database database = new MockDatabase()
-        changeWrapper.customChange = Mock(CustomChange.class);
-        changeWrapper.customChange.validate(database) >> null;
+        changeWrapper.customChange = Mock(CustomChange.class)
+        changeWrapper.customChange.validate(database) >> null
 
         then:
         changeWrapper.validate(database) == null
@@ -116,9 +119,9 @@ public class CustomChangeWrapperTest extends Specification {
 
     def validate_exceptionInNestedValidate() {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
         Database database = new MockDatabase()
-        changeWrapper.customChange = Mock(CustomChange.class);
+        changeWrapper.customChange = Mock(CustomChange.class)
         changeWrapper.customChange.validate(database) >> { throw new NullPointerException() }
 
         then:
@@ -132,13 +135,13 @@ public class CustomChangeWrapperTest extends Specification {
 
     def generateStatements_paramsSetCorrectly() throws Exception {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.setClassLoader(getClass().getClassLoader());
-        changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
-        changeWrapper.setParam("tableName", "myName");
-        changeWrapper.setParam("columnName", "myCol");
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.setClassLoader(getClass().getClassLoader())
+        changeWrapper.setClass(ExampleCustomSqlChange.class.getName())
+        changeWrapper.setParam("tableName", "myName")
+        changeWrapper.setParam("columnName", "myCol")
 
-        changeWrapper.generateStatements(new MockDatabase());
+        changeWrapper.generateStatements(new MockDatabase())
 
         then:
         ((ExampleCustomSqlChange) changeWrapper.customChange).tableName == "myName"
@@ -147,12 +150,12 @@ public class CustomChangeWrapperTest extends Specification {
 
     def generateStatements_paramsSetBad() throws Exception {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.setClassLoader(getClass().getClassLoader());
-        changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
-        changeWrapper.setParam("badParam", "myName");
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.setClassLoader(getClass().getClassLoader())
+        changeWrapper.setClass(ExampleCustomSqlChange.class.getName())
+        changeWrapper.setParam("badParam", "myName")
 
-        changeWrapper.generateStatements(new MockDatabase());
+        changeWrapper.generateStatements(new MockDatabase())
 
         then:
         thrown(UnexpectedLiquibaseException.class)
@@ -161,22 +164,22 @@ public class CustomChangeWrapperTest extends Specification {
     def generateStatements_sqlStatementsReturned() throws Exception {
         when:
         def database = new MockDatabase()
-        SqlStatement[] statements = new SqlStatement[0];
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.customChange = Mock(CustomSqlChange.class);
-        ((CustomSqlChange) changeWrapper.customChange).generateStatements(database) >> statements;
+        SqlStatement[] statements = new SqlStatement[0]
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.customChange = Mock(CustomSqlChange.class)
+        ((CustomSqlChange) changeWrapper.customChange).generateStatements(database) >> statements
 
         then:
-        assertSame(statements, changeWrapper.generateStatements(database));
+        assertSame(statements, changeWrapper.generateStatements(database))
     }
 
     def generateStatements_nullSqlStatementsReturned() throws Exception {
         when:
         def database = new MockDatabase()
 
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.customChange = Mock(CustomSqlChange.class);
-        ((CustomSqlChange) changeWrapper.customChange).generateStatements(database) >> null;
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.customChange = Mock(CustomSqlChange.class)
+        ((CustomSqlChange) changeWrapper.customChange).generateStatements(database) >> null
 
         then:
         changeWrapper.generateStatements(database).length == 0
@@ -186,8 +189,8 @@ public class CustomChangeWrapperTest extends Specification {
         when:
         def database = new MockDatabase()
 
-        def changeWrapper = new CustomChangeWrapper();
-        changeWrapper.customChange = Mock(CustomTaskChange.class);
+        def changeWrapper = new CustomChangeWrapper()
+        changeWrapper.customChange = Mock(CustomTaskChange.class)
         1 * ((CustomTaskChange) changeWrapper.customChange).execute(database)
 
         then:
@@ -196,10 +199,10 @@ public class CustomChangeWrapperTest extends Specification {
 
     def generateStatements_unknownType() throws Exception {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.customChange = Mock(CustomChange.class);
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.customChange = Mock(CustomChange.class)
 
-        changeWrapper.generateStatements(new MockDatabase());
+        changeWrapper.generateStatements(new MockDatabase())
 
         then:
         thrown(UnexpectedLiquibaseException.class)
@@ -208,13 +211,13 @@ public class CustomChangeWrapperTest extends Specification {
 
     def generateRollbackStatements_paramsSetCorrectly() throws Exception {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.setClassLoader(getClass().getClassLoader());
-        changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
-        changeWrapper.setParam("tableName", "myName");
-        changeWrapper.setParam("columnName", "myCol");
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.setClassLoader(getClass().getClassLoader())
+        changeWrapper.setClass(ExampleCustomSqlChange.class.getName())
+        changeWrapper.setParam("tableName", "myName")
+        changeWrapper.setParam("columnName", "myCol")
 
-        changeWrapper.generateRollbackStatements(new MockDatabase());
+        changeWrapper.generateRollbackStatements(new MockDatabase())
 
         then:
         ((ExampleCustomSqlChange) changeWrapper.customChange).tableName == "myName"
@@ -223,12 +226,12 @@ public class CustomChangeWrapperTest extends Specification {
 
     def generateRollbackStatements_paramsSetBad() throws Exception {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.setClassLoader(getClass().getClassLoader());
-        changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
-        changeWrapper.setParam("badParam", "myName");
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.setClassLoader(getClass().getClassLoader())
+        changeWrapper.setClass(ExampleCustomSqlChange.class.getName())
+        changeWrapper.setParam("badParam", "myName")
 
-        changeWrapper.generateRollbackStatements(new MockDatabase());
+        changeWrapper.generateRollbackStatements(new MockDatabase())
 
         then:
         thrown(UnexpectedLiquibaseException.class)
@@ -236,24 +239,36 @@ public class CustomChangeWrapperTest extends Specification {
 
     def generateRollbackStatements_unknownType() throws Exception {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
-        changeWrapper.customChange = Mock(CustomChange.class);
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
+        changeWrapper.customChange = Mock(CustomChange.class)
 
-        changeWrapper.generateRollbackStatements(new MockDatabase());
+        changeWrapper.generateRollbackStatements(new MockDatabase())
 
         then:
         thrown(RollbackImpossibleException.class)
     }
 
-    def getConfirmationMessage() {
+    def getConfirmationMessage_nominal() {
         when:
-        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
 
-        changeWrapper.customChange = Mock(CustomChange.class);
+        changeWrapper.customChange = Mock(CustomChange.class)
         changeWrapper.customChange.getConfirmationMessage() >> "mock message"
 
         then:
         changeWrapper.getConfirmationMessage() == "mock message"
+    }
+
+    def getConfirmationMessage_usingParams() {
+        when:
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
+        changeWrapper.setClassLoader(getClass().getClassLoader());
+        changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
+        changeWrapper.setParam("tableName", "myName");
+        changeWrapper.setParam("columnName", "myCol");
+
+        then:
+        changeWrapper.getConfirmationMessage() == "Custom class updated myName.myCol";
     }
 
     def "load works correctly"() {

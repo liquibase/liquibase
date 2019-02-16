@@ -3,7 +3,8 @@ package liquibase.resource;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.io.*;
-import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -15,12 +16,15 @@ import java.util.zip.GZIPInputStream;
 public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
     private File baseDirectory;
+    private boolean readyForInit;
 
     /**
      * Creates with no base directory. All files will be resolved exactly as they are given.
      */
     public FileSystemResourceAccessor() {
         baseDirectory = null;
+        readyForInit = true;
+        init();
     }
 
     /**
@@ -31,6 +35,32 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         if (!baseDirectory.isDirectory()) {
             throw new IllegalArgumentException(base + " must be a directory");
         }
+        readyForInit = true;
+        init();
+    }
+
+    @Override
+    protected void init() {
+        if (readyForInit) {
+            super.init();
+        }
+    }
+
+    @Override
+    protected void addRootPath(URL path) {
+        try {
+            URI pathAsUri = path.toURI();
+
+            for (File fileSystemRoot : File.listRoots()) {
+                if (pathAsUri.equals(fileSystemRoot.toURI())) { //don't include root
+                    return;
+                }
+            }
+        } catch (URISyntaxException e) {
+            //add like normal
+        }
+
+        super.addRootPath(path);
     }
 
     @Override
@@ -56,7 +86,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
 
 
-        Set<InputStream> returnSet = new HashSet<InputStream>();
+        Set<InputStream> returnSet = new HashSet<>();
         returnSet.add(fileStream);
         return returnSet;
     }
@@ -82,10 +112,10 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
 
         if (finalDir.exists() && finalDir.isDirectory()) {
-            Set<String> returnSet = new HashSet<String>();
+            Set<String> returnSet = new HashSet<>();
             getContents(finalDir, recursive, includeFiles, includeDirectories, path, returnSet);
 
-            SortedSet<String> rootPaths = new TreeSet<String>(new Comparator<String>() {
+            SortedSet<String> rootPaths = new TreeSet<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
                     int i = -1 * ((Integer) o1.length()).compareTo(o2.length());
@@ -97,14 +127,25 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             });
 
             for (String rootPath : getRootPaths()) {
-                rootPaths.add(rootPath.replaceFirst("^file:/", "").replace("\\", "/"));
+                if (rootPath.matches("file:/[A-Za-z]:/.*")) {
+                    rootPath = rootPath.replaceFirst("file:/", "");
+                } else {
+                    rootPath = rootPath.replaceFirst("file:", "");
+                }
+                rootPaths.add(rootPath.replace("\\", "/"));
             }
 
-            Set<String> finalReturnSet = new LinkedHashSet<String>();
+            Set<String> finalReturnSet = new LinkedHashSet<>();
             for (String returnPath : returnSet) {
                 returnPath = returnPath.replace("\\", "/");
                 for (String rootPath : rootPaths) {
-                    if (returnPath.startsWith(rootPath)) {
+                    boolean matches = false;
+                    if (isCaseSensitive()) {
+                        matches = returnPath.startsWith(rootPath);
+                    } else {
+                        matches = returnPath.toLowerCase().startsWith(rootPath.toLowerCase());
+                    }
+                    if (matches) {
                         returnPath = returnPath.substring(rootPath.length());
                         break;
                     }

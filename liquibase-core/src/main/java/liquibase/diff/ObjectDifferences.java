@@ -12,14 +12,14 @@ import java.util.*;
 public class ObjectDifferences {
 
     private CompareControl compareControl;
-    private HashMap<String, Difference> differences = new HashMap<String, Difference>();
+    private HashMap<String, Difference> differences = new HashMap<>();
 
     public ObjectDifferences(CompareControl compareControl) {
         this.compareControl = compareControl;
     }
 
     public Set<Difference> getDifferences() {
-        return Collections.unmodifiableSet(new TreeSet<Difference>(differences.values()));
+        return Collections.unmodifiableSet(new TreeSet<>(differences.values()));
     }
 
     public Difference getDifference(String field) {
@@ -43,7 +43,7 @@ public class ObjectDifferences {
     }
 
     public boolean hasDifferences() {
-        return differences.size() > 0;
+        return !differences.isEmpty();
     }
 
     public void compare(String attribute, DatabaseObject referenceObject, DatabaseObject compareToObject, CompareFunction compareFunction) {
@@ -61,9 +61,10 @@ public class ObjectDifferences {
         compareValue = undoCollection(compareValue, referenceValue);
 
         boolean different;
-        if (referenceValue == null && compareValue == null) {
+        if ((referenceValue == null) && (compareValue == null)) {
             different = false;
-        } else if ((referenceValue == null && compareValue != null) || (referenceValue != null && compareValue == null)) {
+        } else if (((referenceValue == null) && (compareValue != null)) || ((referenceValue != null) && (compareValue
+            == null))) {
             different = true;
         } else {
             different = !compareFunction.areEqual(referenceValue, compareValue);
@@ -81,8 +82,10 @@ public class ObjectDifferences {
      * Otherwise, return the original collection.
      */
     protected Object undoCollection(Object potentialCollection, Object otherObject) {
-        if (potentialCollection != null && otherObject != null && potentialCollection instanceof Collection && !(otherObject instanceof Collection)) {
-            if (((Collection) potentialCollection).size() == 1 && ((Collection) potentialCollection).iterator().next().getClass().equals(otherObject.getClass())) {
+        if ((potentialCollection != null) && (otherObject != null) && (potentialCollection instanceof Collection) &&
+            !(otherObject instanceof Collection)) {
+            if ((((Collection) potentialCollection).size() == 1) && ((Collection) potentialCollection).iterator()
+                .next().getClass().equals(otherObject.getClass())) {
                 potentialCollection = ((Collection) potentialCollection).iterator().next();
             }
         }
@@ -99,7 +102,7 @@ public class ObjectDifferences {
     }
 
     public interface CompareFunction {
-        public boolean areEqual(Object referenceValue, Object compareToValue);
+        boolean areEqual(Object referenceValue, Object compareToValue);
     }
 
     public static class StandardCompareFunction implements CompareFunction {
@@ -114,14 +117,14 @@ public class ObjectDifferences {
 
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
-            if (referenceValue == null && compareToValue == null) {
+            if ((referenceValue == null) && (compareToValue == null)) {
                 return true;
             }
-            if (referenceValue == null || compareToValue == null) {
+            if ((referenceValue == null) || (compareToValue == null)) {
                 return false;
             }
 
-            if (referenceValue instanceof DatabaseObject && compareToValue instanceof DatabaseObject) {
+            if ((referenceValue instanceof DatabaseObject) && (compareToValue instanceof DatabaseObject)) {
                 return DatabaseObjectComparatorFactory.getInstance().isSameObject((DatabaseObject) referenceValue, (DatabaseObject) compareToValue, schemaComparisons, accordingTo);
             } else {
                 if ((referenceValue instanceof Number) && (compareToValue instanceof Number)
@@ -129,7 +132,12 @@ public class ObjectDifferences {
                     referenceValue = new BigDecimal(referenceValue.toString());
                     compareToValue = new BigDecimal(compareToValue.toString());
                 }
-                return referenceValue.equals(compareToValue);
+                if ((referenceValue instanceof Number) && (referenceValue instanceof Comparable)) {
+                    return (compareToValue instanceof Number) && (((Comparable) referenceValue).compareTo
+                        (compareToValue) == 0);
+                } else {
+                    return referenceValue.equals(compareToValue);
+                }
             }
         }
     }
@@ -144,10 +152,10 @@ public class ObjectDifferences {
 
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
-            if (referenceValue == null && compareToValue == null) {
+            if ((referenceValue == null) && (compareToValue == null)) {
                 return true;
             }
-            if (referenceValue == null || compareToValue == null) {
+            if ((referenceValue == null) || (compareToValue == null)) {
                 return false;
             }
 
@@ -192,10 +200,10 @@ public class ObjectDifferences {
                 }
             }
 
-            if (referenceValue == null && compareToValue == null) {
+            if ((referenceValue == null) && (compareToValue == null)) {
                 return true;
             }
-            if (referenceValue == null || compareToValue == null) {
+            if ((referenceValue == null) || (compareToValue == null)) {
                 return false;
             }
 
@@ -214,10 +222,10 @@ public class ObjectDifferences {
                 object2Name = compareToValue.toString();
             }
 
-            if (object1Name == null && object2Name == null) {
+            if ((object1Name == null) && (object2Name == null)) {
                 return true;
             }
-            if (object1Name == null || object2Name == null) {
+            if ((object1Name == null) || (object2Name == null)) {
                 return false;
             }
             if (accordingTo.isCaseSensitive()) {
@@ -240,10 +248,10 @@ public class ObjectDifferences {
 
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
-            if (referenceValue == null && compareToValue == null) {
+            if ((referenceValue == null) && (compareToValue == null)) {
                 return true;
             }
-            if (referenceValue == null || compareToValue == null) {
+            if ((referenceValue == null) || (compareToValue == null)) {
                 return false;
             }
 
@@ -275,10 +283,10 @@ public class ObjectDifferences {
 
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
-            if (referenceValue == null && compareToValue == null) {
+            if ((referenceValue == null) && (compareToValue == null)) {
                 return true;
             }
-            if (referenceValue == null || compareToValue == null) {
+            if ((referenceValue == null) || (compareToValue == null)) {
                 return false;
             }
 
@@ -321,10 +329,10 @@ public class ObjectDifferences {
 
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
-            if (referenceValue == null && compareToValue == null) {
+            if ((referenceValue == null) && (compareToValue == null)) {
                 return true;
             }
-            if (referenceValue == null || compareToValue == null) {
+            if ((referenceValue == null) || (compareToValue == null)) {
                 return false;
             }
 
@@ -336,17 +344,14 @@ public class ObjectDifferences {
                 return false;
             }
 
-            Iterator referenceIterator = ((Collection) referenceValue).iterator();
-            List unmatchedCompareToValues = new ArrayList(((Collection) compareToValue));
 
             if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
                 return false;
             }
 
-            while (referenceIterator.hasNext()) {
-                Object referenceObj = referenceIterator.next();
-
+            for (Object referenceObj : ((Collection) referenceValue)) {
                 Object foundMatch = null;
+                List<Object> unmatchedCompareToValues = new ArrayList<>(((Collection<?>) compareToValue));
                 for (Object compareObj : unmatchedCompareToValues) {
                     if (compareFunction.areEqual(referenceObj, compareObj)) {
                         foundMatch = compareObj;

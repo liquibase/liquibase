@@ -2,16 +2,18 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.io.*;
-
 import liquibase.Contexts;
 import liquibase.LabelExpression;
-import liquibase.resource.ResourceAccessor;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Creates an SQL migration script using the provided DatabaseChangeLog(s) comparing what
@@ -37,7 +39,7 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
   @Override
   public void configureFieldsAndValues(ResourceAccessor fo)
           throws MojoExecutionException, MojoFailureException {
-    getLog().warn("This plugin goal is DEPRICATED and will bre removed in a future "
+    getLog().warn("This plugin goal is DEPRECATED and will bre removed in a future "
                   + "release, please use \"updateSQL\" instead of \"migrateSQL\".");
     super.configureFieldsAndValues(fo);
   }

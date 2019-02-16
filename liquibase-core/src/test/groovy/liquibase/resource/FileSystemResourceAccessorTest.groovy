@@ -43,4 +43,26 @@ public class FileSystemResourceAccessorTest extends Specification {
             }
         }
     }
+
+    def addRootPathTestDirectory() {
+        expect:
+        def directoryUrl = new URL("file:/home/user/liquibase/liquibase-core/target/test-classes/");
+        def fileSystemResourceAccessor = createResourceAccessor();
+        def count = fileSystemResourceAccessor.getRootPaths().size();
+
+        fileSystemResourceAccessor.addRootPath(directoryUrl);
+
+        assert (fileSystemResourceAccessor.getRootPaths().size() == count + 1) : "non-root directory not added";
+    }
+
+    def addRootPathTestMultiReleaseJar() {
+        expect:
+        def multiReleaseJarUrl = new URL("jar:file:/home/user/.m2/repository/javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar!/META-INF/versions/9/");
+        def fileSystemResourceAccessor = createResourceAccessor();
+        def count = fileSystemResourceAccessor.getRootPaths().size();
+
+        fileSystemResourceAccessor.addRootPath(multiReleaseJarUrl);
+
+        assert (fileSystemResourceAccessor.getRootPaths().size() == count + 1) : "multi-release jar not added";
+    }
 }

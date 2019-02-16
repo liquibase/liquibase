@@ -1,7 +1,9 @@
 package liquibase.structure.core;
 
+import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
@@ -29,10 +31,10 @@ public class DatabaseObjectFactory {
         if (StringUtils.trimToNull(typesString) == null) {
             return getStandardTypes();
         } else {
-            Set<Class<? extends DatabaseObject>> returnSet = new HashSet<Class<? extends DatabaseObject>>();
+            Set<Class<? extends DatabaseObject>> returnSet = new HashSet<>();
 
-            Set<String> typesToInclude = new HashSet<String>(Arrays.asList(typesString.toLowerCase().split("\\s*,\\s*")));
-            Set<String> typesNotFound = new HashSet<String>(typesToInclude);
+            Set<String> typesToInclude = new HashSet<>(Arrays.asList(typesString.toLowerCase().split("\\s*,\\s*")));
+            Set<String> typesNotFound = new HashSet<>(typesToInclude);
 
             Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
             for (Class<? extends DatabaseObject> clazz : classes) {
@@ -46,7 +48,7 @@ public class DatabaseObjectFactory {
                     typesNotFound.remove(clazz.getSimpleName().toLowerCase()+"es");
                 }
             }
-            if (typesNotFound.size() > 0) {
+            if (!typesNotFound.isEmpty()) {
                 throw new UnexpectedLiquibaseException("Unknown snapshot type(s) "+StringUtils.join(typesNotFound, ", "));
             }
             return returnSet;
@@ -55,16 +57,16 @@ public class DatabaseObjectFactory {
 
     public Set<Class<? extends DatabaseObject>> getStandardTypes() {
         if (standardTypes == null) {
-            Set<Class<? extends DatabaseObject>> set = new HashSet<Class<? extends DatabaseObject>>();
+            Set<Class<? extends DatabaseObject>> set = new HashSet<>();
 
             Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
             for (Class<? extends DatabaseObject> clazz : classes) {
                 try {
-                    if (clazz.newInstance().snapshotByDefault()) {
+                    if (!clazz.equals(LiquibaseColumn.class) && clazz.newInstance().snapshotByDefault()) {
                         set.add(clazz);
                     }
                 } catch (Exception e) {
-                    LogFactory.getLogger().info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
+                    LogService.getLog(getClass()).info(LogType.LOG, "Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
                 }
             }
 
@@ -73,4 +75,7 @@ public class DatabaseObjectFactory {
         return standardTypes;
     }
 
+    public void reset() {
+        this.standardTypes = null;
+    }
 }

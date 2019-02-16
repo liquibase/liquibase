@@ -50,6 +50,8 @@ public class ISODateFormat {
             return format(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return format(((java.sql.Timestamp) date));
+        } else if (date instanceof java.util.Date) {
+            return format(new java.sql.Timestamp(date.getTime()));
         } else {
             throw new RuntimeException("Unknown type: "+date.getClass().getName());
         }
@@ -69,7 +71,7 @@ public class ISODateFormat {
                 return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
         default:
-            if (length < 19 || dateAsString.charAt(19) != '.') {
+            if ((length < 19) || (dateAsString.charAt(19) != '.')) {
                 throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
             }
             long time = 0;

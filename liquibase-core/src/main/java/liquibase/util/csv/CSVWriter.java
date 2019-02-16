@@ -5,7 +5,6 @@ import liquibase.util.ISODateFormat;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 public class CSVWriter extends liquibase.util.csv.opencsv.CSVWriter {

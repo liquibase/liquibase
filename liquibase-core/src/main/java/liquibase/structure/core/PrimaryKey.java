@@ -4,7 +4,6 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
-import javax.swing.text.TableView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,6 +66,16 @@ public class PrimaryKey extends AbstractDatabaseObject {
         });
     }
 
+    /**
+     * Adds a new column to the column list of this PrimaryKey. The first column has the position 0.
+     * If you specify a position that is greater than the number of columns present, undefined
+     * columns (NULL expressions) will be added as padding. If a position that is already
+     * occupied by a column is specified, that column will be replaced.
+     *
+     * @param position the position where to insert or replace the column
+     * @param column   the new column
+     * @return a reference to the updated PrimaryKey object.
+     */
     public PrimaryKey addColumn(int position, Column column) {
         if (position >= getColumns().size()) {
             for (int i = getColumns().size()-1; i < position; i++) {
@@ -77,10 +86,21 @@ public class PrimaryKey extends AbstractDatabaseObject {
         return this;
     }
 
+    /**
+     * Returns the Table object this PrimaryKey belongs to.
+     *
+     * @return the Table object, or null if not initialized yet.
+     */
     public Table getTable() {
         return getAttribute("table", Table.class);
     }
 
+    /**
+     * Sets the Table object this PrimaryKey belongs to.
+     *
+     * @param table the table object to set as the container for this PrimaryKey
+     * @return the updated object
+     */
     public PrimaryKey setTable(Table table) {
         this.setAttribute("table", table);
         return this;
@@ -94,9 +114,6 @@ public class PrimaryKey extends AbstractDatabaseObject {
         if (returnValue == 0) {
             returnValue = this.getColumnNames().compareTo(o.getColumnNames());
         }
-//        if (returnValue == 0) {
-//            returnValue = this.getName().compareTo(o.getName());
-//        }
 
         return returnValue;
     }
@@ -105,11 +122,12 @@ public class PrimaryKey extends AbstractDatabaseObject {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if ((o == null) || (getClass() != o.getClass())) return false;
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return !(getColumnNames() != null ? !getColumnNames().equals(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable().getName() != null ? !getTable().getName().equals(that.getTable().getName()) : that.getTable().getName() != null);
+        return !((getColumnNames() != null) ? !getColumnNames().equals(that.getColumnNames()) : (that.getColumnNames
+            () != null)) && !((getTable().getName() != null) ? !getTable().getName().equals(that.getTable().getName()) : (that.getTable().getName() != null));
 
     }
 
@@ -136,7 +154,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public List<String> getColumnNamesAsList() {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (Column col : getColumns()) {
             names.add(col.getName());
         }

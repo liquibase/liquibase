@@ -4,7 +4,7 @@ update changelog.txt
 
 Manually run branch in the "Release" buildserver project
 
-Download liquibase-X.Y.Z-*.zip and *-.tar.gz artifacts from the buildserver and upload to github
+Download liquibase-X.Y.Z-*.zip and *-.tar.gz and *-.deb and *-.rpm artifacts from the buildserver and upload to github
 
 upload target/checkout/liquibase-maven-plugin/target/site to liquibase.org/documentation\maven\generated
 copy target/checkout/liquibase-core/target/site/apidocs to liquibase.org/javadoc

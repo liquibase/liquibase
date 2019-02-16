@@ -1,18 +1,18 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.structure.core.Table;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
@@ -51,9 +51,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
                         insertOrUpdateStatement.getSchemaName(),
                         insertOrUpdateStatement.getTableName(),
-                        thisPkColumn)).append(newValue == null || newValue.toString().equalsIgnoreCase("NULL") ? " is " : " = ");
+                        thisPkColumn)).append(((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) ?
+                " is " : " = ");
 
-            if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
+            if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
                 where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
@@ -99,14 +100,15 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         		insertOrUpdateStatement.getCatalogName(), 
         		insertOrUpdateStatement.getSchemaName(),
         		insertOrUpdateStatement.getTableName());
-        if (!(database instanceof OracleDatabase && insertOrUpdateStatement.getOnlyUpdate() != null && insertOrUpdateStatement.getOnlyUpdate())) {
+        if (!((database instanceof OracleDatabase) && (insertOrUpdateStatement.getOnlyUpdate() != null) &&
+            insertOrUpdateStatement.getOnlyUpdate())) {
             whereClause += ";\n";
         }
 
         updateStatement.setWhereClause(whereClause);
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
-        HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
+        HashSet<String> hashPkFields = new HashSet<>(Arrays.asList(pkFields));
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {
             if (!hashPkFields.contains(columnKey)) {

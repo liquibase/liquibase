@@ -22,7 +22,8 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
 
     protected static final String hostname;
     protected static final String hostaddress;
-    protected static final String hostDescription = System.getProperty( "liquibase.hostDescription" ) == null ? "" : "#" + System.getProperty( "liquibase.hostDescription" );
+    protected static final String hostDescription = (System.getProperty("liquibase.hostDescription") == null) ? "" :
+        ("#" + System.getProperty("liquibase.hostDescription"));
 
     static {
         try {
