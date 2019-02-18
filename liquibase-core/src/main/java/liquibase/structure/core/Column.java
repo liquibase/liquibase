@@ -52,6 +52,7 @@ public class Column extends AbstractDatabaseObject {
         ConstraintsConfig constraints = columnConfig.getConstraints();
         if (constraints != null) {
             setNullable(constraints.isNullable());
+            setShouldValidateNullable(constraints.shouldValidateNullable());
         }
 
         setRemarks(columnConfig.getRemarks());
