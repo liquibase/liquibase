@@ -92,6 +92,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         if (columnSnapshot.isNullable() != null && !columnSnapshot.isNullable()) {
             constraints.setNullable(columnSnapshot.isNullable());
+            constraints.setShouldValidateNullable(columnSnapshot.shouldValidateNullable());
             nonDefaultConstraints = true;
         }
 

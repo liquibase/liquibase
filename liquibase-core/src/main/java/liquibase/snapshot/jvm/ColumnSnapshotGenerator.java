@@ -111,8 +111,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         // not validated not null constraint found
                         column.setNullable(false);
                         column.setShouldValidateNullable(false);
-                } else {
-                    column.setShouldValidateNullable(validated.toString().equalsIgnoreCase(VALIDATE));
                 }
             }
         }
@@ -135,10 +133,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 schema = relation.getSchema();
                 allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
+                List<CachedRow> metaDataNotNullConst = databaseMetaData.getNotNullConst(schema.getCatalogName(), schema.getName(), relation.getName());
 
                 for (CachedRow row : allColumnsMetadataRs) {
                     Column column = readColumn(row, relation, database);
                     setAutoIncrementDetails(column, database, snapshot);
+                    populateValidateNullableIfNeeded(column, metaDataNotNullConst, database);
                     column.setAttribute(LIQUIBASE_COMPLETE, !column.isNullable());
                     relation.getColumns().add(column);
                 }
