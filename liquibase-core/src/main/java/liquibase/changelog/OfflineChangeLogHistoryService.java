@@ -222,11 +222,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                     csvWriter.writeNext(line);
                 }
             }
-            oldFile.delete();
-            newFile.renameTo(oldFile);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
+        oldFile.delete();
+        newFile.renameTo(oldFile);
     }
 
     protected void appendChangeSet(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
@@ -265,11 +265,12 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
             csvWriter.writeNext(newLine);
 
-            oldFile.delete();
-            newFile.renameTo(oldFile);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
+        
+        oldFile.delete();
+        newFile.renameTo(oldFile);
     }
 
     @Override
