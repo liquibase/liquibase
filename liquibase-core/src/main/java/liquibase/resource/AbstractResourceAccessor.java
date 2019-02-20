@@ -3,6 +3,7 @@ package liquibase.resource;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtil;
 import liquibase.util.SystemUtils;
+import liquibase.util.file.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -152,7 +153,7 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
             }
             base = baseFile.toURI().getPath();
         } else if (baseUrl.toExternalForm().startsWith("jar:file:")) {
-                return convertToPath(new File(relativeTo).getParent() + '/' + path);
+        	return FilenameUtils.concat(FilenameUtils.getFullPath(relativeTo), path);
         } else {
             base = relativeTo;
         }
