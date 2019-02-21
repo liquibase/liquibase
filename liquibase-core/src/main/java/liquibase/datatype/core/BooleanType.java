@@ -40,6 +40,11 @@ public class BooleanType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("SMALLINT");
             }
+        } else if (database.getClass().isAssignableFrom(DB2Database.class)) {
+			if (((DB2Database) database).supportsBooleanDataType())
+				return new DatabaseDataType("BOOLEAN");
+			else
+				return new DatabaseDataType("SMALLINT");
         } else if (database instanceof HsqlDatabase) {
             return new DatabaseDataType("BOOLEAN");
         } else if (database instanceof PostgresDatabase) {
@@ -98,8 +103,10 @@ public class BooleanType extends LiquibaseDataType {
     protected boolean isNumericBoolean(Database database) {
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
-        }
-        return (database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase) || (database instanceof
+        } else if (database.getClass().isAssignableFrom(DB2Database.class)) {
+			return !((DB2Database) database).supportsBooleanDataType();
+    	}
+        return (database instanceof Db2zDatabase) || (database instanceof DB2Database) || (database instanceof FirebirdDatabase) || (database instanceof
             MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof OracleDatabase) ||
             (database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
             SybaseDatabase);

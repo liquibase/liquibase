@@ -103,7 +103,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
-                    if (database instanceof DB2Database) {
+                    if (database.getClass().isAssignableFrom(DB2Database.class)) {
                         return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
                     } else if (database instanceof Db2zDatabase) {
                        return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, tableName), database);
@@ -200,7 +200,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "AND p.table_name NOT LIKE 'BIN$%' " +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
                         return executeAndExtract(sql, database);
-                    } else if (database instanceof DB2Database) {
+                    } else if(database.getClass().isAssignableFrom(DB2Database.class)) {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                         return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
