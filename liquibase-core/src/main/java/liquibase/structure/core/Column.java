@@ -200,7 +200,7 @@ public class Column extends AbstractDatabaseObject {
      * to see if it complies with the constraint logic. The default state for not null constraint is to
      * have 'ENABLE VALIDATE' set.
      */
-    public Column setShouldValidateNullable(boolean shouldValidateNullable) {
+    public Column setShouldValidateNullable(Boolean shouldValidateNullable) {
         this.setAttribute("validateNullable", shouldValidateNullable);
         return this;
     }
