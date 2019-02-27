@@ -31,8 +31,9 @@ create table table1 (
     id int primary key
 );
 
---rollback delete from table1;
---rollback drop table table1;
+--changesetrollback
+delete from table1;
+drop table table1;
 
 --ChangeSet nvoxland:3
 create table table2 (
@@ -285,6 +286,26 @@ select 1
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:db2, db2i\ncreate table test (id int);\n" | ["db2"]
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:db2,\ncreate table test (id int);\n"      | ["db2"]
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:,db2,\ncreate table test (id int);\n"     | null
+    }
+    
+    @Unroll
+    def parse_multilineRollback() throws Exception {
+        when:
+        String changeLogWithComment = "--liquibase formatted sql\n\n" +
+                "--changeset JohnDoe:12345\n" +
+                "create table test (id int);\n" +
+                "--changesetrollback\n" +
+                "delete from test;\n" +
+                "drop table test;\n"
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        
+        then:
+        changeLog.getChangeSets().size() == 1
+        changeLog.getChangeSets().get(0).getAuthor() == "JohnDoe"
+        changeLog.getChangeSets().get(0).getId() == "12345"
+        changeLog.getChangeSets().get(0).rollback.changes().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(0).rollback.changes[0]).getSql().replace("\r\n", "\n") == "delete from test;\ndrop table test;"
     }
 
     @Unroll("#featureName: #example")
