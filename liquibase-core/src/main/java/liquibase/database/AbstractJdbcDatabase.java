@@ -1632,4 +1632,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.UPPER_CASE;
     }
+
+    public String getCharTypeName() {
+        return "varchar";
+    }
+
+    public String getDateTimeTypeString() {
+        return "datetime";
+    }
 }

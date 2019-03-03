@@ -1,6 +1,7 @@
 package liquibase.statementexecute;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.definition.ChangeLogTableDefinition;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
@@ -15,7 +16,7 @@ import java.util.List;
 public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
-        return Arrays.asList(new CreateDatabaseChangeLogTableStatement());
+        return Arrays.asList(new CreateDatabaseChangeLogTableStatement(new ChangeLogTableDefinition()));
     }
 
     @Test

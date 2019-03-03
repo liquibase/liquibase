@@ -107,7 +107,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 writeHeader(changeLogFile);
 
                 if (isExecuteDdlAgainstDatabase()) {
-                    ExecutorService.getInstance().getExecutor(getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
+                    ExecutorService.getInstance().getExecutor(getDatabase()).execute(new CreateDatabaseChangeLogTableStatement(getChangeLogTableDefinition()));
                 }
 
 

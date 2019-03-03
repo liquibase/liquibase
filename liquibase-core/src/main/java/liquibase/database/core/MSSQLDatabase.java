@@ -588,6 +588,18 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return "Unknown";
     }
 
+    public String getCharTypeName() {
+        if (this.sendsStringParametersAsUnicode()) {
+            return "nvarchar";
+        }
+        return "varchar";
+    }
+
+    @Override
+    public String getDateTimeTypeString() {
+        return "datetime2(3)";
+    }
+
     @Override
     protected String getQuotingStartCharacter() {
         return "[";
