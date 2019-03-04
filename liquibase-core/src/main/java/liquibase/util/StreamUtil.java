@@ -99,9 +99,32 @@ public class StreamUtil {
     public static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
         byte[] bytes = new byte[1024];
         int r = inputStream.read(bytes);
-        while (r > 0) {
+        while (r > 0 ) {
             outputStream.write(bytes, 0, r);
             r = inputStream.read(bytes);
+        }
+    }
+
+    /**
+     * Writes 1Mb (in case of size wasn't specified) inputStream to outputStream
+     *
+     * @param inputStream - some processing stream from some db client
+     * @param outputStream - stream for logs
+     * @param sizeKb - it's a size of processing stream that we write to outputStream. If it wasn't specified
+     *               we use 1024 Kb by default
+     *
+     * @throws IOException
+     */
+    public static void copy(InputStream inputStream, OutputStream outputStream, int sizeKb) throws IOException {
+        if (sizeKb <= 0) {
+            sizeKb = 1024;
+        }
+        byte[] bytes = new byte[1024];
+        int r = inputStream.read(bytes);
+        while (r > 0 && sizeKb >= 0) {
+            outputStream.write(bytes, 0, r);
+            r = inputStream.read(bytes);
+            sizeKb--;
         }
     }
 

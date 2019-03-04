@@ -362,16 +362,20 @@ public class ExecuteShellCommandChange extends AbstractChange {
             this.outputStream = outputStream;
         }
 
+        /**
+         * @note We copy 1 Mb logs from processStream. In case of big size of processStream copy
+         *       we can cause OutOfMemoryError
+         */
         public void run() {
             try {
                 BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream);
-                while (processStream != null) {
-                    if (bufferedInputStream.available() > 0) {
-                        StreamUtil.copy(bufferedInputStream, outputStream);
-                    }
+                if (processStream != null && bufferedInputStream.available() > 0) {
+                    StreamUtil.copy(bufferedInputStream, outputStream, 1024/*Kb to copy*/);
+
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignore) {
+                        //nop
                     }
                 }
             } catch (IOException ioe) {
