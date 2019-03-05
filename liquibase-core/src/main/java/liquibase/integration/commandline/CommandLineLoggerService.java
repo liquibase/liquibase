@@ -8,7 +8,7 @@ import liquibase.logging.core.AbstractLogger;
 import java.util.logging.Level;
 
 /**
- * Customized SLF4j appender which outputs user message and/or SQL to pipe from the log to the console.
+ * Customized log service which outputs user message and/or SQL to pipe from the log to the console.
  */
 public class CommandLineLoggerService extends AbstractLogService {
 

@@ -26,8 +26,6 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     private ResourceAccessor resourceAccessor;
     private String basePath;
 
-    private Logger log= Scope.getCurrentScope().getLog(getClass());
-
     public LiquibaseEntityResolver(LiquibaseSerializer serializer) {
         this.serializer = serializer;
     }
@@ -48,6 +46,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
    @Override
    public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
+       Logger log = Scope.getCurrentScope().getLog(getClass());
+
        log.debug(LogType.LOG, "Resolving XML entity name='" + name + "', publicId='" + publicId + "', baseURI='" + baseURI + "', systemId='" + systemId + "'");
 
        if(systemId == null){
@@ -83,6 +83,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     }
 
     private InputSource tryResolveFromResourceAccessor(String systemId) {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
         String path=FilenameUtils.concat(basePath, systemId);
         log.debug(LogType.LOG, "Attempting to load "+systemId+" from resourceAccessor as "+path);
 
@@ -105,7 +107,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        log.warning(LogType.LOG, "Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
+        Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
         return tryResolveLiquibaseSchema(systemId, publicId);
     }
 

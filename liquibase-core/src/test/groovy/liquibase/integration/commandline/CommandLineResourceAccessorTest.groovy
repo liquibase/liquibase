@@ -12,7 +12,7 @@ public class CommandLineResourceAccessorTest extends Specification {
 
     def getResourcesAsStream() throws Exception {
         when:
-        def resourcesAsStream = createFileOpener().openStreams(null,"liquibase/integration/ant/AntResourceAccessorTest.class");
+        def resourcesAsStream = createFileOpener().openStreams(null,"liquibase/integration/ant/DBDocTask.class");
 
         then:
         resourcesAsStream.size() == 1

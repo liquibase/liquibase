@@ -4,8 +4,6 @@ import liquibase.logging.core.JavaLogService;
 import liquibase.plugin.Plugin;
 
 /**
- * Primary facade for working with Logs in Liquibase.
- *
  * This service is used to create named {@link Logger} instances through a {@link LogService}.
  *
  * The default LoggerFactory used in {@link JavaLogService} uses {@link java.util.logging.Logger}

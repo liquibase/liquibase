@@ -20,8 +20,6 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     private Database database;
 
-    private Logger log = Scope.getCurrentScope().getLog(getClass());
-    
     private ChangeExecListener execListener;
 
     /**
@@ -46,7 +44,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database,
                       Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
-        log.debug(LogType.LOG, "Running Changeset:" + changeSet);
+        Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Running Changeset:" + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
         ExecType execType = null;
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();

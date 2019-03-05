@@ -22,14 +22,8 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
 
     private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
 
-    private Logger log;
-
     private ChangeFactory() {
-      log = Scope.getCurrentScope().getLog(getClass());
-    }
 
-    protected Logger getLogger() {
-      return log;
     }
 
     @Override
@@ -113,10 +107,5 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         }
 
         return returnMap;
-    }
-
-    // exposed for test only
-    protected void setLogger(Logger mockLogger) {
-      log = mockLogger;
     }
 }

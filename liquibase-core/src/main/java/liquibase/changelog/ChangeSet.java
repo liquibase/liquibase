@@ -103,8 +103,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private String filePath = "UNKNOWN CHANGE LOG";
 
-    private Logger log;
-
     /**
      * If set to true, the changeSet will be executed on every update. Defaults to false
      */
@@ -207,7 +205,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public ChangeSet(DatabaseChangeLog databaseChangeLog) {
         this.changes = new ArrayList<>();
-        log = Scope.getCurrentScope().getLog(getClass());
         this.changeLog = databaseChangeLog;
     }
 
@@ -481,6 +478,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -707,7 +706,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (runInTransaction) {
                 database.commit();
             }
-            log.debug(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
+            Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             try {
                 database.rollback();

@@ -79,7 +79,7 @@ public class Scope {
         try {
             currentScope = scopeManager.init(currentScope);
         } catch (Exception e) {
-//            Scope.getCurrentScope().getLog(Scope.class).warning(e.getMessage(), e);
+            Scope.getCurrentScope().getLog(Scope.class).warning(e.getMessage(), e);
         }
         scopeManager.setCurrentScope(currentScope);
 

@@ -5,8 +5,7 @@ import liquibase.logging.LogType;
 import java.util.logging.Level;
 
 /**
- * The default logger for Liquibase. Routes messages through SLF4j.
- * The command line app uses logback, but this logger can use any slf4j binding.
+ * The default logger for Liquibase. Routes messages through {@link java.util.logging.Logger}.
  */
 public class JavaLogger extends AbstractLogger {
 

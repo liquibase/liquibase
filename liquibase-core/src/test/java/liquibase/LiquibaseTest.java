@@ -38,8 +38,6 @@ public class LiquibaseTest {
     private DatabaseChangeLog mockChangeLog;
     private ChangeLogIterator mockChangeLogIterator;
 
-    private Logger mockLogger;
-
     @Before
     public void before() throws Exception {
 

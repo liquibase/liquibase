@@ -7,14 +7,22 @@ import java.util.logging.Level;
 
 /**
  * Interface to class that does the actual logging.
- * Instances will be created by {@link LogService} to know the class to log against.
+ * Instances will be created by {@link LogService}, normally through {@link liquibase.Scope#getLog(Class)}).
  *
  * All log methods take a {@link LogType} to describe the type of message being logged.
- *
- * The hierarchy of log levels is:
- * (finest) DEBUG < INFO < WARN < ERROR (coarsest)
  */
 public interface Logger extends ExtensibleObject {
+
+    /**
+     * Returns the {@link Level} for this logger. Logs that are not using {@link java.util.logging.Logger} still translate to this standard.
+     */
+    Level getLogLevel();
+
+
+    /**
+     * Sets the {@link Level} for this logger.
+     */
+    void setLogLevel(Level level);
 
     /**
      * Log an error that occurred, using the {@link LogType#LOG} type.
@@ -25,10 +33,6 @@ public interface Logger extends ExtensibleObject {
      * Log an error together with data from an error/exception, using the {@link LogType#LOG} type.
      */
     void severe(String message, Throwable e);
-
-    Level getLogLevel();
-
-    void setLogLevel(Level level);
 
     /**
      * Log an error that occurred.
@@ -59,8 +63,6 @@ public interface Logger extends ExtensibleObject {
      * Log a event the user should be warned about together with data from an error/exception
      */
     void warning(LogType target, String message, Throwable e);
-
-
 
     /**
      * Logs a general event that might be useful for the user, using the {@link LogType#LOG} type.

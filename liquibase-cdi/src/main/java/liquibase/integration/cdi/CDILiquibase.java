@@ -79,7 +79,7 @@ public class CDILiquibase implements Extension {
     @Inject
     @LiquibaseType
     ResourceAccessor resourceAccessor;
-    private Logger log = Scope.getCurrentScope().getLog(CDILiquibase.class);
+
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
     @Inject @LiquibaseType
@@ -97,6 +97,8 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
         log.info(LogType.LOG, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {

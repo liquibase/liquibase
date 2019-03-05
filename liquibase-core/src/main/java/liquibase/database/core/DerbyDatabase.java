@@ -25,7 +25,6 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     protected int driverVersionMajor;
     protected int driverVersionMinor;
-    private Logger log = Scope.getCurrentScope().getLog(getClass());
 
     public DerbyDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");

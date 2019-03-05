@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
     private LinkedHashMap<URI, InputStream> streams = new LinkedHashMap<>();
-    private Logger log = Scope.getCurrentScope().getLog(getClass());
 
     public InputStreamList() {
     }
@@ -25,6 +24,8 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
     }
 
     public boolean add(URI uri, InputStream inputStream) {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
         boolean duplicate = streams.put(uri, inputStream) != null;
         if (duplicate) {
             log.debug("Closing duplicate stream for "+uri);

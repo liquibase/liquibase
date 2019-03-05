@@ -29,8 +29,6 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     private Database database;
     private CatalogAndSchema[] schemas;
 
-    private Logger log = Scope.getCurrentScope().getLog(getClass());
-
     @Override
     public String getName() {
         return "dropAll";
@@ -80,6 +78,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     @Override
     protected CommandResult run() throws Exception {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        Logger log = Scope.getCurrentScope().getLog(getClass());
         try {
             lockService.waitForLock();
 

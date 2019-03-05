@@ -1,5 +1,6 @@
-package liquibase.integration.ant.logging;
+package liquibase.integration.ant;
 
+import liquibase.integration.ant.AntTaskLogger;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import org.apache.tools.ant.Task;

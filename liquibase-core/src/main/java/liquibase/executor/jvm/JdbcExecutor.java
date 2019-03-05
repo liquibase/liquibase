@@ -38,8 +38,6 @@ import java.util.Map;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
-    private Logger log = Scope.getCurrentScope().getLog(getClass());
-
     @Override
     public boolean updatesDatabase() {
         return true;
@@ -234,7 +232,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                log.debug(LogType.WRITE_SQL, sqlToExecute[0]);
+                Scope.getCurrentScope().getLog(getClass()).debug(LogType.WRITE_SQL, sqlToExecute[0]);
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -341,6 +339,8 @@ public class JdbcExecutor extends AbstractExecutor {
 
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
+            Logger log = Scope.getCurrentScope().getLog(getClass());
+
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (database instanceof OracleDatabase) {
                     while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
@@ -420,7 +420,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                log.info(LogType.READ_SQL, sqlToExecute[0]);
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.READ_SQL, sqlToExecute[0]);
 
                 rs = stmt.executeQuery(sqlToExecute[0]);
                 ResultSet rsToUse = rs;
