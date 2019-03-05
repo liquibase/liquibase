@@ -4,6 +4,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.core.ClobType;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,6 +13,11 @@ import static org.junit.Assert.assertEquals;
 public class ClobTypeTest {
     @Before
     public void prepare() {
+        LiquibaseConfiguration.getInstance().reset();
+    }
+
+    @After
+    public void reset() {
         LiquibaseConfiguration.getInstance().reset();
     }
 

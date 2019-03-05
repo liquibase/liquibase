@@ -156,7 +156,7 @@ public class ChangeLogParameters {
             result = found.get(0);
         } else if (found.size() > 1) {
             for (ChangeLogParameter changeLogParameter : found) {
-                if (changeLogParameter.getChangeLog() == changeLog) {
+                if (changeLogParameter.getChangeLog().equals(changeLog)) {
                     result = changeLogParameter;
                 }
             }

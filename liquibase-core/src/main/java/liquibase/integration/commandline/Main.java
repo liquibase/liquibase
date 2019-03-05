@@ -770,6 +770,9 @@ public class Main {
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
+        if(arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
+            return;
+
         String[] splitArg = splitArg(arg);
 
         String attributeName = splitArg[0];

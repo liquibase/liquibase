@@ -193,6 +193,8 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
 
+        assertEquals("Option --promptForNonLocalDatabase was parsed correctly",
+                Boolean.FALSE, cli.promptForNonLocalDatabase);
         assertEquals("Main command 'migrate' was parsed correctly as 'update'", "update", cli.command);
     }
 
@@ -265,6 +267,62 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
     }
+
+    @Test
+    public void statusVerbose() throws Exception {
+        String[] args = new String[]{
+                "--url=URL",
+                "--changeLogFile=FILE",
+                "status",
+                "--verbose",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
+
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals(0,errMsgs.size()); // verbose option parsed correctly
+    }
+
+    @Test
+    public void statusVerboseWithValue() throws Exception {
+        String[] args = new String[]{
+                "--url=URL",
+                "--changeLogFile=FILE",
+                "status",
+                "--verbose=true",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
+
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals(1,errMsgs.size()); // value is not expected and will raise an error message
+
+    }
+
+
+    @Test
+    public void statusWithoutVerbose() throws Exception {
+        String[] args = new String[]{
+                "--url=URL",
+                "--changeLogFile=FILE",
+                "status",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
+
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals(0,errMsgs.size());
+    }
+
 
     @Test(expected = CommandLineParsingException.class)
     public void configureNonExistantClassloaderLocation() throws Exception {

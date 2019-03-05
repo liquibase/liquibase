@@ -9,7 +9,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
@@ -481,6 +480,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             for (String path : resources) {
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Reading resource: " + path);
                 include(path, false, resourceAccessor, includeContexts, false);
             }
         } catch (Exception e) {

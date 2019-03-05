@@ -331,14 +331,18 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 0;
         }
 
-        // MySQL 5.6.4 introduced fractional support...
-        // https://dev.mysql.com/doc/refman/5.7/en/data-types.html
-        String minimumVersion = "5.6.4";
+        String minimumVersion = getMinimumVersionForFractionalDigitsForTimestamp();
 
         if (StringUtil.isMinimumVersion(minimumVersion, major, minor, patch))
             return 6;
         else
             return 0;
+    }
+
+    protected String getMinimumVersionForFractionalDigitsForTimestamp() {
+        // MySQL 5.6.4 introduced fractional support...
+        // https://dev.mysql.com/doc/refman/5.7/en/data-types.html
+        return "5.6.4";
     }
 
     @Override
