@@ -61,7 +61,7 @@ public class Scope {
             Scope rootScope = new Scope();
             scopeManager.setCurrentScope(rootScope);
 
-            LogService overrideLogService = new LogServiceFactory().getDefaultLogService();
+            LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
             if (overrideLogService == null) {
                 throw new UnexpectedLiquibaseException("Cannot find default log service");
             }

@@ -19,7 +19,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
 
     def "can recursively enumerate files inside JARs on the classpath"() {
         given:
-        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
+        def accessor = new ClassLoaderResourceAccessor(getClass().getClassLoader())
 
         when:
         def listedResources = accessor.list(null, "org/springframework/core/io", true, true, false)
@@ -31,7 +31,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
 
     def "can non-recursively enumerate files inside JARs on the classpath"() {
         given:
-        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
+        def accessor = new ClassLoaderResourceAccessor(getClass().getClassLoader())
 
         when:
         def listedResources = accessor.list(null, "org/springframework/core/io", false, true, false)
@@ -44,7 +44,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
     // Test case for [CORE-3139]
 //    def "can recursively enumerate files inside JARs using JAR file URL"() {
 //        given:
-//        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
+//        def accessor = new ClassLoaderResourceAccessor(getClass().getClassLoader())
 //        def jarPkgURL = this.getClass().getClassLoader().getResource("org/springframework/core/io/").toExternalForm()
 //
 //        when:
