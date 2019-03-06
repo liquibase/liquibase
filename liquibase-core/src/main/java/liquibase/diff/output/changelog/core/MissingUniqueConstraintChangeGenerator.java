@@ -113,7 +113,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
     }
 
-    public boolean indexMatchesExisting(UniqueConstraint uc, Index backingIndex) {
+    private boolean indexMatchesExisting(UniqueConstraint uc, Index backingIndex) {
         boolean found = false;
         Table table = (Table)uc.getTable();
         List<Index> indexList = table.getIndexes();
