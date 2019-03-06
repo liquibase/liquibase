@@ -73,18 +73,21 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = uc.getBackingIndex();
             if (backingIndex != null && backingIndex.getName() != null) {
-                Change[] changes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
-                if (changes != null) {
-                    returnList.addAll(Arrays.asList(changes));
+                boolean found = indexMatchesExisting(uc, backingIndex);
+                if (! found) {
+                    Change[] changes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+                    if (changes != null) {
+                        returnList.addAll(Arrays.asList(changes));
 
-                    change.setForIndexName(backingIndex.getName());
-                    Schema schema = backingIndex.getSchema();
-                    if (schema != null) {
-                        if (control.getIncludeCatalog()) {
-                            change.setForIndexCatalogName(schema.getCatalogName());
-                        }
-                        if (control.getIncludeSchema()) {
-                            change.setForIndexSchemaName(schema.getName());
+                        change.setForIndexName(backingIndex.getName());
+                        Schema schema = backingIndex.getSchema();
+                        if (schema != null) {
+                            if (control.getIncludeCatalog()) {
+                                change.setForIndexCatalogName(schema.getCatalogName());
+                            }
+                            if (control.getIncludeSchema()) {
+                                change.setForIndexSchemaName(schema.getName());
+                            }
                         }
                     }
                 }
@@ -108,6 +111,18 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
         return returnList.toArray(new Change[returnList.size()]);
 
 
+    }
+
+    public boolean indexMatchesExisting(UniqueConstraint uc, Index backingIndex) {
+        boolean found = false;
+        Table table = (Table)uc.getTable();
+        List<Index> indexList = table.getIndexes();
+        for (Index index : indexList) {
+            if (index.getName().equals(backingIndex.getName())) {
+                found = true;
+            }
+        }
+        return found;
     }
 
     protected AddUniqueConstraintChange createAddUniqueConstraintChange() {
