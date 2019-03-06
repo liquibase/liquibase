@@ -325,6 +325,7 @@
 		<xsd:attribute name="generationType" type="xsd:string" />
 		<xsd:attribute name="defaultOnNull" type="booleanExp" />
 		<xsd:attribute name="remarks" type="xsd:string" />
+		<xsd:attribute name="descending" type="booleanExp" />
         <xsd:attribute name="encoding" type="xsd:string">
             <xsd:annotation>
                 <xsd:appinfo>
