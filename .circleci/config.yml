@@ -92,7 +92,7 @@ jobs:
 #
       - store_test_results:
           path: liquibase-core/target/surefire-reports
-      - store_test_results:
+      - store_artifacts:
           path: liquibase-core/target/surefire-reports/*
       - store_artifacts:
           path: liquibase-core/target/liquibase-*.jar
