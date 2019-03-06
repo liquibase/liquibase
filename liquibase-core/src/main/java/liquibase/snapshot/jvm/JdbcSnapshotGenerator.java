@@ -8,7 +8,6 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -108,7 +107,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (this.statusListeners == null) {
             return;
         }
-        Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, message);
+        Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }

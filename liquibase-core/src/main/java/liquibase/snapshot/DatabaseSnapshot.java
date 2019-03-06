@@ -11,7 +11,6 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
@@ -265,7 +264,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
 
         if (!snapshotControl.shouldInclude(example)) {
-            LOGGER.debug(LogType.LOG, "Excluding " + example);
+            LOGGER.fine(LogType.LOG, "Excluding " + example);
             return example;
         }
 

@@ -16,7 +16,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
@@ -586,7 +585,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
 
-                log.debug(LogType.LOG, "Reading ChangeSet: " + toString());
+                log.fine(LogType.LOG, "Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
                     if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         if (listener != null) {
@@ -603,7 +602,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                             listener.ran(change, this, changeLog, database);
                         }
                     } else {
-                        log.debug(LogType.LOG, "Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+                        log.fine(LogType.LOG, "Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
                 }
 
@@ -615,7 +614,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     execType = ExecType.EXECUTED;
                 }
             } else {
-                log.debug(LogType.LOG, "Skipping ChangeSet: " + toString());
+                log.fine(LogType.LOG, "Skipping ChangeSet: " + toString());
             }
 
         } catch (Exception e) {
@@ -626,7 +625,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
             if ((getFailOnError() != null) && !getFailOnError()) {
                 log.info(LogType.LOG, "Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
-                log.debug(LogType.LOG, "Failure Stacktrace", e);
+                log.fine(LogType.LOG, "Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
                 // just log the message, dont log the stacktrace by appending exception. Its logged anyway to stdout
@@ -706,7 +705,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (runInTransaction) {
                 database.commit();
             }
-            Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             try {
                 database.rollback();

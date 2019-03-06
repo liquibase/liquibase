@@ -8,7 +8,6 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
@@ -49,10 +48,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
             preconditions.check(database, changeLog, null, null);
         } catch (PreconditionFailedException e) {
-            Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Precondition Failed: "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Precondition Error: "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Precondition Error: "+e.getMessage(), e);
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {

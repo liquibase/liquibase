@@ -68,7 +68,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
         String sql = generateSql(cols);
         LOG.info(LogType.WRITE_SQL, sql);
-        LOG.debug(LogType.LOG, "Number of columns = " + cols.size());
+        LOG.fine(LogType.LOG, "Number of columns = " + cols.size());
 
         // create prepared statement
         PreparedStatement stmt = factory.create(sql);
@@ -105,7 +105,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             throws SQLException, DatabaseException {
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
-            LOG.debug(LogType.LOG, "Applying column parameter = " + i + " for column " + col.getName());
+            LOG.fine(LogType.LOG, "Applying column parameter = " + i + " for column " + col.getName());
             applyColumnParameter(stmt, i, col);
             i++;
         }
@@ -124,17 +124,17 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
         if (col.getValue() != null) {
-            LOG.debug(LogType.LOG, "value is string = " + col.getValue());
+            LOG.fine(LogType.LOG, "value is string = " + col.getValue());
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
                 stmt.setObject(i, UUID.fromString(col.getValue()));
             } else {
                 stmt.setString(i, col.getValue());
             }
         } else if (col.getValueBoolean() != null) {
-            LOG.debug(LogType.LOG, "value is boolean = " + col.getValueBoolean());
+            LOG.fine(LogType.LOG, "value is boolean = " + col.getValueBoolean());
             stmt.setBoolean(i, col.getValueBoolean());
         } else if (col.getValueNumeric() != null) {
-            LOG.debug(LogType.LOG, "value is numeric = " + col.getValueNumeric());
+            LOG.fine(LogType.LOG, "value is numeric = " + col.getValueNumeric());
             Number number = col.getValueNumeric();
             if (number instanceof ColumnConfig.ValueNumeric) {
                 ColumnConfig.ValueNumeric valueNumeric = (ColumnConfig.ValueNumeric) number;
@@ -163,14 +163,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 );
             }
         } else if (col.getValueDate() != null) {
-            LOG.debug(LogType.LOG, "value is date = " + col.getValueDate());
+            LOG.fine(LogType.LOG, "value is date = " + col.getValueDate());
             if (col.getValueDate() instanceof Timestamp) {
                 stmt.setTimestamp(i, (Timestamp) col.getValueDate());
             } else {
                 stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
             }
         } else if (col.getValueBlobFile() != null) {
-            LOG.debug(LogType.LOG, "value is blob = " + col.getValueBlobFile());
+            LOG.fine(LogType.LOG, "value is blob = " + col.getValueBlobFile());
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
                 if (lob.length <= Integer.MAX_VALUE) {
@@ -183,7 +183,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             }
         } else if (col.getValueClobFile() != null) {
             try {
-                LOG.debug(LogType.LOG, "value is clob = " + col.getValueClobFile());
+                LOG.fine(LogType.LOG, "value is clob = " + col.getValueClobFile());
                 LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
                 if (lob.length <= Integer.MAX_VALUE) {
                     stmt.setCharacterStream(i, lob.content, (int) lob.length);
@@ -195,7 +195,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             }
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
-            LOG.debug(LogType.LOG, "value is explicit null");
+            LOG.fine(LogType.LOG, "value is explicit null");
             stmt.setNull(i, java.sql.Types.NULL);
         }
     }

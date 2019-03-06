@@ -3,7 +3,6 @@ package liquibase.integration.cdi;
 import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -65,7 +64,7 @@ public class SchemesCDIConfigBuilder {
      */
     public CDILiquibaseConfig createCDILiquibaseConfig() {
         final String id = UUID.randomUUID().toString();
-        log.debug(LogType.LOG, String.format("[id = %s] createConfig(). Date: '%s'", id, new Date()));
+        log.fine(LogType.LOG, String.format("[id = %s] createConfig(). Date: '%s'", id, new Date()));
 
         final InputStream is = SchemesCDIConfigBuilder.class.getResourceAsStream(SCHEMA_NAME);
         try {
@@ -91,24 +90,24 @@ public class SchemesCDIConfigBuilder {
         if (!liquibaseDir.exists() && (!liquibaseDir.mkdirs())) {
             throw new RuntimeException(String.format("[id = %s] Cannot create [%s] dirs.", id, liquibaseDir));
         }
-        log.debug(LogType.LOG, String.format("[id = %s] Includes directory: [path='%s']", id, liquibaseDir.getAbsolutePath()));
+        log.fine(LogType.LOG, String.format("[id = %s] Includes directory: [path='%s']", id, liquibaseDir.getAbsolutePath()));
 
         String path = String.format("%s/%s", ROOT_PATH, TEMPLATE_NAME);
         File output = new File(path);
 
         if (output.exists()) {
-            log.debug(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, deleting", id, path));
+            log.fine(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, deleting", id, path));
             if (output.delete()) {
-                log.debug(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, deleted successfully.", id, path));
+                log.fine(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, deleted successfully.", id, path));
             } else {
-                log.debug(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, failed to delete.", id, path));
+                log.fine(LogType.LOG, String.format("[id = %s] File [path='%s'] already exists, failed to delete.", id, path));
             }
         }
         if (!output.createNewFile()) {
             throw new RuntimeException(String.format("[id = %s] Cannot create [%s] file.", id, output));
         }
         log.info(LogType.LOG, String.format("[id = %s] File %s was created.", id, output));
-        log.debug(LogType.LOG, String.format("[id = %s] Root liquibase file [path='%s'] ready.", id, path));
+        log.fine(LogType.LOG, String.format("[id = %s] Root liquibase file [path='%s'] ready.", id, path));
 
         long start = System.currentTimeMillis();
         log.info(LogType.LOG, String.format("[id = %s] Scanning application for liquibase schemes.", id));
@@ -148,8 +147,8 @@ public class SchemesCDIConfigBuilder {
         }
 
         log.info(LogType.LOG, String.format("[id = %s] Scan complete [took=%s milliseconds].", id, System.currentTimeMillis() - start));
-        log.debug(LogType.LOG, String.format("[id = %s] Resolved schemes: %n%s%n", id, schemes));
-        log.debug(LogType.LOG, String.format("[id = %s] Generating root liquibase file...", id));
+        log.fine(LogType.LOG, String.format("[id = %s] Resolved schemes: %n%s%n", id, schemes));
+        log.fine(LogType.LOG, String.format("[id = %s] Generating root liquibase file...", id));
 
         String template = StreamUtil.readStreamAsString(is); // schema.template.xml
 
@@ -158,8 +157,8 @@ public class SchemesCDIConfigBuilder {
         FileUtil.write(xml, output);
 
         log.info(LogType.LOG, String.format("[id = %s] File %s was written.", id, output));
-        log.debug(LogType.LOG, String.format("[id = %s] Generation complete.", id));
-        log.debug(LogType.LOG, String.format("[id = %s] Root liquibase xml: %n %s %n", id, xml));
+        log.fine(LogType.LOG, String.format("[id = %s] Generation complete.", id));
+        log.fine(LogType.LOG, String.format("[id = %s] Root liquibase xml: %n %s %n", id, xml));
 
         CDILiquibaseConfig config = new CDILiquibaseConfig();
         config.setChangeLog(TEMPLATE_NAME);
@@ -195,10 +194,10 @@ public class SchemesCDIConfigBuilder {
                 try {
                     lock = fileChannel.tryLock();
                 } catch (OverlappingFileLockException e) {
-                    log.debug(LogType.LOG, String.format("[id = %s] Lock already acquired, waiting for the lock...", id));
+                    log.fine(LogType.LOG, String.format("[id = %s] Lock already acquired, waiting for the lock...", id));
                 }
                 if (null == lock) {
-                    log.debug(LogType.LOG, String.format("[id = %s] Waiting for the lock...", id));
+                    log.fine(LogType.LOG, String.format("[id = %s] Waiting for the lock...", id));
                     Thread.sleep(FILE_LOCK_TIMEOUT);
                 }
             }
@@ -220,12 +219,12 @@ public class SchemesCDIConfigBuilder {
 
             log.info(LogType.LOG, String.format("[id = %s] Transferring schema [resource=%s] to directory [path=%s]...", id, schema, liquibase));
             String path = schema.startsWith("/") ? schema.substring(1) : schema;
-            log.debug(LogType.LOG, String.format("[id = %s] LiquibaseSchema path is [path='%s'].", id, path));
+            log.fine(LogType.LOG, String.format("[id = %s] LiquibaseSchema path is [path='%s'].", id, path));
 
             if (path.contains("/")) {
 
                 String dirPath = String.format("%s/%s", liquibase, path.substring(0, path.lastIndexOf('/')));
-                log.debug(LogType.LOG, String.format("[id = %s] LiquibaseSchema path contains intermediate directories [path='%s'], preparing its...", id, dirPath));
+                log.fine(LogType.LOG, String.format("[id = %s] LiquibaseSchema path contains intermediate directories [path='%s'], preparing its...", id, dirPath));
 
                 File file = new File(dirPath);
                 if (!file.exists() && file.mkdirs()) {
@@ -243,7 +242,7 @@ public class SchemesCDIConfigBuilder {
             if (file.createNewFile()) {
                 log.info(LogType.LOG, String.format("[id = %s] File [path='%s'] created.", id, file.getAbsolutePath()));
             }
-            log.debug(LogType.LOG, String.format("[id = %s] LiquibaseSchema file [path='%s'] is ready, copying data...", id, file.getAbsolutePath()));
+            log.fine(LogType.LOG, String.format("[id = %s] LiquibaseSchema file [path='%s'] is ready, copying data...", id, file.getAbsolutePath()));
 
             FileUtil.write(StreamUtil.readStreamAsString(is), file);
 

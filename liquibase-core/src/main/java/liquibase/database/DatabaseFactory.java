@@ -5,7 +5,6 @@ import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -213,7 +212,7 @@ public class DatabaseFactory {
             if (null != driverPropertiesFile) {
                 File propertiesFile = new File(driverPropertiesFile);
                 if (propertiesFile.exists()) {
-                    LOG.debug(
+                    LOG.fine(
                             LogType.LOG, "Loading properties from the file:'" + driverPropertiesFile + "'"
                     );
                     FileInputStream inputStream = new FileInputStream(propertiesFile);
@@ -229,15 +228,15 @@ public class DatabaseFactory {
             }
 
 
-            LOG.debug(LogType.LOG, "Properties:");
+            LOG.fine(LogType.LOG, "Properties:");
             for (Map.Entry entry : driverProperties.entrySet()) {
-                LOG.debug(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+                LOG.fine(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
             }
 
 
-            LOG.debug(LogType.LOG, "Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
+            LOG.fine(LogType.LOG, "Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
             Connection connection = driverObject.connect(url, driverProperties);
-            LOG.debug(LogType.LOG, "Connection has been created");
+            LOG.fine(LogType.LOG, "Connection has been created");
             if (connection == null) {
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }

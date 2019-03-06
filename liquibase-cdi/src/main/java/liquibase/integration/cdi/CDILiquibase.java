@@ -13,7 +13,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.cdi.annotations.LiquibaseType;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -105,7 +104,7 @@ public class CDILiquibase implements Extension {
             hostName = NetUtil.getLocalHostName();
         } catch (Exception e) {
             log.warning(LogType.LOG, "Cannot find hostname: " + e.getMessage());
-            log.debug(LogType.LOG, "", e);
+            log.fine(LogType.LOG, "", e);
             return;
         }
 

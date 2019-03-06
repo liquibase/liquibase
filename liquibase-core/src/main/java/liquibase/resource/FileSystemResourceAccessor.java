@@ -124,7 +124,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                             finalRootPath = rootPathFile.getParentFile().toPath();
                         }
                     } else {
-                        Scope.getCurrentScope().getLog(getClass()).debug("No relative path " + relativeTo + " in " + rootPath);
+                        Scope.getCurrentScope().getLog(getClass()).fine("No relative path " + relativeTo + " in " + rootPath);
                         continue;
                     }
                 }

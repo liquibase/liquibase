@@ -16,52 +16,7 @@ public class JavaLogger extends AbstractLogger {
     }
 
     @Override
-    public void setLogLevel(Level level) {
-        this.logger.setLevel(level);
-    }
-
-    @Override
-    public Level getLogLevel() {
-        return this.logger.getLevel();
-    }
-
-    @Override
-    public void severe(LogType target, String message) {
-        logger.log(Level.SEVERE, message);
-    }
-
-    @Override
-    public void severe(LogType target, String message, Throwable e) {
-        logger.log(Level.SEVERE, message, e);
-    }
-
-    @Override
-    public void warning(LogType target, String message) {
-        logger.log(Level.WARNING, message);
-    }
-
-    @Override
-    public void warning(LogType target, String message, Throwable e) {
-        logger.log(Level.WARNING, message, e);
-    }
-
-    @Override
-    public void info(LogType target, String message) {
-        logger.log(Level.INFO, message);
-    }
-
-    @Override
-    public void info(LogType target, String message, Throwable e) {
-        logger.log(Level.INFO, message, e);
-    }
-
-    @Override
-    public void debug(LogType target, String message) {
-        logger.log(Level.FINE, message);
-    }
-
-    @Override
-    public void debug(LogType target, String message, Throwable e) {
-        logger.log(Level.FINE, message, e);
+    public void log(Level level, LogType target, String message, Throwable e) {
+        logger.log(level, message, e);
     }
 }

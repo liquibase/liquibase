@@ -5,6 +5,7 @@ import liquibase.logging.Logger;
 import liquibase.logging.core.AbstractLogService;
 import liquibase.logging.core.AbstractLogger;
 
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -55,18 +56,11 @@ public class CommandLineLoggerService extends AbstractLogService {
 
         private Level level = Level.SEVERE;
 
-
         @Override
-        public Level getLogLevel() {
-            return level;
-        }
-
-        @Override
-        public void setLogLevel(Level level) {
-            this.level = level;
-        }
-
-        public void log(LogType logType, String message) {
+        public void log(Level level, LogType logType, String message, Throwable e) {
+            if (level.intValue() < this.level.intValue()) {
+                return;
+            }
             if (CommandLineLoggerService.this.mode == Mode.STANDARD) {
                 if (logType == LogType.USER_MESSAGE) {
                     System.out.println(message);
@@ -78,47 +72,6 @@ public class CommandLineLoggerService extends AbstractLogService {
                     System.out.println(message);
                 }
             }
-        }
-
-
-        @Override
-        public void severe(LogType target, String message) {
-
-        }
-
-        @Override
-        public void severe(LogType target, String message, Throwable e) {
-
-        }
-
-        @Override
-        public void warning(LogType target, String message) {
-
-        }
-
-        @Override
-        public void warning(LogType target, String message, Throwable e) {
-
-        }
-
-        @Override
-        public void info(LogType logType, String message) {
-
-        }
-
-        @Override
-        public void info(LogType target, String message, Throwable e) {
-
-        }
-
-        @Override
-        public void debug(LogType target, String message) {
-
-        }
-
-        @Override
-        public void debug(LogType target, String message, Throwable e) {
-
         }
     }
 }

@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
 import liquibase.integration.cdi.exceptions.CyclicDependencyException;
 import liquibase.integration.cdi.exceptions.DependencyNotFoundException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 
@@ -80,7 +79,7 @@ public class SchemesTreeBuilder {
      * @return sorted collection of schemes
      */
     public List<LiquibaseSchema> build(final String id, Collection<LiquibaseSchema> schemes) {
-        log.debug(LogType.LOG, String.format("[id = %s] build(%s)", id, schemes));
+        log.fine(LogType.LOG, String.format("[id = %s] build(%s)", id, schemes));
 
         log.info(LogType.LOG, String.format("[id = %s] Sorting schemes according dependencies...", id));
 
@@ -110,7 +109,7 @@ public class SchemesTreeBuilder {
         } else {
             // take first of not-dependent and use it as root of hierarchy.
             root = new SchemaNode(notDependent.get(0));
-            log.debug(LogType.LOG, String.format("[id = %s] Selected dependencies tree root [%s]", id, root.getItem()));
+            log.fine(LogType.LOG, String.format("[id = %s] Selected dependencies tree root [%s]", id, root.getItem()));
             availableSchemes.removeAll(notDependent); // we won't to check not-dependent schemes.
             notDependent.remove(root.getItem());  // remove root from not-dependent schemes
             schemes.retainAll(availableSchemes); // remove not-dependent from all schemes
@@ -120,7 +119,7 @@ public class SchemesTreeBuilder {
                 root.addChild(liquibaseSchema);
             }
 
-            log.debug(LogType.LOG, String.format("[id = %s] Made other non-dependent schemes children of root. [%s] dependent schemes to resolve. Resolving...",
+            log.fine(LogType.LOG, String.format("[id = %s] Made other non-dependent schemes children of root. [%s] dependent schemes to resolve. Resolving...",
                     id,
                     availableSchemes.size()
             ));
@@ -130,10 +129,10 @@ public class SchemesTreeBuilder {
             // until we resolve all dependencies
             while (!availableSchemes.isEmpty()) {
                 cycles++;
-                log.debug(LogType.LOG, String.format("[id = %s] Resolution cycle [%s] started.", id, cycles));
+                log.fine(LogType.LOG, String.format("[id = %s] Resolution cycle [%s] started.", id, cycles));
                 int additions = 0; //we will count dependencies resolution for each resolution cycle.
                 for (LiquibaseSchema liquibaseSchema : schemes) {
-                    log.debug(LogType.LOG, String.format(
+                    log.fine(LogType.LOG, String.format(
                             "[id = %s] LiquibaseSchema [name=%s] depends on liquibaseSchema [name=%s].",
                             id, liquibaseSchema.name(), liquibaseSchema.depends()
                     ));
@@ -141,7 +140,7 @@ public class SchemesTreeBuilder {
 
                     // we make the dependent liquibaseSchema as a child for it's dependency if found. If not, we just continue.
                     if (parent == null) {
-                        log.debug(LogType.LOG, String.format(
+                        log.fine(LogType.LOG, String.format(
                                 "[id = %s] Dependency not found in resolved dependencies tree, skipping liquibaseSchema [name=%s] for a while.",
                                 id, liquibaseSchema.name()
                         ));
@@ -160,7 +159,7 @@ public class SchemesTreeBuilder {
                             ));
                         }
                     } else {
-                        log.debug(LogType.LOG, String.format(
+                        log.fine(LogType.LOG, String.format(
                                 "[id = %s] Dependency found for liquibaseSchema [name=%s], moving it to resolved dependencies tree.",
                                 id, liquibaseSchema.name()
                         ));
@@ -169,7 +168,7 @@ public class SchemesTreeBuilder {
                         additions++;
                     }
                 }
-                log.debug(LogType.LOG, String.format("[id = %s] Resolution cycle [%s] completed", id, cycles));
+                log.fine(LogType.LOG, String.format("[id = %s] Resolution cycle [%s] completed", id, cycles));
 
                 //if not resolutions happened through resolution cycle, definitely there is a cyclic dependency.
                 if (additions == 0) {

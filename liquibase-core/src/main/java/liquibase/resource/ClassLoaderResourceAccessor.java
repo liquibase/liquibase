@@ -5,11 +5,13 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
 import liquibase.util.CollectionUtil;
 
+import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.jar.Manifest;
 
 /**
  * An implementation of {@link FileSystemResourceAccessor} that builds up the file roots based on the passed {@link ClassLoader}.
@@ -24,6 +26,35 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
             for (ClassLoader classLoader : CollectionUtil.createIfNull(classLoaders)) {
                 for (Path path : findRootPaths(classLoader)) {
                     addRootPath(path);
+                }
+                Enumeration<URL> manifests = classLoader.getResources("META-INF/MANIFEST.MF");
+                while (manifests.hasMoreElements()) {
+                    URL manifestUrl = manifests.nextElement();
+
+                    File jarFile = new File(manifestUrl.getFile()
+                            .replaceFirst("^jar:", "")
+                            .replaceFirst("^file:/", "")
+                            .replaceFirst("!.*", ""));
+
+
+                    Manifest manifest = new Manifest(manifestUrl.openStream());
+                    String classpath = manifest.getMainAttributes().getValue("Class-Path");
+                    if (classpath != null) {
+                        for (String entry : classpath.split("\\s+")) {
+                            entry = entry.replaceFirst("file:/", "");
+                            File entryFile = new File(entry);
+                            if (!entryFile.isAbsolute()) {
+                                entryFile = new File(jarFile, entry);
+                            }
+
+                            if (entryFile.exists()) {
+                                addRootPath(entryFile.toPath());
+                            } else {
+                                Scope.getCurrentScope().getLog(getClass()).info("Missing file referenced in " + jarFile.getAbsolutePath() + "!/META-INF/MANIFEST.MF Class-Path: " + entry);
+                            }
+                        }
+
+                    }
                 }
             }
         } catch (Exception e) {
@@ -85,7 +116,7 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
         for (URL url : returnUrls) {
             Path path = rootUrlToPath(url);
             if (path != null) {
-                logger.debug("Found classloader root at " + path.toString());
+                logger.fine("Found classloader root at " + path.toString());
                 returnPaths.add(path);
             }
         }
@@ -94,6 +125,7 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
 
     /**
      * Converts the given URL to a Path. Used by {@link #findRootPaths(ClassLoader)} to convert classloader URLs to Paths to pass to {@link #addRootPath(Path)}.
+     *
      * @return null if url cannot or should not be converted to a Path.
      */
     protected Path rootUrlToPath(URL url) {

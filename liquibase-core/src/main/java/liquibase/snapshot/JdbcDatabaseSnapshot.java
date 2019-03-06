@@ -18,7 +18,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
@@ -131,7 +130,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     // from a table, but the table has no FOREIGN KEYs.
                                     if ((database instanceof SybaseASADatabase) && e.getSQLState().equalsIgnoreCase
                                         (ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE)) {
-                                        Scope.getCurrentScope().getLog(getClass()).debug(
+                                        Scope.getCurrentScope().getLog(getClass()).fine(
                                                 LogType.LOG, String.format("Ignored SAP SQL Anywhere SQL " +
                                                         "exception thrown when FOREIGN KEY list of table '%s' was " +
                                                         "empty.", foundTable));

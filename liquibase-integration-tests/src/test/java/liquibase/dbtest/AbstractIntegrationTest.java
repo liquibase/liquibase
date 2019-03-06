@@ -24,7 +24,6 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.CompositeResourceAccessor;
@@ -949,7 +948,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts);
 
         Path outputDir = tempDirectory.newFolder().toPath().normalize();
-        logger.debug(LogType.LOG, "Database documentation will be written to this temporary folder: " + outputDir);
+        logger.fine(LogType.LOG, "Database documentation will be written to this temporary folder: " + outputDir);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());

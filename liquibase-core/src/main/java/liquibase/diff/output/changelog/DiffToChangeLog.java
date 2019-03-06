@@ -17,7 +17,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
@@ -320,7 +319,7 @@ public class DiffToChangeLog {
                     return toSort;
                 }
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Cannot get object dependencies: " + e.getMessage());
+                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Cannot get object dependencies: " + e.getMessage());
             }
         }
 
@@ -547,7 +546,7 @@ public class DiffToChangeLog {
             for (Class<? extends DatabaseObject> type : types) {
                 log += "    " + type.getName();
             }
-            Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, log);
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, log);
             loggedOrderFor.add(generatorType);
         }
 

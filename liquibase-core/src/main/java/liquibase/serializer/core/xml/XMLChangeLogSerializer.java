@@ -81,7 +81,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        documentBuilder.setEntityResolver(new LiquibaseEntityResolver(this));
+        documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
 
         Document doc = documentBuilder.newDocument();
         doc.setXmlVersion(XML_VERSION);

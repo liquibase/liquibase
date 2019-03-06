@@ -449,8 +449,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (!(pathName.endsWith("/"))) {
                 pathName = pathName + '/';
             }
-            LOG.debug(LogType.LOG, "includeAll for " + pathName);
-            LOG.debug(LogType.LOG, "Using file opener for includeAll: " + resourceAccessor.toString());
+            LOG.fine(LogType.LOG, "includeAll for " + pathName);
+            LOG.fine(LogType.LOG, "Using file opener for includeAll: " + resourceAccessor.toString());
 
             String relativeTo = null;
             if (isRelativeToChangelogFile) {

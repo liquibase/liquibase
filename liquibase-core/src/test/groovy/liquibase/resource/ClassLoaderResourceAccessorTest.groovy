@@ -22,11 +22,11 @@ class ClassLoaderResourceAccessorTest extends Specification {
         def accessor = new ClassLoaderResourceAccessor(getClass().getClassLoader())
 
         when:
-        def listedResources = accessor.list(null, "org/springframework/core/io", true, true, false)
+        def listedResources = accessor.list(null, "org/junit", true, true, false)
 
         then:
-        listedResources.contains("org/springframework/core/io/Resource.class")
-        listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
+        listedResources.contains("org/junit/Assert.class")
+        listedResources.contains("org/junit/runner/Runner.class")
     }
 
     def "can non-recursively enumerate files inside JARs on the classpath"() {
@@ -34,10 +34,10 @@ class ClassLoaderResourceAccessorTest extends Specification {
         def accessor = new ClassLoaderResourceAccessor(getClass().getClassLoader())
 
         when:
-        def listedResources = accessor.list(null, "org/springframework/core/io", false, true, false)
+        def listedResources = accessor.list(null, "org/junit", false, true, false)
 
         then:
-        listedResources.contains("org/springframework/core/io/Resource.class")
-        !listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
+        listedResources.contains("org/junit/Assert.class")
+        !listedResources.contains("org/junit/runner/Runner.class")
     }
 }

@@ -3,6 +3,8 @@ package liquibase.logging;
 import liquibase.logging.core.JavaLogService;
 import liquibase.plugin.Plugin;
 
+import java.util.logging.Level;
+
 /**
  * This service is used to create named {@link Logger} instances through a {@link LogService}.
  *
@@ -11,6 +13,16 @@ import liquibase.plugin.Plugin;
 public interface LogService extends Plugin {
 
     int getPriority();
+
+    /**
+     * Returns the {@link Level} for this logger. Logs that are not using {@link java.util.logging.Logger} still translate to this standard.
+     */
+    Level getLogLevel();
+
+    /**
+     * Sets the {@link Level} for this logger.
+     */
+    void setLogLevel(Level level);
 
     /**
      * Creates a logger for logging from the given class.

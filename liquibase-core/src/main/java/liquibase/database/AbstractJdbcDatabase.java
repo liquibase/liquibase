@@ -32,7 +32,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
@@ -154,19 +153,19 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
-        Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
+        Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
         this.connection = conn;
         try {
             boolean autoCommit = conn.getAutoCommit();
             if (autoCommit == getAutoCommitMode()) {
                 // Don't adjust the auto-commit mode if it's already what the database wants it to be.
-                Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Not adjusting the auto commit mode; it is already " + autoCommit);
+                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Not adjusting the auto commit mode; it is already " + autoCommit);
             } else {
                 // Store the previous auto-commit mode, because the connection needs to be restored to it when this
                 // AbstractDatabase type is closed. This is important for systems which use connection pools.
                 previousAutoCommit = autoCommit;
 
-                Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
+                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
 
             }
@@ -756,7 +755,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
                 final long createSnapshotStarted = System.currentTimeMillis();
                 snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-                Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -774,7 +773,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     compareControl);
 
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
-            Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             boolean previousAutoCommit = this.getAutoCommitMode();
             this.commit(); //clear out currently executed statements
@@ -1262,7 +1261,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
                 continue;
             }
-            Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, "Executing Statement: " + statement);
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Executing Statement: " + statement);
             try {
                 ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {

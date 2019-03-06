@@ -11,18 +11,18 @@ import java.util.logging.Level;
  *
  * All log methods take a {@link LogType} to describe the type of message being logged.
  */
-public interface Logger extends ExtensibleObject {
+public interface Logger extends ExtensibleObject, AutoCloseable {
+
+    @Override
+    default void close() throws Exception {
+
+    }
 
     /**
-     * Returns the {@link Level} for this logger. Logs that are not using {@link java.util.logging.Logger} still translate to this standard.
+     * Generic log method that can log at any log level
      */
-    Level getLogLevel();
+    void log(Level level, LogType target, String message, Throwable e);
 
-
-    /**
-     * Sets the {@link Level} for this logger.
-     */
-    void setLogLevel(Level level);
 
     /**
      * Log an error that occurred, using the {@link LogType#LOG} type.
@@ -84,25 +84,45 @@ public interface Logger extends ExtensibleObject {
      */
     void info(LogType target, String message, Throwable e);
 
+    /**
+     * Logs configuration information, using the {@link LogType#LOG} type.
+     */
+    void config(String message);
+
+    /**
+     * Logs configuration information together with data from an error/exception, using the {@link LogType#LOG} type.
+     */
+    void config(String message, Throwable e);
+
+    /**
+     * Logs configuration information.
+     */
+    void config(LogType logType, String message);
+
+    /**
+     * Logs configuration information together with data from an error/exception
+     */
+    void config(LogType target, String message, Throwable e);
+
 
     /**
      * Logs a debugging event to aid in troubleshooting, using the {@link LogType#LOG} type.
      */
-    void debug(String message);
+    void fine(String message);
 
     /**
      * Logs a debugging event to aid in troubleshooting together with data from an error/exception, using the {@link LogType#LOG} type.
      */
-    void debug(String message, Throwable e);
+    void fine(String message, Throwable e);
 
     /**
      * Logs a debugging event to aid in troubleshooting
      */
-    void debug(LogType target, String message);
+    void fine(LogType target, String message);
 
     /**
      * Logs a debugging event to aid in troubleshooting together with data from an error/exception
      */
-    void debug(LogType target, String message, Throwable e);
+    void fine(LogType target, String message, Throwable e);
 
 }

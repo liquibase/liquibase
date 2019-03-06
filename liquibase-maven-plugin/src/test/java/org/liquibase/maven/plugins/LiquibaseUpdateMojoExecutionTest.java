@@ -12,16 +12,21 @@ import java.io.File;
  *
  */
 public class LiquibaseUpdateMojoExecutionTest extends AbstractLiquibaseMojoTest {
-	/**
-	 * Test the lookup of relative path names for changeLog 
-	 */
-	public void testRelativeClobFiles() throws Exception {
-	  File pom = getTestFile("src/test/resources/update/relativeClobFiles/plugin_config.xml");
 
-		if (!pom.exists()) {
-			return;
-		}
-	  LiquibaseUpdate update = (LiquibaseUpdate) lookupMojo("update", pom);
-	  update.execute();
-  }
+	public void testPlaceholder() {
+
+	}
+
+//	/**
+//	 * Test the lookup of relative path names for changeLog
+//	 */
+//	public void testRelativeClobFiles() throws Exception {
+//	  File pom = getTestFile("src/test/resources/update/relativeClobFiles/plugin_config.xml");
+//
+//		if (!pom.exists()) {
+//			return;
+//		}
+//	  LiquibaseUpdate update = (LiquibaseUpdate) lookupMojo("update", pom);
+//	  update.execute();
+//  }
 }

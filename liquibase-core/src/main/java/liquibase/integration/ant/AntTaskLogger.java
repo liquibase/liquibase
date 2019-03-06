@@ -20,52 +20,23 @@ public final class AntTaskLogger extends AbstractLogger {
     }
 
     @Override
-    public Level getLogLevel() {
-        return null;
-    }
-
-    @Override
-    public void setLogLevel(Level level) {
-        //managed by ant
-    }
-
-    @Override
-    public void severe(LogType target, String message) {
-        task.log(message, Project.MSG_ERR);
-    }
-
-    @Override
-    public void severe(LogType target, String message, Throwable e) {
-        task.log(message, e, Project.MSG_ERR);
-    }
-
-    @Override
-    public void warning(LogType target, String message) {
-        task.log(message, Project.MSG_WARN);
-    }
-
-    @Override
-    public void warning(LogType target, String message, Throwable e) {
-        task.log(message, e, Project.MSG_WARN);
-    }
-
-    @Override
-    public void info(LogType logType, String message) {
-        task.log(message, Project.MSG_INFO);
-    }
-
-    @Override
-    public void info(LogType target, String message, Throwable e) {
-        task.log(message, e, Project.MSG_INFO);
-    }
-
-    @Override
-    public void debug(LogType target, String message) {
-        task.log(message, Project.MSG_DEBUG);
-    }
-
-    @Override
-    public void debug(LogType target, String message, Throwable e) {
-        task.log(message, e, Project.MSG_DEBUG);
+    public void log(Level level, LogType target, String message, Throwable e) {
+        int antLevel;
+        if (level.intValue() == Level.SEVERE.intValue()) {
+            antLevel = Project.MSG_ERR;
+        } else if (level.intValue() == Level.WARNING.intValue()) {
+            antLevel = Project.MSG_WARN;
+        } else if (level.intValue() == Level.INFO.intValue()) {
+            antLevel = Project.MSG_INFO;
+        } else if (level.intValue() == Level.CONFIG.intValue()) {
+            //no config level, using debug
+            antLevel = Project.MSG_DEBUG;
+        } else if (level.intValue() == Level.FINE.intValue()) {
+            antLevel = Project.MSG_DEBUG;
+        } else {
+            //lower than FINE
+            antLevel = Project.MSG_DEBUG;
+        }
+        task.log(message, e, antLevel);
     }
 }

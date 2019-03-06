@@ -876,7 +876,7 @@ public class Main {
                                 File jar = extract(earZip, entry);
                                 URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
                                 urls.add(newUrl);
-                                LOG.debug(LogType.LOG,
+                                LOG.fine(LogType.LOG,
                                         String.format(coreBundle.getString("adding.to.classpath"), newUrl));
                                 jar.deleteOnExit();
                             } else if (entry.getName().toLowerCase().endsWith("war")) {
@@ -895,7 +895,7 @@ public class Main {
                     } catch (MalformedURLException e) {
                         throw new CommandLineParsingException(e);
                     }
-                    LOG.debug(LogType.LOG, String.format(coreBundle.getString("adding.to.classpath"), newUrl));
+                    LOG.fine(LogType.LOG, String.format(coreBundle.getString("adding.to.classpath"), newUrl));
                     urls.add(newUrl);
                 }
             }

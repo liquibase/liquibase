@@ -24,9 +24,7 @@ public abstract class AbstractLiquibaseMojoTest extends AbstractMojoTestCase {
   protected void loadPropertiesFileIfPresent(AbstractLiquibaseMojo mojo)
           throws MojoExecutionException, MojoFailureException {
 
-    File rootDir = new File(getBasedir(), "target/test-classes");
-    ResourceAccessor fo = new FileSystemResourceAccessor(rootDir);
-    mojo.configureFieldsAndValues(fo);
+    mojo.configureFieldsAndValues();
   }
 
   protected PlexusConfiguration loadConfiguration(String configFile) throws Exception {

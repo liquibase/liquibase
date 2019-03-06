@@ -8,7 +8,6 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
@@ -62,7 +61,7 @@ public class OutputChange extends AbstractChange {
                 } else if ("STDERR".equalsIgnoreCase(target)) {
                     System.err.println(getMessage());
                 } else if ("DEBUG".equalsIgnoreCase(target)) {
-                    Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, getMessage());
                 } else if ("INFO".equalsIgnoreCase(target)) {
                     Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, getMessage());
                 } else if ("WARN".equalsIgnoreCase(target) || "WARNING".equalsIgnoreCase(target)) {

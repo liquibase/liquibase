@@ -5,7 +5,6 @@ package liquibase.integration.spring;
 
 import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -123,7 +122,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			Object lookup = context.lookup(jndiUrl);
 			if(lookup instanceof DataSource) {
 				dataSources.add((DataSource) lookup);
-				log.debug(LogType.LOG, "Added a data source at " + jndiUrl);
+				log.fine(LogType.LOG, "Added a data source at " + jndiUrl);
 			} else {
 				log.info(LogType.LOG, "Skipping a resource " + jndiUrl + " not compatible with DataSource.");
 			}

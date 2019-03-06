@@ -28,7 +28,7 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
         boolean duplicate = streams.put(uri, inputStream) != null;
         if (duplicate) {
-            log.debug("Closing duplicate stream for "+uri);
+            log.fine("Closing duplicate stream for "+uri);
             try {
                 inputStream.close();
             } catch (IOException e) {
@@ -80,5 +80,9 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
     public boolean isEmpty() {
         return streams.isEmpty();
+    }
+
+    public List<URI> getURIs() {
+        return new ArrayList<>(streams.keySet());
     }
 }

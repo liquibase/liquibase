@@ -9,7 +9,6 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.sql.CallableSql;
@@ -232,7 +231,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                Scope.getCurrentScope().getLog(getClass()).debug(LogType.WRITE_SQL, sqlToExecute[0]);
+                Scope.getCurrentScope().getLog(getClass()).fine(LogType.WRITE_SQL, sqlToExecute[0]);
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -268,7 +267,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        Scope.getCurrentScope().getLog(getClass()).debug(LogType.LOG, message);
+        Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, message);
     }
 
     private void executeDb2ZosComplexStatement(SqlStatement sqlStatement) throws DatabaseException {
@@ -356,7 +355,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     //if execute returns false, we can retrieve the affected rows count
                     // (true used when resultset is returned)
                     if (!stmt.execute(statement)) {
-                        log.debug(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
+                        log.fine(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + getErrorCode(e) + statement+"]", e);
@@ -368,7 +367,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         if (!stmt.getMoreResults()) {
                             updateCount = stmt.getUpdateCount();
                             if (updateCount != -1)
-                                log.debug(Integer.toString(updateCount) + " row(s) affected");
+                                log.fine(Integer.toString(updateCount) + " row(s) affected");
                         }
                     } while (updateCount != -1);
 

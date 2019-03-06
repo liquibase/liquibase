@@ -10,8 +10,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.snapshot.CachedRow;
@@ -128,7 +126,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     currentOrdinal++;
                     int rsOrdinal = row.getInt("ORDINAL_POSITION");
                     if (rsOrdinal != currentOrdinal) {
-                        log.debug(
+                        log.fine(
                                 LogType.LOG, String.format(
                                         "Repairing ORDINAL_POSITION with gaps for table=%s, column name=%s, " +
                                                 "bad ordinal=%d, new ordinal=%d",
@@ -275,16 +273,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         String selectStatement;
                         if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                            Scope.getCurrentScope().getLog(getClass()).debug("rawCatalogName : <" + rawCatalogName + ">");
-                            Scope.getCurrentScope().getLog(getClass()).debug("rawSchemaName : <" + rawSchemaName + ">");
-                            Scope.getCurrentScope().getLog(getClass()).debug("rawTableName : <" + rawTableName + ">");
-                            Scope.getCurrentScope().getLog(getClass()).debug("raw selectStatement : <" + selectStatement + ">");
+                            Scope.getCurrentScope().getLog(getClass()).fine("rawCatalogName : <" + rawCatalogName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).fine("rawSchemaName : <" + rawSchemaName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).fine("rawTableName : <" + rawTableName + ">");
+                            Scope.getCurrentScope().getLog(getClass()).fine("raw selectStatement : <" + selectStatement + ">");
 
 
                         } else {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                         }
-                        Scope.getCurrentScope().getLog(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                        Scope.getCurrentScope().getLog(getClass()).fine("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                         Statement statement = null;
                         ResultSet columnSelectRS = null;
