@@ -2,7 +2,6 @@ package liquibase.resource;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtil;
-import liquibase.util.SystemUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +43,15 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
         }
     }
 
+    /**
+     * This method determines is access case sensitive or insensitive in terms of OS.
+     * It could be wrong, since MacOS could be case sensitive, depending on file system.
+     *
+     * @link https://issues.apache.org/jira/browse/IO-171
+     * @return true if OS is Windows, false otherwise
+     */
     protected boolean isCaseSensitive() {
-        return !SystemUtils.isWindows();
+        return !System.getProperty("os.name").startsWith("Windows ");
     }
 
     protected void addRootPath(URL path) {
