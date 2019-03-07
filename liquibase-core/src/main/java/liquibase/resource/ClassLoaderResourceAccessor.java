@@ -22,9 +22,9 @@ import java.util.jar.Manifest;
 public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
 
     public ClassLoaderResourceAccessor(ClassLoader... classLoaders) {
-        Logger log = Scope.getCurrentScope().getLog(getClass());
         try {
             for (ClassLoader classLoader : CollectionUtil.createIfNull(classLoaders)) {
+                Logger log = Scope.getCurrentScope().getLog(getClass());
                 for (Path path : findRootPaths(classLoader)) {
                     addRootPath(path);
                 }
