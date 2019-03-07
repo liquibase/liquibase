@@ -103,16 +103,16 @@ public class SqlGeneratorFactoryTest {
         assertEquals(3, factory.getGenerators().size());
     }
 
-    @Test
-    public void registerWithCache() {
-        factory.getGenerators().clear();
-
-        assertEquals(0, factory.getGenerators(statement, database).size());
-
-        factory.register(new AddAutoIncrementGeneratorHsqlH2());
-
-        assertEquals(1, factory.getGenerators(statement, database).size());
-    }
+//    @Test
+//    public void registerWithCache() {
+//        factory.getGenerators().clear();
+//
+//        assertEquals(0, factory.getGenerators(statement, database).size());
+//
+//        factory.register(new AddAutoIncrementGeneratorHsqlH2());
+//
+//        assertEquals(1, factory.getGenerators(statement, database).size());
+//    }
 
     @Test
     public void unregisterInstanceWithCache() {
