@@ -22,7 +22,7 @@ jobs:
     environment:
       # Tests for embedded RDBMS (esp. hsqldb and Derby-DB) crash more often without higher memory.
       # Surefire crashes without disableClassPathURLCheck:
-      _JAVA_OPTIONS: "-Xms512m -Xmx1024m _JAVA_OPTIONS=-Djdk.net.URLClassPath.disableClassPathURLCheck=true"
+      _JAVA_OPTIONS: "-Xms512m -Xmx1024m -Djdk.net.URLClassPath.disableClassPathURLCheck=true"
     steps:
       - run:
           name: Install needed packages
