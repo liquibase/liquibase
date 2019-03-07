@@ -24,7 +24,6 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
     public ClassLoaderResourceAccessor(ClassLoader... classLoaders) {
         try {
             for (ClassLoader classLoader : CollectionUtil.createIfNull(classLoaders)) {
-                Logger log = Scope.getCurrentScope().getLog(getClass());
                 for (Path path : findRootPaths(classLoader)) {
                     addRootPath(path);
                 }
@@ -40,7 +39,6 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
 
                     Manifest manifest = new Manifest(manifestUrl.openStream());
                     String classpath = manifest.getMainAttributes().getValue("Class-Path");
-                    log.fine("MANIFEST.MF Class-Path in " + manifestUrl + " is " + classpath);
                     if (classpath != null) {
                         for (String entry : classpath.split("\\s+")) {
                             entry = entry.replaceFirst("file:", "");
