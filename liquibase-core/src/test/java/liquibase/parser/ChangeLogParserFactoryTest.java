@@ -26,8 +26,8 @@ public class ChangeLogParserFactoryTest {
     @Test
     public void getInstance() {
         assertNotNull(ChangeLogParserFactory.getInstance());
-        
-        assertTrue(ChangeLogParserFactory.getInstance() == ChangeLogParserFactory.getInstance());
+
+        assertSame(ChangeLogParserFactory.getInstance(), ChangeLogParserFactory.getInstance());
     }
 
     @Test
@@ -64,10 +64,9 @@ public class ChangeLogParserFactoryTest {
     public void reset() {
         ChangeLogParserFactory instance1 = ChangeLogParserFactory.getInstance();
         ChangeLogParserFactory.reset();
-        assertFalse(instance1 == ChangeLogParserFactory.getInstance());
+        assertNotSame(instance1, ChangeLogParserFactory.getInstance());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void builtInGeneratorsAreFound() {
         List<ChangeLogParser> generators = ChangeLogParserFactory.getInstance().getParsers();
@@ -99,8 +98,8 @@ public class ChangeLogParserFactoryTest {
         parserFactory.register(otherXmlParser);
 
         try {
-            assertTrue(otherXmlParser == parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
-            assertFalse(defaultParser == parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
+            assertSame(otherXmlParser, parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
+            assertNotSame(defaultParser, parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
         } finally {
             parserFactory.unregister(otherXmlParser);
         }
