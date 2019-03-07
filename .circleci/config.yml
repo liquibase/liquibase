@@ -20,8 +20,9 @@ jobs:
 #          MSSQL_SA_PASSWORD: Liquibase01#
 
     environment:
-      # Tests for embedded RDBMS (esp. hsqldb and Derby-DB) crash more often without this one:
-      _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+      # Tests for embedded RDBMS (esp. hsqldb and Derby-DB) crash more often without higher memory.
+      # Surefire crashes without disableClassPathURLCheck:
+      _JAVA_OPTIONS: "-Xms512m -Xmx1024m _JAVA_OPTIONS=-Djdk.net.URLClassPath.disableClassPathURLCheck=true"
     steps:
       - run:
           name: Install needed packages
@@ -92,8 +93,6 @@ jobs:
 #
       - store_test_results:
           path: liquibase-core/target/surefire-reports
-      - store_artifacts:
-          path: liquibase-core/target/surefire-reports/*
       - store_artifacts:
           path: liquibase-core/target/liquibase-*.jar
       - store_artifacts:
