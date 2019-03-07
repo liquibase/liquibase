@@ -1,31 +1,33 @@
 package liquibase.changelog;
 
-import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
+import liquibase.parser.MockChangeLogParser;
 import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.ResourceAccessor;
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.After;
 import org.junit.Test;
 
 import java.util.List;
 
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
 public class ChangeLogParserFactoryTest {
+
     @After
     public void teardown() {
         ChangeLogParserFactory.reset();
-
     }
 
     @Test
     public void getInstance() {
         assertNotNull(ChangeLogParserFactory.getInstance());
 
-        assertTrue(ChangeLogParserFactory.getInstance() == ChangeLogParserFactory.getInstance());
+        assertSame(ChangeLogParserFactory.getInstance(), ChangeLogParserFactory.getInstance());
     }
 
     @Test
@@ -34,7 +36,7 @@ public class ChangeLogParserFactoryTest {
 
         assertEquals(0, ChangeLogParserFactory.getInstance().getParsers().size());
 
-        ChangeLogParserFactory.getInstance().register(new MockChangeLogParser());
+        ChangeLogParserFactory.getInstance().register(new MockChangeLogParser(".test"));
 
         assertEquals(1, ChangeLogParserFactory.getInstance().getParsers().size());
     }
@@ -47,7 +49,7 @@ public class ChangeLogParserFactoryTest {
 
         assertEquals(0, factory.getParsers().size());
 
-        ChangeLogParser mockChangeLogParser = new MockChangeLogParser();
+        ChangeLogParser mockChangeLogParser = new MockChangeLogParser(".test");
 
         factory.register(new XMLChangeLogSAXParser());
         factory.register(mockChangeLogParser);
@@ -70,7 +72,7 @@ public class ChangeLogParserFactoryTest {
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("xml", new JUnitResourceAccessor());
 
         assertNotNull(parser);
-        assertTrue(xmlChangeLogParser == parser);
+        assertSame(xmlChangeLogParser, parser);
     }
 
     @Test
@@ -84,10 +86,10 @@ public class ChangeLogParserFactoryTest {
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("path/to/a/file.xml", new JUnitResourceAccessor());
 
         assertNotNull(parser);
-        assertTrue(xmlChangeLogParser == parser);
+        assertSame(xmlChangeLogParser, parser);
     }
 
-    @Test
+    @Test(expected = UnknownChangelogFormatException.class)
     public void getParser_noneMatching() throws Exception {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
@@ -97,43 +99,19 @@ public class ChangeLogParserFactoryTest {
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
         ChangeLogParserFactory.getInstance().register(new SqlChangeLogParser());
 
-        try {
-            ChangeLogParserFactory.getInstance().getParser("badextension", new JUnitResourceAccessor());
-            fail("Did not throw an exception");
-        } catch (Exception e) {
-            //what we want
-        }
+        ChangeLogParserFactory.getInstance().getParser("badextension", new JUnitResourceAccessor());
     }
 
     @Test
     public void reset() {
         ChangeLogParserFactory instance1 = ChangeLogParserFactory.getInstance();
         ChangeLogParserFactory.reset();
-        assertFalse(instance1 == ChangeLogParserFactory.getInstance());
+        assertNotSame(instance1, ChangeLogParserFactory.getInstance());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void builtInGeneratorsAreFound() {
-        List parsers = ChangeLogParserFactory.getInstance().getParsers();
-        assertTrue(!parsers.isEmpty());
-    }
-
-    private static class MockChangeLogParser implements ChangeLogParser {
-
-        @Override
-        public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-            return null;
-        }
-
-        @Override
-        public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-            return changeLogFile.endsWith(".test");
-        }
-
-        @Override
-        public int getPriority() {
-            return PRIORITY_DEFAULT;
-        }        
+        List<ChangeLogParser> parsers = ChangeLogParserFactory.getInstance().getParsers();
+        assertThat(parsers, not(empty()));
     }
 }
