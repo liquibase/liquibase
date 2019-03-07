@@ -72,31 +72,27 @@ jobs:
 #      - run:
 #          name: Build and test everything.
 #          command: mvn -B -Psonar --fail-at-end clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${CIRCLE_BRANCH}
-#      - run:
-#          name: Collect test results and build artifacts
-#          command: |
+      - run:
+          name: Collect test results and build artifacts
+          command: |
 #              mkdir /home/circleci/circle_test_reports
 #              export CIRCLE_TEST_REPORTS=/home/circleci/circle_test_reports
 #              mkdir -p ${CIRCLE_TEST_REPORTS}/junit/
 #              find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/junit/ \;
 #              find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/junit/ \;
 #
-#              mkdir /home/circleci/circle_artifacts
-#              export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts
+              mkdir /home/circleci/circle_artifacts
+              export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts
 #
-#              cp liquibase-core/target/liquibase*-bin.zip ${CIRCLE_ARTIFACTS}
-#              cp liquibase-core/target/liquibase*-bin.tar.gz ${CIRCLE_ARTIFACTS}
-#              cp liquibase-core/target/liquibase*-SNAPSHOT.jar ${CIRCLE_ARTIFACTS}
-#              cp liquibase-rpm/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm ${CIRCLE_ARTIFACTS}
-#              cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
-#          when: always
-#
+              cp liquibase-core/target/liquibase*-bin.zip ${CIRCLE_ARTIFACTS}
+              cp liquibase-core/target/liquibase*-bin.tar.gz ${CIRCLE_ARTIFACTS}
+              cp liquibase-core/target/liquibase*-SNAPSHOT.jar ${CIRCLE_ARTIFACTS}
+              cp liquibase-rpm/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm ${CIRCLE_ARTIFACTS}
+              cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
+          when: always
+
       - store_test_results:
           path: liquibase-core/target/surefire-reports
       - store_artifacts:
-          path: liquibase-core/target/liquibase-*.jar
-      - store_artifacts:
-          path: liquibase-core/target/liquibase-*.rpm
-      - store_artifacts:
-          path: liquibase-core/target/liquibase-*.deb
+          path: ${CIRCLE_ARTIFACTS}
 
