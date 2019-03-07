@@ -1,6 +1,7 @@
 package liquibase.serializer.core.string
 
 import liquibase.Scope
+import liquibase.changelog.ChangeSet
 import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 import spock.lang.Unroll;
@@ -263,10 +264,20 @@ public class StringChangeLogSerializerTest extends Specification {
         expect:
         setFields(change);
 
+        if (change instanceof CreateProcedureChange) {
+            ((CreateProcedureChange) change).setRelativeToChangelogFile(false)
+            ((CreateProcedureChange) change).setPath(null)
+        } else if (change instanceof CreateViewChange) {
+            ((CreateViewChange) change).setRelativeToChangelogFile(false)
+            ((CreateViewChange) change).setPath(null)
+        }
+
+        change.setChangeSet(new ChangeSet("test", "author", false, false, null, null, null, null))
+
         String string = new StringChangeLogSerializer().serialize(change, false);
 //            System.out.println(string);
 //            System.out.println("-------------");
-        assert string.indexOf("@") < 0: "@ in string.  Probably poorly serialzed object reference." + string;
+        assert string.indexOf("@") < 0: "@ in string.  Probably poorly serialized object reference." + string;
 
         where:
         change << Scope.getCurrentScope().getSingleton(ChangeFactory.class).findAllInstances()

@@ -152,6 +152,11 @@ public class CreateViewChange extends AbstractChange {
         return validate;
     }
 
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return false;
+    }
+
     protected InputStream openSqlStream() throws IOException {
         if (path == null) {
             return null;
