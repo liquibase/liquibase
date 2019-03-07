@@ -392,8 +392,8 @@
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <!--<systemProperties>-->
                             <!--<property>-->
-                                <!--<name>liquibase.defaultlogger.level</name>-->
-                                <!--<value>severe</value>-->
+                                <!--<name>liquibase.log.level</name>-->
+                                <!--<value>fine</value>-->
                             <!--</property>-->
                         <!--</systemProperties>-->
                     </configuration>

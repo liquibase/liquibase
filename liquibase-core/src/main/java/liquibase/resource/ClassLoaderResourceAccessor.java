@@ -22,6 +22,7 @@ import java.util.jar.Manifest;
 public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
 
     public ClassLoaderResourceAccessor(ClassLoader... classLoaders) {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
         try {
             for (ClassLoader classLoader : CollectionUtil.createIfNull(classLoaders)) {
                 for (Path path : findRootPaths(classLoader)) {
@@ -39,18 +40,16 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
 
                     Manifest manifest = new Manifest(manifestUrl.openStream());
                     String classpath = manifest.getMainAttributes().getValue("Class-Path");
+                    log.fine("MANIFEST.MF Class-Path in " + manifestUrl + " is " + classpath);
                     if (classpath != null) {
                         for (String entry : classpath.split("\\s+")) {
-                            entry = entry.replaceFirst("file:/", "");
+                            entry = entry.replaceFirst("file:", "");
                             File entryFile = new File(entry);
-                            if (!entryFile.isAbsolute()) {
-                                entryFile = new File(jarFile, entry);
-                            }
 
                             if (entryFile.exists()) {
                                 addRootPath(entryFile.toPath());
                             } else {
-                                Scope.getCurrentScope().getLog(getClass()).info("Missing file referenced in " + jarFile.getAbsolutePath() + "!/META-INF/MANIFEST.MF Class-Path: " + entry);
+                                Scope.getCurrentScope().getLog(getClass()).info("Missing file " + entryFile.getAbsolutePath() + " referenced in " + jarFile.getAbsolutePath() + "!/META-INF/MANIFEST.MF");
                             }
                         }
 
