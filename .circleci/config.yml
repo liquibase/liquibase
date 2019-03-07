@@ -88,4 +88,5 @@ jobs:
           path: liquibase-core/target/surefire-reports
       - store_artifacts:
           path: /home/circleci/circle_artifacts
+          prefix:
 
