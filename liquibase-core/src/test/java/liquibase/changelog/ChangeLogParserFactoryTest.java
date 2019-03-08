@@ -13,8 +13,10 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeThat;
 
 public class ChangeLogParserFactoryTest {
 
@@ -32,9 +34,8 @@ public class ChangeLogParserFactoryTest {
 
     @Test
     public void register() {
-        ChangeLogParserFactory.getInstance().getParsers().clear();
-
-        assertEquals(0, ChangeLogParserFactory.getInstance().getParsers().size());
+        ChangeLogParserFactory.getInstance().unregisterAllParsers();
+        assumeThat(ChangeLogParserFactory.getInstance().getParsers(), empty());
 
         ChangeLogParserFactory.getInstance().register(new MockChangeLogParser(".test"));
 
@@ -44,10 +45,8 @@ public class ChangeLogParserFactoryTest {
     @Test
     public void unregister_instance() {
         ChangeLogParserFactory factory = ChangeLogParserFactory.getInstance();
-
-        factory.getParsers().clear();
-
-        assertEquals(0, factory.getParsers().size());
+        factory.unregisterAllParsers();
+        assumeThat(ChangeLogParserFactory.getInstance().getParsers(), empty());
 
         ChangeLogParser mockChangeLogParser = new MockChangeLogParser(".test");
 
@@ -62,8 +61,20 @@ public class ChangeLogParserFactoryTest {
     }
 
     @Test
+    public void unregisterAllParsers_ShouldRemoveAllParsers() {
+        ChangeLogParserFactory factory = ChangeLogParserFactory.getInstance();
+        factory.register(new MockChangeLogParser());
+        assumeThat(factory.getParsers(), not(empty()));
+
+        factory.unregisterAllParsers();
+
+        assertThat(factory.getParsers(), empty());
+    }
+
+    @Test
     public void getParser_byExtension() throws Exception {
-        ChangeLogParserFactory.getInstance().getParsers().clear();
+        ChangeLogParserFactory.getInstance().unregisterAllParsers();
+        assumeThat(ChangeLogParserFactory.getInstance().getParsers(), empty());
 
         XMLChangeLogSAXParser xmlChangeLogParser = new XMLChangeLogSAXParser();
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
@@ -77,7 +88,8 @@ public class ChangeLogParserFactoryTest {
 
     @Test
     public void getParser_byFile() throws Exception {
-        ChangeLogParserFactory.getInstance().getParsers().clear();
+        ChangeLogParserFactory.getInstance().unregisterAllParsers();
+        assumeThat(ChangeLogParserFactory.getInstance().getParsers(), empty());
 
         XMLChangeLogSAXParser xmlChangeLogParser = new XMLChangeLogSAXParser();
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
@@ -89,11 +101,35 @@ public class ChangeLogParserFactoryTest {
         assertSame(xmlChangeLogParser, parser);
     }
 
+    @Test
+    public void getParser_shouldAssumePriority() throws Exception {
+        ChangeLogParserFactory factory = ChangeLogParserFactory.getInstance();
+
+        MockChangeLogParser higherPriorityParser = new MockChangeLogParser("banana") {
+            @Override
+            public int getPriority() {
+                return Integer.MAX_VALUE;
+            }
+        };
+        factory.register(new MockChangeLogParser("banana"));
+        factory.register(higherPriorityParser);
+
+        assertEquals(higherPriorityParser, factory.getParser("banana", new JUnitResourceAccessor()));
+    }
+
+    @Test
+    public void getParser_shouldNotGiveAbilityToChangeParsers() {
+        ChangeLogParserFactory factory = ChangeLogParserFactory.getInstance();
+
+        MockChangeLogParser mockChangeLogParser = new MockChangeLogParser();
+        factory.getParsers().add(mockChangeLogParser);
+
+        assertThat(factory.getParsers(), not(hasItem(mockChangeLogParser)));
+    }
+
     @Test(expected = UnknownChangelogFormatException.class)
     public void getParser_noneMatching() throws Exception {
-        ChangeLogParserFactory.getInstance().getParsers().clear();
-
-        ChangeLogParserFactory.getInstance().getParsers().clear();
+        ChangeLogParserFactory.getInstance().unregisterAllParsers();
 
         XMLChangeLogSAXParser xmlChangeLogParser = new XMLChangeLogSAXParser();
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);

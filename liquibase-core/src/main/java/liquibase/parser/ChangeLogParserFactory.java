@@ -42,7 +42,7 @@ public class ChangeLogParserFactory {
     }
 
     public List<ChangeLogParser> getParsers() {
-        return parsers;
+        return new ArrayList<>(parsers);
     }
 
     public ChangeLogParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor) throws LiquibaseException {
@@ -66,5 +66,9 @@ public class ChangeLogParserFactory {
 
     public void unregister(ChangeLogParser changeLogParser) {
         parsers.remove(changeLogParser);
+    }
+
+    public void unregisterAllParsers() {
+        parsers.clear();
     }
 }
