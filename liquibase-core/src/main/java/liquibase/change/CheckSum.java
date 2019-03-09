@@ -68,7 +68,7 @@ public final class CheckSum {
                 //remove "Unknown" unicode char 65533
                 Normalizer.normalize(
                     StringUtil.standardizeLineEndings(valueToChecksum)
-                            .replaceAll("\\uFFFD", "")
+                            .replace("\uFFFD", "")
                         , Normalizer.Form.NFC)
         ), getCurrentVersion());
     }

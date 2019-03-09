@@ -43,6 +43,14 @@ public class CheckSumTest {
     }
 
     @Test
+    public void compute_String_shouldIgnoreUnknownUnicodeChar() {
+        CheckSum checkSum1 = CheckSum.compute("asdfa");
+        CheckSum checkSum2 = CheckSum.compute("as\uFFFDdf\uFFFDa");
+
+        assertEquals(checkSum2, checkSum1);
+    }
+
+    @Test
     public void compute_Stream() {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false);
