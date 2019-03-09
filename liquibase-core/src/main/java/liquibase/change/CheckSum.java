@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtil;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.Normalizer;
@@ -19,10 +20,10 @@ import java.util.regex.Pattern;
  * It is not up to this class to determine what should be storedCheckSum-ed, it simply hashes what is passed to it.
  */
 public final class CheckSum {
-    public static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 8;
     private int version;
     private String storedCheckSum;
 
+    private static final int CURRENT_CHECKSUM_ALGORITHM_VERSION = 8;
     private static final char DELIMITER = ':';
     private static final Pattern CHECKSUM_PATTERN = Pattern.compile("(^\\d)" + DELIMITER + "([a-zA-Z0-9]++)");
 
@@ -83,13 +84,20 @@ public final class CheckSum {
         InputStream newStream = stream;
         if (standardizeLineEndings) {
             newStream = new InputStream() {
+                private boolean isPrevR = false;
+
                 @Override
                 public int read() throws IOException {
                     int read = stream.read();
 
                     if (read == '\r') {
+                        isPrevR = true;
+                        return '\n';
+                    } else if (read == '\n' && isPrevR) {
+                        isPrevR = false;
                         return read();
                     } else {
+                        isPrevR = false;
                         return read;
                     }
                 }
