@@ -65,11 +65,6 @@ public class CheckSumTest {
     }
 
     @Test
-    public void hashCode_test() {
-        assertNotNull(CheckSum.parse("5:asdf").hashCode());
-    }
-
-    @Test
     public void equals() {
         assertEquals(CheckSum.parse("9:asdf"), CheckSum.parse("9:asdf"));
         assertNotEquals(CheckSum.parse("9:asdf"), CheckSum.parse("8:asdf"));
