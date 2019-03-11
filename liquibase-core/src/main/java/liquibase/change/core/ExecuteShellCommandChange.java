@@ -306,7 +306,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
      */
     protected void processResult(int returnCode, String errorStreamOut, String infoStreamOut, Database database) {
         if (returnCode != 0) {
-            throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
+            throw new RuntimeException(getCommandString() + " returned a code of " + returnCode);
         }
     }
 
