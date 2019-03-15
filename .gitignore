@@ -14,7 +14,7 @@ release.properties
 liquibase.integrationtest.local.properties
 /liquibase
 derby.log
-/.idea
+.idea
 *.iml
 .DS_Store
 /tmp
