@@ -34,11 +34,11 @@ public class ChangeLogParserFactoryTest {
     public void register() {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
-        assertEquals(0, ChangeLogParserFactory.getInstance().getParsers().size());
+        assertEquals(5, ChangeLogParserFactory.getInstance().getParsers().size());
 
         ChangeLogParserFactory.getInstance().register(new MockChangeLogParser("mock"));
 
-        assertEquals(1, ChangeLogParserFactory.getInstance().getParsers().size());
+        assertEquals(6, ChangeLogParserFactory.getInstance().getParsers().size());
     }
 
     @Test
@@ -47,17 +47,17 @@ public class ChangeLogParserFactoryTest {
 
         factory.getParsers().clear();
 
-        assertEquals(0, factory.getParsers().size());
+        assertEquals(5, factory.getParsers().size());
 
         XMLChangeLogSAXParser changeLogParser = new XMLChangeLogSAXParser();
 
         factory.register(new SqlChangeLogParser());
         factory.register(changeLogParser);
 
-        assertEquals(2, factory.getParsers().size());
+        assertEquals(7, factory.getParsers().size());
 
         factory.unregister(changeLogParser);
-        assertEquals(1, factory.getParsers().size());
+        assertEquals(6, factory.getParsers().size());
     }
 
     @Test

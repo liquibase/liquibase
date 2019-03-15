@@ -1,6 +1,5 @@
 package liquibase.resource
 
-import liquibase.util.SystemUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -88,7 +87,8 @@ class FileSystemResourceAccessorTest extends Specification {
     @Unroll("#featureName: #path")
     def "openStream can open a single file using an absolute path (windows)"() {
         expect:
-        if (!SystemUtils.isWindows()) {
+        String osName = System.getProperty("os.name");
+        if ((osName != null) && osName.toLowerCase().contains("windows")) {
             return
         }
 

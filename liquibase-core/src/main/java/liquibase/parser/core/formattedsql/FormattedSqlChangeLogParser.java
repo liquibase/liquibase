@@ -15,7 +15,6 @@ import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -206,7 +205,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             }
                         } else if (rollbackMatcher.matches()) {
                             if (rollbackMatcher.groupCount() == 1) {
-                                currentRollbackSql.append(rollbackMatcher.group(1)).append(SystemUtils.LINE_SEPARATOR);
+                                currentRollbackSql.append(rollbackMatcher.group(1)).append(System.lineSeparator());
                             }
                         } else if (preconditionsMatcher.matches()) {
                             if (preconditionsMatcher.groupCount() == 1) {
@@ -238,7 +237,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 }
                             }
                         } else {
-                            currentSql.append(line).append(SystemUtils.LINE_SEPARATOR);
+                            currentSql.append(line).append(System.lineSeparator());
                         }
                     }
                 }
