@@ -33,6 +33,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -1148,7 +1149,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         sql += "WHERE a.OWNER IN ('" + ownerName + "', " + getAllCatalogsStringScratchData() + ")";
                     }
                     if (viewName != null) {
-                        sql += " AND a.VIEW_NAME='" + viewName + "'";
+                        sql += " AND a.VIEW_NAME='" + database.correctObjectName(viewName, View.class) + "'";
                     }
                     sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner=a.owner)";
 
