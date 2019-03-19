@@ -591,20 +591,51 @@ public class DiffToChangeLog {
                     changeSet.addChange(change);
                     changeSets.add(changeSet);
                 }
+            } else {
+                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+                        null, false, quotingStrategy, null);
+                changeSet.setCreated(created);
+                if (diffOutputControl.getLabels() != null) {
+                    changeSet.setLabels(diffOutputControl.getLabels());
+                }
+                for (Change change : changes) {
+                    changeSet.addChange(change);
+                }
+                changeSets.add(changeSet);
+
             }
         }
     }
 
     protected boolean useSeparateChangeSets(Change[] changes) {
+        boolean sawAutocommitBefore = false;
+
         for (Change change : changes) {
-            if (!(change instanceof InsertDataChange
+            boolean thisStatementAutocommits = true;
+
+            if ((change instanceof InsertDataChange
                     || change instanceof DeleteDataChange
                     || change instanceof UpdateDataChange
                     || change instanceof LoadDataChange
             )) {
-                return true;
+                thisStatementAutocommits = false;
+            }
+            if (change instanceof RawSQLChange) {
+                if (((RawSQLChange) change).getSql().trim().matches("SET\\s+\\w+\\s+\\w+")) {
+                    //don't separate out when there is a `SET X Y` statement
+                    thisStatementAutocommits = false;
+                }
+            }
+
+            if (thisStatementAutocommits) {
+                if (sawAutocommitBefore) {
+                    return true;
+                } else {
+                    sawAutocommitBefore = true;
+                }
             }
         }
+
         return false;
     }
 
