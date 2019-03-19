@@ -10,6 +10,8 @@ import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
+import liquibase.logging.LogFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
@@ -73,8 +75,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = uc.getBackingIndex();
             if (backingIndex != null && backingIndex.getName() != null) {
-                boolean found = indexMatchesExisting(uc, backingIndex);
-                if (! found) {
+                if (! alreadyExists(backingIndex, comparisonDatabase, control)) {
                     Change[] changes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
                     if (changes != null) {
                         returnList.addAll(Arrays.asList(changes));
@@ -113,14 +114,26 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
     }
 
-    private boolean indexMatchesExisting(UniqueConstraint uc, Index backingIndex) {
+    private boolean alreadyExists(Index backingIndex, Database comparisonDatabase, DiffOutputControl control) {
         boolean found = false;
-        Table table = (Table)uc.getTable();
-        List<Index> indexList = table.getIndexes();
-        for (Index index : indexList) {
-            if (index.getName().equals(backingIndex.getName())) {
-                found = true;
+        try {
+            String catalogName = null;
+            String schemaName = null;
+            if (control.getIncludeCatalog()) {
+                catalogName = backingIndex.getTable().getSchema().getCatalogName();
             }
+            if (control.getIncludeSchema()) {
+                schemaName = backingIndex.getTable().getSchema().getName();
+            }
+
+            Index backingIndexCopy = new Index(backingIndex.getName(), catalogName, schemaName, backingIndex.getTable().getName());
+            for (Column column : backingIndex.getColumns()) {
+                backingIndexCopy.addColumn(column);
+            }
+
+            found = SnapshotGeneratorFactory.getInstance().has(backingIndexCopy, comparisonDatabase);
+        } catch (Exception e) {
+            LogFactory.getInstance().getLog().warning("Error checking for backing index "+backingIndex.toString()+": "+e.getMessage(), e);
         }
         return found;
     }
