@@ -5,6 +5,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
@@ -125,7 +126,8 @@ public class StandardLockService implements LockService {
         }
 
         if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
-            .supportsBooleanDataType()) {
+                .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
+    			.supportsBooleanDataType()) {
             //check if the changelog table is of an old smallint vs. boolean format
             String lockTable = database.escapeTableName(
                     database.getLiquibaseCatalogName(),
