@@ -189,7 +189,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 // manifold classes should be skipped (no physical jar file present)
                 // see http://manifold.systems/ for details about manifold
                 if (url.toString().startsWith("manifoldclass:") || urlPath.startsWith("manifoldclass:")) {
-                    log.debug(LogType.LOG, "It's a manifold classes url, skipping");
+                    log.fine(LogType.LOG, "It's a manifold classes url, skipping");
                     continue;
                 }
 
