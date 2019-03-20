@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -166,6 +167,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             LOG.fine(LogType.LOG, "value is date = " + col.getValueDate());
             if (col.getValueDate() instanceof Timestamp) {
                 stmt.setTimestamp(i, (Timestamp) col.getValueDate());
+            } else if (col.getValueDate() instanceof Time) {
+                stmt.setTime(i, (Time) col.getValueDate());
             } else {
                 stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
             }
