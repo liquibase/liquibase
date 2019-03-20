@@ -1077,7 +1077,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             });
         }
 
-        public List<CachedRow> getViews(final String catalogName, final String schemaName, final String view) throws DatabaseException {
+        public List<CachedRow> getViews(final String catalogName, final String schemaName, String viewName) throws DatabaseException {
+            final String view;
+            if (database instanceof DB2Database) {
+              view = database.correctObjectName(viewName, View.class);
+            }
+            else {
+              view = viewName;
+            }
             return getResultSetCache("getViews").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
