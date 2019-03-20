@@ -71,7 +71,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 //        dbSpy.setDefaultSchemaName("myschema");
 //        assertEquals("myschema", dbSpy.getDefaultSchemaName());
 //    }
-
+//
 //    @Test
 //    public void changeDefaultSchemaToNull() throws Exception {
 //        Database database = new MSSQLDatabase();
@@ -83,7 +83,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 //        dbSpy.setDefaultSchemaName(null);
 //        assertNull("Changing the default schema to null should be successful.", dbSpy.getDefaultSchemaName());
 //    }
-
+//
 //    @Test(expected = RuntimeException.class)
 //    public void changeDefaultSchemaToForbiddenValue() throws Exception {
 //        Database database = new MSSQLDatabase();
