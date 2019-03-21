@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
@@ -52,7 +53,7 @@ public class DB2Database extends AbstractDb2Database {
 					new RawSqlStatement("SELECT fixpack_num FROM TABLE (sysproc.env_get_inst_info()) as INSTANCEINFO"),
 					Integer.class);
 		} catch (final Exception e) {
-			LogService.getLog(getClass()).info(LogType.LOG, "Error getting fix pack number", e);
+			Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting fix pack number", e);
 		}
 		return null;
 	}
