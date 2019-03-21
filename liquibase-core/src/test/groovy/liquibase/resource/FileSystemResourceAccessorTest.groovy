@@ -88,7 +88,7 @@ class FileSystemResourceAccessorTest extends Specification {
     def "openStream can open a single file using an absolute path (windows)"() {
         expect:
         String osName = System.getProperty("os.name");
-        if ((osName != null) && osName.toLowerCase().contains("windows")) {
+        if ((osName != null) && !osName.toLowerCase().contains("windows")) {
             return
         }
 
