@@ -56,11 +56,6 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     returnKey.setName(row.getString("PK_NAME"));
                 }
 
-                //SQLite is zero based position?
-                if (database instanceof SQLiteDatabase) {
-                    position = (short) (position + 1);
-                }
-
                 String ascOrDesc = row.getString("ASC_OR_DESC");
 
                 Boolean descending;
