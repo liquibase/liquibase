@@ -41,6 +41,12 @@ import java.util.List;
 public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected CheckSum checkSum;
+    /**
+     * storedChecksum is used to make the checksum of a changeset that has already been run
+     * on a database available to liquibase extensions. This value might differ from the checkSum value that
+     * is calculated at run time when ValidatorVisitor is being called
+     */
+    private CheckSum storedCheckSum;
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
@@ -1179,5 +1185,21 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.attributes.put(attribute, value);
 
         return this;
+    }
+
+    /**
+     * Gets storedCheckSum
+     * @return storedCheckSum if it was executed otherwise null
+     */
+    public CheckSum getStoredCheckSum() {
+        return storedCheckSum;
+    }
+
+    /**
+     * Sets storedCheckSum in ValidatingVisitor in case when changeset was executed
+     * @param storedCheckSum
+     */
+    public void setStoredCheckSum(CheckSum storedCheckSum) {
+        this.storedCheckSum = storedCheckSum;
     }
 }
