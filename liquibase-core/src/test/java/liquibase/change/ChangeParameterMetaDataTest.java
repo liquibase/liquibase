@@ -138,7 +138,6 @@ public class ChangeParameterMetaDataTest {
         assertSetsEqual(new String[]{}, catalogName.analyzeRequiredDatabases(new String[] {ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, catalogName.analyzeSupportedDatabases(new String[] {ChangeParameterMetaData.COMPUTE}));
 
-
         ChangeParameterMetaData tableName = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("tableName");
         assertSetsEqual(new String[]{"all"}, tableName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, tableName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
@@ -169,7 +168,7 @@ public class ChangeParameterMetaDataTest {
 
         ChangeParameterMetaData replaceIfExists  = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new CreateViewChange()).getParameters().get("replaceIfExists");
         assertSetsEqual(new String[]{}, replaceIfExists.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
-        assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2","hsqldb","db2"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
+        assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2","hsqldb","db2", "ingress"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
     }
 
 
