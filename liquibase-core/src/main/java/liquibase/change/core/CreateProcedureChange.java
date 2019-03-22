@@ -185,7 +185,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
         if ((StringUtil.trimToNull(getProcedureText()) == null) && (StringUtil.trimToNull(getPath()) == null)) {
             validate.addError(
-                "Cannot specify either 'path' or a nested procedure text in " +
+                "Must specify either 'path' or a nested procedure text in " +
                     Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
             );
         }
