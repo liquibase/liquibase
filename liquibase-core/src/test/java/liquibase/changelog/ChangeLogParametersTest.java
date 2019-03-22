@@ -30,6 +30,13 @@ public class ChangeLogParametersTest {
     }
 
     @Test
+    public void getParameterValue_envVariable() {
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+
+        assertEquals(System.getenv("PATH"), changeLogParameters.getValue("PATH", null));
+    }
+
+    @Test
     public void getParameterValue_systemProperty() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters();
 
