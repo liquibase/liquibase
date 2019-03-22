@@ -18,6 +18,11 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
+
+        if ((database instanceof Firebird3Database)) {
+            return new DatabaseDataType("BOOLEAN");
+        }
+
         if ((database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
@@ -61,6 +66,7 @@ public class BooleanType extends LiquibaseDataType {
 
         String returnValue;
         if (value instanceof String) {
+            value = ((String) value).replaceAll("'", "");
             if ("true".equals(((String) value).toLowerCase(Locale.US)) || "1".equals(value) || "b'1'".equals(((String) value).toLowerCase(Locale.US)) || "t".equals(((String) value).toLowerCase(Locale.US)) || ((String) value).toLowerCase(Locale.US).equals(this.getTrueBooleanValue(database).toLowerCase(Locale.US))) {
                 returnValue = this.getTrueBooleanValue(database);
             } else if ("false".equals(((String) value).toLowerCase(Locale.US)) || "0".equals(value) || "b'0'".equals(
