@@ -101,6 +101,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
+        changeSet.setStoredCheckSum(ran?ranChangeSet.getLastCheckSum():null);
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
         for (Change change : changeSet.getChanges()) {
             try {
