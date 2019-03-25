@@ -52,6 +52,7 @@ public class Column extends AbstractDatabaseObject {
         ConstraintsConfig constraints = columnConfig.getConstraints();
         if (constraints != null) {
             setNullable(constraints.isNullable());
+            setShouldValidateNullable(constraints.shouldValidateNullable());
         }
 
         setRemarks(columnConfig.getRemarks());
@@ -199,9 +200,18 @@ public class Column extends AbstractDatabaseObject {
      * to see if it complies with the constraint logic. The default state for not null constraint is to
      * have 'ENABLE VALIDATE' set.
      */
-    public Column setShouldValidateNullable(boolean shouldValidateNullable) {
+    public Column setShouldValidateNullable(Boolean shouldValidateNullable) {
         this.setAttribute("validateNullable", shouldValidateNullable);
         return this;
+    }
+
+    /**
+     * This returns false for Not Null constraints created with ENABLE NOVALIDATE mode,
+     * otherwise returns true.
+     * @return
+     */
+    public boolean shouldValidateNullable() {
+        return getAttribute("validateNullable", true);
     }
 
     public String toString(boolean includeRelation) {
