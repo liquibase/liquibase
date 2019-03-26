@@ -98,8 +98,10 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (details.supports(this, namespace)) {
                     String shortName = details.getShortName(namespace);
                     String url = details.getSchemaUrl(namespace);
-                    if (shortName != null && url != null) {
+                    if (shortName != null) {
                         shortNameByNamespace.put(namespace, shortName);
+                    }
+                    if (url != null) {
                         urlByNamespace.put(namespace, url);
                     }
                 }
