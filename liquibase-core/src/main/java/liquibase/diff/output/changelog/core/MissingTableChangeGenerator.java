@@ -110,6 +110,9 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             } else if (column.isNullable() != null && !column.isNullable()) {
                 constraintsConfig = new ConstraintsConfig();
                 constraintsConfig.setNullable(false);
+                if (!column.shouldValidateNullable()) {
+                    constraintsConfig.setShouldValidateNullable(false);
+                }
             }
 
             if (constraintsConfig != null) {
