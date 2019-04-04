@@ -6,6 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
@@ -55,7 +56,15 @@ public class BigIntType extends LiquibaseDataType {
         }
         if (database instanceof PostgresDatabase) {
             if (isAutoIncrement()) {
-                return new DatabaseDataType("BIGSERIAL");
+                int majorVersion = 9;
+                try {
+                    majorVersion = database.getDatabaseMajorVersion();
+                } catch (DatabaseException e) {
+                    // ignore
+                }
+                if (majorVersion < 10) {
+                    return new DatabaseDataType("BIGSERIAL");
+                }
             }
         }
         if (database instanceof SybaseASADatabase) {

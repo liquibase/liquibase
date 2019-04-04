@@ -6,6 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
@@ -42,13 +43,22 @@ public class SmallIntType extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 5);
         }
 
-	if (database instanceof PostgresDatabase) {
+        if (database instanceof PostgresDatabase)
+        {
             if (isAutoIncrement()) {
-                return new DatabaseDataType("SMALLSERIAL");
-            } else {
-		return new DatabaseDataType("SMALLINT");
-	    }
+                int majorVersion = 9;
+                try {
+                    majorVersion = database.getDatabaseMajorVersion();
+                } catch (DatabaseException e) {
+                    // ignore
+                }
+                if (majorVersion < 10) {
+                    return new DatabaseDataType("SMALLSERIAL");
+                }
+            }
         }
+
+
         return super.toDatabaseDataType(database);
     }
 
