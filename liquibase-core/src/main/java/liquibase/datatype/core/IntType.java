@@ -6,6 +6,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Locale;
@@ -36,8 +37,18 @@ public class IntType extends LiquibaseDataType {
             return new DatabaseDataType("INTEGER");
         }
         if (database instanceof PostgresDatabase) {
-            if (autoIncrement) {
-                return new DatabaseDataType("SERIAL");
+            if (isAutoIncrement()) {
+                int majorVersion = 9;
+                try {
+                    majorVersion = database.getDatabaseMajorVersion();
+                } catch (DatabaseException e) {
+                    // ignore
+                }
+                if (majorVersion < 10) {
+                    return new DatabaseDataType("SERIAL");
+                } else {
+                    return new DatabaseDataType("INTEGER");
+                }
             } else {
                 return new DatabaseDataType("INTEGER");
             }

@@ -108,7 +108,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
 
         int majorVersion = conn.getDatabaseMajorVersion();
-        int minorVersion =conn.getDatabaseMinorVersion();
+        int minorVersion = conn.getDatabaseMinorVersion();
 
         if ((majorVersion < MINIMUM_DBMS_MAJOR_VERSION) || ((majorVersion == MINIMUM_DBMS_MAJOR_VERSION) &&
             (minorVersion < MINIMUM_DBMS_MINOR_VERSION))) {
@@ -206,17 +206,38 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getAutoIncrementClause() {
-        return "";
+        try {
+            if (getDatabaseMajorVersion() < 10) {
+                return "";
+            }
+        } catch (DatabaseException e) {
+            return "";
+        }
+        return super.getAutoIncrementClause();
     }
 
     @Override
     public boolean generateAutoIncrementStartWith(BigInteger startWith) {
-        return false;
+        try {
+            if (getDatabaseMajorVersion() < 10) {
+                return false;
+            }
+        } catch (DatabaseException e) {
+            return false;
+        }
+        return super.generateAutoIncrementStartWith(startWith);
     }
 
     @Override
     public boolean generateAutoIncrementBy(BigInteger incrementBy) {
-        return false;
+        try {
+            if (getDatabaseMajorVersion() < 10) {
+                return false;
+            }
+        } catch (DatabaseException e) {
+            return false;
+        }
+        return super.generateAutoIncrementBy(incrementBy);
     }
 
     /**
