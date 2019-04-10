@@ -60,7 +60,7 @@ public class ConvertCommand extends AbstractCommand {
         openers.add(new FileSystemResourceAccessor());
         openers.add(new ClassLoaderResourceAccessor());
         if (classpath != null) {
-            openers.add(new FileSystemResourceAccessor(classpath));
+            openers.add(new FileSystemResourceAccessor(new File(classpath)));
         }
         ResourceAccessor resourceAccessor = new CompositeResourceAccessor(openers);
 

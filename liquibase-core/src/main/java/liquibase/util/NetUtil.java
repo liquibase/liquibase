@@ -1,6 +1,6 @@
 package liquibase.util;
 
-import liquibase.logging.LogService;
+import liquibase.Scope;
 import liquibase.logging.LogType;
 
 import java.net.InetAddress;
@@ -53,7 +53,7 @@ public class NetUtil {
         try {
             return getLocalHost().getHostAddress();
         } catch (Exception e) {
-            LogService.getLog(NetUtil.class).debug(LogType.LOG, "Error getting hostname", e);
+            Scope.getCurrentScope().getLog(NetUtil.class).fine(LogType.LOG, "Error getting hostname", e);
             return "unknown";
         }
     }
@@ -68,7 +68,7 @@ public class NetUtil {
         try {
             return getLocalHost().getHostName();
         } catch (Exception e) {
-            LogService.getLog(NetUtil.class).debug(LogType.LOG, "Error getting hostname", e);
+            Scope.getCurrentScope().getLog(NetUtil.class).fine(LogType.LOG, "Error getting hostname", e);
             return "unknown";
         }
     }

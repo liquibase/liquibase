@@ -264,20 +264,16 @@ public class AbstractExtensibleObject implements ExtensibleObject {
                 Object value = this.get(attr, Object.class);
                 if (value instanceof Collection) {
                     try {
-                        Collection valueClone = (Collection) value.getClass().newInstance();
-                        for (Object obj : ((Collection) value)) {
-                            valueClone.add(obj);
-                        }
+                        Collection valueClone = (Collection) value.getClass().getConstructor().newInstance();
+                        valueClone.addAll(((Collection) value));
                         value = valueClone;
                     } catch (Exception e) {
                         //keep original object
                     }
                 } else if (value instanceof Map) {
                     try {
-                        Map valueClone = (Map) value.getClass().newInstance();
-                        for (Map.Entry obj : ((Map<?, ?>) value).entrySet()) {
-                            valueClone.put(obj.getKey(), obj.getValue());
-                        }
+                        Map valueClone = (Map) value.getClass().getConstructor().newInstance();
+                        valueClone.putAll((Map<?, ?>) value);
                         value = valueClone;
                     } catch (Exception e) {
                         //keep original object

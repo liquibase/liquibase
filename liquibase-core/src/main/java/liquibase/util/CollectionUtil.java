@@ -53,4 +53,40 @@ public class CollectionUtil {
         }
     }
 
+    /**
+     * Returns passed currentValue if it is not null and creates a new ArrayList if it is null.
+     * <br><br>
+     * Example: values = createIfNull(values)
+     */
+    public static <T> List<T> createIfNull(List<T> currentValue) {
+        if (currentValue == null) {
+            return new ArrayList<T>();
+        } else {
+            return currentValue;
+        }
+    }
+
+    /**
+     * Returns a new empty array if the passed array is null.
+     */
+    public static <T> T[] createIfNull(T[] arguments) {
+        if (arguments == null) {
+            return (T[]) new Object[0];
+        } else {
+            return arguments;
+        }
+    }
+
+    /**
+     * Returns a new empty set if the passed array is null.
+     */
+    public static <T> Set<T> createIfNull(Set<T> currentValue) {
+        if (currentValue == null) {
+            return new HashSet<>();
+        } else {
+            return currentValue;
+        }
+    }
+
+
 }

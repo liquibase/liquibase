@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
@@ -16,7 +17,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
@@ -82,12 +82,12 @@ public class DiffToChangeLog {
         this.changeSetPath = changeLogFile;
         File file = new File(changeLogFile);
         if (!file.exists()) {
-            LogService.getLog(getClass()).info(LogType.LOG, file + " does not exist, creating");
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " does not exist, creating");
             FileOutputStream stream = new FileOutputStream(file);
             print(new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
             stream.close();
         } else {
-            LogService.getLog(getClass()).info(LogType.LOG, file + " exists, appending");
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " exists, appending");
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
 
@@ -97,7 +97,7 @@ public class DiffToChangeLog {
             innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
             innerXml = innerXml.trim();
             if ("".equals(innerXml)) {
-                LogService.getLog(getClass()).info(LogType.LOG, "No changes found, nothing to do");
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "No changes found, nothing to do");
                 return;
             }
 
@@ -319,7 +319,7 @@ public class DiffToChangeLog {
                     return toSort;
                 }
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).debug(LogType.LOG, "Cannot get object dependencies: " + e.getMessage());
+                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Cannot get object dependencies: " + e.getMessage());
             }
         }
 
@@ -363,7 +363,7 @@ public class DiffToChangeLog {
             else if (! tryDbaDependencies) {
               throw new DatabaseException(dbe);
             }
-            LogService.getLog(getClass()).warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
+            Scope.getCurrentScope().getLog(getClass()).warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
             tryDbaDependencies = false;
             return queryForDependencies(executor, schemas);
         }
@@ -546,7 +546,7 @@ public class DiffToChangeLog {
             for (Class<? extends DatabaseObject> type : types) {
                 log += "    " + type.getName();
             }
-            LogService.getLog(getClass()).debug(LogType.LOG, log);
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, log);
             loggedOrderFor.add(generatorType);
         }
 

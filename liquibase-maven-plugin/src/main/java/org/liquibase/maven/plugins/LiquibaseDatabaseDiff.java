@@ -139,13 +139,13 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         ClassLoader cl = null;
-        ResourceAccessor fileOpener;
+        ResourceAccessor resourceAccessor;
         try {
             cl = getClassLoaderIncludingProjectClasspath();
             Thread.currentThread().setContextClassLoader(cl);
 
             ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-            fileOpener = getFileOpener(artifactClassLoader);
+            resourceAccessor = getResourceAccessor(artifactClassLoader);
         }
         catch (MojoExecutionException e) {
             throw new LiquibaseException("Could not create the class loader, " + e, e);
@@ -153,7 +153,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
         Database db = liquibase.getDatabase();
 
-        Database referenceDatabase = CommandLineUtils.createDatabaseObject(fileOpener, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null, databaseChangeLogTableName, databaseChangeLogLockTableName);
+        Database referenceDatabase = CommandLineUtils.createDatabaseObject(resourceAccessor, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null, databaseChangeLogTableName, databaseChangeLogLockTableName);
 
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {

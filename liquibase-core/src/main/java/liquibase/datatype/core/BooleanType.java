@@ -18,6 +18,11 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
+
+        if ((database instanceof Firebird3Database)) {
+            return new DatabaseDataType("BOOLEAN");
+        }
+
         if ((database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
@@ -37,6 +42,11 @@ public class BooleanType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("SMALLINT");
             }
+        } else if (database.getClass().isAssignableFrom(DB2Database.class)) {
+			if (((DB2Database) database).supportsBooleanDataType())
+				return new DatabaseDataType("BOOLEAN");
+			else
+				return new DatabaseDataType("SMALLINT");
         } else if (database instanceof HsqlDatabase) {
             return new DatabaseDataType("BOOLEAN");
         } else if (database instanceof PostgresDatabase) {
@@ -56,6 +66,7 @@ public class BooleanType extends LiquibaseDataType {
 
         String returnValue;
         if (value instanceof String) {
+            value = ((String) value).replaceAll("'", "");
             if ("true".equals(((String) value).toLowerCase(Locale.US)) || "1".equals(value) || "b'1'".equals(((String) value).toLowerCase(Locale.US)) || "t".equals(((String) value).toLowerCase(Locale.US)) || ((String) value).toLowerCase(Locale.US).equals(this.getTrueBooleanValue(database).toLowerCase(Locale.US))) {
                 returnValue = this.getTrueBooleanValue(database);
             } else if ("false".equals(((String) value).toLowerCase(Locale.US)) || "0".equals(value) || "b'0'".equals(
@@ -94,8 +105,10 @@ public class BooleanType extends LiquibaseDataType {
     protected boolean isNumericBoolean(Database database) {
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
-        }
-        return (database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase) || (database instanceof
+        } else if (database.getClass().isAssignableFrom(DB2Database.class)) {
+			return !((DB2Database) database).supportsBooleanDataType();
+    	}
+        return (database instanceof Db2zDatabase) || (database instanceof DB2Database) || (database instanceof FirebirdDatabase) || (database instanceof
             MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof OracleDatabase) ||
             (database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
             SybaseDatabase);

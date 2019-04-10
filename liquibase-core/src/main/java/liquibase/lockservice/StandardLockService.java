@@ -1,9 +1,11 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
@@ -12,7 +14,6 @@ import liquibase.exception.LockException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -96,7 +97,7 @@ public class StandardLockService implements LockService {
                 executor.comment("Create Database Lock Table");
                 executor.execute(new CreateDatabaseChangeLogLockTableStatement());
                 database.commit();
-                LogService.getLog(getClass()).debug(
+                Scope.getCurrentScope().getLog(getClass()).fine(
                         LogType.LOG, "Created database lock table with name: " +
                                 database.escapeTableName(
                                         database.getLiquibaseCatalogName(),
@@ -107,7 +108,7 @@ public class StandardLockService implements LockService {
             } catch (DatabaseException e) {
                 if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
                     //hit a race condition where the table got created by another node.
-                    LogService.getLog(getClass()).debug(LogType.LOG, "Database lock table already appears to exist " +
+                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Database lock table already appears to exist " +
                             "due to exception: " + e.getMessage() + ". Continuing on");
                 }  else {
                     throw e;
@@ -125,7 +126,8 @@ public class StandardLockService implements LockService {
         }
 
         if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
-            .supportsBooleanDataType()) {
+                .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
+    			.supportsBooleanDataType()) {
             //check if the changelog table is of an old smallint vs. boolean format
             String lockTable = database.escapeTableName(
                     database.getLiquibaseCatalogName(),
@@ -206,7 +208,7 @@ public class StandardLockService implements LockService {
         while (!locked && (new Date().getTime() < timeToGiveUp)) {
             locked = acquireLock();
             if (!locked) {
-                LogService.getLog(getClass()).info(LogType.LOG, "Waiting for changelog lock....");
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Waiting for changelog lock....");
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
@@ -256,7 +258,7 @@ public class StandardLockService implements LockService {
                 executor.comment("Lock Database");
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
                 if ((rowsUpdated == -1) && (database instanceof MSSQLDatabase)) {
-                    LogService.getLog(getClass()).debug(
+                    Scope.getCurrentScope().getLog(getClass()).fine(
                             LogType.LOG, "Database did not return a proper row count (Might have NOCOUNT enabled)"
                     );
                     database.rollback();
@@ -278,7 +280,7 @@ public class StandardLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                LogService.getLog(getClass()).info(LogType.LOG, coreBundle.getString("successfully.acquired.change.log.lock"));
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, coreBundle.getString("successfully.acquired.change.log.lock"));
 
                 hasChangeLogLock = true;
 
@@ -312,7 +314,7 @@ public class StandardLockService implements LockService {
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
                 if ((updatedRows == -1) && (database instanceof MSSQLDatabase)) {
-                    LogService.getLog(getClass()).debug(
+                    Scope.getCurrentScope().getLog(getClass()).fine(
                             LogType.LOG, "Database did not return a proper row count (Might have NOCOUNT enabled.)"
                     );
                     database.rollback();
@@ -354,7 +356,7 @@ public class StandardLockService implements LockService {
                 hasChangeLogLock = false;
 
                 database.setCanCacheLiquibaseTableInfo(false);
-                LogService.getLog(getClass()).info(LogType.LOG, "Successfully released change log lock");
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Successfully released change log lock");
                 database.rollback();
             } catch (DatabaseException e) {
             }
@@ -408,7 +410,7 @@ public class StandardLockService implements LockService {
             releaseLock();
         } catch (LockException e) {
             // ignore ?
-            LogService.getLog(getClass()).info("Ignored exception in forceReleaseLock: " + e.getMessage());
+            Scope.getCurrentScope().getLog(getClass()).info("Ignored exception in forceReleaseLock: " + e.getMessage());
         }*/
     }
 

@@ -81,7 +81,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        documentBuilder.setEntityResolver(new LiquibaseEntityResolver(this));
+        documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
 
         Document doc = documentBuilder.newDocument();
         doc.setXmlVersion(XML_VERSION);
@@ -137,7 +137,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         FileInputStream in = new FileInputStream(changeLogFile);
         String existingChangeLog;
         try {
-            existingChangeLog = StreamUtil.getStreamContents(in);
+            existingChangeLog = StreamUtil.readStreamAsString(in);
         } finally {
             in.close();
         }

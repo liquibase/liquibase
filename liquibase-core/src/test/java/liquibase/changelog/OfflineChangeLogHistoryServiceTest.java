@@ -21,7 +21,9 @@ import static org.junit.Assert.assertTrue;
 /**
  * @see https://liquibase.jira.com/browse/CORE-2334
  */
-public class OfflineChangeLogHistoryServiceTest  {
+public class OfflineChangeLogHistoryServiceTest {
+    private static final String CHANGE_LOG_CSV = "changeLog.csv";
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -54,6 +56,27 @@ public class OfflineChangeLogHistoryServiceTest  {
         assertTrue(writer.toString().contains("CREATE TABLE PUBLIC.DATABASECHANGELOG"));
         assertTrue(writer.toString().contains("INSERT INTO PUBLIC.DATABASECHANGELOG"));
     }
+
+    /**
+     * Test if the changelogCsv gets updated properly and the .new file gets deleted
+     */
+    @Test
+    public void testNewCsvFileDeletion() throws Exception {
+        // Given
+        StringWriter writer = new StringWriter();
+        OfflineChangeLogHistoryService service = createService(writer, "true");
+        ChangeSet changeSet = createChangeSet();
+
+        // When
+        service.init();
+        service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED);
+        writer.close();
+
+        // Assert
+        assertTrue(new File(temporaryFolder.getRoot(), CHANGE_LOG_CSV).exists());
+        assertFalse(new File(temporaryFolder.getRoot(), CHANGE_LOG_CSV + ".new").exists());
+    }
+
     /**
      * Test ChangeLog table update SQL generation with outputLiquibaseSql=true and outputLiquibaseSql=data_only
      */
@@ -76,8 +99,8 @@ public class OfflineChangeLogHistoryServiceTest  {
      */
     private OfflineChangeLogHistoryService createService(Writer writer, String outputLiquibaseSql) {
         HsqlDatabase database = new HsqlDatabase();
-        File changeLogCsvFile = new File(temporaryFolder.getRoot(), "changeLog.csv");
-        OfflineConnection connection = new OfflineConnection("offline:hsqldb?changeLogFile="+changeLogCsvFile.getAbsolutePath()+"&outputLiquibaseSql="+outputLiquibaseSql, new ClassLoaderResourceAccessor());
+        File changeLogCsvFile = new File(temporaryFolder.getRoot(), CHANGE_LOG_CSV);
+        OfflineConnection connection = new OfflineConnection("offline:hsqldb?changeLogFile="+changeLogCsvFile.getAbsolutePath() + "&outputLiquibaseSql=" + outputLiquibaseSql, new ClassLoaderResourceAccessor());
         database.setConnection(connection);
         connection.attached(database);
         OfflineChangeLogHistoryService changeLogHistoryService = (OfflineChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);

@@ -1,5 +1,6 @@
 package liquibase.change.custom;
 
+import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
@@ -44,8 +45,6 @@ public class CustomChangeWrapper extends AbstractChange {
 
     private Map<String, String> paramValues = new HashMap<>();
 
-    private ClassLoader classLoader;
-
     private boolean configured;
 
     @Override
@@ -62,40 +61,21 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     /**
-     * Returns the classloader to use when creating the CustomChange instance in {@link #setClass(String)}.
-     */
-    @DatabaseChangeProperty(isChangeProperty = false)
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
-
-
-
-    /**
-     * Specify the name of the class to use as the CustomChange. This method instantiates the class using {@link #getClassLoader()} or fallback methods
-     * and assigns it to {@link #getCustomChange()}.
-     * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link liquibase.change.Change#generateStatements(liquibase.database.Database)}
+     * Specify the name of the class to use as the CustomChange and assigns it to {@link #getCustomChange()}.
      */
     public CustomChangeWrapper setClass(String className) throws CustomChangeException {
         if (className == null) {
             return this;
         }
-        if (classLoader == null) {
-            throw new CustomChangeException("CustomChangeWrapper classLoader not set");
-        }
         this.className = className;
             try {
                 try {
-                    customChange = (CustomChange) Class.forName(className, true, classLoader).newInstance();
+                    customChange = (CustomChange) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
                 } catch (ClassCastException e) { //fails in Ant in particular
                     try {
-                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).newInstance();
+                        customChange = (CustomChange) Thread.currentThread().getContextClassLoader().loadClass(className).getConstructor().newInstance();
                     } catch (ClassNotFoundException e1) {
-                        customChange = (CustomChange) Class.forName(className).newInstance();
+                        customChange = (CustomChange) Class.forName(className).getConstructor().newInstance();
                     }
                 }
         } catch (Exception e) {
@@ -303,7 +283,6 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        setClassLoader(resourceAccessor.toClassLoader());
         try {
             setClass(parsedNode.getChildValue(null, "class", String.class));
         } catch (CustomChangeException e) {
@@ -332,7 +311,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
         CustomChange customChange = null;
         try {
-            customChange = (CustomChange) Class.forName(className, false, resourceAccessor.toClassLoader()).newInstance();
+            customChange = (CustomChange) Class.forName(className, false, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

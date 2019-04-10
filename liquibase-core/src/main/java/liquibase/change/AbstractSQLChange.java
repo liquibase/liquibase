@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -8,7 +9,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -192,7 +192,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    LogService.getLog(getClass()).debug(LogType.LOG, "Error closing stream", e);
+                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Error closing stream", e);
                 }
             }
         }

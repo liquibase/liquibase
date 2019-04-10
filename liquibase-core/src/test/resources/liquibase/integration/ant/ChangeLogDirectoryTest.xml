@@ -88,7 +88,7 @@
 	</target>
 
 	<target name="testRelativeChangeLogDirectoryStartsWithSlash">
-        <au:expectfailure expectedmessage="/src/test/resources/liquibase/integration/ant/changelog must be a directory">
+        <au:expectfailure expectedmessage="Unable to update database: simple-changelog.xml not found">
 			<lb:updateDatabase
 					changelogdirectory="/src/test/resources/liquibase/integration/ant/changelog"
 					changelogfile="simple-changelog.xml">
@@ -118,7 +118,7 @@
 	</target>
 
 	<target name="testRelativeBackslashedChangeLogDirectoryStartsWithBackslash">
-        <au:expectfailure expectedmessage="/src/test/resources/liquibase/integration/ant/changelog must be a directory">
+        <au:expectfailure expectedmessage="Unable to update database: simple-changelog.xml not found">
 			<lb:updateDatabase
 					changelogdirectory="\src\test\resources\liquibase\integration\ant\changelog"
 					changelogfile="simple-changelog.xml">

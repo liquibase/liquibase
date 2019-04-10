@@ -5,17 +5,17 @@ import static org.junit.Assert.*;
 
 public class SpringBootFatJarTest {
 
-//    @Test
-//    public void testGetPathForResourceWithTwoBangs() {
-//        String result = SpringBootFatJar.getPathForResource("some/path!/that/has!/two/bangs");
-//        assertEquals(result, "that/has/two/bangs");
-//    }
+    @Test
+    public void testGetPathForResourceWithTwoBangs() {
+        String result = SpringBootFatJar.getPathForResource("some/path!/that/has!/two/bangs");
+        assertEquals("that/has/two/bangs", result);
+    }
 
-//    @Test
-//    public void testGetPathForResourceWithOneBang() {
-//        String result = SpringBootFatJar.getPathForResource("some/path!/that/has/one/bang");
-//        assertEquals("that/has/one/bang", result);
-//    }
+    @Test
+    public void testGetPathForResourceWithOneBang() {
+        String result = SpringBootFatJar.getPathForResource("some/path!/that/has/one/bang");
+        assertEquals("that/has/one/bang", result);
+    }
 
     @Test
     public void testGetPathForResourceWithSimplePath() {

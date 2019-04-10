@@ -138,7 +138,6 @@ public class ChangeParameterMetaDataTest {
         assertSetsEqual(new String[]{}, catalogName.analyzeRequiredDatabases(new String[] {ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, catalogName.analyzeSupportedDatabases(new String[] {ChangeParameterMetaData.COMPUTE}));
 
-
         ChangeParameterMetaData tableName = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("tableName");
         assertSetsEqual(new String[]{"all"}, tableName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, tableName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));

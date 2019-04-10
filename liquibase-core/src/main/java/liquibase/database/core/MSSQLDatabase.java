@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -175,8 +176,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         boolean isRealSqlServerConnection = PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
                 || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
 
-        if (isRealSqlServerConnection && (majorVersion <= MSSQL_SERVER_VERSIONS.MSSQL2008)) {
-            LogService.getLog(getClass()).warning(
+        if (isRealSqlServerConnection && (majorVersion < MSSQL_SERVER_VERSIONS.MSSQL2008)) {
+            Scope.getCurrentScope().getLog(getClass()).warning(
                 LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your " +
                         "software is older than SQL Server 2008. Unfortunately, this is not supported, and this " +
                         "connection cannot be used.",
@@ -402,7 +403,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from MSSQL", e);
+                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from MSSQL", e);
             }
         }
         return (caseSensitive != null) && caseSensitive;
@@ -546,7 +547,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
                 }
             } catch (SQLException | DatabaseException e) {
-                LogService.getLog(getClass()).warning(
+                Scope.getCurrentScope().getLog(getClass()).warning(
                     LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
@@ -583,7 +584,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     .queryForObject(new RawSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
-            LogService.getLog(getClass()).warning(LogType.LOG, "Could not determine engine edition", e);
+            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Could not determine engine edition", e);
         }
         return "Unknown";
     }

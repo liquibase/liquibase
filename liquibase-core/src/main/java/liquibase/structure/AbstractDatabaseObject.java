@@ -134,7 +134,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
                 clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
                 return clone;
             } else if (value instanceof DatabaseObject) {
-                DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
+                DatabaseObject clone = (DatabaseObject) value.getClass().getConstructor().newInstance();
                 clone.setName(((DatabaseObject) value).getName());
                 clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
                 return clone;

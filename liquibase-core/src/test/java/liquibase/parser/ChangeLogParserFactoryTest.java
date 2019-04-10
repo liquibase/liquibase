@@ -26,19 +26,19 @@ public class ChangeLogParserFactoryTest {
     @Test
     public void getInstance() {
         assertNotNull(ChangeLogParserFactory.getInstance());
-        
-        assertTrue(ChangeLogParserFactory.getInstance() == ChangeLogParserFactory.getInstance());
+
+        assertSame(ChangeLogParserFactory.getInstance(), ChangeLogParserFactory.getInstance());
     }
 
     @Test
     public void register() {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
-        assertEquals(0, ChangeLogParserFactory.getInstance().getParsers().size());
+        assertEquals(5, ChangeLogParserFactory.getInstance().getParsers().size());
 
         ChangeLogParserFactory.getInstance().register(new MockChangeLogParser("mock"));
 
-        assertEquals(1, ChangeLogParserFactory.getInstance().getParsers().size());
+        assertEquals(6, ChangeLogParserFactory.getInstance().getParsers().size());
     }
 
     @Test
@@ -47,27 +47,26 @@ public class ChangeLogParserFactoryTest {
 
         factory.getParsers().clear();
 
-        assertEquals(0, factory.getParsers().size());
+        assertEquals(5, factory.getParsers().size());
 
         XMLChangeLogSAXParser changeLogParser = new XMLChangeLogSAXParser();
 
         factory.register(new SqlChangeLogParser());
         factory.register(changeLogParser);
 
-        assertEquals(2, factory.getParsers().size());
+        assertEquals(7, factory.getParsers().size());
 
         factory.unregister(changeLogParser);
-        assertEquals(1, factory.getParsers().size());
+        assertEquals(6, factory.getParsers().size());
     }
 
     @Test
     public void reset() {
         ChangeLogParserFactory instance1 = ChangeLogParserFactory.getInstance();
         ChangeLogParserFactory.reset();
-        assertFalse(instance1 == ChangeLogParserFactory.getInstance());
+        assertNotSame(instance1, ChangeLogParserFactory.getInstance());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void builtInGeneratorsAreFound() {
         List<ChangeLogParser> generators = ChangeLogParserFactory.getInstance().getParsers();
@@ -99,8 +98,8 @@ public class ChangeLogParserFactoryTest {
         parserFactory.register(otherXmlParser);
 
         try {
-            assertTrue(otherXmlParser == parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
-            assertFalse(defaultParser == parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
+            assertSame(otherXmlParser, parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
+            assertNotSame(defaultParser, parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
         } finally {
             parserFactory.unregister(otherXmlParser);
         }

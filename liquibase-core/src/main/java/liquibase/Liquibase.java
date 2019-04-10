@@ -33,6 +33,7 @@ import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
+import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -60,7 +61,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class Liquibase {
 
-    private static final Logger LOG = LogService.getLog(Liquibase.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(Liquibase.class);
     protected static final int CHANGESET_ID_NUM_PARTS = 3;
     protected static final int CHANGESET_ID_AUTHOR_PART = 2;
     protected static final int CHANGESET_ID_CHANGESET_PART = 1;
@@ -586,13 +587,13 @@ public class Liquibase {
         final Executor executor = ExecutorService.getInstance().getExecutor(database);
         String rollbackScriptContents;
         try {
-            Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
+            InputStreamList streams = resourceAccessor.openStreams(null, rollbackScript);
             if ((streams == null) || streams.isEmpty()) {
                 throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
             } else if (streams.size() > 1) {
                 throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
             }
-            rollbackScriptContents = StreamUtil.getStreamContents(streams.iterator().next());
+            rollbackScriptContents = StreamUtil.readStreamAsString(streams.iterator().next());
         } catch (IOException e) {
             throw new LiquibaseException("Error reading rollbackScript "+executor+": "+e.getMessage());
         }
@@ -608,7 +609,7 @@ public class Liquibase {
                 "Error executing rollback script. ChangeSets will still be marked as rolled back: " + e.getMessage(),
                 e
             );
-            LogService.getLog(getClass()).severe(LogType.LOG, ex.getMessage());
+            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, ex.getMessage());
             LOG.severe(LogType.LOG, "Error executing rollback script", ex);
             if (changeExecListener != null) {
                 changeExecListener.runFailed(null, databaseChangeLog, database, ex);

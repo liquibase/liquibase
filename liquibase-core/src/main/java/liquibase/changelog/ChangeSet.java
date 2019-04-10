@@ -16,7 +16,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
@@ -102,8 +101,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * File changeSet is defined in.  May be a logical/non-physical string.  It is included in the unique identifier to allow duplicate id+author combinations in different files
      */
     private String filePath = "UNKNOWN CHANGE LOG";
-
-    private Logger log;
 
     /**
      * If set to true, the changeSet will be executed on every update. Defaults to false
@@ -207,7 +204,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public ChangeSet(DatabaseChangeLog databaseChangeLog) {
         this.changes = new ArrayList<>();
-        log = LogService.getLog(getClass());
         this.changeLog = databaseChangeLog;
     }
 
@@ -481,6 +477,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
             throws MigrationFailedException {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -533,7 +531,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
 
-                    LogService.getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
@@ -587,7 +585,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
 
-                log.debug(LogType.LOG, "Reading ChangeSet: " + toString());
+                log.fine(LogType.LOG, "Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
                     if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         if (listener != null) {
@@ -604,7 +602,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                             listener.ran(change, this, changeLog, database);
                         }
                     } else {
-                        log.debug(LogType.LOG, "Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+                        log.fine(LogType.LOG, "Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
                 }
 
@@ -616,7 +614,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     execType = ExecType.EXECUTED;
                 }
             } else {
-                log.debug(LogType.LOG, "Skipping ChangeSet: " + toString());
+                log.fine(LogType.LOG, "Skipping ChangeSet: " + toString());
             }
 
         } catch (Exception e) {
@@ -627,7 +625,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
             if ((getFailOnError() != null) && !getFailOnError()) {
                 log.info(LogType.LOG, "Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
-                log.debug(LogType.LOG, "Failure Stacktrace", e);
+                log.fine(LogType.LOG, "Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
                 // just log the message, dont log the stacktrace by appending exception. Its logged anyway to stdout
@@ -707,7 +705,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (runInTransaction) {
                 database.commit();
             }
-            log.debug(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             try {
                 database.rollback();

@@ -37,18 +37,14 @@ public class ForeignKey extends AbstractDatabaseObject{
 
         List<Column> objects = new ArrayList<>();
         if (getPrimaryKeyColumns() != null) {
-            for (Column column : getPrimaryKeyColumns()) {
-                objects.add(column);
-            }
+            objects.addAll(getPrimaryKeyColumns());
         }
 
         if (getForeignKeyColumns() != null) {
-            for (Column column : getForeignKeyColumns()) {
-                objects.add(column);
-            }
+            objects.addAll(getForeignKeyColumns());
         }
 
-        return objects.toArray(new DatabaseObject[objects.size()]);
+        return objects.toArray(new DatabaseObject[0]);
     }
 
     @Override

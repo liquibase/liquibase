@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -54,7 +55,7 @@ public class ColumnMapRowMapper implements RowMapper {
      * @see java.sql.ResultSetMetaData#getColumnName
      */
     protected String getColumnKey(String columnName) {
-        return columnName.toUpperCase();
+        return columnName.toUpperCase(Locale.US);
     }
 
     /**

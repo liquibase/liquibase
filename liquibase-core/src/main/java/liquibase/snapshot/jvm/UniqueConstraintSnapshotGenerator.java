@@ -276,6 +276,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         "and systable.table_name = '" + database.correctObjectName(example.getRelation().getName(), Table.class) + "'";
             } else if (database instanceof InformixDatabase) {
                 sql = getUniqueConstraintsSqlInformix((InformixDatabase)database, schema, name);
+            } else if(database instanceof Ingres9Database) {
+                sql = "select constraint_name, column_name " +
+                        "from iikeys " +
+                        "where constraint_name = '" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
+                        "and table_name = '" + database.correctObjectName(example.getTable().getName(), Table.class) + "'";
             } else {
                 // If we do not have a specific handler for the RDBMS, we assume that the database has an
                 // INFORMATION_SCHEMA we can use. This is a last-resort measure and might fail.

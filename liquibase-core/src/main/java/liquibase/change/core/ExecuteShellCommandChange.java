@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
@@ -126,7 +127,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                LogService.getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
         }
@@ -222,9 +223,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 (GlobalConfiguration.class).getOutputEncoding());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
-            LogService.getLog(getClass()).severe(LogType.LOG, errorStreamOut);
+            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, errorStreamOut);
         }
-        LogService.getLog(getClass()).info(LogType.LOG, infoStreamOut);
+        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, infoStreamOut);
 
         processResult(returnCode, errorStreamOut, infoStreamOut, database);
     }

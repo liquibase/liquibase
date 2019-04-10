@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.logging.LogService;
@@ -107,7 +108,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                         buffer.append(" ").append(autoIncrementClause);
                     }
                 } else {
-                    LogService.getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
