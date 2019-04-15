@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
@@ -285,7 +286,7 @@ public class SqlUtil {
             if (stringVal.equals("")) {
                 return stringVal;
             }
-            LogService.getLog(SqlUtil.class).info("Unknown default value: value '" + stringVal +
+            Scope.getCurrentScope().getLog(SqlUtil.class).info("Unknown default value: value '" + stringVal +
                     "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
             if (strippedSingleQuotes) { //put quotes back
                 return new DatabaseFunction("'" + stringVal + "'");

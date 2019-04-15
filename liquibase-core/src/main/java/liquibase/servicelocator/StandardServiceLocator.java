@@ -1,10 +1,8 @@
 package liquibase.servicelocator;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import liquibase.Scope;
 import liquibase.exception.ServiceNotFoundException;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

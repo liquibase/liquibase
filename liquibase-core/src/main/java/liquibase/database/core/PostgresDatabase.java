@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -31,7 +32,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
-    private static final Logger LOG = LogService.getLog(PostgresDatabase.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
 
     private Set<String> systemTablesAndViews = new HashSet<>();
 
@@ -291,7 +292,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             major = getDatabaseMajorVersion();
             minor = getDatabaseMinorVersion();
         } catch (DatabaseException x) {
-            LogService.getLog(getClass()).warning(
+            Scope.getCurrentScope().getLog(getClass()).warning(
                     LogType.LOG, "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);

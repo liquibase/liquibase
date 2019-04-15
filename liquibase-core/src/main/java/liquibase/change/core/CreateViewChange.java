@@ -20,6 +20,7 @@ import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.View;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -151,13 +152,23 @@ public class CreateViewChange extends AbstractChange {
         return validate;
     }
 
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return false;
+    }
+
     protected InputStream openSqlStream() throws IOException {
         if (path == null) {
             return null;
         }
 
         try {
-            return StreamUtil.openStream(getPath(), getRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            String path = getPath();
+            String relativeTo = null;
+            if (ObjectUtil.defaultIfNull(getRelativeToChangelogFile(), false)) {
+                relativeTo = getChangeSet().getFilePath();
+            }
+            return getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException("<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
         }
@@ -234,7 +245,7 @@ public class CreateViewChange extends AbstractChange {
 				if (stream == null) {
 					throw new IOException("File does not exist: " + path);
 				}
-				selectQuery = StreamUtil.getStreamContents(stream, encoding);
+				selectQuery = StreamUtil.readStreamAsString(stream, encoding);
 			    if (getChangeSet() != null) {
 					ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
 					if (parameters != null) {

@@ -183,7 +183,7 @@
     </target>
 
     <target name="testRollbackDatabaseByCountChangeLogDirectoryDoesNotExist">
-        <au:expectfailure expectedmessage="${liquibase.test.ant.basedir}/bad_changelog must be a directory">
+        <au:expectfailure expectedmessage="Unable to rollback database: changelog-with-rollback.xml not found">
 	        <lb:rollbackDatabase rollbackCount="1"
                                  changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog"
                                  changelogfile="changelog-with-rollback.xml">

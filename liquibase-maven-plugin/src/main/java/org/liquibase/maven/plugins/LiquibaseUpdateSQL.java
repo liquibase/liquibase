@@ -53,9 +53,9 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 	}
 
 	@Override
-	protected Liquibase createLiquibase(ResourceAccessor fo, Database db)
+	protected Liquibase createLiquibase(Database db)
 			throws MojoExecutionException {
-		Liquibase liquibase = super.createLiquibase(fo, db);
+		Liquibase liquibase = super.createLiquibase(db);
 
 		// Setup the output file writer
 		try {

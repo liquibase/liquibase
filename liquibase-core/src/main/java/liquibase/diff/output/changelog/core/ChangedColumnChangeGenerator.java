@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.Scope;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.core.*;
@@ -122,7 +123,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         Difference difference = differences.getDifference("autoIncrementInformation");
         if (difference != null) {
             if (difference.getReferenceValue() == null) {
-                LogService.getLog(getClass()).info(LogType.LOG, "ChangedColumnChangeGenerator cannot fix dropped auto increment values");
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "ChangedColumnChangeGenerator cannot fix dropped auto increment values");
                 //todo: Support dropping auto increments
             } else {
                 AddAutoIncrementChange change = new AddAutoIncrementChange();

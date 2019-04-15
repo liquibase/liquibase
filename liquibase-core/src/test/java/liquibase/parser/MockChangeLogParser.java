@@ -19,10 +19,11 @@ public class MockChangeLogParser implements ChangeLogParser {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
+
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         for (String ext : validExtensions) {
-            if (changeLogFile.endsWith("."+validExtensions)) {
+            if (changeLogFile.endsWith(ext)) {
                 return true;
             }
         }
@@ -30,7 +31,8 @@ public class MockChangeLogParser implements ChangeLogParser {
     }
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+                                   ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+        return null;
     }
 }

@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Set;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
@@ -103,7 +103,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
-                    if (database instanceof DB2Database) {
+                    if (database.getClass().isAssignableFrom(DB2Database.class)) {
                         return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
                     } else if (database instanceof Db2zDatabase) {
                        return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, tableName), database);
@@ -130,7 +130,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     // from a table, but the table has no FOREIGN KEYs.
                                     if ((database instanceof SybaseASADatabase) && e.getSQLState().equalsIgnoreCase
                                         (ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE)) {
-                                        LogService.getLog(getClass()).debug(
+                                        Scope.getCurrentScope().getLog(getClass()).fine(
                                                 LogType.LOG, String.format("Ignored SAP SQL Anywhere SQL " +
                                                         "exception thrown when FOREIGN KEY list of table '%s' was " +
                                                         "empty.", foundTable));
@@ -200,7 +200,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "AND p.table_name NOT LIKE 'BIN$%' " +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
                         return executeAndExtract(sql, database);
-                    } else if (database instanceof DB2Database) {
+                    } else if(database.getClass().isAssignableFrom(DB2Database.class)) {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                         return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
@@ -504,7 +504,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         protected void warnAboutDbaRecycleBin() {
             if (!ignoreWarnAboutDbaRecycleBin && !warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
-                LogService.getLog(getClass()).warning(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
+                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
                 warnedAboutDbaRecycleBin = true;
             }
         }
@@ -1241,7 +1241,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     Database database = JdbcDatabaseSnapshot.this.getDatabase();
                     String sql;
-                    if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase) || (database
+                    if( database instanceof Ingres9Database ) {
+                        sql = "select CONSTRAINT_NAME, TABLE_NAME from iiconstraints where schema_name ='"
+                                + schemaName + "' and constraint_type='U'";
+                        if (tableName != null) {
+                            sql += " and table_name='" + tableName + "'";
+                        }
+                    } else if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase) || (database
                         instanceof MariaDBDatabase)) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME "
                                 + "from " + database.getSystemSchema() + ".table_constraints "
@@ -1356,7 +1362,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        LogService.getLog(getClass()).warning(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
+                        Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
                         return null; //TODO: find sybase sql
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +

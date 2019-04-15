@@ -21,7 +21,7 @@ public abstract class TestUtil {
     public static <T extends ExtensibleObject> List<T> createAllPermutations(Class<T> type, Map<String, List<Object>> defaultValues, boolean addNulls = true) throws Exception {
         List<T> returnList = new ArrayList<>();
         for (Map<String, Object> parameterValues : CollectionUtil.permutations(defaultValues, addNulls)) {
-            T obj = type.newInstance();
+            T obj = type.getConstructor().newInstance();
             for (Map.Entry<String, ?> entry : parameterValues.entrySet()) {
                 if (obj.getObjectMetaData().getAttribute(entry.getKey()) == null) {
                     throw new RuntimeException("No attribute "+entry.getKey()+" on "+type.getName())

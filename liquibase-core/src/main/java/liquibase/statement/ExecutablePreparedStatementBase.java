@@ -1,19 +1,19 @@
 package liquibase.statement;
 
+import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtil;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.*;
@@ -21,14 +21,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
+import liquibase.change.core.LoadDataChange;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-    private static final Logger LOG = LogService.getLog(ExecutablePreparedStatementBase.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(ExecutablePreparedStatementBase.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
@@ -59,11 +61,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
     }
 
-    private static Reader createReader(InputStream in, String encoding) {
-        return new BufferedReader((StringUtil.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
-            UtfBomAwareReader(in, encoding));
-    }
-
     @Override
     public void execute(PreparedStatementFactory factory) throws DatabaseException {
 
@@ -72,7 +69,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
         String sql = generateSql(cols);
         LOG.info(LogType.WRITE_SQL, sql);
-        LOG.debug(LogType.LOG, "Number of columns = " + cols.size());
+        LOG.fine(LogType.LOG, "Number of columns = " + cols.size());
 
         // create prepared statement
         PreparedStatement stmt = factory.create(sql);
@@ -85,7 +82,10 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             throw new DatabaseException(e);
         } finally {
             for (Closeable closeable : closeables) {
-                StreamUtil.closeQuietly(closeable);
+                try {
+                    closeable.close();
+                } catch (IOException ignore) {
+                }
             }
             JdbcUtils.closeStatement(stmt);
         }
@@ -106,7 +106,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             throws SQLException, DatabaseException {
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
-            LOG.debug(LogType.LOG, "Applying column parameter = " + i + " for column " + col.getName());
+            LOG.fine(LogType.LOG, "Applying column parameter = " + i + " for column " + col.getName());
             applyColumnParameter(stmt, i, col);
             i++;
         }
@@ -125,13 +125,17 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
         if (col.getValue() != null) {
-            LOG.debug(LogType.LOG, "value is string = " + col.getValue());
-            stmt.setString(i, col.getValue());
+            LOG.fine(LogType.LOG, "value is string = " + col.getValue());
+            if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
+                stmt.setObject(i, UUID.fromString(col.getValue()));
+            } else {
+                stmt.setString(i, col.getValue());
+            }
         } else if (col.getValueBoolean() != null) {
-            LOG.debug(LogType.LOG, "value is boolean = " + col.getValueBoolean());
+            LOG.fine(LogType.LOG, "value is boolean = " + col.getValueBoolean());
             stmt.setBoolean(i, col.getValueBoolean());
         } else if (col.getValueNumeric() != null) {
-            LOG.debug(LogType.LOG, "value is numeric = " + col.getValueNumeric());
+            LOG.fine(LogType.LOG, "value is numeric = " + col.getValueNumeric());
             Number number = col.getValueNumeric();
             if (number instanceof ColumnConfig.ValueNumeric) {
                 ColumnConfig.ValueNumeric valueNumeric = (ColumnConfig.ValueNumeric) number;
@@ -160,14 +164,16 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 );
             }
         } else if (col.getValueDate() != null) {
-            LOG.debug(LogType.LOG, "value is date = " + col.getValueDate());
+            LOG.fine(LogType.LOG, "value is date = " + col.getValueDate());
             if (col.getValueDate() instanceof Timestamp) {
                 stmt.setTimestamp(i, (Timestamp) col.getValueDate());
+            } else if (col.getValueDate() instanceof Time) {
+                stmt.setTime(i, (Time) col.getValueDate());
             } else {
                 stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
             }
         } else if (col.getValueBlobFile() != null) {
-            LOG.debug(LogType.LOG, "value is blob = " + col.getValueBlobFile());
+            LOG.fine(LogType.LOG, "value is blob = " + col.getValueBlobFile());
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
                 if (lob.length <= Integer.MAX_VALUE) {
@@ -175,29 +181,29 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 } else {
                     stmt.setBinaryStream(i, lob.content, lob.length);
                 }
-            } catch (IOException e) {
+            } catch (IOException | LiquibaseException e) {
                 throw new DatabaseException(e.getMessage(), e); // wrap
             }
         } else if (col.getValueClobFile() != null) {
             try {
-                LOG.debug(LogType.LOG, "value is clob = " + col.getValueClobFile());
+                LOG.fine(LogType.LOG, "value is clob = " + col.getValueClobFile());
                 LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
                 if (lob.length <= Integer.MAX_VALUE) {
                     stmt.setCharacterStream(i, lob.content, (int) lob.length);
                 } else {
                     stmt.setCharacterStream(i, lob.content, lob.length);
                 }
-            } catch (IOException e) {
+            } catch (IOException | LiquibaseException e) {
                 throw new DatabaseException(e.getMessage(), e); // wrap
             }
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
-            LOG.debug(LogType.LOG, "value is explicit null");
+            LOG.fine(LogType.LOG, "value is explicit null");
             stmt.setNull(i, java.sql.Types.NULL);
         }
     }
 
-    private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws DatabaseException, IOException {
+    private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws LiquibaseException, IOException {
         InputStream in = getResourceAsStream(valueLobFile);
 
         if (in == null) {
@@ -218,12 +224,16 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 in.mark(IN_MEMORY_THRESHOLD);
             }
 
-            long length = StreamUtil.getContentLength(in);
+            long length = getContentLength(in);
 
             if (in.markSupported() && (length <= IN_MEMORY_THRESHOLD)) {
                 in.reset();
             } else {
-                StreamUtil.closeQuietly(in);
+                try {
+                    in.close();
+                } catch (IOException ignored) {
+
+                }
                 in = getResourceAsStream(valueLobFile);
                 in = createStream(in);
             }
@@ -237,7 +247,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     private LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
-            throws IOException, DatabaseException {
+            throws IOException, LiquibaseException {
         InputStream in = getResourceAsStream(valueLobFile);
 
         if (in == null) {
@@ -249,20 +259,23 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         Reader reader = null;
 
         try {
-            reader = createReader(in, encoding);
+            reader = StreamUtil.readStreamWithReader(in, encoding);
 
             if (reader.markSupported()) {
                 reader.mark(IN_MEMORY_THRESHOLD);
             }
 
-            long length = StreamUtil.getContentLength(reader);
+            long length = getContentLength(reader);
 
             if (reader.markSupported() && (length <= IN_MEMORY_THRESHOLD)) {
                 reader.reset();
             } else {
-                StreamUtil.closeQuietly(reader);
+                try {
+                    reader.close();
+                } catch (IOException ignored) {
+                }
                 in = getResourceAsStream(valueLobFile);
-                reader = createReader(in, encoding);
+                reader = StreamUtil.readStreamWithReader(in, encoding);
             }
 
             return new LOBContent<>(reader, length);
@@ -276,9 +289,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    private InputStream getResourceAsStream(String valueLobFile) throws IOException {
+    private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
         String fileName = getFileName(valueLobFile);
-        Set<InputStream> streams = this.resourceAccessor.getResourcesAsStream(fileName);
+        InputStreamList streams = this.resourceAccessor.openStreams(null, fileName);
         if ((streams == null) || streams.isEmpty()) {
             return null;
         }
@@ -346,6 +359,27 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return columns;
     }
 
+    protected long getContentLength(InputStream in) throws IOException {
+        long length = 0;
+        byte[] buf = new byte[4096];
+        int bytesRead = in.read(buf);
+        while (bytesRead > 0) {
+            length += bytesRead;
+            bytesRead = in.read(buf);
+        }
+        return length;
+    }
+
+    protected long getContentLength(Reader reader) throws IOException {
+        long length = 0;
+        char[] buf = new char[2048];
+        int charsRead = reader.read(buf);
+        while (charsRead > 0) {
+            length += charsRead;
+            charsRead = reader.read(buf);
+        }
+        return length;
+    }
     private class LOBContent<T> {
         private final T content;
         private final long length;

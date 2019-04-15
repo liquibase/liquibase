@@ -1,11 +1,5 @@
 package liquibase.integration.commandline;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.ConsoleAppender;
-import ch.qos.logback.core.filter.AbstractMatcherFilter;
-import ch.qos.logback.core.spi.FilterReply;
 import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.visitor.ChangeExecListener;
@@ -23,11 +17,8 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogLevel;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
-import liquibase.logging.core.DefaultLoggerConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -38,7 +29,6 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.xml.XMLResourceBundle;
 import liquibase.util.xml.XmlResourceBundleControl;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -60,12 +50,12 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class Main {
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
-    private static final Logger LOG = LogService.getLog(Main.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static XMLResourceBundle commandLineHelpBundle = ((XMLResourceBundle) getBundle
             ("liquibase/i18n/liquibase-commandline-helptext", new XmlResourceBundleControl()));
 
-    private static ConsoleLogFilter consoleLogFilter = new ConsoleLogFilter();
+    private static CommandLineLoggerService consoleLogFilter = new CommandLineLoggerService();
 
     protected ClassLoader classLoader;
     protected String driver;
@@ -120,7 +110,7 @@ public class Main {
     protected String outputSchemasAs;
     protected String referenceSchemas;
     protected String schemas;
-        
+
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
      * a simple wrapper so that an errorlevel of != 0 is guaranteed in case of an uncaught exception.
@@ -131,7 +121,7 @@ public class Main {
         int errorLevel = 0;
         try {
             errorLevel = run(args);
-        } catch (LiquibaseException e) {
+        } catch (Throwable e) {
             System.exit(-1);
         }
         System.exit(errorLevel);
@@ -145,119 +135,99 @@ public class Main {
      * @return the errorlevel to be returned to the operating system, e.g. for further processing by scripts
      * @throws LiquibaseException a runtime exception
      */
-    public static int run(String[] args) throws LiquibaseException {
-        setupLogging();
+    public static int run(String[] args) throws Exception {
+        return Scope.child(null, Collections.singletonMap(Scope.Attr.logService.name(), new CommandLineLoggerService()), new Scope.ScopedRunnerWithReturn<Integer>() {
+            @Override
+            public Integer run() throws Exception {
+                Logger log = Scope.getCurrentScope().getLog(Main.class);
+                boolean outputLoggingEnabled = false;
 
-        Logger log = LogService.getLog(Main.class);
-        boolean outputLoggingEnabled = false;
+                try {
+                    GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration
+                            (GlobalConfiguration.class);
 
-        try {
-            GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration
-                (GlobalConfiguration.class);
-
-            if (!globalConfiguration.getShouldRun()) {
-                log.warning(LogType.USER_MESSAGE, (
-                    String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                        LiquibaseConfiguration.getInstance().describeValueLookupLogic(
-                            globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)))));
-                return 0;
-            }
+                    if (!globalConfiguration.getShouldRun()) {
+                        log.warning(LogType.USER_MESSAGE, (
+                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
+                                        LiquibaseConfiguration.getInstance().describeValueLookupLogic(
+                                                globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)))));
+                        return 0;
+                    }
 
 
-            Main main = new Main();
-            log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
+                    Main main = new Main();
+                    log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
 
-            if ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0])) {
-                main.printHelp(System.out);
-                return 0;
-            } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
-                log.info(LogType.USER_MESSAGE,
-                    String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
-                    StreamUtil.getLineSeparator()));
-                return 0;
-            }
+                    if ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0])) {
+                        main.printHelp(System.out);
+                        return 0;
+                    } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
+                        log.info(LogType.USER_MESSAGE,
+                                String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
+                                        StreamUtil.getLineSeparator()));
+                        return 0;
+                    }
 
-            try {
-                main.parseOptions(args);
-            } catch (CommandLineParsingException e) {
-                log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
-                throw e;
-            }
+                    try {
+                        main.parseOptions(args);
+                    } catch (CommandLineParsingException e) {
+                        log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
+                        throw e;
+                    }
 
-            List<String> setupMessages = main.checkSetup();
-            if (!setupMessages.isEmpty()) {
-                main.printHelp(setupMessages, System.err);
-                return 1;
-            }
+                    List<String> setupMessages = main.checkSetup();
+                    if (!setupMessages.isEmpty()) {
+                        main.printHelp(setupMessages, System.err);
+                        return 1;
+                    }
 
-            main.applyDefaults();
-            Scope.getCurrentScope().child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {
-                main.doMigration();
+                    main.applyDefaults();
+                    Scope.child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {
+                        main.doMigration();
 
-                if (COMMANDS.UPDATE.equals(main.command)) {
-                    log.info(LogType.USER_MESSAGE, coreBundle.getString("update.successful"));
-                } else if (main.command.startsWith(COMMANDS.ROLLBACK) && !main.command.endsWith("SQL")) {
-                    log.info(LogType.USER_MESSAGE, coreBundle.getString("rollback.successful"));
-                } else if (!main.command.endsWith("SQL")) {
-                    log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("command.successful"), main.command));
+                        if (COMMANDS.UPDATE.equals(main.command)) {
+                            log.info(LogType.USER_MESSAGE, coreBundle.getString("update.successful"));
+                        } else if (main.command.startsWith(COMMANDS.ROLLBACK) && !main.command.endsWith("SQL")) {
+                            log.info(LogType.USER_MESSAGE, coreBundle.getString("rollback.successful"));
+                        } else if (!main.command.endsWith("SQL")) {
+                            log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("command.successful"), main.command));
+                        }
+
+                    });
+                } catch (Exception e) {
+                    String message = e.getMessage();
+                    if (e.getCause() != null) {
+                        message = e.getCause().getMessage();
+                    }
+                    if (message == null) {
+                        message = coreBundle.getString("unknown.reason");
+                    }
+                    // At a minimum, log the message.  We don't need to print the stack
+                    // trace because the logger already did that upstream.
+                    try {
+                        if (e.getCause() instanceof ValidationFailedException) {
+                            ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
+                        } else {
+                            log.severe(LogType.USER_MESSAGE,
+                                    (String.format(coreBundle.getString("unexpected.error"), message)), e);
+                            log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
+                        }
+                    } catch (IllegalFormatException e1) {
+                        e1.printStackTrace();
+                    }
+                    throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
                 }
-
-            });
-        } catch (Exception e) {
-            String message = e.getMessage();
-            if (e.getCause() != null) {
-                message = e.getCause().getMessage();
+                return 0;
             }
-            if (message == null) {
-                message = coreBundle.getString("unknown.reason");
-            }
-            // At a minimum, log the message.  We don't need to print the stack
-            // trace because the logger already did that upstream.
-            try {
-                if (e.getCause() instanceof ValidationFailedException) {
-                    ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
-                } else {
-                    log.severe(LogType.USER_MESSAGE,
-                        (String.format(coreBundle.getString("unexpected.error"), message)), e);
-                    log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
-                }
-            } catch (IllegalFormatException e1) {
-                e1.printStackTrace();
-            }
-            throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
-        }
-        return 0;
-    }
+        });
 
-    /**
-     * Set up the logging to the STDOUT/STDERR console streams.
-     */
-    protected static void setupLogging() {
-        LogLevel defaultLogLevel =
-            (LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class)).getLogLevel();
 
-        ch.qos.logback.classic.Logger root =
-            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.toLevel(defaultLogLevel.name()));
-
-        Iterator<Appender<ILoggingEvent>> appenderIterator = root.iteratorForAppenders();
-        while (appenderIterator.hasNext()) {
-            Appender<ILoggingEvent> next = appenderIterator.next();
-            if (next instanceof ConsoleAppender) {
-                ((ConsoleAppender) next).addFilter(consoleLogFilter);
-            }
-        }
-
-        for (String target : new String[] {"System.out", "System.err"}) {
-            CommandLineOutputAppender appender = new CommandLineOutputAppender(LoggerFactory.getILoggerFactory(), target);
-            root.addAppender(appender);
-            appender.start();
-        }
     }
 
     /**
      * Warns the user that some logging was suppressed because the --logLevel command line switch was not set high
      * enough
+     *
      * @param outputLoggingEnabled if a warning should be printed
      * @return the warning message (if outputLoggingEnabled==true), an empty String otherwise
      */
@@ -459,14 +429,15 @@ public class Main {
 
     /**
      * Open a property file that is embedded as a Java resource and parse it.
+     *
      * @param potentialPropertyFile location and file name of the property file
-     * @throws IOException if the file cannot be opened
+     * @throws IOException                 if the file cannot be opened
      * @throws CommandLineParsingException if an error occurs during parsing
      */
     private void parseDefaultPropertyFileFromResource(File potentialPropertyFile) throws IOException,
-        CommandLineParsingException {
+            CommandLineParsingException {
         try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream
-            (potentialPropertyFile.getAbsolutePath())) {
+                (potentialPropertyFile.getAbsolutePath())) {
             if (resourceAsStream != null) {
                 parsePropertiesFile(resourceAsStream);
             }
@@ -476,12 +447,13 @@ public class Main {
     /**
      * Open a regular property file (not embedded in a resource - use {@link #parseDefaultPropertyFileFromResource}
      * for that) and parse it.
+     *
      * @param potentialPropertyFile path and file name to the the property file
-     * @throws IOException if the file cannot be opened
+     * @throws IOException                 if the file cannot be opened
      * @throws CommandLineParsingException if an error occurs during parsing
      */
     private void parseDefaultPropertyFileFromFile(File potentialPropertyFile) throws IOException,
-        CommandLineParsingException {
+            CommandLineParsingException {
         try (FileInputStream stream = new FileInputStream(potentialPropertyFile)) {
             parsePropertiesFile(stream);
         }
@@ -546,68 +518,70 @@ public class Main {
     /**
      * Checks for unexpected (unknown) command line parameters and, if any problems are found,
      * returns the list of issues in String form.
+     *
      * @param messages an array of Strings to which messages for issues found will be added
      */
     private void checkForUnexpectedCommandParameter(List<String> messages) {
         if (COMMANDS.UPDATE_COUNT.equalsIgnoreCase(command)
-            || COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)
-            || COMMANDS.UPDATE_TO_TAG.equalsIgnoreCase(command)
-            || COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)
-            || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
-            || COMMANDS.DB_DOC.equalsIgnoreCase(command)
-            || COMMANDS.TAG.equalsIgnoreCase(command)
-            || COMMANDS.TAG_EXISTS.equalsIgnoreCase(command)) {
+                || COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)
+                || COMMANDS.UPDATE_TO_TAG.equalsIgnoreCase(command)
+                || COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)
+                || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
+                || COMMANDS.DB_DOC.equalsIgnoreCase(command)
+                || COMMANDS.TAG.equalsIgnoreCase(command)
+                || COMMANDS.TAG_EXISTS.equalsIgnoreCase(command)) {
 
             if ((!commandParams.isEmpty()) && commandParams.iterator().next().startsWith("-")) {
                 messages.add(coreBundle.getString(ERRORMSG_UNEXPECTED_PARAMETERS) + commandParams);
             }
         } else if (COMMANDS.STATUS.equalsIgnoreCase(command)
-            || COMMANDS.UNEXPECTED_CHANGESETS.equalsIgnoreCase(command)) {
+                || COMMANDS.UNEXPECTED_CHANGESETS.equalsIgnoreCase(command)) {
             if ((!commandParams.isEmpty())
-                && !commandParams.iterator().next().equalsIgnoreCase("--" + OPTIONS.VERBOSE)) {
+                    && !commandParams.iterator().next().equalsIgnoreCase("--" + OPTIONS.VERBOSE)) {
                 messages.add(coreBundle.getString(ERRORMSG_UNEXPECTED_PARAMETERS) + commandParams);
             }
         } else if (COMMANDS.DIFF.equalsIgnoreCase(command)
-            || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
+                || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
             if ((!commandParams.isEmpty())) {
                 for (String cmdParm : commandParams) {
                     if (!cmdParm.startsWith("--" + OPTIONS.REFERENCE_USERNAME)
-                        && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_PASSWORD)
-                        && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DRIVER)
-                        && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_CATALOG_NAME)
-                        && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                        && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
-                        && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)
-                        && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_SCHEMAS)
-                        && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_URL)
-                        && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
-                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
-                        && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)) {
+                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_PASSWORD)
+                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DRIVER)
+                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_CATALOG_NAME)
+                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_DEFAULT_SCHEMA_NAME)
+                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
+                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
+                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
+                            && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
+                            && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)
+                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_SCHEMAS)
+                            && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_URL)
+                            && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
+                            && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
+                            && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
             }
         } else if ((COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
-            || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
+                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
         )
-            && (!commandParams.isEmpty())) {
+                && (!commandParams.isEmpty())) {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
-                    && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
-                    && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                    && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)) {
+                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
+                        && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
+                        && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
         }
-        
+
     }
 
     /**
      * Checks the command line for correctness and reports on unexpected, missing and/or malformed parameters.
+     *
      * @param messages an array of Strings to which messages for issues found will be added
      */
     private void validateCommandParameters(final List<String> messages) {
@@ -619,11 +593,12 @@ public class Main {
     /**
      * Checks for missing command line parameters and, if any problems are found,
      * returns the list of issues in String form.
+     *
      * @param messages an array of Strings to which messages for issues found will be added
      */
     private void checkForMissingCommandParameters(final List<String> messages) {
         if ((commandParams.isEmpty() || commandParams.iterator().next().startsWith("-"))
-            && (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command))) {
+                && (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command))) {
             messages.add(coreBundle.getString("changeset.identifier.missing"));
         }
     }
@@ -631,6 +606,7 @@ public class Main {
     /**
      * Checks for incorrectly written command line parameters and, if any problems are found,
      * returns the list of issues in String form.
+     *
      * @param messages an array of Strings to which messages for issues found will be added
      */
     private void checkForMalformedCommandParameters(final List<String> messages) {
@@ -651,9 +627,9 @@ public class Main {
                 }
             }
         } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
-            ().contains("data")) {
+                ().contains("data")) {
             messages.add(String.format(coreBundle.getString("including.data.diffchangelog.has.no.effect"),
-                OPTIONS.DIFF_TYPES, COMMANDS.GENERATE_CHANGELOG
+                    OPTIONS.DIFF_TYPES, COMMANDS.GENERATE_CHANGELOG
             ));
         }
     }
@@ -662,12 +638,12 @@ public class Main {
      * Reads various execution parameters from an InputStream and sets our internal state according to the values
      * found.
      *
-     * @param propertiesInputStream        an InputStream from a Java properties file
+     * @param propertiesInputStream an InputStream from a Java properties file
      * @throws IOException                 if there is a problem reading the InputStream
      * @throws CommandLineParsingException if an invalid property is encountered
      */
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException,
-        CommandLineParsingException {
+            CommandLineParsingException {
         Properties props = new Properties();
         props.load(propertiesInputStream);
         if (props.containsKey("strict")) {
@@ -681,7 +657,7 @@ public class Main {
                 }
                 if (((String) entry.getKey()).startsWith("parameter.")) {
                     changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue
-                        ());
+                            ());
                 } else {
                     Field field = getClass().getDeclaredField((String) entry.getKey());
                     Object currentValue = field.get(this);
@@ -698,16 +674,16 @@ public class Main {
             } catch (NoSuchFieldException ignored) {
                 if (strict) {
                     throw new CommandLineParsingException(
-                        String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
+                            String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
                     );
                 } else {
-                    LogService.getLog(getClass()).warning(
-                        LogType.LOG, String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
+                    Scope.getCurrentScope().getLog(getClass()).warning(
+                            LogType.LOG, String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
                     );
                 }
             } catch (IllegalAccessException e) {
-                throw new UnexpectedLiquibaseException (
-                    String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
+                throw new UnexpectedLiquibaseException(
+                        String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
                 );
             }
         }
@@ -715,8 +691,9 @@ public class Main {
 
     /**
      * If any errors have been found, print the list of errors first, then print the command line help text.
+     *
      * @param errorMessages List of error messages
-     * @param stream the output stream to write the text to
+     * @param stream        the output stream to write the text to
      */
     protected void printHelp(List<String> errorMessages, PrintStream stream) {
         stream.println(coreBundle.getString("errors"));
@@ -728,6 +705,7 @@ public class Main {
 
     /**
      * Print instructions on how to use this program from the command line.
+     *
      * @param stream the output stream to write the help text to
      */
     protected void printHelp(PrintStream stream) {
@@ -792,6 +770,9 @@ public class Main {
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
+        if(arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
+            return;
+
         String[] splitArg = splitArg(arg);
 
         String attributeName = splitArg[0];
@@ -851,16 +832,16 @@ public class Main {
         if (this.defaultsFile == null) {
             this.defaultsFile = "liquibase.properties";
         }
-        if (this.includeSchema == null){
+        if (this.includeSchema == null) {
             this.includeSchema = false;
         }
-        if (this.includeCatalog == null){
+        if (this.includeCatalog == null) {
             this.includeCatalog = false;
         }
-        if (this.includeTablespace == null){
+        if (this.includeTablespace == null) {
             this.includeTablespace = false;
         }
-            
+
     }
 
     protected ClassLoader configureClassLoader() throws CommandLineParsingException {
@@ -877,7 +858,7 @@ public class Main {
                 File classPathFile = new File(classpathEntry);
                 if (!classPathFile.exists()) {
                     throw new CommandLineParsingException(
-                        String.format(coreBundle.getString("does.not.exist"), classPathFile.getAbsolutePath()));
+                            String.format(coreBundle.getString("does.not.exist"), classPathFile.getAbsolutePath()));
                 }
 
                 if (classpathEntry.endsWith(FILE_SUFFIXES.WAR_FILE_SUFFIX)) {
@@ -895,8 +876,8 @@ public class Main {
                                 File jar = extract(earZip, entry);
                                 URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
                                 urls.add(newUrl);
-                                LOG.debug(LogType.LOG,
-                                    String.format(coreBundle.getString("adding.to.classpath"), newUrl));
+                                LOG.fine(LogType.LOG,
+                                        String.format(coreBundle.getString("adding.to.classpath"), newUrl));
                                 jar.deleteOnExit();
                             } else if (entry.getName().toLowerCase().endsWith("war")) {
                                 File warFile = extract(earZip, entry);
@@ -914,7 +895,7 @@ public class Main {
                     } catch (MalformedURLException e) {
                         throw new CommandLineParsingException(e);
                     }
-                    LOG.debug(LogType.LOG, String.format(coreBundle.getString("adding.to.classpath"), newUrl));
+                    LOG.fine(LogType.LOG, String.format(coreBundle.getString("adding.to.classpath"), newUrl));
                     urls.add(newUrl);
                 }
             }
@@ -924,7 +905,7 @@ public class Main {
                 @Override
                 public URLClassLoader run() {
                     return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread()
-                        .getContextClassLoader());
+                            .getContextClassLoader());
                 }
             });
 
@@ -945,6 +926,7 @@ public class Main {
 
     /**
      * Do the actual database migration, i.e. apply the ChangeSets.
+     *
      * @throws Exception
      */
     protected void doMigration() throws Exception {
@@ -955,9 +937,9 @@ public class Main {
 
         try {
 //            if (null != logFile) {
-//                LogService.getLog(getClass()).setLogLevel(logLevel, logFile);
+//                Scope.getCurrentScope().getLog(getClass()).setLogLevel(logLevel, logFile);
 //            } else {
-//                LogService.getLog(getClass()).setLogLevel(logLevel);
+//                Scope.getCurrentScope().getLog(getClass()).setLogLevel(logLevel);
 //            }
         } catch (IllegalArgumentException e) {
             throw new CommandLineParsingException(e.getMessage(), e);
@@ -968,42 +950,42 @@ public class Main {
         CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
         Database database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
-            this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName,
-            Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema),
-            this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
-            this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
-            this.databaseChangeLogLockTableName);
+                this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName,
+                Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema),
+                this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
+                this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
+                this.databaseChangeLogLockTableName);
         database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
         try {
-            
+
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
-                    String.format(coreBundle.getString("cannot.specify.both"),
-                        OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
+                        String.format(coreBundle.getString("cannot.specify.both"),
+                                OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
 
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
-                schemas,
-                referenceSchemas,
-                outputSchemasAs,
-                defaultCatalogName, defaultSchemaName,
-                referenceDefaultCatalogName, referenceDefaultSchemaName,
-                database);
+                    schemas,
+                    referenceSchemas,
+                    outputSchemasAs,
+                    defaultCatalogName, defaultSchemaName,
+                    referenceDefaultCatalogName, referenceDefaultSchemaName,
+                    database);
 
             CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
             DiffOutputControl diffOutputControl = new DiffOutputControl(
-                includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
+                    includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
 
             if (excludeObjects != null) {
                 objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
-                    excludeObjects);
+                        excludeObjects);
                 diffOutputControl.setObjectChangeFilter(objectChangeFilter);
             }
 
             if (includeObjects != null) {
                 objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE,
-                    includeObjects);
+                        includeObjects);
                 diffOutputControl.setObjectChangeFilter(objectChangeFilter);
             }
 
@@ -1014,15 +996,15 @@ public class Main {
 
             if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(
-                    createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                    database, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
+                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                        database, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
                 );
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
-                    createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                    database,
-                    diffOutputControl, objectChangeFilter, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
+                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                        database,
+                        diffOutputControl, objectChangeFilter, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
                 );
                 return;
             } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
@@ -1035,7 +1017,7 @@ public class Main {
                 File file = new File(currentChangeLogFile);
                 if (file.exists() && (!Boolean.parseBoolean(overwriteOutputFile))) {
                     throw new LiquibaseException(
-                        String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
+                            String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
                 } else {
                     try {
                         if (!file.delete()) {
@@ -1043,27 +1025,27 @@ public class Main {
                         }
                     } catch (SecurityException e) {
                         throw new LiquibaseException(
-                            String.format(coreBundle.getString("attempt.to.delete.the.file.failed.cannot.continue"),
-                                currentChangeLogFile
-                            ), e
+                                String.format(coreBundle.getString("attempt.to.delete.the.file.failed.cannot.continue"),
+                                        currentChangeLogFile
+                                ), e
                         );
                     }
                 }
 
                 CatalogAndSchema[] finalTargetSchemas = computedSchemas.finalTargetSchemas;
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
-                    StringUtil.trimToNull(diffTypes), StringUtil.trimToNull(changeSetAuthor),
-                    StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
-                    diffOutputControl);
+                        StringUtil.trimToNull(diffTypes), StringUtil.trimToNull(changeSetAuthor),
+                        StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataOutputDirectory),
+                        diffOutputControl);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
-                    .getCommand(COMMANDS.SNAPSHOT);
+                        .getCommand(COMMANDS.SNAPSHOT);
                 snapshotCommand.setDatabase(database);
                 snapshotCommand.setSchemas(
-                    getCommandParam(
-                        OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName()
-                    )
+                        getCommandParam(
+                                OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName()
+                        )
                 );
                 snapshotCommand.setSerializerFormat(getCommandParam("snapshotFormat", null));
                 Writer outputWriter = getOutputWriter();
@@ -1074,7 +1056,7 @@ public class Main {
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
                 ExecuteSqlCommand executeSqlCommand = (ExecuteSqlCommand) CommandFactory.getInstance().getCommand(
-                    COMMANDS.EXECUTE_SQL);
+                        COMMANDS.EXECUTE_SQL);
                 executeSqlCommand.setDatabase(database);
                 executeSqlCommand.setSql(getCommandParam("sql", null));
                 executeSqlCommand.setSqlFile(getCommandParam("sqlFile", null));
@@ -1086,13 +1068,13 @@ public class Main {
                 return;
             } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
                 SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
-                    .getCommand(COMMANDS.SNAPSHOT);
+                        .getCommand(COMMANDS.SNAPSHOT);
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 snapshotCommand.setDatabase(referenceDatabase);
                 snapshotCommand.setSchemas(
-                    getCommandParam(
-                        OPTIONS.SCHEMAS, referenceDatabase.getDefaultSchema().getSchemaName()
-                    )
+                        getCommandParam(
+                                OPTIONS.SCHEMAS, referenceDatabase.getDefaultSchema().getSchemaName()
+                        )
                 );
                 Writer outputWriter = getOutputWriter();
                 outputWriter.write(snapshotCommand.execute().print());
@@ -1104,8 +1086,8 @@ public class Main {
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
-                liquibase.getDatabase(), liquibase.getResourceAccessor(),
-                changeExecListenerClass, changeExecListenerPropertiesFile);
+                    liquibase.getDatabase(), liquibase.getResourceAccessor(),
+                    changeExecListenerClass, changeExecListenerPropertiesFile);
             liquibase.setChangeExecListener(listener);
 
             database.setCurrentDateTimeFunction(currentDateTimeFunction);
@@ -1119,51 +1101,51 @@ public class Main {
             } else if (COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.forceReleaseLock();
-                LogService.getLog(getClass()).info(LogType.USER_MESSAGE, String.format(
-                    coreBundle.getString("successfully.released.database.change.log.locks"),
-                    liquibase.getDatabase().getConnection().getConnectionUserName() +
-                        "@" + liquibase.getDatabase().getConnection().getURL()
-                    )
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.USER_MESSAGE, String.format(
+                        coreBundle.getString("successfully.released.database.change.log.locks"),
+                        liquibase.getDatabase().getConnection().getConnectionUserName() +
+                                "@" + liquibase.getDatabase().getConnection().getURL()
+                        )
                 );
                 return;
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
-                LogService.getLog(getClass()).info(
-                    LogType.LOG, String.format(
-                        coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
-                            .getConnection().getConnectionUserName() + "@" +
-                            liquibase.getDatabase().getConnection().getURL()
-                    )
+                Scope.getCurrentScope().getLog(getClass()).info(
+                        LogType.LOG, String.format(
+                                coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
+                                        .getConnection().getConnectionUserName() + "@" +
+                                        liquibase.getDatabase().getConnection().getURL()
+                        )
                 );
                 return;
             } else if (COMMANDS.TAG_EXISTS.equalsIgnoreCase(command)) {
                 String tag = commandParams.iterator().next();
                 boolean exists = liquibase.tagExists(tag);
                 if (exists) {
-                    LogService.getLog(getClass()).info(
-                        LogType.LOG, String.format(coreBundle.getString("tag.exists"), tag,
-                            liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                liquibase.getDatabase().getConnection().getURL()
-                        )
+                    Scope.getCurrentScope().getLog(getClass()).info(
+                            LogType.LOG, String.format(coreBundle.getString("tag.exists"), tag,
+                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
+                                            liquibase.getDatabase().getConnection().getURL()
+                            )
                     );
                 } else {
-                    LogService.getLog(getClass()).info(
-                        LogType.LOG, String.format(coreBundle.getString("tag.does.not.exist"), tag,
-                            liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
-                                liquibase.getDatabase().getConnection().getURL()
-                        )
+                    Scope.getCurrentScope().getLog(getClass()).info(
+                            LogType.LOG, String.format(coreBundle.getString("tag.does.not.exist"), tag,
+                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
+                                            liquibase.getDatabase().getConnection().getURL()
+                            )
                     );
                 }
                 return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
-                    (COMMANDS.DROP_ALL);
+                        (COMMANDS.DROP_ALL);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
                 dropAllCommand.setSchemas(getCommandParam(
-                    OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName())
+                        OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName())
                 );
 
-                LogService.getLog(getClass()).info(LogType.USER_MESSAGE, dropAllCommand.execute().print());
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.USER_MESSAGE, dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
                 boolean runVerbose = false;
@@ -1172,7 +1154,7 @@ public class Main {
                     runVerbose = true;
                 }
                 liquibase.reportStatus(runVerbose, new Contexts(contexts), new LabelExpression(labels),
-                    getOutputWriter());
+                        getOutputWriter());
                 return;
             } else if (COMMANDS.UNEXPECTED_CHANGESETS.equalsIgnoreCase(command)) {
                 boolean runVerbose = false;
@@ -1189,8 +1171,8 @@ public class Main {
                     e.printDescriptiveError(System.err);
                     return;
                 }
-                LogService.getLog(getClass()).info(
-                    LogType.USER_MESSAGE, coreBundle.getString("no.validation.errors.found"));
+                Scope.getCurrentScope().getLog(getClass()).info(
+                        LogType.USER_MESSAGE, coreBundle.getString("no.validation.errors.found"));
                 return;
             } else if (COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(command)) {
                 liquibase.clearCheckSums();
@@ -1198,7 +1180,7 @@ public class Main {
             } else if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
                 CheckSum checkSum = null;
                 checkSum = liquibase.calculateCheckSum(commandParams.iterator().next());
-                LogService.getLog(getClass()).info(LogType.USER_MESSAGE, checkSum.toString());
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.USER_MESSAGE, checkSum.toString());
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
@@ -1222,118 +1204,118 @@ public class Main {
                     liquibase.markNextChangeSetRan(new Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(command)) {
                     liquibase.markNextChangeSetRan(new Contexts(contexts), new LabelExpression(labels),
-                        getOutputWriter());
+                            getOutputWriter());
                 } else if (COMMANDS.UPDATE_COUNT.equalsIgnoreCase(command)) {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
-                        LabelExpression(labels));
+                            LabelExpression(labels));
                 } else if (COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
-                        LabelExpression(labels), getOutputWriter());
+                            LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TO_TAG.equalsIgnoreCase(command)) {
                     if ((commandParams == null) || commandParams.isEmpty()) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
+                                String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
                     }
 
                     liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
-                        (labels));
+                            (labels));
                 } else if (COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)) {
                     if ((commandParams == null) || commandParams.isEmpty()) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.tag"),
-                                COMMANDS.UPDATE_TO_TAG_SQL));
+                                String.format(coreBundle.getString("command.requires.tag"),
+                                        COMMANDS.UPDATE_TO_TAG_SQL));
                     }
 
                     liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
-                        (labels), getOutputWriter());
+                            (labels), getOutputWriter());
                 } else if (COMMANDS.UPDATE_SQL.equalsIgnoreCase(command)) {
                     liquibase.update(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.tag"), COMMANDS.ROLLBACK));
+                                String.format(coreBundle.getString("command.requires.tag"), COMMANDS.ROLLBACK));
                     }
                     liquibase.rollback(getCommandArgument(), getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null), new
-                        Contexts(contexts), new LabelExpression(labels));
+                            Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.ROLLBACK_TO_DATE.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.timestamp"),
-                                COMMANDS.ROLLBACK_TO_DATE));
+                                String.format(coreBundle.getString("command.requires.timestamp"),
+                                        COMMANDS.ROLLBACK_TO_DATE));
                     }
                     liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam
-                        (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(labels));
+                            (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.ROLLBACK_COUNT.equalsIgnoreCase(command)) {
                     liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam
-                        (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(labels));
+                            (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(labels));
 
                 } else if (COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.tag"),
-                                COMMANDS.ROLLBACK_SQL));
+                                String.format(coreBundle.getString("command.requires.tag"),
+                                        COMMANDS.ROLLBACK_SQL));
                     }
                     liquibase.rollback(getCommandArgument(), getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null), new
-                        Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                            Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK_TO_DATE_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.timestamp"),
-                                COMMANDS.ROLLBACK_TO_DATE_SQL));
+                                String.format(coreBundle.getString("command.requires.timestamp"),
+                                        COMMANDS.ROLLBACK_TO_DATE_SQL));
                     }
                     liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam
-                            (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression
-                            (labels),
-                        getOutputWriter());
+                                    (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression
+                                    (labels),
+                            getOutputWriter());
                 } else if (COMMANDS.ROLLBACK_COUNT_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.count"),
-                                COMMANDS.ROLLBACK_COUNT_SQL));
+                                String.format(coreBundle.getString("command.requires.count"),
+                                        COMMANDS.ROLLBACK_COUNT_SQL));
                     }
 
                     liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam
-                            (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts),
-                        new LabelExpression(labels),
-                        getOutputWriter()
+                                    (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts),
+                            new LabelExpression(labels),
+                            getOutputWriter()
                     );
                 } else if (COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(command)) {
                     liquibase.futureRollbackSQL(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.FUTURE_ROLLBACK_COUNT_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.count"),
-                                COMMANDS.FUTURE_ROLLBACK_COUNT_SQL));
+                                String.format(coreBundle.getString("command.requires.count"),
+                                        COMMANDS.FUTURE_ROLLBACK_COUNT_SQL));
                     }
 
                     liquibase.futureRollbackSQL(Integer.parseInt(getCommandArgument()), new Contexts(contexts), new
-                        LabelExpression(labels), getOutputWriter());
+                            LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
                         throw new CommandLineParsingException(
-                            String.format(coreBundle.getString("command.requires.tag"),
-                                COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL));
+                                String.format(coreBundle.getString("command.requires.tag"),
+                                        COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL));
                     }
 
                     liquibase.futureRollbackSQL(getCommandArgument(), new Contexts(contexts), new LabelExpression
-                        (labels), getOutputWriter());
+                            (labels), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
                 } else {
                     throw new CommandLineParsingException(
-                        String.format(coreBundle.getString("command.unknown"), command));
+                            String.format(coreBundle.getString("command.unknown"), command));
                 }
             } catch (ParseException ignored) {
                 throw new CommandLineParsingException(
-                    coreBundle.getString("timeformat.invalid"));
+                        coreBundle.getString("timeformat.invalid"));
             }
         } finally {
             try {
                 database.rollback();
                 database.close();
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warning(
-                    LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
+                Scope.getCurrentScope().getLog(getClass()).warning(
+                        LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
             }
         }
     }
@@ -1342,6 +1324,7 @@ public class Main {
      * Return the first "parameter" from the command line that does NOT have the form of parameter=value. A parameter
      * is a command line argument that follows the main action (e.g. update/rollback/...). Example:
      * For the main action "updateToTagSQL &lt;tag&gt;", &lt;tag&gt; would be the command argument.
+     *
      * @return the command argument, if one is given. Otherwise null.
      */
     private String getCommandArgument() {
@@ -1357,7 +1340,8 @@ public class Main {
     /**
      * Returns the value for a command line parameter of the form parameterName=value, or defaultValue if that
      * parameter has not been specified by the user.
-     * @param paramName name of the parameter
+     *
+     * @param paramName    name of the parameter
      * @param defaultValue return value if parameter is not given
      * @return the user-specified value for paramName, or defaultValue
      * @throws CommandLineParsingException if a parameter on the command line is un-parsable
@@ -1424,7 +1408,7 @@ public class Main {
 
     private Writer getOutputWriter() throws IOException {
         String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-            .getOutputEncoding();
+                .getOutputEncoding();
 
         if (outputFile != null) {
             FileOutputStream fileOut;
@@ -1432,9 +1416,9 @@ public class Main {
                 fileOut = new FileOutputStream(outputFile, false);
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
-                LogService.getLog(getClass()).severe(LogType.LOG, String.format(
-                    coreBundle.getString("could.not.create.output.file"),
-                    outputFile));
+                Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, String.format(
+                        coreBundle.getString("could.not.create.output.file"),
+                        outputFile));
                 throw e;
             }
         } else {
@@ -1444,6 +1428,7 @@ public class Main {
 
     /**
      * Determines if this program is executed on a Microsoft Windows-type of operating system.
+     *
      * @return true if running under some variant of MS Windows, false otherwise.
      */
     public boolean isWindows() {
@@ -1532,17 +1517,17 @@ public class Main {
         private static final String VERSION = "version";
     }
 
-    private static class ConsoleLogFilter extends AbstractMatcherFilter {
-
-        private boolean outputLogs;
-
-        @Override
-        public FilterReply decide(Object event) {
-            if (outputLogs) {
-                return FilterReply.ACCEPT;
-            } else {
-                return FilterReply.DENY;
-            }
-        }
-    }
+//    private static class ConsoleLogFilter extends AbstractMatcherFilter {
+//
+//        private boolean outputLogs;
+//
+//        @Override
+//        public FilterReply decide(Object event) {
+//            if (outputLogs) {
+//                return FilterReply.ACCEPT;
+//            } else {
+//                return FilterReply.DENY;
+//            }
+//        }
+//    }
 }

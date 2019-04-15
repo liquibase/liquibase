@@ -28,7 +28,14 @@ public class ChangeLogParameters {
     }
 
     public ChangeLogParameters(Database database) {
-        for (Map.Entry entry : ((Properties) System.getProperties().clone()).entrySet()) {
+    	LinkedHashMap<Object, Object> externalParameters = new LinkedHashMap<>();
+    	// First add environment variables
+    	externalParameters.putAll(System.getenv());
+    	
+    	// Next add system properties; they have higher precedence than / overwrite environment variables
+    	externalParameters.putAll((Properties) System.getProperties().clone());
+        
+    	for (Map.Entry entry : externalParameters.entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
 
@@ -156,7 +163,7 @@ public class ChangeLogParameters {
             result = found.get(0);
         } else if (found.size() > 1) {
             for (ChangeLogParameter changeLogParameter : found) {
-                if (changeLogParameter.getChangeLog() == changeLog) {
+                if (changeLogParameter.getChangeLog().equals(changeLog)) {
                     result = changeLogParameter;
                 }
             }

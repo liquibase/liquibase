@@ -56,6 +56,8 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
         addFkChange.setBaseColumnNames(StringUtil.join(fk.getForeignKeyColumns(), ",", formatter));
         addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getName());
         addFkChange.setReferencedColumnNames(StringUtil.join(fk.getPrimaryKeyColumns(), ",", formatter));
+        addFkChange.setOnDelete(fk.getDeleteRule());
+        addFkChange.setOnUpdate(fk.getUpdateRule());
 
         if (control.getIncludeCatalog()) {
             dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());

@@ -52,7 +52,7 @@ public class UUIDType extends LiquibaseDataType {
 
     @Override
     public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
-        return LoadDataChange.LOAD_DATA_TYPE.STRING;
+        return LoadDataChange.LOAD_DATA_TYPE.UUID;
     }
 
 }

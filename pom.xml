@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.liquibase</groupId>
@@ -77,18 +78,10 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <jdk.version>1.8</jdk.version>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <!-- To skip all tests, pass -Dmaven.test.skip=true on the command line. Alternatively, pass
-             -DskipITs=true to skip only the integration tests, or -DskipUTs=true to only skip the
-             unit tests. -->
-        <skipTests>false</skipTests>
-        <skipITs>${skipTests}</skipITs>
-        <skipUTs>${skipTests}</skipUTs>
 
         <!-- Liquibase core dependencies and required jars versions -->
         <org.springframework.version>4.3.8.RELEASE</org.springframework.version>
@@ -99,11 +92,7 @@
         <hamcrest-core.version>1.3</hamcrest-core.version>
         <javax.servlet.version>3.0.0.v201112011016</javax.servlet.version>
         <junit.version>4.12</junit.version>
-        <mockito.version>1.10.19</mockito.version>
-        <powermock.version>1.6.6</powermock.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <logback.version>1.2.3</logback.version>
-        <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
         <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
         <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
@@ -192,18 +181,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.jboss.weld.se</groupId>
                 <artifactId>weld-se</artifactId>
                 <version>1.1.8.Final</version>
@@ -214,27 +191,6 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-library</artifactId>
                 <version>1.3</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -307,12 +263,6 @@
                 <groupId>commons-cli</groupId>
                 <artifactId>commons-cli</artifactId>
                 <version>${commons-cli.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
             </dependency>
 
             <dependency>
@@ -412,20 +362,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.6.1</version>
-                    <configuration>
-                        <source>${jdk.version}</source>
-                        <target>${jdk.version}</target>
-                        <optimize>true</optimize>
-                        <debug>true</debug>
-                        <encoding>${project.build.sourceEncoding}</encoding>
-                        <!-- <compilerArgument>-Xlint:deprecation</compilerArgument> -->
-                    </configuration>
-                </plugin>
-
-                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
@@ -454,51 +390,13 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                        <reportFormat>plain</reportFormat>
-                        <printSummary>false</printSummary>
-                        <skipTests>${skipUTs}</skipTests>
-                        <systemPropertyVariables>
-                            <jacoco-agent.destfile>${jacoco.ut.execution.data.file}</jacoco-agent.destfile>
-                        </systemPropertyVariables>
-                        <systemProperties>
-                            <property>
-                                <name>liquibase.defaultlogger.level</name>
-                                <value>severe</value>
-                            </property>
-                        </systemProperties>
+                        <!--<systemProperties>-->
+                            <!--<property>-->
+                                <!--<name>liquibase.log.level</name>-->
+                                <!--<value>fine</value>-->
+                            <!--</property>-->
+                        <!--</systemProperties>-->
                     </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven-enforcer-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>enforce-java</id>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                            <configuration>
-                                <rules>
-                                    <requireJavaVersion>
-                                        <version>${jdk.version}</version>
-                                    </requireJavaVersion>
-                                    <requireMavenVersion>
-                                        <version>3.0</version>
-                                    </requireMavenVersion>
-                                    <!-- Avoid the M.A.D. Gadget vulnerability in certain Apache commons-collections versions -->
-                                    <bannedDependencies>
-                                        <excludes>
-                                            <exclude>commons-collections:commons-collections:[3.0,3.2.1]</exclude>
-                                            <exclude>commons-collections:commons-collections:4.0</exclude>
-                                        </excludes>
-                                    </bannedDependencies>
-                                </rules>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
 
                 <plugin>
@@ -551,7 +449,7 @@
                     <version>1.4</version>
                     <configuration>
                         <providerSelection>2.0</providerSelection>
-                        <source />
+                        <source/>
                     </configuration>
                     <executions>
                         <execution>
@@ -621,40 +519,7 @@
         </pluginManagement>
 
     </build>
-
     <profiles>
-        <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <configuration>
-                            <keyname>${liquibase.gpg.keyname}</keyname>
-                            <passphraseServerId>${liquibase.gpg.keyname}</passphraseServerId>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
         <profile>
             <id>debian</id>
             <activation>
@@ -695,82 +560,6 @@
                             <quiet>true</quiet>
                         </configuration>
                     </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>pre-release-activities</id>
-            <build>
-                <plugins>
-                    <!-- Search for and report dependencies that have known security vulnerabilities.
-                             This is a must-have execution before every release! It is not included in every build
-                             because the first execution can easily take 20 minutes. -->
-                    <plugin>
-                        <groupId>org.owasp</groupId>
-                        <artifactId>dependency-check-maven</artifactId>
-                        <version>1.4.5</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>sonar</id>
-            <!-- This is the JaCoCo setup offline instrumentation for all production classes. -->
-            <dependencies>
-                <dependency>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>org.jacoco.agent</artifactId>
-                    <classifier>runtime</classifier>
-                    <version>${jacoco.version}</version>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>unit-test-instrument</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>instrument</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.8</version>
-                        <executions>
-                            <execution>
-                                <id>mkdir-target</id>
-                                <inherited>false</inherited>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <!-- Safety -->
-                                        <mkdir dir="${project.build.directory}" />
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
                 </plugins>
             </build>
         </profile>

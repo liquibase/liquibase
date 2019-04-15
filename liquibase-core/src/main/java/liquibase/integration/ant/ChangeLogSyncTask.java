@@ -29,7 +29,7 @@ public class ChangeLogSyncTask extends AbstractChangeLogBasedTask {
         } catch (IOException e) {
             throw new BuildException("Unable to generate sync SQL. Error creating output writer.", e);
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to sync change log. " + e.toString(), e);
+            throw new BuildException("Unable to sync change log: " + e.getMessage(), e);
         } finally {
             FileUtils.close(writer);
         }

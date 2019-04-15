@@ -1,5 +1,6 @@
 package liquibase.statement;
 
+import liquibase.Scope;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.changelog.ChangeSet;
@@ -25,7 +26,7 @@ import java.util.List;
  */
 public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedStatementBase {
     private final List<ExecutablePreparedStatementBase> collectedStatements;
-    private final Logger LOG = LogService.getLog(getClass());
+    private final Logger LOG = Scope.getCurrentScope().getLog(getClass());
 
     public BatchDmlExecutablePreparedStatement(
             Database database, String catalogName, String schemaName, String tableName,
