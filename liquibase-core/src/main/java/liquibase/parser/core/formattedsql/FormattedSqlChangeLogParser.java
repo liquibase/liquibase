@@ -89,6 +89,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern rollbackEndDelimiterPattern = Pattern.compile(".*rollbackEndDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\d+)", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -114,6 +115,15 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                    changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
                 }
 
+                Matcher ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
+                if (ignoreLinesMatcher.matches ()) {
+                    long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
+                    while ( ignoreCount>0 && (line = reader.readLine()) != null){
+                        ignoreCount--;
+                    }
+                    continue;
+                }
+                
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
                     String finalCurrentSql = changeLogParameters.expandExpressions(StringUtil.trimToNull(currentSql.toString()), changeLog);
