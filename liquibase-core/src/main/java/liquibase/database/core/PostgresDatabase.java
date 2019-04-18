@@ -197,7 +197,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.LEGACY && hasMixedCase(objectName)) {
             return "\"" + objectName + "\"";
-        } else if (objectType != null && objectType.isAssignableFrom(LiquibaseColumn.class)) {
+        } else if (objectType != null && LiquibaseColumn.class.isAssignableFrom(objectType)) {
             return (objectName != null && !objectName.isEmpty()) ? objectName.trim() : objectName;
         }
     
