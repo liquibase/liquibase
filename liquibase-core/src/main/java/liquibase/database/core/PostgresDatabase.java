@@ -28,6 +28,7 @@ import java.util.*;
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
+    protected String dbFullVersion;
 
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
@@ -296,4 +297,29 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
+
+    @Override
+    public String getDatabaseFullVersion() throws DatabaseException {
+        if (dbFullVersion != null){
+            return dbFullVersion;
+        }
+        final String sqlToGetVersion = "SELECT version()";
+        List<?> result = ExecutorService.getInstance().
+                getExecutor(this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
+        if (result != null && !result.isEmpty()){
+            return result.get(0).toString();
+        }
+
+        return null;
+    }
+
+    /**
+     * Method to check if Postgres DB is a type of EDB.
+     * @param dbFullVersion
+     * @return in case of EDB we return true other wise( for Aurora, RDS, Community) false
+     */
+    public static boolean isEDB(String dbFullVersion) {
+        return dbFullVersion == null || dbFullVersion.toLowerCase().contains("eterprisedb");
+    }
+
 }

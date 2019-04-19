@@ -235,6 +235,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    public String getDatabaseFullVersion() throws DatabaseException {
+        return null;
+    }
+
+    @Override
     public String getDefaultCatalogName() {
         if (defaultCatalogName == null) {
             if (defaultSchemaName != null && !this.supportsSchemas()) {
