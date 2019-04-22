@@ -367,26 +367,18 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         for (int i = returnIndex.getColumns().size(); i < position; i++) {
                             returnIndex.getColumns().add(null);
                         }
-
-                        String ascOrDesc;
-                        if (database instanceof Db2zDatabase) {
-                            ascOrDesc =  row.getString("ORDER");
+                        if (definition == null) {
+                            String ascOrDesc;
+                            if (database instanceof Db2zDatabase) {
+                                ascOrDesc =  row.getString("ORDER");
+                            } else {
+                                ascOrDesc = row.getString("ASC_OR_DESC");
+                            }
+                            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                            returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
                         } else {
-                            ascOrDesc = row.getString("ASC_OR_DESC");
+                            returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
                         }
-                        Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-
-                        boolean computed = false;
-                        if (definition != null) {
-                            computed = true;
-                        } else if (descending != null && descending) {
-                            definition = snapshot.getDatabase().escapeObjectName(columnName, Column.class);
-                            computed = !definition.equals(columnName); // avoid conflict when created here column overshadows ColumnSnapshot generated value
-                        }
-                        returnIndex.getColumns().set(position - 1,
-                                new Column().setDescending(descending)
-                                        .setRelation(returnIndex.getTable())
-                                        .setName(computed ? definition : columnName, computed));
                     }
                 }
             }
