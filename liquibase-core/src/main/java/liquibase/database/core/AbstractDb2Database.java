@@ -231,11 +231,6 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
         return super.isSystemObject(example);
     }
 
-    @Override
-    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return objectName;
-    }
-
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectType.isAssignableFrom(Schema.class) || objectType.isAssignableFrom(Catalog.class)) {
             return true;

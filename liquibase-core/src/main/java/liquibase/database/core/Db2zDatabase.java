@@ -32,6 +32,11 @@ public class Db2zDatabase extends AbstractDb2Database {
     }
 
     @Override
+    public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
+        return objectName;
+    }
+
+    @Override
     public boolean isSystemObject(DatabaseObject example) {
         boolean isSystemIndex = example instanceof Index && example.getName() != null && example.getName().contains("_#_");
         boolean isSystemColumn = example instanceof Column && StringUtils.startsWith(example.getName(), "DB2_GENERATED");
