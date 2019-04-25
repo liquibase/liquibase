@@ -10,6 +10,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.util.BooleanUtils;
 
 import java.util.Set;
 
@@ -26,11 +27,14 @@ public class ColumnComparator implements DatabaseObjectComparator {
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         Column column = (Column) databaseObject;
 
-        if (column.getRelation() == null) {
-            return new String[] {(column.getName()).toLowerCase()};
-        } else {
-            return new String[] {(column.getRelation().getName() + ":" + column.getName()).toLowerCase()};
+        String hash = column.getName();
+        if (column.getRelation() != null) {
+            hash += ":" + column.getRelation().getName();
         }
+        if (BooleanUtils.isTrue(column.getComputed())) {
+            hash += ":computed";
+        }
+        return new String[] {hash.toLowerCase()};
     }
 
     @Override
@@ -48,6 +52,10 @@ public class ColumnComparator implements DatabaseObjectComparator {
         }
 
         if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn.getRelation(), otherColumn.getRelation(), chain.getSchemaComparisons(), accordingTo)) {
+            return false;
+        }
+
+        if (BooleanUtils.isTrue(thisColumn.getComputed()) != BooleanUtils.isTrue(otherColumn.getComputed())) {
             return false;
         }
 

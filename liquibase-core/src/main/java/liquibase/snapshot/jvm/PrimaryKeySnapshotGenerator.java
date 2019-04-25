@@ -58,7 +58,15 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String ascOrDesc = row.getString("ASC_OR_DESC");
                 Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                returnKey.addColumn(position - 1, new Column(columnName).setDescending(descending).setRelation(((PrimaryKey) example).getTable()));
+                boolean computed = false;
+                if (descending != null && descending) {
+                    computed = true;
+                }
+                returnKey.addColumn(position - 1, new Column(columnName)
+                        .setDescending(descending)
+                        .setComputed(computed)
+                        .setRelation(((PrimaryKey) example).getTable())
+                );
                 setValidateOptionIfAvailable(database, returnKey, row);
             }
 
