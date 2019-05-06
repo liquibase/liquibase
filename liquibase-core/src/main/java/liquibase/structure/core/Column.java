@@ -224,14 +224,15 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public String toString() {
+        String columnOrder = getDescending() != null && getDescending() ? " DESC" : "";
         if (getRelation() == null) {
-            return getName() + (getDescending() != null && getDescending() ? " DESC" : "");
+            return getName() + columnOrder;
         } else {
             String tableOrViewName = getRelation().getName();
             if (getRelation().getSchema() != null && getRelation().getSchema().getName() != null) {
                 tableOrViewName = getRelation().getSchema().getName()+"."+tableOrViewName;
             }
-            return tableOrViewName + "." + getName();
+            return tableOrViewName + "." + getName() + columnOrder;
         }
     }
 
