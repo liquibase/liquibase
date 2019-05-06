@@ -368,7 +368,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         for (int i = returnIndex.getColumns().size(); i < position; i++) {
                             returnIndex.getColumns().add(null);
                         }
-
                         String ascOrDesc;
                         if (database instanceof Db2zDatabase) {
                             ascOrDesc =  row.getString("ORDER");
@@ -387,7 +386,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         returnIndex.getColumns().set(position - 1,
                                 new Column().setDescending(descending)
                                         .setRelation(returnIndex.getTable())
-                                        .setName(computed ? definition : columnName, computed));
+                                        .setName(computed ? definition : columnName, computed));                        }
                     }
                 }
             }

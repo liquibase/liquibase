@@ -68,9 +68,6 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
                     buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
                 }
             }
-            if (column.getDescending() != null && column.getDescending()) {
-                buffer.append(" DESC");
-            }
             if (iterator.hasNext()) {
 			    buffer.append(", ");
 		    }
