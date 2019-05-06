@@ -389,7 +389,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                                         .setName(computed ? definition : columnName, computed));                        }
                     }
                 }
-            }
+
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
