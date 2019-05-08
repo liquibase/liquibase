@@ -191,7 +191,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         ascOrDesc = row.getString("ASC_OR_DESC");
                     }
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
+                    boolean computed = descending != null && descending;
+                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(computed).setDescending(descending).setRelation(index.getTable()));
                 }
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
@@ -367,21 +368,28 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         for (int i = returnIndex.getColumns().size(); i < position; i++) {
                             returnIndex.getColumns().add(null);
                         }
-                        if (definition == null) {
-                            String ascOrDesc;
-                            if (database instanceof Db2zDatabase) {
-                                ascOrDesc =  row.getString("ORDER");
-                            } else {
-                                ascOrDesc = row.getString("ASC_OR_DESC");
-                            }
-                            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                            returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                        String ascOrDesc;
+                        if (database instanceof Db2zDatabase) {
+                            ascOrDesc =  row.getString("ORDER");
                         } else {
-                            returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                            ascOrDesc = row.getString("ASC_OR_DESC");
                         }
+                        Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+
+                        boolean computed = false;
+                        if (definition != null) {
+                            computed = true;
+                        } else if (descending != null && descending) {
+                            definition = columnName;
+                            computed = true;
+                        }
+                        returnIndex.getColumns().set(position - 1,
+                                new Column().setDescending(descending)
+                                        .setRelation(returnIndex.getTable())
+                                        .setName(computed ? definition : columnName, computed));                        }
                     }
                 }
-            }
+
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
