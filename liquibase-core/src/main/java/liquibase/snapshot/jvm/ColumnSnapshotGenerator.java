@@ -113,11 +113,18 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     column.setNullable(false);
                     column.setShouldValidateNullable(false);
                 }
-                if (Boolean.FALSE.equals(column.isNullable()) && StringUtils.isNotEmpty(constraintName) && !constraintName.startsWith("SYS_")) {
+                if (Boolean.FALSE.equals(column.isNullable()) && hasValidObjectName(constraintName)) {
                     column.setAttribute("notNullConstraintName", constraintName);
                 }
             }
         }
+    }
+
+    private static boolean hasValidObjectName(String objectName) {
+        if (StringUtils.isEmpty(objectName)) {
+            return false;
+        }
+        return !objectName.startsWith("SYS_") && !objectName.startsWith("BIN$");
     }
 
     @Override
