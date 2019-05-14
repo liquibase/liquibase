@@ -100,8 +100,18 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (validated== null) {
                     break;
                 }
-                column.setShouldValidateNullable(validated.toString().equalsIgnoreCase(VALIDATE));
-                return;
+                // Oracle returns NULLABLE=Y for columns that have not null constraints that are not validated
+                // we have to check the search_condition to verify if it is really nullable
+                String searchCondition = cachedRow.getString("SEARCH_CONDITION");
+                searchCondition = searchCondition == null ? "" : searchCondition.toUpperCase();
+                String nullable = cachedRow.getString("NULLABLE");
+                if ("NOT VALIDATED".equalsIgnoreCase(validated.toString())
+                        && "Y".equalsIgnoreCase(nullable)
+                        && searchCondition.matches("\"?\\w+\" IS NOT NULL")) {
+                        // not validated not null constraint found
+                        column.setNullable(false);
+                        column.setShouldValidateNullable(false);
+                }
             }
         }
     }
@@ -123,10 +133,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 schema = relation.getSchema();
                 allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
+                List<CachedRow> metaDataNotNullConst = databaseMetaData.getNotNullConst(schema.getCatalogName(), schema.getName(), relation.getName());
 
                 for (CachedRow row : allColumnsMetadataRs) {
                     Column column = readColumn(row, relation, database);
                     setAutoIncrementDetails(column, database, snapshot);
+                    populateValidateNullableIfNeeded(column, metaDataNotNullConst, database);
                     column.setAttribute(LIQUIBASE_COMPLETE, !column.isNullable());
                     relation.getColumns().add(column);
                 }

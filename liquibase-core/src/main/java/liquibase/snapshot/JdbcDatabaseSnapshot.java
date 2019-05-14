@@ -33,6 +33,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -131,7 +132,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "c.COLUMN_POSITION AS ORDINAL_POSITION, " +
                                         "e.COLUMN_EXPRESSION AS FILTER_CONDITION, " +
                                         "CASE I.UNIQUENESS WHEN 'UNIQUE' THEN 0 ELSE 1 END AS NON_UNIQUE, " +
-                                        "CASE c.DESCEND WHEN 'Y' THEN 'D' WHEN 'N' THEN 'A' END AS ASC_OR_DESC " +
+                                        "CASE c.DESCEND WHEN 'Y' THEN 'D' WHEN 'DESC' THEN 'D' WHEN 'N' THEN 'A' WHEN 'ASC' THEN 'A' END AS ASC_OR_DESC " +
                                         "FROM ALL_IND_COLUMNS c " +
                                         "JOIN ALL_INDEXES i ON i.owner=c.index_owner AND i.index_name = c.index_name and i.table_owner = c.table_owner " +
                                         "LEFT OUTER JOIN all_ind_expressions e ON e.index_owner=c.index_owner AND e.index_name = c.index_name AND e.column_position = c.column_position   " +
@@ -1076,7 +1077,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             });
         }
 
-        public List<CachedRow> getViews(final String catalogName, final String schemaName, final String view) throws DatabaseException {
+        public List<CachedRow> getViews(final String catalogName, final String schemaName, String viewName) throws DatabaseException {
+            final String view;
+            if (database instanceof DB2Database) {
+              view = database.correctObjectName(viewName, View.class);
+            }
+            else {
+              view = viewName;
+            }
             return getResultSetCache("getViews").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
@@ -1148,7 +1156,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         sql += "WHERE a.OWNER IN ('" + ownerName + "', " + getAllCatalogsStringScratchData() + ")";
                     }
                     if (viewName != null) {
-                        sql += " AND a.VIEW_NAME='" + viewName + "'";
+                        sql += " AND a.VIEW_NAME='" + database.correctObjectName(viewName, View.class) + "'";
                     }
                     sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner=a.owner)";
 
