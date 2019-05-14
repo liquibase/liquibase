@@ -84,7 +84,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Liquibase core dependencies and required jars versions -->
-        <org.springframework.version>4.3.8.RELEASE</org.springframework.version>
+        <org.springframework.version>4.3.24.RELEASE</org.springframework.version>
         <snakeyaml.version>1.23</snakeyaml.version>
 
         <!-- Liquibase SDK sdk/lib-sdk required libraries versions -->
