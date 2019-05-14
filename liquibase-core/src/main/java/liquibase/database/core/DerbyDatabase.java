@@ -8,9 +8,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 
@@ -27,7 +25,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     protected int driverVersionMinor;
 
     public DerbyDatabase() {
-        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
+        super.setCurrentDateTimePlaceholder("CURRENT_TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "(SELECT currentvalue FROM sys.syssequences WHERE sequencename = upper('%s'))";
         determineDriverVersion();

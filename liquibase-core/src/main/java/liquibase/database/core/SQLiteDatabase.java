@@ -34,7 +34,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     }
 
     public SQLiteDatabase() {
-        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
+        super.setCurrentDateTimePlaceholder("CURRENT_TIMESTAMP");
     }
 
     public static List<SqlStatement> getAlterTableStatements(

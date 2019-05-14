@@ -25,9 +25,6 @@ import java.util.ResourceBundle;
 import static java.util.ResourceBundle.getBundle;
 import static org.junit.Assert.*;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Test;
-
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.
  */
@@ -80,7 +77,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void getCurrentDateTimeFunction() {
         Assert.assertEquals("Oracle Database's 'give me the current timestamp' function is correctly reported.",
-                "SYSTIMESTAMP", getDatabase().getCurrentDateTimeFunction());
+                "SYSTIMESTAMP", getDatabase().getCurrentDateTimePlaceholder());
     }
 
     @Test

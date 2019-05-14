@@ -158,8 +158,8 @@ public class LiquibaseTest {
 //
 //        new Liquibase("com/example/test.xml", mockResourceAccessor, database)
 //            .getDatabase()
-//            .setCurrentDateTimeFunction(testFunction);
-//        verify(database).setCurrentDateTimeFunction(testFunction);
+//            .setCurrentDateTimePlaceholder(testFunction);
+//        verify(database).setCurrentDateTimePlaceholder(testFunction);
 //    }
 
     @Test

@@ -15,6 +15,7 @@ import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CurrentDateTimeFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 
@@ -255,12 +256,22 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String getCurrentDateTimeFunction() {
+    public String getCurrentDateTimePlaceholder() {
         return "DATETIME()";
     }
 
     @Override
-    public void setCurrentDateTimeFunction(final String function) {
+    public void setCurrentDateTimePlaceholder(final String function) {
+    }
+
+    @Override
+    public CurrentDateTimeFunction getCurrentDateTimeFunction() {
+        return null;
+    }
+
+    @Override
+    public void setCurrentDateTimeFunction(CurrentDateTimeFunction currentDateTimeFunction) {
+
     }
 
     @Override

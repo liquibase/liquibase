@@ -316,7 +316,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
 
     public HsqlDatabase() {
         super.unquotedObjectsAreUppercased = true;
-        super.setCurrentDateTimeFunction("NOW");
+        super.setCurrentDateTimePlaceholder("NOW");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.defaultAutoIncrementStartWith = BigInteger.ZERO;
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";

@@ -9,7 +9,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -35,7 +34,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     private Boolean hasJdbcConstraintDeferrableBug;
 
     public MySQLDatabase() {
-        super.setCurrentDateTimeFunction("NOW()");
+        super.setCurrentDateTimePlaceholder("NOW()");
         setHasJdbcConstraintDeferrableBug(null);
     }
 

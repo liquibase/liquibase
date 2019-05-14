@@ -21,15 +21,10 @@ import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
 public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
 
     public AbstractDb2Database() {
-        super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
+        super.setCurrentDateTimePlaceholder("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
         super.unquotedObjectsAreUppercased=true;

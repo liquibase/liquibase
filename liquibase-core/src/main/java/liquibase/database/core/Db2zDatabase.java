@@ -10,7 +10,7 @@ import liquibase.util.StringUtil;
 public class Db2zDatabase extends AbstractDb2Database {
 
     public Db2zDatabase() {
-        super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
+        super.setCurrentDateTimePlaceholder("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
         super.unquotedObjectsAreUppercased=true;

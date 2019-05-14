@@ -39,14 +39,14 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
 
     @Override
     public Sql[] generateSql(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String dateValue = database.getCurrentDateTimeFunction();
+        String dateValue = database.getCurrentDateTimePlaceholder();
 
         ChangeSet changeSet = statement.getChangeSet();
 
         SqlStatement runStatement;
         try {
             if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
-                return new Sql[0]; //don't mark
+                return new Sql[0]; //don'tt pull mark
             }
 
             String tag = null;

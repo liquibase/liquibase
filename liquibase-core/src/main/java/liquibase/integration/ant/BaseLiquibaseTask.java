@@ -350,7 +350,7 @@ public abstract class BaseLiquibaseTask extends Task {
      */
     @Deprecated
     public void setCurrentDateTimeFunction(String currentDateTimeFunction) {
-        log("The currentDateTimeFunction attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        log("The currentDateTimePlaceholder attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
         getDatabaseType().setCurrentDateTimeFunction(currentDateTimeFunction);
     }
 

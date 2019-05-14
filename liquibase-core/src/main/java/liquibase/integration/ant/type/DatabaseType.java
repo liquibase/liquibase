@@ -105,7 +105,7 @@ public class DatabaseType extends DataType {
             }
             String dbmsCurrentDateTimeFunction = getCurrentDateTimeFunction();
             if(dbmsCurrentDateTimeFunction != null) {
-                database.setCurrentDateTimeFunction(dbmsCurrentDateTimeFunction);
+                database.setCurrentDateTimePlaceholder(dbmsCurrentDateTimeFunction);
             }
 
             database.setOutputDefaultSchema(isOutputDefaultSchema());

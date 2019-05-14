@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -80,10 +81,13 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             if (rootPath == null) {
                 continue;
             }
-            InputStream stream = null;
+            InputStreamSupplier stream = null;
             if (isCompressedFile(rootPath)) {
                 String finalPath = streamPath;
 
+                // You can't do this. The resource gets closed at the end of the try block, closing any sub-streams.
+                // Instead of reinventing this functionality using InputStreamList, Use Java 8 Stream + Stream.onClose()
+                // instead. I'll use a Supplier for the time being....
                 try (ZipFile zipFile = new ZipFile(rootPath.toFile())) {
                     if (relativeTo != null) {
                         ZipEntry relativeEntry = zipFile.getEntry(relativeTo);
@@ -100,16 +104,14 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                             }
                             finalPath = actualRelativeTo + "/" + streamPath;
                         }
-
                     }
-
 
                     //resolve any ..'s and duplicated /'s and convert back to standard '/' separator format
                     finalPath = Paths.get(finalPath.replaceFirst("^/", "")).normalize().toString().replace("\\", "/");
 
                     ZipEntry entry = zipFile.getEntry(finalPath);
                     if (entry != null) {
-                        stream = zipFile.getInputStream(entry);
+                        stream = () -> new ZipFile(rootPath.toFile()).getInputStream(entry);
                         streamURI = URI.create(rootPath.normalize().toUri() + "!" + entry.toString());
                     }
                 }
@@ -143,14 +145,15 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                 File resolvedFile = finalRootPath.resolve(streamPath).toFile();
                 if (resolvedFile.exists()) {
                     streamURI = resolvedFile.getCanonicalFile().toURI();
-                    stream = new BufferedInputStream(new FileInputStream(resolvedFile));
+                    stream = () -> new BufferedInputStream(new FileInputStream(resolvedFile));
                 }
 
             }
 
             if (stream != null) {
                 if (streamPath.toLowerCase().endsWith(".gz")) {
-                    stream = new GZIPInputStream(stream);
+                    final InputStreamSupplier thatStream = stream;
+                    stream = () -> new GZIPInputStream(thatStream.get());
                 }
 
                 streams.add(streamURI, stream);
