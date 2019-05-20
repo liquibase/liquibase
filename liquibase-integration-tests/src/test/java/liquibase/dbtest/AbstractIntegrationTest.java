@@ -882,11 +882,10 @@ public abstract class AbstractIntegrationTest {
     public void testAbsolutePathChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
 
+        String fileUrlToChangeLog = getClass().getResource("/" + includedChangeLog).toString();
+        assertTrue(fileUrlToChangeLog.startsWith("file:/"));
 
-        Set<String> urls = new JUnitResourceAccessor().list(null, includedChangeLog, true, false, true);
-        String absolutePathOfChangeLog = urls.iterator().next();
-
-        absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/", "");
+        String absolutePathOfChangeLog = fileUrlToChangeLog.replaceFirst("file:\\/", "");
         if (System.getProperty("os.name").startsWith("Windows ")) {
             absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');
         } else {
