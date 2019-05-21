@@ -106,6 +106,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean defaultSchemaSet = false;
 
     private Map<String, Object> attributes = new HashMap<String, Object>();
+    protected String dbFullVersion;
 
     public String getName() {
         return toString();

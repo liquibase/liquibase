@@ -28,7 +28,6 @@ import java.util.*;
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
-    protected String dbFullVersion;
 
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
