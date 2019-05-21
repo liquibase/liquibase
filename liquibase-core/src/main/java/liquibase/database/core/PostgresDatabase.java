@@ -34,6 +34,15 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     private Set<String> reservedWords = new HashSet<String>();
 
+    /**
+     * Represents Postgres DB types.
+     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
+     *       If we need we can extend this ENUM in future
+     */
+    public enum DbTypes {
+        EDB, COMMUNITY, RDS, AURORA
+    }
+
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
         //got list from http://www.postgresql.org/docs/9.1/static/sql-keywords-appendix.html?
@@ -326,12 +335,4 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
     }
 
-    /**
-     * Represents Postgres DB types.
-     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
-     *       If we need we can extend this ENUM in future
-     */
-    public enum DbTypes {
-        EDB, COMMUNITY
-    }
 }
