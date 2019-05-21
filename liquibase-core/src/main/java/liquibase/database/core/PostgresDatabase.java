@@ -28,10 +28,20 @@ import java.util.*;
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
+    protected String dbFullVersion;
 
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
     private Set<String> reservedWords = new HashSet<String>();
+
+    /**
+     * Represents Postgres DB types.
+     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
+     *       If we need we can extend this ENUM in future
+     */
+    public enum DbTypes {
+        EDB, COMMUNITY, RDS, AURORA
+    }
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -296,4 +306,33 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
+
+    @Override
+    public String getDatabaseFullVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            throw new DatabaseException("Connection not set. Can not get database version. " +
+                    "Postgres Database wasn't initialized in proper way !");
+        }
+        if (dbFullVersion != null){
+            return dbFullVersion;
+        }
+        final String sqlToGetVersion = "SELECT version()";
+        List<?> result = ExecutorService.getInstance().
+                getExecutor(this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
+        if (result != null && !result.isEmpty()){
+            return result.get(0).toString();
+        }
+
+        throw new DatabaseException("Connection set to Postgres type we don't support !");
+    }
+
+    /**
+     * Method to get Postgres DB type
+     * @return Db types
+     * */
+    public DbTypes getDbType() throws DatabaseException {
+        boolean enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
+        return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
+    }
+
 }
