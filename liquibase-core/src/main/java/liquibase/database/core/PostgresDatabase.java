@@ -300,6 +300,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDatabaseFullVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            throw new DatabaseException("Connection not set. Can not get database version. " +
+                    "Postgres Database wasn't initialized in proper way !");
+        }
         if (dbFullVersion != null){
             return dbFullVersion;
         }
@@ -310,16 +314,24 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             return result.get(0).toString();
         }
 
-        return null;
+        throw new DatabaseException("Connection set to Postgres type we don't support !");
     }
 
     /**
-     * Method to check if Postgres DB is a type of EDB.
-     * @param dbFullVersion
-     * @return in case of EDB we return true other wise( for Aurora, RDS, Community) false
-     */
-    public static boolean isEDB(String dbFullVersion) {
-        return dbFullVersion == null || dbFullVersion.toLowerCase().contains("eterprisedb");
+     * Method to get Postgres DB type
+     * @return Db types
+     * */
+    public DbTypes getDbType() throws DatabaseException {
+        boolean enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
+        return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
     }
 
+    /**
+     * Represents Postgres DB types.
+     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
+     *       If we need we can extend this ENUM in future
+     */
+    public enum DbTypes {
+        EDB, COMMUNITY
+    }
 }
