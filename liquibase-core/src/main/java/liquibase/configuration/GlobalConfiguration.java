@@ -21,6 +21,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String DIFF_COLUMN_ORDER = "diffColumnOrder";
     public static final String ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA = "alwaysOverrideStoredLogicSchema";
     public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
+    public static final String USE_DB_LOCK = "useDbLock";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -90,6 +91,11 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, Boolean.class)
             .setDescription("Should Liquibase include the change description in the id when generating changeSets?")
                 .setDefaultValue(false);
+
+        getContainer().addProperty(USE_DB_LOCK, Boolean.class)
+            .setDescription(
+                "Should Liquibase use db locks, like Postgres transaction-level advisory locks, when applying the changeSets")
+            .setDefaultValue(false);
     }
 
     /**
@@ -238,6 +244,15 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setGeneratedChangeSetIdsContainDescription(boolean containDescription) {
         getContainer().setValue(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, containDescription);
+        return this;
+    }
+
+    public Boolean getUseDbLock() {
+        return getContainer().getValue(USE_DB_LOCK, Boolean.class);
+    }
+
+    public GlobalConfiguration setUseDbLock(boolean useDbLock) {
+        getContainer().setValue(USE_DB_LOCK, useDbLock);
         return this;
     }
 }
