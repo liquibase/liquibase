@@ -41,7 +41,7 @@ public enum NamedDateTimeFormatter implements CurrentDateTimeFunction {
 				.filter(ndtf -> Objects.equals(ndtf.getName(), nameOrPattern))
 				.findFirst()
 				.map(CurrentDateTimeFunction.class::cast)
-				.orElse(() -> DateTimeFormatter.ofPattern(nameOrPattern).format(ZonedDateTime.now()));
+				.orElse(nameOrPattern != null ? () -> DateTimeFormatter.ofPattern(nameOrPattern).format(ZonedDateTime.now()) : null);
 	}
 
 	public String getName() {
