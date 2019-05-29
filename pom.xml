@@ -532,6 +532,7 @@
             </modules>
         </profile>
 
+<!--
         <profile>
             <id>rpm</id>
             <activation>
@@ -543,7 +544,7 @@
                 <module>liquibase-rpm</module>
             </modules>
         </profile>
-
+-->
         <profile>
             <id>doclint-java8-disable</id>
             <activation>

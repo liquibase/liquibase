@@ -749,6 +749,26 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
+    public boolean isSupportingTransactions() {
+        return true;
+    }
+
+    @Override
+    public void setSupportingTransactions(boolean supportingTransactions) {
+
+    }
+
+    @Override
+    public boolean isSupportingPrimaryKeys() {
+        return true;
+    }
+
+    @Override
+    public void setSupportingPrimaryKeys(boolean supportingPrimaryKeys) {
+
+    }
+
+    @Override
     public boolean isDefaultSchema(final String catalog, final String schema) {
         return false;
     }

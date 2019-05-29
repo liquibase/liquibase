@@ -423,6 +423,14 @@ public interface Database extends PrioritizedService {
 
     void setOutputDefaultCatalog(boolean outputDefaultCatalog);
 
+    boolean isSupportingTransactions();
+
+    void setSupportingTransactions(boolean supportingTransactions);
+
+    boolean isSupportingPrimaryKeys();
+
+    void setSupportingPrimaryKeys(boolean supportingPrimaryKeys);
+
     boolean supportsPrimaryKeyNames();
 
     /**

@@ -54,6 +54,10 @@ public class LockServiceFactory {
 	}
 
 	public LockService getLockService(Database database) {
+    	if (!database.isSupportingTransactions()) {
+    		return new OfflineLockService();
+		}
+
 		if (!openLockServices.containsKey(database)) {
 			SortedSet<LockService> foundServices = new TreeSet<>(new Comparator<LockService>() {
                 @Override

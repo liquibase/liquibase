@@ -107,6 +107,8 @@ public class Main {
     protected String excludeObjects;
     protected Boolean includeCatalog;
     protected String includeObjects;
+    protected Boolean noPrimaryKeys;
+    protected Boolean noTransactions;
     protected Boolean includeSchema;
     protected Boolean includeTablespace;
     protected String outputSchemasAs;
@@ -560,6 +562,7 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_SCHEMAS)
                             && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_URL)
                             && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
+                            && !cmdParm.startsWith("--" + OPTIONS.NO_PRIMARY_KEYS)
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
@@ -838,6 +841,12 @@ public class Main {
         if (this.includeSchema == null) {
             this.includeSchema = false;
         }
+        if (this.noPrimaryKeys == null) {
+            this.noPrimaryKeys = false;
+        }
+        if (this.noTransactions == null) {
+            this.noTransactions = false;
+        }
         if (this.includeCatalog == null) {
             this.includeCatalog = false;
         }
@@ -960,6 +969,9 @@ public class Main {
                 this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                 this.databaseChangeLogLockTableName);
         database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+        database.setSupportingPrimaryKeys(this.noPrimaryKeys == null || !this.noPrimaryKeys);
+        database.setSupportingTransactions(this.noTransactions == null || !this.noTransactions);
+
         try {
 
             if ((excludeObjects != null) && (includeObjects != null)) {
@@ -1400,6 +1412,10 @@ public class Main {
                 dataOutputDirectory = value;
             } else if (OPTIONS.CURRENT_DATE_TIME_FUNCTION.equalsIgnoreCase(attributeName)) {
                 currentDateTimeFunction = value;
+            } else if (OPTIONS.NO_PRIMARY_KEYS.equalsIgnoreCase(attributeName)) {
+            	noPrimaryKeys = Boolean.parseBoolean(value);
+			} else if (OPTIONS.NO_TRANSACTIONS.equalsIgnoreCase(attributeName)) {
+                noTransactions = Boolean.parseBoolean(value);
             }
         }
 
@@ -1505,6 +1521,8 @@ public class Main {
         private static final String DATA_OUTPUT_DIRECTORY = "dataOutputDirectory";
         private static final String DIFF_TYPES = "diffTypes";
         private static final String EXCLUDE_OBJECTS = "excludeObjects";
+        private static final String NO_PRIMARY_KEYS = "noPrimaryKeys";
+        private static final String NO_TRANSACTIONS = "noTransactions";
         private static final String INCLUDE_CATALOG = "includeCatalog";
         private static final String INCLUDE_OBJECTS = "includeObjects";
         private static final String INCLUDE_SCHEMA = "includeSchema";

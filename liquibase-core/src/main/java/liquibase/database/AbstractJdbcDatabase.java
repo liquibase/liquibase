@@ -126,6 +126,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean outputDefaultCatalog = true;
 
     private boolean defaultCatalogSet;
+    private boolean supportingPrimaryKeys = true;
+    private boolean supportingTransactions = true;
 
     private Map<String, Object> attributes = new HashMap<>();
 
@@ -1541,6 +1543,26 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void setOutputDefaultCatalog(final boolean outputDefaultCatalog) {
         this.outputDefaultCatalog = outputDefaultCatalog;
+    }
+
+    @Override
+    public boolean isSupportingPrimaryKeys() {
+        return supportingPrimaryKeys;
+    }
+
+    @Override
+    public void setSupportingPrimaryKeys(boolean supportingPrimaryKeys) {
+        this.supportingPrimaryKeys = supportingPrimaryKeys;
+    }
+
+    @Override
+    public boolean isSupportingTransactions() {
+        return supportingTransactions;
+    }
+
+    @Override
+    public void setSupportingTransactions(boolean supportingTransactions) {
+        this.supportingTransactions = supportingTransactions;
     }
 
     @Override

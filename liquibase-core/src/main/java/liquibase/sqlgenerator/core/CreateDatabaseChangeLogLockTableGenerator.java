@@ -22,9 +22,15 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
     public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String charTypeName = getCharTypeName(database);
         String dateTimeTypeString = getDateTimeTypeString(database);
-        CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
-                .setTablespace(database.getLiquibaseTablespaceName())
-                .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("int", database), null, null, null, new NotNullConstraint())
+        CreateTableStatement baseStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+                .setTablespace(database.getLiquibaseTablespaceName());
+        if (database.isSupportingPrimaryKeys()) {
+            baseStatement = baseStatement.addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("int", database), null, null, null, new NotNullConstraint());
+        } else {
+            baseStatement = baseStatement.addColumn("ID", DataTypeFactory.getInstance().fromDescription("int", database), null, null, new NotNullConstraint());
+        }
+
+        CreateTableStatement createTableStatement = baseStatement
                 .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("boolean", database), null, null, new NotNullConstraint())
                 .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription(dateTimeTypeString, database))
                 .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database));
