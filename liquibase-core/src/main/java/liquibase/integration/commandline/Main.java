@@ -1116,7 +1116,7 @@ public class Main {
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
                 LogService.getLog(getClass()).info(
-                    LogType.LOG, String.format(
+                    LogType.USER_MESSAGE, String.format(
                         coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
                             .getConnection().getConnectionUserName() + "@" +
                             liquibase.getDatabase().getConnection().getURL()
@@ -1128,14 +1128,14 @@ public class Main {
                 boolean exists = liquibase.tagExists(tag);
                 if (exists) {
                     LogService.getLog(getClass()).info(
-                        LogType.LOG, String.format(coreBundle.getString("tag.exists"), tag,
+                        LogType.USER_MESSAGE, String.format(coreBundle.getString("tag.exists"), tag,
                             liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
                                 liquibase.getDatabase().getConnection().getURL()
                         )
                     );
                 } else {
                     LogService.getLog(getClass()).info(
-                        LogType.LOG, String.format(coreBundle.getString("tag.does.not.exist"), tag,
+                        LogType.USER_MESSAGE, String.format(coreBundle.getString("tag.does.not.exist"), tag,
                             liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
                                 liquibase.getDatabase().getConnection().getURL()
                         )
