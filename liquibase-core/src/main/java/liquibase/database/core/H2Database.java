@@ -9,8 +9,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
@@ -81,7 +79,7 @@ public class H2Database extends AbstractJdbcDatabase {
 
     public H2Database() {
         super.unquotedObjectsAreUppercased=true;
-        super.setCurrentDateTimeFunction("NOW()");
+        super.setCurrentDateTimePlaceholder("NOW()");
         // for current date
         this.dateFunctions.add(new DatabaseFunction("CURRENT_DATE"));
         this.dateFunctions.add(new DatabaseFunction("CURDATE"));

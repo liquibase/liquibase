@@ -130,7 +130,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
      */
     public SybaseASADatabase() {
         super();
-        super.setCurrentDateTimeFunction("now()");
+        super.setCurrentDateTimePlaceholder("now()");
         super.unmodifiableDataTypes.addAll(Arrays.asList("integer", "bigint"));
 
     }

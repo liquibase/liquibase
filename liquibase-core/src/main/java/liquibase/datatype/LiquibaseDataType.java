@@ -240,7 +240,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     protected boolean isCurrentDateTimeFunction(String string, Database database) {
         return string.toLowerCase(Locale.US).startsWith("current_timestamp")
                 || string.toLowerCase(Locale.US).startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
-                || database.getCurrentDateTimeFunction().toLowerCase(Locale.US).equals(string.toLowerCase(Locale.US));
+                || database.getCurrentDateTimePlaceholder().toLowerCase(Locale.US).equals(string.toLowerCase(Locale.US));
     }
 
     public void finishInitialization(String originalDefinition) {

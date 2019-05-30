@@ -8,7 +8,6 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -34,7 +33,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     		Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	public InformixDatabase() {
-        super.setCurrentDateTimeFunction("CURRENT " + DATETIME_FIELD_QUALIFIER);
+        super.setCurrentDateTimePlaceholder("CURRENT " + DATETIME_FIELD_QUALIFIER);
         super.sequenceNextValueFunction = "%s.NEXTVAL";
         systemTablesAndViews.add("systables");
 		systemTablesAndViews.add("syscolumns");

@@ -14,8 +14,8 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
     @Override
     public void setConnection(DatabaseConnection conn) {
         super.setConnection(conn);
-        if (currentDateTimeFunction == null) {
-            currentDateTimeFunction = findCurrentDateTimeFunction();
+        if (currentDateTimePlaceholder == null) {
+            currentDateTimePlaceholder = findCurrentDateTimeFunction();
         }
     }
 
@@ -58,8 +58,8 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String getCurrentDateTimeFunction() {
-        return currentDateTimeFunction;
+    public String getCurrentDateTimePlaceholder() {
+        return currentDateTimePlaceholder;
     }
 
     private String findCurrentDateTimeFunction() {

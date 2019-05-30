@@ -24,7 +24,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public Ingres9Database() {
-        setCurrentDateTimeFunction("date('now')");
+        setCurrentDateTimePlaceholder("date('now')");
     }
 
     @Override

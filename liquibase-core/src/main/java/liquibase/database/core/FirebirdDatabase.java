@@ -15,7 +15,7 @@ import java.util.Locale;
 public class FirebirdDatabase extends AbstractJdbcDatabase {
 
     public FirebirdDatabase() {
-        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
+        super.setCurrentDateTimePlaceholder("CURRENT_TIMESTAMP");
         super.sequenceNextValueFunction="NEXT VALUE FOR %s";
     }
 

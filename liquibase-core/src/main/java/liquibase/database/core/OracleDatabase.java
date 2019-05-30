@@ -21,7 +21,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
@@ -64,7 +63,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
         //noinspection HardCodedStringLiteral
-        super.setCurrentDateTimeFunction("SYSTIMESTAMP");
+        super.setCurrentDateTimePlaceholder("SYSTIMESTAMP");
         // Setting list of Oracle's native functions
         //noinspection HardCodedStringLiteral
         dateFunctions.add(new DatabaseFunction("SYSDATE"));

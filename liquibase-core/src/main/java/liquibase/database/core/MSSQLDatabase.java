@@ -9,7 +9,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
@@ -61,7 +60,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     // "Magic numbers" are ok here because we populate a lot of self-explaining metadata.
     @SuppressWarnings("squid:S109")
     public MSSQLDatabase() {
-        super.setCurrentDateTimeFunction("GETDATE()");
+        super.setCurrentDateTimePlaceholder("GETDATE()");
 
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
 

@@ -8,34 +8,29 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A list of {@link InputStream}s. Custom class to allow try-with-resources using output from {@link ResourceAccessor#openStreams(String, String)}.
  */
 public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
-    private LinkedHashMap<URI, InputStream> streams = new LinkedHashMap<>();
+    private LinkedHashMap<URI, InputStreamSupplier> streams = new LinkedHashMap<>();
 
     public InputStreamList() {
     }
 
+    /*
     public InputStreamList(URI uri, InputStream stream) {
+        this.streams.put(uri, stream);
+    }*/
+
+    public InputStreamList(URI uri, InputStreamSupplier stream) {
         this.streams.put(uri, stream);
     }
 
-    public boolean add(URI uri, InputStream inputStream) {
-        Logger log = Scope.getCurrentScope().getLog(getClass());
-
-        boolean duplicate = streams.put(uri, inputStream) != null;
-        if (duplicate) {
-            log.fine("Closing duplicate stream for "+uri);
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                log.warning("Cannot close stream for "+uri, e);
-            }
-        }
-        return duplicate;
+    public boolean add(URI uri, InputStreamSupplier inputStream) {
+        return streams.put(uri, inputStream) != null;
     }
 
     public void addAll(InputStreamList streams) {
@@ -61,17 +56,17 @@ public class InputStreamList implements Iterable<InputStream>, AutoCloseable {
 
     @Override
     public Iterator<InputStream> iterator() {
-        return streams.values().iterator();
+        return streams.values().stream().map(InputStreamSupplier::get).iterator();
     }
 
     @Override
     public void forEach(Consumer<? super InputStream> action) {
-        streams.values().forEach(action);
+        streams.values().stream().map(InputStreamSupplier::get).forEach(action);
     }
 
     @Override
     public Spliterator<InputStream> spliterator() {
-        return streams.values().spliterator();
+        return streams.values().stream().map(InputStreamSupplier::get).spliterator();
     }
 
     public int size() {

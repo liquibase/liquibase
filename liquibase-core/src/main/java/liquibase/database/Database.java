@@ -10,6 +10,7 @@ import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CurrentDateTimeFunction;
 import liquibase.structure.DatabaseObject;
 
 import java.io.IOException;
@@ -124,9 +125,13 @@ public interface Database extends PrioritizedService {
     /**
      * Returns database-specific function for generating the current date/time.
      */
-    String getCurrentDateTimeFunction();
+    String getCurrentDateTimePlaceholder();
 
-    void setCurrentDateTimeFunction(String function);
+    void setCurrentDateTimePlaceholder(String function);
+
+    CurrentDateTimeFunction getCurrentDateTimeFunction();
+
+    void setCurrentDateTimeFunction(CurrentDateTimeFunction currentDateTimeFunction);
 
     String getLineComment();
 
@@ -417,6 +422,14 @@ public interface Database extends PrioritizedService {
     boolean getOutputDefaultCatalog();
 
     void setOutputDefaultCatalog(boolean outputDefaultCatalog);
+
+    boolean isSupportingTransactions();
+
+    void setSupportingTransactions(boolean supportingTransactions);
+
+    boolean isSupportingPrimaryKeys();
+
+    void setSupportingPrimaryKeys(boolean supportingPrimaryKeys);
 
     boolean supportsPrimaryKeyNames();
 

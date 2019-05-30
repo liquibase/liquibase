@@ -23,6 +23,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.statement.core.NamedDateTimeFormatter;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
@@ -95,6 +96,7 @@ public class Main {
     protected String referencePassword;
     protected String referenceDefaultCatalogName;
     protected String referenceDefaultSchemaName;
+    protected String currentDateTimePlaceholder;
     protected String currentDateTimeFunction;
     protected String command;
     protected Set<String> commandParams = new LinkedHashSet<>();
@@ -105,6 +107,8 @@ public class Main {
     protected String excludeObjects;
     protected Boolean includeCatalog;
     protected String includeObjects;
+    protected Boolean noPrimaryKeys;
+    protected Boolean noTransactions;
     protected Boolean includeSchema;
     protected Boolean includeTablespace;
     protected String outputSchemasAs;
@@ -554,9 +558,11 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
                             && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
                             && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)
+                            && !cmdParm.startsWith("--" + OPTIONS.CURRENT_DATE_TIME_FUNCTION)
                             && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_SCHEMAS)
                             && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_URL)
                             && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
+                            && !cmdParm.startsWith("--" + OPTIONS.NO_PRIMARY_KEYS)
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
@@ -835,6 +841,12 @@ public class Main {
         if (this.includeSchema == null) {
             this.includeSchema = false;
         }
+        if (this.noPrimaryKeys == null) {
+            this.noPrimaryKeys = false;
+        }
+        if (this.noTransactions == null) {
+            this.noTransactions = false;
+        }
         if (this.includeCatalog == null) {
             this.includeCatalog = false;
         }
@@ -946,7 +958,8 @@ public class Main {
         }
 
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
-        CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
+        // Using classPath, NONE of these have any rootPaths. Bug.
+        CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(getClass().getClassLoader());
         CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
         Database database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
@@ -956,6 +969,9 @@ public class Main {
                 this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
                 this.databaseChangeLogLockTableName);
         database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+        database.setSupportingPrimaryKeys(this.noPrimaryKeys == null || !this.noPrimaryKeys);
+        database.setSupportingTransactions(this.noTransactions == null || !this.noTransactions);
+
         try {
 
             if ((excludeObjects != null) && (includeObjects != null)) {
@@ -1090,7 +1106,9 @@ public class Main {
                     changeExecListenerClass, changeExecListenerPropertiesFile);
             liquibase.setChangeExecListener(listener);
 
-            database.setCurrentDateTimeFunction(currentDateTimeFunction);
+            database.setCurrentDateTimePlaceholder(currentDateTimePlaceholder);
+            database.setCurrentDateTimeFunction(NamedDateTimeFormatter.byNameOrPattern(currentDateTimeFunction));
+
             for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
@@ -1392,6 +1410,12 @@ public class Main {
                 defSchemaName = value;
             } else if (OPTIONS.DATA_OUTPUT_DIRECTORY.equalsIgnoreCase(attributeName)) {
                 dataOutputDirectory = value;
+            } else if (OPTIONS.CURRENT_DATE_TIME_FUNCTION.equalsIgnoreCase(attributeName)) {
+                currentDateTimeFunction = value;
+            } else if (OPTIONS.NO_PRIMARY_KEYS.equalsIgnoreCase(attributeName)) {
+            	noPrimaryKeys = Boolean.parseBoolean(value);
+			} else if (OPTIONS.NO_TRANSACTIONS.equalsIgnoreCase(attributeName)) {
+                noTransactions = Boolean.parseBoolean(value);
             }
         }
 
@@ -1497,10 +1521,13 @@ public class Main {
         private static final String DATA_OUTPUT_DIRECTORY = "dataOutputDirectory";
         private static final String DIFF_TYPES = "diffTypes";
         private static final String EXCLUDE_OBJECTS = "excludeObjects";
+        private static final String NO_PRIMARY_KEYS = "noPrimaryKeys";
+        private static final String NO_TRANSACTIONS = "noTransactions";
         private static final String INCLUDE_CATALOG = "includeCatalog";
         private static final String INCLUDE_OBJECTS = "includeObjects";
         private static final String INCLUDE_SCHEMA = "includeSchema";
         private static final String INCLUDE_TABLESPACE = "includeTablespace";
+        private static final String CURRENT_DATE_TIME_FUNCTION = "currentDateTimePlaceholder";
         private static final String OUTPUT_SCHEMAS_AS = "outputSchemasAs";
         private static final String REFERENCE_DEFAULT_CATALOG_NAME = "referenceDefaultCatalogName";
         private static final String REFERENCE_DEFAULT_SCHEMA_NAME = "referenceDefaultSchemaName";

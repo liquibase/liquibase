@@ -5,7 +5,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>3.7.0-SNAPSHOT</version>
+    <version>3.7.0-localdates-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
@@ -532,6 +532,7 @@
             </modules>
         </profile>
 
+<!--
         <profile>
             <id>rpm</id>
             <activation>
@@ -543,7 +544,7 @@
                 <module>liquibase-rpm</module>
             </modules>
         </profile>
-
+-->
         <profile>
             <id>doclint-java8-disable</id>
             <activation>

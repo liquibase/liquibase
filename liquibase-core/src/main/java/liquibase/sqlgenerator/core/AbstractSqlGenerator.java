@@ -57,7 +57,7 @@ public abstract class AbstractSqlGenerator<T extends SqlStatement> implements Sq
     public boolean looksLikeFunctionCall(String value, Database database) {
         // TODO: SYSIBM looks DB2-specific, we should move that out of AbstractSqlGenerator into a DB2-specific class.
         return value.startsWith("\"SYSIBM\"") || value.startsWith("to_date(") ||
-            value.equalsIgnoreCase(database.getCurrentDateTimeFunction());
+            value.equalsIgnoreCase(database.getCurrentDateTimePlaceholder());
     }
 
 }

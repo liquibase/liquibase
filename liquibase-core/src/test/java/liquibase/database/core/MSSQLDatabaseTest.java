@@ -30,7 +30,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("GETDATE()", getDatabase().getCurrentDateTimeFunction());
+        assertEquals("GETDATE()", getDatabase().getCurrentDateTimePlaceholder());
     }
 
     @Test

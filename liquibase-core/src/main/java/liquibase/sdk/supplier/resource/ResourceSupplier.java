@@ -8,6 +8,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
+import liquibase.resource.InputStreamSupplier;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.ByteArrayInputStream;
@@ -33,18 +34,18 @@ public class ResourceSupplier {
 
         @Override
         public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-            InputStream stream = null;
+            InputStreamSupplier stream = null;
             String encoding = LiquibaseConfiguration.getInstance().getConfiguration(
                     GlobalConfiguration.class).getOutputEncoding();
             if (streamPath.toLowerCase().endsWith("csv")) {
-                stream = new ByteArrayInputStream(USERS_CSV.getBytes(encoding));
+                stream = () -> new ByteArrayInputStream(USERS_CSV.getBytes(encoding));
             } else if (streamPath.toLowerCase().endsWith("my-logic.sql")) {
-                stream = new ByteArrayInputStream(((String) Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(
+                stream = () -> new ByteArrayInputStream(((String) Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(
                         new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(
                         new HsqlDatabase())).getBytes(encoding)
                 );
             } else if (streamPath.toLowerCase().endsWith("sql")) {
-                stream = new ByteArrayInputStream(EXAMPLE_SQL_COMMAND.getBytes(encoding));
+                stream = () -> new ByteArrayInputStream(EXAMPLE_SQL_COMMAND.getBytes(encoding));
             } else {
                 throw new RuntimeException("Unknown resource type: "+ streamPath);
             }

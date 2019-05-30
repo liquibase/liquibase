@@ -7,6 +7,7 @@ import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
+import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
 import org.xml.sax.*;
 
@@ -16,8 +17,15 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.channels.FileChannel;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
@@ -64,6 +72,27 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         return saxParserFactory;
     }
 
+
+    protected void writeClasspath() {
+        String delim = "#######################################\n";
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        try (FileWriter out = new FileWriter("/tmp/liquibaseClasspath")) {
+            out.write("System: \n"+delim);
+            for(URL url: ((URLClassLoader)cl).getURLs()){
+                out.write(url.getFile() + "\n");
+            }
+            out.write("\n\nClass: \n"+delim);
+            for(URL url: ((URLClassLoader)getClass().getClassLoader()).getURLs()){
+                out.write(url.getFile());
+                out.write("\n");
+            }
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         try (
@@ -101,6 +130,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                             physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", ""),
                             changeLogParameters, resourceAccessor);
                 } else {
+                    writeClasspath();
                     throw new ChangeLogParseException(physicalChangeLogLocation + " not found");
                 }
             }

@@ -10,7 +10,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.logging.Logger;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
@@ -39,7 +38,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private Set<String> reservedWords = new HashSet<>();
 
     public PostgresDatabase() {
-        super.setCurrentDateTimeFunction("NOW()");
+        super.setCurrentDateTimePlaceholder("NOW()");
         // "Reserved" or "reserved (can be function or type)" in PostgreSQL
         // from https://www.postgresql.org/docs/9.6/static/sql-keywords-appendix.html
         reservedWords.addAll(Arrays.asList("ALL", "ANALYSE", "ANALYZE", "AND", "ANY", "ARRAY", "AS", "ASC",
