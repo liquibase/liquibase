@@ -32,6 +32,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
     private Set<String> reservedWords = new HashSet<String>();
+    private Logger log;
 
     /**
      * Represents Postgres DB types.
@@ -52,6 +53,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "bytea", "timestamptz", "text"));
         super.unquotedObjectsAreUppercased=false;
+        log = new LogFactory().getLog();
     }
 
     @Override
@@ -329,8 +331,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
      * Method to get Postgres DB type
      * @return Db types
      * */
-    public DbTypes getDbType() throws DatabaseException {
-        boolean enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
+    public DbTypes getDbType() {
+        boolean enterpriseDb = false;
+        try {
+            enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
+        } catch (DatabaseException e) {
+            log.severe("Can't get full version of Postgres DB. Used EDB as default", e);
+            return  DbTypes.EDB;
+        }
         return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
     }
 
