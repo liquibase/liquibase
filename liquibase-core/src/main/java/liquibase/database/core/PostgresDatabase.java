@@ -321,7 +321,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         List<?> result = ExecutorService.getInstance().
                 getExecutor(this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
         if (result != null && !result.isEmpty()){
-            return result.get(0).toString();
+            return dbFullVersion = result.get(0).toString();
         }
 
         throw new DatabaseException("Connection set to Postgres type we don't support !");
