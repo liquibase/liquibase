@@ -51,6 +51,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.StoredDatabaseLogic;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtils;
 
@@ -202,19 +203,7 @@ public class DiffToChangeLog {
         types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
         List<DatabaseObject> missingObjects = new ArrayList<DatabaseObject>();
         for (Class<? extends DatabaseObject> type : types) {
-            for (DatabaseObject object : diffResult.getMissingObjects(type, new DatabaseObjectComparator() {
-                @Override
-                public int compare(DatabaseObject o1, DatabaseObject o2) {
-                    if (o1 instanceof Column && o1.getAttribute("order", Integer.class) != null && o2.getAttribute("order", Integer.class) != null) {
-                        int i = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
-                        if (i != 0) {
-                            return i;
-                        }
-                    }
-                    return super.compare(o1, o2);
-
-                }
-            })) {
+            for (DatabaseObject object : diffResult.getMissingObjects(type, getDbObjectComparator())) {
                 if (object == null) {
                     continue;
                 }
@@ -253,12 +242,34 @@ public class DiffToChangeLog {
         return changeSets;
     }
 
+    private DatabaseObjectComparator getDbObjectComparator() {
+        return new DatabaseObjectComparator() {
+            @Override
+            public int compare(DatabaseObject o1, DatabaseObject o2) {
+                if (o1 instanceof Column && o1.getAttribute("order", Integer.class) != null && o2.getAttribute("order", Integer.class) != null) {
+                    int i = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
+                    if (i != 0) {
+                        return i;
+                    }
+                } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute("order", Integer.class) != null
+                        && o2.getAttribute("order", Integer.class) != null) {
+                    int order = o1.getAttribute("order", Long.class).compareTo(o2.getAttribute("order", Long.class));
+                    if (order != 0) {
+                        return order;
+                    }
+                }
+                return super.compare(o1, o2);
+
+            }
+        };
+    }
+
     private List<DatabaseObject> sortUnexpectedObjects(Collection<? extends DatabaseObject> unexpectedObjects, Database database) {
         return sortObjects("unexpected", (Collection<DatabaseObject>) unexpectedObjects, database);
     }
 
     private List<DatabaseObject> sortMissingObjects(Collection<DatabaseObject> missingObjects, Database database) {
-        return sortObjects("missing", (Collection<DatabaseObject>) missingObjects, database);
+        return sortObjects("missing", missingObjects, database);
     }
 
     private List<DatabaseObject> sortObjects(final String type, Collection<DatabaseObject> objects, Database database) {
