@@ -384,8 +384,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
             }
+        } else if (database instanceof PostgresDatabase) {
+            columnTypeName = database.unescapeDataTypeName(columnTypeName);
         }
-
 
         if (database instanceof FirebirdDatabase) {
             if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
