@@ -103,4 +103,12 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals(COLUMN_AUTHOR, result);
     }
 
+    @Test
+    public void test_getConcatSql() {
+        assertEquals("", database.getConcatSql());
+        assertEquals("foo", database.getConcatSql("foo"));
+        assertEquals("foo || bar", database.getConcatSql("foo", "bar"));
+        assertEquals("one || two || | three", database.getConcatSql("one", "two", "| three"));
+    }
+
 }

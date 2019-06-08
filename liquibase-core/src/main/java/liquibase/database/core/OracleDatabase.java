@@ -1,16 +1,5 @@
 package liquibase.database.core;
 
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
@@ -21,7 +10,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
@@ -36,7 +24,21 @@ import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 
-import java.util.*;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -293,43 +295,18 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         String normalLiteral = super.getDateLiteral(isoDate);
 
         if (isDateOnly(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            //noinspection HardCodedStringLiteral
-            val.append("TO_DATE(");
-            val.append(normalLiteral);
-            //noinspection HardCodedStringLiteral
-            val.append(", 'YYYY-MM-DD')");
-            return val.toString();
+            return "TO_DATE(" + normalLiteral + ", 'YYYY-MM-DD')";
         } else if (isTimeOnly(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            //noinspection HardCodedStringLiteral
-            val.append("TO_DATE(");
-            val.append(normalLiteral);
-            //noinspection HardCodedStringLiteral
-            val.append(", 'HH24:MI:SS')");
-            return val.toString();
+            return "TO_DATE(" + normalLiteral + ", 'HH24:MI:SS')";
         } else if (isTimestamp(isoDate)) {
-            StringBuffer val = new StringBuffer(26);
-            //noinspection HardCodedStringLiteral
-            val.append("TO_TIMESTAMP(");
-            val.append(normalLiteral);
-            //noinspection HardCodedStringLiteral
-            val.append(", 'YYYY-MM-DD HH24:MI:SS.FF')");
-            return val.toString();
+            return "TO_TIMESTAMP(" + normalLiteral + ", 'YYYY-MM-DD HH24:MI:SS.FF')";
         } else if (isDateTime(isoDate)) {
             int seppos = normalLiteral.lastIndexOf('.');
             if (seppos != -1) {
                 normalLiteral = normalLiteral.substring(0, seppos) + "'";
             }
-            StringBuffer val = new StringBuffer(26);
-            //noinspection HardCodedStringLiteral
-            val.append("TO_DATE(");
-            val.append(normalLiteral);
-            //noinspection HardCodedStringLiteral
-            val.append(", 'YYYY-MM-DD HH24:MI:SS')");
-            return val.toString();
+            return "TO_DATE(" + normalLiteral + ", 'YYYY-MM-DD HH24:MI:SS')";
         }
-        //noinspection HardCodedStringLiteral
         return "UNSUPPORTED:" + isoDate;
     }
 

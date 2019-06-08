@@ -16,20 +16,14 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
 
     @Override
     protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
-
-        StringBuffer recordCheckSql = new StringBuffer();
-
-        recordCheckSql.append("DECLARE\n");
-        recordCheckSql.append("\tv_reccount NUMBER := 0;\n");
-        recordCheckSql.append("BEGIN\n");
-        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
-
-        recordCheckSql.append(whereClause);
-        recordCheckSql.append(";\n");
-
-        recordCheckSql.append("\tIF v_reccount = 0 THEN\n");
-
-        return recordCheckSql.toString();
+        return String.format("DECLARE\n" +
+                "\tv_reccount NUMBER := 0;\n" +
+                "BEGIN\n" +
+                "\tSELECT COUNT(*) INTO v_reccount FROM %s WHERE %s;\n" +
+                "\tIF v_reccount = 0 THEN\n",
+            database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()),
+            whereClause
+        );
     }
 
     @Override
@@ -39,7 +33,7 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
 
     @Override
     protected String getPostUpdateStatements(Database database){
-        StringBuffer endStatements = new StringBuffer();
+        StringBuilder endStatements = new StringBuilder();
         endStatements.append("END IF;\n");
         endStatements.append("END;\n");
 

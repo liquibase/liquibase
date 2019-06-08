@@ -1,21 +1,43 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.Ingres9Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -32,7 +54,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
         Relation table = exampleConstraint.getRelation();
@@ -85,7 +107,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException {
 
         if (!snapshot.getSnapshotControl().shouldInclude(UniqueConstraint.class)) {
             return;
@@ -97,7 +119,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             Schema schema;
             schema = table.getSchema();
 
-            List<CachedRow> metadata = null;
+            List<CachedRow> metadata;
             try {
                 metadata = listConstraints(table, snapshot, schema);
             } catch (SQLException e) {
@@ -248,7 +270,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     String descriptor = rowData.get("DESCRIPTOR").toString();
                     descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
                     for (String columnNumber : StringUtil.splitAndTrim(descriptor, ",")) {
-                        String columnName = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
+                        String columnName = ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
                                 "select c.columnname from sys.syscolumns c "
                                         + "join sys.systables t on t.tableid=c.referenceid "
                                         + "where t.tablename='" + rowData.get("TABLENAME") + "' and c.columnnumber=" + columnNumber), String.class);
@@ -343,7 +365,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
      * @return A lengthy SQL statement that fetches the constraint names and columns
      */
     private String getUniqueConstraintsSqlInformix(InformixDatabase database, Schema schema, String name) {
-        StringBuffer sqlBuf = new StringBuffer();
+        StringBuilder sqlBuf = new StringBuilder();
 
         sqlBuf.append("SELECT * FROM (\n");
 
@@ -377,10 +399,10 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
         // If possible, filter for catalog name and/or constraint name
         if (catalogName != null) {
-            sqlBuf.append("AND owner='" + catalogName + "'\n");
+            sqlBuf.append("AND owner='").append(catalogName).append("'\n");
         }
         if (constraintName != null) {
-            sqlBuf.append("AND constraint_name='" + constraintName + "'");
+            sqlBuf.append("AND constraint_name='").append(constraintName).append("'");
         }
 
         // For correct processing, it is important that we get all columns in order.

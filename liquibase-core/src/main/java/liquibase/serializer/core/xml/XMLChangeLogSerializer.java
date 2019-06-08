@@ -18,13 +18,29 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
@@ -62,12 +78,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     @Override
     public String serialize(LiquibaseSerializable object, boolean pretty) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         int indent = -1;
         if (pretty) {
             indent = 0;
         }
-        nodeToStringBuffer(createNode(object), buffer, indent);
+        nodeToStringBuilder(createNode(object), buffer, indent);
         return buffer.toString();
     }
 
@@ -113,14 +129,18 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
 
 
-        String schemaLocationAttribute = "";
+        StringBuilder schemaLocationAttribute = new StringBuilder();
         for (Map.Entry<String, String> entry : urlByNamespace.entrySet()) {
             if (!"".equals(entry.getValue())) {
-                schemaLocationAttribute += entry.getKey() + " " + entry.getValue() + " ";
+                schemaLocationAttribute
+                    .append(entry.getKey())
+                    .append(" ")
+                    .append(entry.getValue())
+                    .append(" ");
             }
         }
 
-        changeLogElement.setAttribute("xsi:schemaLocation", schemaLocationAttribute.trim());
+        changeLogElement.setAttribute("xsi:schemaLocation", schemaLocationAttribute.toString().trim());
 
         doc.appendChild(changeLogElement);
         setCurrentChangeLogFileDOM(doc);
@@ -134,17 +154,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
-        FileInputStream in = new FileInputStream(changeLogFile);
         String existingChangeLog;
-        try {
+        try (FileInputStream in = new FileInputStream(changeLogFile)) {
             existingChangeLog = StreamUtil.readStreamAsString(in);
-        } finally {
-            in.close();
         }
 
-        FileOutputStream out = new FileOutputStream(changeLogFile);
-
-        try {
+        try (FileOutputStream out = new FileOutputStream(changeLogFile)) {
             if (!existingChangeLog.contains("</databaseChangeLog>")) {
                 write(Arrays.asList(changeSet), out);
             } else {
@@ -153,8 +168,6 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), out);
             }
             out.flush();
-        } finally {
-            out.close();
         }
     }
 
@@ -414,10 +427,10 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
      * change
      *
      * @param node the {@link Element} associated to this change
-     * @param buffer a {@link StringBuffer} object used to hold the {@link String}
+     * @param buffer a {@link StringBuilder} object used to hold the {@link String}
      *               representation of the change
      */
-    private void nodeToStringBuffer(Node node, StringBuffer buffer, int indent) {
+    private void nodeToStringBuilder(Node node, StringBuilder buffer, int indent) {
         if (indent >= 0) {
             if (indent > 0) {
                 buffer.append("\n");
@@ -456,7 +469,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (newIndent >= 0) {
                     newIndent += 4;
                 }
-                nodeToStringBuffer(childNode, buffer, newIndent);
+                nodeToStringBuilder(childNode, buffer, newIndent);
                 sawChildren = true;
             }
         }

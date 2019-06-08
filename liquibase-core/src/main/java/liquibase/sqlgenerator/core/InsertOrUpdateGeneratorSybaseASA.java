@@ -17,7 +17,7 @@ public class InsertOrUpdateGeneratorSybaseASA extends InsertOrUpdateGenerator {
 
     @Override
     protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer(super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
+        StringBuilder sql = new StringBuilder(super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
         
         int pos = sql.indexOf("VALUES (", 0);
         sql.insert(pos, " ON EXISTING UPDATE ");

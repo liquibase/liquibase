@@ -16,7 +16,11 @@ package liquibase.util.csv.opencsv;
  limitations under the License.
  */
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.List;
 
 /**
@@ -253,7 +257,7 @@ public class CSVWriter implements Closeable, Flushable {
 
    /**
     * Appends the character to the StringBuilder adding the escape character if needed.
-    * @param sb - StringBuffer holding the processed character.
+    * @param sb - StringBuilder holding the processed character.
     * @param nextChar - character to process
     */
    private void processCharacter(StringBuilder sb, char nextChar) {

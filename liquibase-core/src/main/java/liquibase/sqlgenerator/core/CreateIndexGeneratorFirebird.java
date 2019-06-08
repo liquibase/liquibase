@@ -111,7 +111,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
             return new Sql[0];
         }
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         buffer.append("CREATE ");
 
@@ -171,7 +171,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
                                                 Database database)  {
         ColumnAnalysisResult result = new ColumnAnalysisResult();
 
-        StringBuffer idxColsBuf = new StringBuffer();
+        StringBuilder idxColsBuf = new StringBuilder();
         result.foundAscColumns = false;
         result.foundDescColumns = false;
         result.numComputedCols = 0;

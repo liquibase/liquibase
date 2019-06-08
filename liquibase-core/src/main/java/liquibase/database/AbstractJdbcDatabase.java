@@ -58,9 +58,9 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.structure.core.View;
 import liquibase.util.ISODateFormat;
+import liquibase.util.NowAndTodayUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.NowAndTodayUtil;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -78,6 +78,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import static liquibase.util.StringUtil.join;
 
 
 /**
@@ -600,12 +602,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getConcatSql(final String... values) {
-        StringBuffer returnString = new StringBuffer();
-        for (String value : values) {
-            returnString.append(value).append(" || ");
-        }
-
-        return returnString.toString().replaceFirst(" \\|\\| $", "");
+        return join(values, " || ");
     }
 
     @Override
