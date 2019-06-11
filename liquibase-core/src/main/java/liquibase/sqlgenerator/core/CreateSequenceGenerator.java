@@ -39,53 +39,56 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
 
     @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE SEQUENCE ");
-        buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
+        StringBuffer queryStringBuilder = new StringBuffer();
+        queryStringBuilder.append("CREATE SEQUENCE ");
+        if (database instanceof PostgresDatabase) {
+            queryStringBuilder.append(" IF NOT EXISTS ");
+        }
+        queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
-            buffer.append(" AS BIGINT ");
+            queryStringBuilder.append(" AS BIGINT ");
         }
         if (statement.getStartValue() != null) {
-            buffer.append(" START WITH ").append(statement.getStartValue());
+            queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
         }
         if (statement.getIncrementBy() != null) {
-            buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
         }
         if (statement.getMinValue() != null) {
-            buffer.append(" MINVALUE ").append(statement.getMinValue());
+            queryStringBuilder.append(" MINVALUE ").append(statement.getMinValue());
         }
         if (statement.getMaxValue() != null) {
-            buffer.append(" MAXVALUE ").append(statement.getMaxValue());
+            queryStringBuilder.append(" MAXVALUE ").append(statement.getMaxValue());
         }
 
         if (statement.getCacheSize() != null) {
             if (database instanceof OracleDatabase || database instanceof Db2zDatabase) {
                 if (BigInteger.ZERO.equals(statement.getCacheSize())) {
                     if (database instanceof OracleDatabase) {
-                        buffer.append(" NOCACHE ");
+                        queryStringBuilder.append(" NOCACHE ");
                     }
                 } else {
-                    buffer.append(" CACHE ").append(statement.getCacheSize());
+                    queryStringBuilder.append(" CACHE ").append(statement.getCacheSize());
                 }
             }
         }
 
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
-                buffer.append(" ORDER");
+                queryStringBuilder.append(" ORDER");
             } else {
                if (database instanceof OracleDatabase) {
-                   buffer.append(" NOORDER");
+                   queryStringBuilder.append(" NOORDER");
                }
             }
         }
         if (statement.getCycle() != null) {
             if (statement.getCycle()) {
-                buffer.append(" CYCLE");
+                queryStringBuilder.append(" CYCLE");
             }
         }
 
-        return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedSequence(statement))};
+        return new Sql[]{new UnparsedSql(queryStringBuilder.toString(), getAffectedSequence(statement))};
     }
 
     protected Sequence getAffectedSequence(CreateSequenceStatement statement) {
