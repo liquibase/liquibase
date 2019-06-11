@@ -556,7 +556,7 @@ public class DiffToChangeLog {
                 final List<String> listReferencingNames= new ArrayList<String>(Arrays.asList(referencingNames.split(",")));
                 for (String firstValueReferencingName: listReferencingNames) {
                     if (schemas.contains(firstValueReferencingName)) continue; // -- don't add schema
-                    if (afterValue.equals(firstValueReferencingName)) continue; // -- don't add itself
+                    if (afterValue.equals(getNameWithoutArg(firstValueReferencingName))) continue; // -- don't add itself
 
                     graph.add(getNameWithoutArg(firstValueReferencingName), afterValue);
                 }
