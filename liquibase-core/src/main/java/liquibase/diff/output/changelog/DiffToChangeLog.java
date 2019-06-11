@@ -552,7 +552,7 @@ public class DiffToChangeLog {
 
             for (Map<String, ?> row : queryForListResult) {
                 String afterValue = getNameWithoutArg(row.get("OBJECT_NAME").toString());
-                String referencingNames = row.get("REFERENCING_NAMES").toString().replaceAll("\\{|\\}|\"}", "");
+                String referencingNames = row.get("REFERENCING_NAMES").toString().replaceAll("\\{|\\}", "").replace("\"", "");
                 final List<String> listReferencingNames= new ArrayList<String>(Arrays.asList(referencingNames.split(",")));
                 for (String firstValueReferencingName: listReferencingNames) {
                     if (schemas.contains(firstValueReferencingName)) continue; // -- don't add schema
