@@ -546,21 +546,23 @@ public class DiffToChangeLog {
                 }
             }
         } else if (database instanceof PostgresDatabase) {
-            final String sql = queryForDependenciesPostgresql(schemas);
+            final String sql = queryForDependenciesPostgreSql(schemas);
             final Executor executor = ExecutorService.getInstance().getExecutor(database);
             final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
-                String bName = StringUtils.trimToNull(StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME")));
-                String tabName = StringUtils.trimToNull(StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME")));
+                String bName = StringUtils.trimToNull(StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToNull(row.get("REFERENCING_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
+                String tabName = StringUtils.trimToNull(StringUtils.trimToNull(row.get("REFERENCED_SCHEMA_NAME").toString()) +
+                        "." + StringUtils.trimToNull(row.get("REFERENCED_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
 
                 graph.add(bName, tabName);
             }
         }
     }
 
-    private String queryForDependenciesPostgresql(List<String> schemas){
-        //SQL adapted from from https://wiki.postgresql.org/wiki/Pg_depend_display
+    private String queryForDependenciesPostgreSql(List<String> schemas){
+        //SQL adapted from https://wiki.postgresql.org/wiki/Pg_depend_display
         return "WITH RECURSIVE preference AS (\n" +
                 "    SELECT 10 AS max_depth  -- The deeper the recursion goes, the slower it performs.\n" +
                 "         , 16384 AS min_oid -- user objects only\n" +
@@ -610,14 +612,24 @@ public class DiffToChangeLog {
                 "                     AND COALESCE(SUBSTRING(refobjid::regclass::text, E'^(\\\\\\\\w+)\\\\\\\\.'),'') !~ preference.schema_exclusion\n" +
                 "                   GROUP BY classid, objid, refclassid, refobjid, deptype, rel.object_name, rrel.object_name\n" +
                 "               )\n" +
-                "select * from dependency_pair where REFERENCED_NAME != REFERENCING_NAME " +
+                " select referenced_schema_name,\n" +
+                "    (CASE\n" +
+                "      WHEN position('.' in referenced_name) >0 THEN substring(referenced_name from position('.' in referenced_name)+1 for length(referenced_name))\n" +
+                "      ELSE referenced_name\n" +
+                "    END)  AS referenced_name, \n" +
+                "   referencing_schema_name,\n" +
+                "   (CASE\n" +
+                "      WHEN position('.' in referencing_name) >0 THEN substring(referencing_name from position('.' in referencing_name)+1 for length(referencing_name))\n" +
+                "      ELSE referencing_name\n" +
+                "    END)  AS referencing_name from dependency_pair where REFERENCED_NAME != REFERENCING_NAME " +
                 " AND (" +
                 StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                     @Override
                     public String toString(String obj) {
                         return " REFERENCED_NAME like '" + obj + ".%' OR REFERENCED_NAME NOT LIKE '%.%'";
                     }
-                })+ ")";
+                })+ ") " +
+                " AND referencing_schema_name is not null and referencing_name is not null";
     }
 
     protected List<Class<? extends DatabaseObject>> getOrderedOutputTypes(Class<? extends ChangeGenerator> generatorType) {
