@@ -556,7 +556,9 @@ public class DiffToChangeLog {
                 String tabName = StringUtils.trimToNull(StringUtils.trimToNull(row.get("REFERENCED_SCHEMA_NAME").toString()) +
                         "." + StringUtils.trimToNull(row.get("REFERENCED_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
 
-                graph.add(bName, tabName);
+                if (tabName != null && bName != null) {
+                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                }
             }
         }
     }
