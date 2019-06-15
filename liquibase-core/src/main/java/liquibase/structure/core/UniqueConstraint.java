@@ -18,14 +18,15 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setAttribute("deferrable", false);
         setAttribute("initiallyDeferred", false);
         setAttribute("disabled", false);
+		setAttribute("validate", true);
     }
 
     public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, Column... columns) {
         this();
         setName(name);
-        if (tableName != null && columns != null) {
-            setTable(new Table(tableCatalog, tableSchema, tableName));
-            setColumns(new ArrayList<Column>(Arrays.asList(columns)));
+        if ((tableName != null) && (columns != null)) {
+        	setRelation(new Table(tableCatalog, tableSchema, tableName));
+            setColumns(new ArrayList<>(Arrays.asList(columns)));
         }
     }
 
@@ -48,19 +49,39 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     @Override
     public Schema getSchema() {
-        if (getTable() == null) {
+        if (getRelation() == null) {
             return null;
         }
 
-        return getTable().getSchema();
+        return getRelation().getSchema();
     }
-
+    
+    /**
+     * @deprecated Use {@link #getRelation()}
+     */
+    @Deprecated
 	public Table getTable() {
-		return getAttribute("table", Table.class);
+		Relation relation = getRelation();
+		if (relation instanceof Table)
+			return (Table) relation;
+		else
+			return null;
 	}
 
+    /**
+     * @deprecated Use {@link #setRelation(Relation)}
+     */
+    @Deprecated
 	public UniqueConstraint setTable(Table table) {
-		this.setAttribute("table", table);
+		return setRelation(table);
+    }
+    
+    public Relation getRelation() {
+    	return getAttribute("table", Relation.class);
+    }
+    
+    public UniqueConstraint setRelation(Relation relation) {
+    	this.setAttribute("table", relation);
         return this;
     }
 
@@ -72,7 +93,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setAttribute("columns", columns);
         if (getAttribute("table", Object.class) instanceof Table) {
             for (Column column : getColumns()) {
-                column.setRelation(getTable());
+                column.setRelation(getRelation());
             }
         }
 
@@ -97,6 +118,28 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		this.setAttribute("deferrable",  deferrable);
         return this;
     }
+
+  /**
+   * In Oracle PL/SQL, the VALIDATE keyword defines whether a newly added unique constraint on a 
+   * column in a table should cause existing rows to be checked to see if they satisfy the 
+   * uniqueness constraint or not. 
+   * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
+   */
+	public boolean shouldValidate() {
+		return getAttribute("validate", true);
+	}
+
+  /**
+   * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+   * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+   * check will be done to ensure old data has valid constraints - only new data would be checked
+   * to see if it complies with the constraint logic. The default state for unique constraints is to
+   * have 'ENABLE VALIDATE' set.
+   */
+	public UniqueConstraint setShouldValidate(boolean shouldValidate) {
+		this.setAttribute("validate", shouldValidate);
+		return this;
+	}
 
 	public boolean isInitiallyDeferred() {
 		return getAttribute("initiallyDeferred", Boolean.class);
@@ -135,32 +178,38 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     }
 
-    @Override
+	public UniqueConstraint setClustered(boolean clustered) {
+		this.setAttribute("clustered", clustered);
+		return this;
+	}
+
+	public boolean isClustered() {
+		return getAttribute("clustered", false);
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (o == null || getClass() != o.getClass())
+		if ((o == null) || (getClass() != o.getClass()))
 			return false;
 		if (null == this.getColumnNames())
 			return false;
 		UniqueConstraint that = (UniqueConstraint) o;
 		boolean result = false;
-		result = !(getColumnNames() != null ? !getColumnNames()
-				.equalsIgnoreCase(that.getColumnNames()) : that
-				.getColumnNames() != null)
-				&& isDeferrable() == that.isDeferrable()
-				&& isInitiallyDeferred() == that.isInitiallyDeferred()
-				&& isDisabled() == that.isDisabled();
+        result = !((getColumnNames() != null) ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : (that
+            .getColumnNames() != null)) && (isDeferrable() == that.isDeferrable()) && (isInitiallyDeferred() == that
+            .isInitiallyDeferred()) && (isDisabled() == that.isDisabled());
 		// Need check for nulls here due to NullPointerException using
 		// Postgres
 		if (result) {
-			if (null == this.getTable()) {
-				result = null == that.getTable();
-			} else if (null == that.getTable()) {
+			if (null == this.getRelation()) {
+				result = null == that.getRelation();
+			} else if (null == that.getRelation()) {
 				result = false;
 			} else {
-				result = this.getTable().getName().equals(
-						that.getTable().getName());
+				result = this.getRelation().getName().equals(
+						that.getRelation().getName());
 			}
 		}
 
@@ -174,9 +223,8 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		// Need check for nulls here due to NullPointerException using Postgres
 		String thisTableName;
 		String thatTableName;
-		thisTableName = null == this.getTable() ? "" : this.getTable()
-				.getName();
-		thatTableName = null == o.getTable() ? "" : o.getTable().getName();
+        thisTableName = (null == this.getRelation()) ? "" : this.getRelation().getName();
+        thatTableName = (null == o.getRelation()) ? "" : o.getRelation().getName();
 		int returnValue = thisTableName.compareTo(thatTableName);
 		if (returnValue == 0) {
 			returnValue = this.getName().compareTo(o.getName());
@@ -195,24 +243,24 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     @Override
 	public int hashCode() {
 		int result = 0;
-		if (this.getTable() != null) {
-			result = this.getTable().hashCode();
+		if (this.getRelation() != null) {
+			result = this.getRelation().hashCode();
 		}
 		if (this.getName() != null) {
-			result = 31 * result + this.getName().toUpperCase().hashCode();
+            result = (31 * result) + this.getName().toUpperCase().hashCode();
 		}
 		if (getColumnNames() != null) {
-			result = 31 * result + getColumnNames().hashCode();
+            result = (31 * result) + getColumnNames().hashCode();
 		}
 		return result;
 	}
 
 	@Override
 	public String toString() {
-        if (getTable() == null) {
+        if (getRelation() == null) {
             return getName();
         } else {
-            return getName() + " on " + getTable().getName() + "("
+            return getName() + " on " + getRelation().getName() + "("
                     + getColumnNames() + ")";
         }
     }

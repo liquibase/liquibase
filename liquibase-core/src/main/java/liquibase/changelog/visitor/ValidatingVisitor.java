@@ -7,37 +7,33 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
-    private List<String> invalidMD5Sums = new ArrayList<String>();
-    private List<FailedPrecondition> failedPreconditions = new ArrayList<FailedPrecondition>();
-    private List<ErrorPrecondition> errorPreconditions = new ArrayList<ErrorPrecondition>();
-    private Set<ChangeSet> duplicateChangeSets = new HashSet<ChangeSet>();
-    private List<SetupException> setupExceptions = new ArrayList<SetupException>();
-    private List<Throwable> changeValidationExceptions = new ArrayList<Throwable>();
+    private List<String> invalidMD5Sums = new ArrayList<>();
+    private List<FailedPrecondition> failedPreconditions = new ArrayList<>();
+    private List<ErrorPrecondition> errorPreconditions = new ArrayList<>();
+    private Set<ChangeSet> duplicateChangeSets = new HashSet<>();
+    private List<SetupException> setupExceptions = new ArrayList<>();
+    private List<Throwable> changeValidationExceptions = new ArrayList<>();
     private ValidationErrors validationErrors = new ValidationErrors();
     private Warnings warnings = new Warnings();
 
-    private Set<String> seenChangeSets = new HashSet<String>();
+    private Set<String> seenChangeSets = new HashSet<>();
 
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
 
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
-        ranIndex = new HashMap<String, RanChangeSet>();
+        ranIndex = new HashMap<>();
         for(RanChangeSet changeSet:ranChangeSets) {
             ranIndex.put(changeSet.toString(), changeSet);
         }
@@ -50,12 +46,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             if (preconditions == null) {
                 return;
             }
-            preconditions.check(database, changeLog, null);
+            preconditions.check(database, changeLog, null, null);
         } catch (PreconditionFailedException e) {
-            LogFactory.getLogger().debug("Precondition Failed: "+e.getMessage(), e);
+            LogService.getLog(getClass()).debug(LogType.LOG, "Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            LogFactory.getLogger().debug("Precondition Error: "+e.getMessage(), e);
+            LogService.getLog(getClass()).debug(LogType.LOG, "Precondition Error: "+e.getMessage(), e);
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {
@@ -63,7 +59,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     database.rollback();
                 }
             } catch (DatabaseException e) {
-                LogFactory.getLogger().warning("Error rolling back after precondition check", e);
+                LogService.getLog(getClass()).warning(LogType.LOG, "Error rolling back after precondition check", e);
             }
         }
     }
@@ -95,7 +91,6 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private String normalizePath(String filePath) {
         return filePath.replaceFirst("^classpath:", "");
     }
-        
 
         @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
@@ -112,19 +107,25 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             
             if(shouldValidate){
                 warnings.addAll(change.warn(database));
-            
-                try {                
-                    ValidationErrors foundErrors = change.validate(database);
 
-                    if (foundErrors != null && foundErrors.hasErrors()) {
-                        if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
-                            LogFactory.getLogger().info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                try {
+                    ValidationErrors foundErrors = change.validate(database);
+                    if ((foundErrors != null)) {
+                        if (foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
+                                (ChangeSet.ValidationFailOption.MARK_RAN))) {
+                            LogService.getLog(getClass()).info(
+                                    LogType.LOG, "Skipping change set " + changeSet + " due to validation error(s): " +
+                                            StringUtils.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                         } else {
+                            if (!foundErrors.getWarningMessages().isEmpty())
+                                LogService.getLog(getClass()).warning(
+                                        LogType.LOG, "Change set " + changeSet + ": " +
+                                                StringUtils.join(foundErrors.getWarningMessages(), ", "));
                             validationErrors.addAll(foundErrors, changeSet);
                         }
                     }
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     changeValidationExceptions.add(e);
                 }
             }
@@ -138,14 +139,15 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
         }
 
-
+        // Did we already see this ChangeSet?
         String changeSetString = changeSet.toString(false);
         if (seenChangeSets.contains(changeSetString)) {
             duplicateChangeSets.add(changeSet);
+            return;
         } else {
             seenChangeSets.add(changeSetString);
         }
-    }
+    } // public void visit(...)
 
     public List<String> getInvalidMD5Sums() {
         return invalidMD5Sums;
@@ -181,13 +183,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     public boolean validationPassed() {
-        return invalidMD5Sums.size() == 0
-                && failedPreconditions.size() == 0
-                && errorPreconditions.size() == 0
-                && duplicateChangeSets.size() == 0
-                && changeValidationExceptions.size() == 0
-                && setupExceptions.size() == 0
-                && !validationErrors.hasErrors();
+        return invalidMD5Sums.isEmpty() && failedPreconditions.isEmpty() && errorPreconditions.isEmpty() &&
+            duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
+            !validationErrors.hasErrors();
     }
 
     public Database getDatabase() {

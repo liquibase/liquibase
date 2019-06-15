@@ -12,11 +12,11 @@ class IndexTest extends Specification {
 
         where:
         index                                                                                     | expected
-        new Index()                                                                               | "null"
+        new Index()                                                                               | "(unnamed index)"
         new Index("idx_name")                                                                     | "idx_name"
-        new Index("idx_name", null, null, "tab_name", new Column("col1"), new Column("col2"))     | "idx_name on tab_name(col1, col2)"
-        new Index("idx_name", null, "schem", "tab_name", new Column("col1"), new Column("col2"))  | "idx_name on schem.tab_name(col1, col2)"
-        new Index("idx_name", "cat", "schem", "tab_name", new Column("col1"), new Column("col2")) | "idx_name on schem.tab_name(col1, col2)"
+        new Index("idx_name", null, null, "tab_name", new Column("col1"), new Column("col2"))     | "idx_name ON tab_name(col1, col2)"
+        new Index("idx_name", null, "schem", "tab_name", new Column("col1"), new Column("col2"))  | "idx_name ON schem.tab_name(col1, col2)"
+        new Index("idx_name", "cat", "schem", "tab_name", new Column("col1"), new Column("col2")) | "idx_name ON schem.tab_name(col1, col2)"
     }
 
     def "equals and hasCode"() {

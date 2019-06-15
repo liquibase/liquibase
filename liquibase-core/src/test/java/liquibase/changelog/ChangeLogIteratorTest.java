@@ -8,8 +8,6 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
-import static org.junit.Assert.*;
-
 import liquibase.exception.LiquibaseException;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +15,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 public class ChangeLogIteratorTest {
     private DatabaseChangeLog changeLog;

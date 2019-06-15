@@ -1,4 +1,4 @@
-_liquibase() 
+_liquibase()
 {
     local cur prev opts
     COMPREPLY=()

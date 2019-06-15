@@ -7,14 +7,14 @@
 
     <preConditions onSqlOutput="IGNORE" >
             <dbms type="h2"/>
-            <runningAs username="lbuser"/>
+            <runningAs username="${loginUser}"/>
             <changeLogPropertyDefined property="database.databaseProductName" value="H2"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
         <preConditions onSqlOutput="TEST">
                 <dbms type="h2"/>
-                <runningAs username="lbuser"/>
+                <runningAs username="${loginUser}"/>
         </preConditions>
         <comment>
             You can add comments to changeSets.

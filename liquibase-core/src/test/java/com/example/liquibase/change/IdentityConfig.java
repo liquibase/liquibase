@@ -1,8 +1,8 @@
 package com.example.liquibase.change;
 
-import java.math.BigDecimal;
-
 import liquibase.serializer.AbstractLiquibaseSerializable;
+
+import java.math.BigDecimal;
 
 public class IdentityConfig extends AbstractLiquibaseSerializable {
     private BigDecimal seed;

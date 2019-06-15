@@ -2,13 +2,16 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +34,7 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public boolean supports(Database database) {
-        return super.supports(database) && !(database instanceof DerbyDatabase);
+        return super.supports(database) && !(database instanceof DerbyDatabase) && !(database instanceof Db2zDatabase);
     }
 
     public String getCatalogName() {
@@ -113,13 +116,13 @@ public class MergeColumnChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    public SqlStatement[] generateStatements(final Database database) {
+        List<SqlStatement> statements = new ArrayList<>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
         addNewColumnChange.setTableName(getTableName());
-        AddColumnConfig columnConfig = new AddColumnConfig();
+        final AddColumnConfig columnConfig = new AddColumnConfig();
         columnConfig.setName(getFinalColumnName());
         columnConfig.setType(getFinalColumnType());
         addNewColumnChange.addColumn(columnConfig);
@@ -133,47 +136,55 @@ public class MergeColumnChange extends AbstractChange {
         statements.add(new RawSqlStatement(updateStatement));
         
         if (database instanceof SQLiteDatabase) {
-            // SQLite does not support this ALTER TABLE operation until now.
-			// For more information see: http://www.sqlite.org/omitted.html
-			// This is a small work around...
-    		
-			// define alter table logic
-    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-    			@Override
+           /* nolgpl: implement */
+
+            // Since SQLite does not support a Merge column statement,
+            SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
+                @Override
                 public ColumnConfig[] getColumnsToAdd() {
-    				ColumnConfig[] new_columns = new ColumnConfig[1];
-    				ColumnConfig new_column = new ColumnConfig();
-    		        new_column.setName(getFinalColumnName());
-    		        new_column.setType(getFinalColumnType());
-    				new_columns[0] = new_column;
-    				return new_columns;
-    			}
-    			@Override
+                    // This gets called after
+                    ColumnConfig[] columnConfigs = new ColumnConfig[1];
+                    ColumnConfig mergedColumn = new ColumnConfig();
+                    mergedColumn.setName(getFinalColumnName());
+                    mergedColumn.setType(getFinalColumnType());
+                    columnConfigs[0] = mergedColumn;
+                    return columnConfigs;
+                }
+
+                @Override
                 public boolean copyThisColumn(ColumnConfig column) {
-    				return !(column.getName().equals(getColumn1Name()) ||
-    						column.getName().equals(getColumn2Name()));
-    			}
-    			@Override
+                    // don't create columns that are merged
+                    return !column.getName().equals(getColumn1Name())
+                            && !column.getName().equals(getColumn2Name());
+                }
+
+                @Override
                 public boolean createThisColumn(ColumnConfig column) {
-    				return !(column.getName().equals(getColumn1Name()) ||
-    						column.getName().equals(getColumn2Name()));
-    			}
-    			@Override
+                    // don't copy columns that are merged
+                    return !column.getName().equals(getColumn1Name())
+                            && !column.getName().equals(getColumn2Name());
+                }
+
+                @Override
                 public boolean createThisIndex(Index index) {
-    				return !(index.getColumnNames().contains(getColumn1Name()) ||
-    						index.getColumnNames().contains(getColumn2Name()));
-    			}
-    		};
-        	
-        	try {
-        		// alter table
-				statements.addAll(SQLiteDatabase.getAlterTableStatements(
-						rename_alter_visitor,
-						database,getCatalogName(), getSchemaName(),getTableName()));
-    		} catch (Exception e) {
-				e.printStackTrace();
-			}
-    		
+                    // skip the index if it has old columns
+                    for (Column column : index.getColumns()) {
+                        if (column.getName().equals(getColumn1Name())
+                                || column.getName().equals(getColumn2Name())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            };
+            List<SqlStatement> workAroundStatements = null;
+            try {
+                workAroundStatements = SQLiteDatabase.getAlterTableStatements(alterTableVisitor, database, getCatalogName(), getSchemaName(), getTableName());
+                statements.addAll(workAroundStatements);
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+
         } else {
         	// ...if it is not a SQLite database 
         	

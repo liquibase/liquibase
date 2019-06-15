@@ -1,35 +1,30 @@
 package liquibase.database.core;
 
-import java.sql.*;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.executor.Executor;
+import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
+import liquibase.logging.Logger;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 
 import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Locale;
 
 public class DerbyDatabase extends AbstractJdbcDatabase {
 
-    private Logger log = LogFactory.getLogger();
-
     protected int driverVersionMajor;
     protected int driverVersionMinor;
+    private Logger log = LogService.getLog(getClass());
 
     public DerbyDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
@@ -86,7 +81,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         if (objectName == null) {
             return null;
         }
-        return objectName.toUpperCase();
+        return objectName.toUpperCase(Locale.US);
     }
 
     @Override
@@ -96,13 +91,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-        if ((driverVersionMajor == 10 && driverVersionMinor >= 6) ||
-                driverVersionMajor >= 11)
-        {
-            return true;
-        } else {
-            return false;
-        }
+        return ((driverVersionMajor == 10) && (driverVersionMinor >= 6)) || (driverVersionMajor >= 11);
     }
 
     @Override
@@ -142,17 +131,19 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if (driverName != null && driverName.toLowerCase().contains("embedded")) {
+        if ((driverName != null) && driverName.toLowerCase().contains("embedded")) {
             try {
                 if (url.contains(";")) {
                     url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
                 } else {
                     url += ";shutdown=true";
                 }
-                LogFactory.getLogger().info("Shutting down derby connection: " + url);
+                LogService.getLog(getClass()).info(LogType.LOG, "Shutting down derby connection: " + url);
                 // this cleans up the lock files in the embedded derby database folder
-                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                Driver driver = (Driver) contextClassLoader.loadClass(driverName).newInstance();
+                JdbcConnection connection = (JdbcConnection) getConnection();
+                ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
+                Driver driver = (Driver) classLoader.loadClass(driverName).getConstructor().newInstance();
+                // this cleans up the lock files in the embedded derby database folder
                 driver.connect(url, null);
             } catch (Exception e) {
                 if (e instanceof SQLException) {
@@ -199,13 +190,13 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+        if ((getConnection() == null) || (getConnection() instanceof OfflineConnection)) {
             return null;
         }
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+            LogService.getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
         }
         return null;
     }
@@ -221,12 +212,18 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             return false; ///assume not;
         }
         try {
-            return this.getDatabaseMajorVersion() > 10
-                    || (this.getDatabaseMajorVersion() == 10 && this.getDatabaseMinorVersion() > 7);
+            return (this.getDatabaseMajorVersion() > 10) || ((this.getDatabaseMajorVersion() == 10) && (this
+                .getDatabaseMinorVersion() > 7));
         } catch (DatabaseException e) {
             return false; //assume not
         }
     }
 
 
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        // According to
+        // https://db.apache.org/derby/docs/10.7/ref/rrefsqlj27620.html
+        return 9;
+    }
 }

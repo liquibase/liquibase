@@ -1,6 +1,5 @@
 package liquibase.statement;
 
-import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -10,12 +9,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
+
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 
     private String whereClause;
 
-    private List<String> whereColumnNames = new ArrayList<String>();
-    private List<Object> whereParameters = new ArrayList<Object>();
+    private List<String> whereColumnNames = new ArrayList<>();
+    private List<Object> whereParameters = new ArrayList<>();
 
 	public UpdateExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
 		super(database, catalogName, schemaName, tableName, columns, changeSet, resourceAccessor);

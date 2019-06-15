@@ -16,6 +16,9 @@
  */
 package liquibase.util;
 
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
+
 import java.io.File;
 
 /**
@@ -696,9 +699,8 @@ public class SystemUtils {
      * @since 2.0
      * @since Java 1.2
      */
-    public static final String USER_COUNTRY =
-        getSystemProperty("user.country") == null ?
-            getSystemProperty("user.region") : getSystemProperty("user.country");
+    public static final String USER_COUNTRY = (getSystemProperty("user.country") == null) ? getSystemProperty("user" +
+        ".region") : getSystemProperty("user.country");
 
     /**
      * <p>The <code>user.dir</code> System Property. User's current working
@@ -1181,7 +1183,7 @@ public class SystemUtils {
             return 0;
         }
         String str = JAVA_VERSION_TRIMMED.substring(0, 1);
-        str = str + JAVA_VERSION_TRIMMED.substring(2, 3);
+        str = str + (JAVA_VERSION_TRIMMED.length() < 3 ? "0" : JAVA_VERSION_TRIMMED.substring(2, 3));
         if (JAVA_VERSION_TRIMMED.length() >= 5) {
             str = str + JAVA_VERSION_TRIMMED.substring(4, 5);
         } else {
@@ -1203,7 +1205,7 @@ public class SystemUtils {
         if (JAVA_VERSION != null) {
             for (int i = 0; i < JAVA_VERSION.length(); i++) {
                 char ch = JAVA_VERSION.charAt(i);
-                if (ch >= '0' && ch <= '9') {
+                if ((ch >= '0') && (ch <= '9')) {
                     return JAVA_VERSION.substring(i);
                 }
             }
@@ -1245,7 +1247,7 @@ public class SystemUtils {
      * @return true if matches, or false if not or can't determine
      */
     private static boolean getOSMatches(String osNamePrefix, String osVersionPrefix) {
-        if (OS_NAME == null || OS_VERSION == null) {
+        if ((OS_NAME == null) || (OS_VERSION == null)) {
             return false;
         }
         return OS_NAME.startsWith(osNamePrefix) && OS_VERSION.startsWith(osVersionPrefix);
@@ -1267,9 +1269,10 @@ public class SystemUtils {
             return System.getProperty(property);
         } catch (SecurityException ex) {
             // we are not allowed to look at this property
-            System.err.println(
-                "Caught a SecurityException reading the system property '" + property
-                + "'; the SystemUtils property value will default to null."
+            LogService.getLog(SystemUtils.class).severe(
+                    LogType.LOG, "Caught a SecurityException reading the system property '" + property
+                + "'; the SystemUtils property value will default to null.",
+                    ex
             );
             return null;
         }
@@ -1321,7 +1324,7 @@ public class SystemUtils {
      * @since Java 1.4
      */
     public static boolean isJavaAwtHeadless() {
-        return JAVA_AWT_HEADLESS != null ? JAVA_AWT_HEADLESS.equals(Boolean.TRUE.toString()) : false;
+        return (JAVA_AWT_HEADLESS != null) ? JAVA_AWT_HEADLESS.equals(Boolean.TRUE.toString()) : false;
     }
     /**
      * <p>Gets the Java home directory as a <code>File</code>.</p>

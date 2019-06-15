@@ -149,4 +149,36 @@
             </lb:updateDatabase>
         </au:expectfailure>
     </target>
+
+	
+	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
+	
+    <target name="testUpdateDatabaseChangeLogDirectoryLegacy">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
+        	               changelogdirectory="${liquibase.test.ant.basedir}/changelog"
+        	               changelogfile="simple-changelog.xml"
+                           classpathref="basic-classpath"/>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+	<target name="testUpdateDatabaseChangeLogDirectory">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:updateDatabase changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:updateDatabase>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+	<target name="testUpdateDatabaseChangeLogDirectoryDoesNotExist">
+        <au:expectfailure expectedmessage="${liquibase.test.ant.basedir}/bad_changelog must be a directory">
+	        <lb:updateDatabase changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">
+	            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+	        </lb:updateDatabase>
+        </au:expectfailure>
+    </target>
 </project>

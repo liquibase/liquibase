@@ -9,7 +9,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.integration.ant.logging.AntTaskLogFactory;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
@@ -29,22 +29,29 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+
+import static java.util.ResourceBundle.getBundle;
 
 /**
  * Base class for all Ant Liquibase tasks.  This class sets up Liquibase and defines parameters
  * that are common to all tasks.
  */
 public abstract class BaseLiquibaseTask extends Task {
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+
     private AntClassLoader classLoader;
     private Liquibase liquibase;
 
     private Path classpath;
     private DatabaseType databaseType;
     private ChangeLogParametersType changeLogParameters;
-    private boolean promptOnNonLocalDatabase = false;
+    private boolean promptOnNonLocalDatabase;
 
     public BaseLiquibaseTask() {
         super();
@@ -52,14 +59,14 @@ public abstract class BaseLiquibaseTask extends Task {
 
     @Override
     public void init() throws BuildException {
-        LogFactory.setInstance(new AntTaskLogFactory(this));
+        LogService.setLoggerFactory(new AntTaskLogFactory(this));
         classpath = new Path(getProject());
     }
 
     @Override
     public final void execute() throws BuildException {
         super.execute();
-        log("Starting Liquibase.", Project.MSG_INFO);
+        log(coreBundle.getString("starting.liquibase"), Project.MSG_INFO);
         classLoader = getProject().createClassLoader(classpath);
         classLoader.setParent(this.getClass().getClassLoader());
         classLoader.setThreadContextLoader();
@@ -104,6 +111,17 @@ public abstract class BaseLiquibaseTask extends Task {
         return liquibase;
     }
 
+
+    /**
+     * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
+     *
+     * @return Returns null in this implementation. Subclasses that need a change log should implement.
+     * @see AbstractChangeLogBasedTask#getChangeLogDirectory()
+     */
+    public String getChangeLogDirectory() {
+      return null;
+    }
+
     /**
      * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
      *
@@ -114,11 +132,16 @@ public abstract class BaseLiquibaseTask extends Task {
         return null;
     }
 
+    public void setChangeLogFile(String changeLogFile) {
+        // This method is deprecated. Use child implementation.
+    }
+
     protected boolean shouldRun() {
         LiquibaseConfiguration configuration = LiquibaseConfiguration.getInstance();
         GlobalConfiguration globalConfiguration = configuration.getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            log("Liquibase did not run because " + configuration.describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
+            log("Liquibase did not run because " + configuration.describeValueLookupLogic(globalConfiguration
+                .getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
             return false;
         }
         return true;
@@ -146,10 +169,20 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return A ResourceAccessor.
      */
     private ResourceAccessor createResourceAccessor(ClassLoader classLoader) {
-        FileSystemResourceAccessor fileSystemResourceAccessor = new FileSystemResourceAccessor();
-        ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor(classLoader);
-        return new CompositeResourceAccessor(fileSystemResourceAccessor, classLoaderResourceAccessor);
+        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+        resourceAccessors.add(new FileSystemResourceAccessor());
+        resourceAccessors.add(new ClassLoaderResourceAccessor(classLoader));
+        String changeLogDirectory = getChangeLogDirectory();
+        if (changeLogDirectory != null) {
+          changeLogDirectory = changeLogDirectory.trim().replace('\\', '/');  //convert to standard / if using absolute path on windows
+          resourceAccessors.add(new FileSystemResourceAccessor(changeLogDirectory));
+        }
+        return new CompositeResourceAccessor(resourceAccessors);
     }
+
+    /*
+     * Ant parameters
+     */
 
     /**
      * Convenience method to safely close the database connection.
@@ -165,10 +198,6 @@ public abstract class BaseLiquibaseTask extends Task {
             log("Error closing the database connection.", e, Project.MSG_WARN);
         }
     }
-
-    /*
-     * Ant parameters
-     */
 
     public Path createClasspath() {
         if (this.classpath == null) {
@@ -209,13 +238,13 @@ public abstract class BaseLiquibaseTask extends Task {
         return promptOnNonLocalDatabase;
     }
 
-    public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
-        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
-    }
-
     /*************************
      * Deprecated parameters *
      *************************/
+
+    public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
+        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
+    }
 
     /**
      * Helper method for deprecated ant attributes. This method will be removed when the deprecated methods are removed.
@@ -309,10 +338,6 @@ public abstract class BaseLiquibaseTask extends Task {
     public void setPassword(String password) {
         log("The password attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
         getDatabaseType().setPassword(password);
-    }
-
-    public void setChangeLogFile(String changeLogFile) {
-        // This method is deprecated. Use child implementation.
     }
 
     /**
@@ -464,73 +489,13 @@ public abstract class BaseLiquibaseTask extends Task {
         // Parent method is deprecated. Use child implementations.
     }
 
-
-    /**
-     * Redirector of logs from java.util.logging to ANT's logging
-     */
-    @Deprecated
-    protected static class LogRedirector {
-
-        private final Task task;
-
-        /**
-         * Constructor
-         *
-         * @param task Ant task
-         */
-        protected LogRedirector(Task task) {
-            super();
-            this.task = task;
-        }
-
-        protected void redirectLogger() {
-            registerHandler(createHandler());
-        }
-
-        protected void registerHandler(Handler theHandler) {
-            Logger logger = LogFactory.getInstance().getLog();
-        }
-
-
-        protected Handler createHandler() {
-            return new Handler() {
-                @Override
-                public void publish(LogRecord logRecord) {
-                    task.log(logRecord.getMessage(), mapLevelToAntLevel(logRecord.getLevel()));
-                }
-
-                @Override
-                public void close() throws SecurityException {
-                }
-
-                @Override
-                public void flush() {
-                }
-
-                protected int mapLevelToAntLevel(Level level) {
-                    if (Level.ALL == level) {
-                        return Project.MSG_INFO;
-                    } else if (Level.SEVERE == level) {
-                        return Project.MSG_ERR;
-                    } else if (Level.WARNING == level) {
-                        return Project.MSG_WARN;
-                    } else if (Level.INFO == level) {
-                        return Project.MSG_INFO;
-                    } else {
-                        return Project.MSG_VERBOSE;
-                    }
-                }
-            };
-        }
-
-    }
-
     /**
      * @deprecated Use {@link #closeDatabase(liquibase.database.Database)} instead.
      */
     @Deprecated
     protected void closeDatabase(Liquibase liquibase) {
-        if (liquibase != null && liquibase.getDatabase() != null && liquibase.getDatabase().getConnection() != null) {
+        if ((liquibase != null) && (liquibase.getDatabase() != null) && (liquibase.getDatabase().getConnection() !=
+            null)) {
             try {
                 liquibase.getDatabase().close();
             } catch (DatabaseException e) {
@@ -645,22 +610,63 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     /**
-     * @deprecated No longer needed. This method has no replacement.
-     * @return Log level.
+     * Redirector of logs from java.util.logging to ANT's logging
      */
     @Deprecated
-    public String getLogLevel() {
-        return LogFactory.getInstance().getLog().getLogLevel().name();
-    }
+    protected static class LogRedirector {
 
-    /**
-     * @deprecated Use the ant logging flags (-debug, -verbose, -quiet) instead of this method to control logging
-     * output. This will no longer change log levels.
-     * @param level Log level to set.
-     */
-    @Deprecated
-    public void setLogLevel(String level) {
-        LogFactory.getInstance().getLog().setLogLevel(level);
+        private final Task task;
+
+        /**
+         * Constructor
+         *
+         * @param task Ant task
+         */
+        protected LogRedirector(Task task) {
+            super();
+            this.task = task;
+        }
+
+        protected void redirectLogger() {
+            registerHandler(createHandler());
+        }
+
+        protected void registerHandler(Handler theHandler) {
+            Logger logger = LogService.getLog(getClass());
+        }
+
+
+        protected Handler createHandler() {
+            return new Handler() {
+                @Override
+                public void publish(LogRecord logRecord) {
+                    task.log(logRecord.getMessage(), mapLevelToAntLevel(logRecord.getLevel()));
+                }
+
+                @Override
+                public void close() throws SecurityException {
+                }
+
+                @Override
+                public void flush() {
+                }
+
+                protected int mapLevelToAntLevel(Level level) {
+                    if (Level.ALL == level) {
+                        return Project.MSG_INFO;
+                    } else if (Level.SEVERE == level) {
+                        return Project.MSG_ERR;
+                    } else if (Level.WARNING == level) {
+                        return Project.MSG_WARN;
+                    } else if (Level.INFO == level) {
+                        return Project.MSG_INFO;
+                    } else {
+                        return Project.MSG_VERBOSE;
+                    }
+                }
+            };
+        }
+
     }
 
     /**

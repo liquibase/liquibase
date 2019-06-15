@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
+import liquibase.statement.AbstractSqlStatement;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import liquibase.statement.AbstractSqlStatement;
 
 public class DropColumnStatement extends AbstractSqlStatement {
 
@@ -12,7 +12,7 @@ public class DropColumnStatement extends AbstractSqlStatement {
     private String tableName;
     private String columnName;
 
-    private List<DropColumnStatement> columns = new ArrayList<DropColumnStatement>();
+    private List<DropColumnStatement> columns = new ArrayList<>();
 
     public DropColumnStatement(String catalogName, String schemaName, String tableName, String columnName) {
         this.catalogName = catalogName;

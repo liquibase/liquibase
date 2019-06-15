@@ -12,7 +12,7 @@ public class SqlVisitorFactory {
 
     @SuppressWarnings("unchecked")
 	private SqlVisitorFactory() {
-        tagToClassMap = new HashMap<String, Class>();
+        tagToClassMap = new HashMap<>();
         Class[] visitors = new Class[]{
                 PrependSqlVisitor.class,
                 AppendSqlVisitor.class,
@@ -22,7 +22,7 @@ public class SqlVisitorFactory {
 
         try {
             for (Class<SqlVisitor> visitorClass : visitors) {
-                SqlVisitor visitor = visitorClass.newInstance();
+                SqlVisitor visitor = visitorClass.getConstructor().newInstance();
                 tagToClassMap.put(visitor.getName(), visitorClass);
             }
         } catch (Exception e) {
@@ -43,7 +43,7 @@ public class SqlVisitorFactory {
             return null;
         }
         try {
-            return (SqlVisitor) aClass.newInstance();
+            return (SqlVisitor) aClass.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -6,10 +6,8 @@ import org.apache.ant.antunit.junit4.AntUnitSuiteRunner;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 
 @RunWith(AntUnitSuiteRunner.class)
 public class DatabaseUpdateTaskTest extends AbstractAntTaskTest {

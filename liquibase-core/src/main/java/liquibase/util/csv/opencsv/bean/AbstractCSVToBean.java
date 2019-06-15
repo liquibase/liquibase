@@ -13,10 +13,9 @@ public abstract class AbstractCSVToBean {
      *
      * @param desc - PropertyDescriptor.
      * @return - the PropertyEditor for the given PropertyDescriptor.
-     * @throws InstantiationException - thrown when getting the PropertyEditor for the class.
-     * @throws IllegalAccessException - thrown when getting the PropertyEditor for the class.
+     * @throws ReflectiveOperationException - thrown when getting the PropertyEditor for the class.
      */
-    abstract protected PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws InstantiationException, IllegalAccessException;
+    protected abstract PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws ReflectiveOperationException;
 
     /**
      * Returns the trimmed value of the string only if the property the string is describing should be trimmed
@@ -41,10 +40,9 @@ public abstract class AbstractCSVToBean {
      * @param value - String value
      * @param prop  - PropertyDescriptor
      * @return The object set to value (i.e. Integer).  Will return String if no PropertyEditor is found.
-     * @throws InstantiationException - Thrown on error getting the property editor from the property descriptor.
-     * @throws IllegalAccessException - Thrown on error getting the property editor from the property descriptor.
+     * @throws ReflectiveOperationException - Thrown on error getting the property editor from the property descriptor.
      */
-    protected Object convertValue(String value, PropertyDescriptor prop) throws InstantiationException, IllegalAccessException {
+    protected Object convertValue(String value, PropertyDescriptor prop) throws ReflectiveOperationException {
         PropertyEditor editor = getPropertyEditor(prop);
         Object obj = value;
         if (null != editor) {

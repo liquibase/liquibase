@@ -1,13 +1,14 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
+import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
-import liquibase.database.Database;
 import liquibase.statement.core.ReorganizeTableStatement;
 
 @DatabaseChange(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
@@ -18,6 +19,11 @@ public class ModifyDataTypeChange extends AbstractChange {
     private String tableName;
     private String columnName;
     private String newDataType;
+
+    @Override
+    public boolean supports(Database database) {
+        return !(database instanceof Db2zDatabase) && super.supports(database);
+    }
 
     @Override
     public String getConfirmationMessage() {

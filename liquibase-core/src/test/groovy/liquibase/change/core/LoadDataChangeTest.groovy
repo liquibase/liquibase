@@ -1,10 +1,13 @@
 package liquibase.change.core
+
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
+import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
 import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.resource.ResourceAccessor
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
@@ -12,9 +15,24 @@ import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
 import liquibase.test.JUnitResourceAccessor
+import liquibase.test.TestContext
 import spock.lang.Unroll
 
 public class LoadDataChangeTest extends StandardChangeTest {
+
+    MSSQLDatabase mssqlDb;
+    MockDatabase mockDb;
+
+    def setup() {
+        ResourceAccessor resourceAccessor = TestContext.getInstance().getTestResourceAccessor()
+        String offlineUrl
+
+        mssqlDb = new MSSQLDatabase();
+        mssqlDb.setConnection(DatabaseFactory.getInstance().openConnection("offline:mssql",
+                "superuser", "superpass", null, resourceAccessor));
+
+        mockDb = new MockDatabase();
+    }
 
 
     def "loadDataEmpty database agnostic"() throws Exception {
@@ -27,9 +45,26 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
-		SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
-		then:
-		sqlStatement.length == 0
+
+        SqlStatement[] sqlStatement = refactoring.generateStatements(mssqlDb);
+        then:
+        sqlStatement.length == 0
+    }
+
+    def "loadDataEmpty not using InsertSetStatement"() throws Exception {
+        when:
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/empty.data.csv");
+        refactoring.setSeparator(",");
+
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
+
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
+
+        then:
+        sqlStatements.length == 0
     }
 
 
@@ -208,6 +243,44 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "21" == ((InsertStatement) sqlStatements[1]).getColumnValue("age").toString()
         Boolean.FALSE == ((InsertStatement) sqlStatements[1]).getColumnValue("active")
     }
+    
+        def "generateStatement_uuid not using InsertStatement"() throws Exception {
+        when:
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/sample.data3.csv");
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        LoadDataColumnConfig idConfig = new LoadDataColumnConfig();
+        idConfig.setHeader("id");
+        idConfig.setType("UUID");
+        refactoring.addColumn(idConfig);
+
+        LoadDataColumnConfig parentIdConfig = new LoadDataColumnConfig();
+        parentIdConfig.setHeader("parent_id");
+        parentIdConfig.setType("UUID");
+        refactoring.addColumn(parentIdConfig);
+
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+
+        then:
+        sqlStatements.length == 2
+        assert sqlStatements[0] instanceof InsertStatement
+        assert sqlStatements[1] instanceof InsertStatement
+        println sqlStatements[0]
+        println sqlStatements[1]
+        
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+        "c7ac2480-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[0]).getColumnValue("id")
+        "NULL" == ((InsertStatement) sqlStatements[0]).getColumnValue("parent_id")
+        
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+        "c801be90-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[1]).getColumnValue("id")
+        "3c39ee40-ac78-11e4-aca7-78acc0c3521f" == ((InsertStatement) sqlStatements[1]).getColumnValue("parent_id")
+    }
 
 
     def getConfirmationMessage() throws Exception {
@@ -293,7 +366,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         relativeChange.setFile("core/sample.data1.csv");
         relativeChange.setResourceAccessor(new ClassLoaderResourceAccessor());
 
-        SqlStatement[] relativeStatements = relativeChange.generateStatements(new MockDatabase());
+        SqlStatement[] relativeStatements = relativeChange.generateStatements(mockDb);
 
         LoadUpdateDataChange nonRelativeChange = new LoadUpdateDataChange();
         nonRelativeChange.setSchemaName("SCHEMA_NAME");
@@ -302,7 +375,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         nonRelativeChange.setFile("liquibase/change/core/sample.data1.csv");
         nonRelativeChange.setResourceAccessor(new ClassLoaderResourceAccessor());
 
-        SqlStatement[] nonRelativeStatements = nonRelativeChange.generateStatements(new MockDatabase());
+        SqlStatement[] nonRelativeStatements = nonRelativeChange.generateStatements(mockDb);
 
         then:
         assert relativeStatements != null

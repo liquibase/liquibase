@@ -53,7 +53,7 @@
                         <dbms type="oracle"/>
                         <dbms type="mysql"/>
                     </not>
-                    <runningAs username="sa"/>
+                    <runningAs username="${loginUser}"/>
                 </and>
                 <not>
                     <sqlCheck expectedResult="3">select count(*) from test</sqlCheck>

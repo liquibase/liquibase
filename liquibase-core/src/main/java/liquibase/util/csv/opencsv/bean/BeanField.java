@@ -45,7 +45,7 @@ public class BeanField {
     * @throws IllegalAccessException - Thrown on reflection error.
     */
    public <T> void setFieldValue(T bean, String value) throws IllegalAccessException {
-      if (required && StringUtils.trimToNull(value) == null) {
+      if (required && (StringUtils.trimToNull(value) == null)) {
          throw new IllegalStateException(String.format("Field '%s' is mandatory but no value was provided.", field.getName()));
       }
 

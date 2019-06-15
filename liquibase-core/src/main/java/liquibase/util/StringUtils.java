@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -9,8 +10,14 @@ import java.util.regex.Pattern;
 public class StringUtils {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
+    private static final SecureRandom rnd = new SecureRandom();
 
-
+    /**
+     * Returns the trimmed (left and right) version of the input string. If null is passed, an empty string is returned.
+     *
+     * @param string the input string to trim
+     * @return the trimmed string, or an empty string if the input was null.
+     */
     public static String trimToEmpty(String string) {
         if (string == null) {
             return "";
@@ -18,12 +25,18 @@ public class StringUtils {
         return string.trim();
     }
 
+    /**
+     * Returns the trimmed (left and right) form of the input string. If the string is empty after trimming (or null
+     * was passed in the first place), null is returned, i.e. the input string is reduced to nothing.
+     * @param string the string to trim
+     * @return the trimmed string or null
+     */
     public static String trimToNull(String string) {
         if (string == null) {
             return null;
         }
         String returnString = string.trim();
-        if (returnString.length() == 0) {
+        if (returnString.isEmpty()) {
             return null;
         } else {
             return returnString;
@@ -41,13 +54,14 @@ public class StringUtils {
 
         StringClauses parsed = SqlParser.parse(multiLineSQL, true, !stripComments);
 
-        List<String> returnArray = new ArrayList<String>();
+        List<String> returnArray = new ArrayList<>();
 
         StringBuilder currentString = new StringBuilder();
         String previousPiece = null;
         boolean previousDelimiter = false;
-        for (Object piece : parsed.toArray(true)) {
-            if (splitStatements && piece instanceof String && isDelimiter((String) piece, previousPiece, endDelimiter)) {
+        List<Object> parsedArray = Arrays.asList(parsed.toArray(true));
+        for (Object piece : mergeTokens(parsedArray, endDelimiter)) {
+            if (splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
                 String trimmedString = StringUtils.trimToNull(currentString.toString());
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
@@ -55,8 +69,8 @@ public class StringUtils {
                 currentString = new StringBuilder();
                 previousDelimiter = true;
             } else {
-                if (!previousDelimiter || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace after a delimiter
-                    if (!currentString.toString().equals("") || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace before the statement
+                if (!previousDelimiter || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
+                    if ((currentString.length() > 0) || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
                         currentString.append(piece);
                     }
                 }
@@ -73,9 +87,53 @@ public class StringUtils {
         return returnArray.toArray(new String[returnArray.size()]);
     }
 
+    /**
+     * Delimiters like "//" may span multiple tokens. Look for them and combine them
+     */
+    private static List<Object> mergeTokens(List<Object> parsedArray, String endDelimiter) {
+        if (endDelimiter == null) {
+            return parsedArray;
+        }
+
+        List<Object> returnList = new ArrayList<>();
+        List<String> possibleMerge = new ArrayList<>();
+        for (Object obj : parsedArray) {
+            if (possibleMerge.size() == 0) {
+                if ((obj instanceof String) && endDelimiter.startsWith((String) obj)) {
+                    possibleMerge.add((String) obj);
+                } else {
+                    returnList.add(obj);
+                }
+            } else {
+                String possibleMergeString = StringUtils.join(possibleMerge, "") + obj.toString();
+                if (endDelimiter.equals(possibleMergeString)) {
+                    returnList.add(possibleMergeString);
+                    possibleMerge.clear();
+                } else if (endDelimiter.startsWith(possibleMergeString)) {
+                    possibleMerge.add(obj.toString());
+                } else {
+                    returnList.addAll(possibleMerge);
+                    returnList.add(obj);
+                    possibleMerge.clear();
+                }
+            }
+        }
+
+        return returnList;
+
+    }
+
+    /**
+     * Returns true if the input is a delimiter in one of the popular RDBMSs. Recognized delimiters are: semicolon (;),
+     * a slash (as the only content) or the word GO (as the only content).
+     * @param piece the input line to test
+     * @param previousPiece the characters in the input stream that came before piece
+     * @param endDelimiter ??? (need to see this in a debugger to find out)
+     */
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
-            return piece.equals(";") || ((piece.equalsIgnoreCase("go") || piece.equals("/")) && (previousPiece == null || previousPiece.endsWith("\n")));
+            return ";".equals(piece) || (("go".equalsIgnoreCase(piece) || "/".equals(piece)) && ((previousPiece ==
+                null) || previousPiece.endsWith("\n")));
         } else {
             if (endDelimiter.length() == 1) {
                 return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
@@ -86,7 +144,7 @@ public class StringUtils {
     }
 
     /**
-     * Splits a (possible) multi-line SQL statement along ;'s and "go"'s.
+     * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
         return processMutliLineSQL(multiLineSQL, false, true, endDelimiter);
@@ -125,7 +183,7 @@ public class StringUtils {
             return null;
         }
 
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "";
         }
         
@@ -140,7 +198,7 @@ public class StringUtils {
 
     public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter, boolean sorted) {
         if (sorted) {
-            TreeSet<String> sortedSet = new TreeSet<String>();
+            TreeSet<String> sortedSet = new TreeSet<>();
             for (Object obj : collection) {
                 sortedSet.add(formatter.toString(obj));
             }
@@ -151,7 +209,7 @@ public class StringUtils {
 
     public static String join(Collection<String> collection, String delimiter, boolean sorted) {
         if (sorted) {
-            return join(new TreeSet<String>(collection), delimiter);
+            return join(new TreeSet<>(collection), delimiter);
         } else {
             return join(collection, delimiter);
         }
@@ -162,7 +220,7 @@ public class StringUtils {
     }
 
     public static String join(Map map, String delimiter, StringUtilsFormatter formatter) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
             list.add(entry.getKey().toString()+"="+formatter.toString(entry.getValue()));
         }
@@ -173,7 +231,7 @@ public class StringUtils {
         if (s == null) {
             return null;
         }
-        List<String> returnList = new ArrayList<String>();
+        List<String> returnList = new ArrayList<>();
         for (String string : s.split(regex)) {
             returnList.add(string.trim());
         }
@@ -267,6 +325,11 @@ public class StringUtils {
         return true;
     }
 
+    /**
+     * Returns true if ch is a "7-bit-clean" ASCII character (ordinal number < 128).
+     * @param ch the character to test
+     * @return true if 7 bit-clean, false otherwise.
+     */
     public static boolean isAscii(char ch) {
         return ch < 128;
     }
@@ -276,17 +339,24 @@ public class StringUtils {
         int len = str.length();
         for (int i = 0; i < len; i++) {
             char c = str.charAt(i);
-                if (c > 0x7F) {
-                    out.append("&#");
-                    out.append(Integer.toString(c, 10));
-                    out.append(';');
-                } else {
-                    out.append(c);
-                }
+            if (c > 0x7F) {
+                out.append("&#");
+                out.append(Integer.toString(c, 10));
+                out.append(';');
+            } else {
+                out.append(c);
+            }
         }
         return out.toString();
     }
 
+    /**
+     * Adds spaces to the right of the input value until the string has reached the given length. Nothing is done
+     * if the string already has the given length or if the string is even longer.
+     * @param value The string to pad (if necessary)
+     * @param length the desired length
+     * @return the input string, padded if necessary.
+     */
     public static String pad(String value, int length) {
         value = StringUtils.trimToEmpty(value);
         if (value.length() >= length) {
@@ -297,17 +367,33 @@ public class StringUtils {
     }
 
     /**
-     * Null-safe check if string is empty.
+     * Adds spaces to the left of the input value until the string has reached the given length. Nothing is done
+     * if the string already has the given length or if the string is even longer.
+     * @param value The string to pad (if necessary)
+     * @param length the desired length
+     * @return the input string, padded if necessary.
+     */
+    public static String leftPad(String value, int length) {
+        value = StringUtils.trimToEmpty(value);
+        if (value.length() >= length) {
+            return value;
+        }
+
+        return StringUtils.repeat(" ", length - value.length()) + value;
+    }
+
+    /**
+     * Returns true if the input string is the empty string (null-safe).
      *
      * @param value String to be checked
      * @return true if String is null or empty
      */
     public static boolean isEmpty(String value) {
-        return value == null || value.length() == 0;
+        return (value == null) || value.isEmpty();
     }
 
     /**
-     * Null-safe check if string is not empty
+     * Returns true if the input string is NOT the empty string. If the string is null, false is returned.
      *
      * @param value String to be checked
      * @return true if string is not null and not empty (length > 0)
@@ -323,13 +409,18 @@ public class StringUtils {
      * @return true if <code>value</code> starts with <code>startsWith</code>, otherwise false. If any of arguments is null returns false
      */
     public static boolean startsWith(String value, String startsWith) {
-        if(value == null || startsWith == null){
+        if((value == null) || (startsWith == null)){
             return false;
         }
 
         return value.startsWith(startsWith);
     }
 
+    /**
+     * Returns true if the given string only consists of whitespace characters (null-safe)
+     * @param string the string to test
+     * @return true if the string is null or only consists of whitespaces.
+     */
     public static boolean isWhitespace(CharSequence string) {
         if (string == null) {
             return true;
@@ -337,8 +428,57 @@ public class StringUtils {
         return StringUtils.trimToNull(string.toString()) == null;
     }
 
-    public static interface StringUtilsFormatter<Type> {
-        public String toString(Type obj);
+    /**
+     * Compares a minimum version number given in string form (only the first three parts are considered) with a
+     * candidate version given as the three ints major, minor and patch.
+     *
+     * @param minimumVersion The minimum version that is required, given as a string with up to 3 parts, e.g. "7.4" or "9.6.3"
+     * @param candidateMajor the version number to be tested, major part
+     * @param candidateMinor the version number to be tested, minor part
+     * @param candidatePatch the version number to be tested, patch part
+     * @return true if candidateMajor.candidateMinor.candidatePatch >= minimumVersion or false if not
+     */
+    public static boolean isMinimumVersion(String minimumVersion, int candidateMajor, int candidateMinor,
+                                           int candidatePatch) {
+        String[] parts = minimumVersion.split("\\.", 3);
+        int minMajor = Integer.parseInt(parts[0]);
+        int minMinor = (parts.length > 1) ? Integer.parseInt(parts[1]) : 0;
+        int minPatch = (parts.length > 2) ? Integer.parseInt(parts[2]) : 0;
+
+        if (minMajor > candidateMajor) {
+            return false;
+        }
+
+        if ((minMajor == candidateMajor) && (minMinor > candidateMinor)) {
+            return false;
+        }
+
+        return !((minMajor == candidateMajor) && (minMinor == candidateMinor) && (minPatch > candidatePatch));
+    }
+
+    public static String limitSize(String string, int maxLength) {
+        if (string.length() > maxLength) {
+            return string.substring(0, maxLength - 3) + "...";
+        }
+        return string;
+    }
+
+    /**
+     * Produce a random identifer of the given length, consisting only of uppercase letters.
+     * @param len desired length of the string
+     * @return an identifier of the desired length
+     */
+    public static String randomIdentifer(int len) {
+        final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        StringBuilder sb = new StringBuilder( len );
+        for (int i = 0; i < len; i++)
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
+    }
+
+    public interface StringUtilsFormatter<Type> {
+        String toString(Type obj);
     }
 
     public static class ToStringFormatter implements StringUtilsFormatter {
@@ -351,11 +491,166 @@ public class StringUtils {
         }
     }
 
-    public static String limitSize(String string, int maxLength) {
-        if (string.length() > maxLength) {
-            return string.substring(0, maxLength - 3) + "...";
+    /**
+     * Returns if two strings are equal, ignoring:
+     * <ul>
+     * <li>case (uppercase/lowercase)</li>
+     * <li>difference between null, and empty string, and a string that only has spaces</li>
+     * </ul>
+     *
+     * @param s1 the first String to compare (or null)
+     * @param s2 the second String to compare (or null)
+     * @return true if the Strings are equal by the above criteria, false in all other cases
+     */
+    public static boolean equalsIgnoreCaseAndEmpty(String s1, String s2) {
+        String clean1 = trimToNull(s1);
+        String clean2 = trimToNull(s2);
+        if (clean1 == null && clean2 == null) {
+            return true;
+        } else {
+            // Both cannot be null at this point
+            if (clean1 == null || clean2 == null) {
+                return false;
+            }
         }
-        return string;
+        return clean1.equalsIgnoreCase(clean2);
+    }
+
+    /**
+     * Trims {@link Character#isWhitespace(char) whitespace} characters from the
+     * end of specified <code>string</code>
+     * @param string String to trim
+     * @return new String without the whitespace at the end
+     */
+    public static String trimRight(String string) {
+        int i = string.length()-1;
+        while (i >= 0 && Character.isWhitespace(string.charAt(i))) {
+            i--;
+        }
+        return string.substring(0,i+1);
+    }
+
+    /**
+     *
+     * @param sqlString
+     * @return the last block comment from a Sql string if any
+     */
+    public static String getLastBlockComment(String sqlString) {
+        if (isEmpty(sqlString) || sqlString.length() < 4) {
+            return null;
+        }
+        StringBuilder reversedSqlStringBuilder = new StringBuilder(sqlString).reverse();
+        String reversedString = reversedSqlStringBuilder.toString();
+        int idxClosingLastChar = -1, idxOpeningFirstChar = -1;
+        for (int i = 0; i < reversedString.length(); i++) {
+            if (idxClosingLastChar < 0) {
+                // we have not found the start of the pair (reversed) yet)
+                char c = reversedString.charAt(i);
+                if (c == '/') {
+                    // check the second one
+                    char s = reversedString.charAt(i + 1);
+                    if (s == '*') {
+                        idxClosingLastChar = i;
+                    }
+                } else if (!Character.isWhitespace(c)){
+                    // does not look like it ends with block comment, return null
+                    return null;
+                }
+            } else {
+                // look for closing pair (reversed)
+                char c = reversedString.charAt(i);
+                if (c == '/') {
+                    // check the previous one
+                    char s = reversedString.charAt(i - 1);
+                    char e = reversedString.charAt(i + 1);
+                    // if it was not escaped
+                    if (s == '*' && e != '\\') {
+                        idxOpeningFirstChar = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // reverse the index to get the start of the last comment block
+        int idxOfLastBlockComment = sqlString.length() - (idxOpeningFirstChar + 1);
+
+        return sqlString.substring(idxOfLastBlockComment);
+    }
+
+    /**
+     *
+     * @param sqlString
+     * @return the last line comment from a Sql string if any
+     */
+    public static String getLastLineComment(String sqlString) {
+        if (isEmpty(sqlString) || sqlString.length() < 2) {
+            return null;
+        }
+        boolean startOfNewLine = false;
+        int idxOfDoubleDash = -1;
+        for (int i = 0; i < sqlString.length(); i++) {
+            char c = sqlString.charAt(i);
+            // we have not found the start of the line comment yet
+            if (c == '-') {
+                // check the next one
+                char s = sqlString.charAt(i + 1);
+                if (s == '-') {
+                    if (idxOfDoubleDash < 0) {
+                        idxOfDoubleDash = i;
+                    }
+                    startOfNewLine = false;
+                }
+            } else if (!Character.isWhitespace(c)) {
+                if (startOfNewLine) {
+                    // new line started and we found some other character, reset the index,
+                    idxOfDoubleDash = -1;
+                }
+            } else if (c == '\r' || c == '\n') {
+                // new line found
+                startOfNewLine = true;
+            }
+
+        }
+        if (idxOfDoubleDash < 0) {
+            return null;
+        }
+        return sqlString.substring(idxOfDoubleDash);
+    }
+
+    /**
+     * Strips the comments and whitespaces from the end of given sql string.
+     * @param sqlString
+     * @return
+     */
+    public static String stripSqlCommentsAndWhitespacesFromTheEnd(String sqlString) {
+        if (isEmpty(sqlString)) {
+            return sqlString;
+        }
+        StringBuilder str = new StringBuilder(sqlString);
+        boolean strModified = true;
+        while (strModified) {
+            strModified = false;
+            // first check for last block comment
+            // since line comments could be inside block comments, we want to
+            // remove them first.
+            String lastBlockComment = getLastBlockComment(str.toString());
+            if (isNotEmpty(lastBlockComment)) {
+                str.setLength(str.length() - lastBlockComment.length());
+                // we just modified the end of the string,
+                // do another loop to check for next block or line comments
+                strModified = true;
+            }
+            // now check for the line comments
+            String lastLineComment = getLastLineComment(str.toString());
+            if (isNotEmpty(lastLineComment)) {
+                str.setLength(str.length() - lastLineComment.length());
+                // we just modified the end of the string,
+                // do another loop to check for next block or line comments
+                strModified = true;
+            }
+        }
+        return trimRight(str.toString());
     }
 
     

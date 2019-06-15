@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -16,19 +17,25 @@ import java.io.InputStream;
  * Represents a Change for custom SQL stored in a File.
  * <p/>
  * To create an instance call the constructor as normal and then call
- *
- * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
- * @link{#setResourceAccesssor(ResourceAccessor)} before calling setPath otherwise the
+ * {@link AbstractSQLChange#setResourceAccessor(ResourceAccessor)} before calling setPath, otherwise the
  * file will likely not be found.
  */
 @DatabaseChange(name = "sqlFile",
-        description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a file. It is useful for complex changes that are not supported through LiquiBase's automated refactoring tags such as stored procedures.\n" +
+        description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a " +
+                "file. It is useful for complex changes that are not supported through Liquibase's automated refactoring " +
+                "tags such as stored procedures.\n" +
                 "\n" +
                 "The sqlFile refactoring finds the file by searching in the following order:\n" +
                 "\n" +
-                "The file is searched for in the classpath. This can be manually set and by default the liquibase startup script adds the current directory when run.\n" +
-                "The file is searched for using the file attribute as a file name. This allows absolute paths to be used or relative paths to the working directory to be used.\n" +
-                "The 'sqlFile' tag can also support multiline statements in the same file. Statements can either be split using a ; at the end of the last line of the SQL or a go on its own on the line between the statements can be used.Multiline SQL statements are also supported and only a ; or go statement will finish a statement, a new line is not enough. Files containing a single statement do not need to use a ; or go.\n" +
+                "The file is searched for in the classpath. This can be manually set and by default the Liquibase " +
+                "startup script adds the current directory when run.\n" +
+                "The file is searched for using the file attribute as a file name. This allows absolute paths to be " +
+                "used or relative paths to the working directory to be used.\n" +
+                "The 'sqlFile' tag can also support multiline statements in the same file. Statements can either be " +
+                "split using a ; at the end of the last line of the SQL or a go on its own on the line between the " +
+                "statements can be used.Multiline SQL statements are also supported and only a ; or go statement " +
+                "will finish a statement, a new line is not enough. Files containing a single statement do not " +
+                "need to use a ; or go.\n" +
                 "\n" +
                 "The sql file can also contain comments of either of the following formats:\n" +
                 "\n" +
@@ -50,7 +57,8 @@ public class SQLFileChange extends AbstractSQLChange implements ResourceDependen
         return false;
     }
 
-    @DatabaseChangeProperty(description = "The file path of the SQL file to load", requiredForDatabase = "all", exampleValue = "my/path/file.sql")
+    @DatabaseChangeProperty(description = "The file path of the SQL file to load",
+            exampleValue = "my/path/file.sql", requiredForDatabase = "all")
     public String getPath() {
         return path;
     }
@@ -105,7 +113,8 @@ public class SQLFileChange extends AbstractSQLChange implements ResourceDependen
 
         InputStream inputStream = null;
         try {
-            inputStream = StreamUtil.openStream(path, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            inputStream = StreamUtil.openStream(path, isRelativeToChangelogFile(),
+                    getChangeSet(), getResourceAccessor());
         } catch (IOException e) {
             throw new IOException("Unable to read file '" + path + "'", e);
         }
@@ -158,7 +167,7 @@ public class SQLFileChange extends AbstractSQLChange implements ResourceDependen
 
     @Override
     public void setSql(String sql) {
-        if (getChangeSet() != null && getChangeSet().getChangeLogParameters() != null) {
+        if ((getChangeSet() != null) && (getChangeSet().getChangeLogParameters() != null)) {
             sql = getChangeSet().getChangeLogParameters().expandExpressions(sql, getChangeSet().getChangeLog());
         }
         super.setSql(sql);

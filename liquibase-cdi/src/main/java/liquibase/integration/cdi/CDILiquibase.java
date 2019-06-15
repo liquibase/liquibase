@@ -12,7 +12,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.cdi.annotations.LiquibaseType;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
@@ -38,53 +39,52 @@ import java.util.Map;
  * <code>db-changelog.xml</code> from the classpath and apply it against
  * <code>myDataSource</code>.
  * <p/>
- * Various producers methods are required to resolve the dependencies
- * i.e.
- * <code>
+ * Various producers methods are required to resolve the dependencies, i.e.
+ * <pre>
+ * {@code
+ *
  * public class CDILiquibaseProducer {
  *
- *  @Produces @LiquibaseType
- *  public CDILiquibaseConfig createConfig() {
- *     CDILiquibaseConfig config = new CDILiquibaseConfig();
- *     config.setChangeLog("liquibase/parser/core/xml/simpleChangeLog.xml");
- *     return config;
- *  }
+ *  @literal @Produces @LiquibaseType
+ *   public CDILiquibaseConfig createConfig() {
+ *      CDILiquibaseConfig config = new CDILiquibaseConfig();
+ *      config.setChangeLog("liquibase/parser/core/xml/simpleChangeLog.xml");
+ *      return config;
+ *   }
  *
- *  @Produces @LiquibaseType
- *  public DataSource createDataSource() throws SQLException {
- *     jdbcDataSource ds = new jdbcDataSource();
- *     ds.setDatabase("jdbc:hsqldb:mem:test");
- *     ds.setUser("sa");
- *     ds.setPassword("");
- *     return ds;
- *  }
+ *  @literal @Produces @LiquibaseType
+ *   public DataSource createDataSource() throws SQLException {
+ *      jdbcDataSource ds = new jdbcDataSource();
+ *      ds.setDatabase("jdbc:hsqldb:mem:test");
+ *      ds.setUser("sa");
+ *      ds.setPassword("");
+ *      return ds;
+ *   }
  *
- *  @Produces @LiquibaseType
- *  public ResourceAccessor create() {
- *     return new ClassLoaderResourceAccessor(getClass().getClassLoader());
- *  }
+ *  @literal @Produces @LiquibaseType
+ *   public ResourceAccessor create() {
+ *      return new ClassLoaderResourceAccessor(getClass().getClassLoader());
+ *   }
  *
  * }
- * </code>
  *
+ * }
+ * </p>
  * @author Aaron Walker (http://github.com/aaronwalker)
  */
 @ApplicationScoped
 public class CDILiquibase implements Extension {
 
-    private Logger log = LogFactory.getLogger(CDILiquibase.class.getName());
-
+    @Inject
+    @LiquibaseType
+    ResourceAccessor resourceAccessor;
+    private Logger log = LogService.getLog(CDILiquibase.class);
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
-
     @Inject @LiquibaseType
     private DataSource dataSource;
-
-    @Inject @LiquibaseType
-    ResourceAccessor resourceAccessor;
-
-    private boolean initialized = false;
-    private boolean updateSuccessful = false;
+    private boolean initialized;
+    private boolean updateSuccessful;
 
     public boolean isInitialized() {
         return initialized;
@@ -96,19 +96,23 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
-        log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersion());
+        log.info(LogType.LOG, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();
         } catch (Exception e) {
-            log.warning("Cannot find hostname: " + e.getMessage());
-            log.debug("", e);
+            log.warning(LogType.LOG, "Cannot find hostname: " + e.getMessage());
+            log.debug(LogType.LOG, "", e);
             return;
         }
 
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            log.info("Liquibase did not run on " + hostName + " because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+            log.info(LogType.LOG, String.format("Liquibase did not run on %s because %s was set to false.",
+                    hostName,
+                liquibaseConfiguration.describeValueLookupLogic(
+                    GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
+            ));
             return;
         }
         initialized = true;
@@ -125,7 +129,6 @@ public class CDILiquibase implements Extension {
         try {
             c = dataSource.getConnection();
             liquibase = createLiquibase(c);
-            liquibase.getDatabase();
             liquibase.update(new Contexts(config.getContexts()), new LabelExpression(config.getLabels()));
             updateSuccessful = true;
         } catch (SQLException e) {
@@ -134,7 +137,7 @@ public class CDILiquibase implements Extension {
             updateSuccessful = false;
             throw ex;
         } finally {
-            if (liquibase != null && liquibase.getDatabase() != null) {
+            if ((liquibase != null) && (liquibase.getDatabase() != null)) {
                 liquibase.getDatabase().close();
             } else if (c != null) {
                 try {

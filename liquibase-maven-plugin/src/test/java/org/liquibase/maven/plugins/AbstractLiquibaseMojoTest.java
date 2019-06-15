@@ -2,19 +2,18 @@
 // Copyright: Copyright(c) 2008 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.codehaus.plexus.configuration.PlexusConfiguration;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.codehaus.plexus.configuration.PlexusConfiguration;
 
 /**
  * A base class for writing tests that validate the properties passed in to the plugins.
@@ -35,7 +34,7 @@ public abstract class AbstractLiquibaseMojoTest extends AbstractMojoTestCase {
     assertTrue("The configuration pom could not be found, " + testPom.getAbsolutePath(),
                testPom.exists());
 
-    PlexusConfiguration config = extractPluginConfiguration("liquibase-plugin",
+      PlexusConfiguration config = extractPluginConfiguration("liquibase-plugin",
                                                             testPom);
     assertNotNull("There should be a configuration for the plugin in the pom", config);
     return config;

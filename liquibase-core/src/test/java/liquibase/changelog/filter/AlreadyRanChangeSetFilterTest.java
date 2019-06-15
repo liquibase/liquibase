@@ -1,16 +1,5 @@
 package liquibase.changelog.filter;
 
-import liquibase.change.CheckSum;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
-import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Date;
-
-
 public class AlreadyRanChangeSetFilterTest {
 
 //    private Database database = createMock(Database.class);

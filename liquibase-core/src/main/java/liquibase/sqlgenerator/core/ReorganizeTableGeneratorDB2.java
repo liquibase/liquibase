@@ -8,14 +8,10 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<ReorganizeTableStatement> {
     @Override
@@ -25,7 +21,7 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
 
     @Override
     public boolean supports(ReorganizeTableStatement statement, Database database) {
-        return database instanceof DB2Database && !((DB2Database) database).isZOS();
+        return database instanceof DB2Database;
     }
 
     @Override

@@ -20,7 +20,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     private List<ColumnConfig> columns;
 
     public UpdateDataChange() {
-        columns = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<>();
     }
 
     @Override
@@ -62,7 +62,8 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
                 needsPreparedStatement = true;
             }
 
-            if (database instanceof OracleDatabase &&  column.getType() != null && column.getType().equalsIgnoreCase("CLOB") && column.getValue() != null && column.getValue().length() >= 4000) {
+            if ((database instanceof OracleDatabase) && (column.getType() != null) && "CLOB".equalsIgnoreCase(column
+                .getType()) && (column.getValue() != null) && (column.getValue().length() >= 4000)) {
                 needsPreparedStatement = true;
             }
         }

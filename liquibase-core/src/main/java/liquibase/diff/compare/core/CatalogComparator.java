@@ -24,12 +24,12 @@ public class CatalogComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-       return null;
+        return null;
     }
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Catalog && databaseObject2 instanceof Catalog)) {
+        if (!((databaseObject1 instanceof Catalog) && (databaseObject2 instanceof Catalog))) {
             return false;
         }
 
@@ -58,16 +58,21 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return otherSchema.getCatalogName() == null;
         }
 
-        if (thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
-            return true;
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(accordingTo.getSchemaAndCatalogCase())) {
+            if (StringUtils.trimToEmpty(object1Name).equals(StringUtils.trimToEmpty(object2Name))){
+                return true;
+            }
+        } else {
+            if (StringUtils.trimToEmpty(object1Name).equalsIgnoreCase(StringUtils.trimToEmpty(object2Name))) {
+                return true;
+            }
         }
-
         if (accordingTo.supportsSchemas()) { //no need to check schema mappings
             return false;
         }
 
         //check with schemaComparisons
-        if (chain.getSchemaComparisons() != null && chain.getSchemaComparisons().length > 0) {
+        if ((chain.getSchemaComparisons() != null) && (chain.getSchemaComparisons().length > 0)) {
             for (CompareControl.SchemaComparison comparison : chain.getSchemaComparisons()) {
                 String comparisonCatalog1;
                 String comparisonCatalog2;
@@ -84,9 +89,9 @@ public class CatalogComparator implements DatabaseObjectComparator {
                 String finalCatalog1 = thisSchema.getCatalogName();
                 String finalCatalog2 = otherSchema.getCatalogName();
 
-                if (comparisonCatalog1 != null && comparisonCatalog1.equalsIgnoreCase(finalCatalog1)) {
+                if ((comparisonCatalog1 != null) && comparisonCatalog1.equalsIgnoreCase(finalCatalog1)) {
                     finalCatalog1 = comparisonCatalog2;
-                } else if (comparisonCatalog2 != null && comparisonCatalog2.equalsIgnoreCase(finalCatalog1)) {
+                } else if ((comparisonCatalog2 != null) && comparisonCatalog2.equalsIgnoreCase(finalCatalog1)) {
                     finalCatalog1 = comparisonCatalog1;
                 }
 
@@ -94,9 +99,9 @@ public class CatalogComparator implements DatabaseObjectComparator {
                     return true;
                 }
 
-                if (comparisonCatalog1 != null && comparisonCatalog1.equalsIgnoreCase(finalCatalog2)) {
+                if ((comparisonCatalog1 != null) && comparisonCatalog1.equalsIgnoreCase(finalCatalog2)) {
                     finalCatalog2 = comparisonCatalog2;
-                } else if (comparisonCatalog2 != null && comparisonCatalog2.equalsIgnoreCase(finalCatalog2)) {
+                } else if ((comparisonCatalog2 != null) && comparisonCatalog2.equalsIgnoreCase(finalCatalog2)) {
                     finalCatalog2 = comparisonCatalog1;
                 }
 

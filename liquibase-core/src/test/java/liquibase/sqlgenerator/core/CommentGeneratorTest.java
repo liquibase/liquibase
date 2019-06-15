@@ -5,13 +5,13 @@ import liquibase.statement.core.CommentStatement;
 
 public class CommentGeneratorTest extends AbstractSqlGeneratorTest<CommentStatement> {
 
-	public CommentGeneratorTest() throws Exception {
-		super(new CommentGenerator());
-	}
+    public CommentGeneratorTest() throws Exception {
+        super(new CommentGenerator());
+    }
 
-	@Override
-	protected CommentStatement createSampleSqlStatement() {
-		return new CommentStatement("comment text");
-	}
+    @Override
+    protected CommentStatement createSampleSqlStatement() {
+        return new CommentStatement("comment text");
+    }
 
 }

@@ -1,13 +1,12 @@
-
 <project name="Liquibase RPM" xmlns="http://maven.apache.org/DECORATION/1.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
 
   <bannerRight>
-    <src>img/home_tagline.png</src>
-    <name>Liquibase</name>
-        <href>http://www.liquibase.org/</href>
-        <title>Liquibase rpm</title>
+      <src>img/home_tagline.png</src>
+      <name>Liquibase</name>
+      <href>http://www.liquibase.org/</href>
+      <title>Liquibase rpm</title>
   </bannerRight>
   
   

@@ -27,13 +27,14 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
         validationErrors.checkRequiredField("defaultValue", defaultValue);
         validationErrors.checkRequiredField("columnName", addDefaultValueStatement.getColumnName());
         validationErrors.checkRequiredField("tableName", addDefaultValueStatement.getTableName());
-        if (!database.supportsSequences() && defaultValue instanceof SequenceNextValueFunction) {
+        if (!database.supportsSequences() && (defaultValue instanceof SequenceNextValueFunction)) {
             validationErrors.addError("Database "+database.getShortName()+" does not support sequences");
         }
         if (database instanceof HsqlDatabase) {
             if (defaultValue instanceof SequenceNextValueFunction) {
                 validationErrors.addError("Database " + database.getShortName() + " does not support adding sequence-based default values");
-            } else if (defaultValue instanceof DatabaseFunction && !HsqlDatabase.supportsDefaultValueComputed(addDefaultValueStatement.getColumnDataType(),defaultValue.toString())) {
+            } else if ((defaultValue instanceof DatabaseFunction) && !HsqlDatabase.supportsDefaultValueComputed
+                (addDefaultValueStatement.getColumnDataType(), defaultValue.toString())) {
                 validationErrors.addError("Database " + database.getShortName() + " does not support adding function-based default values");
             }
         }

@@ -306,8 +306,8 @@
     <xsd:complexType name="columnType" mixed="true">
         <xsd:sequence>
             <xsd:element ref="constraints" minOccurs="0"/>
-			<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
-		</xsd:sequence>
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
         <xsd:attributeGroup ref="column"/>
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:complexType>
