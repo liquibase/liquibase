@@ -116,6 +116,7 @@ public class Main {
     protected String outputSchemasAs;
     protected String referenceSchemas;
     protected String schemas;
+    protected String snapshotFormat;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -570,7 +571,8 @@ public class Main {
                         && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_URL)
                         && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
-                        && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)) {
+                        && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
+                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -583,7 +585,8 @@ public class Main {
                 if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
                     && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
                     && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                    && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)) {
+                    && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
+                    && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -1052,7 +1055,7 @@ public class Main {
                         OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName()
                     )
                 );
-                snapshotCommand.setSerializerFormat(getCommandParam("snapshotFormat", null));
+                snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 String result = snapshotCommand.execute().print();
                 outputWriter.write(result);
@@ -1081,6 +1084,7 @@ public class Main {
                         OPTIONS.SCHEMAS, referenceDatabase.getDefaultSchema().getSchemaName()
                     )
                 );
+                snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 outputWriter.write(snapshotCommand.execute().print());
                 outputWriter.flush();
@@ -1517,6 +1521,7 @@ public class Main {
         private static final String URL = "url";
         private static final String HELP = "help";
         private static final String VERSION = "version";
+        private static final String SNAPSHOT_FORMAT = "snapshotFormat";
     }
 
 }
