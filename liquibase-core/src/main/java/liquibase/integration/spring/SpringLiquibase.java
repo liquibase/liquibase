@@ -554,7 +554,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             // +Resource: vfs:/content/second-module-1.0.0-SNAPSHOT.war/WEB-INF/lib/first-module-1.0.0-SNAPSHOT.jar/db/changelog/0-initial-schema.xml
 
             Set<String> returnSet = new HashSet<>();
-            path = path + '*'; // All files inside!
+            path = path + (recursive ? "**" : '*'); // All files inside!
             String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeTo), path);
 
             Resource[] resources = getResources(adjustClasspath(tempFile));
