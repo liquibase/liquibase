@@ -48,11 +48,10 @@ public class SqlPrecondition extends AbstractPrecondition {
         DatabaseConnection connection = database.getConnection();
         try {
             Object oResult = ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
-            String result = oResult.toString();
-            if (result == null) {
+            if (oResult == null) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }
-
+            String result = oResult.toString();
             String expectedResult = getExpectedResult();
             if (!expectedResult.equals(result)) {
                 throw new PreconditionFailedException("SQL Precondition failed.  Expected '"+ expectedResult +"' got '"+result+"'", changeLog, this);

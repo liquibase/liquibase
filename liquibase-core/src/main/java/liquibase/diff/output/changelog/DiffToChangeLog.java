@@ -82,6 +82,7 @@ public class DiffToChangeLog {
         this.changeSetPath = changeLogFile;
         File file = new File(changeLogFile);
         if (!file.exists()) {
+            file.getParentFile().mkdirs();
             LogService.getLog(getClass()).info(LogType.LOG, file + " does not exist, creating");
             FileOutputStream stream = new FileOutputStream(file);
             print(new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);

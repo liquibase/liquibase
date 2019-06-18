@@ -1,11 +1,5 @@
 package liquibase.integration.commandline;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.ConsoleAppender;
-import ch.qos.logback.core.filter.AbstractMatcherFilter;
-import ch.qos.logback.core.spi.FilterReply;
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -69,8 +63,6 @@ public class Main {
     private static XMLResourceBundle commandLineHelpBundle = ((XMLResourceBundle) getBundle
             ("liquibase/i18n/liquibase-commandline-helptext", new XmlResourceBundleControl()));
 
-    private static ConsoleLogFilter consoleLogFilter = new ConsoleLogFilter();
-
     protected ClassLoader classLoader;
     protected String driver;
     protected String username;
@@ -124,6 +116,7 @@ public class Main {
     protected String outputSchemasAs;
     protected String referenceSchemas;
     protected String schemas;
+    protected String snapshotFormat;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -235,25 +228,16 @@ public class Main {
      * Set up the logging to the STDOUT/STDERR console streams.
      */
     protected static void setupLogging() {
-        LogLevel defaultLogLevel =
-            (LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class)).getLogLevel();
+        LogLevel defaultLogLevel = (LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class))
+                .getLogLevel();
 
-        ch.qos.logback.classic.Logger root =
-            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.toLevel(defaultLogLevel.name()));
+        org.slf4j.Logger rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 
-        Iterator<Appender<ILoggingEvent>> appenderIterator = root.iteratorForAppenders();
-        while (appenderIterator.hasNext()) {
-            Appender<ILoggingEvent> next = appenderIterator.next();
-            if (next instanceof ConsoleAppender) {
-                ((ConsoleAppender) next).addFilter(consoleLogFilter);
-            }
-        }
-
-        for (String target : new String[] {"System.out", "System.err"}) {
-            CommandLineOutputAppender appender = new CommandLineOutputAppender(LoggerFactory.getILoggerFactory(), target);
-            root.addAppender(appender);
-            appender.start();
+        if ("ch.qos.logback.classic.Logger".equals(rootLogger.getClass().getName())) {
+            CommandLineOutputAppender.setupLogging(rootLogger, defaultLogLevel);
+        } else {
+            System.err.println(
+                    "Liquibase command line logging cannot be configured; a supported org.slf4j.Logger implementation is not on the classpath.");
         }
     }
 
@@ -587,7 +571,8 @@ public class Main {
                         && !cmdParm.startsWith("--" + OPTIONS.REFERENCE_URL)
                         && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
-                        && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)) {
+                        && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
+                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -600,7 +585,8 @@ public class Main {
                 if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
                     && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
                     && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
-                    && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)) {
+                    && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
+                    && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -1069,7 +1055,7 @@ public class Main {
                         OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName()
                     )
                 );
-                snapshotCommand.setSerializerFormat(getCommandParam("snapshotFormat", null));
+                snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 String result = snapshotCommand.execute().print();
                 outputWriter.write(result);
@@ -1098,6 +1084,7 @@ public class Main {
                         OPTIONS.SCHEMAS, referenceDatabase.getDefaultSchema().getSchemaName()
                     )
                 );
+                snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 outputWriter.write(snapshotCommand.execute().print());
                 outputWriter.flush();
@@ -1133,7 +1120,7 @@ public class Main {
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
                 LogService.getLog(getClass()).info(
-                    LogType.LOG, String.format(
+                    LogType.USER_MESSAGE, String.format(
                         coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
                             .getConnection().getConnectionUserName() + "@" +
                             liquibase.getDatabase().getConnection().getURL()
@@ -1145,14 +1132,14 @@ public class Main {
                 boolean exists = liquibase.tagExists(tag);
                 if (exists) {
                     LogService.getLog(getClass()).info(
-                        LogType.LOG, String.format(coreBundle.getString("tag.exists"), tag,
+                        LogType.USER_MESSAGE, String.format(coreBundle.getString("tag.exists"), tag,
                             liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
                                 liquibase.getDatabase().getConnection().getURL()
                         )
                     );
                 } else {
                     LogService.getLog(getClass()).info(
-                        LogType.LOG, String.format(coreBundle.getString("tag.does.not.exist"), tag,
+                        LogType.USER_MESSAGE, String.format(coreBundle.getString("tag.does.not.exist"), tag,
                             liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
                                 liquibase.getDatabase().getConnection().getURL()
                         )
@@ -1534,19 +1521,7 @@ public class Main {
         private static final String URL = "url";
         private static final String HELP = "help";
         private static final String VERSION = "version";
+        private static final String SNAPSHOT_FORMAT = "snapshotFormat";
     }
 
-    private static class ConsoleLogFilter extends AbstractMatcherFilter {
-
-        private boolean outputLogs;
-
-        @Override
-        public FilterReply decide(Object event) {
-            if (outputLogs) {
-                return FilterReply.ACCEPT;
-            } else {
-                return FilterReply.DENY;
-            }
-        }
-    }
 }
