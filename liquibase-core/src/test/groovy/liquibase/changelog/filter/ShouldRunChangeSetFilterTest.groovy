@@ -1,22 +1,17 @@
-package liquibase.changelog.filter;
+package liquibase.changelog.filter
 
-import liquibase.change.CheckSum;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
-import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.UpdateStatement;
-import org.junit.Test
-import spock.lang.Specification;
+import liquibase.change.CheckSum
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.RanChangeSet
+import liquibase.database.Database
+import liquibase.exception.DatabaseException
+import liquibase.executor.Executor
+import liquibase.executor.ExecutorService
+import spock.lang.Specification
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
 
 public class ShouldRunChangeSetFilterTest extends Specification {
 
@@ -119,24 +114,25 @@ public class ShouldRunChangeSetFilterTest extends Specification {
     }
 
     private Database given_a_database_with_one_twice_executed_changeset() throws DatabaseException {
-        ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
-        RanChangeSet ranChangeSet1 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("not_matched_checksum"), new Date(), null, null, null, null, null, null, null);
-        ranChangeSet1.setOrderExecuted(1);
-        ranChanges.add(ranChangeSet1);
-        RanChangeSet ranChangeSet2 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("7:d41d8cd98f00b204e9800998ecf8427e"), new Date(), null, null, null, null, null, null, null);
-        ranChangeSet2.setOrderExecuted(2);
-        ranChanges.add(ranChangeSet2);
+        ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>()
+        RanChangeSet ranChangeSet1 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("not_matched_checksum"), new Date(), null, null, null, null, null, null, null)
+        ranChangeSet1.setOrderExecuted(1)
+        ranChanges.add(ranChangeSet1)
+        RanChangeSet ranChangeSet2 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("8:d41d8cd98f00b204e9800998ecf8427e"), new Date(), null, null, null, null, null, null, null)
+        ranChangeSet2.setOrderExecuted(2)
+        ranChanges.add(ranChangeSet2)
 
-        return mock_database(ranChanges);
+        return mock_database(ranChanges)
     }
 
 
-    @Test
     public void should_decline_not_changed_changeset_when_has_run_on_change() throws DatabaseException {
-        given_a_database_with_one_twice_executed_changeset();
+        when:
+        given_a_database_with_one_twice_executed_changeset()
+        ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database)
 
-        ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
-
-        assertFalse("RunOnChange not changed changeset should NOT be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)).isAccepted());
+        then:
+        ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)
+        assertFalse("RunOnChange not changed changeset should NOT be accepted", filter.accepts(changeSet).isAccepted())
     }
 }
