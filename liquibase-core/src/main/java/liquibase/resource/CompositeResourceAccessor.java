@@ -24,7 +24,7 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList returnList = new InputStreamList();
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnList.addAll(accessor.openStreams(null, streamPath));
+            returnList.addAll(accessor.openStreams(relativeTo, streamPath));
         }
         return returnList;
     }
