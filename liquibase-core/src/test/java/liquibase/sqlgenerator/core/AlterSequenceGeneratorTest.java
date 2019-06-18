@@ -1,22 +1,12 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.*;
-
-import java.math.BigInteger;
-
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.core.H2Database;
 import liquibase.database.core.OracleDatabase;
-import liquibase.exception.DatabaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
-import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.test.TestContext;
-
-
-import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;

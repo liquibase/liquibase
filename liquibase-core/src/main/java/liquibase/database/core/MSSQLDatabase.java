@@ -9,13 +9,16 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 
@@ -23,7 +26,11 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -241,7 +248,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getConcatSql(String... values) {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         for (String value : values) {
             returnString.append(value).append(" + ");
         }
@@ -327,7 +334,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName),
                 String.class
             );
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String defLine : defLines) {
             sb.append(defLine);
         }
@@ -472,7 +479,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             schemaName = escapeObjectName(schemaName, Schema.class);
         }
 
-        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1);
         if (!dataTypeName.startsWith(getQuotingStartCharacter())) {
             dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
         }
@@ -497,7 +504,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             schemaName = schemaName.substring(1, schemaName.length() - 1);
         }
 
-        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1);
         if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
             dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
         }

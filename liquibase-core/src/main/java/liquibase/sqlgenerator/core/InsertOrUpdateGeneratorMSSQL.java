@@ -15,26 +15,20 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
 
     @Override
     protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
-        StringBuffer recordCheck = new StringBuffer();
-        recordCheck.append("DECLARE @reccount integer\n");
-        recordCheck.append("SELECT @reccount = count(*) FROM ");
-        recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName()));
-        recordCheck.append(" WHERE ");
-        recordCheck.append(whereClause);
-        recordCheck.append("\n");
-        recordCheck.append("IF @reccount = 0\n");
-
-        return recordCheck.toString();
+        return String.format("DECLARE @reccount integer\n" +
+            "SELECT @reccount = count(*) FROM %s" +
+            " WHERE %s\n" +
+            "IF @reccount = 0\n",
+            database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()),
+            whereClause
+        );
     }
 
     @Override
     protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer insertBlock = new StringBuffer();
-        insertBlock.append("BEGIN\n");
-        insertBlock.append(super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
-        insertBlock.append("END\n");
-
-        return insertBlock.toString(); 
+        return "BEGIN\n" +
+            super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain) +
+            "END\n";
     }
 
     @Override
@@ -44,11 +38,9 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
 
     @Override
     protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
-        StringBuffer updateBlock = new StringBuffer();
-        updateBlock.append("BEGIN\n");
-        updateBlock.append(super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain));
-        updateBlock.append("END\n");
-        return updateBlock.toString();
+        return "BEGIN\n" +
+            super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain) +
+            "END\n";
     }
 
     @Override

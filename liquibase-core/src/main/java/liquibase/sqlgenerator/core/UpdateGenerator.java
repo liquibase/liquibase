@@ -31,11 +31,15 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     @Override
     public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
+        StringBuilder sql = new StringBuilder("UPDATE ")
+            .append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
+            .append(" SET");
         for (String column : statement.getNewColumnValues().keySet()) {
-            sql.append(" ").append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(" = ");
-            sql.append(convertToString(statement.getNewColumnValues().get(column), database));
-            sql.append(",");
+            sql.append(" ")
+                .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column))
+                .append(" = ")
+                .append(convertToString(statement.getNewColumnValues().get(column), database))
+                .append(",");
         }
 
         int lastComma = sql.lastIndexOf(",");

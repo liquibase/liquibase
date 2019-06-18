@@ -68,12 +68,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
         changeLog.setPhysicalFilePath(physicalChangeLogLocation);
 
-        BufferedReader reader = null;
-
-        try {
-            reader = new BufferedReader(StreamUtil.readStreamWithReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor), null));
-            StringBuffer currentSql = new StringBuffer();
-            StringBuffer currentRollbackSql = new StringBuffer();
+        try (BufferedReader reader = new BufferedReader(StreamUtil.readStreamWithReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor), null))) {
+            StringBuilder currentSql = new StringBuilder();
+            StringBuilder currentRollbackSql = new StringBuilder();
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
@@ -185,8 +182,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     change.setEndDelimiter(endDelimiter);
                     changeSet.addChange(change);
 
-                    currentSql = new StringBuffer();
-                    currentRollbackSql = new StringBuffer();
+                    currentSql.setLength(0);
+                    currentRollbackSql.setLength(0);
                 } else {
                     if (changeSet != null) {
                         Matcher commentMatcher = commentPattern.matcher(line);
@@ -267,12 +264,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) { }
-            }
         }
 
         return changeLog;

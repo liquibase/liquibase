@@ -9,7 +9,10 @@ import liquibase.command.core.GenerateChangeLogCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
-import liquibase.database.core.*;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
@@ -302,7 +305,7 @@ public class CommandLineUtils {
             myVersion = attr.getValue("Bundle-Version");
             buildTimeString = attr.getValue("Build-Time");
         }
-        StringBuffer banner = new StringBuffer();
+        StringBuilder banner = new StringBuilder();
 
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())

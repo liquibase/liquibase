@@ -1,11 +1,15 @@
 package liquibase.util;
 
 import liquibase.ExtensibleObject;
-import liquibase.database.Database;
-import liquibase.structure.DatabaseObject;
 
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -191,7 +195,7 @@ public class StringUtil {
             return "";
         }
         
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (Object val : collection) {
             buffer.append(formatter.toString(val)).append(delimiter);
         }
@@ -256,17 +260,15 @@ public class StringUtil {
         }
 
         return returnList;
-
-
     }
 
     public static String repeat(String string, int times) {
-        String returnString = "";
-        for (int i=0; i<times; i++) {
-            returnString += string;
+        StringBuilder result = new StringBuilder(string.length() * times);
+        for (int i = 0; i < times; i++) {
+            result.append(string);
         }
 
-        return returnString;
+        return result.toString();
     }
 
     public static String join(Integer[] array, String delimiter) {
@@ -291,7 +293,7 @@ public class StringUtil {
             return "";
         }
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int val : array) {
             buffer.append(val).append(delimiter);
         }
