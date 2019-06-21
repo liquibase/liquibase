@@ -77,6 +77,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             example.setAttribute(LIQUIBASE_COMPLETE, null);
+
+            // computed Postgres columns for indexes are mishandled
+            if (column == null && snapshot.getDatabase() instanceof PostgresDatabase) {
+                ((Column) example).setComputed(true);
+                return example;
+            }
+
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
