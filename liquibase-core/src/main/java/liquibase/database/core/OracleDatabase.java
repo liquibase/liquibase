@@ -1,5 +1,24 @@
 package liquibase.database.core;
 
+import static java.util.ResourceBundle.getBundle;
+
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
@@ -24,28 +43,12 @@ import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.util.ResourceBundle.getBundle;
-
 /**
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
+	private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+	
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
@@ -83,6 +86,21 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
+    
+    private final void tryProxySessionn(final String url, final Connection con) {
+		Matcher m = PROXY_USER.matcher(url);
+		if(m.matches()) {
+	    	Properties props = new Properties();
+			props.put("PROXY_USER_NAME", m.group(1));
+			try {
+				Method method = con.getClass().getMethod("openProxySession", int.class, Properties.class);
+				method.setAccessible(true);
+				method.invoke(con, 1, props);
+			} catch(Exception e) {
+				Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+			}
+		}
+    }
 
     @Override
     public void setConnection(DatabaseConnection conn) {
@@ -108,6 +126,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             }
 
             if (sqlConn != null) {
+                tryProxySessionn(conn.getURL(), sqlConn);
+                
                 try {
                     //noinspection HardCodedStringLiteral
                     reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
