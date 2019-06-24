@@ -89,7 +89,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern rollbackEndDelimiterPattern = Pattern.compile(".*rollbackEndDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
-            Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\d+)", Pattern.CASE_INSENSITIVE);
+            Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -117,11 +117,27 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                 Matcher ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
                 if (ignoreLinesMatcher.matches ()) {
-                    long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
-                    while ( ignoreCount>0 && (line = reader.readLine()) != null){
-                        ignoreCount--;
+                    if ("start".equals(ignoreLinesMatcher.group(1))){
+                        while ((line = reader.readLine()) != null){
+                            ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
+                            if (ignoreLinesMatcher.matches ()) {
+                                if ("end".equals(ignoreLinesMatcher.group(1))){
+                                    break;
+                                }
+                            }
+                        }
+                        continue;
+                    }else{
+                        try {
+                            long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
+                            while ( ignoreCount>0 && (line = reader.readLine()) != null){
+                                ignoreCount--;
+                            }
+                            continue;
+                        } catch (NumberFormatException | NullPointerException nfe) {
+                            throw new ChangeLogParseException("Unknown ignoreLines syntax in changeset " + changeSet.toString(false));
+                        }
                     }
-                    continue;
                 }
                 
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
