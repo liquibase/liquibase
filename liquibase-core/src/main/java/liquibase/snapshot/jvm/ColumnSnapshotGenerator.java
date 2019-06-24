@@ -35,6 +35,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w ]+");
     private Pattern postgresNumberValuePattern = Pattern.compile("(\\d*)::[\\w ]+");
+    private Pattern postgresFunctionRefPattern = Pattern.compile("\\([^)]+\\)"); // something inside brackets: (...)
 
     public ColumnSnapshotGenerator() {
         super(Column.class, new Class[]{Table.class, View.class});
@@ -46,7 +47,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Relation relation = ((Column) example).getRelation();
         if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
             return example;
+        } else if (database instanceof PostgresDatabase && looksLikeFunction(example.getName())) {
+            ((Column) example).setComputed(true);
+            return example;
         }
+
         Schema schema = relation.getSchema();
         try {
             Column column = null;
@@ -77,13 +82,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             example.setAttribute(LIQUIBASE_COMPLETE, null);
-
-            // computed Postgres columns for indexes are mishandled
-            if (column == null && snapshot.getDatabase() instanceof PostgresDatabase) {
-                ((Column) example).setComputed(true);
-                return example;
-            }
-
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -531,6 +529,18 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.getType());
+    }
+
+    /**
+     * {@link IndexSnapshotGenerator} fails to differentiate computed and non-computed column's for {@link PostgresDatabase}
+     * assume that if COLUMN_NAME contains parentesised expression -- its function reference.
+     * should handle cases like:
+     * - ((name)::text)
+     * - lower/upper((name)::text)
+     * - (name)::text || '- concatenation example'
+     */
+    private boolean looksLikeFunction(String columnName) {
+        return postgresFunctionRefPattern.matcher(columnName).find();
     }
 
     //START CODE FROM SQLITEDatabaseSnapshotGenerator
