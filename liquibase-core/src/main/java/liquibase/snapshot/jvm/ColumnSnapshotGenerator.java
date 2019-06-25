@@ -47,9 +47,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Relation relation = ((Column) example).getRelation();
         if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
             return example;
-        } else if (database instanceof PostgresDatabase && looksLikeFunction(example.getName())) {
-            ((Column) example).setComputed(true);
-            return example;
         }
 
         Schema schema = relation.getSchema();
@@ -82,6 +79,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             example.setAttribute(LIQUIBASE_COMPLETE, null);
+
+            if (column == null && database instanceof PostgresDatabase && looksLikeFunction(example.getName())) {
+                ((Column) example).setComputed(true);
+                return example;
+            }
+
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
