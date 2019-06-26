@@ -233,6 +233,11 @@ public class DatabaseFactory {
                 LOG.fine(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
             }
 
+            if(driver.contains("oracle")) {
+              driverProperties.put("remarksReporting", "true");
+            } else if(driver.contains("mysql")) {
+              driverProperties.put("useInformationSchema", "true");
+            }
 
             LOG.fine(LogType.LOG, "Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
             Connection connection = driverObject.connect(url, driverProperties);
