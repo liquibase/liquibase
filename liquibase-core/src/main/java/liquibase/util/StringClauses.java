@@ -548,6 +548,32 @@ public class StringClauses {
         }
     }
 
+    public static class CharLiteral implements LiteralClause {
+        private String value;
+
+        public CharLiteral(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
+
+    public static class QuotedIdentifier implements LiteralClause {
+        private String value;
+
+        public QuotedIdentifier(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
+
     public static class ClauseIterator implements Iterator {
 
         private ListIterator<String> keyIterator;
