@@ -16,6 +16,7 @@ public class MariaDBDatabase extends MySQLDatabase {
     private static final String PRODUCT_NAME = "MariaDB";
 
     public MariaDBDatabase() {
+        addReservedWords(Arrays.asList("PERIOD"));
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         // According to https://mariadb.com/kb/en/library/data-types/, retrieved on 2019-02-12
         super.unmodifiableDataTypes.addAll(Arrays.asList(
