@@ -102,8 +102,8 @@
         <mockito.version>1.10.19</mockito.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
-        <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
         <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
         <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
         <org.codehaus.groovy.version>2.4.11</org.codehaus.groovy.version>
@@ -442,6 +442,7 @@
                         <reportFormat>plain</reportFormat>
                         <printSummary>false</printSummary>
                         <skipTests>${skipUTs}</skipTests>
+                        <useSystemClassLoader>false</useSystemClassLoader>
                         <systemPropertyVariables>
                             <jacoco-agent.destfile>${jacoco.ut.execution.data.file}</jacoco-agent.destfile>
                         </systemPropertyVariables>

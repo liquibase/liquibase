@@ -23,11 +23,11 @@ jobs:
       # Tests for embedded RDBMS (esp. hsqldb and Derby-DB) crash more often without this one:
       _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
     steps:
-#      - run:
-#          name: Install RDBMS client software
-#          command: |
-#            # So that we can fetch .deb packages from Microsoft, who only deliver by https:
-#            sudo apt-get install -y apt-transport-https
+      - run:
+          name: Install 3rd party software
+          command: |
+            # So that we can fetch .deb packages from Microsoft, who only deliver by https:
+            sudo apt-get install -y apt-transport-https rpm
 #
 #            # Install the Microsoft repository for the MSSQL client tools:
 #            curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
@@ -72,13 +72,9 @@ jobs:
               mkdir -p ${CIRCLE_TEST_REPORTS}/failsafe/
               find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/surefire/ \;
               find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/failsafe/ \;
-              echo "tests"
-              ls -l /home/circleci/liquibase/liquibase-core/target/surefire-reports
-              echo "find:"
-              pwd
-              find . -type f -regex ".*/target/surefire-reports/.*xml"
-              echo "found tests:"
-              ls -l "${CIRCLE_TEST_REPORTS}/failsafe/"
+
+              ##Output any dumpstream files
+              find . -type f -regex ".*\.dumpstream$" -exec cat {} \;
           when: always
 
       - store_test_results:
@@ -96,6 +92,7 @@ jobs:
             cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
       - store_artifacts:
           path: /home/circleci/circle_artifacts
+          destination: artifacts
       - save_cache:
           paths:
             - ~/.m2

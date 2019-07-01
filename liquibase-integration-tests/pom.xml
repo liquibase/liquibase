@@ -134,6 +134,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
                     <systemProperties>
                         <property>
                             <name>liquibase.defaultlogger.level</name>
@@ -154,6 +155,7 @@
                 <configuration>
                     <skipTests>${skipTests}</skipTests>
                     <skipITs>${skipITs}</skipITs>
+                    <useSystemClassLoader>false</useSystemClassLoader>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>${jacoco.it.execution.data.file}</jacoco-agent.destfile>

@@ -206,6 +206,7 @@
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader>
 					<excludes>
 						<exclude>**/TestContext.java</exclude>
 						<exclude>**/*.xml</exclude>
