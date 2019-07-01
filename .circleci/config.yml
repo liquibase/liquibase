@@ -68,9 +68,12 @@ jobs:
           command: |
               mkdir /home/circleci/circle_test_reports
               export CIRCLE_TEST_REPORTS=/home/circleci/circle_test_reports
-              mkdir -p ${CIRCLE_TEST_REPORTS}/junit/
-              find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/junit/ \;
-              find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/junit/ \;
+              mkdir -p ${CIRCLE_TEST_REPORTS}/surefire/
+              mkdir -p ${CIRCLE_TEST_REPORTS}/failsafe/
+              find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/surefire/ \;
+              find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/failsafe/ \;
+              echo "found tests:"
+              ls -l "${CIRCLE_TEST_REPORTS}/failsafe/"
           when: always
 
       - store_test_results:
