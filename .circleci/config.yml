@@ -72,6 +72,8 @@ jobs:
               mkdir -p ${CIRCLE_TEST_REPORTS}/failsafe/
               find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/surefire/ \;
               find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/failsafe/ \;
+              echo "tests"
+              ls -l /home/circleci/liquibase/liquibase-core/target/surefire-reports
               echo "find:"
               pwd
               find . -type f -regex ".*/target/surefire-reports/.*xml"
