@@ -82,10 +82,8 @@ public class DiffToChangeLog {
         this.changeSetPath = changeLogFile;
         File file = new File(changeLogFile);
         if (!file.exists()) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " does not exist, creating");
-            FileOutputStream stream = new FileOutputStream(file);
-            print(new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
-            stream.close();
+            //print changeLog only if there are available changeSets to print instead of printing it always
+            printNew(changeLogSerializer, file);
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " exists, appending");
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -134,6 +132,28 @@ public class DiffToChangeLog {
                 randomAccessFile.close();
             }
 
+        }
+    }
+
+    /**
+     * Prints changeLog that would bring the target database to be the same as
+     * the reference database only when there are available changeSets to print
+     */
+    public void printNew(ChangeLogSerializer changeLogSerializer, File file) throws ParserConfigurationException, IOException, DatabaseException {
+
+        List<ChangeSet> changeSets = generateChangeSets();
+
+        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "changeSets count: " + changeSets.size());
+        if (changeSets.isEmpty()) {
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Skipping creation of empty file.");
+            return;
+        }
+
+        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " does not exist, creating");
+
+        try (FileOutputStream stream = new FileOutputStream(file);
+             PrintStream out = new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())) {
+            changeLogSerializer.write(changeSets, out);
         }
     }
 
