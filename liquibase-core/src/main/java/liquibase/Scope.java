@@ -4,8 +4,11 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.LiquibaseListener;
+import liquibase.logging.LogService;
+import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.SmartMap;
@@ -271,4 +274,7 @@ public class Scope {
         void run();
     }
 
+    public Logger getLog(Class clazz) {
+        return LogService.getLog(clazz);
+    }
 }
