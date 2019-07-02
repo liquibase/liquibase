@@ -901,6 +901,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setReferencedColumnNames(constraintsNode.getChildValue(null, "referencedColumnNames", String.class));
         constraints.setUnique(constraintsNode.getChildValue(null, "unique", Boolean.class));
         constraints.setUniqueConstraintName(constraintsNode.getChildValue(null, "uniqueConstraintName", String.class));
+        constraints.setNotNullConstraintName(constraintsNode.getChildValue(null, "notNullConstraintName", String.class));
         constraints.setCheckConstraint(constraintsNode.getChildValue(null, "checkConstraint", String.class));
         constraints.setDeleteCascade(constraintsNode.getChildValue(null, "deleteCascade", Boolean.class));
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));
