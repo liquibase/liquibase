@@ -35,7 +35,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w ]+");
     private Pattern postgresNumberValuePattern = Pattern.compile("(\\d*)::[\\w ]+");
-    private Pattern postgresFunctionRefPattern = Pattern.compile("\\([^)]+\\)"); // something inside brackets: (...)
 
     public ColumnSnapshotGenerator() {
         super(Column.class, new Class[]{Table.class, View.class});
@@ -543,7 +542,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
      * - (name)::text || '- concatenation example'
      */
     private boolean looksLikeFunction(String columnName) {
-        return postgresFunctionRefPattern.matcher(columnName).find();
+        return columnName.contains("(");
     }
 
     //START CODE FROM SQLITEDatabaseSnapshotGenerator
