@@ -75,9 +75,8 @@
     </distributionManagement>
 
     <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <jdk.version>1.7</jdk.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -102,8 +101,8 @@
         <mockito.version>1.10.19</mockito.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
         <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
         <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
         <org.codehaus.groovy.version>2.4.11</org.codehaus.groovy.version>
@@ -401,8 +400,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.6.1</version>
                     <configuration>
-                        <source>${jdk.version}</source>
-                        <target>${jdk.version}</target>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
                         <optimize>true</optimize>
                         <debug>true</debug>
                         <encoding>${project.build.sourceEncoding}</encoding>
@@ -453,38 +452,6 @@
                             </property>
                         </systemProperties>
                     </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven-enforcer-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>enforce-java</id>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                            <configuration>
-                                <rules>
-                                    <requireJavaVersion>
-                                        <version>${jdk.version}</version>
-                                    </requireJavaVersion>
-                                    <requireMavenVersion>
-                                        <version>3.0</version>
-                                    </requireMavenVersion>
-                                    <!-- Avoid the M.A.D. Gadget vulnerability in certain Apache commons-collections versions -->
-                                    <bannedDependencies>
-                                        <excludes>
-                                            <exclude>commons-collections:commons-collections:[3.0,3.2.1]</exclude>
-                                            <exclude>commons-collections:commons-collections:4.0</exclude>
-                                        </excludes>
-                                    </bannedDependencies>
-                                </rules>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
 
                 <plugin>
@@ -681,82 +648,6 @@
                             <quiet>true</quiet>
                         </configuration>
                     </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>pre-release-activities</id>
-            <build>
-                <plugins>
-                    <!-- Search for and report dependencies that have known security vulnerabilities.
-                             This is a must-have execution before every release! It is not included in every build
-                             because the first execution can easily take 20 minutes. -->
-                    <plugin>
-                        <groupId>org.owasp</groupId>
-                        <artifactId>dependency-check-maven</artifactId>
-                        <version>1.4.5</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>sonar</id>
-            <!-- This is the JaCoCo setup offline instrumentation for all production classes. -->
-            <dependencies>
-                <dependency>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>org.jacoco.agent</artifactId>
-                    <classifier>runtime</classifier>
-                    <version>${jacoco.version}</version>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>unit-test-instrument</id>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>instrument</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.8</version>
-                        <executions>
-                            <execution>
-                                <id>mkdir-target</id>
-                                <inherited>false</inherited>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <!-- Safety -->
-                                        <mkdir dir="${project.build.directory}" />
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
                 </plugins>
             </build>
         </profile>

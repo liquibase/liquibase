@@ -14,8 +14,8 @@
 
 
 	<properties>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<bundle.namespace>liquibase.*</bundle.namespace>
         <project.version>3.7.0</project.version>
 	</properties>
@@ -197,8 +197,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
