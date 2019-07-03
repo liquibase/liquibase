@@ -277,6 +277,7 @@
 	<!-- Attributes for constraints -->
 	<xsd:attributeGroup name="constraintsAttributes">
 		<xsd:attribute name="nullable" type="booleanExp" />
+		<xsd:attribute name="notNullConstraintName" type="xsd:string" />
 		<xsd:attribute name="primaryKey" type="booleanExp" />
 		<xsd:attribute name="primaryKeyName" type="xsd:string" />
         <xsd:attribute name="primaryKeyTablespace" type="xsd:string" />

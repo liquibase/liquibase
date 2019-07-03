@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.datatype.DatabaseDataType;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
@@ -20,6 +21,7 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.util.StringUtils;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -147,6 +149,15 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         alterTable += getDefaultClause(statement, database);
 
         if (!statement.isNullable()) {
+            for (ColumnConstraint constraint : statement.getConstraints()) {
+                if (constraint instanceof NotNullConstraint) {
+                    NotNullConstraint notNullConstraint = (NotNullConstraint) constraint;
+                    if (StringUtils.isNotEmpty(notNullConstraint.getConstraintName())) {
+                        alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraint.getConstraintName());
+                        break;
+                    }
+                }
+            }
             alterTable += " NOT NULL";
             if (database instanceof OracleDatabase) {
                 alterTable+= !statement.shouldValidateNullable() ? " ENABLE NOVALIDATE " : "";
