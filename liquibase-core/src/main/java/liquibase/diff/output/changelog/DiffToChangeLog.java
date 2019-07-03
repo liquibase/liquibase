@@ -1,6 +1,29 @@
 package liquibase.diff.output.changelog;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.change.Change;
+import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -47,13 +70,20 @@ public class DiffToChangeLog {
     private String changeSetPath;
     private DiffResult diffResult;
     private DiffOutputControl diffOutputControl;
-    private boolean tryDbaDependencies=true;
+    private boolean tryDbaDependencies = true;
 
     private static Set<Class> loggedOrderFor = new HashSet<>();
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
         this.diffOutputControl = diffOutputControl;
+        respectSchemaAndCatalogCaseIfNeeded(diffOutputControl);
+    }
+
+    private void respectSchemaAndCatalogCaseIfNeeded(DiffOutputControl diffOutputControl) {
+        if (this.diffResult.getComparisonSnapshot().getDatabase() instanceof AbstractDb2Database) {
+            diffOutputControl.setRespectSchemaAndCatalogCase(true);
+        }
     }
 
     public DiffToChangeLog(DiffOutputControl diffOutputControl) {
@@ -328,7 +358,7 @@ public class DiffToChangeLog {
     }
 
     private List<Map<String, ?>> queryForDependencies(Executor executor, List<String> schemas)
-        throws DatabaseException {
+            throws DatabaseException {
         List<Map<String, ?>> rs = null;
         try {
             if (tryDbaDependencies) {
@@ -338,19 +368,17 @@ public class DiffToChangeLog {
                                 return "OWNER='" + obj + "'";
                             }
                         }
-                    ) + ")"));
-            }
-            else {
+                ) + ")"));
+            } else {
                 rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
-                                @Override
-                                public String toString(String obj) {
-                                    return "REFERENCED_OWNER='" + obj + "'";
-                                }
+                            @Override
+                            public String toString(String obj) {
+                                return "REFERENCED_OWNER='" + obj + "'";
                             }
+                        }
                 ) + ")"));
             }
-        }
-        catch (DatabaseException dbe) {
+        } catch (DatabaseException dbe) {
             //
             // If our exception is for something other than a missing table/view
             // then we just re-throw the exception
@@ -358,11 +386,10 @@ public class DiffToChangeLog {
             //   to stop the recursion
             //
             String message = dbe.getMessage();
-            if (! message.contains("ORA-00942: table or view does not exist")) {
-              throw new DatabaseException(dbe);
-            }
-            else if (! tryDbaDependencies) {
-              throw new DatabaseException(dbe);
+            if (!message.contains("ORA-00942: table or view does not exist")) {
+                throw new DatabaseException(dbe);
+            } else if (!tryDbaDependencies) {
+                throw new DatabaseException(dbe);
             }
             LogService.getLog(getClass()).warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
             tryDbaDependencies = false;
@@ -421,17 +448,16 @@ public class DiffToChangeLog {
                 String tabName = null;
                 if (tryDbaDependencies) {
                     tabName =
-                        StringUtils.trimToNull((String) row.get("OWNER")) + "." +
-                        StringUtils.trimToNull((String) row.get("NAME"));
-                }
-                else {
+                            StringUtils.trimToNull((String) row.get("OWNER")) + "." +
+                                    StringUtils.trimToNull((String) row.get("NAME"));
+                } else {
                     tabName =
-                        StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
-                        StringUtils.trimToNull((String) row.get("NAME"));
+                            StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
+                                    StringUtils.trimToNull((String) row.get("NAME"));
                 }
                 String bName =
-                    StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
-                    StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
+                        StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." +
+                                StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
 
                 graph.add(bName, tabName);
             }
@@ -562,17 +588,64 @@ public class DiffToChangeLog {
                 csContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "")
                 .replaceFirst("\\)$", "");
             }
-            ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
-                    null, false, quotingStrategy, null);
-            changeSet.setCreated(created);
-            if (diffOutputControl.getLabels() != null) {
-                changeSet.setLabels(diffOutputControl.getLabels());
+
+            if (useSeparateChangeSets(changes)) {
+                for (Change change : changes) {
+                    ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+                            null, false, quotingStrategy, null);
+                    changeSet.setCreated(created);
+                    if (diffOutputControl.getLabels() != null) {
+                        changeSet.setLabels(diffOutputControl.getLabels());
+                    }
+                    changeSet.addChange(change);
+                    changeSets.add(changeSet);
+                }
+            } else {
+                ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
+                        null, false, quotingStrategy, null);
+                changeSet.setCreated(created);
+                if (diffOutputControl.getLabels() != null) {
+                    changeSet.setLabels(diffOutputControl.getLabels());
+                }
+                for (Change change : changes) {
+                    changeSet.addChange(change);
+                }
+                changeSets.add(changeSet);
+
             }
-            for (Change change : changes) {
-                changeSet.addChange(change);
-            }
-            changeSets.add(changeSet);
         }
+    }
+
+    protected boolean useSeparateChangeSets(Change[] changes) {
+        boolean sawAutocommitBefore = false;
+
+        for (Change change : changes) {
+            boolean thisStatementAutocommits = true;
+
+            if ((change instanceof InsertDataChange
+                    || change instanceof DeleteDataChange
+                    || change instanceof UpdateDataChange
+                    || change instanceof LoadDataChange
+            )) {
+                thisStatementAutocommits = false;
+            }
+            if (change instanceof RawSQLChange) {
+                if (((RawSQLChange) change).getSql().trim().matches("SET\\s+\\w+\\s+\\w+")) {
+                    //don't separate out when there is a `SET X Y` statement
+                    thisStatementAutocommits = false;
+                }
+            }
+
+            if (thisStatementAutocommits) {
+                if (sawAutocommitBefore) {
+                    return true;
+                } else {
+                    sawAutocommitBefore = true;
+                }
+            }
+        }
+
+        return false;
     }
 
     protected String getChangeSetAuthor() {
@@ -614,14 +687,14 @@ public class DiffToChangeLog {
                 this.overriddenIdRoot = true;
             }
 
-             if ((changes != null) && (changes.length > 0)) {
-                 desc = " ("+StringUtils.join(changes, " :: ", new StringUtils.StringUtilsFormatter<Change>() {
-                     @Override
-                     public String toString(Change obj) {
-                         return obj.getDescription();
-                     }
-                 })+")";
-             }
+            if ((changes != null) && (changes.length > 0)) {
+                desc = " (" + StringUtils.join(changes, " :: ", new StringUtils.StringUtilsFormatter<Change>() {
+                    @Override
+                    public String toString(Change obj) {
+                        return obj.getDescription();
+                    }
+                }) + ")";
+            }
 
             if (desc.length() > 150) {
                 desc = desc.substring(0, 146) + "...)";

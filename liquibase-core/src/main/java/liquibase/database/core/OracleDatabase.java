@@ -54,7 +54,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
     protected final int LONG_IDENTIFIERS_LEGNTH = 128;
-    protected final int ORACLE_12C_MAJOR_VERSION = 12;
+    public static final int ORACLE_12C_MAJOR_VERSION = 12;
 
     private Set<String> reservedWords = new HashSet<>();
     private Set<String> userDefinedTypes;
@@ -208,6 +208,20 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         return correctObjectName((schema.getCatalogName() == null) ? schema.getSchemaName() : schema.getCatalogName(), Schema.class);
+    }
+
+    @Override
+    protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
+        if (StringUtils.isEmpty(generationType)) {
+            return "";
+        }
+
+        String autoIncrementClause = "GENERATED %s AS IDENTITY"; // %s -- [ ALWAYS | BY DEFAULT [ ON NULL ] ]
+        String generationStrategy = generationType;
+        if (Boolean.TRUE.equals(defaultOnNull) && generationType.toUpperCase().equals("BY DEFAULT")) {
+            generationStrategy += " ON NULL";
+        }
+        return String.format(autoIncrementClause, generationStrategy);
     }
 
     @Override

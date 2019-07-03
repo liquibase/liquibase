@@ -140,5 +140,9 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
 
             return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
         }
+
+        public void merge(SnapshotCommandResult resultToMerge) {
+            this.snapshot.merge(resultToMerge.snapshot);
+        }
     }
 }

@@ -62,7 +62,7 @@ public class Index extends AbstractDatabaseObject {
         
         return getRelation().getSchema();
     }
-    
+
     /**
      * @deprecated Use {@link #getRelation()}
      */
@@ -82,11 +82,11 @@ public class Index extends AbstractDatabaseObject {
 	public Index setTable(Table table) {
 		return setRelation(table);
     }
-    
+
     public Relation getRelation() {
     	return getAttribute("table", Relation.class);
     }
-    
+
     public Index setRelation(Relation relation) {
     	this.setAttribute("table", relation);
         return this;
@@ -184,9 +184,9 @@ public class Index extends AbstractDatabaseObject {
 
         if ((this.getRelation() != null) && (o.getRelation() != null)) {
             returnValue = this.getRelation().compareTo(o.getRelation());
-            if ((returnValue == 0) && (this.getRelation().getSchema() != null) && (o.getRelation().getSchema() != null)) {
-                returnValue = StringUtils.trimToEmpty(this.getRelation().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
-            }
+            /*if ((returnValue == 0) && (this.getRelation().getSchema() != null) && (o.getRelation().getSchema() != null)) {
+                returnValue = this.getRelation().getSchema().compareTo(o.getRelation().getSchema());
+            }*/
         }
 
         if (returnValue == 0) {

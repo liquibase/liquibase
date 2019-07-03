@@ -39,12 +39,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(),
             statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
-        
+
         boolean isSinglePrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && (statement
             .getPrimaryKeyConstraint().getColumns().size() == 1);
-        
+
         boolean isPrimaryKeyAutoIncrement = false;
-        
+
         Iterator<String> columnIterator = statement.getColumns().iterator();
 
         BigInteger mysqlTableOptionStartWith = null;
@@ -58,7 +58,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             buffer.append(" ").append(columnType);
 
             AutoIncrementConstraint autoIncrementConstraint = null;
-            
+
             for (AutoIncrementConstraint currentAutoIncrementConstraint : statement.getAutoIncrementConstraints()) {
                 if (column.equals(currentAutoIncrementConstraint.getColumnName())) {
                     autoIncrementConstraint = currentAutoIncrementConstraint;
@@ -129,8 +129,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (isAutoIncrementColumn) {
                 // TODO: check if database supports auto increment on non primary key column
                 if (database.supportsAutoIncrement()) {
-                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
-                
+                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
+
                     if (!"".equals(autoIncrementClause)) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
@@ -155,14 +155,20 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 } else {
                     /* Determine if the NOT NULL constraint has a name. */
                     NotNullConstraint nnConstraintForThisColumn = statement.getNotNullColumns().get(column);
-                    String nncName = StringUtils.trimToNull(nnConstraintForThisColumn.getName());
+                    String nncName = StringUtils.trimToNull(nnConstraintForThisColumn.getConstraintName());
                     if (nncName == null) {
                         buffer.append(" NOT NULL");
                     } else {
                         buffer.append(" CONSTRAINT ");
                         buffer.append(database.escapeConstraintName(nncName));
                         buffer.append(" NOT NULL");
-                    } // do we have a NN constraint name?
+                    }
+
+                    if (!nnConstraintForThisColumn.shouldValidateNullable()){
+                        if (database instanceof OracleDatabase){
+                            buffer.append(" ENABLE NOVALIDATE ");
+                        }
+                    }
                 } // does the DB support constraint names?
             } else {
                 if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
@@ -211,7 +217,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" USING INDEX TABLESPACE ");
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
                 }
-
+                buffer.append(!statement.getPrimaryKeyConstraint().shouldValidatePrimaryKey() ? " ENABLE NOVALIDATE " : "");
                 buffer.append(",");
             }
         }
@@ -256,6 +262,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (fkConstraint.isDeferrable()) {
                 buffer.append(" DEFERRABLE");
             }
+
+            if (database instanceof OracleDatabase) {
+                buffer.append(!fkConstraint.shouldValidateForeignKey() ? " ENABLE NOVALIDATE " : "");
+            }
+
             buffer.append(",");
         }
 
@@ -267,6 +278,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
+            if (database instanceof OracleDatabase) {
+                buffer.append(!uniqueConstraint.shouldValidateUnique() ? " ENABLE NOVALIDATE " : "");
+            }
             buffer.append(",");
         }
 

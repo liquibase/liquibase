@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
+import liquibase.LabelExpression;
 import liquibase.Labels;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
@@ -31,7 +32,9 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -39,6 +42,12 @@ import java.util.*;
 public class ChangeSet implements Conditional, ChangeLogChild {
 
     protected CheckSum checkSum;
+    /**
+     * storedChecksum is used to make the checksum of a changeset that has already been run
+     * on a database available to liquibase extensions. This value might differ from the checkSum value that
+     * is calculated at run time when ValidatorVisitor is being called
+     */
+    private CheckSum storedCheckSum;
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
@@ -782,6 +791,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.ignore = ignore;
     }
 
+    public boolean isInheritableIgnore() {
+        DatabaseChangeLog changeLog = getChangeLog();
+        return changeLog.isIncludeIgnore();
+    }
     public Collection<ContextExpression> getInheritableContexts() {
         Collection<ContextExpression> expressions = new ArrayList<>();
         DatabaseChangeLog changeLog = getChangeLog();
@@ -793,6 +806,19 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             ContextExpression includeExpression = changeLog.getIncludeContexts();
             if ((includeExpression != null) && !includeExpression.isEmpty()) {
                 expressions.add(includeExpression);
+            }
+            changeLog = changeLog.getParentChangeLog();
+        }
+        return Collections.unmodifiableCollection(expressions);
+    }
+
+    public Collection<LabelExpression> getInheritableLabels() {
+        Collection<LabelExpression> expressions = new ArrayList<LabelExpression>();
+        DatabaseChangeLog changeLog = getChangeLog();
+        while (changeLog != null) {
+            LabelExpression expression = changeLog.getIncludeLabels();
+            if (expression != null && !expression.isEmpty()) {
+                expressions.add(expression);
             }
             changeLog = changeLog.getParentChangeLog();
         }
@@ -1156,5 +1182,21 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.attributes.put(attribute, value);
 
         return this;
+    }
+
+    /**
+     * Gets storedCheckSum
+     * @return storedCheckSum if it was executed otherwise null
+     */
+    public CheckSum getStoredCheckSum() {
+        return storedCheckSum;
+    }
+
+    /**
+     * Sets storedCheckSum in ValidatingVisitor in case when changeset was executed
+     * @param storedCheckSum
+     */
+    public void setStoredCheckSum(CheckSum storedCheckSum) {
+        this.storedCheckSum = storedCheckSum;
     }
 }

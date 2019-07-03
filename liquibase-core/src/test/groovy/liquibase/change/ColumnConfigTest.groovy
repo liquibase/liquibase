@@ -422,7 +422,7 @@ public class ColumnConfigTest extends Specification {
         def testValue = "value for ${field}"
         if (field in ["defaultValueDate", "valueDate"]) {
             testValue = "2012-03-13T18:52:22.12"
-        } else if (field in ["defaultValueBoolean", "valueBoolean", "autoIncrement", "computed"]) {
+        } else if (field in ["defaultValueBoolean", "valueBoolean", "autoIncrement", "computed", "defaultOnNull"]) {
             testValue = "true"
         } else if (field in ["startWith", "incrementBy"]) {
             testValue = "838"
@@ -455,7 +455,8 @@ public class ColumnConfigTest extends Specification {
         def column = new ColumnConfig()
 
         def testValue = "value for ${field}"
-        if (field in ["unique", "deferrable", "nullable", "deleteCascade", "initiallyDeferred", "primaryKey", "validate"]) {
+        if (field in ["unique", "deferrable", "nullable", "deleteCascade", "initiallyDeferred", "primaryKey",
+        "validateNullable","validatePrimaryKey", "validateForeignKey", "validateUnique" ]) {
             testValue = "true"
         }
         constraintNode.addChild(null, field, testValue)

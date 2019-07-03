@@ -7,6 +7,11 @@ public class IgnoreChangeSetFilter implements ChangeSetFilter {
         if (changeSet.isIgnore()) {
             return new ChangeSetFilterResult(false, "Change set is ignored", this.getClass());
         }
+        else {
+            if (changeSet.isInheritableIgnore()) {
+                return new ChangeSetFilterResult(false, "Change set is ignored", this.getClass());
+            }
+        }
         return new ChangeSetFilterResult(true, "Change set is not ignored", this.getClass());
     }
 }

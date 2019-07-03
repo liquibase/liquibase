@@ -133,7 +133,7 @@ public interface Database extends PrioritizedService {
     /**
      * Returns database-specific auto-increment DDL clause.
      */
-    String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy);
+    String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy, String generationType, Boolean defaultOnNull);
 
     String getDatabaseChangeLogTableName();
 

@@ -100,24 +100,42 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
                 if ((constraintsConfig.isNullable() != null) && !constraintsConfig.isNullable()) {
-                    constraints.add(new NotNullConstraint());
+                    NotNullConstraint notNullConstraint = new NotNullConstraint();
+                    if (constraintsConfig.shouldValidateNullable()!=null && !constraintsConfig.shouldValidateNullable()) {
+                        notNullConstraint.setValidateNullable(false);
+                    }
+                    notNullConstraint.setConstraintName(constraintsConfig.getNotNullConstraintName());
+                    constraints.add(notNullConstraint);
                 }
-                if ((constraintsConfig.isUnique() != null) && constraintsConfig.isUnique()) {
-                    constraints.add(new UniqueConstraint(constraintsConfig.getUniqueConstraintName()));
+                if (constraintsConfig.isUnique() != null && constraintsConfig.isUnique()) {
+                    UniqueConstraint uniqueConstraint = new UniqueConstraint();
+                    if (constraintsConfig.shouldValidateUnique()!=null && !constraintsConfig.shouldValidateUnique()) {
+                        uniqueConstraint.setValidateUnique(false);
+                    }
+                    constraints.add(uniqueConstraint);
                 }
                 if ((constraintsConfig.isPrimaryKey() != null) && constraintsConfig.isPrimaryKey()) {
-                    constraints.add(new PrimaryKeyConstraint(constraintsConfig.getPrimaryKeyName()));
+                    PrimaryKeyConstraint primaryKeyConstraint = new PrimaryKeyConstraint(constraintsConfig.getPrimaryKeyName());
+                    if (constraintsConfig.shouldValidatePrimaryKey()!=null && !constraintsConfig.shouldValidatePrimaryKey()) {
+                        primaryKeyConstraint.setValidatePrimaryKey(false);
+                    }
+                    constraints.add(primaryKeyConstraint);
                 }
 
                 if ((constraintsConfig.getReferences() != null) || ((constraintsConfig.getReferencedColumnNames() !=
                     null) && (constraintsConfig.getReferencedTableName() != null))) {
-                    constraints.add(new ForeignKeyConstraint(constraintsConfig.getForeignKeyName(), constraintsConfig.getReferences()
-                            , constraintsConfig.getReferencedTableName(), constraintsConfig.getReferencedColumnNames()));
+                    ForeignKeyConstraint foreignKeyConstraint = new ForeignKeyConstraint(constraintsConfig.getForeignKeyName(),
+                        constraintsConfig.getReferences(), constraintsConfig.getReferencedTableName(),
+                        constraintsConfig.getReferencedColumnNames());
+                    if (constraintsConfig.shouldValidateForeignKey()!=null && !constraintsConfig.shouldValidateForeignKey()) {
+                        foreignKeyConstraint.setValidateForeignKey(false);
+                    }
+                    constraints.add(foreignKeyConstraint);
                 }
             }
 
             if ((column.isAutoIncrement() != null) && column.isAutoIncrement()) {
-                constraints.add(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
+                constraints.add(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy(), column.getGenerationType(), column.getDefaultOnNull()));
             }
 
             AddColumnStatement addColumnStatement = new AddColumnStatement(getCatalogName(), getSchemaName(),
