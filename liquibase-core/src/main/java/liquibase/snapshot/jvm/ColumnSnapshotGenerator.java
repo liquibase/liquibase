@@ -47,6 +47,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
             return example;
         }
+
         Schema schema = relation.getSchema();
         try {
             Column column = null;
@@ -77,6 +78,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             example.setAttribute(LIQUIBASE_COMPLETE, null);
+
+            if (column == null && database instanceof PostgresDatabase && looksLikeFunction(example.getName())) {
+                ((Column) example).setComputed(true);
+                return example;
+            }
+
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -535,6 +542,18 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.getType());
+    }
+
+    /**
+     * {@link IndexSnapshotGenerator} fails to differentiate computed and non-computed column's for {@link PostgresDatabase}
+     * assume that if COLUMN_NAME contains parentesised expression -- its function reference.
+     * should handle cases like:
+     * - ((name)::text)
+     * - lower/upper((name)::text)
+     * - (name)::text || '- concatenation example'
+     */
+    private boolean looksLikeFunction(String columnName) {
+        return columnName.contains("(");
     }
 
     //START CODE FROM SQLITEDatabaseSnapshotGenerator
