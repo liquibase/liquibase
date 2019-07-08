@@ -13,6 +13,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DatabaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogType;
 import liquibase.sql.Sql;
@@ -153,8 +154,16 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
                     if( autoIncrementConstraint.getStartWith() != null ){
                         if (database instanceof PostgresDatabase) {
-                            String sequenceName = statement.getTableName()+"_"+column+"_seq";
-                            additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+                            int majorVersion = 9;
+                            try {
+                                majorVersion = database.getDatabaseMajorVersion();
+                            } catch (DatabaseException e) {
+                                // ignore
+                            }
+                            if (majorVersion < 10) {
+                                String sequenceName = statement.getTableName()+"_"+column+"_seq";
+                                additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+                            }
                         }else if(database instanceof MySQLDatabase){
                             mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
                         }
