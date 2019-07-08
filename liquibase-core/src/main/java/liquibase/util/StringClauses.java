@@ -548,10 +548,10 @@ public class StringClauses {
         }
     }
 
-    public static class CharLiteral implements LiteralClause {
+    public static class QuotedString implements LiteralClause {
         private String value;
 
-        public CharLiteral(String value) {
+        public QuotedString(String value) {
             this.value = value;
         }
 

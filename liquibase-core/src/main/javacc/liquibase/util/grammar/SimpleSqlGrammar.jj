@@ -72,7 +72,7 @@ TOKEN:
 |	< S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> )+ ( <DIGIT> | <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> )* >
 | 	< #LETTER: ["a"-"z", "A"-"Z", "_", "$"] >
 |   < #SPECIAL_CHARS: "$" | "_" | "#" | "@" >
-|   < CHAR_LITERAL: ("N'" | "'") (~["'"])* "'" ("'" (~["'"])* "'")*>
+|   < QUOTED_STRING: ("N'" | "'") (~["'"])* "'" ("'" (~["'"])* "'")*>
 |   < QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
 |    <EMPTY_QUOTE: "\"" "\"">
 

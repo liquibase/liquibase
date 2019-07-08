@@ -35,8 +35,8 @@ public class SqlParser {
                     }
                 } else if (token.kind == SimpleSqlGrammarConstants.QUOTED_IDENTIFIER) {
                     clauses.append(new StringClauses.QuotedIdentifier(token.image));
-                } else if (token.kind == SimpleSqlGrammarConstants.CHAR_LITERAL) {
-                    clauses.append(new StringClauses.CharLiteral(token.image));
+                } else if (token.kind == SimpleSqlGrammarConstants.QUOTED_STRING) {
+                    clauses.append(new StringClauses.QuotedString(token.image));
                 } else {
                     clauses.append(token.image);
                 }
