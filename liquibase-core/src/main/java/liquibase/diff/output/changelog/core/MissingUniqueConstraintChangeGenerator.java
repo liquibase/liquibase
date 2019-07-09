@@ -2,9 +2,11 @@ package liquibase.diff.output.changelog.core;
 
 import liquibase.change.Change;
 import liquibase.change.core.AddUniqueConstraintChange;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -131,7 +133,21 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
                 backingIndexCopy.addColumn(column);
             }
 
-            found = SnapshotGeneratorFactory.getInstance().has(backingIndexCopy, comparisonDatabase);
+            // get the diffResult from the database object
+            // This was set from DiffToChangeLog#generateChangeSets() so that we can access it here
+            DiffResult diffResult = null;
+            if (comparisonDatabase instanceof AbstractJdbcDatabase) {
+                diffResult = (DiffResult) ((AbstractJdbcDatabase) comparisonDatabase).get("diffResult");
+            }
+
+            if (diffResult != null) {
+                // check against the snapshot (better performance)
+                Index foundIndex = diffResult.getComparisonSnapshot().get(backingIndexCopy);
+                found = foundIndex != null;
+            } else {
+                // go to the db to find out
+                found = SnapshotGeneratorFactory.getInstance().has(backingIndexCopy, comparisonDatabase);
+            }
         } catch (Exception e) {
             LogFactory.getInstance().getLog().warning("Error checking for backing index "+backingIndex.toString()+": "+e.getMessage(), e);
         }
