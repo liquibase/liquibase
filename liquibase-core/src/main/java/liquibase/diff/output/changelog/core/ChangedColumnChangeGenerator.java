@@ -114,6 +114,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setColumnName(column.getName());
                 change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
                 change.setValidate(column.shouldValidate());
+                change.setConstraintName(column.getAttribute("notNullConstraintName", String.class));
                 changes.add(change);
             }
         }

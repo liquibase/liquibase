@@ -86,6 +86,7 @@ public class MissingColumnChangeGenerator extends AbstractChangeGenerator implem
                 constraintsConfig = new ConstraintsConfig();
             }
             constraintsConfig.setNullable(false);
+            constraintsConfig.setNotNullConstraintName(column.getAttribute("notNullConstraintName", String.class));
             if (!column.shouldValidateNullable()) {
                 constraintsConfig.setShouldValidateNullable(false);
             }

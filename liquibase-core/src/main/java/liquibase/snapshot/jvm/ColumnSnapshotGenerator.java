@@ -105,15 +105,26 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 String searchCondition = cachedRow.getString("SEARCH_CONDITION");
                 searchCondition = searchCondition == null ? "" : searchCondition.toUpperCase();
                 String nullable = cachedRow.getString("NULLABLE");
+                String constraintName = cachedRow.getString("CONSTRAINT_NAME");
                 if ("NOT VALIDATED".equalsIgnoreCase(validated.toString())
                         && "Y".equalsIgnoreCase(nullable)
                         && searchCondition.matches("\"?\\w+\" IS NOT NULL")) {
-                        // not validated not null constraint found
-                        column.setNullable(false);
-                        column.setShouldValidateNullable(false);
+                    // not validated not null constraint found
+                    column.setNullable(false);
+                    column.setShouldValidateNullable(false);
+                }
+                if (Boolean.FALSE.equals(column.isNullable()) && hasValidObjectName(constraintName)) {
+                    column.setAttribute("notNullConstraintName", constraintName);
                 }
             }
         }
+    }
+
+    private static boolean hasValidObjectName(String objectName) {
+        if (StringUtils.isEmpty(objectName)) {
+            return false;
+        }
+        return !objectName.startsWith("SYS_") && !objectName.startsWith("BIN$");
     }
 
     @Override
