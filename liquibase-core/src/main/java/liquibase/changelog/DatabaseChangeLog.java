@@ -169,18 +169,25 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath().compareTo(o.getFilePath());
     }
 
-
     public ChangeSet getChangeSet(String path, String author, String id) {
-        for (ChangeSet changeSet : changeSets) {
+	    final List<ChangeSet> possibleChangeSets = getChangeSets(path, author, id);
+	    if (possibleChangeSets.isEmpty()){
+	    	return null;
+	    }
+	    return possibleChangeSets.get(0);
+    }
+
+    public List<ChangeSet> getChangeSets(String path, String author, String id) {
+	    final ArrayList<ChangeSet> changeSetsToReturn = new ArrayList<>();
+	    for (ChangeSet changeSet : this.changeSets) {
             if (normalizePath(changeSet.getFilePath()).equalsIgnoreCase(normalizePath(path))
                     && changeSet.getAuthor().equalsIgnoreCase(author)
                     && changeSet.getId().equalsIgnoreCase(id)
                     && isDbmsMatch(changeSet.getDbmsSet())) {
-                return changeSet;
+                changeSetsToReturn.add(changeSet);
             }
         }
-
-        return null;
+        return changeSetsToReturn;
     }
 
     public List<ChangeSet> getChangeSets() {
@@ -271,8 +278,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    public ChangeSet getChangeSet(RanChangeSet ranChangeSet) {
-        return getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+    public ChangeSet getChangeSet(RanChangeSet ranChangeSet){
+    	return getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+    }
+
+    public List<ChangeSet> getChangeSets(RanChangeSet ranChangeSet) {
+        return getChangeSets(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor)

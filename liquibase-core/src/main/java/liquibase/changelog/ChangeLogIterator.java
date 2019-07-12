@@ -1,5 +1,12 @@
 package liquibase.changelog;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
@@ -11,8 +18,6 @@ import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
-
-import java.util.*;
 
 public class ChangeLogIterator {
     private DatabaseChangeLog databaseChangeLog;
@@ -28,13 +33,13 @@ public class ChangeLogIterator {
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-            ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
-            if (changeSet != null) {
-                if (changeLog.ignoreClasspathPrefix()) {
-                    changeSet.setFilePath(ranChangeSet.getChangeLog());
-                }
-                changeSets.add(changeSet);
-            }
+	        final List<ChangeSet> changeSetsForRanChangeSet = changeLog.getChangeSets(ranChangeSet);
+	        for (ChangeSet changeSet : changeSetsForRanChangeSet) {
+		        if (changeLog.ignoreClasspathPrefix()) {
+			        changeSet.setFilePath(ranChangeSet.getChangeLog());
+		        }
+		        changeSets.add(changeSet);
+	        }
         }
         this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override
