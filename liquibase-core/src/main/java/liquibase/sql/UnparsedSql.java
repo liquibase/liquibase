@@ -17,7 +17,7 @@ public class UnparsedSql implements Sql {
     }
 
     public UnparsedSql(String sql, String endDelimiter, DatabaseObject... affectedDatabaseObjects) {
-        this.sql = StringUtils.trimToEmpty(sql.trim());
+        this.sql = StringUtils.trimToEmpty(sql);
         this.endDelimiter = endDelimiter;
 
         this.affectedDatabaseObjects.addAll(Arrays.asList(affectedDatabaseObjects));

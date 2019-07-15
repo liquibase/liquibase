@@ -27,7 +27,7 @@ public class MockDatabaseConnection implements DatabaseConnection {
 
 	@Override
 	public String nativeSQL(String sql) throws DatabaseException {
-		return null;
+		return sql;
 	}
 
 	@Override
