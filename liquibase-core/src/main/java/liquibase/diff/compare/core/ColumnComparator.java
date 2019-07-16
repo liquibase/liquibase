@@ -82,7 +82,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         boolean autoIncrement1 = ((Column) databaseObject1).isAutoIncrement();
         boolean autoIncrement2 = ((Column) databaseObject2).isAutoIncrement();
 
-        if (autoIncrement1 != autoIncrement2) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc value.
+        if (autoIncrement1 != autoIncrement2 && !compareControl.isSuppressedField(Column.class, "autoIncrementInformation")) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc value.
             differences.addDifference("autoIncrement", autoIncrement1, autoIncrement2);
         }
 
