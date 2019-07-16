@@ -251,12 +251,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void validate(Database database, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        this.validate(new RuntimeEnvironment(database, contexts, labelExpression));
+    }
 
-        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts), new LabelChangeSetFilter(labelExpression));
+    public void validate(RuntimeEnvironment env) throws LiquibaseException {
 
-        ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
-        validatingVisitor.validate(database, this);
-        logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(env.getTargetDatabase()), new ContextChangeSetFilter(env.getContexts()), new LabelChangeSetFilter(env.getLabels()));
+
+        ValidatingVisitor validatingVisitor = new ValidatingVisitor(env.getTargetDatabase().getRanChangeSetList());
+        validatingVisitor.validate(env.getTargetDatabase(), this);
+        logIterator.run(validatingVisitor, env);
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
             LogFactory.getLogger().warning(message);
@@ -317,7 +321,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             path = path.replace('\\', '/');
             ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
             try {
-                include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor, includeContexts);
+                Boolean relativeToChangelogFile = node.getChildValue(null, "relativeToChangelogFile", false);
+                String dbConnection = node.getChildValue(null, "db", RuntimeEnvironment.MAIN_DB_KEY);
+                include(path, relativeToChangelogFile, resourceAccessor, includeContexts, dbConnection);
             } catch (LiquibaseException e) {
                 throw new SetupException(e);
             }
@@ -442,14 +448,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             for (String path : resources) {
-                include(path, false, resourceAccessor, includeContexts);
+                include(path, false, resourceAccessor, includeContexts, null);
             }
         } catch (Exception e) {
             throw new SetupException(e);
         }
     }
 
-    public boolean include(String fileName, boolean isRelativePath, ResourceAccessor resourceAccessor, ContextExpression includeContexts) throws LiquibaseException {
+    public boolean include(String fileName, boolean isRelativePath, ResourceAccessor resourceAccessor, ContextExpression includeContexts, String dbConnection) throws LiquibaseException {
 
         if (fileName.equalsIgnoreCase(".svn") || fileName.equalsIgnoreCase("cvs")) {
             return false;
@@ -501,6 +507,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
+            if (StringUtils.isEmpty(changeSet.getDbConnection())) { // nested include file have higher priority
+                changeSet.setDbConnection(dbConnection);
+            }
             addChangeSet(changeSet);
         }
 

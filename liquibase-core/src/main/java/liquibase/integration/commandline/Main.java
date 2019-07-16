@@ -1,10 +1,7 @@
 package liquibase.integration.commandline;
 
 
-import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
+import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.command.ExecuteSqlCommand;
 import liquibase.command.SnapshotCommand;
@@ -958,6 +955,31 @@ public class Main {
         Database database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
                 this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName,
                 this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
+        HashMap<String, Database> databases = new HashMap();
+        databases.put(RuntimeEnvironment.MAIN_DB_KEY, database);
+
+        // Find other database connections
+        Set<String> allParamsKeys = changeLogParameters.keySet();
+        for (String paramName : changeLogParameters.keySet()) {
+            if (paramName.endsWith(".username")) {
+                int dotIndex = paramName.lastIndexOf('.');
+                String dbConnection = paramName.substring(0, dotIndex);
+
+                String username = (String) changeLogParameters.get(paramName);
+                String password = getDbParam(dbConnection, "password", null);
+                String url = getDbParam(dbConnection, "url", this.url);
+                String driver = getDbParam(dbConnection, "driver", this.driver);
+                String databaseClass = getDbParam(dbConnection, "databaseClass", this.databaseClass);
+                String driverPropertiesFile = getDbParam(dbConnection, "driverPropertiesFile", this.driverPropertiesFile);
+                String propertyProviderClass = getDbParam(dbConnection, "propertyProviderClass", this.propertyProviderClass);
+                Database otherDb = CommandLineUtils.createDatabaseObject(fileOpener, url,
+                        username, password, driver, this.defaultCatalogName, this.defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), databaseClass, driverPropertiesFile, propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName,
+                        this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
+                databases.put(dbConnection, otherDb);
+
+            }
+        }
+
         try {
 
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(getCommandParam("schemas", null), getCommandParam("referenceSchemas", null), getCommandParam("outputSchemasAs", null),
@@ -1045,7 +1067,7 @@ public class Main {
             }
 
 
-            Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, databases);
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);
@@ -1206,11 +1228,14 @@ public class Main {
                 throw new CommandLineParsingException("Unexpected date/time format.  Use 'yyyy-MM-dd'T'HH:mm:ss'");
             }
         } finally {
-            try {
-                database.rollback();
-                database.close();
-            } catch (DatabaseException e) {
-                LogFactory.getInstance().getLog().warning("problem closing connection", e);
+            for (String dbConnection : databases.keySet()) {
+                database = databases.get(dbConnection);
+                try {
+                    database.rollback();
+                    database.close();
+                } catch (DatabaseException e) {
+                    LogFactory.getInstance().getLog().warning("problem closing connection", e);
+                }
             }
         }
     }
@@ -1306,6 +1331,15 @@ public class Main {
 //        database.setDefaultSchemaName(defaultSchemaName);
 //
 //        return database;
+    }
+
+    private String getDbParam(String dbConnection, String paramName, String defaultValue) {
+        String fullParamName = dbConnection + '.' + paramName;
+        Object value = changeLogParameters.get(fullParamName);
+        if (value == null) {
+            return defaultValue;
+        }
+        return (String) value;
     }
 
     private Writer getOutputWriter() throws UnsupportedEncodingException, IOException {

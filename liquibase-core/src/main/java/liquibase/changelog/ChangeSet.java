@@ -101,6 +101,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private String filePath = "UNKNOWN CHANGE LOG";
 
+    /**
+     * Name of the database connection for apply changes.
+     */
+    private String dbConnection;
+
     private Logger log;
 
     /**
@@ -607,11 +612,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 throw new MigrationFailedException(this, e);
             }
             if (getFailOnError() != null && !getFailOnError()) {
+                log.info("Database connection: " + (StringUtils.isEmpty(dbConnection) ? "(MAIN)" : dbConnection));
                 log.info("Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
                 log.debug("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
                 // just log the message, dont log the stacktrace by appending exception. Its logged anyway to stdout
+                log.severe("Database connection: " + (StringUtils.isEmpty(dbConnection) ? "(MAIN)" : dbConnection));
                 log.severe("Change Set " + toString(false) + " failed.  Error: " + e.getMessage());
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
@@ -727,6 +734,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public String getAuthor() {
         return author;
+    }
+
+    public String getDbConnection() {
+        return dbConnection;
+    }
+
+    public void setDbConnection(String dbConnection) {
+        this.dbConnection = dbConnection;
     }
 
     public ContextExpression getContexts() {
