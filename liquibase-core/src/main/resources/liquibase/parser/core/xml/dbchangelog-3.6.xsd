@@ -1141,11 +1141,22 @@
 
     <xsd:element name="dropProcedure">
         <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="argument" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
             <xsd:attribute name="procedureName" type="xsd:string" use="required" />
             <xsd:attribute name="catalogName" type="xsd:string" />
             <xsd:attribute name="schemaName" type="xsd:string" />
         </xsd:complexType>
     </xsd:element>
+
+	<xsd:element name="argument">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="type" type="xsd:string" />
+            <xsd:attribute name="mode" type="xsd:string" />
+            <xsd:attribute name="name" type="xsd:string" />
+        </xsd:complexType>
+	</xsd:element>
 
     <!-- renameColumn -->
 	<xsd:element name="renameColumn">

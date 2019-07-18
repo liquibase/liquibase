@@ -504,4 +504,13 @@ public class StringUtils {
         return trimRight(str.toString());
     }
 
+    public static String firstNotNull(String... args) {
+        for (String arg : args) {
+            if (arg != null) {
+                return arg;
+            }
+        }
+        return null;
+    }
+
 }

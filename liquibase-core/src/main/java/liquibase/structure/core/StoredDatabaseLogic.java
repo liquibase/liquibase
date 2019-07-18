@@ -2,12 +2,25 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
-import java.util.Date;
-
 public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends AbstractDatabaseObject {
+
+    /** Function and {@link StoredProcedure} arguments */
+    public static final String ARGS_ATTR = "args";
+
+    /**
+     * If DB supports Function overloading this attribute backups 'name'
+     * while 'name' contains unique function identifier -- name + arguments
+     */
+    public static final String FUNCTION_NAME_ATTR = "functionName";
+
+    /**
+     * If DB supports {@link StoredProcedure} overloading this attribute backups 'name'
+     * while 'name' contains unique procedure identifier -- name + arguments
+     */
+    public static final String PROCEDURE_NAME_ATTR = "procedureName";
+
     @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[]{

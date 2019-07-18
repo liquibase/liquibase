@@ -9,12 +9,15 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropProcedureStatement;
 
+import java.util.List;
+
 @DatabaseChange(name="dropProcedure", description = "Drops an existing procedure", priority = ChangeMetaData.PRIORITY_DEFAULT+100, appliesTo = "storedProcedure")
 public class DropProcedureChange extends AbstractChange {
 
     private String catalogName;
     private String schemaName;
     private String procedureName;
+    private List<StoredLogicArgumentChange> argument;
 
     @DatabaseChangeProperty(mustEqualExisting ="storedProcedure.catalog")
     public String getCatalogName() {
@@ -43,6 +46,15 @@ public class DropProcedureChange extends AbstractChange {
         this.procedureName = procedureName;
     }
 
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, description = "Procedure arguments")
+    public List<StoredLogicArgumentChange> getArgument() {
+        return argument;
+    }
+
+    public void setArgument(List<StoredLogicArgumentChange> argument) {
+        this.argument = argument;
+    }
+
     @Override
     public String getConfirmationMessage() {
         return "Stored Procedure "+getProcedureName()+" dropped";
@@ -51,7 +63,7 @@ public class DropProcedureChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new DropProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName())
+                new DropProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), getArgument())
         };
     }
 

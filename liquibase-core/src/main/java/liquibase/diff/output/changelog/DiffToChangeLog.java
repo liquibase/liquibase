@@ -299,8 +299,8 @@ public class DiffToChangeLog {
                             if (obj.getSchema() != null) {
                                 schemaName = obj.getSchema().getName();
                             }
-
-                            String name = schemaName + "." + obj.getName();
+                            String objName = objectName(obj);
+                            String name = schemaName + "." + objName;
                             if (dependencyOrder.contains(name)) {
                                 toSort.add(obj);
                             } else {
@@ -324,8 +324,11 @@ public class DiffToChangeLog {
                                 o2Schema = o2.getSchema().getName();
                             }
 
-                            Integer o1Order = dependencyOrder.indexOf(o1Schema + "." + o1.getName());
-                            int o2Order = dependencyOrder.indexOf(o2Schema + "." + o2.getName());
+                            String o1Name = objectName(o1);
+                            String o2Name = objectName(o2);
+
+                            Integer o1Order = dependencyOrder.indexOf(o1Schema + "." + o1Name);
+                            int o2Order = dependencyOrder.indexOf(o2Schema + "." + o2Name);
 
                             int order = o1Order.compareTo(o2Order);
                             if (type.equals("unexpected")) {
@@ -344,6 +347,18 @@ public class DiffToChangeLog {
         }
 
         return new ArrayList<DatabaseObject>(objects);
+    }
+
+    /** for Functions and StoredProcedures we return #functionName and #procedureName respectively */
+    private static String objectName(DatabaseObject object) {
+        if (!(object instanceof StoredDatabaseLogic)) {
+            return object.getName();
+        }
+        return StringUtils.firstNotNull(
+                object.getAttribute(StoredDatabaseLogic.FUNCTION_NAME_ATTR, String.class),
+                object.getAttribute(StoredDatabaseLogic.PROCEDURE_NAME_ATTR, String.class),
+                object.getName()
+        );
     }
 
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
