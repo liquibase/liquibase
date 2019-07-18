@@ -39,9 +39,6 @@ public class ReflectionSerializer {
                 if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
                     continue;
                 }
-                if (Modifier.isStatic(field.getModifiers())) {
-                    continue;
-                }
 
                 fields.put(field.getName(), field);
                 field.setAccessible(true);

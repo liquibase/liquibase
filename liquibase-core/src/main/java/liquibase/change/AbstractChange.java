@@ -601,12 +601,12 @@ public abstract class AbstractChange implements Change {
                                              for (ParsedNode childNode : childNodes) {
                                                  LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
                                                  childObject.load(childNode, resourceAccessor);
-                                                 nullSafeCollectionOf(param).add(childObject);
+                                                 ((Collection) param.getCurrentValue(this)).add(childObject);
                                              }
                                          } else {
                                              LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
                                              childObject.load(node, resourceAccessor);
-                                             nullSafeCollectionOf(param).add(childObject);
+                                             ((Collection) param.getCurrentValue(this)).add(childObject);
                                          }
                                      }
                                  }
@@ -649,25 +649,6 @@ public abstract class AbstractChange implements Change {
         } catch (SetupException e) {
             throw new ParsedNodeException(e);
         }
-    }
-
-    private Collection nullSafeCollectionOf(ChangeParameterMetaData param) {
-        Class collectionDataType = param.getDataTypeClass();
-        if (!Collection.class.isAssignableFrom(collectionDataType)) {
-            throw new IllegalArgumentException("Expected Collection type of field, got: " + collectionDataType);
-        }
-        Collection collection = (Collection) param.getCurrentValue(this);
-        if (collection != null) {
-            return collection;
-        }
-        if (List.class.isAssignableFrom(collectionDataType)) {
-            collection = new ArrayList();
-            param.setValue(this, collection);
-        } else if (Set.class.isAssignableFrom(collectionDataType)) {
-            collection = new HashSet();
-            param.setValue(this, collection);
-        }
-        return collection;
     }
 
     protected ColumnConfig createEmptyColumnConfig(Class collectionType) throws InstantiationException, IllegalAccessException {
