@@ -32,7 +32,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
 
         validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class, HsqlDatabase.class, PostgresDatabase.class);
-
+        validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class);
 
         return validationErrors;
     }
@@ -47,6 +47,8 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
+        } else if (statement.getDataType() != null) {
+            queryStringBuilder.append(" AS " + statement.getDataType());
         }
         if (statement.getStartValue() != null) {
             queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
