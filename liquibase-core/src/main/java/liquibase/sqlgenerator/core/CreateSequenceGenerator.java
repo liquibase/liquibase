@@ -64,7 +64,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
 
         if (statement.getCacheSize() != null) {
-            if (database instanceof OracleDatabase || database instanceof Db2zDatabase) {
+            if (database instanceof OracleDatabase || database instanceof Db2zDatabase || database instanceof PostgresDatabase) {
                 if (BigInteger.ZERO.equals(statement.getCacheSize())) {
                     if (database instanceof OracleDatabase) {
                         queryStringBuilder.append(" NOCACHE ");
