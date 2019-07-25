@@ -13,7 +13,7 @@ public class DependencyUtil {
         private NodeValueListener<T> listener;
         private List<GraphNode<T>> evaluatedNodes = new ArrayList<GraphNode<T>>();
 
-        private int recursiveSizeCheck = -1;
+        private Integer recursiveSizeCheck;
 
         public DependencyGraph(NodeValueListener<T> listener) {
             this.listener = listener;
@@ -82,13 +82,14 @@ public class DependencyUtil {
                 }
             }
             if (nextNodesToDisplay != null && nextNodesToDisplay.size() > 0) {
-                if (nextNodesToDisplay.size() == recursiveSizeCheck) {
+                int recursiveSizeDepth = recursiveSizeDepth(nextNodesToDisplay);
+                if (recursiveSizeDepth < 0 || (recursiveSizeCheck != null && recursiveSizeDepth >= recursiveSizeCheck)) {
                     //Recursion is not making progress, heading to a stack overflow exception.
                     //Probably some cycles in there somewhere, so pull out a node and re-try
-                    GraphNode nodeToRemove = null;
+                    GraphNode<T> nodeToRemove = null;
                     int nodeToRemoveLinks = Integer.MAX_VALUE;
-                    for (GraphNode node : nextNodesToDisplay) {
-                        List links = node.getComingInNodes();
+                    for (GraphNode<T> node : nextNodesToDisplay) {
+                        List<GraphNode<T>> links = node.getComingInNodes();
                         if (links != null && links.size() < nodeToRemoveLinks) {
                             nodeToRemove = node;
                             nodeToRemoveLinks = links.size();
@@ -98,10 +99,49 @@ public class DependencyUtil {
                     nextNodesToDisplay.remove(nodeToRemove);
                 }
 
-                recursiveSizeCheck = nextNodesToDisplay.size();
+                if (recursiveSizeDepth >= 0) {
+                    recursiveSizeCheck = recursiveSizeDepth;
+                }
                 computeDependencies(nextNodesToDisplay);
             }
             // here the recursive call ends
+        }
+
+        private int recursiveSizeDepth(List<GraphNode<T>> nodes) {
+            if (nodes == null) {
+                return 0;
+            }
+            int sum = 0;
+            for (GraphNode<T> node : nodes) {
+                int depth = recursiveSizeDepth(node, 0);
+                if (depth < 0) {
+                    // safety counter was triggered. terminate
+                    return -1;
+                }
+                sum += depth;
+            }
+            return sum;
+        }
+
+        private int recursiveSizeDepth(GraphNode<T> node, int safetyCounter) {
+            if (safetyCounter > 1000) {
+                return -1;
+            }
+            if (isAlreadyEvaluated(node)) {
+                return 0;
+            } else if (node.getGoingOutNodes() == null || node.getGoingOutNodes().isEmpty()) { // leaf node
+                return 1;
+            }
+            int sum = 0;
+            safetyCounter++;
+            for (GraphNode<T> n : node.getGoingOutNodes()) {
+                int depth = recursiveSizeDepth(n, safetyCounter);
+                if (depth < 0) {
+                    return -1;
+                }
+                sum += depth;
+            }
+            return node.getGoingOutNodes().size() + sum;
         }
 
         private boolean isAlreadyEvaluated(GraphNode<T> node) {

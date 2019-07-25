@@ -411,7 +411,8 @@
 		<xsd:attribute name="maxValue" type="xsd:string" />
 		<xsd:attribute name="minValue" type="xsd:string" />
 		<xsd:attribute name="ordered" type="xsd:string" />
-    <xsd:attribute name="cacheSize" type="xsd:string" />
+        <xsd:attribute name="cacheSize" type="xsd:string" />
+        <xsd:attribute name="dataType" type="xsd:string" />
 		<xsd:attribute name="cycle" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation>
@@ -474,6 +475,9 @@
 
 	<xsd:element name="addUniqueConstraint">
 		<xsd:complexType>
+			<xsd:choice maxOccurs="unbounded">
+				<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:choice>
             <xsd:attributeGroup ref="tableNameAttribute" />
 			<xsd:attribute name="columnNames" type="xsd:string"
 				use="required" />

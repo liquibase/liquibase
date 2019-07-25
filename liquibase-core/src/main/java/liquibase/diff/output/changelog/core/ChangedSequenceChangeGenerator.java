@@ -3,6 +3,7 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.AlterSequenceChange;
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
@@ -38,39 +39,62 @@ public class ChangedSequenceChangeGenerator extends AbstractChangeGenerator impl
         Sequence sequence = (Sequence) changedObject;
 
         List<Change> changes = new ArrayList<Change>();
+        AlterSequenceChange accumulatedChange = createAlterSequenceChange(sequence, control);
 
         if (differences.isDifferent("incrementBy")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
             change.setIncrementBy(sequence.getIncrementBy());
+            accumulatedChange.setIncrementBy(sequence.getIncrementBy());
             changes.add(change);
         }
 
         if (differences.isDifferent("maxValue")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
             change.setMaxValue(sequence.getMaxValue());
+            accumulatedChange.setMaxValue(sequence.getMaxValue());
+            changes.add(change);
+        }
+
+        if (differences.isDifferent("minValue")) {
+            AlterSequenceChange change = createAlterSequenceChange(sequence, control);
+            change.setMinValue(sequence.getMinValue());
+            accumulatedChange.setMinValue(sequence.getMinValue());
+            changes.add(change);
             changes.add(change);
         }
 
         if (differences.isDifferent("ordered")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
             change.setOrdered(sequence.getOrdered());
+            accumulatedChange.setOrdered(sequence.getOrdered());
             changes.add(change);
         }
 
         if (differences.isDifferent("cacheSize")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
             change.setCacheSize(sequence.getCacheSize());
+            accumulatedChange.setCacheSize(sequence.getCacheSize());
             changes.add(change);
         }
 
         if (differences.isDifferent("willCycle")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
             change.setCycle(sequence.getWillCycle());
+            accumulatedChange.setCycle(sequence.getWillCycle());
+            changes.add(change);
+        }
+
+        if (differences.isDifferent("dataType")) {
+            AlterSequenceChange change = createAlterSequenceChange(sequence, control);
+            change.setDataType(sequence.getDataType());
+            accumulatedChange.setDataType(sequence.getDataType());
             changes.add(change);
         }
 
         if (changes.size() == 0) {
             return null;
+        } else if (comparisonDatabase instanceof PostgresDatabase) {
+            return new Change[] {accumulatedChange};
         } else {
             return changes.toArray(new Change[changes.size()]);
         }

@@ -7,19 +7,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 
 import liquibase.change.Change;
@@ -30,11 +18,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.Db2zDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -51,6 +35,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.StoredDatabaseLogic;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtils;
 
@@ -202,19 +187,7 @@ public class DiffToChangeLog {
         types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
         List<DatabaseObject> missingObjects = new ArrayList<DatabaseObject>();
         for (Class<? extends DatabaseObject> type : types) {
-            for (DatabaseObject object : diffResult.getMissingObjects(type, new DatabaseObjectComparator() {
-                @Override
-                public int compare(DatabaseObject o1, DatabaseObject o2) {
-                    if (o1 instanceof Column && o1.getAttribute("order", Integer.class) != null && o2.getAttribute("order", Integer.class) != null) {
-                        int i = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
-                        if (i != 0) {
-                            return i;
-                        }
-                    }
-                    return super.compare(o1, o2);
-
-                }
-            })) {
+            for (DatabaseObject object : diffResult.getMissingObjects(type, getDbObjectComparator())) {
                 if (object == null) {
                     continue;
                 }
@@ -253,12 +226,34 @@ public class DiffToChangeLog {
         return changeSets;
     }
 
+    private DatabaseObjectComparator getDbObjectComparator() {
+        return new DatabaseObjectComparator() {
+            @Override
+            public int compare(DatabaseObject o1, DatabaseObject o2) {
+                if (o1 instanceof Column && o1.getAttribute("order", Integer.class) != null && o2.getAttribute("order", Integer.class) != null) {
+                    int i = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
+                    if (i != 0) {
+                        return i;
+                    }
+                } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute("order", Integer.class) != null
+                        && o2.getAttribute("order", Integer.class) != null) {
+                    int order = o1.getAttribute("order", Long.class).compareTo(o2.getAttribute("order", Long.class));
+                    if (order != 0) {
+                        return order;
+                    }
+                }
+                return super.compare(o1, o2);
+
+            }
+        };
+    }
+
     private List<DatabaseObject> sortUnexpectedObjects(Collection<? extends DatabaseObject> unexpectedObjects, Database database) {
         return sortObjects("unexpected", (Collection<DatabaseObject>) unexpectedObjects, database);
     }
 
     private List<DatabaseObject> sortMissingObjects(Collection<DatabaseObject> missingObjects, Database database) {
-        return sortObjects("missing", (Collection<DatabaseObject>) missingObjects, database);
+        return sortObjects("missing", missingObjects, database);
     }
 
     private List<DatabaseObject> sortObjects(final String type, Collection<DatabaseObject> objects, Database database) {
@@ -289,7 +284,7 @@ public class DiffToChangeLog {
                     }
                 };
 
-                DependencyUtil.DependencyGraph graph = new DependencyUtil.DependencyGraph(nameListener);
+                DependencyUtil.DependencyGraph<String> graph = new DependencyUtil.DependencyGraph<String>(nameListener);
                 addDependencies(graph, schemas, objects, database);
                 graph.computeDependencies();
 
@@ -351,7 +346,7 @@ public class DiffToChangeLog {
         return new ArrayList<DatabaseObject>(objects);
     }
 
-    private List<Map<String, ?>> queryForDependencies(Executor executor, List<String> schemas)
+    private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
             throws DatabaseException {
         List<Map<String, ?>> rs = null;
         try {
@@ -387,7 +382,7 @@ public class DiffToChangeLog {
             }
             logger.warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
             tryDbaDependencies = false;
-            return queryForDependencies(executor, schemas);
+            return queryForDependenciesOracle(executor, schemas);
         }
         return rs;
     }
@@ -396,7 +391,8 @@ public class DiffToChangeLog {
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
     protected boolean supportsSortingObjects(Database database) {
-        return database instanceof AbstractDb2Database || database instanceof MSSQLDatabase || database instanceof OracleDatabase;
+        return database instanceof AbstractDb2Database || database instanceof MSSQLDatabase || database instanceof OracleDatabase
+                || database instanceof PostgresDatabase;
     }
 
     /**
@@ -436,7 +432,7 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof OracleDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = queryForDependencies(executor, schemas);
+            List<Map<String, ?>> rs = queryForDependenciesOracle(executor, schemas);
             for (Map<String, ?> row : rs) {
                 String tabName = null;
                 if (tryDbaDependencies) {
@@ -549,7 +545,93 @@ public class DiffToChangeLog {
                     }
                 }
             }
+        } else if (database instanceof PostgresDatabase) {
+            final String sql = queryForDependenciesPostgreSql(schemas);
+            final Executor executor = ExecutorService.getInstance().getExecutor(database);
+            final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
+
+            for (Map<String, ?> row : queryForListResult) {
+                String bName = StringUtils.trimToNull(StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToNull(row.get("REFERENCING_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
+                String tabName = StringUtils.trimToNull(StringUtils.trimToNull(row.get("REFERENCED_SCHEMA_NAME").toString()) +
+                        "." + StringUtils.trimToNull(row.get("REFERENCED_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
+
+                if (tabName != null && bName != null) {
+                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                }
+            }
         }
+    }
+
+    private String queryForDependenciesPostgreSql(List<String> schemas){
+        //SQL adapted from https://wiki.postgresql.org/wiki/Pg_depend_display
+        return "WITH RECURSIVE preference AS (\n" +
+                "    SELECT 10 AS max_depth  -- The deeper the recursion goes, the slower it performs.\n" +
+                "         , 16384 AS min_oid -- user objects only\n" +
+                "         , '^(londiste|pgq|pg_toast)'::text AS schema_exclusion\n" +
+                "         , '^pg_(conversion|language|ts_(dict|template))'::text AS class_exclusion\n" +
+                "         , '{\"SCHEMA\":\"00\", \"TABLE\":\"01\", \"CONSTRAINT\":\"02\", \"DEFAULT\":\"03\",\n" +
+                "      \"INDEX\":\"05\", \"SEQUENCE\":\"06\", \"TRIGGER\":\"07\", \"FUNCTION\":\"08\",\n" +
+                "      \"VIEW\":\"10\", \"MVIEW\":\"11\", \"FOREIGN\":\"12\"}'::json AS type_ranks),\n" +
+                "               dependency_pair AS (\n" +
+                "                   WITH relation_object AS ( SELECT oid, oid::regclass::text AS object_name  FROM pg_class )\n" +
+                "                   SELECT DISTINCT " +
+                "                         substring(pg_identify_object(classid, objid, 0)::text, E'(\\\\w+?)\\\\.') as referenced_schema_name, "+
+                "                         CASE classid\n" +
+                "                              WHEN 'pg_attrdef'::regclass THEN (SELECT attname FROM pg_attrdef d JOIN pg_attribute c ON (c.attrelid,c.attnum)=(d.adrelid,d.adnum) WHERE d.oid = objid)\n" +
+                "                              WHEN 'pg_cast'::regclass THEN (SELECT concat(castsource::regtype::text, ' AS ', casttarget::regtype::text,' WITH ', castfunc::regprocedure::text) FROM pg_cast WHERE oid = objid)\n" +
+                "                              WHEN 'pg_class'::regclass THEN rel.object_name\n" +
+                "                              WHEN 'pg_constraint'::regclass THEN (SELECT conname FROM pg_constraint WHERE oid = objid)\n" +
+                "                              WHEN 'pg_extension'::regclass THEN (SELECT extname FROM pg_extension WHERE oid = objid)\n" +
+                "                              WHEN 'pg_namespace'::regclass THEN (SELECT nspname FROM pg_namespace WHERE oid = objid)\n" +
+                "                              WHEN 'pg_opclass'::regclass THEN (SELECT opcname FROM pg_opclass WHERE oid = objid)\n" +
+                "                              WHEN 'pg_operator'::regclass THEN (SELECT oprname FROM pg_operator WHERE oid = objid)\n" +
+                "                              WHEN 'pg_opfamily'::regclass THEN (SELECT opfname FROM pg_opfamily WHERE oid = objid)\n" +
+                "                              WHEN 'pg_proc'::regclass THEN objid::regprocedure::text\n" +
+                "                              WHEN 'pg_rewrite'::regclass THEN (SELECT ev_class::regclass::text FROM pg_rewrite WHERE oid = objid)\n" +
+                "                              WHEN 'pg_trigger'::regclass THEN (SELECT tgname FROM pg_trigger WHERE oid = objid)\n" +
+                "                              WHEN 'pg_type'::regclass THEN objid::regtype::text\n" +
+                "                              ELSE objid::text\n" +
+                "                              END AS REFERENCED_NAME,\n" +
+                "                          substring(pg_identify_object(refclassid, refobjid, 0)::text, E'(\\\\w+?)\\\\.') as referencing_schema_name, "+
+                "                          CASE refclassid\n" +
+                "                              WHEN 'pg_namespace'::regclass THEN (SELECT nspname FROM pg_namespace WHERE oid = refobjid)\n" +
+                "                              WHEN 'pg_class'::regclass THEN rrel.object_name\n" +
+                "                              WHEN 'pg_opfamily'::regclass THEN (SELECT opfname FROM pg_opfamily WHERE oid = refobjid)\n" +
+                "                              WHEN 'pg_proc'::regclass THEN refobjid::regprocedure::text\n" +
+                "                              WHEN 'pg_type'::regclass THEN refobjid::regtype::text\n" +
+                "                              ELSE refobjid::text\n" +
+                "                              END AS REFERENCING_NAME\n" +
+                "                   FROM pg_depend dep\n" +
+                "                            LEFT JOIN relation_object rel ON rel.oid = dep.objid\n" +
+                "                            LEFT JOIN relation_object rrel ON rrel.oid = dep.refobjid, preference\n" +
+                "                   WHERE deptype = ANY('{n,a}')\n" +
+                "                     AND objid >= preference.min_oid\n" +
+                "                     AND (refobjid >= preference.min_oid OR refobjid = 2200) -- need public schema as root node\n" +
+                "                     AND classid::regclass::text !~ preference.class_exclusion\n" +
+                "                     AND refclassid::regclass::text !~ preference.class_exclusion\n" +
+                "                     AND COALESCE(SUBSTRING(objid::regclass::text, E'^(\\\\\\\\w+)\\\\\\\\.'),'') !~ preference.schema_exclusion\n" +
+                "                     AND COALESCE(SUBSTRING(refobjid::regclass::text, E'^(\\\\\\\\w+)\\\\\\\\.'),'') !~ preference.schema_exclusion\n" +
+                "                   GROUP BY classid, objid, refclassid, refobjid, deptype, rel.object_name, rrel.object_name\n" +
+                "               )\n" +
+                " select referenced_schema_name,\n" +
+                "    (CASE\n" +
+                "      WHEN position('.' in referenced_name) >0 THEN substring(referenced_name from position('.' in referenced_name)+1 for length(referenced_name))\n" +
+                "      ELSE referenced_name\n" +
+                "    END)  AS referenced_name, \n" +
+                "   referencing_schema_name,\n" +
+                "   (CASE\n" +
+                "      WHEN position('.' in referencing_name) >0 THEN substring(referencing_name from position('.' in referencing_name)+1 for length(referencing_name))\n" +
+                "      ELSE referencing_name\n" +
+                "    END)  AS referencing_name from dependency_pair where REFERENCED_NAME != REFERENCING_NAME " +
+                " AND (" +
+                StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                    @Override
+                    public String toString(String obj) {
+                        return " REFERENCED_NAME like '" + obj + ".%' OR REFERENCED_NAME NOT LIKE '%.%'";
+                    }
+                })+ ") " +
+                " AND referencing_schema_name is not null and referencing_name is not null";
     }
 
     protected List<Class<? extends DatabaseObject>> getOrderedOutputTypes(Class<? extends ChangeGenerator> generatorType) {

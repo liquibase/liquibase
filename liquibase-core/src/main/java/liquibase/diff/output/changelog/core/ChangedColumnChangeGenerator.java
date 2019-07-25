@@ -6,6 +6,7 @@ import liquibase.change.core.*;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.BooleanType;
@@ -235,7 +236,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
 
                 changes.add(change);
 
-            } else {
+            } else if (shouldTriggerAddDefaultChange(column, difference, comparisonDatabase)) {
                 AddDefaultValueChange change = new AddDefaultValueChange();
                 if (control.getIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
@@ -279,5 +280,19 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 changes.add(change);
             }
         }
+    }
+
+    /**
+     * For {@link PostgresDatabase} if column is of autoIncrement/SERIAL type we can ignore 'defaultValue' differences
+     * (because its execution of sequence.next() anyway)
+     */
+    private boolean shouldTriggerAddDefaultChange(Column column, Difference difference, Database comparisonDatabase) {
+        if (!(comparisonDatabase instanceof PostgresDatabase)) {
+            return true;
+        }
+        if (column.getAutoIncrementInformation() != null && difference.getReferenceValue() instanceof DatabaseFunction) {
+            return false;
+        }
+        return true;
     }
 }

@@ -32,6 +32,16 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
     private Set<String> reservedWords = new HashSet<String>();
+    private Logger log;
+
+    /**
+     * Represents Postgres DB types.
+     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
+     *       If we need we can extend this ENUM in future
+     */
+    public enum DbTypes {
+        EDB, COMMUNITY, RDS, AURORA
+    }
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -43,6 +53,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "bytea", "timestamptz", "text"));
         super.unquotedObjectsAreUppercased=false;
+        log = new LogFactory().getLog();
     }
 
     @Override
@@ -154,6 +165,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 //        }
 //    }
 
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName.replace("\"", "");
+    }
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
@@ -296,4 +311,39 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
+
+    @Override
+    public String getDatabaseFullVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            throw new DatabaseException("Connection not set. Can not get database version. " +
+                    "Postgres Database wasn't initialized in proper way !");
+        }
+        if (dbFullVersion != null){
+            return dbFullVersion;
+        }
+        final String sqlToGetVersion = "SELECT version()";
+        List<?> result = ExecutorService.getInstance().
+                getExecutor(this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
+        if (result != null && !result.isEmpty()){
+            return dbFullVersion = result.get(0).toString();
+        }
+
+        throw new DatabaseException("Connection set to Postgres type we don't support !");
+    }
+
+    /**
+     * Method to get Postgres DB type
+     * @return Db types
+     * */
+    public DbTypes getDbType() {
+        boolean enterpriseDb = false;
+        try {
+            enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
+        } catch (DatabaseException e) {
+            log.severe("Can't get full version of Postgres DB. Used EDB as default", e);
+            return  DbTypes.EDB;
+        }
+        return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
+    }
+
 }
