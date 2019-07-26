@@ -18,6 +18,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
+import liquibase.license.LicenseServiceFactory;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
@@ -25,6 +26,7 @@ import liquibase.logging.LogLevel;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLoggerConfiguration;
+import liquibase.license.LicenseService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -117,6 +119,7 @@ public class Main {
     protected String referenceSchemas;
     protected String schemas;
     protected String snapshotFormat;
+    protected String licenseKey;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -1093,6 +1096,15 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService("PRO");
+            if (licenseService != null) {
+                if (licenseService.licenseIsValid("PRO")) {
+                    LOG.info("Found valid LiquibasePro license");
+                }
+                else {
+                    LOG.info("No valid LiquibasePro license");
+                }
+            }
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                 liquibase.getDatabase(), liquibase.getResourceAccessor(),
                 changeExecListenerClass, changeExecListenerPropertiesFile);

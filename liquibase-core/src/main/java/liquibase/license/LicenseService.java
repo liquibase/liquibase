@@ -5,6 +5,16 @@ import java.util.List;
 public interface LicenseService {
 
   /**
+   *
+   * This method returns a priority value for an implementation
+   *
+   * @param   licenseType       String
+   * @return  int
+   *
+   */
+  int getPriority(String licenseType);
+
+  /**
    * This method checks whether there is any license with any valid subject installed.
    *  
    * @return true if any license with any valid subject is installed.
