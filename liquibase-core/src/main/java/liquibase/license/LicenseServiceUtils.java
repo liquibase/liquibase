@@ -1,12 +1,17 @@
 package liquibase.license;
 
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.changelog.ChangeSet;
 
+/**
+ *
+ * This class provides a static method for verifying licenses
+ *
+ */
 public class LicenseServiceUtils {
-    private static final Logger LOG = LogFactory.getLogger();
+    private static Logger LOG = LogService.getLog(LicenseServiceUtils.class);
 
     public static ValidationErrors checkForValidLicense(String licenseType, ChangeSet changeSet) {
       LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService(licenseType);
