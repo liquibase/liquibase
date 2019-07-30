@@ -17,6 +17,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.RawSqlStatement;
@@ -308,10 +310,24 @@ public class CommandLineUtils {
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
         ));
+
         if (StringUtils.isNotEmpty(myVersion) && StringUtils.isNotEmpty(buildTimeString)) {
             banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion,
                 buildTimeString));
         }
+
+        LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService("PRO");
+        if (licenseService != null) {
+            if (licenseService.licenseIsValid("PRO")) {
+                banner.append("Found valid LiquibasePro license");
+            }
+            else {
+                banner.append("No valid LiquibasePro license");
+            }
+        } else {
+            banner.append("No license service found");
+        }
+
         return banner.toString();
     }
 

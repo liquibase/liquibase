@@ -1096,15 +1096,6 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
-            LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService("PRO");
-            if (licenseService != null) {
-                if (licenseService.licenseIsValid("PRO")) {
-                    LOG.info("Found valid LiquibasePro license");
-                }
-                else {
-                    LOG.info("No valid LiquibasePro license");
-                }
-            }
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                 liquibase.getDatabase(), liquibase.getResourceAccessor(),
                 changeExecListenerClass, changeExecListenerPropertiesFile);
