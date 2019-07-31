@@ -9,7 +9,7 @@ import liquibase.servicelocator.ServiceLocator;
 
 public class LicenseServiceFactory {
   private static final Logger LOG = LogService.getLog(LicenseServiceFactory.class);
-  private Map<String, LicenseService> licenseServiceMap = new HashMap<String, LicenseService>();
+  private LicenseService licenseService;
   private static LicenseServiceFactory INSTANCE = new LicenseServiceFactory();
   private LicenseServiceFactory() {}
 
@@ -20,10 +20,9 @@ public class LicenseServiceFactory {
     return INSTANCE;
   }
 
-  public LicenseService getLicenseService(String licenseType) {
-    LicenseService licenseService = null;
-    if (licenseServiceMap.containsKey(licenseType)) {
-      licenseService = licenseServiceMap.get(licenseType);
+  public LicenseService getLicenseService() {
+    if (licenseService != null) {
+      return licenseService;
     }
     else {
       Class<? extends LicenseService>[] classes = ServiceLocator.getInstance().findClasses(LicenseService.class);
@@ -31,17 +30,17 @@ public class LicenseServiceFactory {
         try {
           int highPriority = -1;
           for (Class<? extends LicenseService> clazz : classes) {
-            LicenseService test = licenseService = clazz.newInstance();
-            int priority = test.getPriority(licenseType);
+            LicenseService test = clazz.newInstance();
+            int priority = test.getPriority();
+            LOG.debug(String.format("Found an implementation of LicenseService named '%s' with priority %d",test.getClass().getName(),priority));
             if (priority > highPriority && priority > 0) {
               highPriority = priority;
               licenseService = test;
             }
           }
-          licenseServiceMap.put(licenseType, licenseService);
         }
         catch (InstantiationException | IllegalAccessException e) {
-          LOG.severe("Unable to instance LicenseService", e);
+          LOG.severe("Unable to instantiate LicenseService", e);
         }
       }
     }

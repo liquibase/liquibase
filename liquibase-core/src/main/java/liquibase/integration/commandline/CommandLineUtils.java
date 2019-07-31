@@ -316,16 +316,16 @@ public class CommandLineUtils {
                 buildTimeString));
         }
 
-        LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService("PRO");
+        LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
         if (licenseService != null) {
-            if (licenseService.licenseIsValid("PRO")) {
-                banner.append("Found valid LiquibasePro license");
+            if (licenseService.licenseIsValid("Liquibase Pro")) {
+                banner.append("\nPro edition with valid license");
             }
             else {
-                banner.append("No valid LiquibasePro license");
+                banner.append("\nPro edition with invalid license");
             }
         } else {
-            banner.append("No license service found");
+            banner.append("\nCommunity edition");
         }
 
         return banner.toString();
