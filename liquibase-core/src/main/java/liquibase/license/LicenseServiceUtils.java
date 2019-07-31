@@ -14,13 +14,13 @@ public class LicenseServiceUtils {
     private static Logger LOG = LogService.getLog(LicenseServiceUtils.class);
 
     public static ValidationErrors checkForValidLicense(String licenseType, ChangeSet changeSet) {
-      LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService(licenseType);
+      LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
       if (licenseService == null) {
         return new ValidationErrors();
       }
 
       if (licenseService.licenseIsValid(licenseType)) {
-        String message = "Found valid LiquibasePro license";
+        String message = String.format("Found valid license with subject '%s'",licenseType);
         LOG.info(message);
         return new ValidationErrors();
       }
