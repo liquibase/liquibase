@@ -154,7 +154,15 @@ public class Sequence extends AbstractDatabaseObject {
 
     public Sequence setCacheSize(BigInteger cacheSize) {
         this.setAttribute("cacheSize", cacheSize);
+        return this;
+    }
 
+    public String getDataType() {
+        return getAttribute("dataType", String.class);
+    }
+
+    public Sequence setDataType(String dataType) {
+        this.setAttribute("dataType", dataType);
         return this;
     }
 }
