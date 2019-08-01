@@ -1,0 +1,3 @@
+name	username
+Bob ${surNameJohnson}	${userNameBJ}
+John ${unset}	jdoe

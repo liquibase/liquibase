@@ -2,6 +2,7 @@ package liquibase.change.core
 
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
+import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet
 import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
@@ -438,5 +439,118 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         then:
         assert md5sum1.equals(md5sum2)
+    }
+
+    @Unroll("multiple formats with parameter substitution enabled for #fileName")
+    def "multiple formats with parameter substitution enabled using InsertSetStatement"() throws Exception {
+        when:
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile(fileName);
+        if (separator != null) {
+            refactoring.setSeparator(separator);
+        }
+        if (quotChar != null) {
+            refactoring.setQuotchar(quotChar);
+        }
+
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
+        ChangeSet changeSet = new ChangeSet(null, null, true, false,
+                "liquibase/empty.changelog.xml",
+                null, null, false, null, null);
+        def parameters = new ChangeLogParameters()
+        parameters.set("enableCsvParameterSubstitution", "True") // Enable parameter substitution (testing with mixed case)
+        parameters.set("userNameBJ", "bjohnson")
+        parameters.set("userNameBJ", "bjohnson")
+        parameters.set("surNameJohnson", "Johnson, Sr") // Validate that comma in variable doesn't break parsing
+        changeSet.setChangeLogParameters(parameters)
+        refactoring.setChangeSet(changeSet)
+
+        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
+        then:
+        sqlStatement.length == 1
+        assert sqlStatement[0] instanceof InsertSetStatement
+
+        when:
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+
+        then:
+        sqlStatements.length == 2
+        assert sqlStatements[0] instanceof InsertStatement
+        assert sqlStatements[1] instanceof InsertStatement
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+        "Bob Johnson, Sr" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
+        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+        "John \${unset}" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
+        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
+
+        where:
+        fileName                                                          | separator | quotChar
+        "liquibase/change/core/sample.data1-parameterSubstitution.tsv"    | "\t"      | null
+        "liquibase/change/core/sample.quotchar-parameterSubstitution.tsv" | "\t"      | "'"
+        "liquibase/change/core/sample.data1-parameterSubstitution.csv"    | ","       | null
+        "liquibase/change/core/sample.data1-parameterSubstitution.csv"    | null      | null
+    }
+
+    @Unroll("multiple formats with parameter substitution disabled for #fileName")
+    def "multiple formats with parameter substitution disabled using InsertSetStatement"() throws Exception {
+        when:
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile(fileName);
+        if (separator != null) {
+            refactoring.setSeparator(separator);
+        }
+        if (quotChar != null) {
+            refactoring.setQuotchar(quotChar);
+        }
+
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
+        ChangeSet changeSet = new ChangeSet(null, null, true, false,
+                "liquibase/empty.changelog.xml",
+                null, null, false, null, null);
+        def parameters = new ChangeLogParameters()
+        // parameters.set("enableCsvParameterSubstitution", "false") // works with setting to false as well
+        parameters.set("userNameBJ", "bjohnson")
+        parameters.set("surNameJohnson", "Johnson, Sr") // Validate that comma in variable doesn't break parsing
+        changeSet.setChangeLogParameters(parameters)
+        refactoring.setChangeSet(changeSet)
+
+        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
+        then:
+        sqlStatement.length == 1
+        assert sqlStatement[0] instanceof InsertSetStatement
+
+        when:
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+
+        then:
+        sqlStatements.length == 2
+        assert sqlStatements[0] instanceof InsertStatement
+        assert sqlStatements[1] instanceof InsertStatement
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+        "Bob \${surNameJohnson}" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
+        "\${userNameBJ}" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+        "John \${unset}" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
+        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
+
+        where:
+        fileName                                                          | separator | quotChar
+        "liquibase/change/core/sample.data1-parameterSubstitution.tsv"    | "\t"      | null
+        "liquibase/change/core/sample.quotchar-parameterSubstitution.tsv" | "\t"      | "'"
+        "liquibase/change/core/sample.data1-parameterSubstitution.csv"    | ","       | null
+        "liquibase/change/core/sample.data1-parameterSubstitution.csv"    | null      | null
     }
 }
