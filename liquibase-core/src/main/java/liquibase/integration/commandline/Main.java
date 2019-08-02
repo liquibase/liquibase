@@ -19,6 +19,8 @@ import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.license.LicenseServiceFactory;
+import liquibase.license.Location;
+import liquibase.license.LocationType;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
@@ -119,7 +121,7 @@ public class Main {
     protected String referenceSchemas;
     protected String schemas;
     protected String snapshotFormat;
-    protected String licenseKey;
+    protected String liquibaseProLicenseKey;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -183,6 +185,29 @@ public class Main {
                 log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
                 throw e;
             }
+
+            LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+            List<String> results = new ArrayList<String>();
+            if (main.liquibaseProLicenseKey != null) {
+                if (licenseService != null) {
+                  Location licenseKeyLocation = new Location("liquibaseProLicenseKey ", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                  results = licenseService.installLicense(licenseKeyLocation);
+                }
+            }
+            StringBuilder licenseInfo = new StringBuilder();
+            if (licenseService != null) {
+              if (licenseService.licenseIsValid("Liquibase Pro")) {
+                licenseInfo.append("Pro edition with valid license");
+              }
+              else {
+                licenseInfo.append("Pro edition with invalid license");
+                licenseInfo.append(results);
+              }
+            } else {
+              licenseInfo.append("Community edition");
+            }
+            log.info(LogType.USER_MESSAGE,licenseInfo.toString());
+
 
             List<String> setupMessages = main.checkSetup();
             if (!setupMessages.isEmpty()) {
