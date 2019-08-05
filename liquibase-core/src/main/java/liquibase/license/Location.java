@@ -22,7 +22,7 @@ public class Location {
   }
 
   /**
-   * Only use this one for things where the name and the value are the same
+   * Only use this constructor for things where the name and the value are the same
    * 
    * @param value
    * @param type
@@ -42,6 +42,9 @@ public class Location {
 
     case SYSTEM_PROPERTY:
       return String.format("System property '%s' (%s)", value, name);
+
+      case BASE64_STRING:
+        return String.format("Base64 string '%s' (%s)", value, name);
     }
     return String.format("%s %s %s", type, name, value);
   }
@@ -55,6 +58,9 @@ public class Location {
       return String.format("(%s)", name);
 
     case SYSTEM_PROPERTY:
+      return String.format("(%s)", name);
+
+    case BASE64_STRING:
       return String.format("(%s)", name);
     }
     return String.format("%s %s %s", type, name, value);
@@ -71,6 +77,9 @@ public class Location {
       break;
     case SYSTEM_PROPERTY:
       path = System.getProperty(this.value);
+      break;
+    case BASE64_STRING:
+      path = this.value;
       break;
     default:
       throw new RuntimeException("Unknown location type");

@@ -6,7 +6,9 @@ public interface LicenseService {
 
   /**
    *
-   * This method returns a priority value for an implementation
+   * This method returns a priority value for an implementation. Liquibase uses this to
+   * determine which LicenseService is currently in use. There can only be a single
+   * LicenseService used at a time, and the highest priority implementation wins.
    *
    * @return  int
    *
@@ -76,7 +78,7 @@ public interface LicenseService {
   int daysTilExpiration();
 
   /**
-   * Method to allow the license key to persisted in memory
+   * Method to allow the license key to persisted in memory.
    *
    * @param  key
    *
