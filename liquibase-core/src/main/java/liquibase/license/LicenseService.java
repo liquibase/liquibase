@@ -36,13 +36,6 @@ public interface LicenseService {
   String getLicenseInfo();
 
   /**
-   * Return the number of installed licenses. Note that some of the installed licenses 
-   * may not be valid, so this is mainly for informational messages.
-   * 
-   */
-  int getNumLicensesInstalled();
-  
-  /**
    *
    * Given a list of potential locations that a license file could be located,
    * check each one and install any .lic files that are found there, iterating until
@@ -62,14 +55,6 @@ public interface LicenseService {
   boolean licenseIsAboutToExpire();
 
   /**
-   * Remove any existing licenses with any valid subjects.
-   * 
-   * @return true if license was removed or if no license exists. 
-   * false if there was an error.
-   */
-  boolean uninstallLicense();
-
-  /**
    * It is possible that users might have multiple licenses installed. In that case,
    * this will return the lowest number.
    * 
@@ -78,11 +63,4 @@ public interface LicenseService {
    */
   int daysTilExpiration();
 
-  /**
-   * Method to allow the license key to persisted in memory.
-   *
-   * @param  key
-   *
-   */
-   void setKey(String key);
 }

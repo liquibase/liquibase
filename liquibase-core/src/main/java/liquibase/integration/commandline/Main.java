@@ -18,9 +18,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
-import liquibase.license.LicenseServiceFactory;
-import liquibase.license.Location;
-import liquibase.license.LocationType;
+import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
@@ -28,7 +26,6 @@ import liquibase.logging.LogLevel;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLoggerConfiguration;
-import liquibase.license.LicenseService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -187,27 +184,15 @@ public class Main {
             }
 
             LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
-            List<String> results = new ArrayList<String>();
-            if (main.liquibaseProLicenseKey != null) {
-                if (licenseService != null) {
-                  Location licenseKeyLocation = new Location("liquibaseProLicenseKey ", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
-                  results = licenseService.installLicense(licenseKeyLocation);
-                }
-            }
-            StringBuilder licenseInfo = new StringBuilder();
             if (licenseService != null) {
-              if (licenseService.licenseIsValid("Liquibase Pro")) {
-                licenseInfo.append("Pro edition with valid license");
-              }
-              else {
-                licenseInfo.append("Pro edition with invalid license");
-                licenseInfo.append(results);
-              }
+                if(main.liquibaseProLicenseKey != null) {
+                    Location licenseKeyLocation = new Location("liquibaseProLicenseKey ", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                    licenseService.installLicense(licenseKeyLocation);
+                }
+                log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
             } else {
-              licenseInfo.append("Community edition");
+                log.info(LogType.USER_MESSAGE, String.format("Liquibase Community %s by Datical", LiquibaseUtil.getBuildVersion()));
             }
-            log.info(LogType.USER_MESSAGE,licenseInfo.toString());
-
 
             List<String> setupMessages = main.checkSetup();
             if (!setupMessages.isEmpty()) {
