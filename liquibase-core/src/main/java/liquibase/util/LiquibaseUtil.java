@@ -14,6 +14,16 @@ import java.util.jar.Manifest;
 public class LiquibaseUtil {
 
     public static String getBuildVersion() {
+        return getBuildInfo("build.version","Bundle-Version");
+    }
+
+    public static String getBuildTime() {
+        return getBuildInfo("build.timestamp", "Build-Time");
+    }
+
+    // will extract the information from either buildinfo.properties, which should be a properties file in
+    // the jar file, or from the jar file's MANIFEST.MF, which should also have similar information.
+    private static String getBuildInfo(String propertyId, String manifestId) {
         String buildVersion = "UNKNOWN";
         Properties buildInfo = new Properties();
         ClassLoader classLoader = LiquibaseUtil.class.getClassLoader();
@@ -26,7 +36,7 @@ public class LiquibaseUtil {
                 connection.setUseCaches(false);
                 in = connection.getInputStream();
                 buildInfo.load(in);
-                String o = (String) buildInfo.get("build.version");
+                String o = (String) buildInfo.get(propertyId);
 
                 if (o != null) {
                     buildVersion = o;
@@ -45,7 +55,7 @@ public class LiquibaseUtil {
                         throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file.");
                     }
                     Attributes attr = manifest.getMainAttributes();
-                    buildVersion = attr.getValue("Bundle-Version");
+                    buildVersion = attr.getValue(manifestId);
                 }
             }
 
@@ -62,7 +72,6 @@ public class LiquibaseUtil {
                 }
             }
         }
-
         return buildVersion;
     }
 }
