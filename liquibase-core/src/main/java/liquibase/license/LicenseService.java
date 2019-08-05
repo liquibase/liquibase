@@ -43,6 +43,7 @@ public interface LicenseService {
   int getNumLicensesInstalled();
   
   /**
+   *
    * Given a list of potential locations that a license file could be located,
    * check each one and install any .lic files that are found there, iterating until
    * a valid license is installed successfully or all the locations have been tried.
