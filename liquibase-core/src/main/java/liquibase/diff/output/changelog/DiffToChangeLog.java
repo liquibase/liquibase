@@ -15,6 +15,7 @@ import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
@@ -174,6 +175,15 @@ public class DiffToChangeLog {
         List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(ChangedObjectChangeGenerator.class);
         List<ChangeSet> updateChangeSets = new ArrayList<ChangeSet>();
 
+        // Keep a reference to DiffResult in the comparision database so that it can be retrieved later
+        // This is to avoid changing the MissingObjectChangeGenerator API and still be able to pass the
+        // initial DiffResult Object which can be used to check for the objects available in the database
+        // without doing any expensive db calls. Example usage is in MissingUniqueConstraintChangeGenerator#alreadyExists()
+        Database comparisionDatabase = diffResult.getComparisonSnapshot().getDatabase();
+        if (comparisionDatabase instanceof AbstractJdbcDatabase) {
+            ((AbstractJdbcDatabase) comparisionDatabase).set("diffResult", diffResult);
+        }
+
         for (Class<? extends DatabaseObject> type : types) {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
@@ -218,6 +228,11 @@ public class DiffToChangeLog {
                 }
             }
         }
+        // remove the diffResult from the database object
+        if (comparisionDatabase instanceof AbstractJdbcDatabase) {
+            ((AbstractJdbcDatabase) comparisionDatabase).set("diffResult", null);
+        }
+
 
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         changeSets.addAll(createChangeSets);
