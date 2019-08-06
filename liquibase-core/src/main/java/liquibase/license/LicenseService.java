@@ -44,10 +44,10 @@ public interface LicenseService {
    * 
    * @param locations - A variable number of Location objects, each of which has a name, 
    * a type, and a value.
-   * @return A list of strings that detail the locations checked and the result of 
-   * checking each location. 
+   * @return A data structure that contains an overall exit code plus a list of strings
+   * that detail the locations checked and the result of checking each location.
    */
-  List<String> installLicense(Location... locations);
+  LicenseInstallResult installLicense(Location... locations);
 
   /**
    * @return true if any installed license is valid but will expire within the next 30 days.

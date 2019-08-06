@@ -186,8 +186,12 @@ public class Main {
             LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
             if (licenseService != null) {
                 if(main.liquibaseProLicenseKey != null) {
-                    Location licenseKeyLocation = new Location("liquibaseProLicenseKey ", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
-                    licenseService.installLicense(licenseKeyLocation);
+                    Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                    LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                    if (result.code != 0) {
+                        String allMessages = String.join("\n", result.messages);
+                        log.warning(LogType.USER_MESSAGE, allMessages);
+                    }
                 }
                 log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
             } else {
