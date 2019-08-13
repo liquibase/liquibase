@@ -44,7 +44,11 @@ public class Location {
       return String.format("System property '%s' (%s)", value, name);
 
       case BASE64_STRING:
-        return String.format("Base64 string '%s' (%s)", value, name);
+        int substring_length = 10;
+        if (value.length() < 10) {
+          substring_length = value.length();
+        }
+        return String.format("Base64 string starting with '%s' (%s)", value.substring(0,substring_length), name);
     }
     return String.format("%s %s %s", type, name, value);
   }
