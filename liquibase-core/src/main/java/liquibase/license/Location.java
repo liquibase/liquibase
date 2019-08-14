@@ -2,9 +2,11 @@ package liquibase.license;
 
 /**
  * A Location is an object that has a name, LocationType, value, and path. There are currently
- * three LocationTypes in use. The FILE_PATH type is the most direct. The ENVIRONMENT_VARIABLE
- * and SYSTEM_PROPERTY types are things that can refer to a path. All eventually lead to a path
- * on the filesystem that can be used to get a file.
+ * four LocationTypes in use. The FILE_PATH type is the most direct. The ENVIRONMENT_VARIABLE
+ * and SYSTEM_PROPERTY types are things that can refer to a path. These three types eventually
+ * lead to a path on the filesystem that can be used to get a file.
+ * The fourth type is BASE64_STRING. For this type, the value is a BASE64 encoded string of a
+ * license file.
  *  
  * @author Steve Donie
  *
