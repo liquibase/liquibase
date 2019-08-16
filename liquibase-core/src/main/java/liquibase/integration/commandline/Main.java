@@ -18,6 +18,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
+import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
@@ -117,6 +118,7 @@ public class Main {
     protected String referenceSchemas;
     protected String schemas;
     protected String snapshotFormat;
+    protected String liquibaseProLicenseKey;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -179,6 +181,21 @@ public class Main {
             } catch (CommandLineParsingException e) {
                 log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
                 throw e;
+            }
+
+            LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+            if (licenseService != null) {
+                if(main.liquibaseProLicenseKey != null) {
+                    Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                    LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                    if (result.code != 0) {
+                        String allMessages = String.join("\n", result.messages);
+                        log.warning(LogType.USER_MESSAGE, allMessages);
+                    }
+                }
+                log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
+            } else {
+                log.info(LogType.USER_MESSAGE, String.format("Liquibase Community %s by Datical", LiquibaseUtil.getBuildVersion()));
             }
 
             List<String> setupMessages = main.checkSetup();
