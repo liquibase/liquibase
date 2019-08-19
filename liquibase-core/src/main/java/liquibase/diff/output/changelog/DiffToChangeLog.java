@@ -377,7 +377,7 @@ public class DiffToChangeLog {
         return new ArrayList<>(objects);
     }
 
-    private List<Map<String, ?>> queryForDependencies(Executor executor, List<String> schemas)
+    private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
             throws DatabaseException {
         List<Map<String, ?>> rs = null;
         try {
@@ -413,10 +413,20 @@ public class DiffToChangeLog {
             }
             LogService.getLog(getClass()).warning("Unable to query DBA_DEPENDENCIES table. Switching to USER_DEPENDENCIES");
             tryDbaDependencies = false;
-            return queryForDependencies(executor, schemas);
+            return queryForDependenciesOracle(executor, schemas);
         }
         return rs;
     }
+
+    private List<Map<String, ?>> queryForForeignKeysOracle(Executor executor, List<String> schemas)
+                throws DatabaseException {
+        return executor.queryForList(new RawSqlStatement(
+           "SELECT ref_constr.table_name, unique_constr.table_name AS r_table_name FROM all_constraints ref_constr "
+           + "JOIN all_constraints unique_constr ON unique_constr.owner=ref_constr.r_owner AND unique_constr.constraint_type IN ('P','U') "
+           + "AND ref_constr.r_constraint_name=unique_constr.constraint_name AND ref_constr.owner=unique_constr.owner "
+           + "WHERE ref_constr.constraint_type='R' AND ref_constr.r_owner IN ('" + String.join("','", schemas) + "')"));
+    }
+
 
     /**
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
@@ -463,7 +473,7 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof OracleDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = queryForDependencies(executor, schemas);
+            List<Map<String, ?>> rs = queryForDependenciesOracle(executor, schemas);
             for (Map<String, ?> row : rs) {
                 String tabName = null;
                 if (tryDbaDependencies) {
@@ -480,6 +490,14 @@ public class DiffToChangeLog {
                                 StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
 
                 graph.add(bName, tabName);
+            }
+            List<Map<String, ?>> foreign_keys = queryForForeignKeysOracle(executor, schemas);
+            for (Map<String, ?> fk_row : foreign_keys) {
+                String fkSourceTable = StringUtils.trimToNull((String) fk_row.get("OWNER")) + "." +
+                    StringUtils.trimToNull((String) fk_row.get("TABLE_NAME"));
+                String fkDestTable = StringUtils.trimToNull((String) fk_row.get("R_OWNER")) + "." +
+                    StringUtils.trimToNull((String) fk_row.get("R_TABLE_NAME"));
+                graph.add(fkSourceTable, fkDestTable);
             }
         } else if (database instanceof MSSQLDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
