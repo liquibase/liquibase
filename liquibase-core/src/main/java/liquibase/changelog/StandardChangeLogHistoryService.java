@@ -291,14 +291,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         serviceInitialized = true;
     }
 
-    protected String getLabelsSize() {
-        return "255";
-    }
-
-    protected String getContextsSize() {
-        return "255";
-    }
-
     @Override
     public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression
         labels) throws DatabaseException {

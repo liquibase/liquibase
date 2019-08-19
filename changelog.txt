@@ -1,6 +1,10 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.0 (2019.8.16)
+
+- [CORE-3462] - Add new procedural database code change types for Liquibase Pro
+
 Changes in version 3.7.0 (2019.7.16)
 
 - [CORE-3303] - Allow disabling shouldRun configuration via CDI integration
