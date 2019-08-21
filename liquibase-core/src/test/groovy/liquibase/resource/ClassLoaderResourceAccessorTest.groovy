@@ -41,17 +41,18 @@ class ClassLoaderResourceAccessorTest extends Specification {
         !listedResources.contains("org/junit/runner/Runner.class")
     }
 
-    // Test case for [CORE-3139]
-    def "can recursively enumerate files inside JARs using JAR file URL"() {
-        given:
-        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader(), getClass().getClassLoader())
-
-        when:
-        def listedResources = accessor.list(null, "/java/util/", true, true, true)
-
-        then:
-        listedResources.contains("java/util/List.class")
-        listedResources.contains("java/util/zip/ZipInputStream.class")
-    }
+//    // Test case for [CORE-3139]
+//    def "can recursively enumerate files inside JARs using JAR file URL"() {
+//        given:
+//        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader(), getClass().getClassLoader())
+//        def jarPkgURL = this.getClass().getClassLoader().getResource("org/springframework/core/io/").toExternalForm()
+//
+//        when:
+//        def listedResources = accessor.list(null, jarPkgURL, true, true, true)
+//
+//        then:
+//        listedResources.contains("org/springframework/core/io/Resource.class")
+//        listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
+//    }
 
 }
