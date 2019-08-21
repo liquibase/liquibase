@@ -45,13 +45,12 @@ class ClassLoaderResourceAccessorTest extends Specification {
     def "can recursively enumerate files inside JARs using JAR file URL"() {
         given:
         def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().contextClassLoader)
-        def jarPkgURL = this.getClass().getClassLoader().getResource("org/springframework/core/io/").toExternalForm()
 
         when:
-        def listedResources = accessor.list(null, jarPkgURL, true, false, true)
+        def listedResources = accessor.list(null, "/java/util/", true, false, true)
 
         then:
-        listedResources.contains("org/springframework/core/io/Resource.class")
+        listedResources.contains("java/util/String.class")
         listedResources.contains("org/springframework/core/io/support/ResourcePatternUtils.class")
     }
 

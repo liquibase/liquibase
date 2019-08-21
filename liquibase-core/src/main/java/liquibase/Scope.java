@@ -335,8 +335,4 @@ public class Scope {
     public interface ScopedRunnerWithReturn<T> {
         T run() throws Exception;
     }
-
-    public Logger getLog(Class clazz) {
-        return LogService.getLog(clazz);
-    }
 }

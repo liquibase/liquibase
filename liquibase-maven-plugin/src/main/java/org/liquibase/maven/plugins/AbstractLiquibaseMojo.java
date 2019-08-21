@@ -20,6 +20,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
+import javax.xml.bind.annotation.XmlSchema;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -27,8 +28,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.*;
-
-import javax.xml.bind.annotation.XmlSchema;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
@@ -305,7 +304,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 configureFieldsAndValues();
 
-    //        LogService.getInstance().setDefaultLoggingLevel(logging);
+                //        LogService.getInstance().setDefaultLoggingLevel(logging);
                 getLog().info(CommandLineUtils.getBanner());
 
                 // Displays the settings for the Mojo depending of verbosity mode.
@@ -338,9 +337,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                     configureChangeLogProperties();
 
-            configureChangeLogProperties(fileOpener);
-
-            getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+                    getLog().debug("expressionVars = " + String.valueOf(expressionVars));
 
                     if (expressionVars != null) {
                         for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
@@ -371,7 +368,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                             }
                         }
                     }
-            setupBindInfoPackage();
+                    setupBindInfoPackage();
                     performLiquibaseTask(liquibase);
                 } catch (LiquibaseException e) {
                     cleanup(database);
@@ -579,8 +576,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         try {
             props.load(propertiesInputStream);
             return props;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new MojoExecutionException("Could not load the properties Liquibase file", e);
         }
     }

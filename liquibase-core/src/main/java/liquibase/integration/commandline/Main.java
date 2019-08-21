@@ -178,7 +178,7 @@ public class Main {
                         throw e;
                     }
 
-                    LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+                    LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
             if (licenseService != null) {
                 if(main.liquibaseProLicenseKey != null) {
                     Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);

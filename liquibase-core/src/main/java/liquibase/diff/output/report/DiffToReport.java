@@ -19,7 +19,7 @@ public class DiffToReport {
 
     protected DiffResult diffResult;
     private PrintStream out;
-    private StringUtils.StringUtilsFormatter formatter;
+    private StringUtil.StringUtilFormatter formatter;
 
     public DiffToReport(DiffResult diffResult, PrintStream out) {
         this.diffResult = diffResult;
@@ -241,9 +241,9 @@ public class DiffToReport {
 
     }
 
-    public StringUtils.StringUtilsFormatter createFormatter() {
+    public StringUtil.StringUtilFormatter createFormatter() {
         return
-            new StringUtils.StringUtilsFormatter<CompareControl.SchemaComparison>() {
+            new StringUtil.StringUtilFormatter<CompareControl.SchemaComparison>() {
                 @Override
                 public String toString(CompareControl.SchemaComparison obj) {
                     String referenceName;
@@ -281,11 +281,11 @@ public class DiffToReport {
                     }
 
                     if (referenceName == null) {
-                        referenceName = StringUtils.trimToEmpty(referenceDatabase.getDefaultSchemaName());
+                        referenceName = StringUtil.trimToEmpty(referenceDatabase.getDefaultSchemaName());
                     }
 
                     if (comparisonName == null) {
-                        comparisonName = StringUtils.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
+                        comparisonName = StringUtil.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
                     }
 
                     if (referenceName.equalsIgnoreCase(comparisonName)) {

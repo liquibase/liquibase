@@ -25,7 +25,7 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -459,7 +459,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
           protected List<CachedRow> mssqlQuery(boolean bulk) throws DatabaseException, SQLException {
             CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-              String databaseName = StringUtils.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+              String databaseName = StringUtil.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
               String dbIdParam;
               String databasePrefix;
               if (databaseName == null) {
@@ -1001,7 +1001,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryMssql(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class);
 
-                    String databaseName = StringUtils.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+                    String databaseName = StringUtil.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
                     String dbIdParam;
                     String databasePrefix;
                     if (databaseName == null) {

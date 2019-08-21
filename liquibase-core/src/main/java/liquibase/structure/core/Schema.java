@@ -73,10 +73,7 @@ public class Schema extends AbstractDatabaseObject {
         }
         if (getName() != null ? !getName().equalsIgnoreCase(schema.getName()) : schema.getName() != null) return false;
 
-        // catalog or name different?
-        return (
-            (Objects.equals(getCatalog(), otherSchema.getCatalog())) &&
-                (StringUtil.equalsIgnoreCaseAndEmpty(getName(), otherSchema.getName())));
+        return true;
     }
 
     @Override

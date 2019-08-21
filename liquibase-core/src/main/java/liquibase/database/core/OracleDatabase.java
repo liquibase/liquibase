@@ -88,22 +88,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return PRIORITY_DEFAULT;
     }
 
-    private final void tryProxySessionn(final String url, final Connection con) {
-		Matcher m = PROXY_USER.matcher(url);
-		if(m.matches()) {
-	    	Properties props = new Properties();
-			props.put("PROXY_USER_NAME", m.group(1));
-			try {
-				Method method = con.getClass().getMethod("openProxySession", int.class, Properties.class);
-				method.setAccessible(true);
-				method.invoke(con, 1, props);
-			} catch(Exception e) {
-				Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
-			}
-		}
-    }
-
-    private final void tryProxySessionn(final String url, final Connection con) {
+    private final void tryProxySession(final String url, final Connection con) {
         Matcher m = PROXY_USER.matcher(url);
         if (m.matches()) {
             Properties props = new Properties();
@@ -142,7 +127,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             }
 
             if (sqlConn != null) {
-                tryProxySessionn(conn.getURL(), sqlConn);
+                tryProxySession(conn.getURL(), sqlConn);
 
                 try {
                     //noinspection HardCodedStringLiteral
@@ -243,7 +228,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
-        if (StringUtils.isEmpty(generationType)) {
+        if (StringUtil.isEmpty(generationType)) {
             return "";
         }
 

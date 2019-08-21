@@ -60,32 +60,5 @@ public class LiquibaseUpdateMojoExecutionTest extends AbstractLiquibaseMojoTest 
                 .map(ChangeLogParameters.ChangeLogParameter::getValue)
                 .map(Object::toString)
                 .findFirst();
-    }public void testChangeLogParametersFromPropertiesFile() throws Exception {
-        File pom = getTestFile("src/test/resources/update/parameters/plugin_config.xml");
-        if (!pom.exists()) {
-            return;
-        }
-        System.setProperty("overridden", "isoverridden");
-        LiquibaseUpdate update = (LiquibaseUpdate) lookupMojo("update", pom);
-        update.execute();
-        List<ChangeLogParameters.ChangeLogParameter> params = update.getLiquibase().getChangeLogParameters().getChangeLogParameters();
-        System.clearProperty("overridden");
-
-        Optional<String> overridden = getChangeLogParameter(params, "overridden");
-        Optional<String> notoverridden = getChangeLogParameter(params, "notoverridden");
-
-        assertTrue("overridden should be present", overridden.isPresent());
-        assertEquals("wrong value for overriden", "isoverridden", overridden.get());
-        assertTrue("notoverridden should be present", notoverridden.isPresent());
-        assertEquals("wrong value for notoverridden", "notoverridden", notoverridden.get());
-
-    }
-
-    private static Optional<String> getChangeLogParameter(List<ChangeLogParameters.ChangeLogParameter> params, String paramName){
-        return params.stream()
-                .filter(p -> paramName.equalsIgnoreCase(p.getKey()))
-                .map(ChangeLogParameters.ChangeLogParameter::getValue)
-                .map(Object::toString)
-                .findFirst();
     }
 }

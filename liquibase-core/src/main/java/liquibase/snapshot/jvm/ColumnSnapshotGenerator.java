@@ -131,7 +131,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     private static boolean hasValidObjectName(String objectName) {
-        if (StringUtils.isEmpty(objectName)) {
+        if (StringUtil.isEmpty(objectName)) {
             return false;
         }
         return !objectName.startsWith("SYS_") && !objectName.startsWith("BIN$");

@@ -154,7 +154,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             for (ColumnConstraint constraint : statement.getConstraints()) {
                 if (constraint instanceof NotNullConstraint) {
                     NotNullConstraint notNullConstraint = (NotNullConstraint) constraint;
-                    if (StringUtils.isNotEmpty(notNullConstraint.getConstraintName())) {
+                    if (StringUtil.isNotEmpty(notNullConstraint.getConstraintName())) {
                         alterTable += " CONSTRAINT " + database.escapeConstraintName(notNullConstraint.getConstraintName());
                         break;
                     }

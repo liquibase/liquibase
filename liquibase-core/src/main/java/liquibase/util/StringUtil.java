@@ -144,9 +144,14 @@ public class StringUtil {
                 null) || previousPiece.endsWith("\n")));
         } else {
             if (endDelimiter.length() == 1) {
-                return ((previousPiece == null) || previousPiece.endsWith("\n")) && piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
+                if ("/".equals(endDelimiter)) {
+                    if (previousPiece != null && !previousPiece.endsWith("\n")) {
+                        return false;
+                    }
+                }
+                return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
             } else {
-                return ((previousPiece == null) || previousPiece.endsWith("\n")) && (piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[\\s\n\r]*"+endDelimiter.toLowerCase()));
+                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[\\s\n\r]*"+endDelimiter.toLowerCase());
             }
         }
     }

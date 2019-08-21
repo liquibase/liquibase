@@ -22,7 +22,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.structure.core.UniqueConstraint;
 
 import java.math.BigInteger;
@@ -229,7 +229,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 if ((incrementBy != null) && !incrementBy.equals(BigInteger.ONE)) {
                     columnConfig.setIncrementBy(incrementBy);
                 }
-                if (StringUtils.isNotEmpty(generationType)) {
+                if (StringUtil.isNotEmpty(generationType)) {
                     columnConfig.setGenerationType(generationType);
                     if (defaultOnNull != null) {
                         columnConfig.setDefaultOnNull(defaultOnNull);

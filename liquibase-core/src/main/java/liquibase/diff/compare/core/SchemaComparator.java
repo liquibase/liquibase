@@ -119,10 +119,7 @@ public class SchemaComparator extends CommonCatalogSchemaComparator {
             }
         }
 
-        schemaName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
-        schemaName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
-
-        return StringUtil.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtil.trimToEmpty(schemaName2));
+        return finalSchema1;
     }
 
     @Override
