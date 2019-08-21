@@ -19,7 +19,8 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     private Map<String, String> columnRemarks = new HashMap<>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
-    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<>();
+    private Map<String,NotNullConstraint> notNullConstraints = new HashMap<String, NotNullConstraint>();
+    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
 
     /* NOT NULL constraints in RDBMSs are curious beasts. In some RDBMS, they do not exist as constraints at all, i.e.
        they are merely a property of the column. In others, like Oracle DB, they can exist in both forms, and to be
@@ -87,20 +88,35 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
     }
 
     public Map<String, NotNullConstraint> getNotNullColumns() {
-        return notNullColumns;
+        return notNullConstraints;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
-//        String pkName = "PK_" + getTableName().toUpperCase();
-////        if (pkName.length() > 18) {
-////            pkName = pkName.substring(0, 17);
-////        }
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName,
+        String tablespace, ColumnConstraint... constraints) {
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
         pkConstraint.setTablespace(tablespace);
 
         List<ColumnConstraint> allConstraints = new ArrayList<>();
         allConstraints.addAll(Arrays.asList(constraints));
+        allConstraints.add(new NotNullConstraint(columnName));
+        allConstraints.add(pkConstraint);
+
+        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+
+        return this;
+    }
+
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue,
+        Boolean validate,String keyName, String tablespace, ColumnConstraint... constraints) {
+        PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
+        if (validate!=null) {
+            pkConstraint.setValidatePrimaryKey(validate);
+        }
+        pkConstraint.addColumns(columnName);
+        pkConstraint.setTablespace(tablespace);
+
+        List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 

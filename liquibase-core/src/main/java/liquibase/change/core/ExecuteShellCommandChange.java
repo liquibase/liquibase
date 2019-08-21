@@ -23,7 +23,6 @@ import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.*;
@@ -53,6 +52,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private static final Long SECS_IN_MILLIS = 1000L;
     private static final Long MIN_IN_MILLIS = SECS_IN_MILLIS * 60;
     private static final Long HOUR_IN_MILLIS = MIN_IN_MILLIS * 60;
+
+    protected Integer maxStreamGobblerOutput = null;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -231,6 +232,14 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     /**
+     * Max bytes to copy from output to {@link #processResult(int, String, String, Database)}. If null, process all output.
+     * @return
+     */
+    protected Integer getMaxStreamGobblerOutput() {
+        return maxStreamGobblerOutput;
+    }
+
+    /**
      * Waits for the process to complete and kills it if the process is not finished after the specified <code>timeoutInMillis</code>.
      * <p>
      * Creates a scheduled task to destroy the process in given timeout milliseconds.
@@ -316,7 +325,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
      */
     protected void processResult(int returnCode, String errorStreamOut, String infoStreamOut, Database database) {
         if (returnCode != 0) {
-            throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
+            throw new RuntimeException(getCommandString() + " returned a code of " + returnCode);
         }
     }
 
@@ -368,6 +377,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         private static final int THREAD_SLEEP_MILLIS = 100;
         private final OutputStream outputStream;
         private InputStream processStream;
+        boolean loggedTruncated = false;
+        long copiedSize = 0;
 
         private StreamGobbler(InputStream processStream, ByteArrayOutputStream outputStream) {
             this.processStream = processStream;
@@ -380,7 +391,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream);
                 while (processStream != null) {
                     if (bufferedInputStream.available() > 0) {
-                        StreamUtil.copy(bufferedInputStream, outputStream);
+                        copy(bufferedInputStream, outputStream);
                     }
                     try {
                         Thread.sleep(THREAD_SLEEP_MILLIS);
@@ -399,12 +410,31 @@ public class ExecuteShellCommandChange extends AbstractChange {
             this.processStream = null;
 
             try {
-                StreamUtil.copy(procStream, outputStream);
+                copy(procStream, outputStream);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         }
+
+        public void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+            Integer maxToCopy = getMaxStreamGobblerOutput();
+            byte[] bytes = new byte[1024];
+            int r = inputStream.read(bytes);
+            while (r > 0) {
+                if (maxToCopy != null && copiedSize > maxToCopy) {
+                    if (!loggedTruncated) {
+                        outputStream.write("...[TRUNCATED]...".getBytes());
+                        loggedTruncated = true;
+                    }
+                } else {
+                    outputStream.write(bytes, 0, r);
+                }
+                r = inputStream.read(bytes);
+                copiedSize += r;
+            }
+        }
+
 
     }
 

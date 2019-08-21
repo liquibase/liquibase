@@ -195,9 +195,12 @@ public class DateTimeType extends LiquibaseDataType {
         } catch (ParseException e) {
             String[] genericFormats = new String[] {"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ss" };
 
+            //regexp can't handle millisenconds beyond three digits
+            String shortenedValue = value.replaceFirst("(\\.\\d{3})\\d+", "$1");
+
             for (String format : genericFormats) {
                 try {
-                    return new Timestamp(new SimpleDateFormat(format).parse(value).getTime());
+                    return new Timestamp(new SimpleDateFormat(format).parse(shortenedValue).getTime());
                 } catch (ParseException ignore) {
                     //doesn't match
                 }

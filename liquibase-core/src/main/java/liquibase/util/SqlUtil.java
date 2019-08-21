@@ -170,7 +170,9 @@ public class SqlUtil {
             } else {
                 value = Integer.valueOf(stringVal);
             }
-
+            //
+            // Make sure we handle BooleanType values which are not Boolean
+            //
             if (database instanceof MSSQLDatabase && value instanceof Boolean) {
                 if ((Boolean) value) {
                     return new DatabaseFunction("'true'");

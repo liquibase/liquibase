@@ -126,6 +126,42 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return true;
     }
 
+    public boolean shouldValidateNullable() {
+        if (isPrimaryKey()) {
+            return false;
+        }
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof NotNullConstraint) {
+                if (!((NotNullConstraint) constraint).shouldValidateNullable()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean shouldValidateUnique() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof UniqueConstraint) {
+                if (!((UniqueConstraint) constraint).shouldValidateUnique()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean shouldValidatePrimaryKey() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof PrimaryKeyConstraint) {
+                if (!((PrimaryKeyConstraint) constraint).shouldValidatePrimaryKey()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public boolean isUnique() {
         for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof UniqueConstraint) {

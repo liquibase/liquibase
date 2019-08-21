@@ -23,7 +23,7 @@ public class SqlGeneratorFactoryTest {
 
     @Before
     public void setUp() {
-        statement = new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null);
+        statement = new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null, null, null);
         database = new H2Database();
         factory = SqlGeneratorFactory.getInstance();
     }
@@ -178,7 +178,7 @@ public class SqlGeneratorFactoryTest {
 
     @Test
     public void getGenerators() {
-        SortedSet<SqlGenerator> allGenerators = factory.getGenerators(statement, database);
+        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null, null, null), new H2Database());
 
         assertNotNull(allGenerators);
         assertEquals(1, allGenerators.size());        

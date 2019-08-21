@@ -177,7 +177,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
                 CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, objectChangeFilter, StringUtil.trimToNull(diffTypes));
                 if (new File(diffChangeLogFile).exists()) {
-                    getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
+                    if (new File(diffChangeLogFile).exists()) {getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
                 }
             }
             catch (IOException|ParserConfigurationException e) {

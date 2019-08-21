@@ -9,6 +9,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.BooleanType;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
@@ -114,6 +115,8 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setTableName(column.getRelation().getName());
                 change.setColumnName(column.getName());
                 change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
+                change.setValidate(column.shouldValidate());
+                change.setConstraintName(column.getAttribute("notNullConstraintName", String.class));
                 changes.add(change);
             }
         }
@@ -248,8 +251,23 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setColumnName(column.getName());
                 change.setColumnDataType(columnDataType.toString());
 
-                if (value instanceof Boolean) {
-                    change.setDefaultValueBoolean((Boolean) value);
+                //
+                // Make sure we handle BooleanType values which are not Boolean
+                //
+                if (value instanceof Boolean || columnDataType instanceof BooleanType) {
+                    if (value instanceof Boolean) {
+                        change.setDefaultValueBoolean((Boolean) value);
+                    }
+                    else if (columnDataType instanceof BooleanType) {
+                        if (value instanceof DatabaseFunction) {
+                            if (value.equals(new DatabaseFunction("'false'"))) {
+                                change.setDefaultValueBoolean(false);
+                            }
+                            else {
+                                change.setDefaultValueBoolean(true);
+                            }
+                        }
+                    }
                 } else if (value instanceof Date) {
                     change.setDefaultValueDate(new ISODateFormat().format(((Date) value)));
                 } else if (value instanceof Number) {

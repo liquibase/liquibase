@@ -25,8 +25,9 @@ jobs:
       _JAVA_OPTIONS: "-Xms512m -Xmx1024m -Djdk.net.URLClassPath.disableClassPathURLCheck=true"
     steps:
       - run:
-          name: Install needed packages
+          name: Install 3rd party software
           command: |
+            # So that we can fetch .deb packages from Microsoft, who only deliver by https:
             sudo apt-get install -y apt-transport-https rpm
 
       #
@@ -73,7 +74,7 @@ jobs:
       #          name: Build and test everything.
       #          command: mvn -B -Psonar --fail-at-end clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${CIRCLE_BRANCH}
       - run:
-          name: Collect test results and build artifacts
+          name: Collect test results
           command: |
             mkdir /home/circleci/circle_artifacts
             export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts

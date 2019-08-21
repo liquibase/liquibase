@@ -136,7 +136,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         }
                     }
                 }
-                
+
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
                     String finalCurrentSql = changeLogParameters.expandExpressions(StringUtil.trimToNull(currentSql.toString()), changeLog);

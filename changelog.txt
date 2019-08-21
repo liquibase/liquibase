@@ -1,6 +1,29 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.0 (2019.8.16)
+
+- [CORE-3462] - Add new procedural database code change types for Liquibase Pro
+
+Changes in version 3.7.0 (2019.7.16)
+
+- [CORE-3303] - Allow disabling shouldRun configuration via CDI integration
+- [CORE-3388] - DB2 LUW supports boolean data type column from version 11.1.1.1
+- [CORE-3400] - add "manifoldclass:" to list of skipped URL protocols in DefaultPackageScanClassResolver
+- [CORE-2377] - Using replaceIfExists with <createView> generates DROP statements
+- [CORE-2971] - Comments at end of statements are incorrectly parsed
+- [CORE-3124] - Indexes with DESC sorting are not created for PostgreSQL
+- [CORE-3159] - class cast exception when running command line
+- [CORE-3174] - Plugin does not create parent directory
+- [CORE-3211] - Firebird does not support RESTRICT option on Foreign Keys
+- [CORE-3251] - SQL Server Changesets Not Escaping Keywords
+- [CORE-3365] - PrimaryKeySnapshotGenerator throws NPE for SQLite
+- [CORE-3375] - addNotNullConstraint on h2 still requires (unused) columnDataType
+- [CORE-3386] - includeAll can't resolve relativeToChangelogFile path within a jar file
+- [CORE-3437] - MariaDB 10.3.4+ problem with add column PERIOD
+- [CORE-2235] - Support priority-based selection of Precondition implementation
+- [CORE-3205] - Change Log Parameters from Environment Variable
+
 Changes in version 3.6.3 (2019.1.29)
 
 - [CORE-3100] - diff with uppercase reference database name

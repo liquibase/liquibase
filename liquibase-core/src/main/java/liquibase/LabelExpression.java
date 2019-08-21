@@ -1,11 +1,9 @@
 package liquibase;
 
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.ExpressionMatcher;
 import liquibase.util.StringUtil;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class LabelExpression {
 
@@ -88,76 +86,34 @@ public class LabelExpression {
         return false;
     }
 
+    /**
+     *
+     * Return true if any of the LabelExpression objects match the runtime
+     *
+     * @param   expressions    Expressions to match against
+     * @param   labels         Runtime labels
+     * @return  boolean        True if match
+     *
+     */
+    public static boolean matchesAll(Collection<LabelExpression> expressions, LabelExpression labels) {
+        if (expressions == null || expressions.isEmpty()) {
+            return true;
+        }
+        if (labels == null || labels.isEmpty()) {
+            return true;
+        }
+        Set<String> labelStrings = labels.getLabels();
+        Labels runtimeLabels = new Labels(labelStrings);
+        for (LabelExpression expression : expressions) {
+            if (!expression.matches(runtimeLabels)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private boolean matches(String expression, Labels runtimeLabels) {
-        if (runtimeLabels.isEmpty()) {
-            return true;
-        }
-
-        if (":TRUE".equals(expression.trim())) {
-            return true;
-        }
-        if (":FALSE".equals(expression.trim())) {
-            return false;
-        }
-
-        while (expression.contains("(")) {
-            Pattern pattern = Pattern.compile("(.*?)\\(([^\\(\\)]*?)\\)(.*)");
-            Matcher matcher = pattern.matcher(expression);
-            if (!matcher.matches()) {
-                throw new UnexpectedLiquibaseException("Cannot parse label pattern "+expression);
-            }
-            String parenExpression = matcher.group(2);
-
-            parenExpression = ":"+String.valueOf(matches(parenExpression, runtimeLabels)).toUpperCase();
-
-            expression = matcher.group(1)+" "+parenExpression+" "+matcher.group(3);
-        }
-
-        String[] orSplit = expression.split("\\s+or\\s+");
-        if (orSplit.length > 1) {
-            for (String split : orSplit) {
-                if (matches(split, runtimeLabels)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        String[] andSplit = expression.split("\\s+and\\s+");
-        if (andSplit.length > 1) {
-            for (String split : andSplit) {
-                if (!matches(split, runtimeLabels)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-
-        boolean notExpression = false;
-        if (expression.startsWith("!")) {
-            notExpression = true;
-            expression = expression.substring(1);
-        } else if (expression.toLowerCase().startsWith("not ")) {
-            notExpression = true;
-            expression = expression.substring(4);
-        }
-
-        if (":TRUE".equals(expression.trim())) {
-            return !notExpression;
-        }
-        if (":FALSE".equals(expression.trim())) {
-            return notExpression;
-        }
-
-        for (String label : runtimeLabels.getLabels()) {
-            if (label.equalsIgnoreCase(expression)) {
-                return !notExpression;
-            }
-        }
-        return notExpression;
-
-
+        return ExpressionMatcher.matches(expression, runtimeLabels.getLabels());
     }
 
     public boolean isEmpty() {

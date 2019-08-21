@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.change.core.RawSQLChange;
 import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -217,6 +218,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         String processedSQL = normalizeLineEndings(sql);
+        if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
+            returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
+            return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+        }
         for (String statement : StringUtil.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
                  statement = statement.replaceAll("\\n", "\r\n");

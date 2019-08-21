@@ -62,16 +62,16 @@ public class Schema extends AbstractDatabaseObject {
 
     @Override
     public boolean equals(Object o) {
-        // object identity
-        if (this == o) {
-            return true;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        // other object null or of different class
-        if ((o == null) || (getClass() != o.getClass())) {
-            return false;
+        Schema schema = (Schema) o;
+
+        if (shouldIncludeCatalogInSpecification()) {
+            if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null)
+                return false;
         }
-        Schema otherSchema = (Schema) o;
+        if (getName() != null ? !getName().equalsIgnoreCase(schema.getName()) : schema.getName() != null) return false;
 
         // catalog or name different?
         return (
@@ -81,8 +81,8 @@ public class Schema extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        int result = (getCatalog() != null) ? getCatalog().hashCode() : 0;
-        result = (31 * result) + ((getName() != null) ? getName().hashCode() : 0);
+        int result = (shouldIncludeCatalogInSpecification() && getCatalog() != null) ? getCatalog().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
         return result;
     }
 

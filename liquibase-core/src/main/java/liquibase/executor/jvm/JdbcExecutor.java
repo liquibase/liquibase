@@ -1,6 +1,7 @@
 package liquibase.executor.jvm;
 
 import liquibase.Scope;
+import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -19,6 +20,7 @@ import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.DropTableStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 
@@ -120,7 +122,12 @@ public class JdbcExecutor extends AbstractExecutor {
             }
         }
 
-        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        if (sql instanceof DropTableStatement && database instanceof Db2zDatabase) {
+            execute(new ExecuteStatementCallbackAndCatch(sql, sqlVisitors), sqlVisitors);
+        }
+        else {
+            execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        }
     }
 
 

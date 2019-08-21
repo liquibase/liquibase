@@ -115,10 +115,10 @@ public class ShouldRunChangeSetFilterTest extends Specification {
 
     private Database given_a_database_with_one_twice_executed_changeset() throws DatabaseException {
         ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>()
-        RanChangeSet ranChangeSet1 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("not_matched_checksum"), new Date(), null, null, null, null, null, null, null)
+        RanChangeSet ranChangeSet1 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("not_matched_checksum"), new Date(100000), null, null, null, null, null, null, null)
         ranChangeSet1.setOrderExecuted(1)
         ranChanges.add(ranChangeSet1)
-        RanChangeSet ranChangeSet2 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("8:d41d8cd98f00b204e9800998ecf8427e"), new Date(), null, null, null, null, null, null, null)
+        RanChangeSet ranChangeSet2 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("8:d41d8cd98f00b204e9800998ecf8427e"), new Date(100000 + 5), null, null, null, null, null, null, null)
         ranChangeSet2.setOrderExecuted(2)
         ranChanges.add(ranChangeSet2)
 

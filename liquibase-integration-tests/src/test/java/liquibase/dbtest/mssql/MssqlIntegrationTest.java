@@ -13,6 +13,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import org.junit.Test;
 
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -51,6 +52,12 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                             assertTrue(defaultValue.equals("2017-12-09 23:52:39.1234567 +01:00"));
                         } else if (defaultValue instanceof DatabaseFunction) {
                             ((DatabaseFunction) defaultValue).getValue().contains("type datetimeoffset");
+                        } else if (defaultValue instanceof Time) {
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(((Date) defaultValue));
+                            assertEquals(23, calendar.get(Calendar.HOUR_OF_DAY));
+                            assertEquals(52, calendar.get(Calendar.MINUTE));
+                            assertEquals(39, calendar.get(Calendar.SECOND));
                         } else {
                             assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof Date);
                             Calendar calendar = Calendar.getInstance();

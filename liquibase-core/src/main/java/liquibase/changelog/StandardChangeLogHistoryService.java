@@ -1,12 +1,15 @@
 package liquibase.changelog;
 
 import liquibase.*;
+import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
@@ -21,6 +24,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
@@ -457,11 +461,27 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void destroy() throws DatabaseException {
         Database database = getDatabase();
         try {
-            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogTableName
-                ()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
-                ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database
-                    .getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database
-                    .getDatabaseChangeLogTableName(), false));
+            //
+            // This code now uses the ChangeGeneratorFactory to
+            // allow extension code to be called in order to
+            // delete the changelog table.
+            //
+            // To implement the extension, you will need to override:
+            // DropTableStatement
+            // DropTableChange
+            // DropTableGenerator
+            //
+            //
+            DatabaseObject example =new Table().setName(database.getDatabaseChangeLogTableName
+                ()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
+            if (SnapshotGeneratorFactory.getInstance().has(example, database)) {
+                DatabaseObject table = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+                DiffOutputControl diffOutputControl = new DiffOutputControl(true, true, false, null);
+                Change[] change = ChangeGeneratorFactory.getInstance().fixUnexpected(table, diffOutputControl,database
+                    , database);
+                SqlStatement[] sqlStatement = change[0].generateStatements(database);
+                ExecutorService.getInstance().getExecutor( database
+                    ).execute(sqlStatement[0]);
             }
             reset();
         } catch (InvalidExampleException e) {

@@ -20,10 +20,13 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
+import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -289,31 +292,20 @@ public class CommandLineUtils {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
-        Class clazz = CommandLineUtils.class;
-        String className = clazz.getSimpleName() + ".class";
-        String classPath = clazz.getResource(className).toString();
-        if (classPath.startsWith("jar")) {
-            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) +
-                    "/META-INF/MANIFEST.MF";
-            Manifest manifest = null;
-            try {
-                manifest = new Manifest(new URL(manifestPath).openStream());
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file.");
-            }
-            Attributes attr = manifest.getMainAttributes();
-            myVersion = attr.getValue("Bundle-Version");
-            buildTimeString = attr.getValue("Build-Time");
-        }
+        myVersion = LiquibaseUtil.getBuildVersion();
+        buildTimeString = LiquibaseUtil.getBuildTime();
+
         StringBuilder banner = new StringBuilder();
 
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
         ));
+
         if (StringUtil.isNotEmpty(myVersion) && StringUtil.isNotEmpty(buildTimeString)) {
             banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion,
                 buildTimeString));
         }
+
         return banner.toString();
     }
 

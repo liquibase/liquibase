@@ -87,7 +87,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 for (Catalog catalog : catalogs) {
                     quotedCatalogs.add("'" + catalog.getName() + "'");
                 }
-                this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtil.join(quotedCatalogs, ", ").toUpperCase());
+                if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+                    this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", "));
+                } else {
+                    this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtil.join(quotedCatalogs, ", ").toUpperCase());
+                }
             }
 
             if (getDatabase().supportsCatalogs()) {
@@ -159,6 +163,31 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    /**
+     *
+     *  Method which merges two object snapshot models into one
+     *
+     *  @param  snapshotToMerge            Another object snapshot model
+     *  @return DatabaseSnapshot           Merged object model
+     *
+     */
+    public DatabaseSnapshot merge(DatabaseSnapshot snapshotToMerge) {
+        DatabaseSnapshot returnSnapshot = this;
+        Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> allFoundMap = snapshotToMerge.allFound.toMap();
+        Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> referencedObjectsMap = snapshotToMerge.referencedObjects.toMap();
+        for (Set<? extends DatabaseObject> setOfDatabaseObject : allFoundMap.values()) {
+            for (DatabaseObject dbObject : setOfDatabaseObject) {
+                returnSnapshot.allFound.add(dbObject);
+            }
+        }
+        for (Set<? extends DatabaseObject> setOfDatabaseObject : referencedObjectsMap.values()) {
+            for (DatabaseObject dbObject : setOfDatabaseObject) {
+                returnSnapshot.referencedObjects.add(dbObject);
+            }
+        }
+        return returnSnapshot;
     }
 
     public SnapshotControl getSnapshotControl() {
@@ -490,8 +519,15 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 catalogName = obj.getName();
             }
             if (catalogName != null) {
-                catalogNames.add(catalogName.toLowerCase());
+                if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+                    catalogNames.add(catalogName);
+                } else {
+                    catalogNames.add(catalogName.toLowerCase());
+                }
             }
+        }
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+            return !catalogNames.contains(fieldCatalog);
         }
 
         return !catalogNames.contains(fieldCatalog.toLowerCase());

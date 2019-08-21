@@ -18,7 +18,6 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
-
         if ((database instanceof Firebird3Database)) {
             return new DatabaseDataType("BOOLEAN");
         }

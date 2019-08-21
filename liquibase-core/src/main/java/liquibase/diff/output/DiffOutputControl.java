@@ -36,6 +36,9 @@ public class DiffOutputControl {
     private Labels labels;
 
     private ObjectChangeFilter objectChangeFilter;
+    private boolean respectSchemaAndCatalogCase = false;
+    // Some JDBC drivers call 'Catalogs' 'Schemas'
+    private boolean considerCatalogsAsSchemas = false;
 
     public DiffOutputControl() {
         includeSchema = true;
@@ -185,4 +188,19 @@ public class DiffOutputControl {
         }
     }
 
+    public boolean shouldRespectSchemaAndCatalogCase() {
+        return respectSchemaAndCatalogCase;
+    }
+
+    public void setRespectSchemaAndCatalogCase(boolean respectSchemaAndCatalogCase) {
+        this.respectSchemaAndCatalogCase = respectSchemaAndCatalogCase;
+    }
+
+    public boolean considerCatalogsAsSchemas() {
+        return considerCatalogsAsSchemas;
+    }
+
+    public void setConsiderCatalogsAsSchemas(boolean considerCatalogsAsSchemas) {
+        this.considerCatalogsAsSchemas = considerCatalogsAsSchemas;
+    }
 }
