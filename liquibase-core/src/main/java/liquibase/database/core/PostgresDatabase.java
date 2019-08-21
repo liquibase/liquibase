@@ -195,6 +195,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName.replace("\"", "");
+    }
+
+    @Override
     public boolean isSystemObject(DatabaseObject example) {
         // All tables in the schemas pg_catalog and pg_toast are definitely system tables.
         if

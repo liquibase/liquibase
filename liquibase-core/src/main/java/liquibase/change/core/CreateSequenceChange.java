@@ -120,9 +120,11 @@ public class CreateSequenceChange extends AbstractChange {
     public String getDataType() {
         return dataType;
     }
+
     public void setDataType(String dataType) {
         this.dataType = dataType;
     }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {

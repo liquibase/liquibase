@@ -128,6 +128,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean defaultCatalogSet;
 
     private Map<String, Object> attributes = new HashMap<>();
+    protected String dbFullVersion;
 
     public String getName() {
         return toString();
