@@ -7,7 +7,7 @@ import spock.lang.Specification
 public class CommandLineResourceAccessorTest extends Specification {
 
     def ResourceAccessor createFileOpener() {
-        return new CommandLineResourceAccessor(Thread.currentThread().getContextClassLoader())
+        return new CommandLineResourceAccessor(Thread.currentThread().getContextClassLoader(), getClass().getClassLoader())
     }
 
     def getResourcesAsStream() throws Exception {

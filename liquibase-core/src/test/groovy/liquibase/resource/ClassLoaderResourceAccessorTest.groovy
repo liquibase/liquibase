@@ -44,7 +44,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
     // Test case for [CORE-3139]
     def "can recursively enumerate files inside JARs using JAR file URL"() {
         given:
-        def accessor = new ClassLoaderResourceAccessor(getClass().getClassLoader())
+        def accessor = new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader(), getClass().getClassLoader())
 
         when:
         def listedResources = accessor.list(null, "/java/util/", true, true, true)
