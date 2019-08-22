@@ -46,7 +46,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
             LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(columnDataType, database);
             boolean typeMismatch = false;
             if (dataType instanceof BooleanType) {
-                if (!(defaultValue instanceof Boolean)) {
+                if (!(defaultValue instanceof Boolean) && !(defaultValue instanceof DatabaseFunction)) {
                     typeMismatch = true;
                 }
             } else if (dataType instanceof CharType) {
