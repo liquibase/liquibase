@@ -1,0 +1,41 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+    <id>liquibase-jar</id>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>jar</format>
+    </formats>
+
+    <containerDescriptorHandlers>
+        <containerDescriptorHandler>
+            <handlerName>metaInf-services</handlerName>
+        </containerDescriptorHandler>
+    </containerDescriptorHandlers>
+
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>true</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <outputDirectory>/</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>${project.groupId}:*:jar</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
+    <moduleSets>
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <excludes>
+                <exclude>liquibase-dist</exclude>
+            </excludes>
+            <binaries>
+                <outputDirectory>/</outputDirectory>
+                <unpack>true</unpack>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+</assembly>
+

@@ -232,6 +232,8 @@ public class Main {
                     log.severe(LogType.USER_MESSAGE,
                         (String.format(coreBundle.getString("unexpected.error"), message)), e);
                     log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
+
+                            e.printStackTrace();
                 }
             } catch (IllegalFormatException e1) {
                 e1.printStackTrace();
