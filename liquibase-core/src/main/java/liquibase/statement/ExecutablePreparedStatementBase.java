@@ -25,6 +25,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
 
+import org.springframework.util.Base64Utils;
+
 import static java.util.ResourceBundle.getBundle;
 import liquibase.change.core.LoadDataChange;
 
@@ -127,9 +129,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
         if (col.getValue() != null) {
-            LOG.debug(LogType.LOG, "value is string = " + col.getValue());
+            LOG.debug(LogType.LOG, "value is string/UUID/blob = " + col.getValue());
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
                 stmt.setObject(i, UUID.fromString(col.getValue()));
+            } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
+                stmt.setBlob(i, new ByteArrayInputStream(Base64Utils.decodeFromString(col.getValue())));
             } else {
                 stmt.setString(i, col.getValue());
             }

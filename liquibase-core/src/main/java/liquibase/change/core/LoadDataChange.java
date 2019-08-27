@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -76,6 +77,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
      * CSV Lines starting with that sign(s) will be treated as comments by default
      */
     public static final String DEFAULT_COMMENT_PATTERN = "#";
+    public static final Pattern BASE64_PATTERN = Pattern.compile("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$");
     private static final Logger LOG = LogService.getLog(LoadDataChange.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private String catalogName;
@@ -404,6 +406,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BLOB.toString())) {
                                 if ("NULL".equalsIgnoreCase(value.toString())) {
                                     valueConfig.setValue(null);
+                                } else if (BASE64_PATTERN.matcher(value.toString()).matches()) {
+                                    valueConfig.setType(columnConfig.getType());
+                                    valueConfig.setValue(value.toString());
+                                    needsPreparedStatement = true;
                                 } else {
                                     valueConfig.setValueBlobFile(value.toString());
                                     needsPreparedStatement = true;
