@@ -6,6 +6,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -226,6 +227,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             if (database instanceof MSSQLDatabase) {
                  statement = statement.replaceAll("\\n", "\r\n");
              }
+            if (database instanceof PostgresDatabase) {
+                statement = statement.replaceAll("(^|[^\\?])\\?(?!\\?)", "$1??");
+            }
 
             String escapedStatement = statement;
             try {
