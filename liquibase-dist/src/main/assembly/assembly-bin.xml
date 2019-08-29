@@ -49,7 +49,7 @@
     </fileSets>
     <files>
         <file>
-            <source>${project.build.directory}/liquibase-${revision}.jar</source>
+            <source>${project.build.directory}/liquibase-${liquibase.version}.jar</source>
             <outputDirectory>lib</outputDirectory>
             <fileMode>0644</fileMode>
         </file>

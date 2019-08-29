@@ -7,15 +7,17 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-base</artifactId>
-    <version>${revision}</version>
+    <version>${liquibase.version}</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
 
     <properties>
-        <revision>3.9.0-SNAPSHOT</revision>
+        <liquibase.version>3.9.0-SNAPSHOT</liquibase.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
+        <maven.enforcer.requireJavaVersion>${maven.compiler.source}</maven.enforcer.requireJavaVersion>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -114,6 +116,31 @@
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>${maven.enforcer.requireMavenVersion}</version>
+                                    <message>This POM requires Maven ${maven.enforcer.requireMavenVersion}.</message>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>${maven.enforcer.requireJavaVersion}</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

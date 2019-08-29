@@ -7,17 +7,18 @@
     <parent>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase</artifactId>
-        <version>${revision}</version>
+        <version>${liquibase.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>liquibase-dist</artifactId>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>${revision}</version>
+            <version>${liquibase.version}</version>
         </dependency>
 
     </dependencies>
@@ -91,10 +92,10 @@
                             <goal>jdeb</goal>
                         </goals>
                         <configuration>
-                            <deb>${project.build.directory}/liquibase-${revision}.deb</deb>
+                            <deb>${project.build.directory}/liquibase-${liquibase.version}.deb</deb>
                             <dataSet>
                                 <data>
-                                    <src>${project.build.directory}/liquibase-${revision}</src>
+                                    <src>${project.build.directory}/liquibase-${liquibase.version}</src>
                                     <type>directory</type>
                                     <mapper>
                                         <type>perm</type>
@@ -129,6 +130,39 @@
 
     <profiles>
         <profile>
+            <id>liquibase-pro</id>
+            <activation>
+                <file>
+                    <exists>../../liquibase-pro/pom.xml</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>../../liquibase-pro</module>
+            </modules>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.datical.lb</groupId>
+                    <artifactId>liquibase-pro</artifactId>
+                    <version>${liquibase.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.datical.lb</groupId>
+                    <artifactId>licensing-keymgr</artifactId>
+                    <version>${liquibase.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.datical.lb</groupId>
+                    <artifactId>licensing-keygen</artifactId>
+                    <version>${liquibase.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+
+        <profile>
             <!-- rpm packager dependency. WARNING, rpmbuild required to build -->
             <id>build-rpm</id>
             <build>
@@ -162,7 +196,7 @@
                                     <directory>/opt/liquibase</directory>
                                     <sources>
                                         <source>
-                                            <location>${project.build.directory}/liquibase-${revision}</location>
+                                            <location>${project.build.directory}/liquibase-${liquibase.version}</location>
                                         </source>
                                     </sources>
                                 </mapping>

@@ -21,6 +21,8 @@
             <unpack>true</unpack>
             <includes>
                 <include>${project.groupId}:*:jar</include>
+                <include>com.datical.lb:liquibase-pro:jar</include>
+                <include>com.datical.lb:license-keymgr:jar</include>
             </includes>
         </dependencySet>
     </dependencySets>

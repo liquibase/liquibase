@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-base</artifactId>
-        <version>${revision}</version>
+        <version>${liquibase.version}</version>
         <relativePath>base.pom.xml</relativePath>
     </parent>
 
@@ -19,13 +19,13 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>${revision}</version>
+            <version>${liquibase.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>${revision}</version>
+            <version>${liquibase.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

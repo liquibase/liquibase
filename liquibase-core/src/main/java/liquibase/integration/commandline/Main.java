@@ -233,7 +233,7 @@ public class Main {
                         (String.format(coreBundle.getString("unexpected.error"), message)), e);
                     log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
 
-                            e.printStackTrace();
+                            Scope.getCurrentScope().getLog(getClass()).severe(e.getMessage(), e);
                 }
             } catch (IllegalFormatException e1) {
                 e1.printStackTrace();
