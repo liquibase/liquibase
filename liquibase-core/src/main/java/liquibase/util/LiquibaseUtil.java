@@ -54,22 +54,39 @@ public class LiquibaseUtil {
         final Class clazz = LiquibaseUtil.class;
         final String className = clazz.getSimpleName() + ".class";
         final String classPath = clazz.getResource(className).toString();
-        if (classPath.startsWith("jar")) {
-            final String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1)
-                    + "/META-INF/MANIFEST.MF";
-            try (final InputStream inputStream = new URL(manifestPath).openStream()) {
-                final Manifest manifest = new Manifest(inputStream);
-                return manifest.getMainAttributes().getValue(manifestId);
-            } catch (final IOException e) {
-                // TODO maybe better to swallow this exception like in readFromProperties()?
-                throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file");
-            }
+        final Manifest manifest = readManifestFromJar(classPath);
+        if (manifest != null) {
+            return manifest.getMainAttributes().getValue(manifestId);
         }
         return null;
     }
 
     // package-private for unit test
     static String readFromProperties(final String propertyId) {
+        final Properties properties = readProperties();
+        if (properties != null) {
+            return (String) properties.get(propertyId);
+        }
+        return null;
+    }
+
+    // package-private for unit test
+    static Manifest readManifestFromJar(final String classPath) {
+        if (classPath.startsWith("jar")) {
+            final String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1)
+                    + "/META-INF/MANIFEST.MF";
+            try (final InputStream inputStream = new URL(manifestPath).openStream()) {
+                return new Manifest(inputStream);
+            } catch (final IOException e) {
+                // TODO maybe better to swallow this exception like in readFromProperties()?
+                throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file", e);
+            }
+        }
+        return null;
+    }
+
+    // package-private for unit test
+    static Properties readProperties() {
         final URL buildInfoFileUrl = LiquibaseUtil.class.getClassLoader().getResource("buildinfo.properties");
         if (buildInfoFileUrl != null) {
             try {
@@ -78,10 +95,7 @@ public class LiquibaseUtil {
                 try (InputStream inputStream = connection.getInputStream()) {
                     final Properties properties = new Properties();
                     properties.load(inputStream);
-                    final String propertyValue = (String) properties.get(propertyId);
-                    if (propertyValue != null) {
-                        return propertyValue;
-                    }
+                    return properties;
                 }
             } catch (final IOException e) {
                 // This is not a fatal exception, ignore
