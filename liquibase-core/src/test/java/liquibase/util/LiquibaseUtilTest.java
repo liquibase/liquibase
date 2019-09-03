@@ -22,6 +22,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @PrepareForTest(LiquibaseUtil.class)
 public class LiquibaseUtilTest {
 
+    private static final String UNKNOWN = "UNKNOWN";
+
     private static final String BUILD_VERSION   = "DUMMY_VERSION";
     private static final String BUILD_TIMESTAMP = "DUMMY_TIMESTAMP";
 
@@ -42,7 +44,7 @@ public class LiquibaseUtilTest {
         when(LiquibaseUtil.readFromManifest(anyString())).thenReturn(null);
         when(LiquibaseUtil.readFromProperties(anyString())).thenReturn(null);
 
-        assertEquals("UNKNOWN", LiquibaseUtil.getBuildTime());
+        assertEquals(UNKNOWN, LiquibaseUtil.getBuildTime());
     }
 
     @Test
@@ -50,21 +52,21 @@ public class LiquibaseUtilTest {
         when(LiquibaseUtil.readFromManifest(anyString())).thenReturn(null);
         when(LiquibaseUtil.readFromProperties(anyString())).thenReturn(null);
 
-        assertEquals("UNKNOWN", LiquibaseUtil.getBuildVersion());
+        assertEquals(UNKNOWN, LiquibaseUtil.getBuildVersion());
     }
 
     @Test
     public void testShouldReturnNotNullBuildTime() {
         final String buildTime = LiquibaseUtil.getBuildTime();
         assertNotNull(buildTime);
-        assertNotEquals("UNKNOWN", buildTime);
+        assertNotEquals(UNKNOWN, buildTime);
     }
 
     @Test
     public void testShouldReturnNotNullBuildVersion() {
         final String buildVersion = LiquibaseUtil.getBuildVersion();
         assertNotNull(buildVersion);
-        assertNotEquals("UNKNOWN", buildVersion);
+        assertNotEquals(UNKNOWN, buildVersion);
     }
 
     @Test
@@ -74,7 +76,7 @@ public class LiquibaseUtilTest {
         final String buildTime = LiquibaseUtil.getBuildTime();
 
         assertNotNull(buildTime);
-        assertNotEquals("UNKNOWN", buildTime);
+        assertNotEquals(UNKNOWN, buildTime);
     }
 
     @Test
@@ -83,7 +85,7 @@ public class LiquibaseUtilTest {
 
         final String buildVersion = LiquibaseUtil.getBuildVersion();
         assertNotNull(buildVersion);
-        assertNotEquals("UNKNOWN", buildVersion);
+        assertNotEquals(UNKNOWN, buildVersion);
     }
 
     @Test
