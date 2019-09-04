@@ -456,7 +456,8 @@ public class Liquibase {
             StreamUtil.getLineSeparator()
         );
 
-        if (database instanceof OracleDatabase) {
+        if (System.getProperty("oracle.skip.set.define.off.in.header", "false").equals("false") &&
+                database instanceof OracleDatabase) {
             executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
         }
         if ((database instanceof MSSQLDatabase) && (database.getDefaultCatalogName() != null)) {
