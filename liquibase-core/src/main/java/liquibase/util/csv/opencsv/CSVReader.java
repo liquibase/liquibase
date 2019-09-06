@@ -363,6 +363,7 @@ public class CSVReader implements Closeable, Iterable<String[]> {
      *
      * @throws IOException if the close fails
      */
+    @Override
     public void close() throws IOException {
         br.close();
     }
@@ -371,6 +372,7 @@ public class CSVReader implements Closeable, Iterable<String[]> {
      * Creates an Iterator for processing the csv data.
      * @return an String[] iterator.
      */
+    @Override
     public Iterator<String[]> iterator() {
         try {
             return new CSVIterator(this);

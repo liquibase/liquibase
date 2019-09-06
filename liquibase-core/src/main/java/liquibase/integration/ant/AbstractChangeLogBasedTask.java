@@ -52,14 +52,17 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
         return changeLogFile;
     }
 
+    @Override
     public void setChangeLogFile(String changeLogFile) {
         this.changeLogFile = changeLogFile;
     }
 
+    @Override
     public String getContexts() {
         return contexts;
     }
 
+    @Override
     public void setContexts(String contexts) {
         this.contexts = contexts;
     }
@@ -72,10 +75,12 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
         this.labels = new LabelExpression(labels);
     }
 
+    @Override
     public FileResource getOutputFile() {
         return outputFile;
     }
 
+    @Override
     public void setOutputFile(FileResource outputFile) {
         this.outputFile = outputFile;
     }
@@ -84,6 +89,7 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
         return (StringUtil.trimToNull(outputEncoding) == null) ? getDefaultOutputEncoding() : outputEncoding.trim();
     }
 
+    @Override
     public void setOutputEncoding(String outputEncoding) {
         this.outputEncoding = outputEncoding;
     }

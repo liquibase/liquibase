@@ -278,6 +278,7 @@ public class CSVWriter implements Closeable, Flushable {
     *
     * @throws IOException if bad things happen
     */
+   @Override
    public void flush() throws IOException {
 
       pw.flush();
@@ -289,6 +290,7 @@ public class CSVWriter implements Closeable, Flushable {
     *
     * @throws IOException if bad things happen
     */
+   @Override
    public void close() throws IOException {
       flush();
       pw.close();

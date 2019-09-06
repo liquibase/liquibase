@@ -17,6 +17,7 @@ import java.util.List;
 public abstract class AbstractExecutor implements Executor {
     protected Database database;
 
+    @Override
     public void setDatabase(Database database) {
         this.database = database;
     }

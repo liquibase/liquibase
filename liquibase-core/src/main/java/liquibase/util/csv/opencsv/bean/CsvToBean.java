@@ -174,6 +174,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
     * @return - the PropertyEditor for the given PropertyDescriptor.
     * @throws ReflectiveOperationException - thrown when getting the PropertyEditor for the class.
     */
+   @Override
    protected PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws ReflectiveOperationException {
       Class<?> cls = desc.getPropertyEditorClass();
       if (null != cls) {

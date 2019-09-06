@@ -507,6 +507,7 @@ public class StringClauses {
     }
 
     public interface LiteralClause {
+        @Override
         String toString();
     }
 

@@ -152,6 +152,7 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
      * @deprecated Use {@link #addConfiguredXml(ChangeLogOutputFile)} instead.
      * @param outputFile The file to write the change log to.
      */
+    @Override
     @Deprecated
     public void setOutputFile(FileResource outputFile) {
         log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, <yaml>, or <txt> element instead.", Project.MSG_WARN);

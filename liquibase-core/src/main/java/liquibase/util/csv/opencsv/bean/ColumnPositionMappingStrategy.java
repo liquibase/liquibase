@@ -29,6 +29,7 @@ public class ColumnPositionMappingStrategy<T> extends HeaderColumnNameMappingStr
     * @param reader - CSVReader.
     * @throws IOException - would be thrown by the CSVReader if it was used :)
     */
+   @Override
    public void captureHeader(CSVReader reader) throws IOException {
       //do nothing, first line is not header
    }

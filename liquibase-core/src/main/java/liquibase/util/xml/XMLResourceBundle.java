@@ -18,6 +18,7 @@ public class XMLResourceBundle extends ResourceBundle {
         props.loadFromXML(stream);
     }
 
+    @Override
     protected Object handleGetObject(String key) {
         return props.getProperty(key);
     }

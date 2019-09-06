@@ -55,6 +55,7 @@ public class DBDocTask extends BaseLiquibaseTask {
         return changeLog;
     }
 
+    @Override
     public void setChangeLogFile(String changeLog) {
         this.changeLog = changeLog;
     }
@@ -67,6 +68,7 @@ public class DBDocTask extends BaseLiquibaseTask {
         this.outputDirectory = outputDirectory;
     }
 
+    @Override
     public void setContexts(String contexts) {
         this.contexts = contexts;
     }
