@@ -205,6 +205,7 @@ public class Main {
             }
 
             main.applyDefaults();
+            main.updateLogging();
             main.configureClassLoader();
             main.doMigration();
 
@@ -252,6 +253,21 @@ public class Main {
 
         if ("ch.qos.logback.classic.Logger".equals(rootLogger.getClass().getName())) {
             CommandLineOutputAppender.setupLogging(rootLogger, defaultLogLevel);
+        } else {
+            System.err.println(
+                    "Liquibase command line logging cannot be configured; a supported org.slf4j.Logger implementation is not on the classpath.");
+        }
+    }
+
+    protected void updateLogging() {
+        org.slf4j.Logger rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        if ("ch.qos.logback.classic.Logger".equals(rootLogger.getClass().getName())) {
+            try {
+                CommandLineOutputAppender.updateLogging(rootLogger, LogLevel.valueOf(logLevel.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                System.err.println(
+                        "Liquibase command line logging cannot be updated; an unsupported logLevel was given.");
+            }
         } else {
             System.err.println(
                     "Liquibase command line logging cannot be configured; a supported org.slf4j.Logger implementation is not on the classpath.");

@@ -16,6 +16,7 @@ import liquibase.logging.LogLevel;
 import liquibase.logging.LogType;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,8 @@ public class CommandLineOutputAppender extends ConsoleAppender {
             LogType logType = LogType.valueOf(marker.getName());
             if (CommandLineOutputAppender.this.mode == Mode.STANDARD) {
                 if (logType == LogType.USER_MESSAGE && target.equals(ConsoleTarget.SystemOut)) {
+                    return FilterReply.ACCEPT;
+                } else if (logType == LogType.LOG && target.equals(ConsoleTarget.SystemOut)) {
                     return FilterReply.ACCEPT;
                 } else {
                     return FilterReply.DENY;
@@ -115,6 +118,18 @@ public class CommandLineOutputAppender extends ConsoleAppender {
             root.addAppender(appender);
             appender.start();
         }
+    }
+
+    /**
+     * Update the log level of the root logger if the user has changed it with
+     * a command line switch.
+     * @param rootLogger the instance of the root logger
+     * @param logLevel the level to use.
+     */
+    protected static void updateLogging(final org.slf4j.Logger rootLogger, final LogLevel logLevel) {
+        Logger root = (ch.qos.logback.classic.Logger) rootLogger;
+        // NOTE: Mismatched levels default to debug.
+        root.setLevel(Level.toLevel(logLevel.name()));
     }
 
     private static class ConsoleLogFilter extends AbstractMatcherFilter {
