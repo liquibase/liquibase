@@ -130,7 +130,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         && searchCondition.matches("\"?\\w+\" IS NOT NULL")) {
                     // not validated not null constraint found
                     column.setNullable(false);
-                    column.setShouldValidateNullable(false);
+                    column.setValidateNullable(false);
                 }
                 if (Boolean.FALSE.equals(column.isNullable()) && hasValidObjectName(constraintName)) {
                     column.setAttribute("notNullConstraintName", constraintName);

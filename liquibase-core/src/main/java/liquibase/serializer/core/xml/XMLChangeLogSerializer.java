@@ -375,17 +375,17 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (constraints.isDeferrable() != null) {
                 constraintsElement.setAttribute("deferrable", constraints.isDeferrable().toString());
             }
-            if (constraints.shouldValidateNullable() != null) {
-                constraintsElement.setAttribute("validateNullable", constraints.shouldValidateNullable().toString());
+            if (constraints.getValidateNullable() != null) {
+                constraintsElement.setAttribute("validateNullable", constraints.getValidateNullable().toString());
             }
-            if (constraints.shouldValidateUnique() != null) {
-                constraintsElement.setAttribute("validateUnique", constraints.shouldValidateUnique().toString());
+            if (constraints.getValidateUnique() != null) {
+                constraintsElement.setAttribute("validateUnique", constraints.getValidateUnique().toString());
             }
-            if (constraints.shouldValidatePrimaryKey() != null) {
-                constraintsElement.setAttribute("validatePrimaryKey", constraints.shouldValidatePrimaryKey().toString());
+            if (constraints.getValidatePrimaryKey() != null) {
+                constraintsElement.setAttribute("validatePrimaryKey", constraints.getValidatePrimaryKey().toString());
             }
-            if (constraints.shouldValidateForeignKey() != null) {
-                constraintsElement.setAttribute("validateForeignKey", constraints.shouldValidateForeignKey().toString());
+            if (constraints.getValidateForeignKey() != null) {
+                constraintsElement.setAttribute("validateForeignKey", constraints.getValidateForeignKey().toString());
             }
             if (constraints.isDeleteCascade() != null) {
                 constraintsElement.setAttribute("deleteCascade", constraints.isDeleteCascade().toString());

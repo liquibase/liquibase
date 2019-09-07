@@ -101,7 +101,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             if (constraintsConfig != null) {
                 if ((constraintsConfig.isNullable() != null) && !constraintsConfig.isNullable()) {
                     NotNullConstraint notNullConstraint = new NotNullConstraint();
-                    if (constraintsConfig.shouldValidateNullable()!=null && !constraintsConfig.shouldValidateNullable()) {
+                    if (constraintsConfig.getValidateNullable()!=null && !constraintsConfig.getValidateNullable()) {
                         notNullConstraint.setValidateNullable(false);
                     }
                     notNullConstraint.setConstraintName(constraintsConfig.getNotNullConstraintName());
@@ -109,14 +109,14 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 }
                 if (constraintsConfig.isUnique() != null && constraintsConfig.isUnique()) {
                     UniqueConstraint uniqueConstraint = new UniqueConstraint();
-                    if (constraintsConfig.shouldValidateUnique()!=null && !constraintsConfig.shouldValidateUnique()) {
+                    if (constraintsConfig.getValidateUnique()!=null && !constraintsConfig.getValidateUnique()) {
                         uniqueConstraint.setValidateUnique(false);
                     }
                     constraints.add(uniqueConstraint);
                 }
                 if ((constraintsConfig.isPrimaryKey() != null) && constraintsConfig.isPrimaryKey()) {
                     PrimaryKeyConstraint primaryKeyConstraint = new PrimaryKeyConstraint(constraintsConfig.getPrimaryKeyName());
-                    if (constraintsConfig.shouldValidatePrimaryKey()!=null && !constraintsConfig.shouldValidatePrimaryKey()) {
+                    if (constraintsConfig.getValidatePrimaryKey()!=null && !constraintsConfig.getValidatePrimaryKey()) {
                         primaryKeyConstraint.setValidatePrimaryKey(false);
                     }
                     constraints.add(primaryKeyConstraint);
@@ -127,7 +127,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     ForeignKeyConstraint foreignKeyConstraint = new ForeignKeyConstraint(constraintsConfig.getForeignKeyName(),
                         constraintsConfig.getReferences(), constraintsConfig.getReferencedTableName(),
                         constraintsConfig.getReferencedColumnNames());
-                    if (constraintsConfig.shouldValidateForeignKey()!=null && !constraintsConfig.shouldValidateForeignKey()) {
+                    if (constraintsConfig.getValidateForeignKey()!=null && !constraintsConfig.getValidateForeignKey()) {
                         foreignKeyConstraint.setValidateForeignKey(false);
                     }
                     constraints.add(foreignKeyConstraint);
