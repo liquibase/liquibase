@@ -131,15 +131,14 @@ public class SqlUtil {
             }
             stringVal = stringVal.trim();
 
-            Object value;
+            Object value = stringVal;
             if (scanner.hasNextBoolean()) {
                 value = scanner.nextBoolean();
-            } else {
+            } else if (scanner.hasNextInt()) {
                 value = Integer.valueOf(stringVal);
             }
-            //
+
             // Make sure we handle BooleanType values which are not Boolean
-            //
             if (database instanceof MSSQLDatabase) {
               if (value instanceof Boolean) {
                   if ((Boolean) value) {
@@ -147,14 +146,16 @@ public class SqlUtil {
                   } else {
                       return new DatabaseFunction("'false'");
                   }
-              }
-              else {
+              } else if (value instanceof Integer) {
                   if (((Integer) value) != 0) {
                       return new DatabaseFunction("'true'");
                   }
                   else {
                       return new DatabaseFunction("'false'");
                   }
+              } else {
+                  // you can declare in MsSQL: `col_name bit default 'nonsense'`
+                  return new DatabaseFunction(String.format("'%s'", value));
               }
             }
             return value;

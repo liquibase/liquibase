@@ -259,9 +259,10 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                         if (value instanceof DatabaseFunction) {
                             if (value.equals(new DatabaseFunction("'false'"))) {
                                 change.setDefaultValueBoolean(false);
-                            }
-                            else {
+                            } else if (value.equals(new DatabaseFunction("'true'"))) {
                                 change.setDefaultValueBoolean(true);
+                            } else {
+                                change.setDefaultValueComputed(((DatabaseFunction) value));
                             }
                         }
                     }
