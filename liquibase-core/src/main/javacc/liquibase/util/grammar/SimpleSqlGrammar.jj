@@ -75,12 +75,31 @@ TOKEN:
 |   < S_CHAR_LITERAL: "'" (~["'"]|"\\'")* "'" ("'" (~["'"]|"\\'")* "'")*>
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
 |    <EMPTY_QUOTE: "\"" "\"">
+/*
+built from http://unicode.org/charts/PDF/U20A0.pdf
+*/
+| < #UNICODE_CURRENCIES: ["\u0024",
+    "\u00A2"-"\u00A5",
+    "\u058F",
+    "\u060B",
+    "\u09F2"-"\u09F3",
+    "\u0AF1",
+    "\u0BF9",
+    "\u0E3F",
+    "\u17DB",
+    "\u2133",
+    "\u5143",
+    "\u5186",
+    "\u5706",
+    "\u5173",
+    "\uFDFC",
+    "\u20A0"-"\u20BF"
+    ]>
 
 /*
 Built list from http://stackoverflow.com/a/37668315/45756
 */
 | < #UNICODE_LETTERS: ["\u00AA",
-    "\u00A3",
     "\u00B5",
     "\u00BA",
     "\u00C0"-"\u00D6",
