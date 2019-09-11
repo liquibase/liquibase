@@ -3,26 +3,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.liquibase</groupId>
-    <artifactId>liquibase</artifactId>
+    <parent>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-base</artifactId>
+        <version>${liquibase.version}</version>
+        <relativePath>base.pom.xml</relativePath>
+    </parent>
+
+    <artifactId>liquibase-root</artifactId>
     <version>${liquibase.version}</version>
     <packaging>pom</packaging>
-
-    <name>Liquibase</name>
-    <description>Liquibase is a tool for managing and executing database changes.</description>
-    <url>http://www.liquibase.org</url>
-
-    <organization>
-        <name>Liquibase.org</name>
-        <url>http://www.liquibase.org</url>
-    </organization>
-
-    <licenses>
-        <license>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            <name>Apache License, Version 2.0</name>
-        </license>
-    </licenses>
 
     <modules>
         <module>liquibase-core</module>
@@ -60,18 +50,6 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
-
-    <properties>
-        <liquibase.version>3.9.0-SNAPSHOT</liquibase.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
-        <build.timestamp>${maven.build.timestamp}</build.timestamp>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <spring.version>5.0.12.RELEASE</spring.version>
-    </properties>
 
     <build>
         <plugins>
@@ -135,4 +113,18 @@
         </plugins>
 
     </build>
+
+    <profiles>
+        <profile>
+            <id>liquibase-pro</id>
+            <activation>
+                <file>
+                    <exists>../liquibase-pro/pom.xml</exists>
+                </file>
+            </activation>
+            <modules>
+                <module>../liquibase-pro</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

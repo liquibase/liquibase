@@ -26,18 +26,5 @@
             </includes>
         </dependencySet>
     </dependencySets>
-
-    <moduleSets>
-        <moduleSet>
-            <useAllReactorProjects>true</useAllReactorProjects>
-            <excludes>
-                <exclude>liquibase-dist</exclude>
-            </excludes>
-            <binaries>
-                <outputDirectory>/</outputDirectory>
-                <unpack>true</unpack>
-            </binaries>
-        </moduleSet>
-    </moduleSets>
 </assembly>
 

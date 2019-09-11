@@ -66,10 +66,7 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>ch.qos.logback:logback-classic</include>
-                <include>ch.qos.logback:logback-core</include>
-                <include>org.slf4j:slf4j-api</include>
-                <include>org.yaml:snakeyaml</include>
+                <include>org.yaml:snakeyaml:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>
