@@ -12,9 +12,6 @@
 	<artifactId>liquibase-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 
-	<name>Liquibase Maven Plugin</name>
-	<description>A Maven plugin wraps up some of the functionality of Liquibase</description>
-
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -51,18 +48,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<artifactId>maven-install-plugin</artifactId>
-				<configuration>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>

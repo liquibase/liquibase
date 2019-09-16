@@ -11,20 +11,34 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>liquibase</artifactId>
-    <name>Liquibase</name>
+    <artifactId>liquibase-dist</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-cdi</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${liquibase.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-maven-plugin</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
+        <finalName>liquibase-${liquibase.version}</finalName>
         <plugins>
+            <!-- todo: disabled javadoc generation until build is more stable -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -35,7 +49,6 @@
                     <doctitle>Liquibase ${project.version} API</doctitle>
                     <dependencySourceIncludes>
                         <dependencySourceInclude>org.liquibase:*</dependencySourceInclude>
-
                     </dependencySourceIncludes>
                     <quiet>true</quiet>
                     <doclint>none</doclint>
@@ -54,6 +67,59 @@
                         <!--</configuration>-->
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <outputDirectory>target</outputDirectory>
+                    <!--                    <embedBuildProfileDependencies>true</embedBuildProfileDependencies>-->
+                    <flattenMode>ossrh</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!-- Converts the generated flattened-pom into a cleaner version for maven distribution -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <version>1.0.2</version>
+                <executions>
+                    <execution>
+                        <id>transform-deploy-pom</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <forceCreation>true</forceCreation>
+                    <transformationSets>
+                        <transformationSet>
+                            <dir>${project.build.directory}</dir>
+                            <includes>.flattened-pom.xml</includes>
+                            <stylesheet>${project.basedir}/src/main/maven/liquibase-deployment-pom.xslt</stylesheet>
+                        </transformationSet>
+                    </transformationSets>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -127,14 +193,28 @@
 
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
                 <configuration>
                     <skip>false</skip>
+                    <artifactId>liquibase</artifactId>
+                    <file>${project.build.directory}/liquibase-${version}.jar</file>
+                    <pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>custom-install</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
+                    <pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
                 </configuration>
             </plugin>
 

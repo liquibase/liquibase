@@ -13,12 +13,24 @@
         </containerDescriptorHandler>
     </containerDescriptorHandlers>
 
+    <files>
+        <file>
+            <source>${project.basedir}/target/generated-resources/xml/xslt/.flattened-pom.xml</source>
+            <destName>META-INF/maven/org.liquibase/liquibase/pom.xml</destName>
+        </file>
+    </files>
+
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>true</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <outputDirectory>/</outputDirectory>
             <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>META-INF/maven/**</exclude>
+                </excludes>
+            </unpackOptions>
             <includes>
                 <include>${project.groupId}:*:jar</include>
                 <include>com.datical.lb:liquibase-pro:jar</include>
