@@ -38,7 +38,6 @@
     <build>
         <finalName>liquibase-${liquibase.version}</finalName>
         <plugins>
-            <!-- todo: disabled javadoc generation until build is more stable -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
