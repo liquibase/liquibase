@@ -156,7 +156,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
             ConstraintsConfig constraintsConfig = null;
             // In MySQL, the primary key must be specified at creation for an autoincrement column
-            if (column.isAutoIncrement() && (pkColumnList != null) && primaryKeyOrderMatchesTableOrder &&  pkColumnList.contains(column.getName())) {
+            if ((pkColumnList != null) && primaryKeyOrderMatchesTableOrder &&  pkColumnList.contains(column.getName())) {
                 if ((referenceDatabase instanceof MSSQLDatabase) && (primaryKey.getBackingIndex() != null) &&
                         (primaryKey.getBackingIndex().getClustered() != null) && !primaryKey.getBackingIndex()
                         .getClustered()) {
@@ -183,8 +183,12 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                         constraintsConfig.setNullable(false);
                     }
                 }
-            } else if ((column.isNullable() != null) && !column.isNullable()) {
-                constraintsConfig = new ConstraintsConfig();
+            }
+
+            if ((column.isNullable() != null) && !column.isNullable()) {
+                if (constraintsConfig == null) {
+                    constraintsConfig = new ConstraintsConfig();
+                }
                 constraintsConfig.setNullable(false);
                 if (!column.shouldValidateNullable()) {
                     constraintsConfig.setShouldValidateNullable(false);
