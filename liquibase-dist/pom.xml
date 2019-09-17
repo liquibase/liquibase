@@ -14,6 +14,11 @@
     <artifactId>liquibase-dist</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <deploy.repositoryId>sonatype-nexus-staging</deploy.repositoryId>
+        <deploy.url>https://oss.sonatype.org/content/repositories/snapshots</deploy.url>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -127,6 +132,7 @@
                 <configuration>
                     <finalName>liquibase-${liquibase.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
+                    <attach>false</attach>
                     <descriptors>
                         <descriptor>src/main/assembly/assembly-jar.xml</descriptor>
                         <descriptor>src/main/assembly/assembly-bin.xml</descriptor>
@@ -158,6 +164,7 @@
                         </goals>
                         <configuration>
                             <deb>${project.build.directory}/liquibase-${liquibase.version}.deb</deb>
+                            <attach>false</attach>
                             <dataSet>
                                 <data>
                                     <src>${project.build.directory}/liquibase-${liquibase.version}</src>
@@ -211,10 +218,34 @@
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
                 <configuration>
                     <skip>false</skip>
+                    <repositoryId>${deploy.repositoryId}</repositoryId>
+                    <artifactId>liquibase</artifactId>
+                    <url>${deploy.url}</url>
+                    <file>${project.build.directory}/liquibase-${version}.jar</file>
+                    <files>
+                        target/liquibase-${version}.zip,target/liquibase-${version}.tar.gz
+                    </files>
+                    <types>
+                        zip,tgz
+                    </types>
+                    <classifiers>
+                        <!-- need empty classifier so deployed zip/tar files do not have appended "-bin" etc. suffixes -->
+                        ,
+                    </classifiers>
                     <pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>custom-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>
