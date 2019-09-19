@@ -14,6 +14,32 @@
     <artifactId>liquibase-dist</artifactId>
     <packaging>jar</packaging>
 
+    <description>Liquibase is a tool for managing and executing database changes.</description>
+    <url>http://www.liquibase.org</url>
+
+    <organization>
+        <name>Liquibase.org</name>
+        <url>http://www.liquibase.org</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>Apache License, Version 2.0</name>
+        </license>
+    </licenses>
+
+    <issueManagement>
+        <url>http://liquibase.jira.com/browse/CORE</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+    </scm>
+
+
     <properties>
         <deploy.repositoryId>sonatype-nexus-staging</deploy.repositoryId>
         <deploy.url>https://oss.sonatype.org/content/repositories/snapshots</deploy.url>
@@ -79,7 +105,10 @@
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <outputDirectory>target</outputDirectory>
-                    <!--                    <embedBuildProfileDependencies>true</embedBuildProfileDependencies>-->
+                    <pomElements>
+                        <organization/>
+                        <issueManagement/>
+                    </pomElements>
                     <flattenMode>ossrh</flattenMode>
                 </configuration>
                 <executions>

@@ -22,17 +22,6 @@
         <module>liquibase-dist</module>
     </modules>
 
-    <scm>
-        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
-        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
-        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
-    <issueManagement>
-        <url>http://liquibase.jira.com/browse/CORE</url>
-    </issueManagement>
-
     <ciManagement>
         <system>CircleCI</system>
         <url>https://circleci.com/gh/liquibase/liquibase/tree/master</url>

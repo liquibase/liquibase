@@ -12,21 +12,6 @@
 
     <name>${project.artifactId}</name>
 
-    <description>Liquibase is a tool for managing and executing database changes.</description>
-    <url>http://www.liquibase.org</url>
-
-    <organization>
-        <name>Liquibase.org</name>
-        <url>http://www.liquibase.org</url>
-    </organization>
-
-    <licenses>
-        <license>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            <name>Apache License, Version 2.0</name>
-        </license>
-    </licenses>
-
     <properties>
         <liquibase.version>3.9.0-SNAPSHOT</liquibase.version>
         <maven.compiler.source>1.8</maven.compiler.source>
