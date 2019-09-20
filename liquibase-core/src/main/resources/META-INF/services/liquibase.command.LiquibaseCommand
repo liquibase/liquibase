@@ -4,3 +4,4 @@ liquibase.command.core.DropAllCommand
 liquibase.command.core.ExecuteSqlCommand
 liquibase.command.core.GenerateChangeLogCommand
 liquibase.command.core.SnapshotCommand
+liquibase.sdk.convert.ConvertCommand

@@ -10,6 +10,7 @@ import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
+import liquibase.servicelocator.LiquibaseService
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.StringUtil
 import org.hamcrest.Matchers
@@ -300,6 +301,7 @@ select 1
         "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
     }
 
+    @LiquibaseService(skip = true)
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
         private String changeLog
 
