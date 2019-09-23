@@ -231,7 +231,7 @@
                 <version>2.5.2</version>
                 <configuration>
                     <skip>false</skip>
-                    <artifactId>liquibase</artifactId>
+                    <artifactId>liquibase-core</artifactId>
                     <file>${project.build.directory}/liquibase-${version}.jar</file>
                     <pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
                 </configuration>
@@ -251,7 +251,7 @@
                 <configuration>
                     <skip>false</skip>
                     <repositoryId>${deploy.repositoryId}</repositoryId>
-                    <artifactId>liquibase</artifactId>
+                    <artifactId>liquibase-core</artifactId>
                     <url>${deploy.url}</url>
                     <file>${project.build.directory}/liquibase-${version}.jar</file>
                     <files>

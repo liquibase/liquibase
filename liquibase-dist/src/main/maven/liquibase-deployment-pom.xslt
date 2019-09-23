@@ -29,7 +29,7 @@
     We do not set it in the original pom.xml since it makes build output more confusing - nice to keep the module names matching directory names
     -->
     <xsl:template match="maven:artifactId">
-        <artifactId xmlns="http://maven.apache.org/POM/4.0.0">liquibase</artifactId>
+        <artifactId xmlns="http://maven.apache.org/POM/4.0.0">liquibase-core</artifactId>
     </xsl:template>
 
 </xsl:stylesheet>

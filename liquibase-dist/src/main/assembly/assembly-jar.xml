@@ -34,8 +34,11 @@
             <includes>
                 <include>${project.groupId}:*:jar</include>
                 <include>com.datical.lb:liquibase-pro:jar</include>
-                <include>com.datical.lb:license-keymgr:jar</include>
+                <include>com.datical.lb:licensing-keymgr:jar</include>
             </includes>
+            <excludes>
+                <exclude>${project.groupId}:liquibase-maven-plugin:jar</exclude>
+            </excludes>
         </dependencySet>
     </dependencySets>
 </assembly>
