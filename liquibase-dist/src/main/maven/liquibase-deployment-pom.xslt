@@ -15,6 +15,10 @@
     <!-- remove all org.liquibase sub-module dependencies -->
     <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'org.liquibase']"/>
 
+    <!-- remove all jaxb dependencies -->
+    <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'com.sun.xml.bind']"/>
+    <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'javax.xml.bind']"/>
+
     <!--
     Set module <name> as "Liquibase".
     We do not set it in the original pom.xml since it makes build output more confusing - nice to keep the capitalization consistent

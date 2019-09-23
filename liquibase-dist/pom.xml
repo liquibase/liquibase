@@ -58,11 +58,26 @@
             <version>${liquibase.version}</version>
         </dependency>
 
+        <!-- needed for inclusion in CLI when running in newer java versions -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>liquibase-maven-plugin</artifactId>
-            <version>${liquibase.version}</version>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.2.11</version>
+            <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.2.11</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.2.11</version>
+            <optional>true</optional>
+        </dependency>
+
 
     </dependencies>
 
