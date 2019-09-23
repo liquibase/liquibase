@@ -22,8 +22,8 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
-<!--                    <skipTests>false</skipTests>-->
-<!--                    <skipITs>false</skipITs>-->
+                    <!--                    <skipTests>false</skipTests>-->
+                    <!--                    <skipITs>false</skipITs>-->
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <!--<systemPropertyVariables>-->
                     <!--<jacoco-agent.destfile>${jacoco.it.execution.data.file}</jacoco-agent.destfile>-->

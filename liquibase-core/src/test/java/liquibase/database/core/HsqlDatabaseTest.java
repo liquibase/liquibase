@@ -6,9 +6,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.structure.core.Table;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class HsqlDatabaseTest extends TestCase {
     public void testGetDefaultDriver() {
         Database database = new HsqlDatabase();
@@ -43,19 +40,19 @@ public class HsqlDatabaseTest extends TestCase {
         assertEquals("\"Test\"", databaseWithAllQuoting.escapeObjectName("Test", Table.class));
     }
     
-    public void testUsingOracleSyntax()  {
-        HsqlDatabase database = new HsqlDatabase();
-        DatabaseConnection conn = mock(DatabaseConnection.class);
-        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb;sql.syntax_ora=true;sql.enforce_names=true");
-        database.setConnection(conn );
-        assertTrue("Using oracle syntax", database.isUsingOracleSyntax());
-    }
-
-    public void testNotUsingOracleSyntax()  {
-        HsqlDatabase database = new HsqlDatabase();
-        DatabaseConnection conn = mock(DatabaseConnection.class);
-        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb");
-        database.setConnection(conn );
-        assertFalse("Using oracle syntax", database.isUsingOracleSyntax());
-    }
+//    public void testUsingOracleSyntax()  {
+//        HsqlDatabase database = new HsqlDatabase();
+//        DatabaseConnection conn = mock(DatabaseConnection.class);
+//        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb;sql.syntax_ora=true;sql.enforce_names=true");
+//        database.setConnection(conn );
+//        assertTrue("Using oracle syntax", database.isUsingOracleSyntax());
+//    }
+//
+//    public void testNotUsingOracleSyntax()  {
+//        HsqlDatabase database = new HsqlDatabase();
+//        DatabaseConnection conn = mock(DatabaseConnection.class);
+//        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb");
+//        database.setConnection(conn );
+//        assertFalse("Using oracle syntax", database.isUsingOracleSyntax());
+//    }
 }

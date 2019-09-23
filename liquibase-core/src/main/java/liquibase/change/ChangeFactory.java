@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.SingletonObject;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @see liquibase.change.Change
  */
-public class ChangeFactory {
+public class ChangeFactory implements SingletonObject {
 
     private static ChangeFactory instance;
 
