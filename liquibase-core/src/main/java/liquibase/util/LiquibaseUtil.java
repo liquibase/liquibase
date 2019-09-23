@@ -1,7 +1,6 @@
 package liquibase.util;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.integration.commandline.CommandLineUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,8 +12,10 @@ import java.util.jar.Manifest;
 
 public class LiquibaseUtil {
 
+    private static final String DEFAULT_BUILD_INFO_VALUE = "UNKNOWN";
+
     public static String getBuildVersion() {
-        return getBuildInfo("build.version","Bundle-Version");
+        return getBuildInfo("build.version", "Bundle-Version");
     }
 
     public static String getBuildTime() {
@@ -24,17 +25,17 @@ public class LiquibaseUtil {
     // will extract the information from either buildinfo.properties, which should be a properties file in
     // the jar file, or from the jar file's MANIFEST.MF, which should also have similar information.
     private static String getBuildInfo(String propertyId, String manifestId) {
-        String buildInfoValue = "UNKNOWN";
+        String buildInfoValue = null;
 
-        Class clazz = LiquibaseUtil.class;
+        Class<?> clazz = LiquibaseUtil.class;
         String className = clazz.getSimpleName() + ".class";
         String classPath = clazz.getResource(className).toString();
         if (classPath.startsWith("jar")) {
             String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) +
                     "/META-INF/MANIFEST.MF";
-            Manifest manifest = null;
-            try {
-                manifest = new Manifest(new URL(manifestPath).openStream());
+            Manifest manifest;
+            try (InputStream mstream = new URL(manifestPath).openStream()) {
+                manifest = new Manifest(mstream);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file.");
             }
@@ -42,7 +43,7 @@ public class LiquibaseUtil {
             buildInfoValue = attr.getValue(manifestId);
         }
 
-        if (buildInfoValue.equals("UNKNOWN")) {
+        if (buildInfoValue == null) {
             Properties buildInfo = new Properties();
             ClassLoader classLoader = LiquibaseUtil.class.getClassLoader();
 
@@ -75,6 +76,6 @@ public class LiquibaseUtil {
                 }
             }
         }
-        return buildInfoValue;
+        return (buildInfoValue != null) ? buildInfoValue : DEFAULT_BUILD_INFO_VALUE;
     }
 }
