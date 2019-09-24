@@ -6,94 +6,89 @@ jobs:
       # The first docker image is the image where the actual build process will run in CircleCI:
       - image: circleci/openjdk:8
       # We need MySQL 5.6.4+ for the integration tests due to operations on TIMESTAMP(6) data types:
-#      - image: circleci/mysql:5.6.36
-      # Use the oldest PostgreSQL version available, so we do not accidentally break an older version.
-#      - image: circleci/postgres:9.2
-#        environment:
-#          POSTGRES_USER: postgres
-#          POSTGRES_DB: postgres
-#          POSTGRES_PASSWORD: liquibase
-      # Microsoft SQL Server. As a docker image. On Linux. Still feels weird.
-#      - image: microsoft/mssql-server-linux:latest
-#        environment:
-#          ACCEPT_EULA: Y
-#          MSSQL_SA_PASSWORD: Liquibase01#
+    #      - image: circleci/mysql:5.6.36
+    #      # Use the oldest PostgreSQL version available, so we do not accidentally break an older version.
+    #      - image: circleci/postgres:9.2
+    #        environment:
+    #          POSTGRES_USER: postgres
+    #          POSTGRES_DB: postgres
+    #          POSTGRES_PASSWORD: liquibase
+    #      # Microsoft SQL Server. As a docker image. On Linux. Still feels weird.
+    #      - image: microsoft/mssql-server-linux:latest
+    #        environment:
+    #          ACCEPT_EULA: Y
+    #          MSSQL_SA_PASSWORD: Liquibase01#
 
     environment:
-      # Tests for embedded RDBMS (esp. hsqldb and Derby-DB) crash more often without this one:
-      _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+      # Tests for embedded RDBMS (esp. hsqldb and Derby-DB) crash more often without higher memory.
+      # Surefire crashes without disableClassPathURLCheck:
+      _JAVA_OPTIONS: "-Xms512m -Xmx1024m -Djdk.net.URLClassPath.disableClassPathURLCheck=true"
     steps:
       - run:
-          name: Install 3rd party software
+          name: Install needed packages
           command: |
-            # So that we can fetch .deb packages from Microsoft, who only deliver by https:
             sudo apt-get install -y apt-transport-https rpm
-#
-#            # Install the Microsoft repository for the MSSQL client tools:
-#            curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-#            curl https://packages.microsoft.com/config/debian/8/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
-#            sudo apt-get update
-#
-#            # unixodbc-dev and locales-all are needed by mssql-tools, plus a very old libssl (which we need to borrow from Debian 8):
-#            wget "http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u7_amd64.deb"
-#            sudo apt install ./libssl1.0.0_1.0.1t-1+deb8u7_amd64.deb
-#            rm -f ./libssl1.0.0_1.0.1t-1+deb8u7_amd64.deb
-#            sudo ACCEPT_EULA=Y apt-get install -y rpm postgresql-client mysql-client mssql-tools unixodbc-dev locales-all
+
+      #
+      #            # Install the Microsoft repository for the MSSQL client tools:
+      #            curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+      #            curl https://packages.microsoft.com/config/debian/8/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+      #            sudo apt-get update
+      #
+      #            # unixodbc-dev and locales-all are needed by mssql-tools, plus a very old libssl (which we need to borrow from Debian 8):
+      #            wget "http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u7_amd64.deb"
+      #            sudo apt install ./libssl1.0.0_1.0.1t-1+deb8u7_amd64.deb
+      #            rm -f ./libssl1.0.0_1.0.1t-1+deb8u7_amd64.deb
+      #            sudo ACCEPT_EULA=Y apt-get install -y rpm postgresql-client mysql-client mssql-tools unixodbc-dev locales-all
       - checkout
       - restore_cache:
           key: liquibase-{{ checksum "pom.xml" }}
-#      - run:
-#         name: Prepare test databases
-#         command: |
-#          # Copy the CircleCI-specific local integration test configuration:
-#          cp -vf liquibase-integration-tests/src/test/resources/liquibase/liquibase.integrationtest.circleci.properties liquibase-integration-tests/src/test/resources/liquibase/liquibase.integrationtest.local.properties
-#
-#          # Configure the PostgreSQL test database:
-#          echo "localhost:5432:postgres:postgres:liquibase" > ~/.pgpass
-#          chmod 600 ~/.pgpass
-#          psql --dbname=postgres --host=localhost --port=5432 --username=postgres --no-password --file=liquibase-integration-tests/setup/postgresql/create_dbs_for_integration_tests.sql --variable="path_for_tablespace='/var/lib/postgresql/data'"
-#
-#          # Configure the MySQL test database:
-#          mysql --protocol tcp --show-warnings --host=localhost --port=3306 --verbose --user=root circle_test < liquibase-integration-tests/setup/mysql/create_dbs_for_integration_tests.sql
-#
-#          # Configure the SQL Server test database:
-#          # Disable for now because some SQL Server integration tests need to be fixed
-#          /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Liquibase01#' -i liquibase-integration-tests/setup/mssql/create_dbs_for_integration_tests.sql
-      - run:
-          name: Build and test everything.
-#          command: mvn -B -Psonar --fail-at-end clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${CIRCLE_BRANCH}
-          command: mvn package -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-      - run:
-          name: Collect test results
-          command: |
-              mkdir /home/circleci/circle_test_reports
-              export CIRCLE_TEST_REPORTS=/home/circleci/circle_test_reports
-              mkdir -p ${CIRCLE_TEST_REPORTS}/surefire/
-              mkdir -p ${CIRCLE_TEST_REPORTS}/failsafe/
-              find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/surefire/ \;
-              find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} ${CIRCLE_TEST_REPORTS}/failsafe/ \;
 
-              ##Output any dumpstream files
-              find . -type f -regex ".*\.dumpstream$" -exec cat {} \;
-          when: always
-
-      - store_test_results:
-          path: /home/circleci/circle_test_reports
       - run:
-          name: Collect build artifacts
-          command: |
-            mkdir /home/circleci/circle_artifacts
-            export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts
+          name: Build and test
+          command: mvn --batch-mode clean package -P build-rpm
 
-            cp liquibase-core/target/liquibase*-bin.zip ${CIRCLE_ARTIFACTS}
-            cp liquibase-core/target/liquibase*-bin.tar.gz ${CIRCLE_ARTIFACTS}
-            cp liquibase-core/target/liquibase*-SNAPSHOT.jar ${CIRCLE_ARTIFACTS}
-            cp liquibase-rpm/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm ${CIRCLE_ARTIFACTS}
-            cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
-      - store_artifacts:
-          path: /home/circleci/circle_artifacts
-          destination: artifacts
       - save_cache:
           paths:
             - ~/.m2
           key: liquibase-{{ checksum "pom.xml" }}
+      #      - run:
+      #         name: Prepare test databases
+      #         command: |
+      #          # Copy the CircleCI-specific local integration test configuration:
+      #          cp -vf liquibase-integration-tests/src/test/resources/liquibase/liquibase.integrationtest.circleci.properties liquibase-integration-tests/src/test/resources/liquibase/liquibase.integrationtest.local.properties
+      #
+      #          # Configure the PostgreSQL test database:
+      #          echo "localhost:5432:postgres:postgres:liquibase" > ~/.pgpass
+      #          chmod 600 ~/.pgpass
+      #          psql --dbname=postgres --host=localhost --port=5432 --username=postgres --no-password --file=liquibase-integration-tests/setup/postgresql/create_dbs_for_integration_tests.sql --variable="path_for_tablespace='/var/lib/postgresql/data'"
+      #
+      #          # Configure the MySQL test database:
+      #          mysql --protocol tcp --show-warnings --host=localhost --port=3306 --verbose --user=root circle_test < liquibase-integration-tests/setup/mysql/create_dbs_for_integration_tests.sql
+      #
+      #          # Configure the SQL Server test database:
+      #          # Disable for now because some SQL Server integration tests need to be fixed
+      #          /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Liquibase01#' -i liquibase-integration-tests/setup/mssql/create_dbs_for_integration_tests.sql
+      #      - run:
+      #          name: Build and test everything.
+      #          command: mvn -B -Psonar --fail-at-end clean install jacoco:restore-instrumented-classes sonar:sonar -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${CIRCLE_BRANCH}
+      - run:
+          name: Collect test results and build artifacts
+          command: |
+            mkdir /home/circleci/circle_artifacts
+            export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts
+            cp liquibase-dist/target/liquibase*.zip ${CIRCLE_ARTIFACTS}
+            cp liquibase-dist/target/liquibase*.tar.gz ${CIRCLE_ARTIFACTS}
+            cp liquibase-dist/target/liquibase*.jar ${CIRCLE_ARTIFACTS}
+            cp liquibase-dist/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm ${CIRCLE_ARTIFACTS}
+            cp liquibase-dist/target/*.deb ${CIRCLE_ARTIFACTS}
+
+            rm ${CIRCLE_ARTIFACTS}/liquibase-dist*
+          when: always
+
+      - store_test_results:
+          path: liquibase-core/target/surefire-reports
+      - store_artifacts:
+          path: /home/circleci/circle_artifacts
+          destination:
+

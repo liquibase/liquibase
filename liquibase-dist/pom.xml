@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-root</artifactId>
+        <version>${liquibase.version}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>liquibase-dist</artifactId>
+    <packaging>jar</packaging>
+
+    <description>Liquibase is a tool for managing and executing database changes.</description>
+    <url>http://www.liquibase.org</url>
+
+    <organization>
+        <name>Liquibase.org</name>
+        <url>http://www.liquibase.org</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>Apache License, Version 2.0</name>
+        </license>
+    </licenses>
+
+    <issueManagement>
+        <url>http://liquibase.jira.com/browse/CORE</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+    </scm>
+
+
+    <properties>
+        <deploy.repositoryId>sonatype-nexus-staging</deploy.repositoryId>
+        <deploy.url>https://oss.sonatype.org/content/repositories/snapshots</deploy.url>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-cdi</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
+
+        <!-- needed for inclusion in CLI when running in newer java versions -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.2.11</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.2.11</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.2.11</version>
+            <optional>true</optional>
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+        <finalName>liquibase-${liquibase.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <author>false</author>
+                    <includeDependencySources>true</includeDependencySources>
+                    <doctitle>Liquibase ${project.version} API</doctitle>
+                    <dependencySourceIncludes>
+                        <dependencySourceInclude>org.liquibase:*</dependencySourceInclude>
+                    </dependencySourceIncludes>
+                    <quiet>true</quiet>
+                    <doclint>none</doclint>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>aggregate</id>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <!--<configuration>-->
+                        <!--&lt;!&ndash; Specific configuration for the aggregate report &ndash;&gt;-->
+                        <!--...-->
+                        <!--</configuration>-->
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <outputDirectory>target</outputDirectory>
+                    <pomElements>
+                        <organization/>
+                        <issueManagement/>
+                    </pomElements>
+                    <flattenMode>ossrh</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!-- Converts the generated flattened-pom into a cleaner version for maven distribution -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <version>1.0.2</version>
+                <executions>
+                    <execution>
+                        <id>transform-deploy-pom</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <forceCreation>true</forceCreation>
+                    <transformationSets>
+                        <transformationSet>
+                            <dir>${project.build.directory}</dir>
+                            <includes>.flattened-pom.xml</includes>
+                            <stylesheet>${project.basedir}/src/main/maven/liquibase-deployment-pom.xslt</stylesheet>
+                        </transformationSet>
+                    </transformationSets>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <finalName>liquibase-${liquibase.version}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <attach>false</attach>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly-jar.xml</descriptor>
+                        <descriptor>src/main/assembly/assembly-bin.xml</descriptor>
+                    </descriptors>
+                    <archive>
+                        <manifestFile>src/main/assembly/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <deb>${project.build.directory}/liquibase-${liquibase.version}.deb</deb>
+                            <attach>false</attach>
+                            <dataSet>
+                                <data>
+                                    <src>${project.build.directory}/liquibase-${liquibase.version}</src>
+                                    <type>directory</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/lib/liquibase</prefix>
+                                    </mapper>
+                                </data>
+                                <data>
+                                    <type>link</type>
+                                    <linkName>/usr/bin/liquibase</linkName>
+                                    <linkTarget>/usr/lib/liquibase/liquibase</linkTarget>
+                                    <symlink>true</symlink>
+                                </data>
+                                <data>
+                                    <src>
+                                        ${project.basedir}/../liquibase-dist/src/main/archive/lib/liquibase_autocomplete.sh
+                                    </src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <filemode>644</filemode>
+                                        <prefix>/etc/bash_completion.d/</prefix>
+                                    </mapper>
+                                </data>
+                            </dataSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <skip>false</skip>
+                    <artifactId>liquibase-core</artifactId>
+                    <file>${project.build.directory}/liquibase-${version}.jar</file>
+                    <pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>custom-install</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <configuration>
+                    <skip>false</skip>
+                    <repositoryId>${deploy.repositoryId}</repositoryId>
+                    <artifactId>liquibase-core</artifactId>
+                    <url>${deploy.url}</url>
+                    <file>${project.build.directory}/liquibase-${version}.jar</file>
+                    <files>
+                        target/liquibase-${version}.zip,target/liquibase-${version}.tar.gz
+                    </files>
+                    <types>
+                        zip,tgz
+                    </types>
+                    <classifiers>
+                        <!-- need empty classifier so deployed zip/tar files do not have appended "-bin" etc. suffixes -->
+                        ,
+                    </classifiers>
+                    <pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>custom-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>liquibase-pro</id>
+            <activation>
+                <file>
+                    <exists>../../liquibase-pro/pom.xml</exists>
+                </file>
+            </activation>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.datical.lb</groupId>
+                    <artifactId>liquibase-pro</artifactId>
+                    <version>${liquibase.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.datical.lb</groupId>
+                    <artifactId>licensing-keymgr</artifactId>
+                    <version>${liquibase.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.datical.lb</groupId>
+                    <artifactId>licensing-keygen</artifactId>
+                    <version>${liquibase.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+
+        <profile>
+            <!-- rpm packager dependency. WARNING, rpmbuild required to build -->
+            <id>build-rpm</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>rpm-maven-plugin</artifactId>
+                        <version>2.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-rpm</id>
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <name>liquibase</name>
+                            <license>Apache License, Version 2.0</license>
+                            <sourceEncoding>UTF-8</sourceEncoding>
+                            <distribution>N/A</distribution>
+                            <group>Applications/Databases</group>
+                            <icon>src/main/icons/icon.xpm</icon>
+                            <packager>Liquibase</packager>
+                            <prefix>/usr/local</prefix>
+                            <changelogFile>${project.basedir}../changelog.txt</changelogFile>
+
+                            <mappings>
+
+                                <mapping>
+                                    <directory>/opt/liquibase</directory>
+                                    <sources>
+                                        <source>
+                                            <location>${project.build.directory}/liquibase-${liquibase.version}</location>
+                                        </source>
+                                    </sources>
+                                </mapping>
+
+                                <!-- Add symbolic link -->
+                                <mapping>
+                                    <directory>/usr/bin</directory>
+                                    <sources>
+                                        <softlinkSource>
+                                            <location>/opt/liquibase/liquibase</location>
+                                        </softlinkSource>
+                                    </sources>
+                                </mapping>
+                            </mappings>
+
+                            <preinstallScriptlet>
+                                <script>echo "Installing liquibase ..."</script>
+                            </preinstallScriptlet>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

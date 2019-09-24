@@ -1,25 +1,6 @@
 package liquibase.integration.commandline;
 
-import liquibase.command.CommandFactory;
-import liquibase.command.core.SnapshotCommand;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.CommandLineParsingException;
-import liquibase.util.StringUtils;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-
-import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
-import static org.junit.Assert.*;
 
 
 /**

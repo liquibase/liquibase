@@ -26,7 +26,7 @@ class ScopeTest extends Specification {
                 assert Scope.currentScope.get("test1", String) == "Level 2 A"
                 assert Scope.currentScope.get("test2", String) == "Level 1 B"
                 assert Scope.currentScope.get("test3", String) == "Level 2 C"
-            })
+            } as Scope.ScopedRunner)
 
             assert Scope.currentScope.get("test1", String) == "Level 1 A"
             assert Scope.currentScope.get("test2", String) == "Level 1 B"
@@ -41,9 +41,9 @@ class ScopeTest extends Specification {
                     assert Scope.currentScope.get("test1", String) == "Level 3 D"
                     assert Scope.currentScope.get("test2", String) == "Level 3 E"
                     assert Scope.currentScope.get("test3", String) == "Level 2 Y"
-                })
-            })
-        })
+                } as Scope.ScopedRunner)
+            } as Scope.ScopedRunner)
+        } as Scope.ScopedRunner)
     }
 
 }

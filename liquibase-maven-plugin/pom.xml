@@ -2,44 +2,47 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>liquibase-maven-plugin</artifactId>
-    <packaging>maven-plugin</packaging>
+	<parent>
+		<groupId>org.liquibase</groupId>
+		<artifactId>liquibase-base-module</artifactId>
+		<version>${liquibase.version}</version>
+		<relativePath>../base-module.pom.xml</relativePath>
+	</parent>
 
-    <name>Liquibase Maven Plugin</name>
-    <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
-
-    <parent>
-        <artifactId>liquibase-parent</artifactId>
-        <groupId>org.liquibase</groupId>
-        <version>3.8.1-SNAPSHOT</version>
-    </parent>
+	<artifactId>liquibase-maven-plugin</artifactId>
+	<packaging>maven-plugin</packaging>
+	<description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
 	<dependencies>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>liquibase-core</artifactId>
+			<version>${liquibase.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
+            <version>2.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-project</artifactId>
-		</dependency>
-
-		<dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-			<version>${project.version}</version>
+			<version>2.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.maven.shared</groupId>
 			<artifactId>maven-plugin-testing-harness</artifactId>
+            <version>1.1</version>
+            <scope>test</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-			<version>${derby.version}</version><!--$NO-MVN-MAN-VER$-->
+			<groupId>org.apache.maven.shared</groupId>
+			<artifactId>maven-verifier</artifactId>
+			<version>1.2</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -47,15 +50,9 @@
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
-
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
+                <version>3.6.0</version>
 				<executions>
 					<execution>
 						<id>generated-helpmojo</id>
@@ -64,46 +61,114 @@
 						</goals>
 					</execution>
 				</executions>
+                <configuration>
+                    <mojoDependencies>
+                        <param>org.liquibase:liquibase-maven-plugin</param>
+                    </mojoDependencies>
+                </configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<configuration>
+					<updatePomFile>true</updatePomFile>
+					<outputDirectory>target</outputDirectory>
+					<pomElements>
+						<organization/>
+						<issueManagement/>
+					</pomElements>
+					<flattenMode>ossrh</flattenMode>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<!-- Converts the generated flattened-pom into a cleaner version for maven distribution -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>xml-maven-plugin</artifactId>
+				<version>1.0.2</version>
+				<executions>
+					<execution>
+						<id>transform-deploy-pom</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>transform</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<forceCreation>true</forceCreation>
+					<transformationSets>
+						<transformationSet>
+							<dir>${project.build.directory}</dir>
+							<includes>.flattened-pom.xml</includes>
+							<stylesheet>${project.basedir}/src/main/maven/liquibase-deployment-pom.xslt</stylesheet>
+						</transformationSet>
+					</transformationSets>
+				</configuration>
+			</plugin>
+
+			<!-- re-enable install/deploy for this plugin -->
+			<plugin>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+				<configuration>
+					<skip>false</skip>
+					<artifactId>${project.artifactId}</artifactId>
+					<file>${project.build.directory}/liquibase-maven-plugin-${version}.jar</file>
+					<pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
+				</configuration>
+				<executions>
+					<execution>
+						<id>custom-install</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.2</version>
+				<configuration>
+					<skip>false</skip>
+					<repositoryId>${deploy.repositoryId}</repositoryId>
+					<artifactId>${project.artifactId}</artifactId>
+					<url>${deploy.url}</url>
+					<file>${project.build.directory}/liquibase-maven-plugin-${version}.jar</file>
+					<pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
+				</configuration>
+				<executions>
+					<execution>
+						<id>custom-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven
-						build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-plugin-plugin
-										</artifactId>
-										<versionRange>
-											[2.6,)
-										</versionRange>
-										<goals>
-											<goal>descriptor</goal>
-											<goal>helpmojo</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 	<reporting>

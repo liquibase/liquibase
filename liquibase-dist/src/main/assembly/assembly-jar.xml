@@ -1,0 +1,42 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+    <id>liquibase-jar</id>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>jar</format>
+    </formats>
+
+    <containerDescriptorHandlers>
+        <containerDescriptorHandler>
+            <handlerName>metaInf-services</handlerName>
+        </containerDescriptorHandler>
+    </containerDescriptorHandlers>
+
+    <files>
+        <file>
+            <source>${project.basedir}/target/generated-resources/xml/xslt/.flattened-pom.xml</source>
+            <destName>META-INF/maven/org.liquibase/liquibase/pom.xml</destName>
+        </file>
+    </files>
+
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>true</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <outputDirectory>/</outputDirectory>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>META-INF/maven/**</exclude>
+                </excludes>
+            </unpackOptions>
+            <includes>
+                <include>${project.groupId}:*:jar</include>
+                <include>com.datical.lb:liquibase-pro:jar</include>
+                <include>com.datical.lb:licensing-keymgr:jar</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+</assembly>
+
