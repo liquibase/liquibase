@@ -17,6 +17,7 @@ import liquibase.util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
@@ -43,13 +44,8 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             SnapshotControl snapshotControl = snapshot.getSnapshotControl();
             List<Class> includedTypes = sort(snapshotControl.getTypesToInclude());
 
-            buffer.append("Included types:\n" ).append(StringUtil.indent(StringUtil.join(includedTypes, "\n", new StringUtil.StringUtilFormatter<Class>() {
-                @Override
-                public String toString(Class obj) {
-                    return obj.getName();
-                }
-            }))).append("\n");
-
+            buffer.append(includedTypes.stream().map(clazz -> StringUtil.indent(clazz.getName(), INDENT_LENGTH))
+                    .collect(Collectors.joining("\n", "Included types:\n", "\n")));
 
             List<Schema> schemas = sort(snapshot.get(Schema.class), new Comparator<Schema>() {
                 @Override

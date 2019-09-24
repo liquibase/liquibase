@@ -1,15 +1,5 @@
 package liquibase.diff.output.changelog;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.*;
@@ -44,6 +34,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static java.util.stream.Collectors.joining;
 
 public class DiffToChangeLog {
 
@@ -394,21 +386,14 @@ public class DiffToChangeLog {
         List<Map<String, ?>> rs = null;
         try {
             if (tryDbaDependencies) {
-                rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                            @Override
-                            public String toString(String obj) {
-                                return "OWNER='" + obj + "'";
-                            }
-                        }
-                ) + ")"));
+                rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND " +
+                        schemas.stream().map(sch -> "OWNER='" + sch + "'")
+                            .collect(joining(" OR ", "(", ")"))));
             } else {
-                rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND (" + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                            @Override
-                            public String toString(String obj) {
-                                return "REFERENCED_OWNER='" + obj + "'";
-                            }
-                        }
-                ) + ")"));
+                rs = executor.queryForList(new RawSqlStatement("select NAME, REFERENCED_OWNER, REFERENCED_NAME from USER_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(NAME = REFERENCED_NAME) AND " +
+                        schemas.stream().map(sch -> "REFERENCED_OWNER='" + sch + "'")
+                            .collect(joining(" OR ", "(", ")"))));
+
             }
         } catch (DatabaseException dbe) {
             //
@@ -444,13 +429,9 @@ public class DiffToChangeLog {
     protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Database database) throws DatabaseException {
         if (database instanceof DB2Database) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where (" + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                        @Override
-                        public String toString(String obj) {
-                            return "TABSCHEMA='" + obj + "'";
-                        }
-                    }
-            ) + ")"));
+            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where " + schemas.stream()
+                    .map(sch -> "TABSCHEMA='" + sch + "'")
+                    .collect(joining(" OR ", "(", ")"))));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
                 String bName = StringUtil.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("BNAME"));
@@ -459,13 +440,10 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof Db2zDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            String db2ZosSql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE (" + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                        @Override
-                        public String toString(String obj) {
-                            return "DSCHEMA='" + obj + "'";
-                        }
-                    }
-            ) + ")";
+            String db2ZosSql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE " +
+                    schemas.stream()
+                            .map(sch -> "DSCHEMA='" + sch + "'")
+                            .collect(joining(" OR ", "(", ")"));
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(db2ZosSql));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtil.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtil.trimToNull((String) row.get("TABNAME"));
@@ -495,36 +473,24 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof MSSQLDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            String sql = "select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where (" + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                        @Override
-                        public String toString(String obj) {
-                            return "object_schema_name(referenced_id)='" + obj + "'";
-                        }
-                    }
-            ) + ")";
+            String sql = "select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where " +
+                    schemas.stream().map(sch -> "object_schema_name(referenced_id)='" + sch + "'")
+                            .collect(joining(" OR ", "(", ")"));
             sql += " UNION select object_schema_name(object_id) as referencing_schema_name, object_name(object_id) as referencing_name, object_name(parent_object_id) as referenced_name, object_schema_name(parent_object_id) as referenced_schema_name " +
                     "from sys.objects " +
                     "where parent_object_id > 0 " +
                     "and is_ms_shipped=0 " +
-                    "and (" + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                        @Override
-                        public String toString(String obj) {
-                            return "object_schema_name(object_id)='" + obj + "'";
-                        }
-                    }
-            ) + ")";
+                    "and " +
+                    schemas.stream().map(sch -> "object_schema_name(object_id)='" + sch + "'")
+                        .collect(joining(" OR ", "(", ")"));
 
             sql += " UNION select object_schema_name(fk.object_id) as referencing_schema_name, fk.name as referencing_name, i.name as referenced_name, object_schema_name(i.object_id) as referenced_schema_name " +
                     "from sys.foreign_keys fk " +
                     "join sys.indexes i on fk.referenced_object_id=i.object_id and fk.key_index_id=i.index_id " +
                     "where fk.is_ms_shipped=0 " +
-                    "and (" + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                        @Override
-                        public String toString(String obj) {
-                            return "object_schema_name(fk.object_id)='" + obj + "'";
-                        }
-                    }
-            ) + ")";
+                    "and " +
+                    schemas.stream().map(sch -> "object_schema_name(fk.object_id)='" + sch + "'")
+                        .collect(joining(" OR ", "(", ")"));
 
             sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, object_name(i.object_id) as referencing_name, s.name as referenced_name, null as referenced_schema_name " +
                     "from sys.indexes i " +
@@ -558,24 +524,26 @@ public class DiffToChangeLog {
                     "where i.data_space_id > 1";
 
             //get index -> table dependencies
-            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, object_name(i.object_id) as referenced_name, object_schema_name(i.object_id) as referenced_schema_name from sys.indexes i " +
-                    "where " + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                @Override
-                public String toString(String obj) {
-                    return "object_schema_name(i.object_id)='" + obj + "'";
-                }
-            });
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, object_name(i.object_id) as referenced_name, object_schema_name(i.object_id) as referenced_schema_name " +
+                    "from sys.indexes i " +
+                    "where " +
+                    schemas.stream().map(sch -> "object_schema_name(i.object_id)='" + sch + "'")
+                        .collect(joining(" OR "));
 
             //get schema -> base object dependencies
-            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM SYS.SYNONYMS WHERE is_ms_shipped='false' AND " + StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                @Override
-                public String toString(String obj) {
-                    return "SCHEMA_NAME(SCHEMA_ID)='" + obj + "'";
-                }
-            });
+            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name " +
+                    "FROM SYS.SYNONYMS " +
+                    "WHERE is_ms_shipped='false' AND " +
+                    schemas.stream().map(sch -> "SCHEMA_NAME(SCHEMA_ID)='" + sch + "'")
+                        .collect(joining(" OR ")); // should here be ... AND (... OR ... OR ...)
+
 
             //get non-clustered indexes -> unique clustered indexes on views dependencies
-            sql += " UNION select object_schema_name(c.object_id) as referencing_schema_name, c.name as referencing_name, object_schema_name(nc.object_id) as referenced_schema_name, nc.name as referenced_name from sys.indexes c join sys.indexes nc on c.object_id=nc.object_id JOIN sys.objects o ON c.object_id = o.object_id where  c.index_id != nc.index_id and c.type_desc='CLUSTERED' and c.is_unique='true' and (not(nc.type_desc='CLUSTERED') OR nc.is_unique='false') AND o.type_desc='VIEW' AND o.name='AR_DETAIL_OPEN'";
+            sql += " UNION select object_schema_name(c.object_id) as referencing_schema_name, c.name as referencing_name, object_schema_name(nc.object_id) as referenced_schema_name, nc.name as referenced_name " +
+                    "from sys.indexes c " +
+                    "join sys.indexes nc on c.object_id=nc.object_id " +
+                    "JOIN sys.objects o ON c.object_id = o.object_id " +
+                    "where  c.index_id != nc.index_id and c.type_desc='CLUSTERED' and c.is_unique='true' and (not(nc.type_desc='CLUSTERED') OR nc.is_unique='false') AND o.type_desc='VIEW' AND o.name='AR_DETAIL_OPEN'";
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (!rs.isEmpty()) {
@@ -668,12 +636,9 @@ public class DiffToChangeLog {
                 "      ELSE referencing_name\n" +
                 "    END)  AS referencing_name from dependency_pair where REFERENCED_NAME != REFERENCING_NAME " +
                 " AND (" +
-                StringUtil.join(schemas, " OR ", new StringUtil.StringUtilFormatter<String>() {
-                    @Override
-                    public String toString(String obj) {
-                        return " REFERENCED_NAME like '" + obj + ".%' OR REFERENCED_NAME NOT LIKE '%.%'";
-                    }
-                })+ ") " +
+                schemas.stream().map(schema -> " REFERENCED_NAME like '" + schema + ".%' OR REFERENCED_NAME NOT LIKE '%.%'")
+                    .collect(joining(" OR "))
+                + ") " +
                 " AND referencing_schema_name is not null and referencing_name is not null";
     }
 
@@ -806,12 +771,8 @@ public class DiffToChangeLog {
             }
 
              if ((changes != null) && (changes.length > 0)) {
-                 desc = " ("+ StringUtil.join(changes, " :: ", new StringUtil.StringUtilFormatter<Change>() {
-                    @Override
-                    public String toString(Change obj) {
-                        return obj.getDescription();
-                    }
-                }) + ")";
+                 desc = Arrays.stream(changes).map(Change::getDescription)
+                         .collect(joining(" :: ", " (", ")"));
             }
 
             if (desc.length() > 150) {
@@ -893,21 +854,14 @@ public class DiffToChangeLog {
                     String message = "Could not resolve " + generatorType.getSimpleName() + " dependencies due " +
                      "to dependency cycle. Dependencies: \n";
 
-                    for (Node node : allNodes.values()) {
-                        SortedSet<String> fromTypes = new TreeSet<>();
-                        SortedSet<String> toTypes = new TreeSet<>();
-                        for (Edge edge : node.inEdges) {
-                            fromTypes.add(edge.from.type.getSimpleName());
-                        }
-                        for (Edge edge : node.outEdges) {
-                            toTypes.add(edge.to.type.getSimpleName());
-                        }
-                        String from = StringUtil.join(fromTypes, ",");
-                        String to = StringUtil.join(toTypes, ",");
-                        message += "    [" + from + "] -> " + node.type.getSimpleName() + " -> [" + to + "]\n";
-                    }
+                    String fromTo = allNodes.values().stream().map(node -> {
+                                String from = node.inEdges.stream().map(edge -> edge.from.type.getSimpleName()).sorted().collect(joining(","));
+                                String to = node.outEdges.stream().map(edge -> edge.to.type.getSimpleName()).sorted().collect(joining(","));
+                                return "    [" + from + "] -> " + node.type.getSimpleName() + " -> [" + to + "]";
+                            }
+                    ).collect(joining("\n"));
 
-                    throw new UnexpectedLiquibaseException(message);
+                    throw new UnexpectedLiquibaseException(message + fromTo);
                 }
             }
         }

@@ -61,7 +61,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.NowAndTodayUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.NowAndTodayUtil;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -79,9 +78,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import static liquibase.util.StringUtil.join;
-
 
 /**
  * AbstractJdbcDatabase is extended by all supported databases as a facade to the underlying database.
@@ -611,7 +607,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getConcatSql(final String... values) {
-        return join(values, " || ");
+        return String.join(" || ", values);
     }
 
     @Override

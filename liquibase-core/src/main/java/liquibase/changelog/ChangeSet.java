@@ -39,7 +39,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,7 +51,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -303,13 +303,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.created = node.getChildValue(null, "created", String.class);
         this.runOrder = node.getChildValue(null, "runOrder", String.class);
         this.ignore = node.getChildValue(null, "ignore", false);
-        this.comments = StringUtil.join(node.getChildren(null, "comment"), "\n", obj -> {
-            if (((ParsedNode) obj).getValue() == null) {
-                return "";
-            } else {
-                return ((ParsedNode) obj).getValue().toString();
-            }
-        });
+        this.comments = node.getChildren(null, "comment").stream()
+                .map(ParsedNode::getValue)
+                .map(value -> value == null ? "" : value.toString())
+                .collect(joining("\n"));
         this.comments = StringUtil.trimToNull(this.comments);
 
         String objectQuotingStrategyString = StringUtil.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
@@ -531,7 +528,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         lines[i] = database.getLineComment() + " " + lines[i];
                     }
                 }
-                executor.comment(StringUtil.join(Arrays.asList(lines), "\n"));
+                executor.comment(String.join("\n", lines));
             }
 
             try {
@@ -917,12 +914,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return "empty";
         }
 
-        List<String> messages = new ArrayList<>();
-        for (Change change : changes) {
-            messages.add(change.getDescription());
-        }
+        String messages = changes.stream().map(Change::getDescription).collect(joining("; "));
 
-        return StringUtil.limitSize(StringUtil.join(messages, "; "), 255);
+        return StringUtil.limitSize(messages, 255);
     }
 
     public Boolean getFailOnError() {
@@ -1097,19 +1091,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("labels".equals(field)) {
-            if ((this.getLabels() != null) && !this.getLabels().isEmpty()) {
-                return StringUtil.join(this.getLabels().getLabels(), ", ");
-            } else {
-                return null;
-            }
+            return (this.getLabels() == null) || this.getLabels().isEmpty() ? null : String.join(", ", this.getLabels().getLabels());
         }
 
         if ("dbms".equals(field)) {
-            if ((this.getDbmsSet() != null) && !this.getDbmsSet().isEmpty()) {
-                return StringUtil.join(getDbmsSet(), ",xxx");
-            } else {
-                return null;
-            }
+            return (this.getDbmsSet() == null) || this.getDbmsSet().isEmpty() ? null : String.join(",xxx", getDbmsSet());
         }
 
         if ("comment".equals(field)) {
