@@ -164,7 +164,7 @@ public class Main {
 
 
             Main main = new Main();
-            log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
+            log.info(LogType.LOG, CommandLineUtils.getBanner());
 
             if ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0])) {
                 main.printHelp(System.out);
@@ -193,9 +193,9 @@ public class Main {
                         log.warning(LogType.USER_MESSAGE, allMessages);
                     }
                 }
-                log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
+                log.info(LogType.LOG, licenseService.getLicenseInfo());
             } else {
-                log.info(LogType.USER_MESSAGE, String.format("Liquibase Community %s by Datical", LiquibaseUtil.getBuildVersion()));
+                log.info(LogType.LOG, String.format("Liquibase Community %s by Datical", LiquibaseUtil.getBuildVersion()));
             }
 
             List<String> setupMessages = main.checkSetup();
