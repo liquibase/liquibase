@@ -20,4 +20,5 @@ Liquibase-Package: liquibase.change,
  liquibase.lockservice,
  liquibase.sdk.database,
  liquibase.ext,
- liquibase.pro
+ liquibase.pro,
+ com.datical.liquibase
