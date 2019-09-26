@@ -185,15 +185,18 @@ public class Main {
 
             LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
             if (licenseService != null) {
-                if(main.liquibaseProLicenseKey != null) {
+                String licenseInfo = "No license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.";
+
+                if (main.liquibaseProLicenseKey != null) {
                     Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                     LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                     if (result.code != 0) {
                         String allMessages = String.join("\n", result.messages);
                         log.warning(LogType.USER_MESSAGE, allMessages);
                     }
+                    licenseInfo = licenseService.getLicenseInfo();
                 }
-                log.info(LogType.LOG, licenseService.getLicenseInfo());
+                log.info(LogType.LOG, licenseInfo);
             } else {
                 log.info(LogType.LOG, String.format("Liquibase Community %s by Datical", LiquibaseUtil.getBuildVersion()));
             }
@@ -737,6 +740,7 @@ public class Main {
      * @param stream the output stream to write the help text to
      */
     protected void printHelp(PrintStream stream) {
+        stream.println(CommandLineUtils.getBanner());
         String helpText = commandLineHelpBundle.getString("commandline-helptext");
         stream.println(helpText);
     }
