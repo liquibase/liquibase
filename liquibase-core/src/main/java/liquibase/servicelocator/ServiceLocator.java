@@ -148,6 +148,8 @@ public class ServiceLocator {
                     addPackageToScan("liquibase.lockservice");
                     addPackageToScan("liquibase.sdk.database");
                     addPackageToScan("liquibase.ext");
+                    addPackageToScan("liquibase.pro");
+                    addPackageToScan("com.datical.liquibase");
                 }
             }
         }
