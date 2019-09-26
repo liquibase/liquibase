@@ -73,6 +73,16 @@
                 <include>javax.xml.bind:jaxb-api:jar:</include>
                 <include>com.sun.xml.bind:jaxb-impl:jar:</include>
                 <include>com.sun.xml.bind:jaxb-core:jar:</include>
+                <include>com.datical.lb:licensing-keymgr:jar:</include>
+                <include>net.java.truelicense:truelicense-json:jar:</include>
+                <include>net.java.truelicense:truelicense-core:jar:</include>
+                <include>net.java.truelicense:truelicense-obfuscate:jar:</include>
+                <include>net.java.truelicense:truelicense-ui:jar:</include>
+                <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations:jar:</include>
+                <include>com.fasterxml.jackson.core:jackson-core:jar:</include>
+                <include>com.fasterxml.jackson.core:jackson-databind:jar:</include>
+                <include>com.fasterxml.jackson.core:jackson-annotations:jar:</include>
+                <include>commons-codec:commons-codec:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>
