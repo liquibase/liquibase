@@ -403,8 +403,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 }
             }
         } catch (ClassNotFoundException cnfex) {
-            this.getLog().warn(MessageFormat
-                    .format("Class [{0}] could not be found. Processing bindings will probably fail.",
+            this.getLog().debug(MessageFormat
+                    .format("Class [{0}] could not be found. Processing hibernate bindings will probably fail if applicable.",
                             packageInfoClassName), cnfex);
         }
     }
