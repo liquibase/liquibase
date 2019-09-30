@@ -173,6 +173,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
+    public String getDatabaseFullVersion() throws DatabaseException {
+        return null;
+    }
+
+    @Override
     public String getShortName() {
         return "mock";
     }
