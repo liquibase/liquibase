@@ -54,8 +54,11 @@ class AbstractResourceAccessorTest extends Specification {
     @Unroll("#featureName: #path -> #expected")
     def "convertToPath with linux rootUrls"() {
         when:
-        def accessor = createResourceAccessor(["file:/path/to/target/test-classes/",
-                                               "file:/path/to/target/classes/"], false);
+        def accessor = createResourceAccessor([
+                "file:/path/to/target/test-classes/",
+                "file:/path/to/target/classes/",
+                "file:/path/to%20spaces/"
+        ], false);
 
         then:
         accessor.convertToPath(path) == expected
@@ -68,6 +71,7 @@ class AbstractResourceAccessorTest extends Specification {
         "file:/path/to/target/classes/other/file.ext"  | "other/file.ext"
         "file:/path/to/target/outside/short.file"      | "file:/path/to/target/outside/short.file"
         "/path/to/target/classes/other/file.ext"       | "other/file.ext"
+        "/path/to spaces/another.short.file"           | "another.short.file"
         "\\path\\to\\target\\classes\\other\\file.ext" | "other/file.ext"
     }
 

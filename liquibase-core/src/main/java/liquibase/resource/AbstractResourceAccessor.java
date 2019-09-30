@@ -87,17 +87,28 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
         for (File file : files) {
             if (file.isDirectory()) {
                 if (includeDirectories) {
-                    returnSet.add(convertToPath(file.getAbsolutePath()));
+                    returnSet.add(convertToPath(extractPath(file)));
                 }
                 if (recursive) {
                     getContents(file, recursive, includeFiles, includeDirectories, basePath, returnSet);
                 }
             } else {
                 if (includeFiles) {
-                    returnSet.add(convertToPath(file.getAbsolutePath()));
+                    returnSet.add(convertToPath(extractPath(file)));
                 }
             }
         }
+    }
+
+    private String extractPath(File file) {
+        String absolutePath;
+        try {
+            // this will properly handle symbolic links
+            absolutePath = file.getCanonicalPath();
+        } catch (IOException e) {
+            absolutePath = file.getAbsolutePath();
+        }
+        return absolutePath;
     }
 
     protected String convertToPath(String string) {
@@ -105,6 +116,7 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
 
         String stringAsUrl = string;
         if (!stringAsUrl.matches("[a-zA-Z0-9]{2,}:.*")) {
+            stringAsUrl = stringAsUrl.replace(" ", "%20");
             if (stringAsUrl.startsWith("/")) {
                 stringAsUrl = "file:"+stringAsUrl;
             } else {
