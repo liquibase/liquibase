@@ -146,8 +146,9 @@
 					<skip>false</skip>
 					<repositoryId>${deploy.repositoryId}</repositoryId>
 					<artifactId>${project.artifactId}</artifactId>
+					<version>${liquibase.version}</version>
 					<url>${deploy.url}</url>
-					<file>${project.build.directory}/liquibase-maven-plugin-${version}.jar</file>
+					<file>${project.build.directory}/liquibase-maven-plugin-${liquibase.version}.jar</file>
 					<pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
 				</configuration>
 				<executions>

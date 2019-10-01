@@ -267,10 +267,11 @@
                     <skip>false</skip>
                     <repositoryId>${deploy.repositoryId}</repositoryId>
                     <artifactId>liquibase-core</artifactId>
+                    <version>${liquibase.version}</version>
                     <url>${deploy.url}</url>
-                    <file>${project.build.directory}/liquibase-${version}.jar</file>
+                    <file>${project.build.directory}/liquibase-${liquibase.version}.jar</file>
                     <files>
-                        target/liquibase-${version}.zip,target/liquibase-${version}.tar.gz
+                        target/liquibase-${version}.zip,target/liquibase-${liquibase.version}.tar.gz
                     </files>
                     <types>
                         zip,tgz
