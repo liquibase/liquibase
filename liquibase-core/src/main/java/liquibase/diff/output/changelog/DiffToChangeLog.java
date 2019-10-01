@@ -176,11 +176,10 @@ public class DiffToChangeLog {
 
         Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "changeSets count: " + changeSets.size());
         if (changeSets.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Skipping creation of empty file.");
-            return;
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "No changesets to add.");
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
-
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " does not exist, creating");
 
         try (FileOutputStream stream = new FileOutputStream(file);
              PrintStream out = new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())) {

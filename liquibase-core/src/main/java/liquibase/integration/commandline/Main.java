@@ -130,7 +130,8 @@ public class Main {
         int errorLevel = 0;
         try {
             errorLevel = run(args);
-        } catch (LiquibaseException e) {
+        } catch (Throwable e) {
+            e.printStackTrace(System.err);
             System.exit(-1);
         }
         System.exit(errorLevel);
