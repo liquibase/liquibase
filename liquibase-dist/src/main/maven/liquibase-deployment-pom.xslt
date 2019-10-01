@@ -32,7 +32,7 @@
     Set artifactId as "liquibase".
     We do not set it in the original pom.xml since it makes build output more confusing - nice to keep the module names matching directory names
     -->
-    <xsl:template match="/maven:artifactId">
+    <xsl:template match="maven:project/maven:artifactId">
         <artifactId xmlns="http://maven.apache.org/POM/4.0.0">liquibase-core</artifactId>
     </xsl:template>
 
