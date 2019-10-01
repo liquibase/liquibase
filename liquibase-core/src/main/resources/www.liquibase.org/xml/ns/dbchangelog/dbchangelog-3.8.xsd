@@ -420,9 +420,10 @@
         <xsd:attribute name="incrementBy" type="xsd:string"/>
         <xsd:attribute name="maxValue" type="xsd:string"/>
         <xsd:attribute name="minValue" type="xsd:string"/>
-        <xsd:attribute name="ordered" type="booleanExp"/>
+        <xsd:attribute name="ordered" type="xsd:string"/>
         <xsd:attribute name="cacheSize" type="xsd:string"/>
-        <xsd:attribute name="cycle" type="booleanExp">
+        <xsd:attribute name="dataType" type="xsd:string" />
+        <xsd:attribute name="cycle" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation>
                     true for a cycling sequence, false for a non-cycling sequence.
@@ -486,6 +487,9 @@
 
     <xsd:element name="addUniqueConstraint">
         <xsd:complexType>
+            <xsd:choice maxOccurs="unbounded">
+				<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:choice>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="columnNames" type="xsd:string"
@@ -957,6 +961,7 @@
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="tablespace" type="xsd:string"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
+            <xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1124,7 +1129,7 @@
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="tag" type="xsd:string" use="required"/>
-
+			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1226,7 +1231,6 @@
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="sequenceAttributes"/>
-            <xsd:attribute name="dataType" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1283,7 +1287,7 @@
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="class" type="xsd:string" use="required"/>
-
+			<xsd:anyAttribute processContents="lax" />
         </xsd:complexType>
     </xsd:element>
 

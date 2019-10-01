@@ -72,7 +72,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase))) {
+        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
             if (statement.getCacheSize().equals(BigInteger.ZERO)) {
                 buffer.append(" NOCACHE ");
             } else {
@@ -80,7 +80,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCycle() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase))) {
+        if ((statement.getCycle() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
             if (statement.getCycle()) {
                 buffer.append(" CYCLE ");
             } else {

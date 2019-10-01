@@ -125,7 +125,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean defaultCatalogSet;
 
     private Map<String, Object> attributes = new HashMap<>();
-    protected String dbFullVersion;
 
     public String getName() {
         return toString();
@@ -252,10 +251,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    @Override
-    public String getDatabaseFullVersion() throws DatabaseException {
-        throw new AssertionError("Method can't be invoked directly in abstract level !");
-    }
 
     @Override
     public String getDefaultCatalogName() {

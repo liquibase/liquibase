@@ -153,7 +153,8 @@ public class SqlUtil {
             }
 
             // Make sure we handle BooleanType values which are not Boolean
-            if (database instanceof MSSQLDatabase && value instanceof Boolean) {
+            if (database instanceof MSSQLDatabase) {
+              if (value instanceof Boolean) {
                 if ((Boolean) value) {
                     return new DatabaseFunction("'true'");
                 } else {

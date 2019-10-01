@@ -53,15 +53,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private Set<String> reservedWords = new HashSet<>();
     private Logger log;
 
-    /**
-     * Represents Postgres DB types.
-     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
-     *       If we need we can extend this ENUM in future
-     */
-    public enum DbTypes {
-        EDB, COMMUNITY, RDS, AURORA
-    }
-
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
         // "Reserved" or "reserved (can be function or type)" in PostgreSQL
@@ -81,7 +72,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text"));
         super.unquotedObjectsAreUppercased=false;
-        log = new LogFactory().getLog();
+        log = LogService.getLog(getClass());
     }
 
     @Override
@@ -366,7 +357,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
 
-    @Override
     public String getDatabaseFullVersion() throws DatabaseException {
         if (getConnection() == null) {
             throw new DatabaseException("Connection not set. Can not get database version. " +

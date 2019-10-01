@@ -76,12 +76,6 @@ public interface Database extends PrioritizedService {
     int getDatabaseMinorVersion() throws DatabaseException;
 
     /**
-     * Method to get full db version
-     * @return Full version of db with name and version in it
-     */
-    String getDatabaseFullVersion() throws DatabaseException;
-
-    /**
      * Returns an all-lower-case short name of the product.  Used for end-user selecting of database type
      * such as the DBMS precondition.
      */

@@ -69,7 +69,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             queryStringBuilder.append(" MAXVALUE ").append(statement.getMaxValue());
         }
         if (database instanceof MariaDBDatabase && statement.getStartValue() != null) {
-            buffer.append(" START WITH ").append(statement.getStartValue());
+            queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
         }
 
         if (statement.getCacheSize() != null) {
