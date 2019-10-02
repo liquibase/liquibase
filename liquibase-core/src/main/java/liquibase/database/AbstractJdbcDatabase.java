@@ -251,6 +251,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+
     @Override
     public String getDefaultCatalogName() {
         if (defaultCatalogName == null) {

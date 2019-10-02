@@ -51,6 +51,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private Set<String> systemTablesAndViews = new HashSet<>();
 
     private Set<String> reservedWords = new HashSet<>();
+    private Logger log;
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -71,6 +72,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text"));
         super.unquotedObjectsAreUppercased=false;
+        log = LogService.getLog(getClass());
     }
 
     @Override
@@ -193,6 +195,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             }
         }
 
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName.replace("\"", "");
     }
 
     @Override
@@ -377,9 +384,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         try {
             enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
         } catch (DatabaseException e) {
-            LOG.severe("Can't get full version of Postgres DB. Used EDB as default", e);
+            log.severe("Can't get full version of Postgres DB. Used EDB as default", e);
             return  DbTypes.EDB;
         }
         return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
     }
+
 }
