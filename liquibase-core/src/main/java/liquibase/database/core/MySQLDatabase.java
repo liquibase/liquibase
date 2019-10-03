@@ -232,7 +232,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 0;
         }
 
-        String versionStrings[] = databaseProductVersion.split("\\.");
+        String[] versionStrings = databaseProductVersion.split("\\.");
         try {
             return Integer.parseInt(versionStrings[2].replaceFirst("\\D.*", ""));
         } catch (IndexOutOfBoundsException | NumberFormatException e) {

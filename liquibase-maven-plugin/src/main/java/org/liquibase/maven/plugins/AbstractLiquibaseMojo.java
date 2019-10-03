@@ -337,7 +337,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                     configureChangeLogProperties();
 
-                    getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+                    getLog().debug("expressionVars = " + expressionVars);
 
                     if (expressionVars != null) {
                         for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
@@ -345,7 +345,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         }
                     }
 
-                    getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                    getLog().debug("expressionVariables = " + expressionVariables);
                     if (expressionVariables != null) {
                         for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
                             if (var.getValue() != null) {
@@ -503,7 +503,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         try {
             List classpathElements = project.getCompileClasspathElements();
             classpathElements.add(project.getBuild().getOutputDirectory());
-            URL urls[] = new URL[classpathElements.size()];
+            URL[] urls = new URL[classpathElements.size()];
             for (int i = 0; i < classpathElements.size(); ++i) {
                 urls[i] = new File((String) classpathElements.get(i)).toURI().toURL();
             }

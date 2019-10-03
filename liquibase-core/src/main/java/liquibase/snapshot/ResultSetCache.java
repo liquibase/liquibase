@@ -324,7 +324,7 @@ class ResultSetCache {
                             // We need to discern the space in front of an index name,
                             // to know if it was auto-generated or not
 
-                            if (informixIndexTrimHint == false) {
+                            if (!informixIndexTrimHint) {
                                 value = ((String) value).trim(); // Trim the value normally
                             } else {
                                 boolean startsWithSpace = false;
@@ -332,7 +332,7 @@ class ResultSetCache {
                                     startsWithSpace = true; // Set the flag if the value started with a space
                                 }
                                 value = ((String) value).trim(); // Trim the value normally
-                                if (startsWithSpace == true) {
+                                if (startsWithSpace) {
                                     value = " " + value; // Put the space back at the beginning if the flag was set
                                 }
                             }

@@ -362,7 +362,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     //if execute returns false, we can retrieve the affected rows count
                     // (true used when resultset is returned)
                     if (!stmt.execute(statement)) {
-                        log.fine(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
+                        log.fine(stmt.getUpdateCount() + " row(s) affected");
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + getErrorCode(e) + statement+"]", e);
@@ -374,7 +374,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         if (!stmt.getMoreResults()) {
                             updateCount = stmt.getUpdateCount();
                             if (updateCount != -1)
-                                log.fine(Integer.toString(updateCount) + " row(s) affected");
+                                log.fine(updateCount + " row(s) affected");
                         }
                     } while (updateCount != -1);
 

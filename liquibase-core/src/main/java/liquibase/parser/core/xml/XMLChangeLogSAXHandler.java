@@ -64,7 +64,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     }
 
     @Override
-    public void characters(char ch[], int start, int length) {
+    public void characters(char[] ch, int start, int length) {
         textStack.peek().append(new String(ch, start, length));
     }
 
