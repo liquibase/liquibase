@@ -440,15 +440,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 }
             }
             Collection newCollection = null;
-            try {
-                Class<?> collectionClass = fieldValue.getClass();
-                if (List.class.isAssignableFrom(collectionClass)) {
-                    collectionClass = ArrayList.class;
-                }
-                newCollection = (Collection) collectionClass.getConstructor().newInstance();
-            } catch (InstantiationException e) {
-                throw e;
+            Class<?> collectionClass = fieldValue.getClass();
+            if (List.class.isAssignableFrom(collectionClass)) {
+                collectionClass = ArrayList.class;
             }
+            newCollection = (Collection) collectionClass.getConstructor().newInstance();
             newCollection.addAll(newValues);
             return newCollection;
         } else if (fieldValue instanceof Map) {

@@ -203,8 +203,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             int version = 9;
             try {
                 version = database.getDatabaseMajorVersion();
-            } catch (Exception ignore) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + ignore);
+            } catch (Exception e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + e);
             }
             if (version < 10) { // 'pg_sequence' view does not exists yet
                 return "SELECT c.relname AS SEQUENCE_NAME FROM pg_class c " +

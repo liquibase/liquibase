@@ -83,11 +83,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             columnConfig.setDefaultValueComputed(function);
         } else {
             String defaultValueString = null;
-            try {
-                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), database).objectToSql(defaultValue, database);
-            } catch (NullPointerException e) {
-                throw e;
-            }
+            defaultValueString = DataTypeFactory.getInstance().from(column.getType(), database).objectToSql(defaultValue, database);
             if (defaultValueString != null) {
                 defaultValueString = defaultValueString.replaceFirst("'",
                         "").replaceAll("'$", "");

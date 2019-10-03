@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -154,7 +155,9 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
             completeSql.append(updateStatement);
             
-        } catch (LiquibaseException e) {}
+        } catch (LiquibaseException e) {
+            Scope.getCurrentScope().getLog(getClass()).warning("Failed to generate update statement: " + e);
+        }
 
         if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
         	completeSql.append(getPostUpdateStatements(database));

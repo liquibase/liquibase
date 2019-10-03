@@ -297,6 +297,7 @@ public class StandardLockService implements LockService {
             try {
                 database.rollback();
             } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to roll back database: " + e);
             }
         }
 
@@ -363,6 +364,7 @@ public class StandardLockService implements LockService {
                 Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Successfully released change log lock");
                 database.rollback();
             } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to roll back database: " + e);
             }
             if (incomingQuotingStrategy != null) {
                 database.setObjectQuotingStrategy(incomingQuotingStrategy);
