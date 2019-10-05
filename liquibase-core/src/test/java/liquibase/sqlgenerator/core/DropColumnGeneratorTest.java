@@ -9,6 +9,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertTrue;
 
 public class DropColumnGeneratorTest extends AbstractSqlGeneratorTest<DropColumnStatement> {
 
@@ -32,7 +36,11 @@ public class DropColumnGeneratorTest extends AbstractSqlGeneratorTest<DropColumn
         Sql[] sql = generatorUnderTest.generateSql(drop, new MySQLDatabase(), new MockSqlGeneratorChain());
         Assert.assertEquals(1, sql.length);
         Assert.assertEquals("ALTER TABLE TEST_TABLE DROP col1, DROP col2", sql[0].toSql());
-        Assert.assertEquals("[DEFAULT, TEST_TABLE, TEST_TABLE.col1, TEST_TABLE.col2]", String.valueOf(sql[0].getAffectedDatabaseObjects()));
+
+        List<String> actualNames = sql[0].getAffectedDatabaseObjects().stream().map(o -> o.toString()).collect(Collectors.toList());
+        List<String> expectedNames = Arrays.asList(new String[]{"TEST_TABLE.col1", "TEST_TABLE.col2", "TEST_TABLE", "DEFAULT"});
+        assertTrue(actualNames.containsAll(expectedNames));
+        assertTrue(expectedNames.containsAll(actualNames));
     }
 
 ////    @Test
