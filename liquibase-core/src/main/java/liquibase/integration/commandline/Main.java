@@ -140,7 +140,6 @@ public class Main {
         try {
             errorLevel = run(args);
         } catch (Throwable e) {
-            e.printStackTrace(System.err);
             System.exit(-1);
         }
         System.exit(errorLevel);
@@ -172,9 +171,6 @@ public class Main {
                 return 0;
             }
 
-
-            log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
-
             if ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0])) {
                 main.printHelp(System.out);
                 return 0;
@@ -196,22 +192,21 @@ public class Main {
 
             main.reconfigureLogging();
 
+            log.info(LogType.LOG, CommandLineUtils.getBanner());
             LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
             if (licenseService != null) {
-                String licenseInfo = "No license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.";
 
-                if (main.liquibaseProLicenseKey != null) {
+                if (main.liquibaseProLicenseKey == null) {
+                    log.info(LogType.LOG, "No license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                } else {
                     Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                     LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                     if (result.code != 0) {
                         String allMessages = String.join("\n", result.messages);
                         log.warning(LogType.USER_MESSAGE, allMessages);
                     }
-                    licenseInfo = licenseService.getLicenseInfo();
                 }
-                log.info(LogType.LOG, licenseInfo);
-            } else {
-                log.info(LogType.LOG, String.format("Liquibase Community %s by Datical", LiquibaseUtil.getBuildVersion()));
+                log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
             }
 
             List<String> setupMessages = main.checkSetup();
@@ -731,9 +726,7 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
-                            && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)
-                            && !cmdParm.startsWith("--" + OPTIONS.LOG_FILE)
-                            && !cmdParm.startsWith("--" + OPTIONS.LOG_LEVEL)) {
+                            && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -747,9 +740,7 @@ public class Main {
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
                         && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
-                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)
-                        && !cmdParm.startsWith("--" + OPTIONS.LOG_FILE)
-                        && !cmdParm.startsWith("--" + OPTIONS.LOG_LEVEL)) {
+                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
