@@ -20,9 +20,10 @@ public class LiquibaseUtil {
         return getBuildInfo("build.timestamp");
     }
 
-    // will extract the information from either liquibase.build.properties, which should be a properties file in
-    // the jar file, or from the jar file's MANIFEST.MF, which should also have similar information.
+    // will extract the information from liquibase.build.properties, which should be a properties file in
+    // the jar file.
     private static String getBuildInfo(String propertyId) {
+        String value = "UNKONWN";
         if (liquibaseBuildProperties == null) {
             try (InputStream buildProperties =StreamUtil.openStream("liquibase.build.properties", false, null, new ClassLoaderResourceAccessor(LiquibaseUtil.class.getClassLoader()))) {
                 liquibaseBuildProperties = new Properties();
@@ -34,9 +35,8 @@ public class LiquibaseUtil {
             }
         }
 
-        String value = liquibaseBuildProperties.getProperty(propertyId);
-        if (value == null) {
-            return "UNKNOWN";
+        if (liquibaseBuildProperties != null) {
+            value = liquibaseBuildProperties.getProperty(propertyId);
         }
         return value;
     }
