@@ -159,6 +159,11 @@ public class Main {
         main.reconfigureLogging();
 
         Logger log = LogService.getLog(Main.class);
+        log.debug("There were " + args.length + " args passed to Liquibase. They are:");
+        for (String arg : args) {
+            log.debug("  " + arg);
+        }
+        boolean outputLoggingEnabled = false;
 
         try {
             GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration
