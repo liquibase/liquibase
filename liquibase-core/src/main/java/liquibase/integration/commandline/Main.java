@@ -129,7 +129,9 @@ public class Main {
     protected String liquibaseProLicenseKey;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
-    private String sqlFile;
+    protected String sqlFile;
+    protected String delimiter;
+    protected String rollbackScript;
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
