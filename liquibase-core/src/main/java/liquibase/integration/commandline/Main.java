@@ -163,10 +163,6 @@ public class Main {
             main.reconfigureLogging();
 
             log = LogService.getLog(Main.class);
-            log.debug("There were " + args.length + " args passed to Liquibase. They are:");
-            for (String arg : args) {
-                log.debug("  " + arg);
-            }
         } catch (Throwable e) {
             e.printStackTrace(System.err);
             System.exit(-1);
