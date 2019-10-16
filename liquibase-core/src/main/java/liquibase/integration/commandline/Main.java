@@ -30,6 +30,7 @@ import liquibase.exception.*;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogLevel;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
@@ -141,7 +142,6 @@ public class Main {
         try {
             errorLevel = run(args);
         } catch (Throwable e) {
-            e.printStackTrace(System.err);
             System.exit(-1);
         }
         System.exit(errorLevel);
@@ -156,10 +156,17 @@ public class Main {
      * @throws LiquibaseException a runtime exception
      */
     public static int run(String[] args) throws LiquibaseException {
-        Main main = new Main();
-        main.reconfigureLogging();
+        Main main = null;
+        Logger log = null;
+        try {
+            main = new Main();
+            main.reconfigureLogging();
 
-        Logger log = LogService.getLog(Main.class);
+            log = LogService.getLog(Main.class);
+        } catch (Throwable e) {
+            e.printStackTrace(System.err);
+            System.exit(-1);
+        }
 
         try {
             GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration
@@ -228,7 +235,7 @@ public class Main {
             } else if (!main.command.endsWith("SQL")) {
                 log.info(LogType.USER_MESSAGE, String.format(coreBundle.getString("command.successful"), main.command));
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             String message = e.getMessage();
             if (e.getCause() != null) {
                 message = e.getCause().getMessage();
@@ -246,7 +253,7 @@ public class Main {
                         log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)), e);
                     } else {
                         log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)));
-                        log.severe(LogType.USER_MESSAGE,  coreBundle.getString("for.more.information.use.loglevel.flag"));
+                        log.severe(LogType.USER_MESSAGE, coreBundle.getString("for.more.information.use.loglevel.flag"));
 
                         //send it to the LOG in case we're using logFile
                         log.severe(LogType.LOG, (String.format(coreBundle.getString("unexpected.error"), message)), e);
@@ -304,6 +311,29 @@ public class Main {
         if (this.logLevel == null) {
             logLevel = Level.OFF;
         } else {
+            if (this.logLevel.equalsIgnoreCase(LogLevel.DEBUG.name())) {
+                this.logLevel = Level.DEBUG.toString();
+            } else if (this.logLevel.equalsIgnoreCase(LogLevel.INFO.name())) {
+                this.logLevel = Level.INFO.toString();
+            } else if (this.logLevel.equalsIgnoreCase(LogLevel.WARNING.name())) {
+                this.logLevel = Level.WARN.toString();
+            } else if (this.logLevel.equalsIgnoreCase(LogLevel.SEVERE.name())) {
+                this.logLevel = Level.ERROR.toString();
+            }
+
+            if (this.logLevel.equalsIgnoreCase(java.util.logging.Level.FINE.toString())
+                    || this.logLevel.equalsIgnoreCase(java.util.logging.Level.FINER.toString())
+                    || this.logLevel.equalsIgnoreCase(java.util.logging.Level.FINEST.toString())) {
+                this.logLevel = Level.DEBUG.toString();
+            } else if (this.logLevel.equalsIgnoreCase(java.util.logging.Level.INFO.toString())) {
+                this.logLevel = Level.INFO.toString();
+            } else if (this.logLevel.equalsIgnoreCase(java.util.logging.Level.WARNING.toString())) {
+                this.logLevel = Level.WARN.toString();
+            } else if (this.logLevel.equalsIgnoreCase(java.util.logging.Level.SEVERE.toString())) {
+                this.logLevel = Level.ERROR.toString();
+            }
+
+
             logLevel = Level.toLevel(this.logLevel);
         }
 
