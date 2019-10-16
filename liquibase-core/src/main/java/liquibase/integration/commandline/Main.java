@@ -473,7 +473,8 @@ public class Main {
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
-                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command);
+                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
+                || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command);
     }
 
     /**
