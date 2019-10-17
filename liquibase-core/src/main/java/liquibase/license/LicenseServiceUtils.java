@@ -36,4 +36,21 @@ public class LicenseServiceUtils {
       validationErrors.addError(message);
       return validationErrors;
     }
+
+  /**
+   * check for a Liquibase Pro License, return true if licensed, false if not
+   * @param licenseType
+   * @return
+   */
+  public static boolean checkForValidLicense(String licenseType) {
+    LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+    if (licenseService == null) {
+      return false;
+    }
+    if (licenseService.licenseIsValid(licenseType)) {
+      return true;
+    }
+    return false;
+  }
+
 }

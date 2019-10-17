@@ -17,19 +17,6 @@ set CP=!CP!;!LIQUIBASE_HOME!lib
 rem special characters may be lost
 setlocal DISABLEDELAYEDEXPANSION
 
-rem get command line args into a variable
-set CMD_LINE_ARGS=%1
-if ""%1""=="""" goto done
-shift
-:setup
-if ""%1""=="""" goto done
-set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
-shift
-goto setup
-:done
-
 IF NOT DEFINED JAVA_OPTS set JAVA_OPTS=
 
-set CMD=java -cp "%CP%" %JAVA_OPTS% liquibase.integration.commandline.Main %CMD_LINE_ARGS%
-::echo %CMD%
-%CMD%
+java -cp "%CP%" %JAVA_OPTS% liquibase.integration.commandline.Main %*

@@ -11,6 +11,10 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
     @Override
     public int getPriority() {
@@ -49,10 +53,10 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                 schemaName = "dbo";
             }
 
-            return new Sql[]{new UnparsedSql("DECLARE @TableName SYSNAME " +
-                    "set @TableName = N'" + statement.getTableName() + "'; " +
+            Sql[] generatedSql = {new UnparsedSql("DECLARE @TableName SYSNAME " +
+                    "set @TableName = N'" +statement.getTableName() + "'; " +
                     "DECLARE @FullTableName SYSNAME " +
-                    "set @FullTableName = N'" + schemaName+"."+statement.getTableName() + "'; " +
+                    "set @FullTableName = N'" + schemaName + "." + statement.getTableName() + "'; " +
                     "DECLARE @ColumnName SYSNAME " +
                     "set @ColumnName = N'" + statement.getColumnName() + "'; " +
                     "DECLARE @MS_DescriptionValue NVARCHAR(3749); " +
@@ -88,6 +92,11 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                     "@level2type = N'COLUMN', " +
                     "@level2name = @ColumnName; " +
                     "END")};
+            List<Sql> sqlList = new ArrayList<>(Arrays.asList(generatedSql));
+            if (statement.getCatalogName() != null) {
+                surroundWithCatalogSets(sqlList, statement.getCatalogName(), database);
+            }
+            return sqlList.toArray(new Sql[0]);
         } else {
             return new Sql[]{new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
                     + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"

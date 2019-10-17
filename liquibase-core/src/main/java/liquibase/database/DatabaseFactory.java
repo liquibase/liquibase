@@ -238,7 +238,11 @@ public class DatabaseFactory {
 
             LOG.debug(LogType.LOG, "Properties:");
             for (Map.Entry entry : driverProperties.entrySet()) {
-                LOG.debug(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+                if (entry.getKey().toString().toLowerCase().contains("password")) {
+                    LOG.debug(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'**********'");
+                } else {
+                    LOG.debug(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+                }
             }
 
             if(driver.contains("oracle")) {
