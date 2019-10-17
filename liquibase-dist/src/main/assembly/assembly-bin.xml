@@ -46,6 +46,13 @@
                 <include>**/*</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>src/main/archive/licenses</directory>
+            <outputDirectory>licenses</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
     </fileSets>
     <files>
         <file>
