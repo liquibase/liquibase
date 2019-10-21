@@ -23,6 +23,7 @@ import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
+import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
@@ -97,10 +98,10 @@ public class DiffToChangeLog {
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 
-        if (file.exists()) {
-            newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, new File(file.getParentFile(), "objects-" + new Date().getTime()));
-        } else {
+        if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, new File(file.getParentFile(), "objects"));
+        } else {
+            newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, new File(file.getParentFile(), "objects-" + new Date().getTime()));
         }
 
         newScopeObjects.put(DIFF_OUTPUT_CONTROL_SCOPE_KEY, diffOutputControl);

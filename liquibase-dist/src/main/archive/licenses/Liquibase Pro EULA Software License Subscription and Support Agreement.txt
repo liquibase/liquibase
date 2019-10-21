@@ -1,0 +1,182 @@
+SOFTWARE LICENSE SUBSCRIPTION AND SUPPORT AGREEMENT
+
+PLEASE READ THIS AGREEMENT CAREFULLY BEFORE USING THIS SERVICE.
+
+BY USING THE SOFTWARE OR CLICKING AGREE, CUSTOMER IS AGREEING TO BE BOUND BY 
+THIS AGREEMENT. IF YOU ARE AGREEING TO THIS AGREEMENT ON BEHALF OF OR FOR THE 
+BENEFIT OF YOUR EMPLOYER OR A THIRD PARTY, THEN YOU REPRESENT AND WARRANT THAT 
+YOU HAVE THE NECESSARY AUTHORITY TO AGREE TO THIS AGREEMENT ON YOUR EMPLOYER'S 
+OR THAT THIRD PARTY'S BEHALF.
+
+This agreement is between Datical, Inc. a Delaware corporation (Datical) and 
+you, the customer entering into this agreement (Customer). The LiquibasePro 
+software, updates, documentation and license keys provided to Customer 
+(Software) are licensed and are not sold. 
+
+SCOPE. This agreement describes the licensing of the Software and support 
+provided to Customer under an order. Third party contractors and majority owned 
+affiliates of Customer can use and access the Software under the terms of this 
+agreement, and Customer is responsible for each of their compliance with such 
+terms.
+
+1. LICENSE. Subject to the other terms of this agreement, Datical grants 
+Customer, under an order, a term based non-exclusive, non-transferable license 
+up to the license capacity purchased to use the Software only in Customer’s 
+internal business operations. Third party licenses delivered with the Software 
+may be subject to additional license rights and restrictions a set forth at 
+https://download.liquibase.org/lbpro-third-party-licenses/.
+
+2. RESTRICTIONS. Customer may not:
+a. Transfer, assign, sublicense, rent the Software, create derivative works of 
+the Software, or use it in any type of service provider environment;
+b. Reverse engineer, decompile, disassemble, or translate the Software; or
+c. Evaluate the Software for the purpose of competing with Liquibase Pro or 
+operate the Software other than in accordance with its technical documentation.
+
+3. PROPRIETARY RIGHTS AND MUTUAL CONFIDENTIALITY.
+a. Proprietary Rights. The Software, workflow processes, user interface, 
+designs and other technologies provided by Datical as part of the Software are 
+the proprietary property of Datical and its licensors, and all right, title and 
+interest in and to such items, including all associated intellectual property 
+rights, remain only with Datical and its licensors. The Software is protected 
+by copyright and other intellectual property laws. Customer may not remove any 
+product identification, copyright, trademark or other notice from the Software. 
+Datical reserves all rights not expressly granted. 
+b. Mutual Confidentiality. Recipient may not disclose Confidential Information 
+of Discloser to any third party or use the Confidential Information in 
+violation of this agreement.
+Confidential Information means all information that is disclosed to the 
+recipient (Recipient) by the discloser (Discloser), and includes, among other 
+things:
+ * any and all information relating to products or services provided by a 
+Discloser, software code, flow charts, techniques, specifications, development 
+and marketing plans, strategies, and forecasts;
+ * as to Datical, the Software and the terms of this agreement, including 
+without limitation, all pricing information.
+Confidential Information excludes information that:
+ * was rightfully in Recipient's possession without any obligation of 
+confidentiality before receipt from the Discloser;
+ * is or becomes a matter of public knowledge through no fault of Recipient;
+ * is rightfully received by Recipient from a third party without violation of 
+a duty of confidentiality; or
+ * is independently developed by or for Recipient without use or access to the 
+Confidential Information.
+
+Recipient may disclose Confidential Information if required by law, but it will 
+attempt to provide notice to the Discloser in advance so it may seek a 
+protective order. Each party acknowledges that any misuse of the other party’s 
+Confidential Information may cause irreparable harm for which there is no 
+adequate remedy at law. Either party may seek immediate injunctive relief in 
+such event.
+
+4. WARRANTY, REMEDY and DISCLAIMER. For new license purchases, Datical warrants 
+that the Software will perform in substantial accordance with its accompanying 
+technical documentation for a period of 60 days from the date of the order. 
+This warranty will not apply to any problems caused by software not licensed to 
+Customer by Datical, use other than in accordance with the technical 
+documentation, or misuse of the Software. The warranty only covers problems 
+reported to Datical during the warranty period or 30 days after. Customer will 
+cooperate with Datical in resolving any warranty claim.
+A. EXCLUSIVE REMEDY AND SOLE LIABILITY. Datical will use commercially 
+reasonable efforts to remedy covered warranty claims within a reasonable period 
+of time or replace the Software, or if Datical cannot do so it will refund to 
+Customer the license fee paid. THIS REMEDY IS CUSTOMER’S EXCLUSIVE REMEDY, AND 
+DATICAL’S SOLE LIABILITY FOR THESE WARRANTY CLAIMS.
+B. DISCLAIMER OF WARRANTIES. DATICAL DISCLAIMS ALL OTHER EXPRESS AND IMPLIED 
+WARRANTIES, INCLUDING WITHOUT LIMITATION THE IMPLIED WARRANTY OF 
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. CUSTOMER UNDERSTANDS THAT 
+THE SOFTWARE MAY NOT BE ERROR FREE, AND USE MAY BE INTERRUPTED.
+
+5. TERMINATION. This agreement expires at the end of the license period 
+specified. Either party may terminate this agreement upon a material breach of 
+the other party after a 30 days’ notice/cure period, if the breach is not cured 
+during such time period. Upon terminationof this agreement or a license, 
+Customer must discontinue using the Software, de-install and destroy or return 
+the Software and all copies, within 5 days. Upon Datical's request, Customer 
+will provide written certification of such compliance.
+
+6. SUPPORT. Datical’s technical support and maintenance services (Support) is 
+included with the license fees. Customer will receive best efforts e-mail 
+response for support within two business days from receipt of issue. Datical 
+may change its Support terms, but Support will not materially degrade during 
+any Support term.
+
+7. LIMIT ON LIABILITY. There may be situations in which (as a result of 
+material breach or other liability) Customer is entitled to make a claim 
+against Datical. In each situation (regardless of the form of the legal action 
+(e.g. contract or tort claims)), Datical is not responsible for any damage and 
+does not have any liability beyond the greater of the amount paid or payable by 
+Customer to Datical within the 12 months prior to the event that gave rise to 
+the claim and in no event is Datical responsible for any: loss of data or 
+information; lost profits, revenue, or productivity; or other special, 
+consequential, incidental or indirect damages.
+
+8. INTELLECTUAL PROPERTY INDEMNITY
+a. Defense of Third Party Claims. Datical will defend or settle any third party 
+claim against Customer to the extent that such claim alleges that the Software 
+violates a copyright, patent, trademark or other intellectual property right, 
+if Customer, promptly notifies Datical of the claim in writing, cooperates with 
+Datical in the defense, and allows Datical to solely control the defense or 
+settlement of the claim. Costs. Datical will pay infringement claim defense 
+costs incurred as part of its obligations above, and Datical negotiated 
+settlement amounts, and court awarded damages. Process. If such a claim appears 
+likely, then Datical may modify the Software, procure the necessary rights, or 
+replace it with the functional equivalent. If Datical determines that none of 
+these are reasonably available, then Datical may terminate the Software and 
+refund any prepaid and unused fees. Exclusions. Datical has no obligation for 
+any claim arising from: Datical’s compliance with Customer’s specifications; A 
+combination of the Software with other technology where the infringement would 
+not occur but for the combination; or Technology not provided by Datical. THIS 
+SECTION CONTAINS CUSTOMER’S EXCLUSIVE REMEDIES AND DATICAL’S SOLE LIABILITY FOR 
+INTELLECTUAL PROPERTY INFRINGEMENT CLAIMS.
+
+9. GOVERNING LAW AND EXCLUSIVE FORUM. This agreement is governed by the laws of 
+the State of Delaware (without regard to conflicts of law principles) for any 
+dispute between the parties or relating in any way to the subject matter of 
+this agreement. Any suit or legal proceeding must be exclusively brought in the 
+federal or state courts for Travis County, Texas, and Customer submits to this 
+personal jurisdiction and venue. Nothing in this agreement prevents either 
+party from seeking injunctive relief in a court of competent jurisdiction. The 
+prevailing party in litigation is entitled to recover its attorneys’ fees and 
+costs from the other party.
+
+10. OTHER TERMS.
+a. Entire Agreement. This agreement and the order constitute the entire 
+agreement between the parties and supersede any prior or contemporaneous 
+negotiations or agreements, whether oral or written, related to this subject 
+matter. Customer is not relying on any representation concerning this subject 
+matter, oral or written, not included in this agreement. No representation, 
+promise or inducement not included in this agreement is binding.
+b. Non-Assignment. Neither party may assign or transfer this agreement to a 
+third party, nor delegate any duty, except that the agreement and all orders 
+may be assigned, without the consent of the other party, as part of a merger, 
+or sale of all or substantially all of the business or assets, of a party.
+c. Independent Contractors. The parties are independent contractors with 
+respect to each other. 
+d. Enforceability. If any term of this agreement is invalid or unenforceable, 
+the other terms remain in effect. 
+e. Survival of Terms and Force Majeure. All terms that by their nature survive 
+termination of this agreement for each party to receive the benefits and 
+protections of this agreement, will survive. Neither party is liable for events 
+beyond its reasonable control, including, without limitation force majeure 
+events.
+f. Modification Only in Writing. No modification or waiver of any term of this 
+agreement is effective unless signed by both parties.
+g. Export Compliance. Customer must comply with all applicable export control 
+laws of the United States, foreign jurisdictions and other applicable laws and 
+regulations.
+h. US GOVERNMENT RESTRICTED RIGHTS. If Customer is a United States government 
+agency or acquired the license to the Software hereunder pursuant to a 
+government contract or with government funds, then as defined in FAR §2.101, 
+DFAR §252.227-7014(a)(1) and DFAR §252.227-7014(a)(5) or otherwise, all 
+Software provided in connection with this agreement are “commercial items,” 
+“commercial computer software” or “commercial computer software documentation.” 
+Consistent with DFAR §227.7202 and FAR §12.212, any use, modification, 
+reproduction, release, performance, display, disclosure or distribution by or 
+for the United States government is governed solely by the terms of this 
+agreement and is prohibited except to the extent permitted by the terms of this 
+agreement.
+i. No PO Terms. Datical rejects conflicting terms of a Customer’s 
+form-purchasing document.
+j. Order of Precedence. If there is an inconsistency between this agreement and 
+an order, the order prevails.
