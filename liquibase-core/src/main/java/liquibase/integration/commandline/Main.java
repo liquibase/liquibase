@@ -180,7 +180,7 @@ public class Main {
                 return 0;
             }
 
-            if ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0])) {
+            if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                 main.printHelp(System.out);
                 return 0;
             } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
