@@ -43,6 +43,8 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     @Override
     protected CommandResult run() throws Exception {
+        SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
+
         DiffResult diffResult = createDiffResult();
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, getDiffOutputControl());

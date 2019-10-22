@@ -1,12 +1,15 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.*;
 import liquibase.exception.LiquibaseException;
+import liquibase.license.LicenseServiceUtils;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -91,6 +94,8 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
 
     @Override
     protected SnapshotCommandResult run() throws Exception {
+        SnapshotCommand.logUnsupportedDatabase(database, this.getClass());
+
         SnapshotControl snapshotControl = new SnapshotControl(database);
         snapshotControl.setSnapshotListener(snapshotListener);
 
@@ -145,4 +150,14 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
             this.snapshot.merge(resultToMerge.snapshot);
         }
     }
+
+    public static void logUnsupportedDatabase(Database database, Class callingClass) {
+        if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
+            if (!(database instanceof MSSQLDatabase
+                    || database instanceof OracleDatabase)) {
+                Scope.getCurrentScope().getLog(callingClass).info("This command does not yet capture Liquibase Pro additional object types on " + database.getShortName());
+            }
+        }
+    }
+
 }

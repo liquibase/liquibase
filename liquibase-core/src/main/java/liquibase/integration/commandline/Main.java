@@ -206,7 +206,7 @@ public class Main {
             if (licenseService != null) {
 
                 if (main.liquibaseProLicenseKey == null) {
-                    log.info(LogType.LOG, "No license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                    log.info(LogType.LOG, "No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
                 } else {
                     Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                     LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
