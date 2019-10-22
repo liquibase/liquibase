@@ -33,6 +33,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
+        validationErrors.checkDisallowedField("catalogName", setColumnRemarksStatement.getCatalogName(), database, MSSQLDatabase.class);
         return validationErrors;
     }
 
@@ -92,11 +93,8 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                     "@level2type = N'COLUMN', " +
                     "@level2name = @ColumnName; " +
                     "END")};
-            List<Sql> sqlList = new ArrayList<>(Arrays.asList(generatedSql));
-            if (statement.getCatalogName() != null) {
-                surroundWithCatalogSets(sqlList, statement.getCatalogName(), database);
-            }
-            return sqlList.toArray(new Sql[0]);
+
+            return generatedSql;
         } else {
             return new Sql[]{new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
                     + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
