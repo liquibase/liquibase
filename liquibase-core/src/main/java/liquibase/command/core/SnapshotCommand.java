@@ -10,6 +10,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.license.LicenseServiceUtils;
+import liquibase.logging.LogType;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -156,7 +157,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
         if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
             if (!(database instanceof MSSQLDatabase
                     || database instanceof OracleDatabase)) {
-                Scope.getCurrentScope().getLog(callingClass).info("This command does not yet capture Liquibase Pro additional object types on " + database.getShortName());
+                Scope.getCurrentScope().getLog(callingClass).info(LogType.USER_MESSAGE, "INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
             }
         }
     }
