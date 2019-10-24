@@ -19,6 +19,7 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
@@ -143,7 +144,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
                 format = "txt";
             }
 
-            return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
+            return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize(snapshot, true);
         }
 
         public void merge(SnapshotCommandResult resultToMerge) {
