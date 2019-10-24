@@ -1198,8 +1198,7 @@ public class Main {
             if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(
                         createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons
-                );
+                        database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons, new PrintStream(getOutputStream()));
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
@@ -1608,15 +1607,12 @@ public class Main {
                 this.liquibaseSchemaName, this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
     }
 
-    private Writer getOutputWriter() throws IOException {
-        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getOutputEncoding();
-
+    private OutputStream getOutputStream() throws IOException {
         if (outputFile != null) {
             FileOutputStream fileOut;
             try {
                 fileOut = new FileOutputStream(outputFile, false);
-                return new OutputStreamWriter(fileOut, charsetName);
+                return fileOut;
             } catch (IOException e) {
                 LogService.getLog(getClass()).severe(LogType.LOG, String.format(
                         coreBundle.getString("could.not.create.output.file"),
@@ -1624,8 +1620,16 @@ public class Main {
                 throw e;
             }
         } else {
-            return new OutputStreamWriter(System.out, charsetName);
+            return System.out;
         }
+
+    }
+
+    private Writer getOutputWriter() throws IOException {
+        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                .getOutputEncoding();
+
+        return new OutputStreamWriter(getOutputStream(), charsetName);
     }
 
     /**
