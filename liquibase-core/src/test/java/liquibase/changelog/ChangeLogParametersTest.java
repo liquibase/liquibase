@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 
-public class ChangeLogParametersTest {
+public class  ChangeLogParametersTest {
 
     @Before
     public void before() {
@@ -101,5 +101,146 @@ public class ChangeLogParametersTest {
         inner2SamePath.setPhysicalFilePath("b");
         Object aKey = changeLogParameters.getValue("aKey", inner2SamePath);
         assertEquals("bValue", aKey);
+    }
+
+    @Test
+    /**
+     * db.changelog-master.xml
+     * - table_1.xml (table.name=table_1 global=false)
+     * - - include templates/common_columns_1.xml
+     * - table_2.xml (table.name=table_2 global=false)
+     * - - include templates/common_columns_2.xml
+     * - - - include templates/common_columns_1.xml
+     *
+     *  For local parameters, return the value of the definition in the closest direct ancestor of the requesting changeSet.
+     */
+    public void getParameterValue_ReturnValueOfLocalParameterDefinedInTheClosestAncestorChangeSet() {
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
+        DatabaseChangeLog master = new DatabaseChangeLog("db/db.changelog-master.xml");
+
+        DatabaseChangeLog table_1 = new DatabaseChangeLog("db/changelog/table_1.xml");
+        table_1.setParentChangeLog(master);
+        changeLogParameters.set("table.name", "table_1", "junit", "junitLabel", "baddb, h2", false, table_1);
+        DatabaseChangeLog common_columns_1_of_table_1 = new DatabaseChangeLog("db/templates/common_columns_1.xml");
+        common_columns_1_of_table_1.setParentChangeLog(table_1);
+
+        assertEquals("table_1", changeLogParameters.getValue("table.name", common_columns_1_of_table_1));
+        assertEquals("table_1", changeLogParameters.getValue("table.name", table_1));
+
+        DatabaseChangeLog table_2 = new DatabaseChangeLog("db/changelog/table_2.xml");
+        table_2.setParentChangeLog(master);
+        changeLogParameters.set("table.name", "table_2", "junit", "junitLabel", "baddb, h2", false, table_2);
+        DatabaseChangeLog common_columns_2_of_table_2 = new DatabaseChangeLog("db/templates/common_columns_2.xml");
+        common_columns_2_of_table_2.setParentChangeLog(table_2);
+        DatabaseChangeLog common_columns_1_of_table_2 = new DatabaseChangeLog("db/templates/common_columns_1.xml");
+        common_columns_1_of_table_2.setParentChangeLog(common_columns_2_of_table_2);
+
+        assertEquals("should return local value of closest ancestor changeSet (here the grand parent)", "table_2", changeLogParameters.getValue("table.name", common_columns_1_of_table_2));
+        assertEquals("should return local value of closest ancestor changeSet (here the direct parent)", "table_2", changeLogParameters.getValue("table.name", common_columns_2_of_table_2));
+        assertEquals("should return local value of changeSet", "table_2", changeLogParameters.getValue("table.name", table_2));
+    }
+
+    @Test
+    /**
+     * db.changelog-master.xml
+     * - table_1.xml (table.name=table_1 global=false)
+     * - - include templates/common_columns_1.xml
+     * - table_2.xml (table.name=table_2 global=false)
+     * - - include templates/common_columns_2.xml
+     * - - - include templates/common_columns_1.xml
+     *
+     *  Return <code>null</code> if there is a local parameter, but its not defined in an direct ancestor changeSet.
+     */
+    public void getParameterValue_ReturnNullIfLocalParameterNotInAncestorChangeSet() {
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
+        DatabaseChangeLog master = new DatabaseChangeLog("db/db.changelog-master.xml");
+
+        DatabaseChangeLog table_1 = new DatabaseChangeLog("db/changelog/table_1.xml");
+        table_1.setParentChangeLog(master);
+        changeLogParameters.set("table.name", "table_1", "junit", "junitLabel", "baddb, h2", false, table_1);
+        DatabaseChangeLog common_columns_1_of_table_1 = new DatabaseChangeLog("db/templates/common_columns_1.xml");
+        common_columns_1_of_table_1.setParentChangeLog(table_1);
+
+        assertEquals("table_1", changeLogParameters.getValue("table.name", common_columns_1_of_table_1));
+        assertEquals("table_1", changeLogParameters.getValue("table.name", table_1));
+
+        DatabaseChangeLog table_2 = new DatabaseChangeLog("db/changelog/table_2.xml");
+        table_2.setParentChangeLog(master);
+        // programmer forgot to define the property "table.name" in this changeSet
+        // changeLogParameters.set("table.name", "table_2", "junit", "junitLabel", "baddb, h2", false, table_2);
+        DatabaseChangeLog common_columns_2_of_table_2 = new DatabaseChangeLog("db/templates/common_columns_2.xml");
+        common_columns_2_of_table_2.setParentChangeLog(table_2);
+        DatabaseChangeLog common_columns_1_of_table_2 = new DatabaseChangeLog("db/templates/common_columns_1.xml");
+        common_columns_1_of_table_2.setParentChangeLog(common_columns_2_of_table_2);
+
+        // even though there is a single value for "table.name" it is not being used since it does not belong to an ancestor of the requesting changeSet
+        assertNull("should return no value since there is no matching global key and no local key belonging to the current changeSet or an ancestor changeSet", changeLogParameters.getValue("table.name", common_columns_1_of_table_2));
+        assertNull("should return no value since there is no matching global key and no local key belonging to the current changeSet or an ancestor changeSet", changeLogParameters.getValue("table.name", common_columns_2_of_table_2));
+        assertNull("should return no value since there is no matching global key and no local key belonging to the current changeSet or an ancestor changeSet", changeLogParameters.getValue("table.name", table_2));
+    }
+
+    @Test
+    /**
+     * db.changelog-master.xml
+     * - table_1.xml (table.name=table_1 global=false)
+     * - - include templates/common_columns_1.xml
+     * - table_2.xml (table.name=table_2 global=false)
+     * - - include templates/common_columns_2.xml
+     * - - - include templates/common_columns_1.xml
+     *
+     *  Local parameters with the same name are ignore after the first global parameter with that same name.
+     */
+    public void getParameterValue_IgnoreLocalParameterAfterGlobalParameter() {
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
+        DatabaseChangeLog master = new DatabaseChangeLog("db/db.changelog-master.xml");
+
+        DatabaseChangeLog table_1 = new DatabaseChangeLog("db/changelog/table_1.xml");
+        table_1.setParentChangeLog(master);
+        changeLogParameters.set("table.name", "table_1", "junit", "junitLabel", "baddb, h2", true, table_1);
+        DatabaseChangeLog common_columns_1_of_table_1 = new DatabaseChangeLog("db/templates/common_columns_1.xml");
+        common_columns_1_of_table_1.setParentChangeLog(table_1);
+
+        assertEquals("table_1", changeLogParameters.getValue("table.name", common_columns_1_of_table_1));
+        assertEquals("table_1", changeLogParameters.getValue("table.name", table_1));
+
+        DatabaseChangeLog table_2 = new DatabaseChangeLog("db/changelog/table_2.xml");
+        table_2.setParentChangeLog(master);
+        changeLogParameters.set("table.name", "table_2", "junit", "junitLabel", "baddb, h2", false, table_2);
+        DatabaseChangeLog common_columns_2_of_table_2 = new DatabaseChangeLog("db/templates/common_columns_2.xml");
+        common_columns_2_of_table_2.setParentChangeLog(table_2);
+        DatabaseChangeLog common_columns_1_of_table_2 = new DatabaseChangeLog("db/templates/common_columns_1.xml");
+        common_columns_1_of_table_2.setParentChangeLog(common_columns_2_of_table_2);
+
+        // the local parameter value "table_2" is being ignored since there is already a global value defined
+        assertEquals("should return first global value", "table_1", changeLogParameters.getValue("table.name", common_columns_1_of_table_2));
+        assertEquals("should return first global value", "table_1", changeLogParameters.getValue("table.name", common_columns_2_of_table_2));
+        assertEquals("should return first global value", "table_1", changeLogParameters.getValue("table.name", table_2));
+    }
+
+    @Test
+    /**
+     * master.xml
+     * - table_1.xml (table.name=table_1 global=false)
+     * - - include_of_table_1.xml
+     * - - - include_of_include_of_table_1.xml
+     *
+     *  The same parameter defined multiple times on different levels of included files
+     */
+    public void getParameterValue_MultipleLocalParametersInOneHierarchy() {
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
+        DatabaseChangeLog master = new DatabaseChangeLog("master.xml");
+
+        DatabaseChangeLog table_1 = new DatabaseChangeLog("table_1.xml");
+        table_1.setParentChangeLog(master);
+        changeLogParameters.set("aKey", "aValue", "junit", "junitLabel", "baddb, h2", false, table_1);
+        DatabaseChangeLog include_of_table_1 = new DatabaseChangeLog("include_of_table_1.xml");
+        include_of_table_1.setParentChangeLog(table_1);
+        DatabaseChangeLog include_of_include_of_table_1 = new DatabaseChangeLog("include_of_include_of_table_1.xml");
+        include_of_include_of_table_1.setParentChangeLog(include_of_table_1);
+        changeLogParameters.set("aKey", "bValue", "junit", "junitLabel", "baddb, h2", false, include_of_include_of_table_1);
+
+        assertEquals("should return local value of changeSet", "bValue", changeLogParameters.getValue("aKey", include_of_include_of_table_1));
+        assertEquals("should return local value of closest ancestor changeSet (here the direct parent)", "aValue", changeLogParameters.getValue("aKey", include_of_table_1));
+        assertEquals("should return local value of changeSet", "aValue", changeLogParameters.getValue("aKey", table_1));
     }
 }
