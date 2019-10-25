@@ -168,8 +168,9 @@ public class ChangeLogParameters {
                 }
             }
 
-            // if none of the found parameters are global (all of them are local),
-            if (result == null) {
+            // if none of the found parameters are global (all of them are local) and
+            // the parameter is searched in the context of a changeSet (otherwise implicitly a global parameter is wanted)
+            if (result == null && changeLog != null) {
                 // look for the first parameter belonging to the current changeLog or the closest ancestor of the changeLog
                 DatabaseChangeLog changeLogOrParent = changeLog;
                 do {
