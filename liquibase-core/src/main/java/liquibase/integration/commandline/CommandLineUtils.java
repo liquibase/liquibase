@@ -302,8 +302,8 @@ public class CommandLineUtils {
         ));
 
         if (StringUtils.isNotEmpty(myVersion) && StringUtils.isNotEmpty(buildTimeString)) {
-            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion,
-                buildTimeString));
+            myVersion = myVersion + " #"+ LiquibaseUtil.getBuildNumber();
+            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion, buildTimeString));
         }
 
         return banner.toString();

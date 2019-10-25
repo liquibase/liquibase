@@ -20,6 +20,10 @@ public class LiquibaseUtil {
         return getBuildInfo("build.timestamp");
     }
 
+    public static String getBuildNumber() {
+        return getBuildInfo("build.number");
+    }
+
     // will extract the information from liquibase.build.properties, which should be a properties file in
     // the jar file.
     private static String getBuildInfo(String propertyId) {
