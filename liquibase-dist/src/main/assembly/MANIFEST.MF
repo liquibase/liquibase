@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Main-Class: liquibase.integration.commandline.Main
 Build-Time: ${build.timestamp}
+Build-Number: ${build.number}
 Liquibase-Version: ${project.version}
 Liquibase-Package: liquibase.change,
  liquibase.command,

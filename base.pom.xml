@@ -13,13 +13,19 @@
     <name>${project.artifactId}</name>
 
     <properties>
-        <liquibase.version>3.8.1-SNAPSHOT</liquibase.version>
+        <liquibase.base.version>3.8.1</liquibase.base.version>
+        <liquibase.version.qualifier>-local</liquibase.version.qualifier>
+        <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
+        <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}</liquibase.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
         <maven.enforcer.requireJavaVersion>${maven.compiler.source}</maven.enforcer.requireJavaVersion>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
+        <build.number>0</build.number>
+        <build.commit>unknown</build.commit>
+        <build.commit_pro>unknown</build.commit_pro>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.version>5.0.12.RELEASE</spring.version>
