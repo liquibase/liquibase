@@ -29,20 +29,30 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>aggregate-source</id>
-                        <goals>
-                            <goal>aggregate</goal>
-                        </goals>
-                        <phase>compile</phase>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- TODO: re-enable without breaking signing -->
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-source-plugin</artifactId>-->
+            <!--                <version>3.0.1</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>aggregate-source</id>-->
+            <!--                        <goals>-->
+            <!--                            <goal>aggregate</goal>-->
+            <!--                        </goals>-->
+            <!--                        <phase>package</phase>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--                <configuration>-->
+            <!--                    <outputDirectory>liquibase-dist/target</outputDirectory>-->
+            <!--                    <finalName>liquibase-${liquibase.version}</finalName>-->
+            <!--                    <attach>true</attach>-->
+            <!--                    <excludes>-->
+            <!--                        <exclude>com/datical/**</exclude>-->
+            <!--                        <exclude>**/pro/**</exclude>-->
+            <!--                    </excludes>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
 
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
