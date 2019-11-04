@@ -51,7 +51,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setResourceAccessor(new ClassLoaderResourceAccessor());
+        change.setResourceAccessor(new JUnitResourceAccessor());
 
         SqlStatement[] statements = change.generateStatements(database);
 
@@ -70,7 +70,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setResourceAccessor(new ClassLoaderResourceAccessor());
+        change.setResourceAccessor(new JUnitResourceAccessor());
         change.setOnlyUpdate(true);
 
         SqlStatement[] statements = change.generateStatements(database);
@@ -86,7 +86,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
         String md5sum1 = refactoring.generateCheckSum().toString();
 
@@ -122,7 +122,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
         //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         refactoring.setCommentLineStartsWith("") //comments disabled
@@ -141,7 +141,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
         //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         refactoring.setCommentLineStartsWith("") //comments disabled
@@ -160,7 +160,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
         //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         refactoring.setCommentLineStartsWith("#");

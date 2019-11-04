@@ -10,6 +10,7 @@ public class SetNullableStatement extends AbstractSqlStatement {
     private String columnDataType;
     private boolean nullable;
     private String constraintName;
+    private boolean validate = true;
 
     public SetNullableStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType, boolean nullable) {
         this.catalogName = catalogName;
@@ -23,6 +24,15 @@ public class SetNullableStatement extends AbstractSqlStatement {
     public SetNullableStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType, boolean nullable, String constraintName) {
         this(catalogName, schemaName, tableName, columnName, columnDataType, nullable);
         this.constraintName = constraintName;
+    }
+
+    public SetNullableStatement(String catalogName, String schemaName, String tableName, String columnName,
+                                String columnDataType, boolean nullable, String constraintName, Boolean validate) {
+        this(catalogName, schemaName, tableName, columnName, columnDataType, nullable);
+        this.constraintName = constraintName;
+        if (validate!=null) {
+            this.validate = validate;
+        }
     }
 
     public String getCatalogName() {
@@ -51,5 +61,13 @@ public class SetNullableStatement extends AbstractSqlStatement {
 
     public String getConstraintName() {
         return constraintName;
+    }
+
+    public boolean isValidate() {
+        return validate;
+    }
+
+    public void setValidate(boolean validate) {
+        this.validate = validate;
     }
 }

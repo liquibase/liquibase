@@ -50,11 +50,9 @@ public class FileUtil {
         }
         try (
             FileInputStream fileInputStream = new FileInputStream(file);
-            Reader reader = new InputStreamReader(fileInputStream, LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class).getOutputEncoding());
         ) {
             
-            return StreamUtil.getReaderContents(reader);
+            return StreamUtil.readStreamAsString(fileInputStream);
         } catch (FileNotFoundException e) {
             return null;
         }

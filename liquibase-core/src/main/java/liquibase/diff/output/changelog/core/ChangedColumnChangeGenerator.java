@@ -1,13 +1,16 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.Scope;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.BooleanType;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
@@ -113,6 +116,8 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setTableName(column.getRelation().getName());
                 change.setColumnName(column.getName());
                 change.setColumnDataType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toString());
+                change.setValidate(column.shouldValidate());
+                change.setConstraintName(column.getAttribute("notNullConstraintName", String.class));
                 changes.add(change);
             }
         }
@@ -122,7 +127,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         Difference difference = differences.getDifference("autoIncrementInformation");
         if (difference != null) {
             if (difference.getReferenceValue() == null) {
-                LogService.getLog(getClass()).info(LogType.LOG, "ChangedColumnChangeGenerator cannot fix dropped auto increment values");
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "ChangedColumnChangeGenerator cannot fix dropped auto increment values");
                 //todo: Support dropping auto increments
             } else {
                 AddAutoIncrementChange change = new AddAutoIncrementChange();
@@ -235,7 +240,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
 
                 changes.add(change);
 
-            } else {
+            } else if (shouldTriggerAddDefaultChange(column, difference, comparisonDatabase)) {
                 AddDefaultValueChange change = new AddDefaultValueChange();
                 if (control.getIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
@@ -247,8 +252,23 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setColumnName(column.getName());
                 change.setColumnDataType(columnDataType.toString());
 
-                if (value instanceof Boolean) {
-                    change.setDefaultValueBoolean((Boolean) value);
+                //
+                // Make sure we handle BooleanType values which are not Boolean
+                //
+                if (value instanceof Boolean || columnDataType instanceof BooleanType) {
+                    if (value instanceof Boolean) {
+                        change.setDefaultValueBoolean((Boolean) value);
+                    }
+                    else if (columnDataType instanceof BooleanType) {
+                        if (value instanceof DatabaseFunction) {
+                            if (value.equals(new DatabaseFunction("'false'"))) {
+                                change.setDefaultValueBoolean(false);
+                            }
+                            else {
+                                change.setDefaultValueBoolean(true);
+                            }
+                        }
+                    }
                 } else if (value instanceof Date) {
                     change.setDefaultValueDate(new ISODateFormat().format(((Date) value)));
                 } else if (value instanceof Number) {
@@ -264,5 +284,19 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 changes.add(change);
             }
         }
+    }
+
+    /**
+     * For {@link PostgresDatabase} if column is of autoIncrement/SERIAL type we can ignore 'defaultValue' differences
+     * (because its execution of sequence.next() anyway)
+     */
+    private boolean shouldTriggerAddDefaultChange(Column column, Difference difference, Database comparisonDatabase) {
+        if (!(comparisonDatabase instanceof PostgresDatabase)) {
+            return true;
+        }
+        if (column.getAutoIncrementInformation() != null && difference.getReferenceValue() instanceof DatabaseFunction) {
+            return false;
+        }
+        return true;
     }
 }

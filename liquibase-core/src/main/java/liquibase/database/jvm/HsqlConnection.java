@@ -1,5 +1,6 @@
 package liquibase.database.jvm;
 
+import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
@@ -24,7 +25,7 @@ public class HsqlConnection extends JdbcConnection {
         try {
             st = createStatement();
             final String sql = "CHECKPOINT";
-            LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
             st.execute(sql);
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -41,7 +42,7 @@ public class HsqlConnection extends JdbcConnection {
         try {
             st = createStatement();
             final String sql = "CHECKPOINT";
-            LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
             st.execute(sql);
         } catch (SQLException e) {
             throw new DatabaseException(e);

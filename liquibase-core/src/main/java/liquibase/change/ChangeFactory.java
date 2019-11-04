@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
@@ -21,14 +22,8 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
 
     private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
 
-    private Logger log;
-
     private ChangeFactory() {
-      log = LogService.getLog(getClass());
-    }
 
-    protected Logger getLogger() {
-      return log;
     }
 
     @Override
@@ -95,7 +90,7 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
             return null;
         }
         try {
-            return plugin.getClass().newInstance();
+            return plugin.getClass().getConstructor().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -112,10 +107,5 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         }
 
         return returnMap;
-    }
-
-    // exposed for test only
-    protected void setLogger(Logger mockLogger) {
-      log = mockLogger;
     }
 }

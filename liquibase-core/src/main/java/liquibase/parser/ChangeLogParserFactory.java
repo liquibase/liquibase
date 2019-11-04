@@ -5,20 +5,14 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class ChangeLogParserFactory {
 
     private static ChangeLogParserFactory instance;
 
-    private List<ChangeLogParser> parsers;
-    private Comparator<ChangeLogParser> changelogParserComparator;
-
+    private List<ChangeLogParser> parsers = new ArrayList<>();
 
     public static synchronized void reset() {
         instance = new ChangeLogParserFactory();
@@ -26,7 +20,7 @@ public class ChangeLogParserFactory {
 
     public static synchronized ChangeLogParserFactory getInstance() {
         if (instance == null) {
-             instance = new ChangeLogParserFactory();
+            instance = new ChangeLogParserFactory();
         }
         return instance;
     }
@@ -39,21 +33,16 @@ public class ChangeLogParserFactory {
     }
 
     private ChangeLogParserFactory() {
-        changelogParserComparator = (o1, o2) -> Integer.compare(o2.getPriority(), o1.getPriority());
-
-        parsers = new ArrayList<>();
         try {
-            for (ChangeLogParser parser : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogParser.class)) {
-                    register(parser);
-            }
+            List<ChangeLogParser> parser = Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogParser.class);
+            register(parser);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
-
     }
 
     public List<ChangeLogParser> getParsers() {
-        return parsers;
+        return new ArrayList<>(parsers);
     }
 
     public ChangeLogParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor) throws LiquibaseException {
@@ -63,15 +52,23 @@ public class ChangeLogParserFactory {
             }
         }
 
-        throw new UnknownChangelogFormatException("Cannot find parser that supports "+fileNameOrExtension);
+        throw new UnknownChangelogFormatException("Cannot find parser that supports " + fileNameOrExtension);
     }
 
-    public void register(ChangeLogParser changeLogParser) {
-        parsers.add(changeLogParser);
-        Collections.sort(parsers, changelogParserComparator);
+    public void register(ChangeLogParser changeLogParsers) {
+        register(Collections.singletonList(changeLogParsers));
+    }
+
+    private void register(List<ChangeLogParser> changeLogParsers) {
+        parsers.addAll(changeLogParsers);
+        parsers.sort(ChangeLogParser.COMPARATOR);
     }
 
     public void unregister(ChangeLogParser changeLogParser) {
         parsers.remove(changeLogParser);
+    }
+
+    public void unregisterAllParsers() {
+        parsers.clear();
     }
 }

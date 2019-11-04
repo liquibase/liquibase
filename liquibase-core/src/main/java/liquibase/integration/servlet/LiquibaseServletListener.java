@@ -3,6 +3,7 @@ package liquibase.integration.servlet;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.GlobalConfiguration;
@@ -149,7 +150,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
         GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run on " + hostName
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Liquibase did not run on " + hostName
                     + " because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                             + " was set to false");
             return false;

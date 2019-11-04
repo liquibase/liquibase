@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -38,7 +39,7 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogTableName()
                                 );
-                        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                        Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok
@@ -50,7 +51,7 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogLockTableName()
                                 );
-                        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                        Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok
@@ -201,7 +202,7 @@ public class LockServiceExecuteTest {
 //
 //                        database.commit();
 //
-////                        Database clearDatabase = database.getClass().newInstance();
+////                        Database clearDatabase = database.getClass().getConstructor().newInstance();
 ////                        clearDatabase.setConnection(database.getConnection());
 //
 //                        Executor originalTemplate = ExecutorService.getInstance().getExecutor(database);

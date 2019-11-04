@@ -37,18 +37,14 @@ public class ForeignKey extends AbstractDatabaseObject{
 
         List<Column> objects = new ArrayList<>();
         if (getPrimaryKeyColumns() != null) {
-            for (Column column : getPrimaryKeyColumns()) {
-                objects.add(column);
-            }
+            objects.addAll(getPrimaryKeyColumns());
         }
 
         if (getForeignKeyColumns() != null) {
-            for (Column column : getForeignKeyColumns()) {
-                objects.add(column);
-            }
+            objects.addAll(getForeignKeyColumns());
         }
 
-        return objects.toArray(new DatabaseObject[objects.size()]);
+        return objects.toArray(new DatabaseObject[0]);
     }
 
     @Override
@@ -217,7 +213,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         ForeignKey that = (ForeignKey) o;
 
         if (this.getSchema() != null && that.getSchema() != null) {
-            boolean schemasEqual = StringUtil.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtil.trimToEmpty(that.getSchema().getName()));
+            boolean schemasEqual = this.getSchema().equals(that.getSchema());
             if (!schemasEqual) {
                 return false;
             }

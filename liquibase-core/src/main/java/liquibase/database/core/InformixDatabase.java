@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -192,7 +193,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	}
 
 	@Override
-	public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
+	public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy, final String generationType, final Boolean defaultOnNull) {
 		return "";
 	}
 
@@ -248,7 +249,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                 return schemaName.trim();
             }
         } catch (Exception e) {
-            LogService.getLog(getClass()).info(LogType.LOG, "Error getting connection schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting connection schema", e);
         }
         return null;
     }

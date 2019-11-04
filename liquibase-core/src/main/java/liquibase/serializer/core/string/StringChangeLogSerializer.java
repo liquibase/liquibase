@@ -10,7 +10,11 @@ import liquibase.util.StringUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class StringChangeLogSerializer implements ChangeLogSerializer {
 
@@ -38,7 +42,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     private String serializeObject(LiquibaseSerializable objectToSerialize, int indent) {
         try {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             buffer.append("[");
 
             SortedSet<String> values = new TreeSet<>();
@@ -53,7 +57,6 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                 if (value instanceof LiquibaseSerializable) {
                     values.add(indent(indent) + serializeObject((LiquibaseSerializable) value, indent + 1));
                 } else {
-                    if (value != null) {
                         if (value instanceof Map) {
                             values.add(indent(indent) + field + "=" + serializeObject((Map) value, indent + 1));
                         } else if (value instanceof Collection) {
@@ -70,7 +73,6 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                             }
                             values.add(indent(indent) + field + "=\"" + valueString + "\"");
                         }
-                    }
                 }
             }
 
@@ -97,18 +99,18 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             return "[]";
         }
 
-        String returnString = "[\n";
+        StringBuilder returnString = new StringBuilder("[\n");
         for (Object object : collection) {
             if (object instanceof LiquibaseSerializable) {
-                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
+                returnString.append(indent(indent)).append(serializeObject((LiquibaseSerializable) object, indent + 1)).append(",\n");
             } else {
-                returnString += indent(indent) + object.toString() + ",\n";
+                returnString.append(indent(indent)).append(object.toString()).append(",\n");
             }
         }
-        returnString = returnString.replaceFirst(",$", "");
-        returnString += indent(indent - 1) + "]";
+        returnString = new StringBuilder(returnString.toString().replaceFirst(",$", ""));
+        returnString.append(indent(indent - 1)).append("]");
 
-        return returnString;
+        return returnString.toString();
 
     }
 
@@ -117,18 +119,18 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             return "[]";
         }
 
-        String returnString = "[\n";
+        StringBuilder returnString = new StringBuilder("[\n");
         for (Object object : collection) {
             if (object instanceof LiquibaseSerializable) {
-                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
+                returnString.append(indent(indent)).append(serializeObject((LiquibaseSerializable) object, indent + 1)).append(",\n");
             } else {
-                returnString += indent(indent) + object.toString() + ",\n";
+                returnString.append(indent(indent)).append(object.toString()).append(",\n");
             }
         }
-        returnString = returnString.replaceFirst(",$", "");
-        returnString += indent(indent - 1) + "]";
+        returnString = new StringBuilder(returnString.toString().replaceFirst(",$", ""));
+        returnString.append(indent(indent - 1)).append("]");
 
-        return returnString;
+        return returnString.toString();
 
     }
 
@@ -137,15 +139,19 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             return "[]";
         }
 
-        String returnString = "{\n";
+        StringBuilder returnString = new StringBuilder("{\n");
         for (Object key : new TreeSet(collection.keySet())) {
-            returnString += indent(indent) + key.toString() + "=\"" + collection.get(key) + "\",\n";
+            returnString
+                .append(indent(indent))
+                .append(key.toString())
+                .append("=\"")
+                .append(collection.get(key))
+                .append("\",\n");
         }
-        returnString = returnString.replaceFirst(",$", "");
-        returnString += indent(indent - 1) + "}";
-
-        return returnString;
-
+        return String.format("%s%s}",
+            returnString.toString().replaceFirst(",$", ""),
+            indent(indent - 1)
+        );
     }
 
     @Override

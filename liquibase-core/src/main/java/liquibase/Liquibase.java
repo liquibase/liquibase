@@ -33,6 +33,7 @@ import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
+import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -60,7 +61,7 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class Liquibase {
 
-    private static final Logger LOG = LogService.getLog(Liquibase.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(Liquibase.class);
     protected static final int CHANGESET_ID_NUM_PARTS = 3;
     protected static final int CHANGESET_ID_AUTHOR_PART = 2;
     protected static final int CHANGESET_ID_CHANGESET_PART = 1;
@@ -586,20 +587,26 @@ public class Liquibase {
         final Executor executor = ExecutorService.getInstance().getExecutor(database);
         String rollbackScriptContents;
         try {
-            Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
+            InputStreamList streams = resourceAccessor.openStreams(null, rollbackScript);
             if ((streams == null) || streams.isEmpty()) {
                 throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
             } else if (streams.size() > 1) {
                 throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
             }
-            rollbackScriptContents = StreamUtil.getStreamContents(streams.iterator().next());
+            rollbackScriptContents = StreamUtil.readStreamAsString(streams.iterator().next());
         } catch (IOException e) {
             throw new LiquibaseException("Error reading rollbackScript "+executor+": "+e.getMessage());
         }
 
-        RawSQLChange rollbackChange = new RawSQLChange(rollbackScriptContents);
-        rollbackChange.setSplitStatements(true);
-        rollbackChange.setStripComments(true);
+        //
+        // Expand changelog properties
+        //
+        changeLogParameters.setContexts(contexts);
+        changeLogParameters.setLabels(labelExpression);
+        DatabaseChangeLog changelog = getDatabaseChangeLog();
+        rollbackScriptContents = changeLogParameters.expandExpressions(rollbackScriptContents, changelog);
+
+        RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
 
         try {
             executor.execute(rollbackChange);
@@ -608,13 +615,20 @@ public class Liquibase {
                 "Error executing rollback script. ChangeSets will still be marked as rolled back: " + e.getMessage(),
                 e
             );
-            LogService.getLog(getClass()).severe(LogType.LOG, ex.getMessage());
+            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, ex.getMessage());
             LOG.severe(LogType.LOG, "Error executing rollback script", ex);
             if (changeExecListener != null) {
                 changeExecListener.runFailed(null, databaseChangeLog, database, ex);
             }
         }
         database.commit();
+    }
+
+    protected RawSQLChange buildRawSQLChange(String rollbackScriptContents) {
+        RawSQLChange rollbackChange = new RawSQLChange(rollbackScriptContents);
+        rollbackChange.setSplitStatements(true);
+        rollbackChange.setStripComments(true);
+        return rollbackChange;
     }
 
     public void rollback(String tagToRollBackTo, String contexts, Writer output) throws LiquibaseException {
@@ -1555,6 +1569,43 @@ public class Liquibase {
 
     public void setChangeLogParameter(String key, Object value) {
         this.changeLogParameters.set(key, value);
+    }
+
+    /**
+     * Add safe database properties as changelog parameters.<br/>
+     * Safe properties are the ones that doesn't have side effects in liquibase state and also don't change in during the liquibase execution
+     * @param database Database which propeties are put in the changelog
+     * @throws DatabaseException
+     */
+    private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
+            setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null, null, null));
+            setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
+            setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
+            setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
+            setChangeLogParameter("database.databaseMajorVersion", database.getDatabaseMajorVersion());
+            setChangeLogParameter("database.databaseMinorVersion", database.getDatabaseMinorVersion());
+            setChangeLogParameter("database.databaseProductName", database.getDatabaseProductName());
+            setChangeLogParameter("database.databaseProductVersion", database.getDatabaseProductVersion());
+            setChangeLogParameter("database.defaultCatalogName", database.getDefaultCatalogName());
+            setChangeLogParameter("database.defaultSchemaName", database.getDefaultSchemaName());
+            setChangeLogParameter("database.defaultSchemaNamePrefix", StringUtil.trimToNull(database.getDefaultSchemaName())==null?"":"."+database.getDefaultSchemaName());
+            setChangeLogParameter("database.lineComment", database.getLineComment());
+            setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
+            setChangeLogParameter("database.liquibaseTablespaceName", database.getLiquibaseTablespaceName());
+            setChangeLogParameter("database.typeName", database.getShortName());
+            setChangeLogParameter("database.isSafeToRunUpdate", database.isSafeToRunUpdate());
+            setChangeLogParameter("database.requiresPassword", database.requiresPassword());
+            setChangeLogParameter("database.requiresUsername", database.requiresUsername());
+            setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
+            setChangeLogParameter("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
+            setChangeLogParameter("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
+            setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
+            setChangeLogParameter("database.supportsSequences", database.supportsSequences());
+            setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
+    }
+
+    private LockService getLockService() {
+        return LockServiceFactory.getInstance().getLockService(database);
     }
 
     public void setChangeExecListener(ChangeExecListener listener) {

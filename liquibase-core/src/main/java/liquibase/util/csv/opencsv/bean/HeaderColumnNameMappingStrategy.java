@@ -224,12 +224,11 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
    /**
     * Creates an object to be mapped.
     * @return an object of type T.
-    * @throws InstantiationException - thrown on error creating object.
-    * @throws IllegalAccessException - thrown on error creating object.
+    * @throws ReflectiveOperationException - thrown on error creating object.
     */
    @Override
-   public T createBean() throws InstantiationException, IllegalAccessException {
-      return type.newInstance();
+   public T createBean() throws ReflectiveOperationException {
+      return type.getConstructor().newInstance();
    }
 
    /**

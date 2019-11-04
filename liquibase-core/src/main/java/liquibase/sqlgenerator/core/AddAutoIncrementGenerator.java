@@ -57,7 +57,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
                 database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement
                     .getTableName(), statement.getColumnName()) +
                 " SET " +
-                database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
+                database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy(), null, null);
     	} else {
             sql = "ALTER TABLE " +
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement
@@ -69,7 +69,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
                 DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() +
                     "{autoIncrement:true}", database).toDatabaseDataType(database) +
                 " " +
-                database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
+                database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy(), statement.getGenerationType(), statement.getDefaultOnNull());
     	}
         return new Sql[]{
             new UnparsedSql(sql, getAffectedColumn(statement))

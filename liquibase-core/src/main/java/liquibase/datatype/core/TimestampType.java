@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
 import java.util.Locale;
 
@@ -109,7 +110,7 @@ public class TimestampType extends DateTimeType {
             }
             int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
             if (maxFractionalDigits < fractionalDigits) {
-                LogService.getLog(getClass()).warning(LogType.LOG, String.format(
+                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, String.format(
                         "A timestamp datatype with %d fractional digits was requested, but the DBMS %s only supports " +
                                 "%d digits. Because of this, the number of digits was reduced to %d.",
                         fractionalDigits, database.getDatabaseProductName(), maxFractionalDigits, maxFractionalDigits)
@@ -136,6 +137,11 @@ public class TimestampType extends DateTimeType {
                 // CORE-3229 Oracle 11g doesn't support WITHOUT clause in TIMESTAMP data type
                 if ((database instanceof OracleDatabase) && additionInformation.startsWith("WITHOUT")) {
                     // https://docs.oracle.com/cd/B19306_01/server.102/b14225/ch4datetime.htm#sthref389
+                    additionalInformation = null;
+                }
+
+                if ((database instanceof H2Database) && additionInformation.startsWith("WITHOUT")) {
+                    // http://www.h2database.com/html/datatypes.html
                     additionalInformation = null;
                 }
             }

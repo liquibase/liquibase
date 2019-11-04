@@ -5,25 +5,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.jvm.ColumnMapRowMapper;
+import liquibase.executor.jvm.RowMapperNotNullConstraintsResultSetExtractor;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtil;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -70,248 +72,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName,
-                                              final String fkName) throws DatabaseException {
-            return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
+            final String fkName) throws DatabaseException {
+            ForeignKeysResultSetCache foreignKeysResultSetCache = new ForeignKeysResultSetCache(database, catalogName, schemaName, tableName, fkName);
+            ResultSetCache importedKeys = getResultSetCache("getImportedKeys");
+            importedKeys.setBulkTracking(!(database instanceof MSSQLDatabase));
 
-                @Override
-                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
-                    return new ResultSetCache.RowData(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM"), database, row.getString("FKTABLE_NAME"), row.getString("FK_NAME"));
-                }
-
-                @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
-                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, fkName);
-                }
-
-                @Override
-                public boolean bulkContainsSchema(String schemaKey) {
-                    return database instanceof OracleDatabase;
-                }
-
-                @Override
-                public String getSchemaKey(CachedRow row) {
-                    return row.getString("FKTABLE_SCHEM");
-                }
-
-                @Override
-                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
-                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                    List<CachedRow> returnList = new ArrayList<>();
-
-                    List<String> tables = new ArrayList<>();
-                    String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
-                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
-                    if (database instanceof DB2Database) {
-                        return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
-                    } else if (database instanceof Db2zDatabase) {
-                       return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, tableName), database);
-                    } else {
-                        if (tableName == null) {
-                            for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
-                                tables.add(row.getString("TABLE_NAME"));
-                            }
-                        } else {
-                            tables.add(tableName);
-                        }
-
-                        for (String foundTable : tables) {
-                            if (database instanceof OracleDatabase) {
-                                throw new RuntimeException("Should have bulk selected");
-                            } else {
-                                ResultSet metaData =
-                                        null;
-                                try {
-                                    metaData = databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable);
-                                    returnList.addAll(extract(metaData));
-                                } catch (SQLException e) {
-                                    // SAP SQL Anywhere throws an SQL Exception when we try to get FOREIGN KEYs
-                                    // from a table, but the table has no FOREIGN KEYs.
-                                    if ((database instanceof SybaseASADatabase) && e.getSQLState().equalsIgnoreCase
-                                        (ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE)) {
-                                        LogService.getLog(getClass()).debug(
-                                                LogType.LOG, String.format("Ignored SAP SQL Anywhere SQL " +
-                                                        "exception thrown when FOREIGN KEY list of table '%s' was " +
-                                                        "empty.", foundTable));
-                                    } else {
-                                        throw e; // Some different SQLException, upstream program code must deal with it
-                                    }
-
-                                }
-                            }
-                        }
-
-                        return returnList;
-                    }
-                }
-
-                /**
-                 * Performance-optimised queries for DBMSs where a series of single lookups (via JDBC's
-                 * getImportedKeys() ) yields no acceptable performance. It should return all the columns that are
-                 * returned by getImportedKeys() and may return additional columns with DBMS-specific information.
-                 *
-                 * @return a list of rows representing the result of the DBMS-specific metadata query.
-                 * @throws SQLException an SQL exception returned by the JDBC driver
-                 * @throws DatabaseException any other problem in the DBMS-related program code
-                 */
-                @Override
-                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
-                    if (database instanceof OracleDatabase) {
-                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
-                        String sql = "SELECT  /*+rule*/" +
-                                "  NULL AS pktable_cat,  " +
-                                "  p.owner as pktable_schem,  " +
-                                "  p.table_name as pktable_name,  " +
-                                "  pc.column_name as pkcolumn_name,  " +
-                                "  NULL as fktable_cat,  " +
-                                "  f.owner as fktable_schem,  " +
-                                "  f.table_name as fktable_name,  " +
-                                "  fc.column_name as fkcolumn_name,  " +
-                                "  fc.position as key_seq,  " +
-                                "  NULL as update_rule,  " +
-                                "  decode (f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,  " +
-                                "  f.constraint_name as fk_name,  " +
-                                "  p.constraint_name as pk_name,  " +
-                                "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,  " +
-                                "  f.validated as fk_validate " +
-                                "FROM " +
-                                "all_cons_columns pc " +
-                                "INNER JOIN all_constraints p " +
-                                "ON pc.owner = p.owner " +
-                                "AND pc.constraint_name = p.constraint_name " +
-                                "INNER JOIN all_constraints f " +
-                                "ON pc.owner = f.r_owner " +
-                                "AND pc.constraint_name = f.r_constraint_name " +
-                                "INNER JOIN all_cons_columns fc " +
-                                "ON fc.owner = f.owner " +
-                                "AND fc.constraint_name = f.constraint_name " +
-                                "AND fc.position = pc.position ";
-                        if (getAllCatalogsStringScratchData() == null) {
-                            sql += "WHERE f.owner = '" + jdbcSchemaName + "' ";
-                        } else {
-                            sql += "WHERE f.owner IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") ";
-                        }
-                        sql += "AND p.constraint_type in ('P', 'U') " +
-                                "AND f.constraint_type = 'R' " +
-                                "AND p.table_name NOT LIKE 'BIN$%' " +
-                                "ORDER BY fktable_schem, fktable_name, key_seq";
-                        return executeAndExtract(sql, database);
-                    } else if (database instanceof DB2Database) {
-                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                        return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
-                    } else if (database instanceof Db2zDatabase) {
-                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                        return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, null), database);
-                    } else if (database instanceof MSSQLDatabase) {
-                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-
-                        String sql = getMSSQLSql(jdbcSchemaName);
-                        return executeAndExtract(sql, database);
-                    } else {
-                        throw new RuntimeException("Cannot bulk select");
-                    }
-                }
-
-                protected String getMSSQLSql(String jdbcSchemaName) {
-                    //comes from select object_definition(object_id('sp_fkeys'))
-                    return "select " +
-                            "convert(sysname,db_name()) AS PKTABLE_CAT, " +
-                            "convert(sysname,schema_name(o1.schema_id)) AS PKTABLE_SCHEM, " +
-                            "convert(sysname,o1.name) AS PKTABLE_NAME, " +
-                            "convert(sysname,c1.name) AS PKCOLUMN_NAME, " +
-                            "convert(sysname,db_name()) AS FKTABLE_CAT, " +
-                            "convert(sysname,schema_name(o2.schema_id)) AS FKTABLE_SCHEM, " +
-                            "convert(sysname,o2.name) AS FKTABLE_NAME, " +
-                            "convert(sysname,c2.name) AS FKCOLUMN_NAME, " +
-                            "isnull(convert(smallint,k.constraint_column_id), convert(smallint,0)) AS KEY_SEQ, " +
-                            "convert(smallint, case ObjectProperty(f.object_id, 'CnstIsUpdateCascade') when 1 then 0 else 1 end) AS UPDATE_RULE, " +
-                            "convert(smallint, case ObjectProperty(f.object_id, 'CnstIsDeleteCascade') when 1 then 0 else 1 end) AS DELETE_RULE, " +
-                            "convert(sysname,object_name(f.object_id)) AS FK_NAME, " +
-                            "convert(sysname,i.name) AS PK_NAME, " +
-                            "convert(smallint, 7) AS DEFERRABILITY " +
-                            "from " +
-                            "sys.objects o1, " +
-                            "sys.objects o2, " +
-                            "sys.columns c1, " +
-                            "sys.columns c2, " +
-                            "sys.foreign_keys f inner join " +
-                            "sys.foreign_key_columns k on (k.constraint_object_id = f.object_id) inner join " +
-                            "sys.indexes i on (f.referenced_object_id = i.object_id and f.key_index_id = i.index_id) " +
-                            "where " +
-                            "o1.object_id = f.referenced_object_id and " +
-                            "o2.object_id = f.parent_object_id and " +
-                            "c1.object_id = f.referenced_object_id and " +
-                            "c2.object_id = f.parent_object_id and " +
-                            "c1.column_id = k.referenced_column_id and " +
-                            "c2.column_id = k.parent_column_id and " +
-                            "object_schema_name(o1.object_id)='" + jdbcSchemaName + "' " +
-                            "order by 5, 6, 7, 9, 8";
-                }
-
-                protected String getDB2Sql(String jdbcSchemaName, String tableName) {
-                    return "SELECT  " +
-                            "  pk_col.tabschema AS pktable_cat,  " +
-                            "  pk_col.tabname as pktable_name,  " +
-                            "  pk_col.colname as pkcolumn_name, " +
-                            "  fk_col.tabschema as fktable_cat,  " +
-                            "  fk_col.tabname as fktable_name,  " +
-                            "  fk_col.colname as fkcolumn_name, " +
-                            "  fk_col.colseq as key_seq,  " +
-                            "  decode (ref.updaterule, 'A', 3, 'R', 1, 1) as update_rule,  " +
-                            "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
-                            "  ref.constname as fk_name,  " +
-                            "  ref.refkeyname as pk_name,  " +
-                            "  7 as deferrability  " +
-                            "FROM " +
-                            "syscat.references ref " +
-                            "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
-                            "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
-                            "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
-                            "and pk_col.colseq=fk_col.colseq " +
-                            (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") +
-                            "ORDER BY fk_col.colseq";
-                }
-
-                protected String getDB2ZOSSql(String jdbcSchemaName, String tableName) {
-                    return "SELECT  " +
-                            "  ref.REFTBCREATOR AS pktable_cat,  " +
-                            "  ref.REFTBNAME as pktable_name,  " +
-                            "  pk_col.colname as pkcolumn_name, " +
-                            "  ref.CREATOR as fktable_cat,  " +
-                            "  ref.TBNAME as fktable_name,  " +
-                            "  fk_col.colname as fkcolumn_name, " +
-                            "  fk_col.colseq as key_seq,  " +
-                            "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
-                            "  ref.relname as fk_name,  " +
-                            "  pk_col.colname as pk_name,  " +
-                            "  7 as deferrability  " +
-                            "FROM " +
-                            "SYSIBM.SYSRELS ref " +
-                            "join SYSIBM.SYSFOREIGNKEYS fk_col on ref.relname = fk_col.RELNAME and ref.CREATOR = fk_col.CREATOR and ref.TBNAME = fk_col.TBNAME " +
-                            "join SYSIBM.SYSKEYCOLUSE pk_col on ref.REFTBCREATOR = pk_col.TBCREATOR and ref.REFTBNAME = pk_col.TBNAME " +
-                            "WHERE ref.CREATOR = '" + jdbcSchemaName + "' " +
-                            "and pk_col.colseq=fk_col.colseq " +
-                            (tableName != null ? " AND ref.TBNAME='" + tableName + "' " : "") +
-                            "ORDER BY fk_col.colseq";
-                }
-
-                @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    if ((database instanceof AbstractDb2Database) || (database instanceof MSSQLDatabase)) {
-                        return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
-                    } else {
-                        return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
-                    }
-                }
-            });
+            return importedKeys.get(foreignKeysResultSetCache);
         }
 
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException, SQLException {
@@ -358,7 +124,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "c.COLUMN_POSITION AS ORDINAL_POSITION, " +
                                         "e.COLUMN_EXPRESSION AS FILTER_CONDITION, " +
                                         "CASE I.UNIQUENESS WHEN 'UNIQUE' THEN 0 ELSE 1 END AS NON_UNIQUE, " +
-                                        "CASE c.DESCEND WHEN 'DESC' THEN 'D' WHEN 'ASC' THEN 'A' END AS ASC_OR_DESC, " +
+                                        "CASE c.DESCEND WHEN 'Y' THEN 'D' WHEN 'DESC' THEN 'D' WHEN 'N' THEN 'A' WHEN 'ASC' THEN 'A' END AS ASC_OR_DESC, " +
                                         "CASE WHEN tablespace_name = (SELECT default_tablespace FROM user_users) " +
                                          "THEN NULL ELSE tablespace_name END AS tablespace_name  " +
                                         "FROM ALL_IND_COLUMNS c " +
@@ -504,7 +270,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         protected void warnAboutDbaRecycleBin() {
             if (!ignoreWarnAboutDbaRecycleBin && !warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
-                LogService.getLog(getClass()).warning(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
+                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
                 warnedAboutDbaRecycleBin = true;
             }
         }
@@ -521,12 +287,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     Statement stmt = null;
                     ResultSet resultSet = null;
                     try {
-                        String sql;
-                        sql = "select name from sys.types where is_user_defined=1";
-
                         stmt = ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement();
-                        resultSet = stmt.executeQuery(sql);
-
+                        resultSet = stmt.executeQuery("select name from " + (catalogName == null ? "" : "[" + catalogName + "].") + "sys.types where is_user_defined=1");
                         while (resultSet.next()) {
                             userDefinedTypes.add(resultSet.getString("name").toLowerCase());
                         }
@@ -535,259 +297,645 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
                 }
             }
+          GetColumnResultSetCache getColumnResultSetCache = new GetColumnResultSetCache(database, catalogName,
+              schemaName, tableName, columnName);
+          return getResultSetCache("getColumns").get(getColumnResultSetCache);
+        }
 
-            List<CachedRow> columns = getResultSetCache("getColumns").get(new ResultSetCache.SingleResultSetExtractor(database) {
+      /**
+       * Return the NotNullConstraints for the given catalog, schema, table, and column.
+       */
+      public List<CachedRow> getNotNullConst(final String catalogName, final String schemaName,
+          final String tableName) throws DatabaseException {
+          if(!(database instanceof OracleDatabase)) {
+            return Collections.emptyList();
+          }
+        GetNotNullConstraintsResultSetCache getNotNullConstraintsResultSetCache = new GetNotNullConstraintsResultSetCache(database, catalogName,
+            schemaName, tableName);
+        return getResultSetCache("getNotNullConst").get(getNotNullConstraintsResultSetCache);
+      }
 
-                @Override
-                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
-                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"), row.getString("COLUMN_NAME"));
+      private class GetColumnResultSetCache extends ResultSetCache.SingleResultSetExtractor {
+          final String catalogName;
+          final String schemaName;
+          final String tableName;
+          final String columnName;
+
+          private GetColumnResultSetCache(Database database, String catalogName, String schemaName, String tableName, String columnName) {
+            super(database);
+            this.catalogName = catalogName;
+            this.schemaName = schemaName;
+            this.tableName = tableName;
+            this.columnName = columnName;
+          }
+
+          @Override
+          public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+            return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"), row.getString("COLUMN_NAME"));
+          }
+
+          @Override
+          public ResultSetCache.RowData wantedKeyParameters() {
+            return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
+          }
+
+          @Override
+          public boolean bulkContainsSchema(String schemaKey) {
+            String catalogs = getAllCatalogsStringScratchData();
+            return catalogs != null && schemaKey != null
+                && catalogs.contains("'" + schemaKey.toUpperCase() + "'")
+                && database instanceof OracleDatabase;
+          }
+
+          @Override
+          public String getSchemaKey(CachedRow row) {
+            return row.getString("TABLE_SCHEM");
+          }
+
+          @Override
+          boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+            return !(tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName()));
                 }
 
-                @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
-                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
-                }
+          @Override
+          public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+            if (database instanceof OracleDatabase) {
+              return oracleQuery(false);
+            } else if (database instanceof MSSQLDatabase) {
+              return mssqlQuery(false);
+            }
+            CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-				@Override
-				public boolean bulkContainsSchema(String schemaKey) {
-					String catalogs = getAllCatalogsStringScratchData();
-					return catalogs != null && schemaKey != null
-                            && catalogs.contains("'" + schemaKey.toUpperCase() + "'")
-							&& database instanceof OracleDatabase;
-				}
-
-                @Override
-                public String getSchemaKey(CachedRow row) {
-                    return row.getString("TABLE_SCHEM");
-                }
-
-                @Override
-                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    return !(tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName()));
-                }
-
-                @Override
-                public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
-                    if (database instanceof OracleDatabase) {
-                        return oracleQuery(false);
-                    } else if (database instanceof MSSQLDatabase) {
-                        return mssqlQuery(false);
-                    }
-                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                    try {
-                        return extract(
+            try {
+              return extract(
                                 databaseMetaData.getColumns(
                                         ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
                                         ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
                                         tableName,
                                         SQL_FILTER_MATCH_ALL)
                         );
-                    } catch (SQLException e) {
-                        if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
-                            return new ArrayList<>();
-                        } else {
-                            throw e;
-                        }
-                    }
-                }
+            } catch (SQLException e) {
+              if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
+                return new ArrayList<>();
+              } else {
+                throw e;
+              }
+            }
+          }
 
-                @Override
-                public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
-                    if (database instanceof OracleDatabase) {
-                        return oracleQuery(true);
-                    } else if (database instanceof MSSQLDatabase) {
-                        return mssqlQuery(true);
-                    }
+          @Override
+          public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+            if (database instanceof OracleDatabase) {
+              return oracleQuery(true);
+            } else if (database instanceof MSSQLDatabase) {
+              return mssqlQuery(true);
+            }
 
-                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+            CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    try {
-                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
+            try {
+              return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
                                 .getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database)
                                 .getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
-                    } catch (SQLException e) {
-                        if (shouldReturnEmptyColumns(e)) {
-                            return new ArrayList<>();
-                        } else {
-                            throw e;
-                        }
-                    }
-                }
+            } catch (SQLException e) {
+              if (shouldReturnEmptyColumns(e)) {
+                return new ArrayList<>();
+              } else {
+                throw e;
+              }
+            }
+          }
 
-                protected boolean shouldReturnEmptyColumns(SQLException e) {
-                    return e.getMessage().contains("references invalid table"); //view with table already dropped. Act like it has no columns.
-                }
+          protected boolean shouldReturnEmptyColumns(SQLException e) {
+            return e.getMessage().contains("references invalid table"); //view with table already dropped. Act like it has no columns.
+          }
 
-                protected List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
-                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+          protected List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
+            CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    boolean getMapDateToTimestamp = true;
-                    String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS," +
-                            "OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE AS DATA_TYPE_NAME, DATA_TYPE_MOD, DATA_TYPE_OWNER, " +
-                            // note: oracle reports DATA_LENGTH=4*CHAR_LENGTH when using VARCHAR( <N> CHAR ), thus BYTEs
-                            "DECODE (c.data_type, 'CHAR', 1, 'VARCHAR2', 12, 'NUMBER', 3, 'LONG', -1, 'DATE', " + (getMapDateToTimestamp ? "93" : "91") + ", 'RAW', -3, 'LONG RAW', -4, 'BLOB', 2004, 'CLOB', 2005, 'BFILE', -13, 'FLOAT', 6, 'TIMESTAMP(6)', 93, 'TIMESTAMP(6) WITH TIME ZONE', -101, 'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, 'INTERVAL YEAR(2) TO MONTH', -103, 'INTERVAL DAY(2) TO SECOND(6)', -104, 'BINARY_FLOAT', 100, 'BINARY_DOUBLE', 101, 'XMLTYPE', 2009, 1111) AS data_type, " +
-                            "DECODE( CHAR_USED, 'C',CHAR_LENGTH, DATA_LENGTH ) as DATA_LENGTH, " +
-                            "DATA_PRECISION, DATA_SCALE, NULLABLE, COLUMN_ID as ORDINAL_POSITION, DEFAULT_LENGTH, " +
-                            "DATA_DEFAULT, " +
-                            "NUM_BUCKETS, CHARACTER_SET_NAME, " +
-                            "CHAR_COL_DECL_LENGTH, CHAR_LENGTH, " +
-                            "CHAR_USED, VIRTUAL_COLUMN " +
-                            "FROM ALL_TAB_COLS c " +
-                            "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) ";
+            boolean getMapDateToTimestamp = true;
+            String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+            boolean collectIdentityData = database.getDatabaseMajorVersion() >= OracleDatabase.ORACLE_12C_MAJOR_VERSION;
 
-                    if (!bulk || getAllCatalogsStringScratchData() == null) {
-                        sql += "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
-                    } else {
-                        sql += "WHERE OWNER IN ('" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "', " + getAllCatalogsStringScratchData() + ") AND hidden_column='NO'";
-                    }
+            String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS," +
+                "OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE AS DATA_TYPE_NAME, DATA_TYPE_MOD, DATA_TYPE_OWNER, " +
+                // note: oracle reports DATA_LENGTH=4*CHAR_LENGTH when using VARCHAR( <N> CHAR ), thus BYTEs
+                "DECODE (c.data_type, 'CHAR', 1, 'VARCHAR2', 12, 'NUMBER', 3, 'LONG', -1, 'DATE', " + (getMapDateToTimestamp ? "93" : "91") + ", 'RAW', -3, 'LONG RAW', -4, 'BLOB', 2004, 'CLOB', 2005, 'BFILE', -13, 'FLOAT', 6, 'TIMESTAMP(6)', 93, 'TIMESTAMP(6) WITH TIME ZONE', -101, 'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, 'INTERVAL YEAR(2) TO MONTH', -103, 'INTERVAL DAY(2) TO SECOND(6)', -104, 'BINARY_FLOAT', 100, 'BINARY_DOUBLE', 101, 'XMLTYPE', 2009, 1111) AS data_type, " +
+                "DECODE( CHAR_USED, 'C',CHAR_LENGTH, DATA_LENGTH ) as DATA_LENGTH, " +
+                "DATA_PRECISION, DATA_SCALE, NULLABLE, COLUMN_ID as ORDINAL_POSITION, DEFAULT_LENGTH, " +
+                "DATA_DEFAULT, " +
+                "NUM_BUCKETS, CHARACTER_SET_NAME, " +
+                "CHAR_COL_DECL_LENGTH, CHAR_LENGTH, " +
+                "CHAR_USED, VIRTUAL_COLUMN ";
+            if (collectIdentityData) {
+                sql += ", DEFAULT_ON_NULL, IDENTITY_COLUMN, ic.GENERATION_TYPE ";
+            }
+            sql += "FROM ALL_TAB_COLS c " +
+                "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) ";
+            if (collectIdentityData) {
+                sql += "LEFT JOIN ALL_TAB_IDENTITY_COLS ic USING (OWNER, TABLE_NAME, COLUMN_NAME ) ";
+            }
+            if (!bulk || getAllCatalogsStringScratchData() == null) {
+              sql += "WHERE OWNER='" + jdbcSchemaName + "' AND hidden_column='NO'";
+            } else {
+              sql += "WHERE OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") AND hidden_column='NO'";
+            }
 
-                    if (!bulk) {
-                        if (tableName != null) {
-                            sql += " AND TABLE_NAME='" + database.escapeStringForDatabase(tableName) + "'";
-                        }
-                        if (columnName != null) {
-                            sql += " AND COLUMN_NAME='" + database.escapeStringForDatabase(columnName) + "'";
-                        }
-                    }
-                    sql += " AND " + ((OracleDatabase) database).getSystemTableWhereClause("TABLE_NAME");
-                    sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
+            if (!bulk) {
+              if (tableName != null) {
+                sql += " AND TABLE_NAME='" + database.escapeStringForDatabase(tableName) + "'";
+              }
+              if (columnName != null) {
+                sql += " AND COLUMN_NAME='" + database.escapeStringForDatabase(columnName) + "'";
+              }
+            }
+            sql += " AND " + ((OracleDatabase) database).getSystemTableWhereClause("TABLE_NAME");
+            sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
 
-                    return this.executeAndExtract(sql, database);
-                }
-
-
-                protected List<CachedRow> mssqlQuery(boolean bulk) throws DatabaseException, SQLException {
-                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                    String tableCat = "original_db_name()";
-
-                    if (9 <= database.getDatabaseMajorVersion()) {
-                    	tableCat = "db_name()";
-                    }
-
-                    String sql = "select " + tableCat +" AS TABLE_CAT, " +
-                            "object_schema_name(c.object_id) AS TABLE_SCHEM, " +
-                            "object_name(c.object_id) AS TABLE_NAME, " +
-                            "c.name AS COLUMN_NAME, " +
-                            "is_filestream, " +
-                            "is_rowguidcol, " +
-                            "CASE WHEN c.is_identity = 'true' THEN 'YES' ELSE 'NO' END as IS_AUTOINCREMENT, " +
-                            "{REMARKS_COLUMN_PLACEHOLDER}" +
-                            "t.name AS TYPE_NAME, " +
-                            "dc.name as COLUMN_DEF_NAME, " +
-                            "dc.definition as COLUMN_DEF, " +
-                            // data type mapping from https://msdn.microsoft.com/en-us/library/ms378878(v=sql.110).aspx
-                            "CASE t.name " +
-                            "WHEN 'bigint' THEN " + java.sql.Types.BIGINT + " " +
-                            "WHEN 'binary' THEN " + java.sql.Types.BINARY + " " +
-                            "WHEN 'bit' THEN " + java.sql.Types.BIT + " " +
-                            "WHEN 'char' THEN " + java.sql.Types.CHAR + " " +
-                            "WHEN 'date' THEN " + java.sql.Types.DATE + " " +
-                            "WHEN 'datetime' THEN " + java.sql.Types.TIMESTAMP + " " +
-                            "WHEN 'datetime2' THEN " + java.sql.Types.TIMESTAMP + " " +
-                            "WHEN 'datetimeoffset' THEN -155 " +
-                            "WHEN 'decimal' THEN " + java.sql.Types.DECIMAL + " " +
-                            "WHEN 'float' THEN " + java.sql.Types.DOUBLE + " " +
-                            "WHEN 'image' THEN " + java.sql.Types.LONGVARBINARY + " " +
-                            "WHEN 'int' THEN " + java.sql.Types.INTEGER + " " +
-                            "WHEN 'money' THEN " + java.sql.Types.DECIMAL + " " +
-                            "WHEN 'nchar' THEN " + java.sql.Types.NCHAR + " " +
-                            "WHEN 'ntext' THEN " + java.sql.Types.LONGNVARCHAR + " " +
-                            "WHEN 'numeric' THEN " + java.sql.Types.NUMERIC + " " +
-                            "WHEN 'nvarchar' THEN " + java.sql.Types.NVARCHAR + " " +
-                            "WHEN 'real' THEN " + Types.REAL + " " +
-                            "WHEN 'smalldatetime' THEN " + java.sql.Types.TIMESTAMP + " " +
-                            "WHEN 'smallint' THEN " + java.sql.Types.SMALLINT + " " +
-                            "WHEN 'smallmoney' THEN " + java.sql.Types.DECIMAL + " " +
-                            "WHEN 'text' THEN " + java.sql.Types.LONGVARCHAR + " " +
-                            "WHEN 'time' THEN " + java.sql.Types.TIME + " " +
-                            "WHEN 'timestamp' THEN " + java.sql.Types.BINARY + " " +
-                            "WHEN 'tinyint' THEN " + java.sql.Types.TINYINT + " " +
-                            "WHEN 'udt' THEN " + java.sql.Types.VARBINARY + " " +
-                            "WHEN 'uniqueidentifier' THEN " + java.sql.Types.CHAR + " " +
-                            "WHEN 'varbinary' THEN " + java.sql.Types.VARBINARY + " " +
-                            "WHEN 'varbinary(max)' THEN " + java.sql.Types.VARBINARY + " " +
-                            "WHEN 'varchar' THEN " + java.sql.Types.VARCHAR + " " +
-                            "WHEN 'varchar(max)' THEN " + java.sql.Types.VARCHAR + " " +
-                            "WHEN 'xml' THEN " + java.sql.Types.LONGVARCHAR + " " +
-                            "WHEN 'LONGNVARCHAR' THEN " + java.sql.Types.SQLXML + " " +
-                            "ELSE " + Types.OTHER + " END AS data_type, " +
-                            "CASE WHEN c.is_nullable = 'true' THEN 1 ELSE 0 END AS NULLABLE, " +
-                            "10 as NUM_PREC_RADIX, " +
-                            "c.column_id as ORDINAL_POSITION, " +
-                            "c.scale as DECIMAL_DIGITS, " +
-                            "c.max_length as COLUMN_SIZE, " +
-                            "c.precision as DATA_PRECISION " +
-                            "FROM sys.columns c " +
-                            "inner join sys.types t on c.user_type_id=t.user_type_id " +
-                            "{REMARKS_JOIN_PLACEHOLDER}" +
-                            "left outer join sys.default_constraints dc on dc.parent_column_id = c.column_id AND dc.parent_object_id=c.object_id AND type_desc='DEFAULT_CONSTRAINT' " +
-                            "WHERE object_schema_name(c.object_id)='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "'";
+            return this.executeAndExtract(sql, database);
+          }
 
 
-                    if (!bulk) {
-                        if (tableName != null) {
-                            sql += " and object_name(c.object_id)='" + database.escapeStringForDatabase(tableName) + "'";
-                        }
-                        if (columnName != null) {
-                            sql += " and c.name='" + database.escapeStringForDatabase(columnName) + "'";
-                        }
-                    }
-                    sql += "order by object_schema_name(c.object_id), object_name(c.object_id), c.column_id";
+          protected List<CachedRow> mssqlQuery(boolean bulk) throws DatabaseException, SQLException {
+            CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+              String databaseName = StringUtil.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+              String dbIdParam;
+              String databasePrefix;
+              if (databaseName == null) {
+                  databasePrefix = "";
+                  dbIdParam = "";
+              } else {
+                  dbIdParam = ", db_id('"+databaseName+"')";
+                  databasePrefix = "[" + databaseName + "].";
+              }
+
+              String sql = "select " +
+                "db_name(" + (databaseName == null ? "" : "db_id('" + databaseName + "')") + ") AS TABLE_CAT, " +
+                "object_schema_name(c.object_id"+dbIdParam+") AS TABLE_SCHEM, " +
+                "object_name(c.object_id"+dbIdParam+") AS TABLE_NAME, " +
+                "c.name AS COLUMN_NAME, " +
+                "is_filestream, " +
+                "is_rowguidcol, " +
+                "CASE WHEN c.is_identity = 'true' THEN 'YES' ELSE 'NO' END as IS_AUTOINCREMENT, " +
+                "{REMARKS_COLUMN_PLACEHOLDER}" +
+                "t.name AS TYPE_NAME, " +
+                "dc.name as COLUMN_DEF_NAME, " +
+                "dc.definition as COLUMN_DEF, " +
+                // data type mapping from https://msdn.microsoft.com/en-us/library/ms378878(v=sql.110).aspx
+                "CASE t.name " +
+                "WHEN 'bigint' THEN " + java.sql.Types.BIGINT + " " +
+                "WHEN 'binary' THEN " + java.sql.Types.BINARY + " " +
+                "WHEN 'bit' THEN " + java.sql.Types.BIT + " " +
+                "WHEN 'char' THEN " + java.sql.Types.CHAR + " " +
+                "WHEN 'date' THEN " + java.sql.Types.DATE + " " +
+                "WHEN 'datetime' THEN " + java.sql.Types.TIMESTAMP + " " +
+                "WHEN 'datetime2' THEN " + java.sql.Types.TIMESTAMP + " " +
+                "WHEN 'datetimeoffset' THEN -155 " +
+                "WHEN 'decimal' THEN " + java.sql.Types.DECIMAL + " " +
+                "WHEN 'float' THEN " + java.sql.Types.DOUBLE + " " +
+                "WHEN 'image' THEN " + java.sql.Types.LONGVARBINARY + " " +
+                "WHEN 'int' THEN " + java.sql.Types.INTEGER + " " +
+                "WHEN 'money' THEN " + java.sql.Types.DECIMAL + " " +
+                "WHEN 'nchar' THEN " + java.sql.Types.NCHAR + " " +
+                "WHEN 'ntext' THEN " + java.sql.Types.LONGNVARCHAR + " " +
+                "WHEN 'numeric' THEN " + java.sql.Types.NUMERIC + " " +
+                "WHEN 'nvarchar' THEN " + java.sql.Types.NVARCHAR + " " +
+                "WHEN 'real' THEN " + Types.REAL + " " +
+                "WHEN 'smalldatetime' THEN " + java.sql.Types.TIMESTAMP + " " +
+                "WHEN 'smallint' THEN " + java.sql.Types.SMALLINT + " " +
+                "WHEN 'smallmoney' THEN " + java.sql.Types.DECIMAL + " " +
+                "WHEN 'text' THEN " + java.sql.Types.LONGVARCHAR + " " +
+                "WHEN 'time' THEN " + java.sql.Types.TIME + " " +
+                "WHEN 'timestamp' THEN " + java.sql.Types.BINARY + " " +
+                "WHEN 'tinyint' THEN " + java.sql.Types.TINYINT + " " +
+                "WHEN 'udt' THEN " + java.sql.Types.VARBINARY + " " +
+                "WHEN 'uniqueidentifier' THEN " + java.sql.Types.CHAR + " " +
+                "WHEN 'varbinary' THEN " + java.sql.Types.VARBINARY + " " +
+                "WHEN 'varbinary(max)' THEN " + java.sql.Types.VARBINARY + " " +
+                "WHEN 'varchar' THEN " + java.sql.Types.VARCHAR + " " +
+                "WHEN 'varchar(max)' THEN " + java.sql.Types.VARCHAR + " " +
+                "WHEN 'xml' THEN " + java.sql.Types.LONGVARCHAR + " " +
+                "WHEN 'LONGNVARCHAR' THEN " + java.sql.Types.SQLXML + " " +
+                "ELSE " + Types.OTHER + " END AS data_type, " +
+                "CASE WHEN c.is_nullable = 'true' THEN 1 ELSE 0 END AS NULLABLE, " +
+                "10 as NUM_PREC_RADIX, " +
+                "c.column_id as ORDINAL_POSITION, " +
+                "c.scale as DECIMAL_DIGITS, " +
+                "c.max_length as COLUMN_SIZE, " +
+                "c.precision as DATA_PRECISION " +
+                "FROM "+databasePrefix+"sys.columns c " +
+                "inner join "+databasePrefix+"sys.types t on c.user_type_id=t.user_type_id " +
+                "{REMARKS_JOIN_PLACEHOLDER}" +
+                "left outer join "+databasePrefix+"sys.default_constraints dc on dc.parent_column_id = c.column_id AND dc.parent_object_id=c.object_id AND type_desc='DEFAULT_CONSTRAINT' " +
+                "WHERE object_schema_name(c.object_id"+dbIdParam+")='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "'";
 
 
-                    // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
-                    if ((!((MSSQLDatabase) database).isAzureDb()) // Either NOT AzureDB (=SQL Server 2008 or higher)
-                        || (database.getDatabaseMajorVersion() >= 12))  { // or at least AzureDB v12
-                            // SQL Server 2005 or later
-                            // https://technet.microsoft.com/en-us/library/ms177541.aspx
-                            sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS], ");
-                            sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "left outer join [sys].[extended_properties] AS [ep] ON [ep].[class] = 1 " +
+            if (!bulk) {
+              if (tableName != null) {
+                sql += " and object_name(c.object_id"+dbIdParam+")='" + database.escapeStringForDatabase(tableName) + "'";
+              }
+              if (columnName != null) {
+                sql += " and c.name='" + database.escapeStringForDatabase(columnName) + "'";
+              }
+            }
+            sql += "order by object_schema_name(c.object_id"+dbIdParam+"), object_name(c.object_id"+dbIdParam+"), c.column_id";
+
+
+            // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
+            if ((!((MSSQLDatabase) database).isAzureDb()) // Either NOT AzureDB (=SQL Server 2008 or higher)
+              || (database.getDatabaseMajorVersion() >= 12))  { // or at least AzureDB v12
+                // SQL Server 2005 or later
+                // https://technet.microsoft.com/en-us/library/ms177541.aspx
+                sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS], ");
+                sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "left outer join "+databasePrefix+"[sys].[extended_properties] AS [ep] ON [ep].[class] = 1 " +
                                     "AND [ep].[major_id] = c.object_id " +
                                     "AND [ep].[minor_id] = column_id " +
                                     "AND [ep].[name] = 'MS_Description' ");
-                    } else {
-                        sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "");
-                        sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "");
-                    }
+            } else {
+              sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "");
+              sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "");
+            }
 
-                    List<CachedRow> rows = this.executeAndExtract(sql, database);
+            List<CachedRow> rows = this.executeAndExtract(sql, database);
 
-                    for (CachedRow row : rows) {
-                        String typeName = row.getString("TYPE_NAME");
-                        if ("nvarchar".equals(typeName) || "nchar".equals(typeName)) {
-                            Integer size = row.getInt("COLUMN_SIZE");
-                            if (size > 0) {
-                                row.set("COLUMN_SIZE", size / 2);
-                            }
-                        } else if ((row.getInt("DATA_PRECISION") != null) && (row.getInt("DATA_PRECISION") > 0)) {
-                            row.set("COLUMN_SIZE", row.getInt("DATA_PRECISION"));
-                        }
-                    }
-
-                    return rows;
+            for (CachedRow row : rows) {
+              String typeName = row.getString("TYPE_NAME");
+              if ("nvarchar".equals(typeName) || "nchar".equals(typeName)) {
+                Integer size = row.getInt("COLUMN_SIZE");
+                if (size > 0) {
+                  row.set("COLUMN_SIZE", size / 2);
                 }
+              } else if ((row.getInt("DATA_PRECISION") != null) && (row.getInt("DATA_PRECISION") > 0)) {
+                row.set("COLUMN_SIZE", row.getInt("DATA_PRECISION"));
+              }
+            }
 
-                @Override
-                protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
-                    List<CachedRow> rows = super.extract(resultSet, informixIndexTrimHint);
-                    if ((database instanceof MSSQLDatabase) && !userDefinedTypes.isEmpty()) { //UDT types in MSSQL don't take parameters
-                        for (CachedRow row : rows) {
-                            String dataType = (String) row.get("TYPE_NAME");
-                            if (userDefinedTypes.contains(dataType.toLowerCase())) {
-                                row.set("COLUMN_SIZE", null);
-                                row.set("DECIMAL_DIGITS ", null);
-                            }
-                        }
-                    }
-                    return rows;
+            return rows;
+          }
+
+          @Override
+          protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
+            List<CachedRow> rows = super.extract(resultSet, informixIndexTrimHint);
+            if ((database instanceof MSSQLDatabase) && !userDefinedTypes.isEmpty()) { //UDT types in MSSQL don't take parameters
+              for (CachedRow row : rows) {
+                String dataType = (String) row.get("TYPE_NAME");
+                if (userDefinedTypes.contains(dataType.toLowerCase())) {
+                  row.set("COLUMN_SIZE", null);
+                  row.set("DECIMAL_DIGITS ", null);
                 }
-            });
-            return columns;
+              }
+            }
+            return rows;
+          }
         }
 
-        public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
+      private class ForeignKeysResultSetCache extends ResultSetCache.UnionResultSetExtractor {
+            final String catalogName;
+            final String schemaName;
+            final String tableName;
+            final String fkName;
+
+            private ForeignKeysResultSetCache(Database database, String catalogName, String schemaName, String tableName, String fkName) {
+                super(database);
+                this.catalogName = catalogName;
+                this.schemaName = schemaName;
+                this.tableName = tableName;
+                this.fkName = fkName;
+            }
+
+            @Override
+            public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                return new ResultSetCache.RowData(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM"), database, row.getString("FKTABLE_NAME"), row.getString("FK_NAME"));
+            }
+
+            @Override
+            public ResultSetCache.RowData wantedKeyParameters() {
+                return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, fkName);
+            }
+
+            @Override
+            public boolean bulkContainsSchema(String schemaKey) {
+                return database instanceof OracleDatabase;
+            }
+
+            @Override
+            public String getSchemaKey(CachedRow row) {
+                return row.getString("FKTABLE_SCHEM");
+            }
+
+            @Override
+            public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                List<CachedRow> returnList = new ArrayList<CachedRow>();
+
+                List<String> tables = new ArrayList<String>();
+                String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+
+                if (database instanceof DB2Database) {
+                    return executeAndExtract(getDB2Sql(jdbcSchemaName, tableName), database);
+                } else if (database instanceof Db2zDatabase) {
+                    return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, tableName), database);
+                } else {
+                    if (tableName == null) {
+                        for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
+                            tables.add(row.getString("TABLE_NAME"));
+                        }
+                    } else {
+                        tables.add(tableName);
+                    }
+
+                    for (String foundTable : tables) {
+                        if (database instanceof OracleDatabase) {
+                            throw new RuntimeException("Should have bulk selected");
+                        } else {
+                            returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
+                        }
+                    }
+
+                    return returnList;
+                }
+            }
+
+            @Override
+            public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+                if (database instanceof OracleDatabase) {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    String sql = getOracleSql(jdbcSchemaName);
+                    return executeAndExtract(sql, database);
+                } else if (database instanceof DB2Database) {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return executeAndExtract(getDB2Sql(jdbcSchemaName, null), database);
+                } else if (database instanceof Db2zDatabase) {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return executeAndExtract(getDB2ZOSSql(jdbcSchemaName, null), database);
+                } else if (database instanceof MSSQLDatabase) {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+                    String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    String sql = getMSSQLSql(jdbcSchemaName, tableName);
+                    return executeAndExtract(sql, database);
+                } else {
+                    throw new RuntimeException("Cannot bulk select");
+                }
+            }
+
+          protected String getOracleSql(String jdbcSchemaName) {
+            String sql = "SELECT  /*+rule*/" +
+                    "  NULL AS pktable_cat,  " +
+                    "  p.owner as pktable_schem,  " +
+                    "  p.table_name as pktable_name,  " +
+                    "  pc.column_name as pkcolumn_name,  " +
+                    "  NULL as fktable_cat,  " +
+                    "  f.owner as fktable_schem,  " +
+                    "  f.table_name as fktable_name,  " +
+                    "  fc.column_name as fkcolumn_name,  " +
+                    "  fc.position as key_seq,  " +
+                    "  NULL as update_rule,  " +
+                    "  decode (f.delete_rule, 'CASCADE', 0, 'SET NULL', 2, 1) as delete_rule,  " +
+                    "  f.constraint_name as fk_name,  " +
+                    "  p.constraint_name as pk_name,  " +
+                    "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability,  " +
+                    "  f.validated as fk_validate " +
+                    "FROM " +
+                    "all_cons_columns pc " +
+                    "INNER JOIN all_constraints p " +
+                    "ON pc.owner = p.owner " +
+                    "AND pc.constraint_name = p.constraint_name " +
+                    "INNER JOIN all_constraints f " +
+                    "ON pc.owner = f.r_owner " +
+                    "AND pc.constraint_name = f.r_constraint_name " +
+                    "INNER JOIN all_cons_columns fc " +
+                    "ON fc.owner = f.owner " +
+                    "AND fc.constraint_name = f.constraint_name " +
+                    "AND fc.position = pc.position ";
+            if (getAllCatalogsStringScratchData() == null) {
+                sql += "WHERE f.owner = '" + jdbcSchemaName + "' ";
+            } else {
+                sql += "WHERE f.owner IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") ";
+            }
+            sql += "AND p.constraint_type in ('P', 'U') " +
+                    "AND f.constraint_type = 'R' " +
+                    "AND p.table_name NOT LIKE 'BIN$%' " +
+                    "ORDER BY fktable_schem, fktable_name, key_seq";
+            return sql;
+          }
+
+          protected String getMSSQLSql(String jdbcSchemaName, String tableName) {
+                //comes from select object_definition(object_id('sp_fkeys'))
+                return "select " +
+                        "convert(sysname,db_name()) AS PKTABLE_CAT, " +
+                        "convert(sysname,schema_name(o1.schema_id)) AS PKTABLE_SCHEM, " +
+                        "convert(sysname,o1.name) AS PKTABLE_NAME, " +
+                        "convert(sysname,c1.name) AS PKCOLUMN_NAME, " +
+                        "convert(sysname,db_name()) AS FKTABLE_CAT, " +
+                        "convert(sysname,schema_name(o2.schema_id)) AS FKTABLE_SCHEM, " +
+                        "convert(sysname,o2.name) AS FKTABLE_NAME, " +
+                        "convert(sysname,c2.name) AS FKCOLUMN_NAME, " +
+                        "isnull(convert(smallint,k.constraint_column_id), convert(smallint,0)) AS KEY_SEQ, " +
+                        "convert(smallint, case ObjectProperty(f.object_id, 'CnstIsUpdateCascade') when 1 then 0 else 1 end) AS UPDATE_RULE, " +
+                        "convert(smallint, case ObjectProperty(f.object_id, 'CnstIsDeleteCascade') when 1 then 0 else 1 end) AS DELETE_RULE, " +
+                        "convert(sysname,object_name(f.object_id)) AS FK_NAME, " +
+                        "convert(sysname,i.name) AS PK_NAME, " +
+                        "convert(smallint, 7) AS DEFERRABILITY " +
+                        "from " +
+                        "sys.objects o1, " +
+                        "sys.objects o2, " +
+                        "sys.columns c1, " +
+                        "sys.columns c2, " +
+                        "sys.foreign_keys f inner join " +
+                        "sys.foreign_key_columns k on (k.constraint_object_id = f.object_id) inner join " +
+                        "sys.indexes i on (f.referenced_object_id = i.object_id and f.key_index_id = i.index_id) " +
+                        "where " +
+                        "o1.object_id = f.referenced_object_id and " +
+                        "o2.object_id = f.parent_object_id and " +
+                        "c1.object_id = f.referenced_object_id and " +
+                        "c2.object_id = f.parent_object_id and " +
+                        "c1.column_id = k.referenced_column_id and " +
+                        "c2.column_id = k.parent_column_id and " +
+                        "((object_schema_name(o1.object_id)='" + jdbcSchemaName + "'" +
+                        " and convert(sysname,schema_name(o2.schema_id))='" + jdbcSchemaName + "' and " +
+                        "convert(sysname,o2.name)='" + tableName + "' ) or ( convert(sysname,schema_name" +
+                        "(o2.schema_id))='" + jdbcSchemaName + "' and convert(sysname,o2.name)='" + tableName +
+                        "' )) order by 5, 6, 7, 9, 8";
+            }
+
+            protected String getDB2Sql(String jdbcSchemaName, String tableName) {
+                return "SELECT  " +
+                        "  pk_col.tabschema AS pktable_cat,  " +
+                        "  pk_col.tabname as pktable_name,  " +
+                        "  pk_col.colname as pkcolumn_name, " +
+                        "  fk_col.tabschema as fktable_cat,  " +
+                        "  fk_col.tabname as fktable_name,  " +
+                        "  fk_col.colname as fkcolumn_name, " +
+                        "  fk_col.colseq as key_seq,  " +
+                        "  decode (ref.updaterule, 'A', 3, 'R', 1, 1) as update_rule,  " +
+                        "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
+                        "  ref.constname as fk_name,  " +
+                        "  ref.refkeyname as pk_name,  " +
+                        "  7 as deferrability  " +
+                        "FROM " +
+                        "syscat.references ref " +
+                        "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
+                        "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
+                        "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
+                        "and pk_col.colseq=fk_col.colseq " +
+                        (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") +
+                        "ORDER BY fk_col.colseq";
+            }
+
+            protected String getDB2ZOSSql(String jdbcSchemaName, String tableName) {
+                return "SELECT  " +
+                        "  ref.REFTBCREATOR AS pktable_cat,  " +
+                        "  ref.REFTBNAME as pktable_name,  " +
+                        "  pk_col.colname as pkcolumn_name, " +
+                        "  ref.CREATOR as fktable_cat,  " +
+                        "  ref.TBNAME as fktable_name,  " +
+                        "  fk_col.colname as fkcolumn_name, " +
+                        "  fk_col.colseq as key_seq,  " +
+                        "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
+                        "  ref.relname as fk_name,  " +
+                        "  pk_col.colname as pk_name,  " +
+                        "  7 as deferrability  " +
+                        "FROM " +
+                        "SYSIBM.SYSRELS ref " +
+                        "join SYSIBM.SYSFOREIGNKEYS fk_col on ref.relname = fk_col.RELNAME and ref.CREATOR = fk_col.CREATOR and ref.TBNAME = fk_col.TBNAME " +
+                        "join SYSIBM.SYSKEYCOLUSE pk_col on ref.REFTBCREATOR = pk_col.TBCREATOR and ref.REFTBNAME = pk_col.TBNAME " +
+                        "WHERE ref.CREATOR = '" + jdbcSchemaName + "' " +
+                        "and pk_col.colseq=fk_col.colseq " +
+                        (tableName != null ? " AND ref.TBNAME='" + tableName + "' " : "") +
+                        "ORDER BY fk_col.colseq";
+            }
+
+            @Override
+            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                if (database instanceof AbstractDb2Database || database instanceof MSSQLDatabase) {
+                    return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
+                } else {
+                    return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
+                }
+            }
+        }
+
+      private class GetNotNullConstraintsResultSetCache extends ResultSetCache.SingleResultSetExtractor {
+            final String catalogName;
+            final String schemaName;
+            final String tableName;
+
+            private GetNotNullConstraintsResultSetCache(Database database, String catalogName, String schemaName, String tableName) {
+                super(database);
+                this.catalogName = catalogName;
+                this.schemaName = schemaName;
+                this.tableName = tableName;
+            }
+
+            @Override
+            public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEMA"),
+                    database, row.getString("TABLE_NAME"));
+            }
+
+            @Override
+            public ResultSetCache.RowData wantedKeyParameters() {
+                return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
+            }
+
+            @Override
+            public boolean bulkContainsSchema(String schemaKey) {
+                return database instanceof OracleDatabase;
+            }
+
+            @Override
+            public String getSchemaKey(CachedRow row) {
+                return row.getString("TABLE_SCHEMA");
+            }
+
+            @Override
+            boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) ||
+                    tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
+                    return false;
+                }
+                return true;
+            }
+
+            @Override
+            public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                if (database instanceof OracleDatabase) {
+                    return oracleQuery(false);
+                }
+                return Collections.emptyList();
+            }
+
+            @Override
+            public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                if (database instanceof OracleDatabase) {
+                    return oracleQuery(true);
+                }
+                return Collections.emptyList();
+            }
+
+            private List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
+                CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                String jdbcTableName = database.escapeStringForDatabase(tableName);
+                String sqlToSelectNotNullConstraints = "SELECT  NULL AS TABLE_CAT, atc.OWNER AS TABLE_SCHEMA, atc.OWNER, atc.TABLE_NAME, " +
+                        "atc.COLUMN_NAME, NULLABLE, ac.VALIDATED as VALIDATED, ac.SEARCH_CONDITION, ac.CONSTRAINT_NAME " +
+                        "FROM ALL_TAB_COLS atc " +
+                        "JOIN all_cons_columns acc ON atc.OWNER = acc.OWNER AND atc.TABLE_NAME = acc.TABLE_NAME AND atc.COLUMN_NAME = acc.COLUMN_NAME " +
+                        "JOIN all_constraints ac ON atc.OWNER = ac.OWNER AND atc.TABLE_NAME = ac.TABLE_NAME AND acc.CONSTRAINT_NAME = ac.CONSTRAINT_NAME ";
+
+                if (!bulk || getAllCatalogsStringScratchData() == null) {
+                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER='" + jdbcSchemaName + "' AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
+                } else {
+                    sqlToSelectNotNullConstraints += " WHERE atc.OWNER IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") "
+                        + " AND atc.hidden_column='NO' AND ac.CONSTRAINT_TYPE='C'  and ac.search_condition is not null ";
+                }
+
+                sqlToSelectNotNullConstraints += (!bulk && tableName != null && !tableName.isEmpty()) ? " AND atc.TABLE_NAME='" + jdbcTableName + "'":"";
+
+                return this.executeAndExtract(sqlToSelectNotNullConstraints, database);
+            }
+
+            @Override
+            protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
+                List<CachedRow> cachedRowList = new ArrayList<CachedRow>();
+                if (!(database instanceof OracleDatabase)) {
+                    return cachedRowList;
+                }
+
+                resultSet.setFetchSize(database.getFetchSize());
+                List<Map> result;
+
+                try {
+                    result = (List<Map>) new RowMapperNotNullConstraintsResultSetExtractor(new ColumnMapRowMapper() {
+                        @Override
+                        protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+                            Object value = super.getColumnValue(rs, index);
+                            if (value == null || !(value instanceof String)) {
+                                return value;
+                            }
+                            return value.toString().trim();
+                        }
+                    }).extractData(resultSet);
+
+                    for (Map row : result) {
+                        cachedRowList.add(new CachedRow(row));
+                    }
+                } finally {
+                    JdbcUtils.closeResultSet(resultSet);
+                }
+                return cachedRowList;
+
+            }
+      }
+
+        public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws DatabaseException {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
@@ -853,20 +1001,32 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryMssql(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class);
 
+                    String databaseName = StringUtil.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+                    String dbIdParam;
+                    String databasePrefix;
+                    if (databaseName == null) {
+                        databasePrefix = "";
+                        dbIdParam = "";
+                    } else {
+                        dbIdParam = ", db_id('"+databaseName+"')";
+                        databasePrefix = "[" + databaseName + "].";
+                    }
+
+
                     //From select object_definition(object_id('sp_tables'))
                     String sql = "select " +
-                            "convert(sysname,db_name()) AS TABLE_QUALIFIER, " +
-                            "convert(sysname,schema_name(o.schema_id)) AS TABLE_SCHEM, " +
+                            "db_name(" + (databaseName == null ? "" : "db_id('" + databaseName + "')") + ") AS TABLE_CAT, " +
+                            "convert(sysname,object_schema_name(o.object_id" + dbIdParam + ")) AS TABLE_SCHEM, " +
                             "convert(sysname,o.name) AS TABLE_NAME, " +
                             "'TABLE' AS TABLE_TYPE, " +
                             "CAST(ep.value as varchar(max)) as REMARKS " +
-                            "from  sys.all_objects o " +
+                            "from " + databasePrefix + "sys.all_objects o " +
                             "left outer join sys.extended_properties ep on ep.name='MS_Description' and major_id=o.object_id and minor_id=0 " +
                             "where " +
                             "o.type in ('U') " +
-                            "and has_perms_by_name(quotename(schema_name(o.schema_id)) + '.' + quotename(o.name), 'object', 'select') = 1 " +
+                            "and has_perms_by_name(" + (databaseName == null ? "" : "quotename('" + databaseName + "') + '.' + ") + "quotename(object_schema_name(o.object_id" + dbIdParam + ")) + '.' + quotename(o.name), 'object', 'select') = 1 " +
                             "and charindex(substring(o.type,1,1),'U') <> 0 " +
-                            "and schema_name(o.schema_id)='" + database.escapeStringForDatabase(ownerName) + "'";
+                            "and object_schema_name(o.object_id" + dbIdParam + ")='" + database.escapeStringForDatabase(ownerName) + "'";
                     if (tableName != null) {
                         sql += " AND o.name='" + database.escapeStringForDatabase(tableName) + "' ";
                     }
@@ -918,7 +1078,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             });
         }
 
-        public List<CachedRow> getViews(final String catalogName, final String schemaName, final String view) throws SQLException, DatabaseException {
+        public List<CachedRow> getViews(final String catalogName, final String schemaName, String viewName) throws DatabaseException {
+            final String view;
+            if (database instanceof DB2Database) {
+              view = database.correctObjectName(viewName, View.class);
+            }
+            else {
+              view = viewName;
+            }
             return getResultSetCache("getViews").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
@@ -991,7 +1158,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         sql += "WHERE a.OWNER IN ('" + ownerName + "', " + getAllCatalogsStringScratchData() + ")";
                     }
                     if (viewName != null) {
-                        sql += " AND a.VIEW_NAME='" + viewName + "'";
+                        sql += " AND a.VIEW_NAME='" + database.correctObjectName(viewName, View.class) + "'";
                     }
                     sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner=a.owner)";
 
@@ -1000,7 +1167,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             });
         }
 
-        public List<CachedRow> getPrimaryKeys(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
+        public List<CachedRow> getPrimaryKeys(final String catalogName, final String schemaName, final String table) throws DatabaseException {
             return getResultSetCache("getPrimaryKeys").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
@@ -1080,7 +1247,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         } else if (database instanceof OracleDatabase) {
                             warnAboutDbaRecycleBin();
 
-                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq, c.constraint_name AS pk_name " +
+                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name as COLUMN_NAME, c.position AS key_seq, c.constraint_name AS pk_name, k.VALIDATED as VALIDATED " +
                                     "FROM all_cons_columns c, all_constraints k " +
                                     "LEFT JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=k.table_name " +
                                     "WHERE k.constraint_type = 'P' " +
@@ -1150,7 +1317,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         warnAboutDbaRecycleBin();
                         try {
-                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM " +
+                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name, k.VALIDATED as VALIDATED FROM " +
                                     "all_cons_columns c, " +
                                     "all_constraints k " +
                                     "LEFT JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=k.table_name " +
@@ -1191,7 +1358,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             });
         }
 
-        public List<CachedRow> getUniqueConstraints(final String catalogName, final String schemaName, final String tableName) throws SQLException, DatabaseException {
+        public List<CachedRow> getUniqueConstraints(final String catalogName, final String schemaName, final String tableName) throws DatabaseException {
             return getResultSetCache("getUniqueConstraints").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
@@ -1241,7 +1408,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     Database database = JdbcDatabaseSnapshot.this.getDatabase();
                     String sql;
-                    if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase) || (database
+                    if( database instanceof Ingres9Database ) {
+                        sql = "select CONSTRAINT_NAME, TABLE_NAME from iiconstraints where schema_name ='"
+                                + schemaName + "' and constraint_type='U'";
+                        if (tableName != null) {
+                            sql += " and table_name='" + tableName + "'";
+                        }
+                    } else if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase) || (database
                         instanceof MariaDBDatabase)) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME "
                                 + "from " + database.getSystemSchema() + ".table_constraints "
@@ -1279,10 +1452,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     } else if (database instanceof OracleDatabase) {
                         warnAboutDbaRecycleBin();
 
-                        sql = "select uc.owner AS CONSTRAINT_SCHEM, uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
+                        sql = "select uc.owner AS CONSTRAINT_SCHEM, uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG, uc.VALIDATED as VALIDATED, ac.COLUMN_NAME as COLUMN_NAME " +
                                 "from all_constraints uc " +
                                 "join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner and uc.table_name=ui.table_name " +
                                 "LEFT OUTER JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=ui.table_name " +
+                                "LEFT JOIN all_cons_columns ac ON ac.OWNER = uc.OWNER AND ac.TABLE_NAME = uc.TABLE_NAME AND ac.CONSTRAINT_NAME = uc.CONSTRAINT_NAME "+
                                 "where uc.constraint_type='U' ";
                         if (tableName != null || getAllCatalogsStringScratchData() == null) {
                             sql += "and uc.owner = '" + jdbcSchemaName + "'";
@@ -1356,7 +1530,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        LogService.getLog(getClass()).warning(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
+                        Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
                         return null; //TODO: find sybase sql
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +

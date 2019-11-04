@@ -1,6 +1,7 @@
 package liquibase.statementexecute;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -124,7 +125,7 @@ public abstract class AbstractExecuteTest {
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
                 String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
                 try {
-                    LogService.getLog(getClass()).info(LogType.WRITE_SQL, sqlToRun);
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sqlToRun);
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
                     System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
@@ -153,7 +154,7 @@ public abstract class AbstractExecuteTest {
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {
-        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null));
+        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null, null, null));
     }
 
     private boolean shouldTestDatabase(Database database, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) {

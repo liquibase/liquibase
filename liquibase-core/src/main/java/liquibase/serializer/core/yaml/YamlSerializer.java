@@ -186,11 +186,11 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                 if (type.equals(ChangeSet.class)) {
                     serialzableType = new ChangeSet("x", "y", false, false, null, null, null, null);
                 } else if (LiquibaseSerializable.class.isAssignableFrom(type)) {
-                    serialzableType = (LiquibaseSerializable) type.newInstance();
+                    serialzableType = (LiquibaseSerializable) type.getConstructor().newInstance();
                 } else {
                     return super.getProperties(type);
                 }
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (ReflectiveOperationException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
             for (String property : serialzableType.getSerializableFields()) {

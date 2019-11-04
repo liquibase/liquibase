@@ -3,6 +3,7 @@ package liquibase.integration.cdi;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -12,7 +13,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.cdi.annotations.LiquibaseType;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -78,7 +78,7 @@ public class CDILiquibase implements Extension {
     @Inject
     @LiquibaseType
     ResourceAccessor resourceAccessor;
-    private Logger log = LogService.getLog(CDILiquibase.class);
+
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
     @Inject @LiquibaseType
@@ -96,13 +96,15 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
         log.info(LogType.LOG, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();
         } catch (Exception e) {
             log.warning(LogType.LOG, "Cannot find hostname: " + e.getMessage());
-            log.debug(LogType.LOG, "", e);
+            log.fine(LogType.LOG, "", e);
             return;
         }
 

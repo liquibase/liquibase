@@ -5,11 +5,11 @@ import liquibase.Labels;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogType;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -23,8 +23,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         Yaml yaml = new Yaml(new SafeConstructor());
 
-        try {
-            InputStream changeLogStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
+        try (InputStream changeLogStream = resourceAccessor.openStream(null, physicalChangeLogLocation)) {
             if (changeLogStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
@@ -95,11 +94,10 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         return parsedYaml;
     }
     
-    private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException {
+    private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException, LiquibaseException {
         Properties props = new Properties();
         try (
-            InputStream propertiesStream = StreamUtil.singleInputStream(
-                (String) property.get("file"), resourceAccessor))
+            InputStream propertiesStream = resourceAccessor.openStream(null, (String) property.get("file")))
         {
             
             if (propertiesStream == null) {

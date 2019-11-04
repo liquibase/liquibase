@@ -1,18 +1,35 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.Db2zDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DatabaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.*;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.core.*;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
@@ -35,16 +52,16 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         List<Sql> additionalSql = new ArrayList<>();
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(),
             statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
-        
+
         boolean isSinglePrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && (statement
             .getPrimaryKeyConstraint().getColumns().size() == 1);
-        
+
         boolean isPrimaryKeyAutoIncrement = false;
-        
+
         Iterator<String> columnIterator = statement.getColumns().iterator();
 
         BigInteger mysqlTableOptionStartWith = null;
@@ -58,7 +75,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             buffer.append(" ").append(columnType);
 
             AutoIncrementConstraint autoIncrementConstraint = null;
-            
+
             for (AutoIncrementConstraint currentAutoIncrementConstraint : statement.getAutoIncrementConstraints()) {
                 if (column.equals(currentAutoIncrementConstraint.getColumnName())) {
                     autoIncrementConstraint = currentAutoIncrementConstraint;
@@ -106,8 +123,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" DEFAULT ");
                 }
 
-                if (defaultValue instanceof SequenceNextValueFunction) {
-                    buffer.append(database.generateDatabaseFunctionValue((SequenceNextValueFunction) defaultValue));
+                if (defaultValue instanceof DatabaseFunction) {
+                    buffer.append(database.generateDatabaseFunctionValue((DatabaseFunction) defaultValue));
                 } else if (database instanceof Db2zDatabase) {
                     if (statement.getDefaultValue(column).toString().contains("CURRENT TIMESTAMP")) {
                         buffer.append("");
@@ -129,22 +146,30 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (isAutoIncrementColumn) {
                 // TODO: check if database supports auto increment on non primary key column
                 if (database.supportsAutoIncrement()) {
-                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
-                
+                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
+
                     if (!"".equals(autoIncrementClause)) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
 
                     if( autoIncrementConstraint.getStartWith() != null ){
                         if (database instanceof PostgresDatabase) {
-                            String sequenceName = statement.getTableName()+"_"+column+"_seq";
-                            additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+                            int majorVersion = 9;
+                            try {
+                                majorVersion = database.getDatabaseMajorVersion();
+                            } catch (DatabaseException e) {
+                                // ignore
+                            }
+                            if (majorVersion < 10) {
+                                String sequenceName = statement.getTableName()+"_"+column+"_seq";
+                                additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+                            }
                         }else if(database instanceof MySQLDatabase){
                             mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
                         }
                     }
                 } else {
-                    LogService.getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
@@ -155,14 +180,20 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 } else {
                     /* Determine if the NOT NULL constraint has a name. */
                     NotNullConstraint nnConstraintForThisColumn = statement.getNotNullColumns().get(column);
-                    String nncName = StringUtil.trimToNull(nnConstraintForThisColumn.getName());
+                    String nncName = StringUtil.trimToNull(nnConstraintForThisColumn.getConstraintName());
                     if (nncName == null) {
                         buffer.append(" NOT NULL");
                     } else {
                         buffer.append(" CONSTRAINT ");
                         buffer.append(database.escapeConstraintName(nncName));
                         buffer.append(" NOT NULL");
-                    } // do we have a NN constraint name?
+                    }
+
+                    if (!nnConstraintForThisColumn.shouldValidateNullable()){
+                        if (database instanceof OracleDatabase){
+                            buffer.append(" ENABLE NOVALIDATE ");
+                        }
+                    }
                 } // does the DB support constraint names?
             } else {
                 if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
@@ -211,7 +242,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" USING INDEX TABLESPACE ");
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
                 }
-
+                buffer.append(!statement.getPrimaryKeyConstraint().shouldValidatePrimaryKey() ? " ENABLE NOVALIDATE " : "");
                 buffer.append(",");
             }
         }
@@ -256,6 +287,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (fkConstraint.isDeferrable()) {
                 buffer.append(" DEFERRABLE");
             }
+
+            if (database instanceof OracleDatabase) {
+                buffer.append(!fkConstraint.shouldValidateForeignKey() ? " ENABLE NOVALIDATE " : "");
+            }
+
             buffer.append(",");
         }
 
@@ -267,6 +303,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtil.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
+            if (database instanceof OracleDatabase) {
+                buffer.append(!uniqueConstraint.shouldValidateUnique() ? " ENABLE NOVALIDATE " : "");
+            }
             buffer.append(",");
         }
 
@@ -278,7 +317,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         String sql = buffer.toString().replaceFirst(",\\s*$", "")+")";
 
         if ((database instanceof MySQLDatabase) && (mysqlTableOptionStartWith != null)){
-            LogService.getLog(getClass()).info(LogType.LOG, "[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
             sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 

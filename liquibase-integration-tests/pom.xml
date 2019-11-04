@@ -5,7 +5,7 @@
     <parent>
         <artifactId>liquibase-parent</artifactId>
         <groupId>org.liquibase</groupId>
-        <version>3.7.0-SNAPSHOT</version>
+        <version>3.9.0-SNAPSHOT</version>
     </parent>
 
 
@@ -29,12 +29,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -134,6 +128,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
                     <systemProperties>
                         <property>
                             <name>liquibase.defaultlogger.level</name>
@@ -154,6 +149,7 @@
                 <configuration>
                     <skipTests>${skipTests}</skipTests>
                     <skipITs>${skipITs}</skipITs>
+                    <useSystemClassLoader>false</useSystemClassLoader>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <systemPropertyVariables>
                         <jacoco-agent.destfile>${jacoco.it.execution.data.file}</jacoco-agent.destfile>

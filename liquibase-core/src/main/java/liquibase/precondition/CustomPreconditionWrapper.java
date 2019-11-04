@@ -1,5 +1,6 @@
 package liquibase.precondition;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.changelog.DatabaseChangeLog;
@@ -18,7 +19,6 @@ import java.util.TreeSet;
 public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     private String className;
-    private ClassLoader classLoader;
 
     private SortedSet<String> params = new TreeSet<>();
     private Map<String, String> paramValues = new HashMap<>();
@@ -33,14 +33,6 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     public void setClass(String className) {
         this.className = className;
-    }
-
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
     }
 
     public String getParamValue(String key) {
@@ -69,9 +61,9 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
         try {
 //            System.out.println(classLoader.toString());
             try {
-                customPrecondition = (CustomPrecondition) Class.forName(className, true, classLoader).newInstance();
+                customPrecondition = (CustomPrecondition) Class.forName(className, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
             } catch (ClassCastException e) { //fails in Ant in particular
-                customPrecondition = (CustomPrecondition) Class.forName(className).newInstance();
+                customPrecondition = (CustomPrecondition) Class.forName(className).getConstructor().newInstance();
             }
         } catch (Exception e) {
             throw new PreconditionFailedException("Could not open custom precondition class "+className, changeLog, this);
@@ -114,7 +106,6 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        setClassLoader(resourceAccessor.toClassLoader());
         setClassName(parsedNode.getChildValue(null, "className", String.class));
 
         ParsedNode paramsNode = parsedNode.getChild(null, "params");

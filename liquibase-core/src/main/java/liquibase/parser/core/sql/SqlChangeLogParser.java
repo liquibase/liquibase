@@ -34,11 +34,11 @@ public class SqlChangeLogParser implements ChangeLogParser {
         RawSQLChange change = new RawSQLChange();
 
         try {
-            InputStream sqlStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
+            InputStream sqlStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
             if (sqlStream == null) {
                 throw new ChangeLogParseException("File does not exist: "+physicalChangeLogLocation);
             }
-            String sql = StreamUtil.getStreamContents(sqlStream, null);
+            String sql = StreamUtil.readStreamAsString(sqlStream);
             change.setSql(sql);
         } catch (IOException e) {
             throw new ChangeLogParseException(e);

@@ -1,13 +1,32 @@
 package liquibase.util;
 
+import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.datatype.core.*;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.logging.LogService;
+import liquibase.datatype.core.BigIntType;
+import liquibase.datatype.core.BlobType;
+import liquibase.datatype.core.BooleanType;
+import liquibase.datatype.core.CharType;
+import liquibase.datatype.core.ClobType;
+import liquibase.datatype.core.DateTimeType;
+import liquibase.datatype.core.DateType;
+import liquibase.datatype.core.DecimalType;
+import liquibase.datatype.core.DoubleType;
+import liquibase.datatype.core.FloatType;
+import liquibase.datatype.core.IntType;
+import liquibase.datatype.core.NCharType;
+import liquibase.datatype.core.NVarcharType;
+import liquibase.datatype.core.NumberType;
+import liquibase.datatype.core.SmallIntType;
+import liquibase.datatype.core.TimeType;
+import liquibase.datatype.core.TimestampType;
+import liquibase.datatype.core.TinyIntType;
+import liquibase.datatype.core.VarcharType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
@@ -151,7 +170,9 @@ public class SqlUtil {
             } else {
                 value = Integer.valueOf(stringVal);
             }
-
+            //
+            // Make sure we handle BooleanType values which are not Boolean
+            //
             if (database instanceof MSSQLDatabase && value instanceof Boolean) {
                 if ((Boolean) value) {
                     return new DatabaseFunction("'true'");
@@ -285,7 +306,7 @@ public class SqlUtil {
             if (stringVal.equals("")) {
                 return stringVal;
             }
-            LogService.getLog(SqlUtil.class).info("Unknown default value: value '" + stringVal +
+            Scope.getCurrentScope().getLog(SqlUtil.class).info("Unknown default value: value '" + stringVal +
                     "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
             if (strippedSingleQuotes) { //put quotes back
                 return new DatabaseFunction("'" + stringVal + "'");

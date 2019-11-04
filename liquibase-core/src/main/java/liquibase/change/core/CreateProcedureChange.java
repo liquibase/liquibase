@@ -185,7 +185,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
         if ((StringUtil.trimToNull(getProcedureText()) == null) && (StringUtil.trimToNull(getPath()) == null)) {
             validate.addError(
-                "Cannot specify either 'path' or a nested procedure text in " +
+                "Must specify either 'path' or a nested procedure text in " +
                     Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
             );
         }
@@ -208,7 +208,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         try {
-            return StreamUtil.openStream(getPath(), isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            String path = getPath();
+            String relativeTo = null;
+            if (isRelativeToChangelogFile()) {
+                relativeTo = getChangeSet().getFilePath();
+            }
+            return getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException(
                 "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
@@ -290,7 +295,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 if (stream == null) {
                     throw new IOException("File does not exist: " + path);
                 }
-                procedureText = StreamUtil.getStreamContents(stream, encoding);
+                procedureText = StreamUtil.readStreamAsString(stream, encoding);
                 if (getChangeSet() != null) {
                     ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
                     if (parameters != null) {
