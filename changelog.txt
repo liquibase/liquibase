@@ -1,6 +1,13 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.1 (2019.11.5)
+
+- [PRO] Oracle and SQL Server users can now reverse engineer database changes for stored logic such as triggers, functions & procedures using generateChangeLog, snapshot, diff, and diffChangeLog commands.  
+- diff command writes to an external file using --outputFile flag
+- updateSQL command no longer outputs to liquibase.log
+- Cleaned up unexpected entries in diffchangelog.xml for SQL Server
+
 Changes in version 3.8.0 (2019.8.16)
 
 - [CORE-3462] - Add new procedural database code change types for Liquibase Pro
