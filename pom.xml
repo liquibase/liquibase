@@ -50,6 +50,7 @@
             <!--                    <excludes>-->
             <!--                        <exclude>com/datical/**</exclude>-->
             <!--                        <exclude>**/pro/**</exclude>-->
+            <!--                        <exclude>*.ks</exclude>-->
             <!--                    </excludes>-->
             <!--                </configuration>-->
             <!--            </plugin>-->
