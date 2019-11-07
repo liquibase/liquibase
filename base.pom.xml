@@ -13,7 +13,7 @@
     <name>${project.artifactId}</name>
 
     <properties>
-        <liquibase.base.version>3.8.1</liquibase.base.version>
+        <liquibase.base.version>3.8.2</liquibase.base.version>
         <liquibase.version.qualifier>-local</liquibase.version.qualifier>
         <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
         <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}</liquibase.version>
