@@ -3,10 +3,10 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
     <preConditions>
             <dbms type="oracle"/>
-            <runningAs username="lbuser"/>
+            <runningAs username="${loginUser}"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
@@ -367,6 +367,42 @@ END testSP;
             id int not null primary key,
             bdtestcol binary_double,
             bftestcol binary_float)
+        </sql>
+    </changeSet>
+
+    <changeSet id="notNullConstraintNamingTest" author="abuschka">
+        <createTable tableName="NOTNULL_NAMING_TEST">
+            <column name="id" type="int"/>
+            <column name="testcol" type="varchar2(50 char)">
+                <constraints nullable="false" notNullConstraintName="NN_NAMING_TEST_TESTCOL_NN" />
+            </column>
+            <column name="testcol2" type="int" />
+        </createTable>
+        <addNotNullConstraint tableName="NOTNULL_NAMING_TEST" columnName="testcol2" constraintName="NN_NAMING_TEST_TESTCOL2_NN" />
+    </changeSet>
+
+    <changeSet id="notNullConstraintNamingTest_part2" author="abuschka">
+        <preConditions>
+            <and>
+                <changeSetExecuted id="notNullConstraintNamingTest" author="abuschka" />
+            </and>
+        </preConditions>
+        <sql dbms="oracle" endDelimiter="none">
+            <![CDATA[
+                DECLARE
+                  v_rows_found INTEGER;
+                BEGIN
+                  SELECT COUNT(*)
+                    INTO v_rows_found
+                    FROM user_constraints
+                   WHERE constraint_name IN ('NN_NAMING_TEST_TESTCOL_NN', 'NN_NAMING_TEST_TESTCOL2_NN');
+
+                  IF v_rows_found < 2 THEN
+                    RAISE_APPLICATION_ERROR(-20000, 'Test case notNullConstraintNamingTest should have created the constraints '
+                      || 'NN_NAMING_TEST_TESTCOL_NN and NN_NAMING_TEST_TESTCOL2_NN.');
+                  END IF;
+                END;
+            ]]>
         </sql>
     </changeSet>
 

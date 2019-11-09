@@ -1,12 +1,6 @@
 package liquibase.structure.core;
 
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.util.ObjectUtil;
-
-import java.util.Set;
 
 public class DataType extends AbstractLiquibaseSerializable {
 
@@ -69,7 +63,18 @@ public class DataType extends AbstractLiquibaseSerializable {
 
     @Override
     public String toString() {
+        String subtypeData = null;
         String value = typeName;
+        if(value.contains("FOR BIT DATA")){
+            value = typeName.replaceAll("\\(.*","");
+            subtypeData = " FOR BIT DATA";
+        }else if (value.contains("FOR SBCS DATA")){
+            value = typeName.replaceAll("\\(.*","");
+            subtypeData = " FOR SBCS DATA";
+        }else if (value.contains("FOR MIXED DATA")){
+            value = typeName.replaceAll("\\(.*","");
+            subtypeData = " FOR MIXED DATA";
+        }
         boolean unsigned = false;
         if (value.toLowerCase().endsWith(" unsigned")) {
             value = value.substring(0, value.length()-" unsigned".length());
@@ -78,9 +83,19 @@ public class DataType extends AbstractLiquibaseSerializable {
 
         if (columnSize == null) {
             if (decimalDigits != null) {
-                value += "(*, "+decimalDigits+")";
+                value += "(*, " + decimalDigits + ")";
             }
-        } else {
+        } else if (subtypeData != null) {
+            value += "(";
+            value += columnSize;
+            if (columnSizeUnit != null && (typeName.equalsIgnoreCase("VARCHAR")
+                    || typeName.equalsIgnoreCase("VARCHAR2")
+                    || typeName.equalsIgnoreCase("CHAR"))) {
+                value += " " + columnSizeUnit;
+            }
+            value +=")";
+            value +=subtypeData;
+        }else{
             value += "(";
             value += columnSize;
 
@@ -89,7 +104,9 @@ public class DataType extends AbstractLiquibaseSerializable {
             }
 
             //Failing on data types such as nvarchar if included
-            if (columnSizeUnit != null && columnSizeUnit.equals(ColumnSizeUnit.CHAR) && (typeName.equalsIgnoreCase("VARCHAR") || typeName.equalsIgnoreCase("VARCHAR2"))) {
+            if ((columnSizeUnit != null) && ("VARCHAR".equalsIgnoreCase(typeName) || "VARCHAR2".equalsIgnoreCase
+                (typeName) || "CHAR".equalsIgnoreCase(typeName))
+            ) {
                 value += " " + columnSizeUnit;
             }
 
@@ -119,12 +136,6 @@ public class DataType extends AbstractLiquibaseSerializable {
         this.characterOctetLength = characterOctetLength;
     }
 
-
-    public static enum ColumnSizeUnit {
-        BYTE,
-        CHAR,
-    }
-
     @Override
     public String getSerializedObjectName() {
         return "dataType";
@@ -133,5 +144,13 @@ public class DataType extends AbstractLiquibaseSerializable {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_SNAPSHOT_NAMESPACE;
+    }
+
+    /**
+     * Specifies the unit of a column's size. Currently, the possible units are BYTE and CHAR.
+     */
+    public enum ColumnSizeUnit {
+        BYTE,
+        CHAR,
     }
 }

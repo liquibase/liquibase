@@ -1,53 +1,52 @@
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-maven-integration-tests</artifactId>
-    <packaging>jar</packaging>
+	<packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>Liquibase Maven Integration tests</name>
     <url>http://www.liquibase.org</url>
-    <dependencies>
-        <dependency>
+	<dependencies>
+		<dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
+	<build>
+		<plugins>
+			<plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>${project.version}</version>
+				<version>${project.version}</version>
 				<dependencies>
-			        <dependency>
-  			            <groupId>hsqldb</groupId>
-			            <artifactId>hsqldb</artifactId>
-			            <version>1.8.0.7</version>
-			        </dependency>
+                    <dependency>
+                        <groupId>org.hsqldb</groupId>
+                        <artifactId>hsqldb</artifactId>
+                        <version>${hsqldb.version}</version>
+                    </dependency>
 				</dependencies>
-                <configuration>
-                    <changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>
-                    <driver>org.hsqldb.jdbcDriver</driver>
+				<configuration>
+					<changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>
+					<driver>org.hsqldb.jdbcDriver</driver>
                     <url>jdbc:hsqldb:file:liquibase;shutdown=true</url>
-                    <logging>debug</logging>
-                    <verbose>true</verbose>
-                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-                    <tag>v5</tag>
-                    <rollbackTag>v5</rollbackTag>
-                </configuration>
-                <executions>
-                    <execution>						
-                        <phase>test</phase>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                    </execution>					
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+					<logging>debug</logging>
+					<verbose>true</verbose>
+					<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+					<tag>v5</tag>
+					<rollbackTag>v5</rollbackTag>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>update</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

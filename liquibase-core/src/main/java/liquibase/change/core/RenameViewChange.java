@@ -76,10 +76,10 @@ public class RenameViewChange extends AbstractChange {
             View newView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getNewViewName()), database);
             View oldView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getOldViewName()), database);
 
-            if (newView == null && oldView == null) {
+            if ((newView == null) && (oldView == null)) {
                 return changeStatus.unknown("Neither view exists");
             }
-            if (newView != null && oldView != null) {
+            if ((newView != null) && (oldView != null)) {
                 return changeStatus.unknown("Both views exist");
             }
             changeStatus.assertComplete(newView != null, "New view does not exist");

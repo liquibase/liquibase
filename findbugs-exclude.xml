@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FindBugsFilter>
+  <LastVersion value="-1" relOp="NEQ"/>
+  <Class name="liquibase.util.grammar.SimpleCharStream"/>
+  <And>
+    <Rank value="10"/>
+    <Bug category="SECURITY"/>
+    <Bug code="SQL"/>
+    <Bug pattern="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE"/>
+  </And>
+  <And>
+    <Rank value="12"/>
+    <Bug category="CORRECTNESS"/>
+    <Bug code="UwF"/>
+    <Bug pattern="UWF_UNWRITTEN_FIELD"/>
+  </And>
+  <And>
+    <Rank value="15"/>
+    <Bug category="STYLE"/>
+    <Bug code="DLS"/>
+  </And>
+  <And>
+    <Rank value="15"/>
+    <Bug category="STYLE"/>
+    <Bug code="ST"/>
+    <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"/>
+  </And>
+  <And>
+    <Rank value="14"/>
+    <Bug category="BAD_PRACTICE"/>
+    <Bug code="Nm"/>
+    <Bug pattern="NM_SAME_SIMPLE_NAME_AS_SUPERCLASS"/>
+  </And>
+</FindBugsFilter>

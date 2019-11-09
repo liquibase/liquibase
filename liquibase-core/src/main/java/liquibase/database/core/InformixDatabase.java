@@ -1,5 +1,19 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
+import liquibase.Scope;
+import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
+import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
+
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
@@ -7,24 +21,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
-
 public class InformixDatabase extends AbstractJdbcDatabase {
 
-	private static final String PRODUCT_NAME = "Informix Dynamic Server";
-    private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
+    private static final String PRODUCT_NAME = "Informix Dynamic Server"; // product name returned by Informix driver
+    private static final String PRODUCT_NAME_DB2JCC_PREFIX = "IDS"; // prefix of the product name (e.g. "IDS/UNIX64") returned by IBM DB2 Universal JDBC (jcc) driver.
+    private static final String TIME_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
     private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
 
-	private final Set<String> systemTablesAndViews = new HashSet<String>();
+	private final Set<String> systemTablesAndViews = new HashSet<>();
 
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+",
     		Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -121,6 +125,8 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(final DatabaseConnection connection) {
+		// TODO Verify connection requirement: DB_LOCALE is a Unicode locale
+		// TODO Verify connection requirement: GL_DATE is set to GL_DATE=%iY-%m-%d
         super.setConnection(connection);
         if (!(connection instanceof OfflineConnection)) {
             try {
@@ -152,7 +158,12 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	@Override
     public boolean isCorrectDatabaseImplementation(final DatabaseConnection conn)
 			throws DatabaseException {
-		return PRODUCT_NAME.equals(conn.getDatabaseProductName());
+		Boolean correct = false;
+		String name = conn.getDatabaseProductName();
+		if (name != null && (name.equals(PRODUCT_NAME) || name.startsWith(PRODUCT_NAME_DB2JCC_PREFIX))) {
+				correct = true;
+		}
+		return correct;
 	}
 
 	@Override
@@ -182,7 +193,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	}
 
 	@Override
-	public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
+	public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy, final String generationType, final Boolean defaultOnNull) {
 		return "";
 	}
 
@@ -190,7 +201,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	@Override
     public String getDateLiteral(final String isoDate) {
         if (isTimeOnly(isoDate)) {
-            return "INTERVAL (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + INTERVAL_FIELD_QUALIFIER;
+            return "DATETIME (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + TIME_FIELD_QUALIFIER;
         } else if (isDateOnly(isoDate)){
         	return super.getDateLiteral(isoDate);
         } else {
@@ -226,4 +237,26 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName;
     }
+
+    @Override
+    protected String getConnectionSchemaName() {
+        if ((getConnection() == null) || (getConnection() instanceof OfflineConnection)) {
+            return null;
+        }
+        try {
+            String schemaName = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select username from sysmaster:informix.syssessions where sid = dbinfo('sessionid')"), String.class);
+            if (schemaName != null) {
+                return schemaName.trim();
+            }
+        } catch (Exception e) {
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting connection schema", e);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean supportsCatalogInObjectName(final Class<? extends DatabaseObject> type) {
+        return true;
+    }
+
 }

@@ -8,6 +8,7 @@ import liquibase.configuration.AbstractConfigurationContainer;
 public class ChangeLogParserCofiguration extends AbstractConfigurationContainer {
 
     public static final String SUPPORT_PROPERTY_ESCAPING = "supportPropertyEscaping";
+    public static final String USE_PROCEDURE_SCHEMA = "useProcedureSchema";
 
     public ChangeLogParserCofiguration() {
         super("liquibase");
@@ -16,6 +17,10 @@ public class ChangeLogParserCofiguration extends AbstractConfigurationContainer 
                 .setDescription("Support escaping changelog parameters using a colon. Example: ${:user.name}")
                 .setDefaultValue(false)
                 .addAlias("enableEscaping");
+
+        getContainer().addProperty(USE_PROCEDURE_SCHEMA, Boolean.class)
+                .setDescription("If set to true (default value), createProcedure tags with a set schemaName will modify the procedure body with the given schema name.")
+                .setDefaultValue(true);
     }
 
     public boolean getSupportPropertyEscaping() {
@@ -26,4 +31,15 @@ public class ChangeLogParserCofiguration extends AbstractConfigurationContainer 
         getContainer().setValue(SUPPORT_PROPERTY_ESCAPING, support);
         return this;
     }
+
+    public boolean getUseProcedureSchema() {
+        return getContainer().getValue(USE_PROCEDURE_SCHEMA, Boolean.class);
+    }
+
+    public ChangeLogParserCofiguration setUseProcedureSchema(boolean useSchema) {
+        getContainer().setValue(USE_PROCEDURE_SCHEMA, useSchema);
+        return this;
+    }
+
+
 }

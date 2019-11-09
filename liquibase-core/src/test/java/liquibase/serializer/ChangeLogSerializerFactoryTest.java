@@ -2,18 +2,25 @@ package liquibase.serializer;
 
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
-import static org.junit.Assert.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class ChangeLogSerializerFactoryTest {
 
     @Before
-    public void setup() {
+    public void setUp() {
         ChangeLogSerializerFactory.reset();
+    }
 
+    @After
+    public void tearDown() {
+        ChangeLogSerializerFactory.reset();
     }
 
     @Test
@@ -60,11 +67,10 @@ public class ChangeLogSerializerFactoryTest {
         assertFalse(instance1 == ChangeLogSerializerFactory.getInstance());
     }
 
-    @SuppressWarnings("unchecked")
-	@Test
-    public void builtInGeneratorsAreFound() {
-        Map<String, ChangeLogSerializer> generators = ChangeLogSerializerFactory.getInstance().getSerializers();
-        assertEquals(5, generators.size());
+    @Test
+    public void builtInSerializersAreFound() {
+        Map<String, List<ChangeLogSerializer>> serializers = ChangeLogSerializerFactory.getInstance().getSerializers();
+        assertEquals(6, serializers.size());
     }
 
     @Test
@@ -72,8 +78,31 @@ public class ChangeLogSerializerFactoryTest {
         ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer("xml");
 
         assertNotNull(serializer);
-        assertTrue(serializer instanceof XMLChangeLogSerializer);
+        assertSame(XMLChangeLogSerializer.class, serializer.getClass());
+        assertEquals(1, ChangeLogSerializerFactory.getInstance().getSerializers("xml").size());
     }
 
+    @Test
+    public void highestPrioritySerializerReturned() {
+        ChangeLogSerializerFactory factory = ChangeLogSerializerFactory.getInstance();
 
+        XMLChangeLogSerializer highestPriority = new XMLChangeLogSerializer() {
+            @Override
+            public int getPriority() {
+                return super.getPriority() + 4;
+            }
+        };
+        factory.register(highestPriority);
+
+        XMLChangeLogSerializer higherPriority = new XMLChangeLogSerializer() {
+            @Override
+            public int getPriority() {
+                return super.getPriority() + 1;
+            }
+        };
+        factory.register(higherPriority);
+
+        assertSame(highestPriority, factory.getSerializer("xml"));
+        assertEquals(3, factory.getSerializers().get("xml").size());
+    }
 }

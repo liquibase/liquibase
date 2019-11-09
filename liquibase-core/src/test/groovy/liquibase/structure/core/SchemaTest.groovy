@@ -19,7 +19,7 @@ class SchemaTest extends Specification {
         where:
         param     | defaultValue | newValue
         "name"    | null         | "schemaName"
-        "default" | false        | true
+        "default" | true         | true
     }
 
     @Unroll("#featureName: #schema -> #expected")

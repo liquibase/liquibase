@@ -1,17 +1,19 @@
 package liquibase.serializer.core.string;
 
-import liquibase.changelog.ChangeSet;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
-import java.io.File;
-import java.util.*;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class StringSnapshotSerializer implements SnapshotSerializer {
 
@@ -27,12 +29,18 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
         return object.getSerializedObjectName() + ":" + serializeObject(object, 1);
     }
 
+    private String serializeObject(Object object, int indent) {
+        return object instanceof LiquibaseSerializable
+            ? serializeObject((LiquibaseSerializable) object, indent)
+            : object.toString();
+    }
+
     private String serializeObject(LiquibaseSerializable objectToSerialize, int indent) {
         try {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             buffer.append("[");
 
-            SortedSet<String> values = new TreeSet<String>();
+            SortedSet<String> values = new TreeSet<>();
             for (String field : objectToSerialize.getSerializableFields()) {
                 Object value = objectToSerialize.getSerializableFieldValue(field);
 
@@ -48,7 +56,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
                             values.add(indent(indent) + field + "=" + serializeObject((Object[]) value, indent + 1));
                         } else {
                             String valueString = value.toString();
-                            if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
+                            if ((value instanceof Double) || (value instanceof Float)) { //java 6 adds additional zeros to the end of doubles and floats
                                 if (valueString.contains(".")) {
                                     valueString = valueString.replaceFirst("0*$","");
                                 }
@@ -59,9 +67,9 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
                 }
             }
 
-            if (values.size() > 0) {
+            if (!values.isEmpty()) {
                 buffer.append("\n");
-                buffer.append(StringUtils.join(values, "\n"));
+                buffer.append(StringUtil.join(values, "\n"));
                 buffer.append("\n");
             }
             buffer.append(indent(indent - 1)).append("]");
@@ -74,7 +82,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
     }
 
     private String indent(int indent) {
-        return StringUtils.repeat(" ", INDENT_LENGTH * indent);
+        return StringUtil.repeat(" ", INDENT_LENGTH * indent);
     }
 
     private String serializeObject(Object[] collection, int indent) {
@@ -82,72 +90,70 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
             return "[]";
         }
 
-        String returnString = "[\n";
+        StringBuilder returnString = new StringBuilder("[\n");
         for (Object object : collection) {
-            if (object instanceof LiquibaseSerializable) {
-                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
-            } else {
-                returnString += indent(indent) + object.toString() + ",\n";
-            }
+            returnString
+                .append(indent(indent))
+                .append(serializeObject(object, indent + 1))
+                .append(",\n");
         }
-        returnString = returnString.replaceFirst(",$", "");
-        returnString += indent(indent - 1) + "]";
-
-        return returnString;
+        String result = returnString.toString().replaceFirst(",$", "");
+        return result + indent(indent - 1) + "]";
 
     }
 
     private String serializeObject(Collection collection, int indent) {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "[]";
         }
 
-        String returnString = "[\n";
+        StringBuilder returnString = new StringBuilder("[\n");
         for (Object object : collection) {
-            if (object instanceof LiquibaseSerializable) {
-                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
-            } else {
-                returnString += indent(indent) + object.toString() + ",\n";
-            }
+            returnString.append(indent(indent));
+            returnString.append(serializeObject(object, indent + 1));
+            returnString.append(",\n");
         }
-        returnString = returnString.replaceFirst(",$", "");
-        returnString += indent(indent - 1) + "]";
-
-        return returnString;
+        String result = returnString.toString().replaceFirst(",$", "");
+        return result + indent(indent - 1) + "]";
 
     }
 
     private String serializeObject(Map collection, int indent) {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "[]";
         }
 
-        String returnString = "{\n";
-        TreeSet sortedCollection = new TreeSet(new Comparator() {
-            @Override
-            public int compare(Object o1, Object o2) {
-                if (o1 instanceof Comparable) {
-                    return ((Comparable) o1).compareTo(o2);
-                } else if (o1 instanceof Class) {
-                    return ((Class) o1).getName().compareTo(((Class) o2).getName());
-                } else {
-                    throw new ClassCastException(o1.getClass().getName()+" cannot be cast to java.lang.Comparable or java.lang.Class");
-                }
+        StringBuilder returnString = new StringBuilder("{\n");
+        TreeSet sortedCollection = new TreeSet((o1, o2) -> {
+            if (o1 instanceof Comparable) {
+                return ((Comparable) o1).compareTo(o2);
+            } else if (o1 instanceof Class) {
+                return ((Class) o1).getName().compareTo(((Class) o2).getName());
+            } else {
+                throw new ClassCastException(o1.getClass().getName()+" cannot be cast to java.lang.Comparable or java.lang.Class");
             }
         });
         sortedCollection.addAll(collection.keySet());
         for (Object key : sortedCollection) {
-            returnString += indent(indent) + key.toString() + "=\"" + collection.get(key) + "\",\n";
+            returnString
+                .append(indent(indent))
+                .append(key.toString())
+                .append("=\"")
+                .append(collection.get(key))
+                .append("\",\n");
         }
-        returnString = returnString.replaceFirst(",$", "");
-        returnString += indent(indent - 1) + "}";
-
-        return returnString;
+        String result = returnString.toString().replaceFirst(",$", "");
+        return result + indent(indent - 1) + "}";
 
     }
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
-        out.write(serialize(snapshot, true).getBytes());
+        out.write(serialize(snapshot, true).getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 }

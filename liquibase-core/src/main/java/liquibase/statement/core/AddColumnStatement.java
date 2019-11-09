@@ -1,17 +1,8 @@
 package liquibase.statement.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import liquibase.statement.*;
 
-import liquibase.statement.AbstractSqlStatement;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.PrimaryKeyConstraint;
-import liquibase.statement.UniqueConstraint;
+import java.util.*;
 
 public class AddColumnStatement extends AbstractSqlStatement {
 
@@ -21,13 +12,14 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String columnName;
     private String columnType;
     private Object defaultValue;
+    private String defaultValueConstraintName;
     private String remarks;
     private String addAfterColumn;
     private String addBeforeColumn;
     private Integer addAtPosition;
-    private Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+    private Set<ColumnConstraint> constraints = new HashSet<>();
 
-    private List<AddColumnStatement> columns = new ArrayList<AddColumnStatement>();
+    private List<AddColumnStatement> columns = new ArrayList<>();
 
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
         this.catalogName = catalogName;
@@ -134,6 +126,42 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return true;
     }
 
+    public boolean shouldValidateNullable() {
+        if (isPrimaryKey()) {
+            return false;
+        }
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof NotNullConstraint) {
+                if (!((NotNullConstraint) constraint).shouldValidateNullable()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean shouldValidateUnique() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof UniqueConstraint) {
+                if (!((UniqueConstraint) constraint).shouldValidateUnique()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean shouldValidatePrimaryKey() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof PrimaryKeyConstraint) {
+                if (!((PrimaryKeyConstraint) constraint).shouldValidatePrimaryKey()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public boolean isUnique() {
         for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof UniqueConstraint) {
@@ -157,26 +185,34 @@ public class AddColumnStatement extends AbstractSqlStatement {
     }
 
     public String getAddAfterColumn() {
-    	return addAfterColumn;
+        return addAfterColumn;
     }
 
     public void setAddAfterColumn(String addAfterColumn) {
-		this.addAfterColumn = addAfterColumn;
-	}
+        this.addAfterColumn = addAfterColumn;
+    }
 
     public String getAddBeforeColumn() {
-    	return addBeforeColumn;
+        return addBeforeColumn;
     }
 
     public void setAddBeforeColumn(String addBeforeColumn) {
-		this.addBeforeColumn = addBeforeColumn;
-	}
+        this.addBeforeColumn = addBeforeColumn;
+    }
 
-	public Integer getAddAtPosition() {
-		return addAtPosition;
-	}
+    public Integer getAddAtPosition() {
+        return addAtPosition;
+    }
 
-	public void setAddAtPosition(Integer addAtPosition) {
-		this.addAtPosition = addAtPosition;
-	}
+    public void setAddAtPosition(Integer addAtPosition) {
+        this.addAtPosition = addAtPosition;
+    }
+
+    public String getDefaultValueConstraintName() {
+        return defaultValueConstraintName;
+    }
+
+    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
+        this.defaultValueConstraintName = defaultValueConstraintName;
+    }
 }

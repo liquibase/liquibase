@@ -38,9 +38,14 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setNullable("").isNullable() == null
         new ConstraintsConfig().setNullable("null").isNullable() == null
         new ConstraintsConfig().setNullable("NULL").isNullable() == null
-        new ConstraintsConfig().setNullable((String) null).isNullable() == null
+        def constraint = new ConstraintsConfig().setNullable((String) null)
+        constraint.isNullable() == null
     }
 
+    def setNotNullConstraintName_string() {
+        expect:
+        new ConstraintsConfig().setNotNullConstraintName("xyz").getNotNullConstraintName() == "xyz"
+    }
 
     def setDeleteCascade() {
         expect:
@@ -61,7 +66,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setDeleteCascade("").isDeleteCascade() == null
         new ConstraintsConfig().setDeleteCascade("null").isDeleteCascade() == null
         new ConstraintsConfig().setDeleteCascade("NULL").isDeleteCascade() == null
-        new ConstraintsConfig().setDeleteCascade((String) null).isDeleteCascade() == null
+        def constraint = new ConstraintsConfig().setDeleteCascade((String) null)
+        constraint.isDeleteCascade() == null
     }
 
 
@@ -84,7 +90,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setInitiallyDeferred("").isInitiallyDeferred() == null
         new ConstraintsConfig().setInitiallyDeferred("null").isInitiallyDeferred() == null
         new ConstraintsConfig().setInitiallyDeferred("NULL").isInitiallyDeferred() == null
-        new ConstraintsConfig().setInitiallyDeferred((String) null).isInitiallyDeferred() == null
+        def constraint = new ConstraintsConfig().setInitiallyDeferred((String) null)
+        constraint.isInitiallyDeferred() == null
     }
 
 
@@ -107,7 +114,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setPrimaryKey("").isPrimaryKey() == null
         new ConstraintsConfig().setPrimaryKey("null").isPrimaryKey() == null
         new ConstraintsConfig().setPrimaryKey("NULL").isPrimaryKey() == null
-        new ConstraintsConfig().setPrimaryKey((String) null).isPrimaryKey() == null
+        def constraint = new ConstraintsConfig().setPrimaryKey((String) null)
+        constraint.isPrimaryKey() == null
     }
 
 
@@ -130,7 +138,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setUnique("").isUnique() == null
         new ConstraintsConfig().setUnique("null").isUnique() == null
         new ConstraintsConfig().setUnique("NULL").isUnique() == null
-        new ConstraintsConfig().setUnique((String) null).isUnique() == null
+        def constraint = new ConstraintsConfig().setUnique((String) null)
+        constraint.isUnique() == null
     }
 
 
@@ -153,7 +162,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setDeferrable("").isDeferrable() == null
         new ConstraintsConfig().setDeferrable("null").isDeferrable() == null
         new ConstraintsConfig().setDeferrable("NULL").isDeferrable() == null
-        new ConstraintsConfig().setDeferrable((String) null).isDeferrable() == null
+        def constraint = new ConstraintsConfig().setDeferrable((String) null)
+        constraint.isDeferrable() == null
     }
 
     def setDeferrable_badString() {
@@ -162,6 +172,74 @@ public class ConstraintsConfigTest extends Specification {
 
         then:
         thrown(UnexpectedLiquibaseException)
+    }
+
+    def setShouldValidateNullable_string() {
+        expect:
+        assert new ConstraintsConfig().setShouldValidateNullable("true").shouldValidateNullable()
+        assert new ConstraintsConfig().setShouldValidateNullable("TRUE").shouldValidateNullable()
+        assert new ConstraintsConfig().setShouldValidateNullable("1").shouldValidateNullable()
+
+        assert !new ConstraintsConfig().setShouldValidateNullable("false").shouldValidateNullable()
+        assert !new ConstraintsConfig().setShouldValidateNullable("FALSE").shouldValidateNullable()
+        assert !new ConstraintsConfig().setShouldValidateNullable("0").shouldValidateNullable()
+
+        new ConstraintsConfig().setShouldValidateNullable("").shouldValidateNullable() == null
+        new ConstraintsConfig().setShouldValidateNullable("null").shouldValidateNullable() == null
+        new ConstraintsConfig().setShouldValidateNullable("NULL").shouldValidateNullable() == null
+        def constraint = new ConstraintsConfig().setShouldValidateNullable((String) null)
+        constraint.shouldValidateNullable() == null
+    }
+
+    def setShouldValidateUnique_string() {
+        expect:
+        assert new ConstraintsConfig().setShouldValidateUnique("true").shouldValidateUnique()
+        assert new ConstraintsConfig().setShouldValidateUnique("TRUE").shouldValidateUnique()
+        assert new ConstraintsConfig().setShouldValidateUnique("1").shouldValidateUnique()
+
+        assert !new ConstraintsConfig().setShouldValidateUnique("false").shouldValidateUnique()
+        assert !new ConstraintsConfig().setShouldValidateUnique("FALSE").shouldValidateUnique()
+        assert !new ConstraintsConfig().setShouldValidateUnique("0").shouldValidateUnique()
+
+        new ConstraintsConfig().setShouldValidateUnique("").shouldValidateUnique() == null
+        new ConstraintsConfig().setShouldValidateUnique("null").shouldValidateUnique() == null
+        new ConstraintsConfig().setShouldValidateUnique("NULL").shouldValidateUnique() == null
+        def constraint = new ConstraintsConfig().setShouldValidateUnique((String) null)
+        constraint.shouldValidateUnique() == null
+    }
+
+    def setShouldValidateForeignKey_string() {
+        expect:
+        assert new ConstraintsConfig().setShouldValidateForeignKey("true").shouldValidateForeignKey()
+        assert new ConstraintsConfig().setShouldValidateForeignKey("TRUE").shouldValidateForeignKey()
+        assert new ConstraintsConfig().setShouldValidateForeignKey("1").shouldValidateForeignKey()
+
+        assert !new ConstraintsConfig().setShouldValidateForeignKey("false").shouldValidateForeignKey()
+        assert !new ConstraintsConfig().setShouldValidateForeignKey("FALSE").shouldValidateForeignKey()
+        assert !new ConstraintsConfig().setShouldValidateForeignKey("0").shouldValidateForeignKey()
+
+        new ConstraintsConfig().setShouldValidateForeignKey("").shouldValidateForeignKey() == null
+        new ConstraintsConfig().setShouldValidateForeignKey("null").shouldValidateForeignKey() == null
+        new ConstraintsConfig().setShouldValidateForeignKey("NULL").shouldValidateForeignKey() == null
+        def constraint = new ConstraintsConfig().setShouldValidateForeignKey((String) null)
+        constraint.shouldValidateForeignKey() == null
+    }
+
+    def setShouldValidatePrimaryKey_string() {
+        expect:
+        assert new ConstraintsConfig().setShouldValidatePrimaryKey("true").shouldValidatePrimaryKey()
+        assert new ConstraintsConfig().setShouldValidatePrimaryKey("TRUE").shouldValidatePrimaryKey()
+        assert new ConstraintsConfig().setShouldValidatePrimaryKey("1").shouldValidatePrimaryKey()
+
+        assert !new ConstraintsConfig().setShouldValidatePrimaryKey("false").shouldValidatePrimaryKey()
+        assert !new ConstraintsConfig().setShouldValidatePrimaryKey("FALSE").shouldValidatePrimaryKey()
+        assert !new ConstraintsConfig().setShouldValidatePrimaryKey("0").shouldValidatePrimaryKey()
+
+        new ConstraintsConfig().setShouldValidatePrimaryKey("").shouldValidatePrimaryKey() == null
+        new ConstraintsConfig().setShouldValidatePrimaryKey("null").shouldValidatePrimaryKey() == null
+        new ConstraintsConfig().setShouldValidatePrimaryKey("NULL").shouldValidatePrimaryKey() == null
+        def constraint = new ConstraintsConfig().setShouldValidatePrimaryKey((String) null)
+        constraint.shouldValidatePrimaryKey() == null
     }
 
     def setPrimaryKeyName() {

@@ -1,11 +1,11 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.List;
-
+import liquibase.ContextExpression;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -19,9 +19,15 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
+
+    public static final String AND = " AND ";
+    public static final String OPEN_BRACKET = "(";
+    public static final String CLOSE_BRACKET = ")";
+    public static final String WHITESPACE = " ";
+    public static final String COMMA = ",";
 
     @Override
     public ValidationErrors validate(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -41,13 +47,31 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         try {
             if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
                 return new Sql[0]; //don't mark
-            } else  if (statement.getExecType().ranBefore) {
+            }
+
+            String tag = null;
+            for (Change change : changeSet.getChanges()) {
+                if (change instanceof TagDatabaseChange) {
+                    TagDatabaseChange tagChange = (TagDatabaseChange) change;
+                    tag = tagChange.getTag();
+                }
+            }
+
+            if (statement.getExecType().ranBefore) {
                 runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
+                        .addNewColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
-                        .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
+                        .addNewColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId())
+                        .setWhereClause(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
+                                                "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
+                                                "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+
+                if (tag != null) {
+                    ((UpdateStatement) runStatement).addNewColumnValue("TAG", tag);
+                }
             } else {
                 runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addColumnValue("ID", changeSet.getId())
@@ -57,19 +81,15 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
                         .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
-                        .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))
+                        .addColumnValue("COMMENTS", limitSize(StringUtil.trimToEmpty(changeSet.getComments())))
                         .addColumnValue("EXECTYPE", statement.getExecType().value)
-                        .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"));
+                        .addColumnValue("CONTEXTS", ((changeSet.getContexts() == null) || changeSet.getContexts()
+                            .isEmpty()) ? null : buildFullContext(changeSet))
+                        .addColumnValue("LABELS", ((changeSet.getLabels() == null) || changeSet.getLabels().isEmpty()
+                        ) ? null : changeSet.getLabels().toString())
+                        .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"))
+                        .addColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId());
 
-                String tag = null;
-                List<Change> changes = changeSet.getChanges();
-                if (changes != null && changes.size() == 1) {
-                    Change change = changes.get(0);
-                    if (change instanceof TagDatabaseChange) {
-                        TagDatabaseChange tagChange = (TagDatabaseChange) change;
-                        tag = tagChange.getTag();
-                    }
-                }
                 if (tag != null) {
                     ((InsertStatement) runStatement).addColumnValue("TAG", tag);
                 }
@@ -79,6 +99,34 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         }
 
         return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
+    }
+
+    private String buildFullContext(ChangeSet changeSet) {
+        StringBuilder contextExpression = new StringBuilder();
+        boolean notFirstContext = false;
+        for (ContextExpression inheritableContext : changeSet.getInheritableContexts()) {
+            appendContext(contextExpression, inheritableContext.toString(), notFirstContext);
+            notFirstContext = true;
+        }
+        ContextExpression changeSetContext = changeSet.getContexts();
+        if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
+            appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
+        }
+        return contextExpression.toString();
+    }
+
+    private void appendContext(StringBuilder contextExpression, String contextToAppend, boolean notFirstContext) {
+        boolean complexExpression = contextToAppend.contains(COMMA) || contextToAppend.contains(WHITESPACE);
+        if (notFirstContext) {
+            contextExpression.append(AND);
+        }
+        if (complexExpression) {
+            contextExpression.append(OPEN_BRACKET);
+        }
+        contextExpression.append(contextToAppend);
+        if (complexExpression) {
+            contextExpression.append(CLOSE_BRACKET);
+        }
     }
 
     private String limitSize(String string) {

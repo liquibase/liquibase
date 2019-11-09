@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -11,13 +12,17 @@ public class DoubleType  extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("FLOAT");
+            return new DatabaseDataType(database.escapeDataTypeName("float"), 53);
         }
-
         if (database instanceof MySQLDatabase) {
-            return new DatabaseDataType("DOUBLE", getParameters());
+            if ((getParameters() != null) && (getParameters().length > 1)) {
+                return new DatabaseDataType("DOUBLE", getParameters());
+            } else {
+                return new DatabaseDataType("DOUBLE");
+            }
         }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof HsqlDatabase) {
+        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof
+            HsqlDatabase)) {
             return new DatabaseDataType("DOUBLE");
         }
         if (database instanceof OracleDatabase) {
@@ -33,5 +38,10 @@ public class DoubleType  extends LiquibaseDataType {
             return new DatabaseDataType("DOUBLE PRECISION");
         }
         return super.toDatabaseDataType(database);
+    }
+
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
     }
 }

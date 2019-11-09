@@ -35,22 +35,21 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                             } else if (dataTypeClassParameters[0] instanceof ParameterizedType) {
                                 collectionType = (Class) ((ParameterizedType) dataTypeClassParameters[0]).getRawType();
                             }
-                            if (collectionType != null
-                                    && LiquibaseSerializable.class.isAssignableFrom(collectionType)
-                                    && !collectionType.isInterface()
-                                    && !Modifier.isAbstract(collectionType.getModifiers())) {
+                            if ((collectionType != null) && LiquibaseSerializable.class.isAssignableFrom
+                                (collectionType) && !collectionType.isInterface() && !Modifier.isAbstract
+                                (collectionType.getModifiers())) {
 
-                                String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
+                                String elementName = ((LiquibaseSerializable) collectionType.getConstructor().newInstance()).getSerializedObjectName();
                                 List<ParsedNode> elementNodes = Collections.emptyList();
                                 if (childNode.getName().equals(elementName)) {
                                     elementNodes = Collections.singletonList(childNode);
-                                } else if (childNode.getName().equals(childNode.getName())) {
+                                } else {
                                     elementNodes = childNode.getChildren(null, elementName);
                                 }
                                 if (!elementNodes.isEmpty()) {
                                     Collection collection = ((Collection) getSerializableFieldValue(childNode.getName()));
                                     for (ParsedNode node : elementNodes) {
-                                        LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
+                                        LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.getConstructor().newInstance();
                                         childObject.load(node, resourceAccessor);
                                         collection.add(childObject);
                                     }
@@ -58,9 +57,13 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                             }
                         }
                     } if (LiquibaseSerializable.class.isAssignableFrom(dataTypeClass)) {
-                        LiquibaseSerializable childObject = (LiquibaseSerializable) dataTypeClass.newInstance();
-                        childObject.load(childNode, resourceAccessor);
-                        setSerializableFieldValue(childNode.getName(), childObject);
+                        if (!dataTypeClass.isInterface()
+                                && !Modifier.isAbstract(dataTypeClass.getModifiers())) {
+
+                            LiquibaseSerializable childObject = (LiquibaseSerializable) dataTypeClass.getConstructor().newInstance();
+                            childObject.load(childNode, resourceAccessor);
+                            setSerializableFieldValue(childNode.getName(), childObject);
+                        }
                     } else if (childNode.getValue() != null) {
                         ObjectUtil.setProperty(this, childNode.getName(), convertEscaped(childNode.getValue().toString()));
                     }
@@ -76,12 +79,11 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                 } else if (dataTypeClassParameters[0] instanceof ParameterizedType) {
                                     collectionType = (Class) ((ParameterizedType) dataTypeClassParameters[0]).getRawType();
                                 }
-                                if (collectionType != null
-                                        && LiquibaseSerializable.class.isAssignableFrom(collectionType)
-                                        && !collectionType.isInterface()
-                                        && !Modifier.isAbstract(collectionType.getModifiers())) {
+                                if ((collectionType != null) && LiquibaseSerializable.class.isAssignableFrom
+                                    (collectionType) && !collectionType.isInterface() && !Modifier.isAbstract
+                                    (collectionType.getModifiers())) {
 
-                                    String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
+                                    String elementName = ((LiquibaseSerializable) collectionType.getConstructor().newInstance()).getSerializedObjectName();
                                     List<ParsedNode> elementNodes = Collections.emptyList();
                                     if (childNode.getName().equals(elementName)) {
                                         elementNodes = Collections.singletonList(childNode);
@@ -91,7 +93,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                     if (!elementNodes.isEmpty()) {
                                         Collection collection = ((Collection) getSerializableFieldValue(field));
                                         for (ParsedNode node : elementNodes) {
-                                            LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
+                                            LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.getConstructor().newInstance();
                                             childObject.load(node, resourceAccessor);
                                             collection.add(childObject);
                                         }
@@ -108,11 +110,17 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
 
         if (parsedNode.getValue() != null) {
             for (String field : this.getSerializableFields()) {
-                if (this.getSerializableFieldType(field) == SerializationType.DIRECT_VALUE) {
+                SerializationType type = this.getSerializableFieldType(field);
+                if (type == SerializationType.DIRECT_VALUE) {
                     Object value = parsedNode.getValue(String.class);
 
                     value = convertEscaped(value);
 
+
+                    ObjectUtil.setProperty(this, field, value);
+                } else if (type == SerializationType.NAMED_FIELD) {
+                    Object value = parsedNode.getChildValue(null, field, Object.class);
+                    value = convertEscaped(value);
 
                     ObjectUtil.setProperty(this, field, value);
                 }
@@ -121,6 +129,9 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
     }
 
     protected Object convertEscaped(Object value) {
+        if (value == null) {
+            return null;
+        }
         Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) value);
         if (matcher.matches()) {
             String stringValue = matcher.group(1);
@@ -158,7 +169,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
             SerializationType type = getSerializableFieldType(field);
             if (type == SerializationType.DIRECT_VALUE) {
                 node.setValue(fieldValue);
-            } else if (type == SerializationType.NAMED_FIELD || type == SerializationType.NESTED_OBJECT) {
+            } else if ((type == SerializationType.NAMED_FIELD) || (type == SerializationType.NESTED_OBJECT)) {
                 if (fieldValue instanceof ParsedNode) {
                     node.addChild((ParsedNode) fieldValue);
                 } else {
@@ -207,7 +218,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                     returnList.add(objValue);
                 }
             }
-            if (((Collection) value).size() == 0) {
+            if (((Collection) value).isEmpty()) {
                 return null;
             } else {
                 return returnList;

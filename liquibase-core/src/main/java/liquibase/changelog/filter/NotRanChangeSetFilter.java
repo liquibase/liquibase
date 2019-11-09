@@ -19,7 +19,7 @@ public class NotRanChangeSetFilter implements ChangeSetFilter {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())
                     && ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
-                    && ranChangeSet.getChangeLog().equalsIgnoreCase(changeSet.getFilePath())) {
+                    && ranChangeSet.getChangeLog().replaceFirst("^classpath:", "").equalsIgnoreCase(changeSet.getFilePath().replaceFirst("^classpath:", ""))) {
                 return new ChangeSetFilterResult(false, "Change set already ran", this.getClass());
             }
         }

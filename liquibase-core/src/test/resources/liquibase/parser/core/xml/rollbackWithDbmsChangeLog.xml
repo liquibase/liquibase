@@ -1,0 +1,28 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="1" author="mches" dbms="mssql">
+        <createTable tableName="a">
+            <column name="b" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="mches" dbms="mssql">
+        <dropTable tableName="a"/>
+        <rollback changeSetId="1" changeSetAuthor="mches"/>
+    </changeSet>
+
+    <changeSet id="3" author="mches">
+        <createTable tableName="c">
+            <column name="d" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="mches">
+        <dropTable tableName="c"/>
+        <rollback changeSetId="3" changeSetAuthor="mches"/>
+    </changeSet>
+
+</databaseChangeLog>

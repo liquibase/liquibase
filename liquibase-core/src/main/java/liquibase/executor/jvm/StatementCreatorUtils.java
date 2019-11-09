@@ -95,9 +95,9 @@ abstract class StatementCreatorUtils {
         } else {  // inValue != null
             if (inValue instanceof SqlTypeValue) {
                 ((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType, typeName);
-            } else if (sqlType == Types.VARCHAR || sqlType == -9 ) { //-9 is Types.NVARCHAR in java 1.6
+            } else if ((sqlType == Types.VARCHAR) || (sqlType == -9)) { //-9 is Types.NVARCHAR in java 1.6
                 ps.setString(paramIndex, inValue.toString());
-            } else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
+            } else if ((sqlType == Types.DECIMAL) || (sqlType == Types.NUMERIC)) {
                 if (inValue instanceof BigDecimal) {
                     ps.setBigDecimal(paramIndex, (BigDecimal) inValue);
                 } else if (scale != null) {
@@ -167,7 +167,7 @@ abstract class StatementCreatorUtils {
      * Check whether the given value can be treated as a String value.
      */
     private static boolean isStringValue(Object inValue) {
-        return (inValue instanceof CharSequence || inValue instanceof StringWriter);
+        return ((inValue instanceof CharSequence) || (inValue instanceof StringWriter));
     }
 
     /**
@@ -175,8 +175,8 @@ abstract class StatementCreatorUtils {
      * (but not one of the JDBC-specific subclasses).
      */
     private static boolean isDateValue(Object inValue) {
-        return (inValue instanceof java.util.Date && !(inValue instanceof java.sql.Date ||
-                inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp));
+        return ((inValue instanceof java.util.Date) && !((inValue instanceof java.sql.Date) || (inValue instanceof
+            java.sql.Time) || (inValue instanceof java.sql.Timestamp)));
     }
 
 }

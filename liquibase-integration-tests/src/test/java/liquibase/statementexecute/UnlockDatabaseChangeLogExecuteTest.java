@@ -1,15 +1,14 @@
 package liquibase.statementexecute;
 
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import liquibase.database.Database;
-
-import java.util.List;
-import java.util.Arrays;
-
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class UnlockDatabaseChangeLogExecuteTest extends AbstractExecuteTest {
     @Override

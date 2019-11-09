@@ -4,12 +4,15 @@ import liquibase.change.Change;
 import liquibase.change.core.DropUniqueConstraintChange;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
-public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObjectChangeGenerator {
+public class UnexpectedUniqueConstraintChangeGenerator extends AbstractChangeGenerator implements UnexpectedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (UniqueConstraint.class.isAssignableFrom(objectType)) {
@@ -34,17 +37,17 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
     @Override
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         UniqueConstraint uc = (UniqueConstraint) unexpectedObject;
-        if (uc.getTable() == null) {
+        if (uc.getRelation() == null) {
             return null;
         }
 
         DropUniqueConstraintChange change = new DropUniqueConstraintChange();
-        change.setTableName(uc.getTable().getName());
+        change.setTableName(uc.getRelation().getName());
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(uc.getTable().getSchema().getCatalogName());
+            change.setCatalogName(uc.getRelation().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(uc.getTable().getSchema().getName());
+            change.setSchemaName(uc.getRelation().getSchema().getName());
         }
         change.setConstraintName(uc.getName());
 

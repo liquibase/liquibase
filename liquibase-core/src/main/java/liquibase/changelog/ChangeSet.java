@@ -1,7 +1,9 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
+import liquibase.LabelExpression;
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.CheckSum;
@@ -12,12 +14,18 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.MigrationFailedException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.RollbackFailedException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
@@ -25,19 +33,39 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
-import java.util.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
  */
-public class ChangeSet implements Conditional, LiquibaseSerializable {
+public class ChangeSet implements Conditional, ChangeLogChild {
+
+    protected CheckSum checkSum;
+    /**
+     * storedChecksum is used to make the checksum of a changeset that has already been run
+     * on a database available to liquibase extensions. This value might differ from the checkSum value that
+     * is calculated at run time when ValidatorVisitor is being called
+     */
+    private CheckSum storedCheckSum;
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
@@ -77,6 +105,8 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
     }
 
+    protected String key;
+
     private ChangeLogParameters changeLogParameters;
 
     /**
@@ -99,8 +129,6 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
      */
     private String filePath = "UNKNOWN CHANGE LOG";
 
-    private Logger log;
-
     /**
      * If set to true, the changeSet will be executed on every update. Defaults to false
      */
@@ -122,6 +150,13 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     private Labels labels;
 
     /**
+     *
+     * If set to true, the changeSet will be ignored (skipped)
+     *
+     */
+    private boolean ignore;
+
+    /**
      * Databases for which this changeset should run.  The string values should match the value returned from Database.getShortName()
      */
     private Set<String> dbmsSet;
@@ -134,7 +169,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     /**
      * List of checksums that are assumed to be valid besides the one stored in the database.  Can include the string "any"
      */
-    private Set<CheckSum> validCheckSums = new HashSet<CheckSum>();
+    private Set<CheckSum> validCheckSums = new HashSet<>();
 
     /**
      * If true, the changeSet will run in a database transaction.  Defaults to true
@@ -147,14 +182,14 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     private ValidationFailOption onValidationFail = ValidationFailOption.HALT;
 
     /**
-     * Stores if validation failed on this chhangeSet
+     * Stores if validation failed on this ChangeSet
      */
     private boolean validationFailed;
 
     /**
      * Changes defined to roll back this changeSet
      */
-    private List<Change> rollBackChanges = new ArrayList<Change>();
+    private RollbackContainer rollback = new RollbackContainer();
 
 
     /**
@@ -171,11 +206,20 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
      * SqlVisitors defined for this changeset.
      * SqlVisitors will modify the SQL generated by the changes before sending it to the database.
      */
-    private List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+    private List<SqlVisitor> sqlVisitors = new ArrayList<>();
 
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private DatabaseChangeLog changeLog;
+
+    private String created;
+
+    /**
+     * Allow changeSet to be ran "first" or "last". Multiple changeSets with the same runOrder will preserve their order relative to each other.
+     */
+    private String runOrder;
+
+    private Map<String, Object> attributes = new HashMap<>();
 
     public boolean shouldAlwaysRun() {
         return alwaysRun;
@@ -186,8 +230,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     public ChangeSet(DatabaseChangeLog databaseChangeLog) {
-        this.changes = new ArrayList<Change>();
-        log = LogFactory.getLogger();
+        this.changes = new ArrayList<>();
         this.changeLog = databaseChangeLog;
     }
 
@@ -218,31 +261,33 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     protected void setDbms(String dbmsList) {
-        if (StringUtils.trimToNull(dbmsList) != null) {
-            String[] strings = dbmsList.toLowerCase().split(",");
-            dbmsSet = new HashSet<String>();
-            for (String string : strings) {
-                dbmsSet.add(string.trim().toLowerCase());
-            }
-        }
+        this.dbmsSet = DatabaseList.toDbmsSet(dbmsList);
     }
 
     public String getFilePath() {
         return filePath;
     }
 
+    public void clearCheckSum() {
+        this.checkSum = null;
+    }
+
     public CheckSum generateCheckSum() {
-        StringBuffer stringToMD5 = new StringBuffer();
-        for (Change change : getChanges()) {
-            stringToMD5.append(change.generateCheckSum()).append(":");
+        if (checkSum == null) {
+            StringBuilder stringToMD5 = new StringBuilder();
+            for (Change change : getChanges()) {
+                stringToMD5.append(change.generateCheckSum()).append(":");
+            }
+
+            for (SqlVisitor visitor : this.getSqlVisitors()) {
+                stringToMD5.append(visitor.generateCheckSum()).append(";");
+            }
+
+
+            checkSum = CheckSum.compute(stringToMD5.toString());
         }
 
-        for (SqlVisitor visitor : this.getSqlVisitors()) {
-            stringToMD5.append(visitor.generateCheckSum()).append(";");
-        }
-
-
-        return CheckSum.compute(stringToMD5.toString());
+        return checkSum;
     }
 
     @Override
@@ -252,22 +297,22 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.alwaysRun  = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
         this.runOnChange  = node.getChildValue(null, "runOnChange", false);
         this.contexts = new ContextExpression(node.getChildValue(null, "context", String.class));
-        this.labels = new Labels(StringUtils.trimToNull(node.getChildValue(null, "labels", String.class)));
+        this.labels = new Labels(StringUtil.trimToNull(node.getChildValue(null, "labels", String.class)));
         setDbms(node.getChildValue(null, "dbms", String.class));
         this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
-        this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
-            @Override
-            public String toString(Object obj) {
-                if (((ParsedNode) obj).getValue() == null) {
-                    return "";
-                } else {
-                    return ((ParsedNode) obj).getValue().toString();
-                }
+        this.created = node.getChildValue(null, "created", String.class);
+        this.runOrder = node.getChildValue(null, "runOrder", String.class);
+        this.ignore = node.getChildValue(null, "ignore", false);
+        this.comments = StringUtil.join(node.getChildren(null, "comment"), "\n", obj -> {
+            if (((ParsedNode) obj).getValue() == null) {
+                return "";
+            } else {
+                return ((ParsedNode) obj).getValue().toString();
             }
         });
-        this.comments = StringUtils.trimToNull(this.comments);
+        this.comments = StringUtil.trimToNull(this.comments);
 
-        String objectQuotingStrategyString = StringUtils.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
+        String objectQuotingStrategyString = StringUtil.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
         if (changeLog != null) {
             this.objectQuotingStrategy = changeLog.getObjectQuotingStrategy();
         }
@@ -279,7 +324,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
         }
 
-        this.filePath = StringUtils.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+        this.filePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
         if (filePath == null) {
             filePath = changeLog.getFilePath();
         }
@@ -294,71 +339,84 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        if (child.getName().equals("rollback")) {
-            handleRollbackNode(child, resourceAccessor);
-        } else if (child.getName().equals("validCheckSum") || child.getName().equals("validCheckSums")) {
-            if (child.getValue() == null) {
-                return;
-            }
-
-            if (child.getValue() instanceof Collection) {
-                for (Object checksum : (Collection) child.getValue()) {
-                    addValidCheckSum((String) checksum);
+        switch (child.getName()) {
+            case "rollback":
+                handleRollbackNode(child, resourceAccessor);
+                break;
+            case "validCheckSum":
+            case "validCheckSums":
+                if (child.getValue() == null) {
+                    return;
                 }
-            } else {
-                addValidCheckSum(child.getValue(String.class));
-            }
-        } else if (child.getName().equals("modifySql")) {
-            String dbmsString = StringUtils.trimToNull(child.getChildValue(null, "dbms", String.class));
-            String contextString = StringUtils.trimToNull(child.getChildValue(null, "context", String.class));
-            String labelsString = StringUtils.trimToNull(child.getChildValue(null, "labels", String.class));
-            boolean applyToRollback = child.getChildValue(null, "applyToRollback", false);
 
-            Set<String> dbms = new HashSet<String>();
-            if (dbmsString != null) {
-                dbms.addAll(StringUtils.splitAndTrim(dbmsString, ","));
-            }
-            ContextExpression context = null;
-            if (contextString != null) {
-                context = new ContextExpression(contextString);
-            }
-
-            Labels labels = null;
-            if (labelsString != null) {
-                labels = new Labels(labelsString);
-            }
-
-
-            List<ParsedNode> potentialVisitors = child.getChildren();
-            for (ParsedNode node : potentialVisitors) {
-                SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(node.getName());
-                if (sqlVisitor != null) {
-                    sqlVisitor.setApplyToRollback(applyToRollback);
-                    if (dbms.size() > 0) {
-                        sqlVisitor.setApplicableDbms(dbms);
+                if (child.getValue() instanceof Collection) {
+                    for (Object checksum : (Collection) child.getValue()) {
+                        addValidCheckSum((String) checksum);
                     }
-                    sqlVisitor.setContexts(context);
-                    sqlVisitor.setLabels(labels);
-                    sqlVisitor.load(node, resourceAccessor);
-
-                    addSqlVisitor(sqlVisitor);
+                } else {
+                    addValidCheckSum(child.getValue(String.class));
                 }
-            }
+                break;
+            case "modifySql":
+                String dbmsString = StringUtil.trimToNull(child.getChildValue(null, "dbms", String.class));
+                String contextString = StringUtil.trimToNull(child.getChildValue(null, "context", String.class));
+                String labelsString = StringUtil.trimToNull(child.getChildValue(null, "labels", String.class));
+                boolean applyToRollback = child.getChildValue(null, "applyToRollback", false);
+
+                Set<String> dbms = new HashSet<>();
+                if (dbmsString != null) {
+                    dbms.addAll(StringUtil.splitAndTrim(dbmsString, ","));
+                }
+                ContextExpression context = null;
+                if (contextString != null) {
+                    context = new ContextExpression(contextString);
+                }
+
+                Labels labels = null;
+                if (labelsString != null) {
+                    labels = new Labels(labelsString);
+                }
 
 
-        } else if (child.getName().equals("preConditions")) {
-            this.preconditions = new PreconditionContainer();
-            try {
-                this.preconditions.load(child, resourceAccessor);
-            } catch (ParsedNodeException e) {
-                e.printStackTrace();
-            }
-        } else if (child.getName().equals("changes")) {
-            for (ParsedNode changeNode : child.getChildren()) {
-                handleChildNode(changeNode, resourceAccessor);
-            }
-        } else {
-            addChange(toChange(child, resourceAccessor));
+                List<ParsedNode> potentialVisitors = child.getChildren();
+                for (ParsedNode node : potentialVisitors) {
+                    SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(node.getName());
+                    if (sqlVisitor != null) {
+                        sqlVisitor.setApplyToRollback(applyToRollback);
+                        if (!dbms.isEmpty()) {
+                            sqlVisitor.setApplicableDbms(dbms);
+                        }
+                        sqlVisitor.setContexts(context);
+                        sqlVisitor.setLabels(labels);
+                        sqlVisitor.load(node, resourceAccessor);
+
+                        addSqlVisitor(sqlVisitor);
+                    }
+                }
+
+
+                break;
+            case "preConditions":
+                this.preconditions = new PreconditionContainer();
+                try {
+                    this.preconditions.load(child, resourceAccessor);
+                } catch (ParsedNodeException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "changes":
+                for (ParsedNode changeNode : child.getChildren()) {
+                    handleChildNode(changeNode, resourceAccessor);
+                }
+                break;
+            default:
+                Change change = toChange(child, resourceAccessor);
+                if ((change == null) && (child.getValue() instanceof String)) {
+                    this.setAttribute(child.getName(), child.getValue());
+                } else {
+                    addChange(change);
+                }
+                break;
         }
     }
 
@@ -368,28 +426,38 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             String changeSetAuthor = rollbackNode.getChildValue(null, "changeSetAuthor", String.class);
             String changeSetPath = rollbackNode.getChildValue(null, "changeSetPath", getFilePath());
 
-            ChangeSet changeSet = this.getChangeLog().getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
+            DatabaseChangeLog changeLog = this.getChangeLog();
+            ChangeSet changeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
+            while ((changeSet == null) && (changeLog != null)) {
+                changeLog = changeLog.getParentChangeLog();
+                if (changeLog != null) {
+                    changeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
+                }
+            }
             if (changeSet == null) {
-                throw new ParsedNodeException("Change set "+new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false)+" does not exist");
+                throw new ParsedNodeException("Change set " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
             }
             for (Change change : changeSet.getChanges()) {
-                addRollbackChange(change);
+                rollback.getChanges().add(change);
             }
             return;
         }
 
         boolean foundValue = false;
         for (ParsedNode childNode : rollbackNode.getChildren()) {
-            addRollbackChange(toChange(childNode, resourceAccessor));
-            foundValue =  true;
+            Change rollbackChange = toChange(childNode, resourceAccessor);
+            if (rollbackChange != null) {
+                addRollbackChange(rollbackChange);
+                foundValue =  true;
+            }
         }
 
         Object value = rollbackNode.getValue();
         if (value != null) {
             if (value instanceof String) {
-                String finalValue = StringUtils.trimToNull((String) value);
+                String finalValue = StringUtil.trimToNull((String) value);
                 if (finalValue != null) {
-                    String[] strings = StringUtils.processMutliLineSQL(finalValue, true, true, ";");
+                    String[] strings = StringUtil.processMutliLineSQL(finalValue, true, true, ";");
                     for (String string : strings) {
                         addRollbackChange(new RawSQLChange(string));
                         foundValue = true;
@@ -405,15 +473,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        Change change = ChangeFactory.getInstance().create(value.getName());
+        Change change = Scope.getCurrentScope().getSingleton(ChangeFactory.class).create(value.getName());
         if (change == null) {
             return null;
         } else {
-            try {
-                change.load(value, resourceAccessor);
-            } catch (ParsedNodeException e) {
-                e.printStackTrace();
-            }
+            change.load(value, resourceAccessor);
+
             return change;
         }
     }
@@ -427,13 +492,17 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
         return execute(databaseChangeLog, null, database);
     }
+
     /**
      * This method will actually execute each of the changes in the list against the
      * specified database.
      *
      * @return should change set be marked as ran
      */
-    public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database) throws MigrationFailedException {
+    public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
+            throws MigrationFailedException {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -449,13 +518,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             // set object quoting strategy
             database.setObjectQuotingStrategy(objectQuotingStrategy);
 
-            // set auto-commit based on runInTransaction if database supports DDL in transactions
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
             }
 
             executor.comment("Changeset " + toString(false));
-            if (StringUtils.trimToNull(getComments()) != null) {
+            if (StringUtil.trimToNull(getComments()) != null) {
                 String comments = getComments();
                 String[] lines = comments.split("\\n");
                 for (int i = 0; i < lines.length; i++) {
@@ -463,18 +531,18 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                         lines[i] = database.getLineComment() + " " + lines[i];
                     }
                 }
-                executor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
+                executor.comment(StringUtil.join(Arrays.asList(lines), "\n"));
             }
 
             try {
                 if (preconditions != null) {
-                    preconditions.check(database, databaseChangeLog, this);
+                    preconditions.check(database, databaseChangeLog, this, listener);
                 }
             } catch (PreconditionFailedException e) {
                 if (listener != null) {
                     listener.preconditionFailed(e, preconditions.getOnFail());
                 }
-                StringBuffer message = new StringBuffer();
+                StringBuilder message = new StringBuilder();
                 message.append(StreamUtil.getLineSeparator());
                 for (FailedPrecondition invalid : e.getFailedPreconditions()) {
                     message.append("          ").append(invalid.toString());
@@ -487,12 +555,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
 
-                    LogFactory.getLogger().info("Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition failure due to onFail='MARK_RAN': " + message);
+                    log.info(LogType.LOG, "Marking ChangeSet: " + toString() + " ran despite precondition failure due to onFail='MARK_RAN': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
                     execType = null; //already warned
                 } else {
@@ -503,7 +571,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     listener.preconditionErrored(e, preconditions.getOnError());
                 }
 
-                StringBuffer message = new StringBuffer();
+                StringBuilder message = new StringBuilder();
                 message.append(StreamUtil.getLineSeparator());
                 for (ErrorPrecondition invalid : e.getErrorPreconditions()) {
                     message.append("          ").append(invalid.toString());
@@ -520,7 +588,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
+                    log.info(LogType.LOG, "Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
                     execType = null; //already logged
                 } else {
@@ -541,31 +609,36 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     }
                 }
 
-                log.debug("Reading ChangeSet: " + toString());
+                log.fine(LogType.LOG, "Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
                     if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         if (listener != null) {
                             listener.willRun(change, this, changeLog, database);
                         }
+                        if (change.generateStatementsVolatile(database)) {
+                            executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
+                        }
+
+
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
-                        log.info(change.getConfirmationMessage());
+                        log.info(LogType.LOG, change.getConfirmationMessage());
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
                         }
                     } else {
-                        log.debug("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+                        log.fine(LogType.LOG, "Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
                 }
 
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
+                log.info(LogType.LOG, "ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
             } else {
-                log.debug("Skipping ChangeSet: " + toString());
+                log.fine(LogType.LOG, "Skipping ChangeSet: " + toString());
             }
 
         } catch (Exception e) {
@@ -574,12 +647,13 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             } catch (Exception e1) {
                 throw new MigrationFailedException(this, e);
             }
-            if (getFailOnError() != null && !getFailOnError()) {
-                log.info("Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
-                log.debug("Failure Stacktrace", e);
+            if ((getFailOnError() != null) && !getFailOnError()) {
+                log.info(LogType.LOG, "Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
+                log.fine(LogType.LOG, "Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
-                log.severe("Change Set " + toString(false) + " failed.  Error: " + e.getMessage(), e);
+                // just log the message, dont log the stacktrace by appending exception. Its logged anyway to stdout
+                log.severe(LogType.LOG, "Change Set " + toString(false) + " failed.  Error: " + e.getMessage());
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
                 } else {
@@ -601,6 +675,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     public void rollback(Database database) throws RollbackFailedException {
+      rollback(database, null);
+    }
+
+    public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
@@ -611,18 +689,29 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
             }
-            
+
             RanChangeSet ranChangeSet = database.getRanChangeSet(this);
             if (hasCustomRollbackChanges()) {
                 
-                final List<SqlStatement> statements = new LinkedList<SqlStatement>();
-                for (Change rollback : rollBackChanges) {
-                    if (((rollback instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) rollback).getDbms(), database, true)) {
+                final List<SqlStatement> statements = new LinkedList<>();
+                for (Change change : rollback.getChanges()) {
+                    if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         continue;
                     }
-                    SqlStatement[] changeStatements = rollback.generateStatements(database);
+                    if (listener != null) {
+                        listener.willRun(change, this, changeLog, database);
+                    }
+                    ValidationErrors errors = change.validate(database);
+                    if (errors.hasErrors()) {
+                        throw new RollbackFailedException("Rollback statement failed validation: "+errors.toString());
+                    }
+                    //
+                    SqlStatement[] changeStatements = change.generateStatements(database);
                     if (changeStatements != null) {
                         statements.addAll(Arrays.asList(changeStatements));
+                    }
+                    if (listener != null) {
+                        listener.ran(change, this, changeLog, database);
                     }
                 }
                 if (!statements.isEmpty()) {
@@ -640,7 +729,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             if (runInTransaction) {
                 database.commit();
             }
-            log.debug("ChangeSet " + toString() + " has been successfully rolled back.");
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             try {
                 database.rollback();
@@ -666,9 +755,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
      * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
      */
     protected boolean hasCustomRollbackChanges() {
-        return rollBackChanges != null && rollBackChanges.size() > 0;
+        return (rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty();
     }
-    
+
     /**
      * Returns an unmodifiable list of changes.  To add one, use the addRefactoing method.
      */
@@ -708,6 +797,48 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return dbmsSet;
     }
 
+    public boolean isIgnore() {
+        return ignore;
+    }
+
+    public void setIgnore(boolean ignore) {
+        this.ignore = ignore;
+    }
+
+    public boolean isInheritableIgnore() {
+        DatabaseChangeLog changeLog = getChangeLog();
+        return changeLog.isIncludeIgnore();
+    }
+    public Collection<ContextExpression> getInheritableContexts() {
+        Collection<ContextExpression> expressions = new ArrayList<>();
+        DatabaseChangeLog changeLog = getChangeLog();
+        while (changeLog != null) {
+            ContextExpression expression = changeLog.getContexts();
+            if ((expression != null) && !expression.isEmpty()) {
+                expressions.add(expression);
+            }
+            ContextExpression includeExpression = changeLog.getIncludeContexts();
+            if ((includeExpression != null) && !includeExpression.isEmpty()) {
+                expressions.add(includeExpression);
+            }
+            changeLog = changeLog.getParentChangeLog();
+        }
+        return Collections.unmodifiableCollection(expressions);
+    }
+
+    public Collection<LabelExpression> getInheritableLabels() {
+        Collection<LabelExpression> expressions = new ArrayList<LabelExpression>();
+        DatabaseChangeLog changeLog = getChangeLog();
+        while (changeLog != null) {
+            LabelExpression expression = changeLog.getIncludeLabels();
+            if (expression != null && !expression.isEmpty()) {
+                expressions.add(expression);
+            }
+            changeLog = changeLog.getParentChangeLog();
+        }
+        return Collections.unmodifiableCollection(expressions);
+    }
+
     public DatabaseChangeLog getChangeLog() {
         return changeLog;
     }
@@ -741,20 +872,20 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return runInTransaction;
     }
 
-    public Change[] getRollBackChanges() {
-        return rollBackChanges.toArray(new Change[rollBackChanges.size()]);
+    public RollbackContainer getRollback() {
+        return rollback;
     }
 
     public void addRollBackSQL(String sql) {
-        if (StringUtils.trimToNull(sql) == null) {
-            if (this.rollBackChanges.size() == 0) {
-                rollBackChanges.add(new EmptyChange());
+        if (StringUtil.trimToNull(sql) == null) {
+            if (rollback.getChanges().isEmpty()) {
+                rollback.getChanges().add(new EmptyChange());
             }
             return;
         }
 
-        for (String statment : StringUtils.splitSQL(sql, null)) {
-            rollBackChanges.add(new RawSQLChange(statment.trim()));
+        for (String statment : StringUtil.splitSQL(sql, null)) {
+            rollback.getChanges().add(new RawSQLChange(statment.trim()));
         }
     }
 
@@ -762,13 +893,13 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         if (change == null) {
             return;
         }
-        rollBackChanges.add(change);
+        rollback.getChanges().add(change);
         change.setChangeSet(this);
     }
 
 
     public boolean supportsRollback(Database database) {
-        if (rollBackChanges != null && rollBackChanges.size() > 0) {
+        if ((rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
             return true;
         }
 
@@ -782,33 +913,16 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     public String getDescription() {
         List<Change> changes = getChanges();
-        if (changes.size() == 0) {
-            return "Empty";
+        if (changes.isEmpty()) {
+            return "empty";
         }
 
-        StringBuffer returnString = new StringBuffer();
-        Class<? extends Change> lastChangeClass = null;
-        int changeCount = 0;
+        List<String> messages = new ArrayList<>();
         for (Change change : changes) {
-            if (change.getClass().equals(lastChangeClass)) {
-                changeCount++;
-            } else if (changeCount > 1) {
-                returnString.append(" (x").append(changeCount).append(")");
-                returnString.append(", ");
-                returnString.append(ChangeFactory.getInstance().getChangeMetaData(change).getName());
-                changeCount = 1;
-            } else {
-                returnString.append(", ").append(ChangeFactory.getInstance().getChangeMetaData(change).getName());
-                changeCount = 1;
-            }
-            lastChangeClass = change.getClass();
+            messages.add(change.getDescription());
         }
 
-        if (changeCount > 1) {
-            returnString.append(" (x").append(changeCount).append(")");
-        }
-
-        return returnString.toString().replaceFirst("^, ", "");
+        return StringUtil.limitSize(StringUtil.join(messages, "; "), 255);
     }
 
     public Boolean getFailOnError() {
@@ -842,7 +956,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     public boolean isCheckSumValid(CheckSum storedCheckSum) {
         // no need to generate the checksum if any has been set as the valid checksum
         for (CheckSum validCheckSum : validCheckSums) {
-            if (validCheckSum.toString().equalsIgnoreCase("1:any")) {
+            if ("1:any".equalsIgnoreCase(validCheckSum.toString())
+                || "1:all".equalsIgnoreCase(validCheckSum.toString())
+                || "1:*".equalsIgnoreCase(validCheckSum.toString())) {
                 return true;
             }
         }
@@ -858,7 +974,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
 
         for (CheckSum validCheckSum : validCheckSums) {
-            if (currentMd5Sum.equals(validCheckSum)) {
+            if (currentMd5Sum.equals(validCheckSum) || storedCheckSum.equals(validCheckSum)) {
                 return true;
             }
         }
@@ -904,7 +1020,29 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     public ObjectQuotingStrategy getObjectQuotingStrategy() {
         return objectQuotingStrategy;
     }
- 
+
+    public String getCreated() {
+        return created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
+    public String getRunOrder() {
+        return runOrder;
+    }
+
+    public void setRunOrder(String runOrder) {
+        if (runOrder != null) {
+            runOrder = runOrder.toLowerCase();
+            if (!"first".equals(runOrder) && !"last".equals(runOrder)) {
+                throw new UnexpectedLiquibaseException("runOrder must be 'first' or 'last'");
+            }
+        }
+        this.runOrder = runOrder;
+    }
+
     @Override
     public String getSerializedObjectName() {
         return "changeSet";
@@ -912,32 +1050,25 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     @Override
     public Set<String> getSerializableFields() {
-        return new HashSet<String>(Arrays.asList(
-                "id",
-                "author",
-                "runAlways",
-                "runOnChange",
-                "failOnError",
-                "context",
-                "dbms",
-                "comment",
-                "changes",
-                "rollback",
-                "labels",
-                "objectQuotingStrategy"));
-
+        return new LinkedHashSet<>(
+            Arrays.asList(
+                "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
+                "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
+                "objectQuotingStrategy", "created"
+            )
+        );
     }
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        if (field.equals("id")) {
+        if ("id".equals(field)) {
             return this.getId();
         }
-        if (field.equals("author")) {
+        if ("author".equals(field)) {
             return this.getAuthor();
         }
 
-        if (field.equals("runAlways")) {
+        if ("runAlways".equals(field)) {
             if (this.isAlwaysRun()) {
                 return true;
             } else {
@@ -945,7 +1076,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             }
         }
 
-        if (field.equals("runOnChange")) {
+        if ("runOnChange".equals(field)) {
             if (this.isRunOnChange()) {
                 return true;
             } else {
@@ -953,11 +1084,11 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             }
         }
 
-        if (field.equals("failOnError")) {
+        if ("failOnError".equals(field)) {
             return this.getFailOnError();
         }
 
-        if (field.equals("context")) {
+        if ("context".equals(field)) {
             if (!this.getContexts().isEmpty()) {
                 return this.getContexts().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             } else {
@@ -965,44 +1096,52 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             }
         }
 
-        if (field.equals("labels")) {
-            if (this.getLabels() != null && !this.getLabels().isEmpty()) {
-                return StringUtils.join(this.getLabels().getLabels(), ", ");
+        if ("labels".equals(field)) {
+            if ((this.getLabels() != null) && !this.getLabels().isEmpty()) {
+                return StringUtil.join(this.getLabels().getLabels(), ", ");
             } else {
                 return null;
             }
         }
 
-        if (field.equals("dbms")) {
-            if (this.getDbmsSet() != null && this.getDbmsSet().size() > 0) {
-                StringBuffer dbmsString = new StringBuffer();
-                for (String dbms : this.getDbmsSet()) {
-                    dbmsString.append(dbms).append(",");
-                }
-                return dbmsString.toString().replaceFirst(",$", "");
+        if ("dbms".equals(field)) {
+            if ((this.getDbmsSet() != null) && !this.getDbmsSet().isEmpty()) {
+                return StringUtil.join(getDbmsSet(), ",xxx");
             } else {
                 return null;
             }
         }
 
-        if (field.equals("comment")) {
-            return StringUtils.trimToNull(this.getComments());
+        if ("comment".equals(field)) {
+            return StringUtil.trimToNull(this.getComments());
         }
 
-        if (field.equals("objectQuotingStrategy")) {
+        if ("objectQuotingStrategy".equals(field)) {
             if (this.getObjectQuotingStrategy() == null) {
                 return null;
             }
             return this.getObjectQuotingStrategy().toString();
         }
 
-        if (field.equals("changes")) {
+        if ("preconditions".equals(field)) {
+            if ((this.getPreconditions() != null) && !this.getPreconditions().getNestedPreconditions().isEmpty()) {
+                return this.getPreconditions();
+            } else {
+                return null;
+            }
+        }
+
+        if ("changes".equals(field)) {
             return getChanges();
         }
 
-        if (field.equals("rollback")) {
-            if (this.getRollBackChanges() != null && this.getRollBackChanges().length > 0) {
-                return this.getRollBackChanges();
+        if ("created".equals(field)) {
+            return getCreated();
+        }
+
+        if ("rollback".equals(field)) {
+            if ((rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
+                return rollback;
             } else {
                 return null;
             }
@@ -1013,10 +1152,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("comment") || field.equals("changes") || field.equals("rollback")) {
+        if ("comment".equals(field) || "preconditions".equals(field) || "changes".equals(field) || "rollback".equals
+            (field)) {
             return SerializationType.NESTED_OBJECT;
-//        } else if (field.equals()) {
-//            return SerializationType.DIRECT_VALUE;
         } else {
             return SerializationType.NAMED_FIELD;
         }
@@ -1044,5 +1182,31 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     @Override
     public int hashCode() {
         return toString(false).hashCode();
+    }
+
+    public Object getAttribute(String attribute) {
+        return attributes.get(attribute);
+    }
+
+    public ChangeSet setAttribute(String attribute, Object value) {
+        this.attributes.put(attribute, value);
+
+        return this;
+    }
+
+    /**
+     * Gets storedCheckSum
+     * @return storedCheckSum if it was executed otherwise null
+     */
+    public CheckSum getStoredCheckSum() {
+        return storedCheckSum;
+    }
+
+    /**
+     * Sets storedCheckSum in ValidatingVisitor in case when changeset was executed
+     * @param storedCheckSum
+     */
+    public void setStoredCheckSum(CheckSum storedCheckSum) {
+        this.storedCheckSum = storedCheckSum;
     }
 }

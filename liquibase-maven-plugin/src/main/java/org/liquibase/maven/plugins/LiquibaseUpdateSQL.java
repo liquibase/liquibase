@@ -1,14 +1,16 @@
 package org.liquibase.maven.plugins;
 
-import java.io.*;
-
 import liquibase.Contexts;
 import liquibase.LabelExpression;
-import liquibase.resource.ResourceAccessor;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Generates the SQL that is required to update the database to the current
@@ -46,14 +48,14 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 		if (changesToApply > 0) {
 			liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(labels), outputWriter);
 		} else {
-			liquibase.update(new Contexts(contexts), new LabelExpression(labels), outputWriter);
+			liquibase.update(toTag, new Contexts(contexts), new LabelExpression(labels), outputWriter);
 		}
 	}
 
 	@Override
-	protected Liquibase createLiquibase(ResourceAccessor fo, Database db)
+	protected Liquibase createLiquibase(Database db)
 			throws MojoExecutionException {
-		Liquibase liquibase = super.createLiquibase(fo, db);
+		Liquibase liquibase = super.createLiquibase(db);
 
 		// Setup the output file writer
 		try {

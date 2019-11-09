@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
@@ -11,8 +12,7 @@ public class ExecutorService {
 
     private static ExecutorService instance = new ExecutorService();
 
-    private Map<Database, Executor> executors = new ConcurrentHashMap<Database, Executor>();
-
+    private Map<Database, Executor> executors = new ConcurrentHashMap<>();
 
     private ExecutorService() {
     }
@@ -22,16 +22,15 @@ public class ExecutorService {
     }
 
     public Executor getExecutor(Database database) {
-        if (!executors.containsKey(database)) {
+        return executors.computeIfAbsent(database, db -> {
             try {
-                Executor executor = (Executor) ServiceLocator.getInstance().newInstance(Executor.class);
-                executor.setDatabase(database);
-                executors.put(database, executor);
+                Executor executor = Scope.getCurrentScope().getServiceLocator().findInstances(Executor.class).get(0);
+                executor.setDatabase(db);
+                return executor;
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-        }
-        return executors.get(database);
+        });
     }
 
     public void setExecutor(Database database, Executor executor) {

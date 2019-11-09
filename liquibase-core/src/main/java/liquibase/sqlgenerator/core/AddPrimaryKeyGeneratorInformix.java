@@ -9,7 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 
 public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
-	
+
     @Override
     public int getPriority() {
         return SqlGenerator.PRIORITY_DATABASE;
@@ -28,10 +28,14 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
         sql.append(" ADD CONSTRAINT PRIMARY KEY (");
         sql.append(database.escapeColumnNameList(statement.getColumnNames()));
         sql.append(")");
-   	    if (statement.getConstraintName() != null) {
-   	        sql.append(" CONSTRAINT ");
-   	        sql.append(database.escapeConstraintName(statement.getConstraintName()));
-   	    }
+
+        // Using auto-generated names of the form <constraint_type><tabid>_<constraintid> can cause collisions
+        // See here: http://www-01.ibm.com/support/docview.wss?uid=swg21156047
+        String constraintName = statement.getConstraintName();
+        if ((constraintName != null) && !constraintName.matches("[urcn][0-9]+_[0-9]+")) {
+            sql.append(" CONSTRAINT ");
+            sql.append(database.escapeConstraintName(constraintName));
+        }
 
         return new Sql[] {
                 new UnparsedSql(sql.toString(), getAffectedPrimaryKey(statement))

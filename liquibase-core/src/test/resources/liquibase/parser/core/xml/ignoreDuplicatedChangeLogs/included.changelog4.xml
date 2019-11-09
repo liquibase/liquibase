@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="1" author="testuser">
+        <createTable tableName="included_table_4">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1" author="testuser" context="testcontext">
+      <createTable tableName="table_table_4_testcontext">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="1" author="testuser" labels="testlabel">
+      <createTable tableName="table_table_4_testlabel">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="1" author="testuser" labels="testlabel,testlabel2">
+      <createTable tableName="table_table_4_testlabels">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="1" author="testuser" dbms="testdb">
+      <createTable tableName="table_table_4_testdb">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

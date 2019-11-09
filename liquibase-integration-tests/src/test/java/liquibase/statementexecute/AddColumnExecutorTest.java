@@ -1,23 +1,16 @@
 package liquibase.statementexecute;
 
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.test.DatabaseTestContext;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.CreateTableStatement;
-
-import java.util.List;
-import java.util.ArrayList;
-
+import liquibase.test.DatabaseTestContext;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddColumnExecutorTest extends AbstractExecuteTest {
 
@@ -39,7 +32,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void generateSql_autoIncrement() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new AutoIncrementConstraint("column_name"));
 
@@ -53,13 +46,13 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void generateSql_notNull() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, null, "table_name", "column_name", "int", 42, new NotNullConstraint());
         assertCorrect("alter table [table_name] add [column_name] int default 42 not null", SybaseASADatabase.class, SybaseDatabase.class);
-        assertCorrect("alter table table_name add column_name int not null default 42", PostgresDatabase.class);
-        assertCorrect("alter table [table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
-        assertCorrect("alter table table_name add column_name int not null default 42", MySQLDatabase.class);
+        assertCorrect("alter table table_name add column_name int default 42 not null", PostgresDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] [int] constraint df_table_name_column_name default 42 not null", MSSQLDatabase.class);
+        assertCorrect("alter table table_name add column_name int default 42 not null", MySQLDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL");
     }
@@ -76,7 +69,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42", PostgresDatabase.class, InformixDatabase.class, OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int default 42 null", SybaseASADatabase.class);
-        assertCorrect("alter table table_name add column_name int null default 42", MySQLDatabase.class);
+        assertCorrect("alter table table_name add column_name int default 42 null", MySQLDatabase.class, MariaDBDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");
     }
 
@@ -100,14 +93,14 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
 
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL", SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", InformixDatabase.class);
-        assertCorrect("alter table [table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] int constraint df_table_name_column_name default 42 not null", MSSQLDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
-        assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42");
+        assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int default 42 not null");
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void generateSql_primaryKey() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new PrimaryKeyConstraint());
 
@@ -120,7 +113,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void generateSql_foreignKey() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new PrimaryKeyConstraint(), new ForeignKeyConstraint("fk_test_fk", "table_name(column_name)"));
 

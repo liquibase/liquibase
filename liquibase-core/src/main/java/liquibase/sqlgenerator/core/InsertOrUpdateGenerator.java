@@ -1,17 +1,18 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.structure.core.Table;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
@@ -40,7 +41,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     protected String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
-        StringBuffer where = new StringBuffer();
+        StringBuilder where = new StringBuilder();
 
         String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");
 
@@ -50,9 +51,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
                         insertOrUpdateStatement.getSchemaName(),
                         insertOrUpdateStatement.getTableName(),
-                        thisPkColumn)).append(newValue == null || newValue.toString().equalsIgnoreCase("NULL") ? " is " : " = ");
+                        thisPkColumn)).append(((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) ?
+                " is " : " = ");
 
-            if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
+            if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
                 where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
@@ -66,7 +68,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer insertBuffer = new StringBuffer();
+        StringBuilder insertBuffer = new StringBuilder();
         InsertGenerator insert = new InsertGenerator();
         Sql[] insertSql = insert.generateSql(insertOrUpdateStatement,database,sqlGeneratorChain);
 
@@ -91,17 +93,22 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
      */
     protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
 
-        StringBuffer updateSqlString = new StringBuffer();
+        StringBuilder updateSqlString = new StringBuilder();
 
         UpdateGenerator update = new UpdateGenerator();
         UpdateStatement updateStatement = new UpdateStatement(
         		insertOrUpdateStatement.getCatalogName(), 
         		insertOrUpdateStatement.getSchemaName(),
         		insertOrUpdateStatement.getTableName());
-        updateStatement.setWhereClause(whereClause + ";\n");
+        if (!((database instanceof OracleDatabase) && (insertOrUpdateStatement.getOnlyUpdate() != null) &&
+            insertOrUpdateStatement.getOnlyUpdate())) {
+            whereClause += ";\n";
+        }
+
+        updateStatement.setWhereClause(whereClause);
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
-        HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
+        HashSet<String> hashPkFields = new HashSet<>(Arrays.asList(pkFields));
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {
             if (!hashPkFields.contains(columnKey)) {
@@ -130,7 +137,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     @Override
     public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer completeSql = new StringBuffer();
+        StringBuilder completeSql = new StringBuilder();
         String whereClause = getWhereClause(insertOrUpdateStatement, database);
         if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
 	        completeSql.append( getRecordCheck(insertOrUpdateStatement, database, whereClause));

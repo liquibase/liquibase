@@ -1,7 +1,7 @@
 package liquibase.diff.compare.core
 
 import liquibase.diff.compare.DatabaseObjectComparatorFactory
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.structure.core.Column
 import liquibase.structure.core.UniqueConstraint
 import spock.lang.Specification
@@ -12,7 +12,7 @@ class UniqueConstraintComparatorTest extends Specification {
     @Unroll
     def "test equality"() {
         expect:
-        assert DatabaseObjectComparatorFactory.instance.isSameObject(constraint1, constraint2, new MockDatabase()) == expected
+        assert DatabaseObjectComparatorFactory.instance.isSameObject(constraint1, constraint2, null, new MockDatabase()) == expected
 
         where:
         constraint1                                                                                       | constraint2                                                                                       | expected
@@ -25,7 +25,7 @@ class UniqueConstraintComparatorTest extends Specification {
         new UniqueConstraint("uq_test", null, null, "table_name", new Column("col1"))                     | new UniqueConstraint("uq_other", null, null, "table_name", new Column("col1"))                    | true //They should be the same object if they have different names but the same columns
         new UniqueConstraint("uq_test", null, null, "table_name", new Column("col1"))                     | new UniqueConstraint("uq_test", null, null, "other_table", new Column("col1"))                    | false //Different if the same name but different tables
         new UniqueConstraint("uq_test", null, "my_schema", "table_name", new Column("col1"))              | new UniqueConstraint("uq_test", null, "other_schema", "table_name", new Column("col1"))           | false //different schemas
-        new UniqueConstraint("uq_test", "my_cat", "my_schema", "table_name", new Column("col1"))          | new UniqueConstraint("uq_test", "other_cat", "my_schema", "table_name", new Column("col1"))       | false //different cat
+        new UniqueConstraint("uq_test", "my_cat", "my_schema", "table_name", new Column("col1"))          | new UniqueConstraint("uq_test", "other_cat", "my_schema", "table_name", new Column("col1"))       | true //different cat
 
         new UniqueConstraint("uq_test", null, null, null, new Column("col1"))                             | new UniqueConstraint("uq_test", null, null, null, new Column("col1"))                             | true //Same if the same name and no table set
         new UniqueConstraint("uq_test", null, null, null, new Column("col1"), new Column("col2"))         | new UniqueConstraint("uq_test", null, null, null, new Column("col1"))                             | true //Same if the same name and no table set and different column count

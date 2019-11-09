@@ -8,11 +8,11 @@ public class UpdateStatement extends AbstractSqlStatement {
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private SortedMap<String, Object> newColumnValues = new TreeMap<String, Object>();
+    private SortedMap<String, Object> newColumnValues = new TreeMap<>();
     private String whereClause;
 
-    private List<String> whereColumnNames = new ArrayList<String>();
-    private List<Object> whereParameters = new ArrayList<Object>();
+    private List<String> whereColumnNames = new ArrayList<>();
+    private List<Object> whereParameters = new ArrayList<>();
 
 
     public UpdateStatement(String catalogName, String schemaName, String tableName) {
@@ -34,7 +34,7 @@ public class UpdateStatement extends AbstractSqlStatement {
     }
 
     public UpdateStatement addNewColumnValue(String columnName, Object newValue) {
-        newColumnValues.put(columnName, newValue);
+            newColumnValues.put(columnName, newValue);
 
         return this;
     }

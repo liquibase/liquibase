@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 
@@ -53,17 +54,24 @@ public class Sequence extends AbstractDatabaseObject {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if ((o == null) || (getClass() != o.getClass())) return false;
 
         Sequence sequence = (Sequence) o;
 
-        return !(getName() != null ? !getName().equalsIgnoreCase(sequence.getName()) : sequence.getName() != null);
+        if ((this.getSchema() != null) && (sequence.getSchema() != null)) {
+            boolean schemasEqual = this.getSchema().equals(sequence.getSchema());
+            if (!schemasEqual) {
+                return false;
+            }
+        }
+
+        return !((getName() != null) ? !getName().equalsIgnoreCase(sequence.getName()) : (sequence.getName() != null));
 
     }
 
     @Override
     public int hashCode() {
-        return (getName() != null ? getName().toUpperCase().hashCode() : 0);
+        return ((getName() != null) ? getName().toUpperCase().hashCode() : 0);
     }
 
 
@@ -146,7 +154,14 @@ public class Sequence extends AbstractDatabaseObject {
 
     public Sequence setCacheSize(BigInteger cacheSize) {
         this.setAttribute("cacheSize", cacheSize);
+        return this;
+    }
 
+    public String getDataType() {
+        return getAttribute("dataType", String.class);
+    }
+    public Sequence setDataType(String dataType) {
+        this.setAttribute("dataType", dataType);
         return this;
     }
 }

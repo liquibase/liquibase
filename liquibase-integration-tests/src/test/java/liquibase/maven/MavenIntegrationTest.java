@@ -1,21 +1,12 @@
 package liquibase.maven;
 
-import java.io.IOException;
-import java.io.File;
-
-import liquibase.CatalogAndSchema;
-import liquibase.structure.core.Schema;
 import org.apache.maven.it.VerificationException;
-
 import org.apache.maven.it.Verifier;
 import org.apache.maven.it.util.ResourceExtractor;
 import org.junit.Test;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
-import liquibase.test.DatabaseTestContext;
-import org.junit.Before;
-import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Maven integration test. Run an update executing maven as if it was ran by the user
@@ -78,7 +69,7 @@ public class MavenIntegrationTest {
         //Clear any artifact created by the test project to avoid unstable test results
         Verifier verifier = new Verifier(testDir.getAbsolutePath());
         verifier.setAutoclean(false); //Don't do clean automatically in each executeGoal
-        verifier.deleteArtifact("org.liquibase", "liquibase-maven-integration-tests", "1.0-SNAPSHOT", "jar");
+       verifier.deleteArtifact("org.liquibase", "liquibase-maven-integration-tests", "1.0-SNAPSHOT", "jar");
         return verifier;
     }
     

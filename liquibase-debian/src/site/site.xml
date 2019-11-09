@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="Maven">
   <bannerLeft>
-    <name>Liquibase Debian installer</name>
-    <src>http://www.liquibase.org/custom_images/home_tagline.png</src>
-    <href>http://www.liquibase.org/</href>
+      <name>Liquibase Debian installer</name>
+      <src>http://www.liquibase.org/custom_images/home_tagline.png</src>
+      <href>http://www.liquibase.org/</href>
   </bannerLeft>
   <bannerRight>
-    <src>http://www.liquibase.org/custom_images/liquibase_logo-40.png</src>
+      <src>http://www.liquibase.org/custom_images/liquibase_logo-40.png</src>
   </bannerRight>
   <body>
     <links>
-      <item name="Liquibase homepage" href="http://www.liquibase.org/" />
-      <item name="Liquibase Jira" href="https://liquibase.jira.com/"/>
-      <item name="Liquibase Github" href="https://github.com/liquibase/liquibase"/>
+        <item name="Liquibase homepage" href="http://www.liquibase.org/"/>
+        <item name="Liquibase Jira" href="https://liquibase.jira.com/"/>
+        <item name="Liquibase Github" href="https://github.com/liquibase/liquibase"/>
     </links>
 
-    <menu name="Liquibase Debian Package">
-      <item name="Introduction" href="liquibase-debian-faq.html"/>
+      <menu name="Liquibase Debian Package">
+          <item name="Introduction" href="liquibase-debian-faq.html"/>
     </menu>
    
 

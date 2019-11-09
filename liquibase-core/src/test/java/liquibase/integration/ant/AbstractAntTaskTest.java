@@ -1,5 +1,8 @@
 package liquibase.integration.ant;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -10,7 +13,7 @@ public abstract class AbstractAntTaskTest {
         final String resourceName = "/" + name.replace('.', '/') + ".class";
         String absoluteFilePath = BaseLiquibaseTask.class.getResource(resourceName).getFile();
         try {
-            absoluteFilePath = URLDecoder.decode(absoluteFilePath, "UTF-8");
+            absoluteFilePath = URLDecoder.decode(absoluteFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Missing UTF-8 encoding in JVM.", e);
         }
@@ -23,7 +26,7 @@ public abstract class AbstractAntTaskTest {
         final String testResourceName = "/" + testClassName.replace('.', '/') + ".class";
         String testAbsoluteFilePath = AbstractAntTaskTest.class.getResource(testResourceName).getFile();
         try {
-            testAbsoluteFilePath = URLDecoder.decode(testAbsoluteFilePath, "UTF-8");
+            testAbsoluteFilePath = URLDecoder.decode(testAbsoluteFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Missing UTF-8 encoding in JVM.", e);
         }

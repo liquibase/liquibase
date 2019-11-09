@@ -1,6 +1,73 @@
 package liquibase.sqlgenerator.core;
 
-public abstract class UpdateGeneratorTest {
+import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.sql.Sql;
+import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class UpdateGeneratorTest {
+    @Test
+    public void testGenerateSqlWithParamPlaceholders() {
+        // given
+        Database database = new MSSQLDatabase();
+        UpdateStatement statement = new UpdateStatement(null, null, "DATABASECHANGELOG")
+                .addNewColumnValue("MD5SUM", "7:e27bf9c0c2313160ef960a15d44ced47")
+                .setWhereClause(
+                        database.escapeObjectName("ID", Column.class) + " = ? " +
+                        "AND " + database.escapeObjectName("AUTHOR", Column.class) + " = ? " +
+                        "AND " + database.escapeObjectName("FILENAME", Column.class) + " = ?")
+                .addWhereParameters(
+                        "SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?",
+                        "martin",
+                        "db/changelog.xml");
+        UpdateGenerator generator = new UpdateGenerator();
+
+        // when
+        Sql[] sqls = generator.generateSql(statement, database, null);
+
+        // then
+        assertEquals(
+            "UPDATE DATABASECHANGELOG " +
+                "SET MD5SUM = '7:e27bf9c0c2313160ef960a15d44ced47' " +
+                "WHERE ID = N'SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?' " +
+                "AND AUTHOR = 'martin' " +
+                "AND FILENAME = 'db/changelog.xml'",
+                sqls[0].toSql());
+    }
+
+    @Test
+    public void testGenerateSqlWithNameValuePlaceholderPairs() {
+        // given
+        Database database = new MSSQLDatabase();
+        UpdateStatement statement = new UpdateStatement(null, null, "DATABASECHANGELOG")
+                .addNewColumnValue("MD5SUM", "7:e27bf9c0c2313160ef960a15d44ced47")
+                .setWhereClause(":name = :value AND :name = :value AND :name = :value")
+                .addWhereColumnName("ID")
+                .addWhereColumnName("AUTHOR")
+                .addWhereColumnName("FILENAME")
+                .addWhereParameters(
+                        "SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?",
+                        "martin",
+                        "db/changelog.xml");
+        UpdateGenerator generator = new UpdateGenerator();
+
+        // when
+        Sql[] sqls = generator.generateSql(statement, database, null);
+
+        // then
+        assertEquals(
+            "UPDATE DATABASECHANGELOG " +
+                "SET MD5SUM = '7:e27bf9c0c2313160ef960a15d44ced47' " +
+                "WHERE ID = N'SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?' " +
+                "AND AUTHOR = 'martin' " +
+                "AND FILENAME = 'db/changelog.xml'",
+                sqls[0].toSql());
+    }
+
 ////    @Test
 ////    public void addNewColumnValue_nullValue() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

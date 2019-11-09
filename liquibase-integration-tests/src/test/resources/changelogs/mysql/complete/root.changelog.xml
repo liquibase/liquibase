@@ -7,7 +7,7 @@
     <preConditions>
         <dbms type="mysql"/>
         <sqlCheck expectedResult="1">select 1</sqlCheck>
-        <runningAs username="lbuser"/>
+        <runningAs username="${loginUser}"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
@@ -306,7 +306,7 @@
         <sqlFile path="changelogs/mysql/complete/sample.sql" stripComments="true"/>
     </changeSet>
 
-    <include file="changelogs\mysql\complete\included.changelog.xml"/>
+    <include file="changelogs/mysql/complete/included.changelog.xml"/>
 
     <include file="changelogs/mysql/complete/renamed.changelog.xml"/>
 
@@ -314,7 +314,7 @@
 
     <include file="changelogs/common/autoincrement.tests.changelog.xml" />
 
-    <include file="../../common/schema.tests.changelog.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/common/schema.tests.changelog.xml" />
 
     <changeSet id="54" author="nvoxland">
         <addColumn tableName="address">

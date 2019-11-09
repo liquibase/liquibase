@@ -3,7 +3,7 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.StandardChangeTest
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 
@@ -30,10 +30,15 @@ public class InsertDataChangeTest extends StandardChangeTest {
         col4.setName("height");
         col4.setValueNumeric("1.78");
 
+        ColumnConfig col5 = new ColumnConfig();
+        col5.setName("date");
+        col5.setValueNumeric("2012-03-13 18:52:22.75");
+
         change.addColumn(col1);
         change.addColumn(col2);
         change.addColumn(col3);
         change.addColumn(col4);
+        change.addColumn(col5);
 
         then:
         "New row inserted into TABLE_NAME" == change.getConfirmationMessage()

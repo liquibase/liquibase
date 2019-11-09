@@ -30,4 +30,5 @@ public class DropSequenceStatement extends AbstractSqlStatement {
     public String getSequenceName() {
         return sequenceName;
     }
+
 }

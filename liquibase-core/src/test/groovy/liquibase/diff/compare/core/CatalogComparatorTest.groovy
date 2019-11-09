@@ -2,7 +2,7 @@ package liquibase.diff.compare.core
 
 import liquibase.diff.compare.DatabaseObjectComparator
 import liquibase.diff.compare.DatabaseObjectComparatorFactory
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
@@ -42,12 +42,12 @@ class CatalogComparatorTest extends Specification {
         }
 
         expect:
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatSupportCatalogs) == isSameIfSupportsCatalogs
-        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatSupportCatalogs) == isSameIfSupportsCatalogs
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatSupportCatalogs) == isSameIfSupportsCatalogs
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatSupportCatalogs) == isSameIfSupportsCatalogs
 
         // always true if doesn't support catalogs
-        assert DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportCatalogs)
-        assert DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatDoesNotSupportCatalogs)
+        assert DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatDoesNotSupportCatalogs)
+        assert DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatDoesNotSupportCatalogs)
 
 
         where:

@@ -22,25 +22,34 @@ public class ChangeSetTest extends Specification {
 
     def getDescriptions() {
         when:
-        def insertDescription = "insert";
+        def insertDescription = "insert tableName=test_table";
         def changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
+
+        def insertData1 = new InsertDataChange()
+        insertData1.setTableName("test_table")
+
+        def insertData2 = new InsertDataChange()
+        insertData2.setTableName("test_table2")
+
         then:
-        changeSet.getDescription() == "Empty"
+        changeSet.getDescription() == "empty"
 
         when:
-        changeSet.addChange(new InsertDataChange());
+        changeSet.addChange(insertData1);
         then:
         changeSet.getDescription() == insertDescription
 
         when:
-        changeSet.addChange(new InsertDataChange());
+        changeSet.addChange(insertData2);
         then:
-        changeSet.getDescription() == insertDescription + " (x2)"
+        changeSet.getDescription() == insertDescription+"; insert tableName=test_table2"
 
         when:
-        changeSet.addChange(new CreateTableChange());
+        def createTableChange = new CreateTableChange()
+        createTableChange.setTableName("new_table")
+        changeSet.addChange(createTableChange);
         then:
-        changeSet.getDescription() == insertDescription + " (x2), createTable"
+        changeSet.getDescription() == insertDescription+"; insert tableName=test_table2; createTable tableName=new_table"
     }
 
     def generateCheckSum() {
@@ -123,7 +132,7 @@ public class ChangeSetTest extends Specification {
                 testValue[param] = "true"
             } else if (param == "context") {
                 testValue[param] = "test or value"
-            } else if (param == "rollback" || param == "changes") {
+            } else if (param == "rollback" || param == "changes" || param == "preconditions") {
                 continue
             } else if (param == "objectQuotingStrategy") {
                 testValue[param] = "QUOTE_ONLY_RESERVED_WORDS"
@@ -186,8 +195,8 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 1
-        ((RawSQLChange) changeSet.rollBackChanges[0]).sql == "rollback logic here"
+        changeSet.rollback.changes.size() == 1
+        ((RawSQLChange) changeSet.rollback.changes[0]).sql == "rollback logic here"
     }
 
     def "load node with rollback containing change node as value"() {
@@ -204,8 +213,8 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 1
-        ((RenameTableChange) changeSet.rollBackChanges[0]).newTableName == "rename_to_x"
+        changeSet.rollback.changes.size() == 1
+        ((RenameTableChange) changeSet.rollback.changes[0]).newTableName == "rename_to_x"
     }
 
     def "load node with rollback containing collection of change nodes as value"() {
@@ -225,9 +234,9 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 2
-        ((RenameTableChange) changeSet.rollBackChanges[0]).newTableName == "rename_to_x"
-        ((RenameTableChange) changeSet.rollBackChanges[1]).newTableName == "rename_to_y"
+        changeSet.rollback.changes.size() == 2
+        ((RenameTableChange) changeSet.rollback.changes[0]).newTableName == "rename_to_x"
+        ((RenameTableChange) changeSet.rollback.changes[1]).newTableName == "rename_to_y"
     }
 
     def "load node with rollback containing rollback nodes as children"() {
@@ -247,10 +256,10 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 3
-        ((RenameTableChange) changeSet.rollBackChanges[0]).newTableName == "rename_to_a"
-        ((RenameTableChange) changeSet.rollBackChanges[1]).newTableName == "rename_to_b"
-        ((RawSQLChange) changeSet.rollBackChanges[2]).sql == "rollback sql"
+        changeSet.rollback.changes.size() == 3
+        ((RenameTableChange) changeSet.rollback.changes[0]).newTableName == "rename_to_a"
+        ((RenameTableChange) changeSet.rollback.changes[1]).newTableName == "rename_to_b"
+        ((RawSQLChange) changeSet.rollback.changes[2]).sql == "rollback sql"
     }
 
     def "load node with rollback containing multiple sql statements in value"() {
@@ -268,9 +277,9 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        ((RawSQLChange) changeSet.rollBackChanges[0]).sql == "rollback sql 1"
-        ((RawSQLChange) changeSet.rollBackChanges[1]).sql == "rollback sql 2"
-        changeSet.rollBackChanges.size() == 2
+        ((RawSQLChange) changeSet.rollback.changes[0]).sql == "rollback sql 1"
+        ((RawSQLChange) changeSet.rollback.changes[1]).sql == "rollback sql 2"
+        changeSet.rollback.changes.size() == 2
     }
 
     def "load node with valid checksums as children"() {
@@ -314,7 +323,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChildren([preConditions: [
+            changeSet.load(new ParsedNode(null, "changeSet").addChildren([preConditions: [
                     [runningAs: [username: "my_user"]],
                     [runningAs: [username: "my_other_user"]],
             ]]), resourceSupplier.simpleResourceAccessor)
@@ -332,7 +341,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").setValue(new liquibase.parser.core.ParsedNode(null, "preConditions").setValue([
+            changeSet.load(new ParsedNode(null, "changeSet").setValue(new ParsedNode(null, "preConditions").setValue([
                     [runningAs: [username: "my_user"]],
                     [runningAs: [username: "my_other_user"]],
             ])), resourceSupplier.simpleResourceAccessor)
@@ -350,9 +359,9 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").setValue([
-                    new liquibase.parser.core.ParsedNode(null, "modifySql").addChildren([applyToRollback: "true", replace: [replace: "a", with: "b"]]),
-                    new liquibase.parser.core.ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).setValue([
+            changeSet.load(new ParsedNode(null, "changeSet").setValue([
+                    new ParsedNode(null, "modifySql").addChildren([applyToRollback: "true", replace: [replace: "a", with: "b"]]),
+                    new ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).setValue([
                             [replace: [replace: "x1", with: "y1"]],
                             [replace: [replace: "x2", with: "y2"]],
                     ])
@@ -384,15 +393,52 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(new liquibase.parser.core.ParsedNode(null, "rollback")), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(new ParsedNode(null, "rollback")), resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
 
         then:
         changeSet.changes.size() == 0
-        changeSet.rollBackChanges.size() == 1
-        changeSet.rollBackChanges[0] instanceof EmptyChange
+        changeSet.rollback.changes.size() == 1
+        changeSet.rollback.changes[0] instanceof EmptyChange
+    }
+
+    def "load node with rollback containing only a comment creates an EmptyChange"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        try {
+            def commentNode = new ParsedNode(null, "comment").setValue("comment here")
+            def rollbackNode = new ParsedNode(null, "rollback").addChild(commentNode)
+            def changeSetNode = new ParsedNode(null, "changeSet").addChild(rollbackNode)
+            changeSet.load(changeSetNode, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
+        then:
+        changeSet.changes.size() == 0
+        changeSet.rollback.changes.size() == 1
+        changeSet.rollback.changes[0] instanceof EmptyChange
+    }
+
+    def "load node with rollback containing change node and a comment as value"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def createTableNode = new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1")
+        def renameTableNode = new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_x")
+        def commentNode = new ParsedNode(null, "comment").setValue("comment here")
+        def rollbackNode = new ParsedNode(null, "rollback").addChild(commentNode).addChild(renameTableNode)
+        def changeSetNode = new ParsedNode(null, "changeSet").addChild(createTableNode).addChild(rollbackNode)
+        try {
+            changeSet.load(changeSetNode, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        changeSet.changes.size() == 1
+        changeSet.rollback.changes.size() == 1
+        ((RenameTableChange) changeSet.rollback.changes[0]).newTableName == "rename_to_x"
     }
 
     @Unroll("#featureName with changeSetPath=#changeSetPath")
@@ -409,8 +455,8 @@ public class ChangeSetTest extends Specification {
         then:
         changeLog.getChangeSet(path, "nvoxland", "3").changes.size() == 1
         ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "3").changes[0]).tableName == "tableX"
-        changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges.size() == 1
-        ((CreateTableChange) changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges[0]).tableName == "table2"
+        changeLog.getChangeSet(path, "nvoxland", "3").rollback.changes.size() == 1
+        ((CreateTableChange) changeLog.getChangeSet(path, "nvoxland", "3").rollback.changes[0]).tableName == "table2"
 
         where:
         changeSetPath << ["com/example/test.xml", null]
@@ -442,7 +488,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -463,7 +509,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }

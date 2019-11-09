@@ -2,14 +2,13 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.structure.core.Schema;
 import liquibase.exception.LiquibaseException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Drops all database objects owned by the user. Note that functions, procedures and packages are not dropped.
+ * Drops all database objects in the configured schema(s). Note that functions, procedures and packages are not dropped.
  * 
  * @author Ferenc Gratzer
  * @description Liquibase DropAll Maven plugin
@@ -31,7 +30,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseMojo {
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
 		if (schemas != null) {
-            List<CatalogAndSchema> schemaObjs = new ArrayList<CatalogAndSchema>();
+            List<CatalogAndSchema> schemaObjs = new ArrayList<>();
             for (String name : schemas.split(",")) {
                 schemaObjs.add(new CatalogAndSchema(catalog, name));
             }

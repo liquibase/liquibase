@@ -1,19 +1,20 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.logging.LogFactory;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
-import liquibase.exception.*;
-import liquibase.precondition.Precondition;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class IndexExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
@@ -75,25 +76,26 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (getIndexName() == null && getTableName() == null && getColumnNames() == null) {
-            validationErrors.addError("indexName OR tableName and columnNames is required");
+        if (getIndexName() == null && (getTableName() == null || getColumnNames() == null)) {
+            validationErrors.addError("indexName OR (tableName and columnNames) is required");
         }
         return validationErrors;
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-    	try {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
+        try {
             Schema schema = new Schema(getCatalogName(), getSchemaName());
             Index example = new Index();
-            String tableName = StringUtils.trimToNull(getTableName());
+            String tableName = StringUtil.trimToNull(getTableName());
             if (tableName != null) {
-                example.setTable((Table) new Table()
+                example.setRelation((Table) new Table()
                         .setName(database.correctObjectName(getTableName(), Table.class))
                         .setSchema(schema));
             }
             example.setName(database.correctObjectName(getIndexName(), Index.class));
-            if (StringUtils.trimToNull(getColumnNames()) != null) {
+            if (StringUtil.trimToNull(getColumnNames()) != null) {
                 for (String column : getColumnNames().split("\\s*,\\s*")) {
                     example.addColumn(new Column(database.correctObjectName(column, Column.class)));
                 }
@@ -108,7 +110,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
                 if (tableName != null) {
                     name += " on "+database.escapeObjectName(getTableName(), Table.class);
 
-                    if (StringUtils.trimToNull(getColumnNames()) != null) {
+                    if (StringUtil.trimToNull(getColumnNames()) != null) {
                         name += " columns "+getColumnNames();
                     }
                 }
@@ -138,7 +140,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
         if (tableName != null) {
             string += " on "+getTableName();
 
-            if (StringUtils.trimToNull(getColumnNames()) != null) {
+            if (StringUtil.trimToNull(getColumnNames()) != null) {
                 string += " columns "+getColumnNames();
             }
         }

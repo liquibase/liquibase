@@ -1,7 +1,7 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 
 /**
  * Liquibase Update Maven plugin. This plugin allows for DatabaseChangeLogs to be
@@ -17,6 +17,12 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
    * @parameter expression="${liquibase.changesToApply}" default-value=0
    */
   protected int changesToApply;
+
+  /**
+   * Update to the changeSet with the given tag command.
+   * @parameter expression="${liquibase.toTag}"
+   */
+  protected String toTag;
 
   @Override
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {

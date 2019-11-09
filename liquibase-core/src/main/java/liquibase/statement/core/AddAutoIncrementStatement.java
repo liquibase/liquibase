@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import java.math.BigInteger;
-
 import liquibase.statement.AbstractSqlStatement;
+
+import java.math.BigInteger;
 
 public class AddAutoIncrementStatement extends AbstractSqlStatement {
 
@@ -13,15 +13,19 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     private String columnDataType;
     private BigInteger startWith;
     private BigInteger incrementBy;
-    
+    private Boolean defaultOnNull;
+    private String generationType;
+
     public AddAutoIncrementStatement(
             String catalogName,
-    		String schemaName,
-    		String tableName,
-    		String columnName,
-    		String columnDataType,
-    		BigInteger startWith,
-    		BigInteger incrementBy) {
+            String schemaName,
+            String tableName,
+            String columnName,
+            String columnDataType,
+            BigInteger startWith,
+            BigInteger incrementBy,
+            Boolean defaultOnNull,
+            String generationType) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -29,6 +33,8 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
         this.columnDataType = columnDataType;
         this.startWith = startWith;
         this.incrementBy = incrementBy;
+        this.defaultOnNull = defaultOnNull;
+        this.generationType = generationType;
     }
 
     public String getCatalogName() {
@@ -52,10 +58,18 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     }
     
     public BigInteger getStartWith() {
-    	return startWith;
+        return startWith;
     }
     
     public BigInteger getIncrementBy() {
-    	return incrementBy;
+        return incrementBy;
+    }
+
+    public Boolean getDefaultOnNull() {
+        return defaultOnNull;
+    }
+
+    public String getGenerationType() {
+        return generationType;
     }
 }

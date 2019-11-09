@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -19,7 +20,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     private List<ColumnConfig> columns;
 
     public UpdateDataChange() {
-        columns = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<>();
     }
 
     @Override
@@ -57,8 +58,12 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             if (column.getValueBlobFile() != null) {
                 needsPreparedStatement = true;
             }
-            if (column.getValueClobFile() != null
-                || (column.getType() != null && column.getType().equalsIgnoreCase("CLOB"))) {
+            if (column.getValueClobFile() != null) {
+                needsPreparedStatement = true;
+            }
+
+            if ((database instanceof OracleDatabase) && (column.getType() != null) && "CLOB".equalsIgnoreCase(column
+                .getType()) && (column.getValue() != null) && (column.getValue().length() >= 4000)) {
                 needsPreparedStatement = true;
             }
         }

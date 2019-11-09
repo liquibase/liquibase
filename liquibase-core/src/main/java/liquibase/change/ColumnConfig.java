@@ -1,17 +1,13 @@
 package liquibase.change;
 
-import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
+import liquibase.exception.DateParseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.serializer.ReflectionSerializer;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.Column;
@@ -20,12 +16,23 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtil;
+import liquibase.util.NowAndTodayUtil;
+import liquibase.util.NowAndTodayUtil;
+
+import java.math.BigInteger;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * The standard configuration used by Change classes to represent a column.
- * It is not required that a column-based Change uses this class, but parsers should look for it so it is a helpful convenience.
- * The definitions of "defaultValue" and "value" will vary based on the Change and may not be applicable in all cases.
+ * It is not required that a column-based Change uses this class, but parsers should look for it so it is a helpful
+ * convenience. The definitions of "defaultValue" and "value" will vary based on the Change and may not be applicable
+ * in all cases.
  */
 public class ColumnConfig extends AbstractLiquibaseSerializable {
     private String name;
@@ -48,12 +55,16 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
     private SequenceNextValueFunction defaultValueSequenceNext;
+    private String defaultValueConstraintName;
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
+    private String generationType;
+    private Boolean defaultOnNull;
     private BigInteger startWith;
     private BigInteger incrementBy;
     private String remarks;
+    private Boolean descending;
 
     /**
      * Create a ColumnConfig object based on a {@link Column} snapshot.
@@ -61,23 +72,53 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setComputed(columnSnapshot.getComputed());
+        setComputed(((columnSnapshot.getComputed() != null) && columnSnapshot.getComputed()) ? Boolean.TRUE : null);
+        setDescending(((columnSnapshot.getDescending() != null) && columnSnapshot.getDescending()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
 
-        if (columnSnapshot.getRelation() != null && columnSnapshot.getRelation() instanceof Table) {
-            if (columnSnapshot.getDefaultValue() != null) {
-                setDefaultValue(columnSnapshot.getDefaultValue().toString());
-            }
 
-            boolean nonDefaultConstraints = false;
-            ConstraintsConfig constraints = new ConstraintsConfig();
-
-            if (columnSnapshot.isNullable() != null && !columnSnapshot.isNullable()) {
-                constraints.setNullable(columnSnapshot.isNullable());
-                nonDefaultConstraints = true;
+        if (columnSnapshot.getDefaultValue() != null) {
+            Object defaultValue = columnSnapshot.getDefaultValue();
+            if (defaultValue instanceof Boolean) {
+                setDefaultValueBoolean((Boolean) defaultValue);
+            } else if (defaultValue instanceof Number) {
+                setDefaultValueNumeric(defaultValue.toString());
+            } else if (defaultValue instanceof SequenceNextValueFunction) {
+                setDefaultValueSequenceNext((SequenceNextValueFunction) defaultValue);
+            } else if (defaultValue instanceof DatabaseFunction) {
+                setDefaultValueComputed((DatabaseFunction) defaultValue);
+            } else if (defaultValue instanceof Date) {
+                setDefaultValueDate((Date) defaultValue);
+            } else {
+                setDefaultValue(defaultValue.toString());
             }
+        }
+        setDefaultValueConstraintName(columnSnapshot.getDefaultValueConstraintName());
+
+        boolean nonDefaultConstraints = false;
+        ConstraintsConfig constraints = new ConstraintsConfig();
+
+        if ((columnSnapshot.isNullable() != null) && !columnSnapshot.isNullable()) {
+            constraints.setNullable(columnSnapshot.isNullable());
+            constraints.setShouldValidateNullable(columnSnapshot.shouldValidateNullable());
+            nonDefaultConstraints = true;
+        }
+
+
+        if ((columnSnapshot.getRelation() != null) && (columnSnapshot.getRelation() instanceof Table)) {
+            Table table = (Table) columnSnapshot.getRelation();
+            List<NotNullConstraint> notNullConstraints = table.getNotNullConstraints();
+            if (notNullConstraints != null) {
+                    for (NotNullConstraint constraint : notNullConstraints) {
+                            if (constraint.getColumnName().equals(getName())) {
+                                    constraints.setNullable(false);
+                                    constraints.setNotNullConstraintName(constraint.getConstraintName());
+                                    nonDefaultConstraints = true;
+                                }
+                        }
+                }
 
             if (columnSnapshot.isAutoIncrement()) {
                 setAutoIncrement(true);
@@ -87,10 +128,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 setAutoIncrement(false);
             }
 
-
-            Table table = (Table) columnSnapshot.getRelation();
             PrimaryKey primaryKey = table.getPrimaryKey();
-            if (primaryKey != null && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
+            if ((primaryKey != null) && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
                 constraints.setPrimaryKey(true);
                 constraints.setPrimaryKeyName(primaryKey.getName());
                 constraints.setPrimaryKeyTablespace(primaryKey.getTablespace());
@@ -111,20 +150,18 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             List<ForeignKey> fks = table.getOutgoingForeignKeys();
             if (fks != null) {
                 for (ForeignKey fk : fks) {
-                    if (fk.getForeignKeyColumns() != null && fk.getForeignKeyColumns().size() == 1 && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
+                    if ((fk.getForeignKeyColumns() != null) && (fk.getForeignKeyColumns().size() == 1) && fk
+                        .getForeignKeyColumns().get(0).getName().equals(getName())) {
                         constraints.setForeignKeyName(fk.getName());
-                        constraints.setReferences(fk.getPrimaryKeyTable().getName() + "(" + fk.getPrimaryKeyColumns().get(0).getName() + ")");
+                        constraints.setReferences(fk.getPrimaryKeyTable().getName() +
+                            "(" +
+                            fk.getPrimaryKeyColumns().get(0).getName() +
+                            ")");
                         nonDefaultConstraints = true;
                     }
                 }
             }
 
-//            if (constraints.isPrimaryKey() == null) {
-//                constraints.setPrimaryKey(false);
-//            }
-//            if (constraints.isUnique() == null) {
-//                constraints.setUnique(false);
-//            }
             if (nonDefaultConstraints) {
                 setConstraints(constraints);
             }
@@ -139,8 +176,32 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig() {
     }
 
+    public static ColumnConfig fromName(String name) {
+        name = name.trim();
+        Boolean descending = null;
+        if (name.matches("(?i).*\\s+DESC")) {
+            name = name.replaceFirst("(?i)\\s+DESC$", "");
+            descending = true;
+        } else if (name.matches("(?i).*\\s+ASC")) {
+            name = name.replaceFirst("(?i)\\s+ASC$", "");
+            descending = false;
+        }
+        return new ColumnConfig()
+                .setName(name)
+                .setDescending(descending);
+    }
 
-
+    public static ColumnConfig[] arrayFromNames(String names) {
+        if (names == null) {
+            return null;
+        }
+        List<String> nameArray = StringUtil.splitAndTrim(names, ",");
+        ColumnConfig[] returnArray = new ColumnConfig[nameArray.size()];
+        for (int i = 0; i < nameArray.size(); i++) {
+            returnArray[i] = fromName(nameArray.get(i));
+        }
+        return returnArray;
+    }
 
     /**
      * The name of the column.
@@ -185,13 +246,13 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * The String value to set this column to. If you do not want the value set by {@link #setValue(String)}
      * use a more specific function like {@link #getValueNumeric()} or the more generic {@link #getValueObject()}
      * <p></p>
-     * If performing an data manipulation operation, the setValue* functions should be used to set what the columns should be set to.
-     * If performing a data definition operation, this setValue* functions should be used to set what existing rows should be set to (may be different than the default value for new rows)
+     * If performing an data manipulation operation, the setValue* functions should be used to set what the columns
+     * should be set to. If performing a data definition operation, this setValue* functions should be used to set
+     * what existing rows should be set to (may be different than the default value for new rows)
      */
     public String getValue() {
         return value;
     }
-
 
     /**
      * Sets the string value this column should be set to.
@@ -213,16 +274,22 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return valueNumeric;
     }
 
+    public ColumnConfig setValueNumeric(Number valueNumeric) {
+        this.valueNumeric = valueNumeric;
+
+        return this;
+    }
 
     /**
-     * Set the number this column should be set to. Supports integers and decimals, and strips off any wrapping parentheses.
-     * If the passed value cannot be parsed as a number, it is assumed to be a function that returns a number.
-     * If the value "null" is passed, it will set a null value.
+     * Set the number this column should be set to. Supports integers and decimals, and strips off any wrapping
+     * parentheses. If the passed value cannot be parsed as a number in US locale, it is assumed to be a function
+     * that returns a number. If the value "null" is passed, it will set a null value.
      */
     public ColumnConfig setValueNumeric(String valueNumeric) {
-        if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {
+        if ((valueNumeric == null) || "null".equalsIgnoreCase(valueNumeric)) {
             this.valueNumeric = null;
         } else {
+            String saved = valueNumeric;
             if (valueNumeric.startsWith("(")) {
                 valueNumeric = valueNumeric.replaceFirst("^\\(", "");
                 valueNumeric = valueNumeric.replaceFirst("\\)$", "");
@@ -231,81 +298,11 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             try {
                 this.valueNumeric = ValueNumeric.of(Locale.US, valueNumeric);
             } catch (ParseException e) {
-                this.valueComputed = new DatabaseFunction(valueNumeric);
+                this.valueComputed = new DatabaseFunction(saved);
             }
         }
 
         return this;
-    }
-
-    public ColumnConfig setValueNumeric(Number valueNumeric) {
-        this.valueNumeric = valueNumeric;
-
-        return this;
-    }
-    
-	public static class ValueNumeric extends Number {
-		private static final long serialVersionUID = 1381154777956917462L;
-		
-		private final Number delegate;
-		private final String value;
-
-		private static ValueNumeric of(Locale locale, String value) throws ParseException {
-			final Number parsedNumber = NumberFormat.getInstance(locale)
-					.parse(value);
-			return new ValueNumeric(value, parsedNumber);
-		}
-
-		private ValueNumeric(final String value, final Number numeric) {
-			this.delegate = numeric;
-			this.value = value;
-		}
-
-		@Override
-		public double doubleValue() {
-			return delegate.doubleValue();
-		}
-
-		@Override
-		public float floatValue() {
-			return delegate.floatValue();
-		}
-
-		@Override
-		public int intValue() {
-			return delegate.intValue();
-		}
-
-		@Override
-		public long longValue() {
-			return delegate.longValue();
-		}
-
-		@Override
-		public String toString() {
-			return value;
-		}
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-
-            if (!(obj instanceof Number)) {
-                return false;
-            }
-            return obj.toString().equals(this.toString());
-        }
-
-        @Override
-        public int hashCode() {
-            return this.toString().hashCode();
-        }
-
-        public Number getDelegate() {
-          return delegate;
-        }
     }
 
     /**
@@ -316,12 +313,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return valueBoolean;
     }
 
-    public ColumnConfig setValueBoolean(Boolean valueBoolean) {
-        this.valueBoolean = valueBoolean;
-
-        return this;
-    }
-
     /**
      * Set the valueBoolean based on a given string.
      * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
@@ -329,19 +320,25 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
     public ColumnConfig setValueBoolean(String valueBoolean) {
-        valueBoolean = StringUtils.trimToNull(valueBoolean);
-        if (valueBoolean == null || valueBoolean.equalsIgnoreCase("null")) {
+        valueBoolean = StringUtil.trimToNull(valueBoolean);
+        if ((valueBoolean == null) || "null".equalsIgnoreCase(valueBoolean)) {
             this.valueBoolean = null;
         } else {
-            if (valueBoolean.equalsIgnoreCase("true") || valueBoolean.equals("1")) {
+            if ("true".equalsIgnoreCase(valueBoolean) || "1".equals(valueBoolean)) {
                 this.valueBoolean = true;
-            } else if (valueBoolean.equalsIgnoreCase("false") || valueBoolean.equals("0")) {
+            } else if ("false".equalsIgnoreCase(valueBoolean) || "0".equals(valueBoolean)) {
                 this.valueBoolean = false;
             } else {
                 this.valueComputed = new DatabaseFunction(valueBoolean);
             }
 
         }
+
+        return this;
+    }
+
+    public ColumnConfig setValueBoolean(Boolean valueBoolean) {
+        this.valueBoolean = valueBoolean;
 
         return this;
     }
@@ -361,24 +358,24 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public SequenceNextValueFunction getValueSequenceNext() {
+        return valueSequenceNext;
+    }
+
     public ColumnConfig setValueSequenceNext(SequenceNextValueFunction valueSequenceNext) {
         this.valueSequenceNext = valueSequenceNext;
 
         return this;
     }
 
-    public SequenceNextValueFunction getValueSequenceNext() {
-        return valueSequenceNext;
+    public SequenceCurrentValueFunction getValueSequenceCurrent() {
+        return valueSequenceCurrent;
     }
 
     public ColumnConfig setValueSequenceCurrent(SequenceCurrentValueFunction valueSequenceCurrent) {
         this.valueSequenceCurrent = valueSequenceCurrent;
 
         return this;
-    }
-
-    public SequenceCurrentValueFunction getValueSequenceCurrent() {
-        return valueSequenceCurrent;
     }
 
     /**
@@ -389,20 +386,18 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return valueDate;
     }
 
-    public ColumnConfig setValueDate(Date valueDate) {
-        this.valueDate = valueDate;
-
-        return this;
-    }
-
     /**
      * Set the date this column should be set to. Supports any of the date or datetime formats handled by {@link ISODateFormat}.
      * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a date.
      * If the string "null" is passed, it will set a null value.
+     * @param valueDate the Date Value to use (may be null or "null", or start with "now" or "today".
+     * @throws DateParseException if the columnType isn't supported for "now" or "today" values.
      */
-    public ColumnConfig setValueDate(String valueDate) {
-        if (valueDate == null || valueDate.equalsIgnoreCase("null")) {
+    public ColumnConfig setValueDate(String valueDate) throws DateParseException {
+        if ((valueDate == null) || "null".equalsIgnoreCase(valueDate)) {
             this.valueDate = null;
+        } else if (NowAndTodayUtil.isNowOrTodayFormat(valueDate)) {
+            this.valueDate = NowAndTodayUtil.doNowOrToday(valueDate, this.getType());
         } else {
             try {
                 this.valueDate = new ISODateFormat().parse(valueDate);
@@ -411,6 +406,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 this.valueComputed = new DatabaseFunction(valueDate);
             }
         }
+
+        return this;
+    }
+
+    public ColumnConfig setValueDate(Date valueDate) {
+        this.valueDate = valueDate;
 
         return this;
     }
@@ -447,12 +448,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public String getEncoding() {
         return encoding;
     }
-    
+
     public ColumnConfig setEncoding(String encoding) {
         this.encoding = encoding;
         return this;
     }
-    
+
     /**
      * Return the value from whatever setValue* function was called. Will return null if none were set.
      */
@@ -479,7 +480,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return null;
     }
 
-
     /**
      * The String default value to assign to this column. If you do not want the default set by {@link #setDefaultValue(String)}
      * use a more specific function like {@link #getDefaultValueNumeric()} or the more generic {@link #getDefaultValueObject()}
@@ -500,19 +500,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-
     /**
      * Return the numeric value this column should default to.
      * @see #setDefaultValue(String)
      */
     public Number getDefaultValueNumeric() {
         return defaultValueNumeric;
-    }
-
-    public ColumnConfig setDefaultValueNumeric(Number defaultValueNumeric) {
-        this.defaultValueNumeric = defaultValueNumeric;
-
-        return this;
     }
 
     /**
@@ -523,7 +516,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * A special case is made for "GENERATED_BY_DEFAULT" which simply sets the ColumnConfig object to autoIncrement.
      */
     public ColumnConfig setDefaultValueNumeric(String defaultValueNumeric) {
-        if (defaultValueNumeric == null || defaultValueNumeric.equalsIgnoreCase("null")) {
+        if ((defaultValueNumeric == null) || "null".equalsIgnoreCase(defaultValueNumeric)) {
             this.defaultValueNumeric = null;
         } else {
             if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
@@ -544,6 +537,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public ColumnConfig setDefaultValueNumeric(Number defaultValueNumeric) {
+        this.defaultValueNumeric = defaultValueNumeric;
+
+        return this;
+    }
+
     /**
      * Return the date value this column should default to.
      * @see #setDefaultValue(String)
@@ -552,14 +551,20 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return defaultValueDate;
     }
 
+    public ColumnConfig setDefaultValueDate(Date defaultValueDate) {
+        this.defaultValueDate = defaultValueDate;
+
+        return this;
+    }
+
     /**
      * Set the date this column should default to. Supports any of the date or datetime formats handled by {@link ISODateFormat}.
      * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a date.
      * If the string "null" or an empty string is passed, it will set a null value.
      */
     public ColumnConfig setDefaultValueDate(String defaultValueDate) {
-        defaultValueDate = StringUtils.trimToNull(defaultValueDate);
-        if (defaultValueDate == null || defaultValueDate.equalsIgnoreCase("null")) {
+        defaultValueDate = StringUtil.trimToNull(defaultValueDate);
+        if ((defaultValueDate == null) || "null".equalsIgnoreCase(defaultValueDate)) {
             this.defaultValueDate = null;
         } else {
             try {
@@ -573,24 +578,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public ColumnConfig setDefaultValueDate(Date defaultValueDate) {
-        this.defaultValueDate = defaultValueDate;
-
-        return this;
-    }
-
     /**
      * Return the boolean value this column should default to.
      * @see #setDefaultValue(String)
      */
     public Boolean getDefaultValueBoolean() {
         return defaultValueBoolean;
-    }
-
-    public ColumnConfig setDefaultValueBoolean(Boolean defaultValueBoolean) {
-        this.defaultValueBoolean = defaultValueBoolean;
-
-        return this;
     }
 
     /**
@@ -600,19 +593,25 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
     public ColumnConfig setDefaultValueBoolean(String defaultValueBoolean) {
-        defaultValueBoolean = StringUtils.trimToNull(defaultValueBoolean);
-        if (defaultValueBoolean == null || defaultValueBoolean.equalsIgnoreCase("null")) {
+        defaultValueBoolean = StringUtil.trimToNull(defaultValueBoolean);
+        if ((defaultValueBoolean == null) || "null".equalsIgnoreCase(defaultValueBoolean)) {
             this.defaultValueBoolean = null;
         } else {
-            if (defaultValueBoolean.equalsIgnoreCase("true") || defaultValueBoolean.equals("1")) {
+            if ("true".equalsIgnoreCase(defaultValueBoolean) || "1".equals(defaultValueBoolean)) {
                 this.defaultValueBoolean = true;
-            } else if (defaultValueBoolean.equalsIgnoreCase("false") || defaultValueBoolean.equals("0")) {
+            } else if ("false".equalsIgnoreCase(defaultValueBoolean) || "0".equals(defaultValueBoolean)) {
                 this.defaultValueBoolean = false;
             } else {
                 this.defaultValueComputed = new DatabaseFunction(defaultValueBoolean);
             }
 
         }
+
+        return this;
+    }
+
+    public ColumnConfig setDefaultValueBoolean(Boolean defaultValueBoolean) {
+        this.defaultValueBoolean = defaultValueBoolean;
 
         return this;
     }
@@ -708,12 +707,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * Returns true if any of the setDefaultValue* functions have had a non-null value set
      */
     public boolean hasDefaultValue() {
-        return this.getDefaultValue() != null
-                || this.getDefaultValueBoolean() != null
-                || this.getDefaultValueDate() != null
-                || this.getDefaultValueNumeric() != null
-                || this.getDefaultValueComputed() != null
-                || this.getDefaultValueSequenceNext() != null;
+        return (this.getDefaultValue() != null) || (this.getDefaultValueBoolean() != null) || (this
+            .getDefaultValueDate() != null) || (this.getDefaultValueNumeric() != null) || (this
+            .getDefaultValueComputed() != null) || (this.getDefaultValueSequenceNext() != null);
     }
 
     /**
@@ -725,6 +721,33 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     public ColumnConfig setRemarks(String remarks) {
         this.remarks = remarks;
+        return this;
+    }
+
+    public Boolean getDescending() {
+        return descending;
+    }
+
+    public ColumnConfig setDescending(Boolean descending) {
+        this.descending = descending;
+        return this;
+    }
+
+    public Boolean getDefaultOnNull() {
+        return defaultOnNull;
+    }
+
+    public ColumnConfig setDefaultOnNull(Boolean defaultOnNull) {
+        this.defaultOnNull = defaultOnNull;
+        return this;
+    }
+
+    public String getGenerationType() {
+        return generationType;
+    }
+
+    public ColumnConfig setGenerationType(String generationType) {
+        this.generationType = generationType;
         return this;
     }
 
@@ -742,7 +765,15 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         return this;
     }
-    
+
+    public String getDefaultValueConstraintName() {
+        return defaultValueConstraintName;
+    }
+
+    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
+        this.defaultValueConstraintName = defaultValueConstraintName;
+    }
+
     @Override
     public SerializationType getSerializableFieldType(String field) {
         return SerializationType.NAMED_FIELD;
@@ -755,6 +786,13 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        for (ParsedNode child : parsedNode.getChildren()) {
+            if (!ObjectUtil.hasProperty(this, child.getName())) {
+                throw new ParsedNodeException("Unexpected node: "+child.getName());
+            }
+        }
+
+
         name = parsedNode.getChildValue(null, "name", String.class);
         computed = parsedNode.getChildValue(null, "computed", Boolean.class);
         type = parsedNode.getChildValue(null, "type", String.class);
@@ -763,13 +801,14 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         startWith = parsedNode.getChildValue(null, "startWith", BigInteger.class);
         incrementBy = parsedNode.getChildValue(null, "incrementBy", BigInteger.class);
         remarks = parsedNode.getChildValue(null, "remarks", String.class);
+        descending = parsedNode.getChildValue(null, "descending", Boolean.class);
 
 
         value = parsedNode.getChildValue(null, "value", String.class);
         if (value == null) {
-            value = StringUtils.trimToNull((String) parsedNode.getValue());
+            value = StringUtil.trimToNull((String) parsedNode.getValue());
         }
-        
+
         setValueNumeric(parsedNode.getChildValue(null, "valueNumeric", String.class));
 
         try {
@@ -794,8 +833,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         }
 
 
+        defaultValueConstraintName = parsedNode.getChildValue(null, "defaultValueConstraintName", String.class);
+
         defaultValue = parsedNode.getChildValue(null, "defaultValue", String.class);
-        
+
         setDefaultValueNumeric(parsedNode.getChildValue(null, "defaultValueNumeric", String.class));
 
         try {
@@ -813,6 +854,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             defaultValueSequenceNext = new SequenceNextValueFunction(defaultValueSequenceNextString);
         }
 
+        defaultOnNull = parsedNode.getChildValue(null, "defaultOnNull", Boolean.class);
+        generationType = parsedNode.getChildValue(null, "generationType", String.class);
+
         loadConstraints(parsedNode.getChild(null, "constraints"));
     }
 
@@ -823,32 +867,101 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setNullable(constraintsNode.getChildValue(null, "nullable", Boolean.class));
+        constraints.setNotNullConstraintName(constraintsNode.getChildValue(null, "notNullConstraintName", String.class));
         constraints.setPrimaryKey(constraintsNode.getChildValue(null, "primaryKey", Boolean.class));
         constraints.setPrimaryKeyName(constraintsNode.getChildValue(null, "primaryKeyName", String.class));
         constraints.setPrimaryKeyTablespace(constraintsNode.getChildValue(null, "primaryKeyTablespace", String.class));
         constraints.setReferences(constraintsNode.getChildValue(null, "references", String.class));
+        constraints.setReferencedTableCatalogName(constraintsNode.getChildValue(null, "referencedTableCatalogName", String.class));
+        constraints.setReferencedTableSchemaName(constraintsNode.getChildValue(null, "referencedTableSchemaName", String.class));
         constraints.setReferencedTableName(constraintsNode.getChildValue(null, "referencedTableName", String.class));
         constraints.setReferencedColumnNames(constraintsNode.getChildValue(null, "referencedColumnNames", String.class));
         constraints.setUnique(constraintsNode.getChildValue(null, "unique", Boolean.class));
         constraints.setUniqueConstraintName(constraintsNode.getChildValue(null, "uniqueConstraintName", String.class));
+        constraints.setNotNullConstraintName(constraintsNode.getChildValue(null, "notNullConstraintName", String.class));
         constraints.setCheckConstraint(constraintsNode.getChildValue(null, "checkConstraint", String.class));
         constraints.setDeleteCascade(constraintsNode.getChildValue(null, "deleteCascade", Boolean.class));
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));
         constraints.setInitiallyDeferred(constraintsNode.getChildValue(null, "initiallyDeferred", Boolean.class));
         constraints.setDeferrable(constraintsNode.getChildValue(null, "deferrable", Boolean.class));
+        constraints.setShouldValidateNullable(constraintsNode.getChildValue(null, "validateNullable", Boolean.class));
+        constraints.setShouldValidateUnique(constraintsNode.getChildValue(null, "validateUnique", Boolean.class));
+        constraints.setShouldValidatePrimaryKey(constraintsNode.getChildValue(null, "validatePrimaryKey", Boolean.class));
+        constraints.setShouldValidateForeignKey(constraintsNode.getChildValue(null, "validateForeignKey", Boolean.class));
         setConstraints(constraints);
-
     }
 
-    public static ColumnConfig[] arrayFromNames(String names) {
-        if (names == null) {
-            return null;
+    public static class ValueNumeric extends Number {
+        private static final long serialVersionUID = 1381154777956917462L;
+
+        private final Number delegate;
+        private final String value;
+
+        private ValueNumeric(final String value, final Number numeric) {
+            this.delegate = numeric;
+            this.value = value;
         }
-        List<String> nameArray = StringUtils.splitAndTrim(names, ",");
-        ColumnConfig[] returnArray = new ColumnConfig[nameArray.size()];
-        for (int i=0; i<nameArray.size(); i++) {
-            returnArray[i] = new ColumnConfig().setName(nameArray.get(i));
+
+        private static ValueNumeric of(Locale locale, String value) throws ParseException {
+            final Number parsedNumber = NumberFormat.getInstance(locale)
+                    .parse(value);
+            return new ValueNumeric(value, parsedNumber);
         }
-        return returnArray;
+
+        @Override
+        public double doubleValue() {
+            return delegate.doubleValue();
+        }
+
+        @Override
+        public float floatValue() {
+            return delegate.floatValue();
+        }
+
+        @Override
+        public int intValue() {
+            return delegate.intValue();
+        }
+
+        @Override
+        public long longValue() {
+            return delegate.longValue();
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            if (!(obj instanceof Number)) {
+                return false;
+            }
+            return obj.toString().equals(this.toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return this.toString().hashCode();
+        }
+
+        public Number getDelegate() {
+            return delegate;
+        }
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        Object o = ReflectionSerializer.getInstance().getValue(this, field);
+        if (field.equals("valueDate") || field.equals("defaultValueDate")) {
+            return new ISODateFormat().format((Date)o);
+        } else {
+            return o;
+        }
     }
 }

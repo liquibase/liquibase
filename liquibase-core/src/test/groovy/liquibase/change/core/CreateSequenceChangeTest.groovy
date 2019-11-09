@@ -2,9 +2,10 @@ package liquibase.change.core
 
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.sqlgenerator.SqlGeneratorFactory
 import spock.lang.Unroll
 
 public class CreateSequenceChangeTest extends StandardChangeTest {
@@ -16,6 +17,25 @@ public class CreateSequenceChangeTest extends StandardChangeTest {
 
         then:
         "Sequence SEQ_NAME created" == change.getConfirmationMessage()
+    }
+
+    def "checkWarnings"() {
+        when:
+        SqlGeneratorFactory.reset();
+        def database = new MockDatabase()
+        database.supportsSequences = false;
+
+        def change = new CreateSequenceChange()
+        change.sequenceName = "seq_my_table"
+
+        then: "without errors"
+        def errors = change.validate(database)
+        assert !errors.hasErrors()
+
+        def warnings = change.warn(database)
+        assert warnings.hasWarnings()
+        assert warnings.messages.size() == 1
+        assert warnings.messages.get(0) == 'liquibase.statement.core.CreateSequenceStatement is not supported on mock, but createSequence will still execute'
     }
 
     @Unroll

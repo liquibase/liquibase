@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
-        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -91,7 +89,8 @@
     <changeSet id="defaultValueTest-1" author="nvoxland">
         <preConditions onFail="MARK_RAN">
             <not><dbms type="derby"/></not>
-            <not><dbms type="mysql"/></not> <!-- fails on set default now() -->
+            <not><dbms type="mysql"/></not> <!-- @todo: fails on set default now() -->
+            <not><dbms type="mariadb"/></not>
         </preConditions>
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
@@ -102,6 +101,8 @@
             <column name="timeA" type="time"/>
             <column name="datetimeA" type="datetime"/>
             <column name="datetimeB" type="datetime"/>
+            <column name="timestampA" type="timestamp"/>
+            <column name="timestampB" type="timestamp"/>
             <column name="computedDate" type="datetime"/>
         </createTable>
 
@@ -112,6 +113,10 @@
         <addDefaultValue tableName="defaultValueTest" columnName="timeA" defaultValueDate="14:15:16" columnDataType="time" />
         <addDefaultValue tableName="defaultValueTest" columnName="datetimeA" defaultValueDate="2007-08-09T10:11:12" columnDataType="datetime" />
         <addDefaultValue tableName="defaultValueTest" columnName="datetimeB" defaultValueDate="2007-08-09 10:11:12" columnDataType="datetime" />
+        <addDefaultValue tableName="defaultValueTest" columnName="timestampA" defaultValueDate="2007-08-09T10:11:12.123"
+                         columnDataType="timestamp"/>
+        <addDefaultValue tableName="defaultValueTest" columnName="timestampB" defaultValueDate="2007-08-09 10:11:12.12"
+                         columnDataType="timestamp"/>
         <addDefaultValue tableName="defaultValueTest" columnName="computedDate" defaultValueComputed="current_datetime" columnDataType="datetime" />
 
         <insert tableName="defaultValueTest">
@@ -129,6 +134,8 @@
             <column name="timeA" type="time" defaultValueDate="14:15:16"/>
             <column name="datetimeA" type="datetime" defaultValueDate="2007-08-09T10:11:12"/>
             <column name="datetimeB" type="datetime" defaultValueDate="2007-08-09 10:11:12"/>
+            <column name="timestampA" type="timestamp" defaultValueDate="2007-08-09T10:11:12.123"/>
+            <column name="timestampB" type="timestamp" defaultValueDate="2007-08-09 10:11:12.12"/>
         </createTable>
 
         <insert tableName="defaultValueTest2">
@@ -167,6 +174,24 @@
         <createIndex indexName="idx_compoundtest" tableName="compoundIndexTest">
             <column name="firstname"/>
             <column name="lastname"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird">
+        <createTable tableName="indexWithAscDescColumns">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="column1ForAsc" type="varchar(10)"/>
+            <column name="column1ForDesc" type="varchar(10)"/>
+            <column name="column2ForAsc" type="int"/>
+            <column name="column2ForDesc" type="int"/>
+        </createTable>
+        <createIndex indexName="idx_indexWithAscDescColumns" tableName="indexWithAscDescColumns">
+            <column name="column1ForAsc"/>
+            <column name="column1ForDesc" descending="true"/>
+            <column name="column2ForAsc"/>
+            <column name="column2ForDesc" descending="true"/>
         </createIndex>
     </changeSet>
 
@@ -229,10 +254,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <!--<createIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE" tablespace="liquibase2">-->
-            <!--<column name="id"/>-->
-        <!--</createIndex>-->
-        <!--<dropIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE"/>-->
+
         <addPrimaryKey tableName="TABLESPACE_TEST_TABLE" columnNames="id" constraintName="pk_tablespacetest"
                        tablespace="liquibase2"/>
         <addUniqueConstraint tableName="TABLESPACE_TEST_TABLE" columnNames="username" constraintName="uq_tbsptest_usern"
@@ -286,7 +308,7 @@
 
     <changeSet id="standardTypes-test" author="nvoxland">
         <createTable tableName="standardTypesTest">
-            <column name="timestampColumn" type="java.sql.Types.TIMESTAMP"/>
+            <column name="timestampColumn" type="java.sql.Types.TIMESTAMP" />
             <column name="varcharColumn" type="java.sql.Types.VARCHAR(255)"/>
             <column name="blobColumn" type="java.sql.Types.BLOB"/>
             <column name="booleanColumn" type="java.sql.Types.BOOLEAN"/>
@@ -448,18 +470,6 @@
             </column>
         </createTable>
     </changeSet>
-    <!--changeSet id="addColumnNamedPK" author="nvoxland">
-        <createTable tableName="addColumnNamedPK">
-            <column name="id" type="int">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-        <addColumn tableName="addColumnNamedPK">
-            <column name="pk" type="int">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_pktest2"/>
-            </column>
-        </addColumn>
-    </changeSet-->
 
     <changeSet id="tableWithRemarks" author="nvoxland">
         <createTable tableName="tableWithRemarks" remarks="some test remarks">
@@ -623,23 +633,6 @@
         </preConditions>
     </changeSet>
 
-    <!--<changeSet id="primaryKeyPrecondition" author="nvoxland">-->
-        <!--<preConditions>-->
-            <!--<primaryKeyExists primaryKeyName="pk_pktest1"/>-->
-        <!--</preConditions>-->
-    <!--</changeSet>-->
-
-
-    <!--<changeSet id="viewsetup" author="nvoxland">-->
-        <!--<sql>create view csvview as select * from csvdata</sql>-->
-    <!--</changeSet>-->
-
-    <!--<changeSet id="viewPrecondition" author="nvoxland">-->
-        <!--<preConditions>-->
-            <!--<viewExists viewName="csvview"/>-->
-        <!--</preConditions>-->
-    <!--</changeSet>-->
-
     <changeSet id="replaceSqlTest" author="nvoxland">
         <createTable tableName="replaceTest">
             <column name="id" type="int"/>
@@ -655,10 +648,6 @@
             <append value=" engine innodb"/>
         </modifySql>
     </changeSet>
-
-    <!--<changeSet id="stopTest" author="nvoxland">-->
-        <!--<stop>Testing the stop command</stop>-->
-    <!--</changeSet>-->
 
     <includeAll path="changelogs/common/pathincluded/"/>
 
@@ -802,40 +791,8 @@
             <column name="col2" type="java.sql.Types.NVARCHAR(10)"/>
         </createTable>
     </changeSet>
-    <!--<changeSet id="modColTest" author="nvoxland">-->
-        <!--<ext:modifyColumn tableName="datatable">-->
-            <!--<column name="col" type="varchar(300)"/>-->
-        <!--</ext:modifyColumn>-->
-    <!--</changeSet>-->
 
     <include file="changelogs/common/sqlstyle/formatted.changelog.sql"/>
-
-    <!-- databases have too many limitations on modifying primary key columns to successfully test -->
-    <!--<changeSet id="ai1" author="lujop">-->
-        <!--<createTable tableName="autoIncrementPreserving">-->
-            <!--<column name="id" type="int">-->
-                <!--<constraints primaryKey="true" nullable="false"/>-->
-            <!--</column>-->
-            <!--<column name="description" type="varchar(50)"/>-->
-        <!--</createTable>-->
-    <!--</changeSet>-->
-
-    <!--<changeSet id="ai2" author="lujop">-->
-        <!--<modifyDataType tableName="autoIncrementPreserving" columnName="id" newDataType="bigint"/>-->
-    <!--</changeSet>-->
-
-    <!--<changeSet id="ai3" author="lujop">-->
-        <!--<insert tableName="autoIncrementPreserving" >-->
-             <!--&lt;!&ndash;If we can add with only description is that autoincrement is preserved in last modifyType&ndash;&gt;-->
-            <!--<column name="description" value="prova"/>-->
-        <!--</insert>-->
-    <!--</changeSet>-->
-
-    <!--<changeSet id="executeComandTest" author="nvoxland">-->
-        <!--<executeCommand executable="/cygwin/bin/echo.exe">-->
-            <!--<arg value="hello from cygwin"/>-->
-        <!--</executeCommand>-->
-    <!--</changeSet>-->
 
     <changeSet id="commentTest2" author="nvoxland">
         <sql>
@@ -1042,7 +999,7 @@
 
     <sql>
       <![CDATA[  
-	    insert into testutf8insert (stringvalue) values ('€');
+        insert into testutf8insert (stringvalue) values ('€');
         insert into testutf8insert (stringvalue) values ('£');
         ]]>
     </sql>
@@ -1092,6 +1049,73 @@
         <preConditions>
             <not>
                 <foreignKeyConstraintExists foreignKeyTableName="some_table" foreignKeyName="fk_some_key"/>
+            </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="timestamp_column_precisions3to6" author="abuschka">
+        <comment>Test if we (and the JDBC driver) correctly fetch the number of fractional positions
+            in a TIMESTAMP column for databases that support it.</comment>
+        <createTable tableName="test_timestamp_fractions">
+            <column name="timestampColumnDefault" type="timestamp" />
+            <column name="timestampColumnPrec3" type="timestamp(3)" />
+            <column name="timestampColumnPrec6" type="timestamp(6)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="timestamp_column_precision9" author="abuschka"
+               dbms="db2,derby,firebird,h2,hsql,informix,mssql,oracle,postgres,sqlite,asany,sybase">
+        <comment>Test if we (and the JDBC driver) correctly support TIMESTAMP columns with a extra-large precision
+            of 9 for supported DBMS.
+        </comment>
+        <addColumn tableName="test_timestamp_fractions">
+            <column name="timestampColumnPrec9" type="timestamp(9)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="windows_execute_command_test" author="abuschka">
+        <executeCommand executable="ping.exe" os="Windows Vista, Windows 7, Windows 8, Windows 8.1, Windows 10">
+            <arg value="127.0.0.1"/>
+            <arg value="-n"/>
+            <arg value="1"/>
+        </executeCommand>
+        <executeCommand executable="/bin/ls" os="Linux, Mac OS X, SunOS, FreeBSD"/>
+        <executeCommand executable="/usr/bin/ls" os="SunOS"/>
+    </changeSet>
+
+    <changeSet id="drop_all_foreign_keys" author="abuschka" dbms="!sqlite">
+        <createTable tableName="father_table1">
+            <column name="some_key" type="int">
+                <constraints primaryKey="true" primaryKeyName="pk_father1"/>
+            </column>
+            <column name="some_value" type="varchar(200)"/>
+        </createTable>
+        <createTable tableName="father_table2">
+            <column name="some_key" type="int">
+                <constraints primaryKey="true" primaryKeyName="pk_father2"/>
+            </column>
+            <column name="some_value" type="varchar(200)"/>
+        </createTable>
+        <createTable tableName="child_table">
+            <column name="ref1" type="int">
+                <constraints foreignKeyName="fk_ref1" referencedTableName="father_table1"
+                             referencedColumnNames="some_key"/>
+            </column>
+            <column name="ref2" type="int">
+                <constraints foreignKeyName="fk_ref2" referencedTableName="father_table2"
+                             referencedColumnNames="some_key"/>
+            </column>
+        </createTable>
+        <dropAllForeignKeyConstraints baseTableName="child_table"/>
+    </changeSet>
+
+    <changeSet id="verify_drop_all_foreign_keys" author="abuschka" dbms="!sqlite">
+        <preConditions>
+            <not>
+                <or>
+                    <foreignKeyConstraintExists foreignKeyName="fk_ref1" foreignKeyTableName="child_table"/>
+                    <foreignKeyConstraintExists foreignKeyName="fk_ref2" foreignKeyTableName="child_table"/>
+                </or>
             </not>
         </preConditions>
     </changeSet>

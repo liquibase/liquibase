@@ -1,9 +1,9 @@
 package liquibase.parser;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializer;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 
@@ -11,13 +11,13 @@ public class NamespaceDetailsFactory {
 
     private static NamespaceDetailsFactory instance;
 
-    private List<NamespaceDetails> namespaceDetails = new ArrayList<NamespaceDetails>();
+    private List<NamespaceDetails> namespaceDetails = new ArrayList<>();
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 
-    public static NamespaceDetailsFactory getInstance() {
+    public static synchronized NamespaceDetailsFactory getInstance() {
         if (instance == null) {
             instance = new NamespaceDetailsFactory();
         }
@@ -26,12 +26,9 @@ public class NamespaceDetailsFactory {
     }
 
     private NamespaceDetailsFactory() {
-        Class<? extends NamespaceDetails>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(NamespaceDetails.class);
-
-            for (Class<? extends NamespaceDetails> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (NamespaceDetails details : Scope.getCurrentScope().getServiceLocator().findInstances(NamespaceDetails.class)) {
+                register(details);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -44,7 +41,7 @@ public class NamespaceDetailsFactory {
     }
 
     public NamespaceDetails getNamespaceDetails(LiquibaseParser parser, String namespace) {
-        SortedSet<NamespaceDetails> validNamespaceDetails = new TreeSet<NamespaceDetails>(new SerializerNamespaceDetailsComparator());
+        SortedSet<NamespaceDetails> validNamespaceDetails = new TreeSet<>(new SerializerNamespaceDetailsComparator());
 
         for (NamespaceDetails details : namespaceDetails) {
             if (details.supports(parser, namespace)) {
@@ -53,14 +50,14 @@ public class NamespaceDetailsFactory {
         }
 
         if (validNamespaceDetails.isEmpty()) {
-            LogFactory.getInstance().getLog().debug("No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
         }
 
         return validNamespaceDetails.iterator().next();
     }
 
     public NamespaceDetails getNamespaceDetails(LiquibaseSerializer serializer, String namespace) {
-        SortedSet<NamespaceDetails> validNamespaceDetails = new TreeSet<NamespaceDetails>(new SerializerNamespaceDetailsComparator());
+        SortedSet<NamespaceDetails> validNamespaceDetails = new TreeSet<>(new SerializerNamespaceDetailsComparator());
 
         for (NamespaceDetails details : namespaceDetails) {
             if (details.supports(serializer, namespace)) {
@@ -69,7 +66,7 @@ public class NamespaceDetailsFactory {
         }
 
         if (validNamespaceDetails.isEmpty()) {
-            LogFactory.getInstance().getLog().debug("No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
         }
 
         return validNamespaceDetails.iterator().next();

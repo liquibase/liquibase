@@ -7,4 +7,9 @@ public class MockSqlStatement implements SqlStatement {
     public boolean skipOnUnsupported() {
         return false;
     }
+
+    @Override
+    public boolean continueOnError() {
+        return false;
+    }
 }

@@ -12,7 +12,10 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
     private BigInteger incrementBy;
     private BigInteger maxValue;
     private BigInteger minValue;
+    private BigInteger cacheSize;
+    private Boolean cycle;
     private Boolean ordered;
+    private String dataType;
 
     public AlterSequenceStatement(String catalogName, String schemaName, String sequenceName) {
         this.catalogName = catalogName;
@@ -70,6 +73,33 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
 
     public AlterSequenceStatement setOrdered(Boolean ordered) {
         this.ordered = ordered;
+        return this;
+    }
+
+    public BigInteger getCacheSize() {
+        return cacheSize;
+    }
+
+    public AlterSequenceStatement setCacheSize(BigInteger cacheSize) {
+        this.cacheSize = cacheSize;
+        return this;
+    }
+
+    public Boolean getCycle() {
+        return cycle;
+    }
+
+    public AlterSequenceStatement setCycle(Boolean cycle) {
+        this.cycle = cycle;
+        return this;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public AlterSequenceStatement setDataType(String dataType) {
+        this.dataType = dataType;
         return this;
     }
 }

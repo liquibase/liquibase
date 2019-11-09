@@ -8,15 +8,11 @@ import java.util.Date;
 public class ISODateFormat {
 
     private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
-    private SimpleDateFormat dateTimeFormatWithDecimal = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_DECIMAL);
     private SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
-    private SimpleDateFormat dateTimeFormatWithSpaceAndDecimal = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE_AND_DECIMAL);
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
-    private static final String DATE_TIME_FORMAT_STRING_WITH_DECIMAL = "yyyy-MM-dd'T'HH:mm:ss.SSS";
-    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE_AND_DECIMAL = "yyyy-MM-dd HH:mm:ss.SSS";
 
 
     public String format(java.sql.Date date) {
@@ -28,7 +24,20 @@ public class ISODateFormat {
     }
 
     public String format(java.sql.Timestamp date) {
-        return dateTimeFormatWithDecimal.format(date);
+        StringBuilder sb = new StringBuilder(dateTimeFormat.format(date));
+        int nanos = date.getNanos();
+        if (nanos != 0) {
+            String nanosString = String.format("%09d", nanos);
+            int lastNotNullIndex = 8;
+            for (; lastNotNullIndex > 0; lastNotNullIndex--) {
+                if (nanosString.charAt(lastNotNullIndex) != '0') {
+                    break;
+                }
+            }
+            sb.append('.');
+            sb.append(nanosString.substring(0, lastNotNullIndex + 1));
+        }
+        return sb.toString();
     }
 
     public String format(Date date) {
@@ -41,30 +50,43 @@ public class ISODateFormat {
             return format(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return format(((java.sql.Timestamp) date));
+        } else if (date instanceof java.util.Date) {
+            return format(new java.sql.Timestamp(date.getTime()));
         } else {
             throw new RuntimeException("Unknown type: "+date.getClass().getName());
         }
     }
 
     public Date parse(String dateAsString) throws ParseException {
-        SimpleDateFormat dateTimeFormat = this.dateTimeFormat;
-
-        if (dateAsString.contains(".") && dateAsString.contains(" ")) {
-            dateTimeFormat = this.dateTimeFormatWithSpaceAndDecimal;
-        } else if (dateAsString.contains(".")) {
-            dateTimeFormat = this.dateTimeFormatWithDecimal;
-        } else if (dateAsString.contains(" ")) {
-            dateTimeFormat = this.dateTimeFormatWithSpace;
-        }
-
-        if (dateAsString.length() != dateFormat.toPattern().length() && dateAsString.length() != timeFormat.toPattern().length()) { //subtract 2 to not count the 's
-            return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
-        } else {
-            if (dateAsString.indexOf(':') > 0) {
-                return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
+        int length = dateAsString.length();
+        switch (length) {
+        case 8:
+            return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
+        case 10:
+            return new java.sql.Date(dateFormat.parse(dateAsString).getTime());
+        case 19:
+            if (dateAsString.contains(" ")) {
+                return new java.sql.Timestamp(dateTimeFormatWithSpace.parse(dateAsString).getTime());
             } else {
-                return new java.sql.Date(dateFormat.parse(dateAsString).getTime());
+                return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
+        default:
+            if ((length < 19) || (dateAsString.charAt(19) != '.')) {
+                throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
+            }
+            long time = 0;
+            if (dateAsString.contains(" ")) {
+                time = dateTimeFormatWithSpace.parse(dateAsString.substring(0, 19)).getTime();
+            } else {
+                time = dateTimeFormat.parse(dateAsString.substring(0, 19)).getTime();
+            }
+            int nanos = Integer.parseInt(dateAsString.substring(20));
+            for (; length < 29; length++) {
+                nanos *= 10;
+            }
+            java.sql.Timestamp timestamp = new java.sql.Timestamp(time);
+            timestamp.setNanos(nanos);
+            return timestamp;
         }
     }
 }

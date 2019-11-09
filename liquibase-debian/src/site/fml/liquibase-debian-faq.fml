@@ -58,7 +58,7 @@
         How to remove liquibase ?
       </question>
       <answer>
-        <p>Just : 
+        <p>Just :
             <source>sudo apt-get remove liquibase</source>
         </p>
       </answer>
@@ -68,7 +68,7 @@
         How to upgrade or downgrade liquibase ?
       </question>
       <answer>
-        <p>Just : 
+        <p>Just :
             <source>sudo dpkg -i target/liquibase-debian_${version}_all.deb</source>
         </p>
       </answer>

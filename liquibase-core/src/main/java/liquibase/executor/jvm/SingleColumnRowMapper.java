@@ -1,14 +1,10 @@
 package liquibase.executor.jvm;
 
-import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
 import liquibase.util.JdbcUtils;
 import liquibase.util.NumberUtils;
+
+import java.math.BigDecimal;
+import java.sql.*;
 
 /**
  * RowMapper implementation that converts a single column into
@@ -76,7 +72,7 @@ class SingleColumnRowMapper implements RowMapper {
 
         // Extract column value from JDBC ResultSet
         Object result = getColumnValue(rs, 1, this.requiredType);
-        if (result != null && this.requiredType != null && !this.requiredType.isInstance(result)) {
+        if ((result != null) && (this.requiredType != null) && !this.requiredType.isInstance(result)) {
             // Extracted value does not match already: try to convert it.
             try {
                 return convertValueToRequiredType(result, this.requiredType);
@@ -163,7 +159,7 @@ class SingleColumnRowMapper implements RowMapper {
 
             // Perform was-null check if demanded (for results that the
             // JDBC driver returns as primitives).
-            if (wasNullCheck && value != null && rs.wasNull()) {
+            if (wasNullCheck && (value != null) && rs.wasNull()) {
                 value = null;
             }
             return value;

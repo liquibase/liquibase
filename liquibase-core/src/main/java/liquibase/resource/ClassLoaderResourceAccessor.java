@@ -1,144 +1,138 @@
 package liquibase.resource;
 
-import liquibase.util.FileUtil;
-import liquibase.util.StringUtils;
+import liquibase.Scope;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.Logger;
+import liquibase.util.CollectionUtil;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.jar.Manifest;
 
 /**
- * An implementation of {@link liquibase.resource.ResourceAccessor} that wraps a class loader.
+ * An implementation of {@link FileSystemResourceAccessor} that builds up the file roots based on the passed {@link ClassLoader}.
+ * If you are using a ClassLoader that isn't based on local files, you will need to use a different {@link ResourceAccessor} implementation.
+ *
+ * @see OSGiResourceAccessor for OSGi-based classloaders
  */
-public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
+public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
 
-    private ClassLoader classLoader;
-    public ClassLoaderResourceAccessor() {
-        this.classLoader = getClass().getClassLoader();
-        init(); //init needs to be called after classloader is set
-    }
+    public ClassLoaderResourceAccessor(ClassLoader... classLoaders) {
+        try {
+            for (ClassLoader classLoader : CollectionUtil.createIfNull(classLoaders)) {
+                for (Path path : findRootPaths(classLoader)) {
+                    addRootPath(path);
+                }
+                Enumeration<URL> manifests = classLoader.getResources("META-INF/MANIFEST.MF");
+                while (manifests.hasMoreElements()) {
+                    URL manifestUrl = manifests.nextElement();
 
-    public ClassLoaderResourceAccessor(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-        init(); //init needs to be called after classloader is set
-    }
+                    File jarFile = new File(manifestUrl.getFile()
+                            .replaceFirst("^jar:", "")
+                            .replaceFirst("^file:/", "")
+                            .replaceFirst("!.*", ""));
 
-    @Override
-    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
-        Enumeration<URL> resources = classLoader.getResources(path);
-        if (resources == null || !resources.hasMoreElements()) {
-            return null;
-        }
-        Set<String> seenUrls = new HashSet<String>();
-        Set<InputStream> returnSet = new HashSet<InputStream>();
-        while (resources.hasMoreElements()) {
-            URL url = resources.nextElement();
-            if (seenUrls.contains(url.toExternalForm())) {
-                continue;
-            }
-            seenUrls.add(url.toExternalForm());
-            InputStream resourceAsStream = url.openStream();
-            if (resourceAsStream != null) {
-                returnSet.add(resourceAsStream);
-            }
-        }
 
-        return returnSet;
-    }
+                    Manifest manifest = new Manifest(manifestUrl.openStream());
+                    String classpath = manifest.getMainAttributes().getValue("Class-Path");
+                    if (classpath != null) {
+                        for (String entry : classpath.split("\\s+")) {
+                            entry = entry.replaceFirst("file:", "");
+                            File entryFile = new File(entry);
 
-    @Override
-    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        path = convertToPath(relativeTo, path);
+                            if (entryFile.exists()) {
+                                addRootPath(entryFile.toPath());
+                            } else {
+                                Scope.getCurrentScope().getLog(getClass()).info("Missing file " + entryFile.getAbsolutePath() + " referenced in " + jarFile.getAbsolutePath() + "!/META-INF/MANIFEST.MF");
+                            }
+                        }
 
-        Enumeration<URL> fileUrls = classLoader.getResources(path);
-
-        Set<String> returnSet = new HashSet<String>();
-
-        if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:"))) {
-            fileUrls = new Vector<URL>(Arrays.asList(new URL(path))).elements();
-        }
-
-        while (fileUrls.hasMoreElements()) {
-            URL fileUrl = fileUrls.nextElement();
-            if (!fileUrl.toExternalForm().startsWith("file:")) {
-                if (fileUrl.toExternalForm().startsWith("jar:file:")
-                        || fileUrl.toExternalForm().startsWith("wsjar:file:")
-                        || fileUrl.toExternalForm().startsWith("zip:")) {
-
-                    String file = fileUrl.getFile();
-                    String[] zipAndFile = file.split("!");
-                    String splitPath = zipAndFile[0];
-                    if (splitPath.matches("file:\\/[A-Za-z]:\\/.*")) {
-                        splitPath = splitPath.replaceFirst("file:\\/", "");
-                    } else {
-                        splitPath = splitPath.replaceFirst("file:", "");
                     }
-                    splitPath = URLDecoder.decode(splitPath, "UTF-8");
-                    File zipfile = new File(splitPath);
-
-
-                    File zipFileDir = FileUtil.unzip(zipfile);
-                    if (path.startsWith("classpath:")) {
-                        path = path.replaceFirst("classpath:", "");
-                    }
-                    if (path.startsWith("classpath*:")) {
-                        path = path.replaceFirst("classpath\\*:", "");
-                    }
-                    File dirInZip = new File(zipFileDir, zipAndFile[1]);
-                    if (!dirInZip.exists()) {
-                        dirInZip = new File(zipFileDir, path);
-                    }
-                    URI fileUri = dirInZip.toURI();
-                    fileUrl = fileUri.toURL();
                 }
             }
-
-            try {
-                File file = new File(fileUrl.toURI());
-                if (file.exists()) {
-                    getContents(file, recursive, includeFiles, includeDirectories, path, returnSet);
-                }
-            } catch (URISyntaxException e) {
-                //not a local file
-            } catch (IllegalArgumentException e) {
-                //not a local file
-            }
-
-            Enumeration<URL> resources = classLoader.getResources(path);
-
-            while (resources.hasMoreElements()) {
-                String url = resources.nextElement().toExternalForm();
-                url = url.replaceFirst("^\\Q" + path + "\\E", "");
-                returnSet.add(url);
-            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-
-        if (returnSet.size() == 0) {
-            return null;
-        }
-        return returnSet;
     }
 
-    @Override
-    public ClassLoader toClassLoader() {
-        return classLoader;
-    }
+    /**
+     * Called by constructor to create all the root paths from the given classloader.
+     * Works best if the passed classLoader is a {@link URLClassLoader} because it can get the root file/dirs directly.
+     * If it is not a URLClassLoader, it still attempts to find files by looking up base packages and MANIFEST.MF files.
+     * This may miss some roots, however, and so if you are not using a URLClassLoader consider using a custom subclass.
+     */
+    protected List<Path> findRootPaths(ClassLoader classLoader) throws Exception {
+        if (classLoader == null) {
+            return new ArrayList<>();
 
-    @Override
-    public String toString() {
-        String description;
+        }
+
+        Logger logger = Scope.getCurrentScope().getLog(getClass());
+
+        List<URL> returnUrls = new ArrayList<>();
         if (classLoader instanceof URLClassLoader) {
-            List<String> urls = new ArrayList<String>();
-            for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-                urls.add(url.toExternalForm());
-            }
-            description = StringUtils.join(urls, ",");
+            returnUrls.addAll(CollectionUtil.createIfNull(Arrays.asList(((URLClassLoader) classLoader).getURLs())));
         } else {
-            description = classLoader.getClass().getName();
-        }
-        return getClass().getName()+"("+ description +")";
+            logger.info("Found non-URL ClassLoader classloader " + classLoader.toString() + ". Liquibase will try to figure out now to load resources from it, some may be missed. Consider using a custom ClassLoaderResourceAccessor subclass.");
+            Set<String> seenUrls = new HashSet<>(); //need to track externalForm as a string to avoid java problem with URL.equals making a network call
 
+            Enumeration<URL> emptyPathUrls = classLoader.getResources("");
+            while (emptyPathUrls.hasMoreElements()) {
+                URL url = emptyPathUrls.nextElement();
+                if (seenUrls.add(url.toExternalForm())) {
+                    returnUrls.add(url);
+                }
+            }
+
+            Enumeration<URL> metaInfoPathUrls = classLoader.getResources("META-INF");
+            while (metaInfoPathUrls.hasMoreElements()) {
+                String originalUrl = metaInfoPathUrls.nextElement().toExternalForm();
+                String finalUrl = originalUrl.replaceFirst("/META-INF", "");
+                if (finalUrl.startsWith("jar:")) {
+                    if (finalUrl.endsWith("!")) {
+                        finalUrl = finalUrl.replaceFirst("^jar:", "").replaceFirst("!$", "");
+                    } else {
+                        logger.warning("ClassLoader URL " + finalUrl + " starts with jar: but does not end with !, don't knnow how to handle it. Skipping");
+                        continue;
+                    }
+                }
+
+                URL finalUrlObj = new URL(finalUrl);
+                if (seenUrls.add(finalUrlObj.toExternalForm())) {
+                    returnUrls.add(finalUrlObj);
+                }
+            }
+
+        }
+
+        List<Path> returnPaths = new ArrayList<>();
+        for (URL url : returnUrls) {
+            Path path = rootUrlToPath(url);
+            if (path != null) {
+                logger.fine("Found classloader root at " + path.toString());
+                returnPaths.add(path);
+            }
+        }
+        return returnPaths;
+    }
+
+    /**
+     * Converts the given URL to a Path. Used by {@link #findRootPaths(ClassLoader)} to convert classloader URLs to Paths to pass to {@link #addRootPath(Path)}.
+     *
+     * @return null if url cannot or should not be converted to a Path.
+     */
+    protected Path rootUrlToPath(URL url) {
+        String protocol = url.getProtocol();
+        switch (protocol) {
+            case "file":
+                return FileSystems.getDefault().getPath(url.getFile().replace("%20", " ").replaceFirst("/(\\w)\\:/", "$1:/"));
+            default:
+                Scope.getCurrentScope().getLog(getClass()).warning("Unknown protocol '" + protocol + "' for ClassLoaderResourceAccessor on " + url.toExternalForm());
+                return null;
+        }
     }
 }

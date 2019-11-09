@@ -8,19 +8,19 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
-public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGenerator {
+public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (PrimaryKey.class.isAssignableFrom(objectType)) {
@@ -41,9 +41,22 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
 
     @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+
+        //don't try to recreate PKs that differ in just clustered
+        Difference clusteredDiff = differences.getDifference("clustered");
+        if (clusteredDiff != null) {
+            if ((clusteredDiff.getReferenceValue() == null) || (clusteredDiff.getComparedValue() == null)) {
+                differences.removeDifference("clustered");
+            }
+        }
+        if (!differences.hasDifferences()) {
+            return new Change[0];
+        }
+
         PrimaryKey pk = (PrimaryKey) changedObject;
 
-        List<Change> returnList = new ArrayList<Change>();
+        List<Change> returnList = new ArrayList<>();
+
 
         DropPrimaryKeyChange dropPkChange = new DropPrimaryKeyChange();
         dropPkChange.setTableName(pk.getTable().getName());
@@ -56,7 +69,7 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
 
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = pk.getBackingIndex();
-            if (backingIndex != null && backingIndex.getName() != null) {
+            if ((backingIndex != null) && (backingIndex.getName() != null)) {
                 Change[] indexChanges = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
                 if (indexChanges != null) {
                     returnList.addAll(Arrays.asList(indexChanges));
@@ -96,16 +109,16 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
             comparedColumns = (List<Column>) columnDifferences.getComparedValue();
         }
 
-        StringUtils.ToStringFormatter formatter = new StringUtils.ToStringFormatter();
+        StringUtil.ToStringFormatter formatter = new StringUtil.ToStringFormatter();
 
-        control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(referenceColumns));
-        if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
-            control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(comparedColumns));
+        control.setAlreadyHandledChanged(new Index().setRelation(pk.getTable()).setColumns(referenceColumns));
+        if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, ",", formatter))) {
+            control.setAlreadyHandledChanged(new Index().setRelation(pk.getTable()).setColumns(comparedColumns));
         }
 
-        control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
-        if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, "," , formatter))) {
-            control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
+        control.setAlreadyHandledChanged(new UniqueConstraint().setRelation(pk.getTable()).setColumns(referenceColumns));
+        if (!StringUtil.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtil.join(comparedColumns, "," , formatter))) {
+            control.setAlreadyHandledChanged(new UniqueConstraint().setRelation(pk.getTable()).setColumns(comparedColumns));
         }
 
         return returnList.toArray(new Change[returnList.size()]);

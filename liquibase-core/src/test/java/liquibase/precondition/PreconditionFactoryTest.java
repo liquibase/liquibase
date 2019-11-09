@@ -2,13 +2,13 @@ package liquibase.precondition;
 
 import liquibase.precondition.core.AndPrecondition;
 import liquibase.precondition.core.OrPrecondition;
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class PreconditionFactoryTest {
 
@@ -37,7 +37,7 @@ public class PreconditionFactoryTest {
 
         assertEquals(0, PreconditionFactory.getInstance().getPreconditions().size());
 
-        PreconditionFactory.getInstance().register(MockPrecondition.class);
+        PreconditionFactory.getInstance().register(new MockPrecondition());
 
         assertEquals(1, PreconditionFactory.getInstance().getPreconditions().size());
     }
@@ -50,10 +50,8 @@ public class PreconditionFactoryTest {
 
         assertEquals(0, factory.getPreconditions().size());
 
-        Class<? extends Precondition> precondition = AndPrecondition.class;
-
-        factory.register(OrPrecondition.class);
-        factory.register(precondition);
+        factory.register(new OrPrecondition());
+        factory.register(new AndPrecondition());
 
         assertEquals(2, factory.getPreconditions().size());
 

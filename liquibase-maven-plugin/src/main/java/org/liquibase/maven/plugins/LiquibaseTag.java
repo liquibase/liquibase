@@ -13,6 +13,8 @@ import org.apache.maven.plugin.MojoFailureException;
 public class LiquibaseTag extends AbstractLiquibaseMojo {
 
   /**
+   * The text to write to the databasechangelog.
+   *
    * @parameter expression="${liquibase.tag}"
    * @required
    */
@@ -22,7 +24,7 @@ public class LiquibaseTag extends AbstractLiquibaseMojo {
   protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
     super.checkRequiredParametersAreSpecified();
 
-    if (tag == null || tag.trim().length() == 0) {
+    if ((tag == null) || tag.trim().isEmpty()) {
       throw new MojoFailureException("The tag must be specified.");
     }
   }

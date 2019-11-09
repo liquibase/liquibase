@@ -2,8 +2,8 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
-import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 
 /**
  * Applies the DatabaseChangeLogs to the database. Useful as part of the build
@@ -30,7 +30,7 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
     if (changesToApply > 0) {
       liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(labels));
     } else {
-      liquibase.update(new Contexts(contexts), new LabelExpression(labels));
+      liquibase.update(toTag, new Contexts(contexts), new LabelExpression(labels));
     }
   }
 

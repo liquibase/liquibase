@@ -1,0 +1,24 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="1" author="kshakir" dbms="!mssql">
+        <createTable tableName="a">
+            <column name="b" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="kshakir" dbms="mssql">
+        <createTable tableName="a">
+            <column name="b" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="kshakir">
+        <addColumn tableName="a">
+            <column name="c" type="bigint"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

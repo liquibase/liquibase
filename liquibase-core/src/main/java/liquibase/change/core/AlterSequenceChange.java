@@ -22,6 +22,9 @@ public class AlterSequenceChange extends AbstractChange {
     private BigInteger maxValue;
     private BigInteger minValue;
     private Boolean ordered;
+    private BigInteger cacheSize;
+    private Boolean cycle;
+    private String dataType;
 
     @DatabaseChangeProperty(mustEqualExisting ="sequence.catalog", since = "3.0")
     public String getCatalogName() {
@@ -87,6 +90,32 @@ public class AlterSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
+    @DatabaseChangeProperty(description = "Change the cache size?")
+    public BigInteger getCacheSize() {
+        return cacheSize;
+    }
+
+    public void setCacheSize(BigInteger cacheSize) {
+        this.cacheSize = cacheSize;
+    }
+
+    public Boolean getCycle() {
+        return cycle;
+    }
+
+    public void setCycle(Boolean cycle) {
+        this.cycle = cycle;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
+    @DatabaseChangeProperty(description = "Data type of the sequence")
+    public String getDataType() {
+        return dataType;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
@@ -94,7 +123,10 @@ public class AlterSequenceChange extends AbstractChange {
                 .setIncrementBy(getIncrementBy())
                 .setMaxValue(getMaxValue())
                 .setMinValue(getMinValue())
+                .setCacheSize(getCacheSize())
+                .setCycle(getCycle())
                 .setOrdered(isOrdered())
+                .setDataType(getDataType())
         };
     }
 
@@ -118,6 +150,12 @@ public class AlterSequenceChange extends AbstractChange {
             }
             if (isOrdered() != null) {
                 result.assertCorrect(isOrdered().equals(sequence.getOrdered()), "Max Value is different");
+            }
+            if (getCacheSize() != null) {
+                result.assertCorrect(getCacheSize().equals(sequence.getCacheSize()), "Cache size is different");
+            }
+            if (getDataType() != null) {
+                result.assertCorrect(getDataType().equals(sequence.getDataType()), "Data type is different");
             }
         } catch (Exception e) {
             return result.unknown(e);

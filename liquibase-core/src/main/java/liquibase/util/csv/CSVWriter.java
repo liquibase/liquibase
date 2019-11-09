@@ -5,7 +5,6 @@ import liquibase.util.ISODateFormat;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 public class CSVWriter extends liquibase.util.csv.opencsv.CSVWriter {
@@ -35,29 +34,7 @@ public class CSVWriter extends liquibase.util.csv.opencsv.CSVWriter {
         super(writer, c, c1, c2, s);
     }
 
-
-    @Override
-    public void writeAll(ResultSet rs, boolean includeColumnNames) throws SQLException, IOException {
-        ResultSetMetaData metadata = rs.getMetaData();
-
-
-        if (includeColumnNames) {
-            writeColumnNames(metadata);
-        }
-
-        int columnCount = metadata.getColumnCount();
-
-        while (rs.next()) {
-            String[] nextLine = new String[columnCount];
-
-            for (int i = 0; i < columnCount; i++) {
-                nextLine[i] = getColumnValue(rs, metadata.getColumnType(i + 1), i + 1);
-            }
-
-            writeNext(nextLine);
-        }
-    }
-
+    
     private String getColumnValue(ResultSet rs, int colType, int colIndex) throws SQLException, IOException {
 
         Object value = rs.getObject(colIndex);

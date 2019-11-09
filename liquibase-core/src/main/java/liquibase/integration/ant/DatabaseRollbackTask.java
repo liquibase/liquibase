@@ -1,7 +1,6 @@
 package liquibase.integration.ant;
 
 import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
@@ -22,6 +21,7 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
     private Date rollbackDate;
     private String rollbackTag;
     private Integer rollbackCount;
+    private String rollbackScript;
 
     @Override
     public void executeWithLiquibaseClassloader() throws BuildException {
@@ -32,29 +32,29 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
             if(rollbackCount != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackCount, new Contexts(getContexts()), getLabels(), writer);
+                    liquibase.rollback(rollbackCount, rollbackScript, new Contexts(getContexts()), getLabels(), writer);
                 } else {
-                    liquibase.rollback(rollbackCount, new Contexts(getContexts()), getLabels());
+                    liquibase.rollback(rollbackCount, rollbackScript, new Contexts(getContexts()), getLabels());
                 }
             } else if(rollbackTag != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackTag, new Contexts(getContexts()), getLabels(), writer);
+                    liquibase.rollback(rollbackTag, rollbackScript, new Contexts(getContexts()), getLabels(), writer);
                 } else {
-                    liquibase.rollback(rollbackTag, new Contexts(getContexts()), getLabels());
+                    liquibase.rollback(rollbackTag, rollbackScript, new Contexts(getContexts()), getLabels());
                 }
             } else if(rollbackDate != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackDate, new Contexts(getContexts()), getLabels(), writer);
+                    liquibase.rollback(rollbackDate, rollbackScript, new Contexts(getContexts()), getLabels(), writer);
                 } else {
-                    liquibase.rollback(rollbackDate, new Contexts(getContexts()), getLabels());
+                    liquibase.rollback(rollbackDate, rollbackScript, new Contexts(getContexts()), getLabels());
                 }
             } else {
                 throw new BuildException("Unable to rollback database. No count, tag, or date set.");
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to rollback database. " + e.toString(), e);
+            throw new BuildException("Unable to rollback database: " + e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to generate rollback SQL. Encoding [" + getOutputEncoding() + "] is not supported.", e);
         } catch (IOException e) {
@@ -72,7 +72,7 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
     }
 
     public void setRollbackDate(String rollbackDateStr) {
-        if(rollbackTag != null || rollbackCount != null) {
+        if((rollbackTag != null) || (rollbackCount != null)) {
             throw new BuildException("Unable to rollback database. A tag or count has already been set.");
         }
         try {
@@ -87,7 +87,7 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
     }
 
     public void setRollbackTag(String rollbackTag) {
-        if(rollbackDate != null || rollbackCount != null) {
+        if((rollbackDate != null) || (rollbackCount != null)) {
             throw new BuildException("Unable to rollback database. A date or count has already been set.");
         }
         this.rollbackTag = rollbackTag;
@@ -98,9 +98,17 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
     }
 
     public void setRollbackCount(Integer rollbackCount) {
-        if(rollbackDate != null || rollbackTag != null) {
+        if((rollbackDate != null) || (rollbackTag != null)) {
             throw new BuildException("Unable to rollback database. A date or tag has already been set.");
         }
         this.rollbackCount = rollbackCount;
+    }
+
+    public String getRollbackScript() {
+        return rollbackScript;
+    }
+
+    public void setRollbackScript(String rollbackScript) {
+        this.rollbackScript = rollbackScript;
     }
 }

@@ -15,6 +15,7 @@ import java.util.Date;
 
 public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
+	private boolean previousInsertHasHeader;
     @Override
     public ValidationErrors validate(InsertStatement insertStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -30,7 +31,29 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
     @Override
     public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");
+       
+        StringBuilder sql = new StringBuilder();
+        
+        if(!previousInsertHasHeader) {
+        	generateHeader(sql,statement,database);
+        } else {
+            sql.append(",");        	
+        }
+        generateValues(sql,statement,database);
+
+        return new Sql[] {
+                new UnparsedSql(sql.toString(), getAffectedTable(statement))
+        };
+    }
+    
+    public void setPreviousInsertStatement(boolean previousInsertHasHeader) {
+    	this.previousInsertHasHeader = previousInsertHasHeader;
+    }
+    
+    public void generateHeader(StringBuilder sql,InsertStatement statement, Database database) {
+        sql.append("INSERT INTO ")
+            .append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
+            .append(" (");
         for (String column : statement.getColumnValues().keySet()) {
             sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(", ");
         }
@@ -40,13 +63,17 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
             sql.deleteCharAt(lastComma);
         }
 
-        sql.append(") VALUES (");
+        sql.append(") VALUES ");
+    }
+
+    public void generateValues(StringBuilder sql,InsertStatement statement, Database database) {
+        sql.append("(");
 
         for (String column : statement.getColumnValues().keySet()) {
             Object newValue = statement.getColumnValues().get(column);
-            if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
+            if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
                 sql.append("NULL");
-            } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
+            } else if ((newValue instanceof String) && !looksLikeFunctionCall(((String) newValue), database)) {
                 sql.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
             } else if (newValue instanceof Date) {
                 sql.append(database.getDateLiteral(((Date) newValue)));
@@ -66,17 +93,16 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         }
 
         sql.deleteCharAt(sql.lastIndexOf(" "));
-        lastComma = sql.lastIndexOf(",");
+        int lastComma = sql.lastIndexOf(",");
         if (lastComma >= 0) {
             sql.deleteCharAt(lastComma);
         }
 
         sql.append(")");
-
-        return new Sql[] {
-                new UnparsedSql(sql.toString(), getAffectedTable(statement))
-        };
+        
+        
     }
+
 
     protected Relation getAffectedTable(InsertStatement statement) {
         return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());

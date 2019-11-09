@@ -1,11 +1,15 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
+
+import java.util.Locale;
 
 @DataTypeInfo(name="smallint", aliases = {"java.sql.Types.SMALLINT", "int2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class SmallIntType extends LiquibaseDataType {
@@ -22,7 +26,16 @@ public class SmallIntType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MSSQLDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase || database instanceof MySQLDatabase) {
+        if (database instanceof MSSQLDatabase) {
+            return new DatabaseDataType(database.escapeDataTypeName("smallint")); //always smallint regardless of parameters passed
+        }
+        if (database instanceof MySQLDatabase) {
+            DatabaseDataType type = new DatabaseDataType("SMALLINT");
+            type.addAdditionalInformation(getAdditionalInformation());
+            return type;
+        }
+        if ((database instanceof AbstractDb2Database) || (database instanceof DerbyDatabase) || (database instanceof
+            FirebirdDatabase) || (database instanceof InformixDatabase)) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
 
@@ -30,12 +43,28 @@ public class SmallIntType extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 5);
         }
 
+        if (database instanceof PostgresDatabase)
+        {
+            if (isAutoIncrement()) {
+                int majorVersion = 9;
+                try {
+                    majorVersion = database.getDatabaseMajorVersion();
+                } catch (DatabaseException e) {
+                    // ignore
+                }
+                if (majorVersion < 10) {
+                    return new DatabaseDataType("SMALLSERIAL");
+                }
+            }
+        }
+
+
         return super.toDatabaseDataType(database);
     }
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if ((value == null) || "null".equals(value.toString().toLowerCase(Locale.US))) {
             return null;
         }
         if (value instanceof DatabaseFunction) {
@@ -49,4 +78,8 @@ public class SmallIntType extends LiquibaseDataType {
         }
     }
 
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
+    }
 }

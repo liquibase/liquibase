@@ -53,4 +53,11 @@ public interface ChangeLogHistoryService extends PrioritizedService {
     void clearAllCheckSums() throws LiquibaseException;
 
     void destroy() throws DatabaseException;
-}
+
+    public String getDeploymentId();
+
+    public void resetDeploymentId();
+
+    public void generateDeploymentId();
+
+    }

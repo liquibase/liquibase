@@ -1,12 +1,6 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import liquibase.change.ChangeFactory;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import liquibase.change.StandardChangeTest
 
 public class AddNotNullConstraintChangeTest extends StandardChangeTest {
 
@@ -15,8 +9,23 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
         def change = new AddNotNullConstraintChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
+        change.setConstraintName("COL_NN");
 
         then:
-        change.getConfirmationMessage() == "Null constraint has been added to TABLE_NAME.COL_HERE"
+        change.getConfirmationMessage() == "NOT NULL constraint \"COL_NN\" has been added to TABLE_NAME.COL_HERE"
+    }
+
+    def getInverse() throws Exception {
+        when:
+        def change = new AddNotNullConstraintChange();
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COL_HERE");
+        change.setConstraintName("COL_NN");
+        DropNotNullConstraintChange[] reverses = change.createInverses()
+
+        then:
+        reverses.length == 1
+        reverses[0].getTableName() == "TABLE_NAME"
+        reverses[0].getColumnName() == "COL_HERE"
     }
 }

@@ -28,15 +28,17 @@ public class ComputedConfig extends AbstractLiquibaseSerializable {
         return expression;
     }
 
-    public void setExpression(String expression) {
+    public ComputedConfig setExpression(String expression) {
         this.expression = expression;
+        return this;
     }
 
     public Boolean getPersisted() {
         return persisted;
     }
 
-    public void setPersisted(Boolean persisted) {
+    public ComputedConfig setPersisted(Boolean persisted) {
         this.persisted = persisted;
+        return this;
     }
 }

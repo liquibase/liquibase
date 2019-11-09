@@ -20,6 +20,6 @@ class CatalogTest extends Specification {
         where:
         param     | defaultValue | newValue
         "name"    | null         | "catName"
-        "default" | false        | true
+        "default" | true         | true
     }
 }

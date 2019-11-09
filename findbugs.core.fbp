@@ -1,8 +1,6 @@
 <Project filename="&lt;&lt;unnamed project&gt;&gt;" projectName="liquibase.core">
   <Jar>C:\othersvn\liquibase\core\build</Jar>
   <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\cglib-nodep-2.1_3.jar</AuxClasspathEntry>
-  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\easymock-2.2.jar</AuxClasspathEntry>
-  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\easymockclassextension-2.2.jar</AuxClasspathEntry>
   <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\junit-4.1.jar</AuxClasspathEntry>
   <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\opencsv-1.8.jar</AuxClasspathEntry>
   <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\ant-1.6.5.jar</AuxClasspathEntry>

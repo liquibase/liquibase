@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ora="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet logicalFilePath="changeLog1.xml" id="changeLog1.1" author="islonik">
+        <createTable tableName="change_log_1">
+            <column name="id"   type="UUID" defaultValueComputed="sys_guid()" />
+            <column name="name" type="varchar2(50)"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
