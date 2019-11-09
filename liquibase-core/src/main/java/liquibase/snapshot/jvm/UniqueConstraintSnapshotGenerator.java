@@ -140,6 +140,10 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         + "and const.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' "
                         + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
                         + "order by ordinal_position";
+            } else if (database.getClass().getName().contains("MaxDB")) {
+				sql = "select CONSTRAINTNAME as constraint_name, COLUMNNAME as column_name from CONSTRAINTCOLUMNS WHERE CONSTRAINTTYPE = 'UNIQUE_CONST' AND tablename = '"
+						+ database.correctObjectName(example.getRelation().getName(), Table.class) + "' AND constraintname = '"
+						+ database.correctObjectName(name, UniqueConstraint.class) + "'";
             } else if (database instanceof MSSQLDatabase) {
                 if (database.getDatabaseMajorVersion() >= 9) {
                     sql =
