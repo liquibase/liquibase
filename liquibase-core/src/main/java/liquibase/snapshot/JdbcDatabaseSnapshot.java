@@ -1259,6 +1259,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (tableName != null) {
                             sql += " and table_name='" + tableName + "'";
                         }
+                    } else if (database.getClass().getName().contains("MaxDB")) {
+                        sql = "select distinct tablename AS TABLE_NAME, constraintname AS CONSTRAINT_NAME from CONSTRAINTCOLUMNS WHERE CONSTRAINTTYPE = 'UNIQUE_CONST'";
+                        if (tableName != null) {
+                            sql += " and tablename='" + tableName + "'";
+                        }
                     } else if (database instanceof MSSQLDatabase) {
                         sql =
                                 "SELECT " +
