@@ -185,6 +185,9 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, " +
                     "CYCLE_OPTION AS WILL_CYCLE " +
                     "FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
+        } else if (database.getClass().getName().contains("MaxDB")) {
+			return "SELECT SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE " +
+				   "FROM sequences WHERE SCHEMANAME = '" + schema.getName() + "'";
         } else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
         }
