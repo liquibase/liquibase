@@ -156,7 +156,8 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     public static void logUnsupportedDatabase(Database database, Class callingClass) {
         if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
             if (!(database instanceof MSSQLDatabase
-                    || database instanceof OracleDatabase)) {
+               || database instanceof OracleDatabase
+               || database instanceof PostgresDatabase)) {
                 Scope.getCurrentScope().getLog(callingClass).info(LogType.USER_MESSAGE, "INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
             }
         }
