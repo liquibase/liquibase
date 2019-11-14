@@ -28,7 +28,7 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
 
   /**
    * The file to output the Migration SQL script to, if it exists it will be overwritten.
-   * @paramater property="liquibase.migrationSqlOutputFile"
+   * @parameter property="liquibase.migrationSqlOutputFile"
    * default-value="${project.build.directory}/liquibase/migrate.sql"
    */
   protected File migrationSqlOutputFile;
