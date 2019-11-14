@@ -20,7 +20,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseMojo {
 	/**
 	 * The schemas to be dropped. Comma separated list.
 	 * 
-	 * @parameter expression="${liquibase.schemas}"
+	 * @paramater property="liquibase.schemas"
 	 */
 	protected String schemas;
     

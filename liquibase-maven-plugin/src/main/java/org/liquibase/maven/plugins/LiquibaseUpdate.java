@@ -17,7 +17,7 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
 
     /**
      * Whether or not to perform a drop on the database before executing the change.
-     * @parameter expression="${liquibase.dropFirst}" default-value="false"
+     * @paramater property="liquibase.dropFirst" default-value="false"
      */
     protected boolean dropFirst;
 

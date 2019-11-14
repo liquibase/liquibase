@@ -15,7 +15,7 @@ public class LiquibaseTag extends AbstractLiquibaseMojo {
   /**
    * The text to write to the databasechangelog.
    *
-   * @parameter expression="${liquibase.tag}"
+   * @paramater property="liquibase.tag"
    * @required
    */
   private String tag;

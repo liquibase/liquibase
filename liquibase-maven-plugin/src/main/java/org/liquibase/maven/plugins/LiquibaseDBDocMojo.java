@@ -13,7 +13,7 @@ public class LiquibaseDBDocMojo extends AbstractLiquibaseChangeLogMojo {
 
     /**
      * @parameter
-     *      expression="${liquibase.outputDirectory}"
+     *      property="liquibase.outputDirectory"
      *      default-value="${project.build.directory}/liquibase/dbDoc"
      */
     private String outputDirectory;

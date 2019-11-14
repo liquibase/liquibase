@@ -26,7 +26,7 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
      * The file to output the Rollback SQL script to, if it exists it will be
      * overwritten.
      *
-     * @parameter expression="${liquibase.migrationSqlOutputFile}"
+     * @paramater property="liquibase.migrationSqlOutputFile"
      *            default-value=
      *            "${project.build.directory}/liquibase/migrate.sql"
      */
