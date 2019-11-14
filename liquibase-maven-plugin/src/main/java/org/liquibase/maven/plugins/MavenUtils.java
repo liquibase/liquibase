@@ -3,6 +3,11 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.exception.LiquibaseException;
+import liquibase.license.Location;
+import liquibase.license.LocationType;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
+import liquibase.license.LicenseInstallResult;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -84,6 +89,27 @@ public class MavenUtils {
         urlArray[i] = uriList.get(i).toURL();
     }
     return new URLClassLoader(urlArray, clazz.getClassLoader());
+  }
+
+  public static void checkProLicense(String liquibaseProLicenseKey, Log log) {
+      LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+      if (licenseService == null) {
+        return;
+      }
+      if (liquibaseProLicenseKey == null) {
+          log.info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line " + 
+                   "or in liquibase.properties to use Liquibase Pro features.");
+      }
+      else {
+          Location licenseKeyLocation = 
+              new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, liquibaseProLicenseKey);
+          LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+          if (result.code != 0) {
+              String allMessages = String.join("\n", result.messages);
+              log.warn(allMessages);
+          }
+          log.info(licenseService.getLicenseInfo());
+      }
   }
 
   /**

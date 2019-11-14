@@ -299,6 +299,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             return;
         }
 
+        //
+        // Check for a LiquibasePro license
+        //
+        String liquibaseProLicenseKey = System.getProperty("LIQUIBASE_PRO_LICENSE_KEY");
+        getLog().info(liquibaseProLicenseKey);
+        MavenUtils.checkProLicense(liquibaseProLicenseKey, getLog());
+
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
         ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
         configureFieldsAndValues(fileOpener);

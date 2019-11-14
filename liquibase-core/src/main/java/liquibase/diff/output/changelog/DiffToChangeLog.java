@@ -210,13 +210,28 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
+    public void print(final PrintStream out, final ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, DatabaseException {
+        final Map<String, Object> newScopeObjects = new HashMap<>();
+        final DiffOutputControl scopeDiffOutputControl = Scope.getCurrentScope().get(DIFF_OUTPUT_CONTROL_SCOPE_KEY, DiffOutputControl.class);
+        if (scopeDiffOutputControl == null) {
+            File file = new File(".");
+            newScopeObjects.put(DIFF_OUTPUT_CONTROL_SCOPE_KEY, diffOutputControl);
+            newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, new File(file, "objects"));
+        }
+        Scope.child(newScopeObjects, new Scope.ScopedRunner() {
+            @Override
+            public void run() {
+                List<ChangeSet> changeSets = generateChangeSets();
+                try {
+                    changeLogSerializer.write(changeSets, out);
+                    out.flush();
+                }
+                catch (IOException ioe) {
+                    LogService.getLog(getClass()).warning("Unable to write changelog file: " + ioe.getMessage());
+                }
+            }
+        });
 
-        List<ChangeSet> changeSets = generateChangeSets();
-
-        changeLogSerializer.write(changeSets, out);
-
-        out.flush();
     }
 
     public List<ChangeSet> generateChangeSets() {
