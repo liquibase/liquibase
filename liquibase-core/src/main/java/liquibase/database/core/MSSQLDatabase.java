@@ -104,6 +104,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         defaultDataTypeParameters.put("money", 4);
         defaultDataTypeParameters.put("smallmoney", 0);
 
+        unmodifiableDataTypes.add("datetime");
+
         addReservedWords(createReservedWordsCollection());
     }
 
