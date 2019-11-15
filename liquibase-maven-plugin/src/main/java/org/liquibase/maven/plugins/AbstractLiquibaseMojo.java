@@ -264,6 +264,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private File driverPropertiesFile;
 
+    /**
+     * Schema against which Liquibase changelog tables will be created.
+     *
+     * @parameter property="liquibase.liquibaseProLicenseKey"
+     */
+    protected String liquibaseProLicenseKey;
+
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding==null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
@@ -302,8 +309,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         //
         // Check for a LiquibasePro license
         //
-        String liquibaseProLicenseKey = System.getProperty("LIQUIBASE_PRO_LICENSE_KEY");
-        getLog().info(liquibaseProLicenseKey);
         MavenUtils.checkProLicense(liquibaseProLicenseKey, getLog());
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
