@@ -369,7 +369,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-		SpringResourceOpener resourceAccessor = createResourceOpener();
+		ResourceAccessor resourceAccessor = createResourceOpener();
 		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
         liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
 		if (parameters != null) {
@@ -439,7 +439,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	/**
 	 * Create a new resourceOpener.
 	 */
-	protected SpringResourceOpener createResourceOpener() {
+	protected ResourceAccessor createResourceOpener() {
 		return new SpringResourceOpener(getChangeLog());
 	}
 
