@@ -180,15 +180,23 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.2</version>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
 				<configuration>
+					<passphrase>${env.GPG_PASSPHRASE}</passphrase>
+					<gpgArguments>
+						<arg>--batch</arg>
+						<!-- This is necessary for gpg to not try to use the pinentry programs -->
+						<arg>--pinentry-mode</arg>
+						<arg>loopback</arg>
+					</gpgArguments>
+
 					<skip>false</skip>
 					<repositoryId>${deploy.repositoryId}</repositoryId>
 					<artifactId>${project.artifactId}</artifactId>
 					<version>${liquibase.version}</version>
 					<url>${deploy.url}</url>
-					<file>${project.build.directory}/liquibase-maven-plugin-${liquibase.version}.jar</file>
+					<file>${project.build.directory}/liquibase-maven-plugin-${liquibase.version}.jar,${project.build.directory}/liquibase-maven-plugin-${liquibase.version}.jar.asc</file>
 					<pomFile>${project.build.directory}/release.pom.xml</pomFile>
 				</configuration>
 				<executions>

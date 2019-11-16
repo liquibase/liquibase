@@ -258,10 +258,17 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- have to manually deploy because we are using an odd pom.xml file -->
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
                 <configuration>
+                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                    <gpgArguments>
+                        <arg>--batch</arg>
+                        <!-- This is necessary for gpg to not try to use the pinentry programs -->
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
+
                     <skip>false</skip>
                     <repositoryId>${deploy.repositoryId}</repositoryId>
                     <artifactId>liquibase-core</artifactId>
@@ -269,14 +276,14 @@
                     <url>${deploy.url}</url>
                     <file>${project.build.directory}/liquibase-${liquibase.version}.jar</file>
                     <files>
-                        target/liquibase-${liquibase.version}.jar.asc,target/liquibase-${liquibase.version}.tar.gz,target/liquibase-${liquibase.version}.tar.gz.asc,target/liquibase-${liquibase.version}.zip,target/liquibase-${liquibase.version}.zip.asc,target/liquibase-${liquibase.version}-sources.jar.asc,target/liquibase-${liquibase.version}-javadoc.jar.asc
+                        target/liquibase-${liquibase.version}.tar.gz,target/liquibase-${liquibase.version}.zip
                     </files>
                     <types>
-                        jar.asc,tar.gz,tar.gz.asc,zip,zip.asc,jar.asc,jar.asc
+                        tar.gz,zip
                     </types>
                     <classifiers>
                         <!-- need empty classifier so deployed zip/tar files do not have appended "-bin" etc. suffixes -->
-                        ,,,,,,
+                        ,
                     </classifiers>
                     <sources>${project.build.directory}/liquibase-${version}-sources.jar</sources>
                     <javadoc>${project.build.directory}/liquibase-${version}-javadoc.jar</javadoc>
@@ -287,12 +294,11 @@
                         <id>custom-deploy</id>
                         <phase>deploy</phase>
                         <goals>
-                            <goal>deploy-file</goal>
+                            <goal>sign-and-deploy-file</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 
