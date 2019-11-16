@@ -13,6 +13,43 @@
 	<packaging>maven-plugin</packaging>
 	<description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
+	<url>http://www.liquibase.org</url>
+
+	<organization>
+		<name>Liquibase.org</name>
+		<url>http://www.liquibase.org</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<id>nvoxland</id>
+			<name>Nathan Voxland</name>
+			<email>nathan.voxland@liquibase.org</email>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<name>Apache License, Version 2.0</name>
+		</license>
+	</licenses>
+
+	<issueManagement>
+		<url>http://liquibase.jira.com/browse/CORE</url>
+	</issueManagement>
+
+	<scm>
+		<connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+		<url>scm:git:git@github.com:liquibase/liquibase.git</url>
+		<developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -68,8 +105,10 @@
 				<version>1.1.0</version>
 				<configuration>
 					<updatePomFile>true</updatePomFile>
-					<outputDirectory>target</outputDirectory>
+					<outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>
+                    <flattenedPomFilename>release.pom.xml</flattenedPomFilename>
 					<pomElements>
+                        <profiles>remove</profiles>
 						<organization/>
 						<issueManagement/>
 					</pomElements>
@@ -111,8 +150,9 @@
 					<forceCreation>true</forceCreation>
 					<transformationSets>
 						<transformationSet>
-							<dir>${project.build.directory}</dir>
-							<includes>.flattened-pom.xml</includes>
+							<dir>${project.build.directory}/flattened-pom</dir>
+                            <includes>release.pom.xml</includes>
+                            <outputDir>${project.build.directory}</outputDir>
 							<stylesheet>${project.basedir}/src/main/maven/liquibase-deployment-pom.xslt</stylesheet>
 						</transformationSet>
 					</transformationSets>
@@ -127,7 +167,7 @@
 					<skip>false</skip>
 					<artifactId>${project.artifactId}</artifactId>
 					<file>${project.build.directory}/liquibase-maven-plugin-${version}.jar</file>
-					<pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
+					<pomFile>${project.build.directory}/release.pom.xml</pomFile>
 				</configuration>
 				<executions>
 					<execution>
@@ -149,7 +189,7 @@
 					<version>${liquibase.version}</version>
 					<url>${deploy.url}</url>
 					<file>${project.build.directory}/liquibase-maven-plugin-${liquibase.version}.jar</file>
-					<pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
+					<pomFile>${project.build.directory}/release.pom.xml</pomFile>
 				</configuration>
 				<executions>
 					<execution>

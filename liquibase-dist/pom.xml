@@ -22,6 +22,19 @@
         <url>http://www.liquibase.org</url>
     </organization>
 
+    <developers>
+        <developer>
+            <id>nvoxland</id>
+            <name>Nathan Voxland</name>
+            <email>nathan.voxland@liquibase.org</email>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+    </developers>
+
     <licenses>
         <license>
             <url>http://www.apache.org/licenses/LICENSE-2.0</url>
@@ -91,43 +104,17 @@
     <build>
         <finalName>liquibase-${liquibase.version}</finalName>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <author>false</author>
-                    <includeDependencySources>true</includeDependencySources>
-                    <doctitle>Liquibase ${project.version} API</doctitle>
-                    <dependencySourceIncludes>
-                        <dependencySourceInclude>org.liquibase:*</dependencySourceInclude>
-                    </dependencySourceIncludes>
-                    <quiet>true</quiet>
-                    <doclint>none</doclint>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>aggregate</id>
-                        <goals>
-                            <goal>aggregate</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <!--<configuration>-->
-                        <!--&lt;!&ndash; Specific configuration for the aggregate report &ndash;&gt;-->
-                        <!--...-->
-                        <!--</configuration>-->
-                    </execution>
-                </executions>
-            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.1.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
-                    <outputDirectory>target</outputDirectory>
+                    <outputDirectory>${project.build.directory}/flattened-pom</outputDirectory>
+                    <flattenedPomFilename>release.pom.xml</flattenedPomFilename>
                     <pomElements>
+                        <profiles>remove</profiles>
                         <organization/>
                         <issueManagement/>
                     </pomElements>
@@ -152,7 +139,7 @@
             </plugin>
 
             <plugin>
-                <!-- Converts the generated flattened-pom into a cleaner version for maven distribution -->
+                <!-- Converts the generated release.pom into a cleaner version for maven distribution -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>xml-maven-plugin</artifactId>
                 <version>1.0.2</version>
@@ -169,8 +156,9 @@
                     <forceCreation>true</forceCreation>
                     <transformationSets>
                         <transformationSet>
-                            <dir>${project.build.directory}</dir>
-                            <includes>.flattened-pom.xml</includes>
+                            <dir>${project.build.directory}/flattened-pom</dir>
+                            <includes>release.pom.xml</includes>
+                            <outputDir>${project.build.directory}</outputDir>
                             <stylesheet>${project.basedir}/src/main/maven/liquibase-deployment-pom.xslt</stylesheet>
                         </transformationSet>
                     </transformationSets>
@@ -255,7 +243,9 @@
                     <skip>false</skip>
                     <artifactId>liquibase-core</artifactId>
                     <file>${project.build.directory}/liquibase-${version}.jar</file>
-                    <pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
+                    <sources>${project.build.directory}/liquibase-${version}-sources.jar</sources>
+                    <javadoc>${project.build.directory}/liquibase-${version}-javadoc.jar</javadoc>
+                    <pomFile>${project.build.directory}/release.pom.xml</pomFile>
                 </configuration>
                 <executions>
                     <execution>
@@ -279,16 +269,18 @@
                     <url>${deploy.url}</url>
                     <file>${project.build.directory}/liquibase-${liquibase.version}.jar</file>
                     <files>
-                        target/liquibase-${liquibase.version}.jar.asc,target/liquibase-${liquibase.version}.tar.gz,target/liquibase-${liquibase.version}.tar.gz.asc,target/liquibase-${liquibase.version}.zip,target/liquibase-${liquibase.version}.zip.asc
+                        target/liquibase-${liquibase.version}.jar.asc,target/liquibase-${liquibase.version}.tar.gz,target/liquibase-${liquibase.version}.tar.gz.asc,target/liquibase-${liquibase.version}.zip,target/liquibase-${liquibase.version}.zip.asc,target/liquibase-${liquibase.version}-sources.jar.asc,target/liquibase-${liquibase.version}-javadoc.jar.asc
                     </files>
                     <types>
-                        jar.asc,.tar.gz,tar.gz.asc,zip,zip.asc
+                        jar.asc,tar.gz,tar.gz.asc,zip,zip.asc,jar.asc,jar.asc
                     </types>
                     <classifiers>
                         <!-- need empty classifier so deployed zip/tar files do not have appended "-bin" etc. suffixes -->
-                        ,,,,
+                        ,,,,,,
                     </classifiers>
-                    <pomFile>${project.build.directory}/generated-resources/xml/xslt/.flattened-pom.xml</pomFile>
+                    <sources>${project.build.directory}/liquibase-${version}-sources.jar</sources>
+                    <javadoc>${project.build.directory}/liquibase-${version}-javadoc.jar</javadoc>
+                    <pomFile>${project.build.directory}/release.pom.xml</pomFile>
                 </configuration>
                 <executions>
                     <execution>
@@ -323,12 +315,6 @@
                 <dependency>
                     <groupId>com.datical.lb</groupId>
                     <artifactId>licensing-keymgr</artifactId>
-                    <version>${liquibase.version}</version>
-                </dependency>
-
-                <dependency>
-                    <groupId>com.datical.lb</groupId>
-                    <artifactId>licensing-keygen</artifactId>
                     <version>${liquibase.version}</version>
                 </dependency>
             </dependencies>

@@ -29,31 +29,58 @@
 
     <build>
         <plugins>
-            <!-- TODO: re-enable without breaking signing -->
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-source-plugin</artifactId>-->
-            <!--                <version>3.0.1</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>aggregate-source</id>-->
-            <!--                        <goals>-->
-            <!--                            <goal>aggregate</goal>-->
-            <!--                        </goals>-->
-            <!--                        <phase>package</phase>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--                <configuration>-->
-            <!--                    <outputDirectory>liquibase-dist/target</outputDirectory>-->
-            <!--                    <finalName>liquibase-${liquibase.version}</finalName>-->
-            <!--                    <attach>true</attach>-->
-            <!--                    <excludes>-->
-            <!--                        <exclude>com/datical/**</exclude>-->
-            <!--                        <exclude>**/pro/**</exclude>-->
-            <!--                        <exclude>*.ks</exclude>-->
-            <!--                    </excludes>-->
-            <!--                </configuration>-->
-            <!--            </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>root-source-aggregate</id>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputDirectory>${project.basedir}/liquibase-dist/target</outputDirectory>
+                    <finalName>liquibase-${liquibase.version}</finalName>
+                    <attach>true</attach>
+                    <excludes>
+                        <exclude>com/datical/**</exclude>
+                        <exclude>**/pro/**</exclude>
+                        <exclude>*.ks</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <author>false</author>
+                    <includeDependencySources>true</includeDependencySources>
+                    <doctitle>Liquibase ${project.version} API</doctitle>
+                    <dependencySourceIncludes>
+                        <dependencySourceInclude>org.liquibase:*</dependencySourceInclude>
+                    </dependencySourceIncludes>
+                    <excludePackageNames>org.liquibase.*,com.datical.*</excludePackageNames>
+                    <quiet>true</quiet>
+                    <doclint>none</doclint>
+                    <encoding>UTF-8</encoding>
+                    <jarOutputDirectory>${project.basedir}/target</jarOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>javadoc-aggregate</id>
+                        <goals>
+                            <goal>aggregate-jar</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
