@@ -29,6 +29,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.version>5.0.12.RELEASE</spring.version>
+        <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
     </properties>
 
     <dependencies>
