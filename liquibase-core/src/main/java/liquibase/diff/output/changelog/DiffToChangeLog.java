@@ -98,7 +98,9 @@ public class DiffToChangeLog {
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 
-        if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
+        if (changeLogFile.toLowerCase().endsWith("sql")) {
+            System.setProperty("liquibase.pro.sql.inline", "true");
+        } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, new File(file.getParentFile(), "objects"));
         } else {
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, new File(file.getParentFile(), "objects-" + new Date().getTime()));
