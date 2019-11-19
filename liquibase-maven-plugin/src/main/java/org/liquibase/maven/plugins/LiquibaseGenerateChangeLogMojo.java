@@ -27,41 +27,41 @@ public class LiquibaseGenerateChangeLogMojo extends
      * List of diff types to include in Change Log expressed as a comma separated list from: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints, data.
      * If this is null then the default types will be: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints
      *
-     * @paramater property="liquibase.diffTypes"
+     * @parameter property="liquibase.diffTypes"
      */
     protected String diffTypes;
 
     /**
      * Directory where insert statement csv files will be kept.
      *
-     * @paramater property="liquibase.dataDir"
+     * @parameter property="liquibase.dataDir"
      */
     protected String dataDir;
 
     /**
      * The author to be specified for Change Sets in the generated Change Log.
      *
-     * @paramater property="liquibase.changeSetAuthor"
+     * @parameter property="liquibase.changeSetAuthor"
      */
     protected String changeSetAuthor;
 
     /**
      * are required. If no context is specified then ALL contexts will be executed.
-     * @paramater property="liquibase.contexts" default-value=""
+     * @parameter property="liquibase.contexts" default-value=""
      */
     protected String contexts;
 
     /**
      * The execution context to be used for Change Sets in the generated Change Log, which can be "," separated if multiple contexts.
      *
-     * @paramater property="liquibase.changeSetContext"
+     * @parameter property="liquibase.changeSetContext"
      */
     protected String changeSetContext;
 
     /**
      * The target change log file to output to. If this is null then the output will be to the screen.
      *
-     * @paramater property="liquibase.outputChangeLogFile"
+     * @parameter property="liquibase.outputChangeLogFile"
      */
     protected String outputChangeLogFile;
 
@@ -69,14 +69,14 @@ public class LiquibaseGenerateChangeLogMojo extends
     /**
      * Objects to be excluded from the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
-     * @paramater property="liquibase.diffExcludeObjects"
+     * @parameter property="liquibase.diffExcludeObjects"
      */
     protected String diffExcludeObjects;
 
     /**
      * Objects to be included in the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
-     * @paramater property="liquibase.diffIncludeObjects"
+     * @parameter property="liquibase.diffIncludeObjects"
      */
     protected String diffIncludeObjects;
 
