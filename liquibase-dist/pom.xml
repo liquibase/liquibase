@@ -15,43 +15,6 @@
     <packaging>jar</packaging>
 
     <description>Liquibase is a tool for managing and executing database changes.</description>
-    <url>http://www.liquibase.org</url>
-
-    <organization>
-        <name>Liquibase.org</name>
-        <url>http://www.liquibase.org</url>
-    </organization>
-
-    <developers>
-        <developer>
-            <id>nvoxland</id>
-            <name>Nathan Voxland</name>
-            <email>nathan.voxland@liquibase.org</email>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>-6</timezone>
-        </developer>
-    </developers>
-
-    <licenses>
-        <license>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            <name>Apache License, Version 2.0</name>
-        </license>
-    </licenses>
-
-    <issueManagement>
-        <url>http://liquibase.jira.com/browse/CORE</url>
-    </issueManagement>
-
-    <scm>
-        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
-        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
-        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
-    </scm>
-
 
     <properties>
         <deploy.repositoryId>sonatype-nexus-staging</deploy.repositoryId>
@@ -59,12 +22,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>liquibase-cdi</artifactId>
-            <version>${liquibase.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>liquibase-core</artifactId>
@@ -238,9 +195,7 @@
 
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
                 <configuration>
-                    <skip>false</skip>
                     <artifactId>liquibase-core</artifactId>
                     <file>${project.build.directory}/liquibase-${version}.jar</file>
                     <sources>${project.build.directory}/liquibase-${version}-sources.jar</sources>
@@ -360,7 +315,8 @@
                                     <directory>/opt/liquibase</directory>
                                     <sources>
                                         <source>
-                                            <location>${project.build.directory}/liquibase-${liquibase.version}</location>
+                                            <location>${project.build.directory}/liquibase-${liquibase.version}
+                                            </location>
                                         </source>
                                     </sources>
                                 </mapping>

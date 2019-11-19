@@ -13,43 +13,6 @@
 	<packaging>maven-plugin</packaging>
 	<description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
-	<url>http://www.liquibase.org</url>
-
-	<organization>
-		<name>Liquibase.org</name>
-		<url>http://www.liquibase.org</url>
-	</organization>
-
-	<developers>
-		<developer>
-			<id>nvoxland</id>
-			<name>Nathan Voxland</name>
-			<email>nathan.voxland@liquibase.org</email>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<timezone>-6</timezone>
-		</developer>
-	</developers>
-
-	<licenses>
-		<license>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
-			<name>Apache License, Version 2.0</name>
-		</license>
-	</licenses>
-
-	<issueManagement>
-		<url>http://liquibase.jira.com/browse/CORE</url>
-	</issueManagement>
-
-	<scm>
-		<connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
-		<url>scm:git:git@github.com:liquibase/liquibase.git</url>
-		<developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
-	</scm>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -80,6 +43,28 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<author>false</author>
+                    <doctitle>Liquibase Maven Plugin ${project.version} API</doctitle>
+					<quiet>true</quiet>
+					<doclint>none</doclint>
+					<encoding>UTF-8</encoding>
+					<jarOutputDirectory>${project.basedir}/target</jarOutputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>jar-javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
@@ -159,14 +144,13 @@
 				</configuration>
 			</plugin>
 
-			<!-- re-enable install/deploy for this plugin -->
 			<plugin>
 				<artifactId>maven-install-plugin</artifactId>
-				<version>2.5.2</version>
 				<configuration>
-					<skip>false</skip>
 					<artifactId>${project.artifactId}</artifactId>
-					<file>${project.build.directory}/liquibase-maven-plugin-${version}.jar</file>
+					<file>${project.build.directory}/${project.artifactId}-${version}.jar</file>
+                    <sources>${project.build.directory}/${project.artifactId}-${version}-sources.jar</sources>
+                    <javadoc>${project.build.directory}/${project.artifactId}-${version}-javadoc.jar</javadoc>
 					<pomFile>${project.build.directory}/release.pom.xml</pomFile>
 				</configuration>
 				<executions>
@@ -195,7 +179,7 @@
 					<artifactId>${project.artifactId}</artifactId>
 					<version>${liquibase.version}</version>
 					<url>${deploy.url}</url>
-					<file>${project.build.directory}/liquibase-maven-plugin-${liquibase.version}.jar,${project.build.directory}/liquibase-maven-plugin-${liquibase.version}.jar.asc</file>
+					<file>${project.build.directory}/${project.artifactId}-${liquibase.version}.jar</file>
 					<pomFile>${project.build.directory}/release.pom.xml</pomFile>
 				</configuration>
 				<executions>
@@ -203,7 +187,7 @@
 						<id>custom-deploy</id>
 						<phase>deploy</phase>
 						<goals>
-							<goal>deploy-file</goal>
+							<goal>sign-and-deploy-file</goal>
 						</goals>
 					</execution>
 				</executions>
