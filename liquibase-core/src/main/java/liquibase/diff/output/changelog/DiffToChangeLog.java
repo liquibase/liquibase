@@ -98,13 +98,22 @@ public class DiffToChangeLog {
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 
+        File objectsDir = null;
         if (changeLogFile.toLowerCase().endsWith("sql")) {
             System.setProperty("liquibase.pro.sql.inline", "true");
         } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
-            newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, new File(file.getParentFile(), "objects"));
+            objectsDir = new File(file.getParentFile(), "objects");
         } else {
-            newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, new File(file.getParentFile(), "objects-" + new Date().getTime()));
+            objectsDir = new File(file.getParentFile(), "objects-" + new Date().getTime());
         }
+
+        if (objectsDir != null) {
+            if (objectsDir.exists()) {
+                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir.getCanonicalPath()+"' dir in your local project directory");
+            }
+            newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
+        }
+
 
         newScopeObjects.put(DIFF_OUTPUT_CONTROL_SCOPE_KEY, diffOutputControl);
 
