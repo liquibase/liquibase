@@ -265,9 +265,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private File driverPropertiesFile;
 
     /**
-     * Schema against which Liquibase changelog tables will be created.
+     *
+     * Liquibase PRO license key value 
      *
      * @parameter property="liquibase.liquibaseProLicenseKey"
+     *
      */
     protected String liquibaseProLicenseKey;
 
