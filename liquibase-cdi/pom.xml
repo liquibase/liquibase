@@ -137,6 +137,7 @@
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.6</version>
                 <configuration>
+                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
                     <gpgArguments>
                         <!-- This is necessary for gpg to not try to use the pinentry programs -->
                         <arg>--batch</arg>
