@@ -50,14 +50,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * The fully qualified name of the driver class to use to connect to the database.
      *
-     * @paramater property="liquibase.driver"
+     * @parameter property="liquibase.driver"
      */
     protected String driver;
 
     /**
      * The Database URL to connect to for executing Liquibase.
      *
-     * @paramater property="liquibase.url"
+     * @parameter property="liquibase.url"
      */
     protected String url;
 
@@ -72,57 +72,57 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * The database username to use to connect to the specified database.
      *
-     * @paramater property="liquibase.username"
+     * @parameter property="liquibase.username"
      */
     protected String username;
     /**
      * The database password to use to connect to the specified database.
      *
-     * @paramater property="liquibase.password"
+     * @parameter property="liquibase.password"
      */
     protected String password;
     /**
      * Use an empty string as the password for the database connection. This should not be
      * used along side the {@link #password} setting.
      *
-     * @paramater property="liquibase.emptyPassword" default-value="false"
+     * @parameter property="liquibase.emptyPassword" default-value="false"
      * @deprecated Use an empty or null value for the password instead.
      */
     protected boolean emptyPassword;
     /**
      * Whether to ignore the schema name.
      *
-     * @paramater property="liquibase.outputDefaultSchema"
+     * @parameter property="liquibase.outputDefaultSchema"
      */
     protected boolean outputDefaultSchema;
     /**
      * Whether to ignore the catalog/database name.
      *
-     * @paramater property="liquibase.outputDefaultCatalog"
+     * @parameter property="liquibase.outputDefaultCatalog"
      */
     protected boolean outputDefaultCatalog;
     /**
      * The default catalog name to use the for database connection.
      *
-     * @paramater property="liquibase.defaultCatalogName"
+     * @parameter property="liquibase.defaultCatalogName"
      */
     protected String defaultCatalogName;
     /**
      * The default schema name to use the for database connection.
      *
-     * @paramater property="liquibase.defaultSchemaName"
+     * @parameter property="liquibase.defaultSchemaName"
      */
     protected String defaultSchemaName;
     /**
      * The class to use as the database object.
      *
-     * @paramater property="liquibase.databaseClass"
+     * @parameter property="liquibase.databaseClass"
      */
     protected String databaseClass;
     /**
      * The class to use as the property provider (must be a java.util.Properties implementation).
      *
-     * @paramater property="liquibase.propertyProviderClass"
+     * @parameter property="liquibase.propertyProviderClass"
      */
     protected String propertyProviderClass;
     /**
@@ -130,27 +130,27 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * changes on a database that is not local to the machine that the user is current
      * executing the plugin on.
      *
-     * @paramater property="liquibase.promptOnNonLocalDatabase" default-value="true"
+     * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="true"
      */
     protected boolean promptOnNonLocalDatabase;
     /**
      * Allows for the maven project artifact to be included in the class loader for
      * obtaining the Liquibase property and DatabaseChangeLog files.
      *
-     * @paramater property="liquibase.includeArtifact" default-value="true"
+     * @parameter property="liquibase.includeArtifact" default-value="true"
      */
     protected boolean includeArtifact;
     /**
      * Allows for the maven test output directory to be included in the class loader for
      * obtaining the Liquibase property and DatabaseChangeLog files.
      *
-     * @paramater property="liquibase.includeTestOutputDirectory" default-value="true"
+     * @parameter property="liquibase.includeTestOutputDirectory" default-value="true"
      */
     protected boolean includeTestOutputDirectory;
     /**
      * Controls the verbosity of the output from invoking the plugin.
      *
-     * @paramater property="liquibase.verbose" default-value="false"
+     * @parameter property="liquibase.verbose" default-value="false"
      * @description Controls the verbosity of the plugin when executing
      */
     protected boolean verbose;
@@ -159,7 +159,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * "debug", "info", "warning", "severe", or "off". The value is
      * case insensitive.
      *
-     * @paramater property="liquibase.logging" default-value="INFO"
+     * @parameter property="liquibase.logging" default-value="INFO"
      * @description Controls the verbosity of the plugin when executing
      */
     protected String logging;
@@ -167,7 +167,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * The Liquibase properties file used to configure the Liquibase {@link
      * liquibase.Liquibase}.
      *
-     * @paramater property="liquibase.propertyFile"
+     * @parameter property="liquibase.propertyFile"
      */
     protected String propertyFile;
     /**
@@ -175,13 +175,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * the Maven plugin configuration. By default if a property is explicity specified it is
      * not overridden if it also appears in the properties file.
      *
-     * @paramater property="liquibase.propertyFileWillOverride" default-value="false"
+     * @parameter property="liquibase.propertyFileWillOverride" default-value="false"
      */
     protected boolean propertyFileWillOverride;
     /**
      * Flag for forcing the checksums to be cleared from the DatabaseChangeLog table.
      *
-     * @paramater property="liquibase.clearCheckSums" default-value="false"
+     * @parameter property="liquibase.clearCheckSums" default-value="false"
      */
     protected boolean clearCheckSums;
     /**
@@ -193,7 +193,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     /**
      * The Maven project that plugin is running under.
      *
-     * @paramater property="project"
+     * @parameter property="project"
      * @required
      * @readonly
      */
@@ -202,43 +202,43 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Set this to 'true' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
      * convenient on occasion.
      *
-     * @paramater property="liquibase.skip" default-value="false"
+     * @parameter property="liquibase.skip" default-value="false"
      */
     protected boolean skip;
     /**
      * Flag to set the character encoding of the output file produced by Liquibase during the updateSQL phase.
      *
-     * @paramater property="liquibase.outputFileEncoding"
+     * @parameter property="liquibase.outputFileEncoding"
      */
     protected String outputFileEncoding;
     /**
      * Schema against which Liquibase changelog tables will be created.
      *
-     * @paramater property="liquibase.changelogCatalogName"
+     * @parameter property="liquibase.changelogCatalogName"
      */
     protected String changelogCatalogName;
     /**
      * Schema against which Liquibase changelog tables will be created.
      *
-     * @paramater property="liquibase.changelogSchemaName"
+     * @parameter property="liquibase.changelogSchemaName"
      */
     protected String changelogSchemaName;
     /**
      * Table name to use for the databasechangelog.
      *
-     * @paramater property="liquibase.databaseChangeLogTableName"
+     * @parameter property="liquibase.databaseChangeLogTableName"
      */
     protected String databaseChangeLogTableName;
     /**
      * Table name to use for the databasechangelog.
      *
-     * @paramater property="liquibase.databaseChangeLogLockTableName"
+     * @parameter property="liquibase.databaseChangeLogLockTableName"
      */
     protected String databaseChangeLogLockTableName;
     /**
      * The server id in settings.xml to use when authenticating with.
      *
-     * @paramater property="liquibase.server"
+     * @parameter property="liquibase.server"
      */
     private String server;
     /**

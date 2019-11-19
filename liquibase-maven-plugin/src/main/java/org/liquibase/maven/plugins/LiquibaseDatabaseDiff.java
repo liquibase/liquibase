@@ -34,21 +34,21 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * The fully qualified name of the driver class to use to connect to the reference database.
      * If this is not specified, then the {@link #driver} will be used instead.
      *
-     * @paramater property="liquibase.referenceDriver"
+     * @parameter property="liquibase.referenceDriver"
      */
     protected String referenceDriver;
 
     /**
      * The reference database URL to connect to for executing Liquibase.
      *
-     * @paramater property="liquibase.referenceUrl"
+     * @parameter property="liquibase.referenceUrl"
      */
     protected String referenceUrl;
 
     /**
      * The reference database username to use to connect to the specified database.
      *
-     * @paramater property="liquibase.referenceUsername"
+     * @parameter property="liquibase.referenceUsername"
      */
     protected String referenceUsername;
 
@@ -56,71 +56,71 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * The reference database password to use to connect to the specified database. If this is
      * null then an empty password will be used.
      *
-     * @paramater property="liquibase.referencePassword"
+     * @parameter property="liquibase.referencePassword"
      */
     protected String referencePassword;
 
     /**
      * The reference database catalog.
      *
-     * @paramater property="liquibase.referenceDefaultCatalogName"
+     * @parameter property="liquibase.referenceDefaultCatalogName"
      */
     protected String referenceDefaultCatalogName;
 
     /**
      * The reference database schema.
      *
-     * @paramater property="liquibase.referenceDefaultSchemaName"
+     * @parameter property="liquibase.referenceDefaultSchemaName"
      */
     protected String referenceDefaultSchemaName;
     /**
      * If this parameter is set, the changelog needed to "fix" differences between the two databases is output. If the file exists, it is appended to.
      * If this is null, a comparison report is output to stdout.
      *
-     * @paramater property="liquibase.diffChangeLogFile"
+     * @parameter property="liquibase.diffChangeLogFile"
      */
     protected String diffChangeLogFile;
     /**
      * Include the catalog in the diff output? If this is null then the catalog will not be included
      *
-     * @paramater property="liquibase.diffIncludeCatalog"
+     * @parameter property="liquibase.diffIncludeCatalog"
      */
     protected boolean diffIncludeCatalog;
     /**
      * Include the schema in the diff output? If this is null then the schema will not be included
      *
-     * @paramater property="liquibase.diffIncludeSchema"
+     * @parameter property="liquibase.diffIncludeSchema"
      */
     protected boolean diffIncludeSchema;
     /**
      * Include the tablespace in the diff output? If this is null then the tablespace will not be included
      *
-     * @paramater property="liquibase.diffIncludeTablespace"
+     * @parameter property="liquibase.diffIncludeTablespace"
      */
     protected boolean diffIncludeTablespace;
     /**
      * List of diff types to include in Change Log expressed as a comma separated list from: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints, data.
      * If this is null then the default types will be: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints
      *
-     * @paramater property="liquibase.diffTypes"
+     * @parameter property="liquibase.diffTypes"
      */
     protected String diffTypes;
     /**
      * Objects to be excluded from the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
-     * @paramater property="liquibase.diffExcludeObjects"
+     * @parameter property="liquibase.diffExcludeObjects"
      */
     protected String diffExcludeObjects;
     /**
      * Objects to be included in the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
-     * @paramater property="liquibase.diffIncludeObjects"
+     * @parameter property="liquibase.diffIncludeObjects"
      */
     protected String diffIncludeObjects;
     /**
      * The server id in settings.xml to use when authenticating with.
      *
-     * @paramater property="liquibase.referenceServer"
+     * @parameter property="liquibase.referenceServer"
      */
     private String referenceServer;
 
