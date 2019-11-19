@@ -138,7 +138,6 @@
                 <version>1.6</version>
                 <configuration>
                     <gpgArguments>
-                        <arg>--batch</arg>
                         <!-- This is necessary for gpg to not try to use the pinentry programs -->
                         <arg>--pinentry-mode</arg>
                         <arg>loopback</arg>
