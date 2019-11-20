@@ -39,7 +39,10 @@ public class LiquibaseUtil {
                 throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file.");
             }
             Attributes attr = manifest.getMainAttributes();
-            buildInfoValue = attr.getValue(manifestId);
+
+            if (attr.containsKey(manifestId)) {
+                buildInfoValue = attr.getValue(manifestId);
+            }
         }
 
         if (buildInfoValue.equals("UNKNOWN")) {
