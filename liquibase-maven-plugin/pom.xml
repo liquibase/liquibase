@@ -182,6 +182,8 @@
 					<version>${liquibase.version}</version>
 					<url>${deploy.url}</url>
 					<file>${project.build.directory}/${project.artifactId}-${liquibase.version}.jar</file>
+					<sources>${project.build.directory}/${project.artifactId}-${version}-sources.jar</sources>
+					<javadoc>${project.build.directory}/${project.artifactId}-${version}-javadoc.jar</javadoc>
 					<pomFile>${project.build.directory}/release.pom.xml</pomFile>
 				</configuration>
 				<executions>
