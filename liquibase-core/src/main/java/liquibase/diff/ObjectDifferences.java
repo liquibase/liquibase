@@ -72,6 +72,11 @@ public class ObjectDifferences {
 
         if (different) {
             addDifference(message, attribute, referenceValue, compareValue);
+            if ("remarks".equals(attribute) && this.differences.get("type") == null) {
+                Object typeReferenceValue = referenceObject.getAttribute("type", Object.class);
+                Object typeCompareValue = compareToObject.getAttribute("type", Object.class);
+                addDifference(message, "type", typeReferenceValue, typeCompareValue);
+            }
         }
 
     }

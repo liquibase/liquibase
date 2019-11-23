@@ -8,13 +8,15 @@ public class ModifyDataTypeStatement extends AbstractSqlStatement {
     private String tableName;
     private String columnName;
     private String newDataType;
+    private String remarks;
 
-    public ModifyDataTypeStatement(String catalogName, String schemaName, String tableName, String columnName, String newDataType) {
+    public ModifyDataTypeStatement(String catalogName, String schemaName, String tableName, String columnName, String newDataType, String remarks) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
         this.newDataType = newDataType;
+        this.remarks = remarks;
     }
 
     public String getCatalogName() {
@@ -51,5 +53,13 @@ public class ModifyDataTypeStatement extends AbstractSqlStatement {
 
     public void setNewDataType(String newDataType) {
         this.newDataType = newDataType;
-    }   
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 }

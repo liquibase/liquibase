@@ -67,6 +67,10 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
             alterTable += " USING ("+columnName+"::"+newDataType+")";
         }
 
+        if (statement.getRemarks() != null && statement.getRemarks().trim().length() > 1) {
+            alterTable += " COMMENT '" + statement.getRemarks() + "'";
+        }
+
         return new Sql[]{new UnparsedSql(alterTable, getAffectedTable(statement))};
     }
 

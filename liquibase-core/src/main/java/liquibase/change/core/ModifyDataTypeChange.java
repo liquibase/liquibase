@@ -19,6 +19,7 @@ public class ModifyDataTypeChange extends AbstractChange {
     private String tableName;
     private String columnName;
     private String newDataType;
+    private String remarks;
 
     @Override
     public boolean supports(Database database) {
@@ -32,7 +33,7 @@ public class ModifyDataTypeChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        ModifyDataTypeStatement modifyDataTypeStatement = new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType());
+        ModifyDataTypeStatement modifyDataTypeStatement = new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType(), getRemarks());
         if (database instanceof DB2Database) {
             return new SqlStatement[] {
                     modifyDataTypeStatement,
@@ -88,6 +89,15 @@ public class ModifyDataTypeChange extends AbstractChange {
 
     public void setNewDataType(String newDataType) {
         this.newDataType = newDataType;
+    }
+
+    @DatabaseChangeProperty()
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
     @Override

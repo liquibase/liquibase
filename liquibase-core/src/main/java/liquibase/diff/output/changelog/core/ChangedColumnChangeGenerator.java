@@ -69,22 +69,6 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         handleDefaultValueDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
         handleAutoIncrementDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
 
-        Difference remarksDiff = differences.getDifference("remarks");
-        if (remarksDiff != null) {
-            SetColumnRemarksChange change = new SetColumnRemarksChange();
-            if (control.getIncludeCatalog()) {
-                change.setCatalogName(column.getSchema().getCatalogName());
-            }
-            if (control.getIncludeSchema()) {
-                change.setSchemaName(column.getSchema().getName());
-            }
-            change.setTableName(column.getRelation().getName());
-            change.setColumnName(column.getName());
-            change.setRemarks(column.getRemarks());
-
-            changes.add(change);
-        }
-
         return changes.toArray(new Change[changes.size()]);
     }
 
@@ -212,6 +196,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 change.setColumnName(column.getName());
                 DataType referenceType = (DataType) typeDifference.getReferenceValue();
                 change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
+                change.setRemarks(column.getRemarks());
 
                 changes.add(change);
             }
