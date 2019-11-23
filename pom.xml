@@ -43,7 +43,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <outputDirectory>${project.basedir}/liquibase-dist/target</outputDirectory>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
                     <finalName>liquibase-${liquibase.version}</finalName>
                     <attach>true</attach>
                     <excludes>
@@ -69,7 +69,7 @@
                     <doclint>none</doclint>
                     <encoding>UTF-8</encoding>
                     <finalName>liquibase-${version}</finalName>
-                    <jarOutputDirectory>${project.basedir}/liquibase-dist/target</jarOutputDirectory>
+                    <jarOutputDirectory>${project.build.directory}</jarOutputDirectory>
                 </configuration>
                 <executions>
                     <execution>

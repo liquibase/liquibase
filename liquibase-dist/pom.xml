@@ -198,8 +198,8 @@
                 <configuration>
                     <artifactId>liquibase-core</artifactId>
                     <file>${project.build.directory}/liquibase-${version}.jar</file>
-                    <sources>${project.build.directory}/liquibase-${version}-sources.jar</sources>
-                    <javadoc>${project.build.directory}/liquibase-${version}-javadoc.jar</javadoc>
+                    <sources>${project.basedir}/../target/liquibase-${version}-sources.jar</sources>
+                    <javadoc>${project.basedir}/../target/liquibase-${version}-javadoc.jar</javadoc>
                     <pomFile>${project.build.directory}/release.pom.xml</pomFile>
                 </configuration>
                 <executions>
@@ -241,8 +241,8 @@
                         <!-- need empty classifier so deployed zip/tar files do not have appended "-bin" etc. suffixes -->
                         ,
                     </classifiers>
-                    <sources>${project.build.directory}/liquibase-${version}-sources.jar</sources>
-                    <javadoc>${project.build.directory}/liquibase-${version}-javadoc.jar</javadoc>
+                    <sources>${project.basedir}/../target/liquibase-${version}-sources.jar</sources>
+                    <javadoc>${project.basedir}/../target/liquibase-${version}-javadoc.jar</javadoc>
                     <pomFile>${project.build.directory}/release.pom.xml</pomFile>
                 </configuration>
                 <executions>
