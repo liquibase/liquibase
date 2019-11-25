@@ -128,7 +128,7 @@
                 <configuration>
                     <finalName>liquibase-${liquibase.version}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <attach>true</attach>
+                    <attach>false</attach>
                     <descriptors>
                         <descriptor>src/main/assembly/assembly-jar.xml</descriptor>
                         <descriptor>src/main/assembly/assembly-bin.xml</descriptor>
@@ -160,7 +160,7 @@
                         </goals>
                         <configuration>
                             <deb>${project.build.directory}/liquibase-${liquibase.version}.deb</deb>
-                            <attach>true</attach>
+                            <attach>false</attach>
                             <dataSet>
                                 <data>
                                     <src>${project.build.directory}/liquibase-${liquibase.version}</src>
