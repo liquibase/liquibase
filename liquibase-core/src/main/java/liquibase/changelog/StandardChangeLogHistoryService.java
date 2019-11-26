@@ -185,13 +185,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 executor.comment("Modifying size of databasechangelog.md5sum column");
 
                 statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName(), "MD5SUM", charTypeName + "(35)"));
+                    getDatabaseChangeLogTableName(), "MD5SUM", charTypeName + "(35)", null));
             }
             if (liquibaseColumnNotRightSize) {
                 executor.comment("Modifying size of databasechangelog.liquibase column");
 
                 statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
-                    getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)"));
+                    getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)", null));
             }
             if (!hasExecTypeColumn) {
                 executor.comment("Adding missing databasechangelog.exectype column");
@@ -211,7 +211,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     executor.comment("Modifying size of databasechangelog.contexts column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS",
-                        charTypeName + "("+ getContextsSize()+")"));
+                        charTypeName + "("+ getContextsSize()+")", null));
                 }
             } else {
                 executor.comment("Adding missing databasechangelog.contexts column");
@@ -226,7 +226,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     executor.comment("Modifying size of databasechangelog.labels column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS",
-                        charTypeName + "(" + getLabelsSize() + ")"));
+                        charTypeName + "(" + getLabelsSize() + ")", null));
                 }
             } else {
                 executor.comment("Adding missing databasechangelog.labels column");
