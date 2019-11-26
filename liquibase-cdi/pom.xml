@@ -9,6 +9,8 @@
         <relativePath>../base-module.pom.xml</relativePath>
     </parent>
 
+    <description>Configures Liquibase for use in a CDI environment</description>
+
     <artifactId>liquibase-cdi</artifactId>
 
     <dependencies>
