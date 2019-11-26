@@ -183,11 +183,19 @@ public class Main {
             if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                 main.printHelp(System.out);
                 return 0;
-            } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
-                log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
-                log.info(LogType.USER_MESSAGE,
+            } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
+                main.command = "";
+                main.reconfigureLogging();
+                main.parseDefaultPropertyFiles();
+                PrintStream stream = System.err;
+                stream.println(CommandLineUtils.getBanner());
+                stream.println(
                         String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
                                 StreamUtil.getLineSeparator()));
+                LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+                if (licenseService != null) {
+                  stream.println("LICENSED: " + licenseService.getLicenseInfo());
+                }
                 return 0;
             }
 
