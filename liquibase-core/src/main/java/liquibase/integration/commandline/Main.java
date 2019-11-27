@@ -194,7 +194,19 @@ public class Main {
                                 StreamUtil.getLineSeparator()));
                 LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
                 if (licenseService != null) {
-                  stream.println("LICENSED: " + licenseService.getLicenseInfo());
+                    if (main.liquibaseProLicenseKey == null) {
+                        log.info(LogType.LOG, "No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                    } 
+                    else {
+                        Location licenseKeyLocation = 
+                            new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                        LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                        if (result.code != 0) {
+                            String allMessages = String.join("\n", result.messages);
+                            log.warning(LogType.USER_MESSAGE, allMessages);
+                        }
+                    }
+                    stream.println(licenseService.getLicenseInfo());
                 }
                 return 0;
             }
