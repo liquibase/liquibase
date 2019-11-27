@@ -238,6 +238,24 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
+        try {
+            if (getDatabaseMajorVersion() < 10) {
+                return "";
+            }
+        } catch (DatabaseException e) {
+            return "";
+        }
+
+        if (StringUtils.isEmpty(generationType)) {
+            return super.getAutoIncrementClause();
+        }
+
+        String autoIncrementClause = "GENERATED %s AS IDENTITY"; // %s -- [ ALWAYS | BY DEFAULT ]
+        return String.format(autoIncrementClause, generationType);
+    }
+
+    @Override
     public boolean generateAutoIncrementStartWith(BigInteger startWith) {
         try {
             if (getDatabaseMajorVersion() < 10) {
