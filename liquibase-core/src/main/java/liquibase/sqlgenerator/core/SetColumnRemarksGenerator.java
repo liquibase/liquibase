@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -34,6 +35,9 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
         validationErrors.checkDisallowedField("catalogName", setColumnRemarksStatement.getCatalogName(), database, MSSQLDatabase.class);
+        if (database instanceof MySQLDatabase) {
+            validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(setColumnRemarksStatement.getColumnDataType()));
+        }
         return validationErrors;
     }
 
@@ -43,7 +47,8 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         String remarksEscaped = database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks()));
 
         if (database instanceof MySQLDatabase) {
-            return new Sql[]{new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " COMMENT = '" + remarksEscaped
+
+            return new Sql[]{new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + " COMMENT '" + remarksEscaped
                     + "'", getAffectedColumn(statement))};
         } else if (database instanceof MSSQLDatabase) {
             String schemaName = statement.getSchemaName();
