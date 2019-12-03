@@ -40,7 +40,7 @@ public class SmallIntType extends LiquibaseDataType {
         }
 
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 5);
+            return new DatabaseDataType("NUMBER", 5, 0);
         }
 
         if (database instanceof PostgresDatabase)

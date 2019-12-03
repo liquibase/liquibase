@@ -210,6 +210,12 @@ class DataTypeFactoryTest extends Specification {
         "nclob"                                        | new OracleDatabase()   | "NCLOB"                                        | ClobType      | false
         "xml"                                          | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
         "xmltype"                                      | new OracleDatabase()   | "XMLTYPE"                                      | XMLType       | false
+        "tinyint"                                      | new OracleDatabase()   | "NUMBER(3, 0)"                                 | TinyIntType   | false
+        "smallint"                                     | new OracleDatabase()   | "NUMBER(5, 0)"                                 | SmallIntType  | false
+        "mediumint"                                    | new OracleDatabase()   | "NUMBER(7, 0)"                                 | MediumIntType | false
+        "int"                                          | new OracleDatabase()   | "NUMBER(10, 0)"                                | IntType       | false
+        "integer"                                      | new OracleDatabase()   | "NUMBER(10, 0)"                                | IntType       | false
+        "bigint"                                       | new OracleDatabase()   | "NUMBER(19, 0)"                                | BigIntType    | false
         "xml"                                          | new PostgresDatabase() | "XML"                                          | XMLType       | false
         "BINARY(16)"                                   | new H2Database()       | "BINARY(16)"                                   | BlobType      | false
     }
