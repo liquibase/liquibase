@@ -1140,7 +1140,6 @@ public class Main {
      */
     protected void doMigration() throws Exception {
         if (COMMANDS.HELP.equalsIgnoreCase(command)) {
-            System.out.println("HERE!!!!!!!!!!!!!!!!!!!");
             printHelp(System.err);
             return;
         }
