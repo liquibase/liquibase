@@ -16,14 +16,12 @@ import liquibase.logging.LogType;
 import liquibase.util.StringUtils;
 import liquibase.util.grammar.ParseException;
 
-import java.util.Locale;
-
 /**
  * Data type support for TIMESTAMP data types in various DBMS. All DBMS are at least expected to support the
  * year, month, day, hour, minute and second parts. Optionally, fractional seconds and time zone information can be
  * specified as well.
  */
-@DataTypeInfo(name = "timestamp", aliases = {"java.sql.Types.TIMESTAMP", "java.sql.Timestamp", "timestamptz"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "timestamp", aliases = {"java.sql.Types.TIMESTAMP", "java.sql.Types.TIMESTAMP_WITH_TIMEZONE", "java.sql.Timestamp", "timestamptz"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class TimestampType extends DateTimeType {
 
     /**
@@ -119,6 +117,21 @@ public class TimestampType extends DateTimeType {
             type =  new DatabaseDataType("TIMESTAMP", fractionalDigits);
         } else {
             type = new DatabaseDataType("TIMESTAMP");
+        }
+
+        if (originalDefinition.startsWith("java.sql.Types.TIMESTAMP_WITH_TIMEZONE")
+            && (database instanceof PostgresDatabase
+            || database instanceof OracleDatabase
+            || database instanceof H2Database
+            || database instanceof HsqlDatabase)) {
+
+            if ((database instanceof PostgresDatabase)) {
+                type.addAdditionalInformation("WITH TIME ZONE");
+            } else {
+                type.addAdditionalInformation("WITH TIMEZONE");
+            }
+
+            return type;
         }
 
         if (getAdditionalInformation() != null
