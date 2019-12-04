@@ -187,7 +187,7 @@ public class Main {
                 main.command = "";
                 main.reconfigureLogging();
                 main.parseDefaultPropertyFiles();
-                PrintStream stream = System.err;
+                PrintStream stream = System.out;
                 stream.println(CommandLineUtils.getBanner());
                 stream.println(
                         String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
