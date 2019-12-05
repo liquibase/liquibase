@@ -68,6 +68,7 @@ public class H2Database extends AbstractJdbcDatabase {
             "SYSDATE",
             "SYSTIME",
             "SYSTIMESTAMP",
+            "TABLE",
             "TODAY",
             "TRUE",
             "UNION",
