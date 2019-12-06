@@ -12,8 +12,45 @@
 
     <name>${project.artifactId}</name>
 
+    <url>http://www.liquibase.org</url>
+
+    <organization>
+        <name>Liquibase.org</name>
+        <url>http://www.liquibase.org</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>nvoxland</id>
+            <name>Nathan Voxland</name>
+            <email>nathan.voxland@liquibase.org</email>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>Apache License, Version 2.0</name>
+        </license>
+    </licenses>
+
+    <issueManagement>
+        <url>http://liquibase.jira.com/browse/CORE</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+    </scm>
+
     <properties>
-        <liquibase.base.version>3.8.2</liquibase.base.version>
+        <liquibase.base.version>3.8.3</liquibase.base.version>
         <liquibase.version.qualifier>-local</liquibase.version.qualifier>
         <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
         <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}</liquibase.version>
@@ -29,6 +66,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.version>5.0.12.RELEASE</spring.version>
+        <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
     </properties>
 
     <dependencies>
@@ -139,7 +177,19 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <configuration>
+                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                    <gpgArguments>
+                        <arg>--batch</arg>
+                        <!-- This is necessary for gpg to not try to use the pinentry programs -->
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -219,17 +269,15 @@
             <!-- By default, no sub-module will be deployed to maven. Override this setting in sub-modules that should be -->
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
                 <executions>
                     <execution>
                         <id>default-install</id>
                         <phase>none</phase>
                     </execution>
                 </executions>
+
             </plugin>
+
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.8.2</version>
@@ -244,5 +292,21 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+            </plugins>
+
+        </pluginManagement>
     </build>
 </project>

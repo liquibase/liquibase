@@ -12,27 +12,16 @@
     <!-- remove all profiles -->
     <xsl:template match="maven:profiles"/>
 
-    <!-- remove all org.liquibase sub-module dependencies -->
-    <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'org.liquibase']"/>
-
-    <!-- remove com.sun.xml.bind dependencies -->
-    <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'com.sun.xml.bind']"/>
+    <!-- remove all org.liquibase sub-module dependencies except liquibase-core -->
+    <xsl:template match="maven:dependencies/maven:dependency[maven:groupId = 'org.liquibase'  and maven:artifactId != 'liquibase-core']"/>
 
     <!--
     Set module <name> as "Liquibase".
     We do not set it in the original pom.xml since it makes build output more confusing - nice to keep the capitalization consistent
     -->
     <xsl:template match="maven:project/maven:description">
-        <name xmlns="http://maven.apache.org/POM/4.0.0">Liquibase</name>
+        <name xmlns="http://maven.apache.org/POM/4.0.0">Liquibase CDI Plugin</name>
         <xsl:copy-of select="."/>
-    </xsl:template>
-
-    <!--
-    Set artifactId as "liquibase".
-    We do not set it in the original pom.xml since it makes build output more confusing - nice to keep the module names matching directory names
-    -->
-    <xsl:template match="maven:project/maven:artifactId">
-        <artifactId xmlns="http://maven.apache.org/POM/4.0.0">liquibase-core</artifactId>
     </xsl:template>
 
 </xsl:stylesheet>

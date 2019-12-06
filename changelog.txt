@@ -1,6 +1,14 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.2 (2019.11.26)
+
+- Pro stored logic snapshot logic now supports postgresql and db2
+- Using generateChangeLog/diffChangeLog to generate formatted sql changelogs now works with Liquibase Pro's stored logic support
+- CDI-related classes moved back out of the main liquibase jar into an optional jar
+- Fixed issue with indexes backing foreign keys not always being caputured in diffChangeLog/generateChangeLog
+- Fixed issue with diffChangeLog/generateChangeLog generating primary keys when column order doesn't match the table's column order
+
 Changes in version 3.8.1 (2019.11.5)
 
 - [PRO] Oracle and SQL Server users can now reverse engineer database changes for stored logic such as triggers, functions & procedures using generateChangeLog, snapshot, diff, and diffChangeLog commands.  
