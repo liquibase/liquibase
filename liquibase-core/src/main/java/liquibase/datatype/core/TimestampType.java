@@ -125,7 +125,7 @@ public class TimestampType extends DateTimeType {
             || database instanceof H2Database
             || database instanceof HsqlDatabase)) {
 
-            if ((database instanceof PostgresDatabase)) {
+            if (database instanceof PostgresDatabase || database instanceof H2Database) {
                 type.addAdditionalInformation("WITH TIME ZONE");
             } else {
                 type.addAdditionalInformation("WITH TIMEZONE");
@@ -143,7 +143,7 @@ public class TimestampType extends DateTimeType {
 
             if (additionalInformation != null) {
                 String additionInformation = additionalInformation.toUpperCase(Locale.US);
-                if ((database instanceof PostgresDatabase) && additionInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
+                if ((database instanceof PostgresDatabase || database instanceof H2Database) && additionInformation.toUpperCase(Locale.US).contains("TIMEZONE")) {
                     additionalInformation = additionInformation.toUpperCase(Locale.US).replace("TIMEZONE", "TIME ZONE");
                 }
                 // CORE-3229 Oracle 11g doesn't support WITHOUT clause in TIMESTAMP data type

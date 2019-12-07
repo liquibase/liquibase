@@ -242,8 +242,8 @@ class DataTypeFactoryTest extends Specification {
         "BINARY(16)"                                   | new H2Database()       | "BINARY(16)"                                   | BlobType      | false
         "timestamp"                                    | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6)"                                 | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
-        "TIMESTAMP WITH TIMEZONE"                      | new H2Database()       | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false
-        "TIMESTAMP(6) WITH TIMEZONE"                   | new H2Database()       | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false
+        "TIMESTAMP WITH TIMEZONE"                      | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                      | TimestampType | false
+        "TIMESTAMP(6) WITH TIMEZONE"                   | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                   | TimestampType | false
         "timestamp without timezone"                   | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "timestamp(6) without timezone"                | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
         "timestamptz"                                  | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
@@ -252,8 +252,8 @@ class DataTypeFactoryTest extends Specification {
         "java.sql.Timestamp(6)"                        | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
         "java.sql.Types.TIMESTAMP"                     | new H2Database()       | "TIMESTAMP"                                    | TimestampType | false
         "java.sql.Types.TIMESTAMP(6)"                  | new H2Database()       | "TIMESTAMP(6)"                                 | TimestampType | false
-        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new H2Database()       | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false
-        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new H2Database()       | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new H2Database()       | "TIMESTAMP WITH TIME ZONE"                      | TimestampType | false
+        "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new H2Database()       | "TIMESTAMP(6) WITH TIME ZONE"                   | TimestampType | false
     }
 
     @Unroll("#featureName: #object for #database")
