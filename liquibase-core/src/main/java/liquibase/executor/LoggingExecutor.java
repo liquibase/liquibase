@@ -31,6 +31,8 @@ public class LoggingExecutor extends AbstractExecutor {
     private Writer output;
     private Executor delegatedReadExecutor;
 
+    private boolean batchChangelogStatements;
+
     public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
         if (output != null) {
             this.output = output;
@@ -45,7 +47,22 @@ public class LoggingExecutor extends AbstractExecutor {
         return output;
     }
 
-    @Override
+    /**
+     * For SQL Server and Sybase each statement is by default in a single batch separated by a GO statement.
+     * If you execute the script as a whole this means that though a statement may have failed an EXECUTED entry
+     * will be stored in DATABASECHANGELOG for the failed change log.
+     *
+     * Use this flag to omit the GO statement for every statement that does not insert or update Liquibase own tables,
+     * such that in case of a failed statement no DATABASECHANGELOG entry will be created.
+     *
+     * @param batchChangelogStatements if true all statements of a change log are batched (separated by a GO statement)
+     * 								   instead of every statement.
+     */
+    public void setBatchChangelogStatements(boolean batchChangelogStatements) {
+		this.batchChangelogStatements = batchChangelogStatements;
+	}
+
+	@Override
     public void execute(SqlStatement sql) throws DatabaseException {
         outputStatement(sql);
     }
@@ -113,39 +130,7 @@ public class LoggingExecutor extends AbstractExecutor {
                 }
 
                 output.write(statement);
-
-                if ((database instanceof MSSQLDatabase) || (database instanceof SybaseDatabase) || (database
-                    instanceof SybaseASADatabase)) {
-                    output.write(StreamUtil.getLineSeparator());
-                    output.write("GO");
-                } else {
-                    String endDelimiter = ";";
-                    String potentialDelimiter = null;
-                    if (sql instanceof RawSqlStatement) {
-                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
-                    } else if (sql instanceof CreateProcedureStatement) {
-                        potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
-                    }
-
-                    if (potentialDelimiter != null) {
-                        //ignore trailing $ as a regexp to determine if it should be output
-                        potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", "");
-
-                        if (potentialDelimiter.replaceAll("\\n", "\n")
-                                .replace("\\r", "\r")
-                                .matches("[;/\r\n\\w@\\-]+")) {
-                            endDelimiter = potentialDelimiter;
-                        }
-                    }
-
-                    endDelimiter = endDelimiter.replace("\\n", "\n");
-                    endDelimiter = endDelimiter.replace("\\r", "\r");
-
-
-                    if (!statement.endsWith(endDelimiter)) {
-                        output.write(endDelimiter);
-                    }
-                }
+                writeEndDelimiter(sql, statement);
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }
@@ -153,6 +138,73 @@ public class LoggingExecutor extends AbstractExecutor {
             throw new DatabaseException(e);
         }
     }
+
+	protected void writeEndDelimiter(SqlStatement sql, String statement) throws IOException {
+		if ((database instanceof MSSQLDatabase) || (database instanceof SybaseDatabase) || (database
+		    instanceof SybaseASADatabase)) {
+			if (printGoStatement(sql)) {
+			    output.write(StreamUtil.getLineSeparator());
+			    output.write("GO");
+			}
+		} else {
+		    String endDelimiter = ";";
+		    String potentialDelimiter = null;
+		    if (sql instanceof RawSqlStatement) {
+		        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+		    } else if (sql instanceof CreateProcedureStatement) {
+		        potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
+		    }
+
+		    if (potentialDelimiter != null) {
+		        //ignore trailing $ as a regexp to determine if it should be output
+		        potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", "");
+
+		        if (potentialDelimiter.replaceAll("\\n", "\n")
+		                .replace("\\r", "\r")
+		                .matches("[;/\r\n\\w@\\-]+")) {
+		            endDelimiter = potentialDelimiter;
+		        }
+		    }
+
+		    endDelimiter = endDelimiter.replace("\\n", "\n");
+		    endDelimiter = endDelimiter.replace("\\r", "\r");
+
+
+		    if (!statement.endsWith(endDelimiter)) {
+		        output.write(endDelimiter);
+		    }
+		}
+	}
+
+	private boolean printGoStatement(SqlStatement sql) {
+		if (!batchChangelogStatements) {
+			return true;
+		} else if (sql instanceof ClearDatabaseChangeLogTableStatement) {
+			return true;
+		} else if (sql instanceof CreateDatabaseChangeLogLockTableStatement) {
+			return true;
+		} else if (sql instanceof CreateDatabaseChangeLogTableStatement) {
+			return true;
+		} else if (sql instanceof InitializeDatabaseChangeLogLockTableStatement) {
+			return true;
+		} else if (sql instanceof LockDatabaseChangeLogStatement) {
+			return true;
+		} else if (sql instanceof MarkChangeSetRanStatement) {
+			return true;
+		} else if (sql instanceof RemoveChangeSetRanStatusStatement) {
+			return true;
+		} else if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
+			return true;
+		} else if (sql instanceof SelectFromDatabaseChangeLogStatement) {
+			return true;
+		} else if (sql instanceof UnlockDatabaseChangeLogStatement) {
+			return true;
+		} else if (sql instanceof UpdateChangeSetChecksumStatement) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
     @Override
     public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
@@ -221,7 +273,7 @@ public class LoggingExecutor extends AbstractExecutor {
     public boolean updatesDatabase() {
         return false;
     }
-    
+
     private class NoopWriter extends Writer {
 
         @Override
@@ -241,5 +293,5 @@ public class LoggingExecutor extends AbstractExecutor {
 
     }
 
-    
+
 }
