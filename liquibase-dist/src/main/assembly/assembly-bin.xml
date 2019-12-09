@@ -68,6 +68,10 @@
             <source>../ABOUT.txt</source>
             <outputDirectory>${file.separator}</outputDirectory>
         </file>
+        <file>
+            <source>../changelog.txt</source>
+            <outputDirectory>${file.separator}</outputDirectory>
+        </file>
     </files>
     <dependencySets>
         <dependencySet>
