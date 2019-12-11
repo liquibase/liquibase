@@ -108,8 +108,8 @@ public class MavenUtils {
               String allMessages = String.join("\n", result.messages);
               log.warn(allMessages);
           }
-          log.info(licenseService.getLicenseInfo());
       }
+    log.info(licenseService.getLicenseInfo());
   }
 
   /**
