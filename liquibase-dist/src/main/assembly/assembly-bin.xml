@@ -47,7 +47,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>src/main/archive/licenses</directory>
+            <directory>${project.basedir}/../liquibase-core/src/main/resources/liquibase/licenses</directory>
             <outputDirectory>licenses</outputDirectory>
             <includes>
                 <include>**/*</include>
