@@ -108,7 +108,15 @@ public class MavenUtils {
               String allMessages = String.join("\n", result.messages);
               log.warn(allMessages);
           }
-          log.info(licenseService.getLicenseInfo());
+          String licenseInfo = licenseService.getLicenseInfo();
+          log.info(licenseInfo);
+
+          //
+          // If the license has expired then just disable the service
+          //
+          if (licenseService.daysTilExpiration() < 0) {
+            licenseService.disable();
+          }
       }
   }
 
