@@ -118,6 +118,7 @@ public class MavenUtils {
             licenseService.disable();
           }
       }
+      log.info(licenseService.getLicenseInfo());
   }
 
   /**
