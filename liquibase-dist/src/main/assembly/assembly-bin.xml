@@ -60,6 +60,7 @@
             <destName>liquibase.jar</destName>
             <fileMode>0644</fileMode>
         </file>
+        <!-- specifying the outputDirectory as file.separator puts it in the root -->
         <file>
             <source>../LICENSE.txt</source>
             <outputDirectory>${file.separator}</outputDirectory>
