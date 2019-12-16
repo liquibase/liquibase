@@ -221,8 +221,7 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
-
+    public void print(final PrintStream out, final ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = generateChangeSets();
 
         changeLogSerializer.write(changeSets, out);
