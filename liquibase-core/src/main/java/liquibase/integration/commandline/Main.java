@@ -136,6 +136,10 @@ public class Main {
                                                  360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
                                                  8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
                                                 };
+    private static class CodePointCheck {
+        public int position;
+        public char ch;
+    }
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -201,13 +205,12 @@ public class Main {
             // Look for characters which cannot be handled
             //
             for (int i=0; i < args.length; i++) {
-                int index = checkArg(args[i]);
-                if (index >= 0) {
-                    char[] chars = args[i].toCharArray();
+                CodePointCheck codePointCheck = checkArg(args[i]);
+                if (codePointCheck != null) {
                     String message =
-                        "A non-standard character '" + chars[index] +
+                        "A non-standard character '" + codePointCheck.ch +
                         "' was detected on the command line at position " +
-                        (index+1) + ".\nIf problems occur, please remove the character and try again.";
+                        (codePointCheck.position + 1) + ".\nIf problems occur, please remove the character and try again.";
                     LOG.warning(message);
                     System.err.println(message);
                 }
@@ -943,19 +946,22 @@ public class Main {
      * Check the string for known characters which cannot be handled
      *
      * @param   arg             Input parameter to check
-     * @return  int             The index of the found character or -1 if none found
+     * @return  int             A CodePointCheck object, or null to indicate all good
      *
      */
-    private static int checkArg(String arg) {
+    private static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
         for (int i=0; i < chars.length; i++) {
             for (int j = 0; j < suspiciousCodePoints.length; j++) {
                 if (suspiciousCodePoints[j] == chars[i]) {
-                    return i;
+                    CodePointCheck codePointCheck = new CodePointCheck();
+                    codePointCheck.position = i;
+                    codePointCheck.ch = chars[i];
+                    return codePointCheck;
                 }
             }
         }
-        return -1;
+        return null;
     }
 
     /**
