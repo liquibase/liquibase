@@ -1,6 +1,7 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -11,7 +12,6 @@ import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
 import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
@@ -20,11 +20,13 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
+import javax.xml.bind.annotation.XmlSchema;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -32,7 +34,7 @@ import java.util.*;
  *
  * @author Peter Murray
  * @author Florent Biville
- *
+ * <p>
  * Test dependency is used because when you run a goal outside the build phases you want to have the same dependencies
  * that it would had if it was ran inside test phase
  * @requiresDependencyResolution test
@@ -59,11 +61,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected String url;
 
     /**
-
-     The Maven Wagon manager to use when obtaining server authentication details.
-     @component role="org.apache.maven.artifact.manager.WagonManager"
-     @required
-     @readonly
+     * The Maven Wagon manager to use when obtaining server authentication details.
+     *
+     * @component role="org.apache.maven.artifact.manager.WagonManager"
+     * @required
+     * @readonly
      */
     protected WagonManager wagonManager;
     /**
@@ -262,12 +264,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private File driverPropertiesFile;
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
-        if (outputFileEncoding==null) {
+        if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
             return new OutputStreamWriter(new FileOutputStream(outputFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
-        return new BufferedWriter(new OutputStreamWriter( new FileOutputStream(outputFile), outputFileEncoding));
+        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), outputFileEncoding));
     }
 
     @Override
@@ -288,7 +290,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
             getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic
-                (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+                    (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
         if (skip) {
@@ -297,86 +299,119 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-        ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
-        configureFieldsAndValues(fileOpener);
-
-//        LogService.getInstance().setDefaultLoggingLevel(logging);
-        getLog().info(CommandLineUtils.getBanner());
-
-        // Displays the settings for the Mojo depending of verbosity mode.
-        displayMojoSettings();
-
-        // Check that all the parameters that must be specified have been by the user.
-        checkRequiredParametersAreSpecified();
-
-        Database database = null;
         try {
-            String dbPassword = (emptyPassword || (password == null)) ? "" : password;
-            String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
-            database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
-                    url,
-                    username,
-                    dbPassword,
-                    driver,
-                    defaultCatalogName,
-                    defaultSchemaName,
-                    outputDefaultCatalog,
-                    outputDefaultSchema,
-                    databaseClass,
-                    driverPropsFile,
-                    propertyProviderClass,
-                    changelogCatalogName,
-                    changelogSchemaName,
-                    databaseChangeLogTableName,
-                    databaseChangeLogLockTableName);
-            liquibase = createLiquibase(fileOpener, database);
+            Scope.child(Scope.Attr.resourceAccessor, getResourceAccessor(artifactClassLoader), () -> {
 
-            getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+                configureFieldsAndValues();
 
-            if (expressionVars != null) {
-                for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
-                    this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
-                }
-            }
+                //        LogService.getInstance().setDefaultLoggingLevel(logging);
+                getLog().info(CommandLineUtils.getBanner());
 
-            getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
-            if (expressionVariables != null) {
-                for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
-                    if (var.getValue() != null) {
-                        this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                // Displays the settings for the Mojo depending of verbosity mode.
+                displayMojoSettings();
+
+                // Check that all the parameters that must be specified have been by the user.
+                checkRequiredParametersAreSpecified();
+
+                Database database = null;
+                try {
+                    String dbPassword = (emptyPassword || (password == null)) ? "" : password;
+                    String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
+                    database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
+                            url,
+                            username,
+                            dbPassword,
+                            driver,
+                            defaultCatalogName,
+                            defaultSchemaName,
+                            outputDefaultCatalog,
+                            outputDefaultSchema,
+                            databaseClass,
+                            driverPropsFile,
+                            propertyProviderClass,
+                            changelogCatalogName,
+                            changelogSchemaName,
+                            databaseChangeLogTableName,
+                            databaseChangeLogLockTableName);
+                    liquibase = createLiquibase(database);
+
+                    configureChangeLogProperties();
+
+                    getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+
+                    if (expressionVars != null) {
+                        for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
+                            this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                        }
                     }
-                }
-            }
 
-            if (clearCheckSums) {
-                getLog().info("Clearing the Liquibase checksums on the database");
-                liquibase.clearCheckSums();
-            }
-
-            getLog().info("Executing on Database: " + url);
-
-            if (isPromptOnNonLocalDatabase()) {
-                if (!liquibase.isSafeToRunUpdate()) {
-                    if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                        throw new LiquibaseException("User decided not to run against non-local database");
+                    getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                    if (expressionVariables != null) {
+                        for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
+                            if (var.getValue() != null) {
+                                this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                            }
+                        }
                     }
+
+                    if (clearCheckSums) {
+                        getLog().info("Clearing the Liquibase checksums on the database");
+                        liquibase.clearCheckSums();
+                    }
+
+                    getLog().info("Executing on Database: " + url);
+
+                    if (isPromptOnNonLocalDatabase()) {
+                        if (!liquibase.isSafeToRunUpdate()) {
+                            if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                                throw new LiquibaseException("User decided not to run against non-local database");
+                            }
+                        }
+                    }
+                    setupBindInfoPackage();
+                    performLiquibaseTask(liquibase);
+                } catch (LiquibaseException e) {
+                    cleanup(database);
+                    throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
                 }
-            }
 
-            performLiquibaseTask(liquibase);
-        }
-        catch (LiquibaseException e) {
-            cleanup(database);
-            throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
+                cleanup(database);
+                getLog().info(MavenUtils.LOG_SEPARATOR);
+                getLog().info("");
+            });
+        } catch (Exception e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
 
-        cleanup(database);
-        getLog().info(MavenUtils.LOG_SEPARATOR);
-        getLog().info("");
     }
 
     protected Liquibase getLiquibase() {
         return liquibase;
+    }
+
+    protected void setupBindInfoPackage() {
+        String nsuri = "http://www.hibernate.org/xsd/orm/hbm";
+        String packageInfoClassName = "org.hibernate.boot.jaxb.hbm.spi.package-info";
+        try {
+            final Class<?> packageInfoClass = Class.forName(packageInfoClassName);
+            final XmlSchema xmlSchema = packageInfoClass.getAnnotation(XmlSchema.class);
+            if (xmlSchema == null) {
+                this.getLog().warn(MessageFormat
+                        .format("Class [{0}] is missing the [{1}] annotation. Processing bindings will probably fail.",
+                                packageInfoClassName, XmlSchema.class.getName()));
+            } else {
+                final String namespace = xmlSchema.namespace();
+                if (nsuri.equals(namespace)) {
+                    this.getLog().warn(MessageFormat
+                            .format("Namespace of the [{0}] annotation does not match [{1}]. Processing bindings will probably fail.",
+                                    XmlSchema.class.getName(), nsuri));
+                }
+            }
+        } catch (ClassNotFoundException cnfex) {
+            this.getLog().warn(MessageFormat
+                    .format("Class [{0}] could not be found. Processing bindings will probably fail.",
+                            packageInfoClassName), cnfex);
+        }
     }
 
     protected abstract void performLiquibaseTask(Liquibase liquibase)
@@ -394,29 +429,55 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
-        return new Liquibase("", fo, db);
+    protected Liquibase createLiquibase(Database db) throws MojoExecutionException {
+        return new Liquibase("", Scope.getCurrentScope().getResourceAccessor(), db);
     }
 
-    public void configureFieldsAndValues(ResourceAccessor fo)
-            throws MojoExecutionException, MojoFailureException {
+    public void configureFieldsAndValues() throws MojoExecutionException, MojoFailureException {
         // Load the properties file if there is one, but only for values that the user has not
         // already specified.
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
-            InputStream is;
-            try {
-                is = StreamUtil.singleInputStream(propertyFile, fo);
+            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+                parsePropertiesFile(is);
+                getLog().info(MavenUtils.LOG_SEPARATOR);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-            if (is == null) {
-                throw new MojoFailureException("Failed to resolve the properties file.");
-            }
-            parsePropertiesFile(is);
-            getLog().info(MavenUtils.LOG_SEPARATOR);
         }
+    }
+
+    protected void configureChangeLogProperties() throws MojoFailureException, MojoExecutionException {
+        if (propertyFile != null) {
+            getLog().info("Parsing Liquibase Properties File " + propertyFile + " for changeLog parameters");
+            try (InputStream propertiesInputStream = handlePropertyFileInputStream(propertyFile)) {
+                Properties props = loadProperties(propertiesInputStream);
+                for (Map.Entry entry : props.entrySet()) {
+                    String key = (String) entry.getKey();
+                    if (key.startsWith("parameter.")) {
+                        getLog().debug("Setting changeLog parameter " + key);
+                        liquibase.setChangeLogParameter(key.replaceFirst("^parameter.", ""), entry.getValue());
+                    }
+                }
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+    }
+
+    private static InputStream handlePropertyFileInputStream(String propertyFile) throws MojoFailureException {
+        InputStream is;
+        try {
+            is = Scope.getCurrentScope().getResourceAccessor().openStream(null, propertyFile);
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        if (is == null) {
+            throw new MojoFailureException("Failed to resolve the properties file.");
+        }
+
+        return is;
     }
 
     protected ClassLoader getMavenArtifactClassLoader() throws MojoExecutionException {
@@ -427,8 +488,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     getClass(),
                     getLog(),
                     verbose);
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new MojoExecutionException("Failed to create artifact classloader", e);
         }
     }
@@ -453,9 +513,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    protected ResourceAccessor getFileOpener(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
-        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
+        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
         return new CompositeResourceAccessor(mFO, fsFO);
     }
 
@@ -505,10 +565,19 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             try {
                 db.rollback();
                 db.close();
-            }
-            catch (DatabaseException e) {
+            } catch (DatabaseException e) {
                 getLog().error("Failed to close open connection to database.", e);
             }
+        }
+    }
+
+    private static Properties loadProperties(InputStream propertiesInputStream) throws MojoExecutionException {
+        Properties props = new Properties();
+        try {
+            props.load(propertiesInputStream);
+            return props;
+        } catch (IOException e) {
+            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
         }
     }
 
@@ -517,24 +586,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @param propertiesInputStream The input stream which is the Liquibase properties that
      *                              needs to be parsed.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          If there is a problem parsing
-     *          the file.
+     * @throws org.apache.maven.plugin.MojoExecutionException If there is a problem parsing
+     *                                                        the file.
      */
     protected void parsePropertiesFile(InputStream propertiesInputStream)
             throws MojoExecutionException {
         if (propertiesInputStream == null) {
             throw new MojoExecutionException("Properties file InputStream is null.");
         }
-        Properties props = new Properties();
-        try {
-            props.load(propertiesInputStream);
-        }
-        catch (IOException e) {
-            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
-        }
+        Properties props = loadProperties(propertiesInputStream);
 
-        for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+        for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
             String key = null;
             try {
                 key = (String) it.next();
@@ -549,8 +611,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         setFieldValue(field, props.get(key).toString());
                     }
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 getLog().info("  '" + key + "' in properties file is not being used by this "
                         + "task.");
             }
@@ -607,8 +668,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     @SuppressWarnings("unchecked")
     private void processSystemProperties() {
-        if (systemProperties == null)
-        {
+        if (systemProperties == null) {
             systemProperties = new Properties();
         }
         // Add all system properties configured by the user

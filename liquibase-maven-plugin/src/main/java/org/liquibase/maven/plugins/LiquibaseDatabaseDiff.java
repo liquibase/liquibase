@@ -18,6 +18,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -139,13 +140,13 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         ClassLoader cl = null;
-        ResourceAccessor fileOpener;
+        ResourceAccessor resourceAccessor;
         try {
             cl = getClassLoaderIncludingProjectClasspath();
             Thread.currentThread().setContextClassLoader(cl);
 
             ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-            fileOpener = getFileOpener(artifactClassLoader);
+            resourceAccessor = getResourceAccessor(artifactClassLoader);
         }
         catch (MojoExecutionException e) {
             throw new LiquibaseException("Could not create the class loader, " + e, e);
@@ -153,7 +154,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
         Database db = liquibase.getDatabase();
 
-        Database referenceDatabase = CommandLineUtils.createDatabaseObject(fileOpener, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null, databaseChangeLogTableName, databaseChangeLogLockTableName);
+        Database referenceDatabase = CommandLineUtils.createDatabaseObject(resourceAccessor, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null, databaseChangeLogTableName, databaseChangeLogLockTableName);
 
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {
@@ -175,7 +176,9 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 }
 
                 CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, objectChangeFilter, StringUtil.trimToNull(diffTypes));
-                getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
+                if (new File(diffChangeLogFile).exists()) {
+                    getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
+                }
             }
             catch (IOException|ParserConfigurationException e) {
                 throw new LiquibaseException(e);

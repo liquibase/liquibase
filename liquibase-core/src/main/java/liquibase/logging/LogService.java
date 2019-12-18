@@ -1,58 +1,39 @@
 package liquibase.logging;
 
-import liquibase.logging.core.Slf4JLoggerFactory;
+import liquibase.logging.core.JavaLogService;
+import liquibase.plugin.Plugin;
+
+import java.util.logging.Level;
 
 /**
- * Primary facade for working with Logs in Liquibase.
+ * This service is used to create named {@link Logger} instances through a {@link LogService}.
  *
- * This service is used to create named {@link Logger} instances through a {@link LoggerFactory}.
- *
- * This service supports "nested diagnostic contexts" and progress tracking through {@link #pushContext(String, Object)}.
- * It is up to the underlying {@link LoggerFactory} implementations to support those features as they can.
- *
- * The default LoggerFactory used in {@link Slf4JLoggerFactory} which allows the log to be bound to most any underlying logging system
- * via SLF4j.
+ * The default LoggerFactory used in {@link JavaLogService} uses {@link java.util.logging.Logger}
  */
-public class LogService {
+public interface LogService extends Plugin {
 
-
-    private static LoggerFactory loggerFactory = new Slf4JLoggerFactory();
-
-    /**
-     * Singleton so private constructor.
-     */
-    private LogService() {
-    }
+    int getPriority();
 
     /**
-     * Set the LoggerFactory used by this singleton.
+     * Returns the {@link Level} for this logger. Logs that are not using {@link java.util.logging.Logger} still translate to this standard.
      */
-    public static void setLoggerFactory(LoggerFactory service) {
-        LogService.loggerFactory = service;
-    }
+    Level getLogLevel();
 
     /**
-     * Returns a Logger for the given class based on the configured {@link #setLoggerFactory(LoggerFactory)}.
-     * There is no string version of this class to force a class-based log pattern.
+     * Sets the {@link Level} for this logger.
      */
-    public static Logger getLog(Class clazz) {
-        return loggerFactory.getLog(clazz);
-    }
+    void setLogLevel(Level level);
 
     /**
-     * Pushes a new nested diagnostic context onto the stack.
-     * The {@link LoggerContext} most be {@link LoggerContext#close()}'ed correctly.
-     * Ususally a "try with resource" pattern is best.
+     * Creates a logger for logging from the given class.
+     * Unlike most logging systems, there is no exposed getLog(String) method in order to provide more consistency in how logs are named.
      */
-    public static LoggerContext pushContext(String key, Object object) {
-        return loggerFactory.pushContext(key, object);
-    }
+    Logger getLog(Class clazz);
 
     /**
-     * Close the current log factory.
+     * Closes the current log output file(s) or any other resources used by this LoggerFactory and its Loggers.
      */
-    public void close() {
-        loggerFactory.close();
-    }
+    void close();
+
 
 }

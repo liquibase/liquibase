@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.logging.LogService;
@@ -101,17 +102,17 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             if (isAutoIncrementColumn) {
                 // TODO: check if database supports auto increment on non primary key column
                 if (database.supportsAutoIncrement()) {
-                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy(), autoIncrementConstraint.getGenerationType(), autoIncrementConstraint.getDefaultOnNull());
                 
                     if (!autoIncrementClause.isEmpty()) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
                 } else {
-                    LogService.getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
-            if (statement.getNotNullColumns().get(column) != null) {
+            if (statement.getNotNullColumns().containsKey(column)) {
                 buffer.append(" NOT NULL");
             }
 

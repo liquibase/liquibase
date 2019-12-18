@@ -55,7 +55,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
         return getRelation().getSchema();
     }
-    
+
     /**
      * @deprecated Use {@link #getRelation()}
      */
@@ -75,11 +75,11 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 	public UniqueConstraint setTable(Table table) {
 		return setRelation(table);
     }
-    
+
     public Relation getRelation() {
     	return getAttribute("table", Relation.class);
     }
-    
+
     public UniqueConstraint setRelation(Relation relation) {
     	this.setAttribute("table", relation);
         return this;
@@ -208,8 +208,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 			} else if (null == that.getRelation()) {
 				result = false;
 			} else {
-				result = this.getRelation().getName().equals(
-						that.getRelation().getName());
+				result = this.getRelation().equals(that.getRelation());
 			}
 		}
 
@@ -221,11 +220,14 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     public int compareTo(Object other) {
         UniqueConstraint o = (UniqueConstraint) other;
 		// Need check for nulls here due to NullPointerException using Postgres
-		String thisTableName;
-		String thatTableName;
-        thisTableName = (null == this.getRelation()) ? "" : this.getRelation().getName();
-        thatTableName = (null == o.getRelation()) ? "" : o.getRelation().getName();
-		int returnValue = thisTableName.compareTo(thatTableName);
+		int returnValue = 0;
+		if (getTable() != null && o.getTable() != null) {
+			returnValue = getTable().compareTo(o.getTable());
+		} else if (getTable() != null) {
+			return 1;
+		} else if (o.getTable() != null) {
+			return -1;
+		}
 		if (returnValue == 0) {
 			returnValue = this.getName().compareTo(o.getName());
 		}

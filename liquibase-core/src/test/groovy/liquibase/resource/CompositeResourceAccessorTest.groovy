@@ -1,96 +1,76 @@
 package liquibase.resource
 
+import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
-import static org.junit.Assert.assertNull
+class CompositeResourceAccessorTest extends Specification {
 
-public class CompositeResourceAccessorTest extends Specification {
-    
-    def ResourceAccessor first;
-    def ResourceAccessor second;
-    def CompositeResourceAccessor composite;
-    def InputStream validStream;
-    def Set<String> empty = new HashSet<>()
-    def Set<String> hasElements;
-    
-    def setup() {
-        first = Mock(ResourceAccessor.class);
-        second = Mock(ResourceAccessor.class);
-        composite = new CompositeResourceAccessor(first,second);
-        validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/resource/CompositeResourceAccessorTest.class");
+    ResourceAccessor first;
+    ResourceAccessor second;
+    CompositeResourceAccessor composite;
+    @Shared
+    InputStream validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/resource/CompositeResourceAccessorTest.class")
+    InputStreamList empty = new InputStreamList()
+    @Shared
+    SortedSet<String> validResources;
 
-        hasElements = new HashSet<>()
+    def setupSpec() {
+        validResources = new TreeSet<>()
         def resources = this.getClass().getClassLoader().getResources("liquibase")
         while (resources.hasMoreElements()) {
-            hasElements.add(resources.nextElement().toExternalForm())
+            validResources.add(resources.nextElement().toExternalForm())
         }
 
     }
-    
+
+    def setup() {
+        first = Mock(ResourceAccessor.class);
+        second = Mock(ResourceAccessor.class);
+        composite = new CompositeResourceAccessor(first, second);
+    }
+
     def cleanup() {
         if (validStream != null) {
             validStream.close();
         }
-        
+
     }
-    
-    def streamFirstHas() {
+
+    @Unroll
+    def "openStreams"() {
         when:
-        1 * first.getResourcesAsStream("file") >> new HashSet<InputStream>(Arrays.asList(validStream))
-        def is = composite.getResourcesAsStream("file");
-        
-        then:
-        validStream == is.iterator().next();
-    }
-    
-    def streamSecondHas() {
-        when:
-        first.getResourcesAsStream("file") >> null
-        second.getResourcesAsStream("file") >> new HashSet<InputStream>(Arrays.asList(validStream))
-        def is = composite.getResourcesAsStream("file");
+        1 * first.openStreams(null, "file") >> firstAccessorMock
+        1 * second.openStreams(null, "file") >> secondAccessorMock
+        def is = composite.openStreams(null, "file");
 
         then:
-        validStream == is.iterator().next()
+        is.streams == expected;
+
+        where:
+        firstAccessorMock                                           | secondAccessorMock                                          | expected
+        new InputStreamList(new URI("test://stream1"), validStream) | null                                                        | [(new URI("test://stream1")): validStream]
+        null                                                        | new InputStreamList(new URI("test://stream2"), validStream) | [(new URI("test://stream2")): validStream]
+        null                                                        | null                                                        | [:]
+        new InputStreamList(new URI("test://stream1"), validStream) | new InputStreamList(new URI("test://stream2"), validStream) | [(new URI("test://stream1")): validStream, (new URI("test://stream2")): validStream]
     }
-    
-    def streamNeitherHas() {
+
+    @Unroll
+    def "list"() {
         when:
-        first.getResourcesAsStream("file") >> null
-        second.getResourcesAsStream("file") >> null
-        def is = composite.getResourcesAsStream("file");
-        
-        then:
-        is == null
-        assertNull(is);
-    }
-    
-    def resourcesFirstHas() {
-        when:
-        first.list(null, "file", true, true, true) >> hasElements
-        def urls = composite.list(null, "file", true, true, true);
+        1 * first.list(null, "file", true, true, true) >> firstAccessorMock
+        1 * second.list(null, "file", true, true, true) >> secondAccessorMock
+        def list = composite.list(null, "file", true, true, true);
 
         then:
-        urls == hasElements
-    }
-    
-    def resourcesSecondHas() {
-        when:
-        first.list(null, "file", true, true, true) >> empty
-        second.list(null, "file", true, true, true) >> hasElements
-        def urls = composite.list(null, "file", true, true, true)
+        list == expected
 
-        then:
-        hasElements == urls
+        where:
+        firstAccessorMock | secondAccessorMock | expected
+        validResources    | [] as SortedSet    | validResources
+        [] as SortedSet   | validResources     | validResources
+        [] as SortedSet   | [] as SortedSet    | [] as SortedSet
+        validResources    | validResources     | validResources
     }
-    
-    def resourcesNeitherHas() {
-        when:
-        first.list(null, "file", true, true, true) >> empty
-        second.list(null, "file", true, true, true) >> empty
 
-        def urls = composite.list(null, "file", true, true, true)
-
-        then:
-        urls == null
-    }
 }

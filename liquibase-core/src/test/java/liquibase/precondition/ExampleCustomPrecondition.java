@@ -1,5 +1,6 @@
 package liquibase.precondition;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.CustomPreconditionFailedException;
 import liquibase.logging.LogService;
@@ -29,7 +30,7 @@ public class ExampleCustomPrecondition implements CustomPrecondition {
 
     @Override
     public void check(Database database) throws CustomPreconditionFailedException {
-        LogService.getLog(getClass()).info(LogType.LOG, "Custom precondition ran. Name: "+name+", count: "+count  );
+        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Custom precondition ran. Name: "+name+", count: "+count  );
 
 //        throw new CustomPreconditionFailedException("custom precondition failed", new RuntimeException());
     }

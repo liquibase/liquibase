@@ -443,7 +443,7 @@ public class CSVParser {
     }
 
     /**
-     * Appends the next character in the line to the stringbuffer.
+     * Appends the next character in the line to the StringBuilder.
      *
      * @param line - line to process
      * @param sb   - contains the processed character

@@ -122,12 +122,14 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
      * Convenience method for when the schemaName is set but we don't want to parse the body
      */
     public static void surroundWithSchemaSets(List<Sql> sql, String schemaName, Database database) {
-        if ((StringUtil.trimToNull(schemaName) != null) && !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
+        if ((StringUtil.trimToNull(schemaName) != null) &&
+                !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
             String defaultSchema = database.getDefaultSchemaName();
             if (database instanceof OracleDatabase) {
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
                 sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(defaultSchema, Schema.class)));
-            } else if (database instanceof AbstractDb2Database) {
+            }
+            else if (database instanceof AbstractDb2Database) {
                 sql.add(0, new UnparsedSql("SET CURRENT SCHEMA " + schemaName));
                 sql.add(new UnparsedSql("SET CURRENT SCHEMA " + defaultSchema));
             }
@@ -146,7 +148,10 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";
             while ((next != null) && !next.toString().equalsIgnoreCase(keywordBeforeName) && clauseIterator.hasNext()) {
-                if (!"PACKAGE".equalsIgnoreCase(keywordBeforeName) && "PACKAGE".equalsIgnoreCase((String) next)) {
+                if ((!"PACKAGE".equalsIgnoreCase(keywordBeforeName) &&
+                     !"BODY".equalsIgnoreCase(keywordBeforeName)) &&
+                    ("PACKAGE".equalsIgnoreCase((String) next)) ||
+                     "BODY".equalsIgnoreCase((String)next)) {
                     return procedureText;
                 }
                 next = clauseIterator.nextNonWhitespace();

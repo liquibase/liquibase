@@ -41,8 +41,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
 
-        if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof
-            InformixDatabase) || (database instanceof H2Database)) {
+        if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof InformixDatabase)) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
         }
         return validationErrors;
@@ -52,17 +51,14 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     public Sql[] generateSql(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 
-        String nullableString;
-        if (statement.isNullable()) {
-            nullableString = " NULL";
-        } else {
-            nullableString = " NOT NULL";
-        }
+        String nullableString = statement.isNullable()?" NULL":" NOT NULL";
 
         if ((database instanceof OracleDatabase) && (statement.getConstraintName() != null)) {
+            nullableString += !statement.isValidate() ? " ENABLE NOVALIDATE " : "";
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
         } else if ((database instanceof OracleDatabase) || (database instanceof SybaseDatabase) || (database
             instanceof SybaseASADatabase)) {
+            nullableString += (database instanceof OracleDatabase)&&(!statement.isValidate()) ? " ENABLE NOVALIDATE " : "";
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + nullableString;
         } else if (database instanceof MSSQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString;

@@ -19,6 +19,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.NowAndTodayUtil;
+import liquibase.util.NowAndTodayUtil;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -58,6 +59,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
+    private String generationType;
+    private Boolean defaultOnNull;
     private BigInteger startWith;
     private BigInteger incrementBy;
     private String remarks;
@@ -99,6 +102,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         if ((columnSnapshot.isNullable() != null) && !columnSnapshot.isNullable()) {
             constraints.setNullable(columnSnapshot.isNullable());
+            constraints.setShouldValidateNullable(columnSnapshot.shouldValidateNullable());
             nonDefaultConstraints = true;
         }
 
@@ -110,7 +114,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                     for (NotNullConstraint constraint : notNullConstraints) {
                             if (constraint.getColumnName().equals(getName())) {
                                     constraints.setNullable(false);
-                                    constraints.setNotNullConstraintName(constraint.getName());
+                                    constraints.setNotNullConstraintName(constraint.getConstraintName());
                                     nonDefaultConstraints = true;
                                 }
                         }
@@ -729,6 +733,24 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public Boolean getDefaultOnNull() {
+        return defaultOnNull;
+    }
+
+    public ColumnConfig setDefaultOnNull(Boolean defaultOnNull) {
+        this.defaultOnNull = defaultOnNull;
+        return this;
+    }
+
+    public String getGenerationType() {
+        return generationType;
+    }
+
+    public ColumnConfig setGenerationType(String generationType) {
+        this.generationType = generationType;
+        return this;
+    }
+
     @Override
     public String getSerializedObjectName() {
         return "column";
@@ -832,6 +854,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             defaultValueSequenceNext = new SequenceNextValueFunction(defaultValueSequenceNextString);
         }
 
+        defaultOnNull = parsedNode.getChildValue(null, "defaultOnNull", Boolean.class);
+        generationType = parsedNode.getChildValue(null, "generationType", String.class);
+
         loadConstraints(parsedNode.getChild(null, "constraints"));
     }
 
@@ -853,14 +878,17 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setReferencedColumnNames(constraintsNode.getChildValue(null, "referencedColumnNames", String.class));
         constraints.setUnique(constraintsNode.getChildValue(null, "unique", Boolean.class));
         constraints.setUniqueConstraintName(constraintsNode.getChildValue(null, "uniqueConstraintName", String.class));
+        constraints.setNotNullConstraintName(constraintsNode.getChildValue(null, "notNullConstraintName", String.class));
         constraints.setCheckConstraint(constraintsNode.getChildValue(null, "checkConstraint", String.class));
         constraints.setDeleteCascade(constraintsNode.getChildValue(null, "deleteCascade", Boolean.class));
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));
         constraints.setInitiallyDeferred(constraintsNode.getChildValue(null, "initiallyDeferred", Boolean.class));
         constraints.setDeferrable(constraintsNode.getChildValue(null, "deferrable", Boolean.class));
-        constraints.setShouldValidate(constraintsNode.getChildValue(null, "validate", Boolean.class));
+        constraints.setShouldValidateNullable(constraintsNode.getChildValue(null, "validateNullable", Boolean.class));
+        constraints.setShouldValidateUnique(constraintsNode.getChildValue(null, "validateUnique", Boolean.class));
+        constraints.setShouldValidatePrimaryKey(constraintsNode.getChildValue(null, "validatePrimaryKey", Boolean.class));
+        constraints.setShouldValidateForeignKey(constraintsNode.getChildValue(null, "validateForeignKey", Boolean.class));
         setConstraints(constraints);
-
     }
 
     public static class ValueNumeric extends Number {

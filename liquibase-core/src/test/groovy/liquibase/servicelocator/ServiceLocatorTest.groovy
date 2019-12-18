@@ -27,7 +27,7 @@ class ServiceLocatorTest extends Specification {
     def "getClasses"() throws Exception {
         expect:
 
-        Scope.getCurrentScope().child(Scope.Attr.resourceAccessor, resourceAccessor, {
+        Scope.child(Scope.Attr.resourceAccessor, resourceAccessor, {
             Class[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(ChangeLogParser.class);
             assertTrue(classes.length > 0);
         });
@@ -37,7 +37,7 @@ class ServiceLocatorTest extends Specification {
     def "findClass"() throws Exception {
         expect:
 
-        Scope.getCurrentScope().child(Scope.Attr.resourceAccessor, resourceAccessor, {
+        Scope.child(Scope.Attr.resourceAccessor, resourceAccessor, {
 
             Class[] classes = Scope.getCurrentScope().getServiceLocator().findClasses(Database.class);
             for (Class clazz : classes) {

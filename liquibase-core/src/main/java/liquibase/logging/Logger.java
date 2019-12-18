@@ -1,15 +1,28 @@
 package liquibase.logging;
 
+import liquibase.ExtensibleObject;
+import liquibase.plugin.Plugin;
+
+import java.util.logging.Level;
+
 /**
  * Interface to class that does the actual logging.
- * Instances will be created by {@link LoggerFactory} to know the class to log against.
+ * Instances will be created by {@link LogService}, normally through {@link liquibase.Scope#getLog(Class)}).
  *
  * All log methods take a {@link LogType} to describe the type of message being logged.
- *
- * The hierarchy of log levels is:
- * (finest) DEBUG < INFO < WARN < ERROR (coarsest)
  */
-public interface Logger {
+public interface Logger extends ExtensibleObject, AutoCloseable {
+
+    @Override
+    default void close() throws Exception {
+
+    }
+
+    /**
+     * Generic log method that can log at any log level
+     */
+    void log(Level level, LogType target, String message, Throwable e);
+
 
     /**
      * Log an error that occurred, using the {@link LogType#LOG} type.
@@ -51,8 +64,6 @@ public interface Logger {
      */
     void warning(LogType target, String message, Throwable e);
 
-
-
     /**
      * Logs a general event that might be useful for the user, using the {@link LogType#LOG} type.
      */
@@ -73,25 +84,45 @@ public interface Logger {
      */
     void info(LogType target, String message, Throwable e);
 
+    /**
+     * Logs configuration information, using the {@link LogType#LOG} type.
+     */
+    void config(String message);
+
+    /**
+     * Logs configuration information together with data from an error/exception, using the {@link LogType#LOG} type.
+     */
+    void config(String message, Throwable e);
+
+    /**
+     * Logs configuration information.
+     */
+    void config(LogType logType, String message);
+
+    /**
+     * Logs configuration information together with data from an error/exception
+     */
+    void config(LogType target, String message, Throwable e);
+
 
     /**
      * Logs a debugging event to aid in troubleshooting, using the {@link LogType#LOG} type.
      */
-    void debug(String message);
+    void fine(String message);
 
     /**
      * Logs a debugging event to aid in troubleshooting together with data from an error/exception, using the {@link LogType#LOG} type.
      */
-    void debug(String message, Throwable e);
+    void fine(String message, Throwable e);
 
     /**
      * Logs a debugging event to aid in troubleshooting
      */
-    void debug(LogType target, String message);
+    void fine(LogType target, String message);
 
     /**
      * Logs a debugging event to aid in troubleshooting together with data from an error/exception
      */
-    void debug(LogType target, String message, Throwable e);
+    void fine(LogType target, String message, Throwable e);
 
 }

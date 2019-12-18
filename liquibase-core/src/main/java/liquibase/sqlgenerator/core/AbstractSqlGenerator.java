@@ -1,10 +1,15 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.Warnings;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.SqlStatement;
+
+import java.util.List;
 
 /**
  * Generic template class for an SQL generator able to generate SQL for an object-form
@@ -58,6 +63,19 @@ public abstract class AbstractSqlGenerator<T extends SqlStatement> implements Sq
         // TODO: SYSIBM looks DB2-specific, we should move that out of AbstractSqlGenerator into a DB2-specific class.
         return value.startsWith("\"SYSIBM\"") || value.startsWith("to_date(") ||
             value.equalsIgnoreCase(database.getCurrentDateTimeFunction());
+    }
+
+
+
+    /**
+     * Convenience method for when the catalogName is set but we don't want to parse the body
+     */
+    public static void surroundWithCatalogSets(List<Sql> sql, String catalogName, Database database) {
+        if (database instanceof MSSQLDatabase) {
+            String defaultCatalogName = database.getDefaultCatalogName();
+            sql.add(0, new UnparsedSql("USE [" + catalogName + "]"));
+            sql.add(new UnparsedSql("USE [" + defaultCatalogName + "]"));
+        }
     }
 
 }

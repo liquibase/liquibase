@@ -20,7 +20,7 @@ public abstract class StandardChangeTest extends Specification {
 
     def "refactoring name matches expected class name"() {
         expect:
-        assert Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(getChangeClass().newInstance()).getName().toLowerCase() == getExpectedChangeName()
+        assert Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(getChangeClass().getConstructor().newInstance()).getName().toLowerCase() == getExpectedChangeName()
     }
 
     protected String getExpectedChangeName() {
@@ -68,7 +68,7 @@ public abstract class StandardChangeTest extends Specification {
 //        def serialized = change.serialize()
 //        assert serialized != null
 //
-//        def newChange = changeClass.newInstance() as Change
+//        def newChange = changeClass.getConstructor().newInstance() as Change
 //        if (!isValidForLoad(change)) {
 //            return;
 //        }

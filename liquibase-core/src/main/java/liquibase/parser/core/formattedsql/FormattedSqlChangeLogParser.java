@@ -1,23 +1,20 @@
 package liquibase.parser.core.formattedsql;
 
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.parser.ChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
-import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,7 +34,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (fileStream == null) {
                     return false;
                 }
-                reader = new BufferedReader(new UtfBomAwareReader(fileStream));
+                reader = new BufferedReader(StreamUtil.readStreamWithReader(fileStream, null));
 
                 String line = reader.readLine();
                 return (line != null) && line.matches("\\-\\-\\s*liquibase formatted.*");
@@ -45,14 +42,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 return false;
             }
         } catch (IOException e) {
-            LogService.getLog(getClass()).debug(LogType.LOG, "Exception reading " + changeLogFile, e);
+            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Exception reading " + changeLogFile, e);
             return false;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    LogService.getLog(getClass()).debug(LogType.LOG, "Exception closing " + changeLogFile, e);
+                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Exception closing " + changeLogFile, e);
                 }
             }
         }
@@ -71,12 +68,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
         changeLog.setPhysicalFilePath(physicalChangeLogLocation);
 
-        BufferedReader reader = null;
-
-        try {
-            reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
-            StringBuffer currentSql = new StringBuffer();
-            StringBuffer currentRollbackSql = new StringBuffer();
+        try (BufferedReader reader = new BufferedReader(StreamUtil.readStreamWithReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor), null))) {
+            StringBuilder currentSql = new StringBuilder();
+            StringBuilder currentRollbackSql = new StringBuilder();
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
@@ -92,6 +86,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern rollbackEndDelimiterPattern = Pattern.compile(".*rollbackEndDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -115,6 +110,31 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (changeLogPatterMatcher.matches ()) {
                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
                    changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
+                }
+
+                Matcher ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
+                if (ignoreLinesMatcher.matches ()) {
+                    if ("start".equals(ignoreLinesMatcher.group(1))){
+                        while ((line = reader.readLine()) != null){
+                            ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
+                            if (ignoreLinesMatcher.matches ()) {
+                                if ("end".equals(ignoreLinesMatcher.group(1))){
+                                    break;
+                                }
+                            }
+                        }
+                        continue;
+                    }else{
+                        try {
+                            long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
+                            while ( ignoreCount>0 && (line = reader.readLine()) != null){
+                                ignoreCount--;
+                            }
+                            continue;
+                        } catch (NumberFormatException | NullPointerException nfe) {
+                            throw new ChangeLogParseException("Unknown ignoreLines syntax in changeset " + changeSet.toString(false));
+                        }
+                    }
                 }
 
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
@@ -188,8 +208,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     change.setEndDelimiter(endDelimiter);
                     changeSet.addChange(change);
 
-                    currentSql = new StringBuffer();
-                    currentRollbackSql = new StringBuffer();
+                    currentSql.setLength(0);
+                    currentRollbackSql.setLength(0);
                 } else {
                     if (changeSet != null) {
                         Matcher commentMatcher = commentPattern.matcher(line);
@@ -208,7 +228,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             }
                         } else if (rollbackMatcher.matches()) {
                             if (rollbackMatcher.groupCount() == 1) {
-                                currentRollbackSql.append(rollbackMatcher.group(1)).append(SystemUtils.LINE_SEPARATOR);
+                                currentRollbackSql.append(rollbackMatcher.group(1)).append(System.lineSeparator());
                             }
                         } else if (preconditionsMatcher.matches()) {
                             if (preconditionsMatcher.groupCount() == 1) {
@@ -240,7 +260,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 }
                             }
                         } else {
-                            currentSql.append(line).append(SystemUtils.LINE_SEPARATOR);
+                            currentSql.append(line).append(System.lineSeparator());
                         }
                     }
                 }
@@ -270,12 +290,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) { }
-            }
         }
 
         return changeLog;
@@ -324,7 +338,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
-        InputStream resourceAsStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
+        InputStream resourceAsStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
         if (resourceAsStream == null) {
             final File physicalChangeLogFile = new File(physicalChangeLogLocation);
             throw new IOException("File does not exist: " + physicalChangeLogFile.getAbsolutePath());

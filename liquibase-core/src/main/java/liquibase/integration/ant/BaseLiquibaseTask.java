@@ -1,15 +1,14 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.ant.logging.AntTaskLogFactory;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
@@ -25,10 +24,8 @@ import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.resources.FileResource;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -59,7 +56,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
     @Override
     public void init() throws BuildException {
-        LogService.setLoggerFactory(new AntTaskLogFactory(this));
+//        LogService.setLoggerFactory(new AntTaskLogService(this));
         classpath = new Path(getProject());
     }
 
@@ -88,7 +85,7 @@ public abstract class BaseLiquibaseTask extends Task {
                 executeWithLiquibaseClassloader();
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to initialize Liquibase. " + e.toString(), e);
+            throw new BuildException("Unable to initialize Liquibase: " + e.getMessage(), e);
         } finally {
             closeDatabase(database);
             classLoader.resetThreadContextLoader();
@@ -170,14 +167,14 @@ public abstract class BaseLiquibaseTask extends Task {
      */
     private ResourceAccessor createResourceAccessor(ClassLoader classLoader) {
         List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
-        resourceAccessors.add(new FileSystemResourceAccessor());
+        resourceAccessors.add(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().getRoot().toFile()));
         resourceAccessors.add(new ClassLoaderResourceAccessor(classLoader));
         String changeLogDirectory = getChangeLogDirectory();
         if (changeLogDirectory != null) {
           changeLogDirectory = changeLogDirectory.trim().replace('\\', '/');  //convert to standard / if using absolute path on windows
-          resourceAccessors.add(new FileSystemResourceAccessor(changeLogDirectory));
+          resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
         }
-        return new CompositeResourceAccessor(resourceAccessors);
+        return new CompositeResourceAccessor(resourceAccessors.toArray(new ResourceAccessor[0]));
     }
 
     /*
@@ -632,7 +629,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = LogService.getLog(getClass());
+            Logger logger = Scope.getCurrentScope().getLog(getClass());
         }
 
 

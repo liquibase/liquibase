@@ -1,5 +1,6 @@
 package liquibase.change.custom;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
@@ -27,12 +28,12 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
 
     @Override
     public void execute(Database database) throws CustomChangeException {
-        LogService.getLog(getClass()).info(LogType.LOG, "Hello "+getHelloTo());
+        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Hello "+getHelloTo());
     }
 
     @Override
     public void rollback(Database database) throws CustomChangeException, RollbackImpossibleException {
-        LogService.getLog(getClass()).info(LogType.LOG, "Goodbye "+getHelloTo());
+        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Goodbye "+getHelloTo());
     }
 
     @Override

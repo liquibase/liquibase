@@ -121,6 +121,12 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
     }
 
     @Test
+    public void getDateLiteral_date() {
+        // DATE in Oracle can have hours/minutes/seconds.
+        assertEquals("TO_DATE('2017-08-16 16:32:55', 'YYYY-MM-DD HH24:MI:SS')", database.getDateLiteral("2017-08-16T16:32:55"));
+    }
+
+    @Test
     public void getDateLiteral_dateOnly() {
         assertEquals("TO_DATE('2017-08-16', 'YYYY-MM-DD')", database.getDateLiteral("2017-08-16"));
     }

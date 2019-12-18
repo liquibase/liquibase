@@ -67,4 +67,16 @@ public class CachedRow {
         }
         return (Boolean) o;
     }
+
+    /**
+     * Convert 'YES'/'NO' value to TRUE/FALSE
+     * @nullable
+     */
+    public Boolean yesNoToBoolean(String columnName) {
+        Object o = row.get(columnName);
+        if (o instanceof String && "YES".equalsIgnoreCase((String)o)) {
+            return Boolean.TRUE;
+        }
+        return getBoolean(columnName);
+    }
 }

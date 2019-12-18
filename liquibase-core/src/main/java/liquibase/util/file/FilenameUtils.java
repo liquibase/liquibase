@@ -19,6 +19,7 @@ package liquibase.util.file;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -1245,8 +1246,8 @@ public class FilenameUtils {
         }
 
         char[] array = text.toCharArray();
-        ArrayList list = new ArrayList();
-        StringBuffer buffer = new StringBuffer();
+        List<String> list = new ArrayList<>();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < array.length; i++) {
             if ((array[i] == '?') || (array[i] == '*')) {
                 if (buffer.length() != 0) {
@@ -1255,7 +1256,7 @@ public class FilenameUtils {
                 }
                 if (array[i] == '?') {
                     list.add("?");
-                } else if (list.isEmpty() || ((i > 0) && ("*".equals(list.get(list.size() - 1)) == false))) {
+                } else if (list.isEmpty() || ((i > 0) && (!"*".equals(list.get(list.size() - 1))))) {
                     list.add("*");
                 }
             } else {
@@ -1266,7 +1267,7 @@ public class FilenameUtils {
             list.add(buffer.toString());
         }
 
-        return (String[]) list.toArray( new String[ list.size() ] );
+        return list.toArray( new String[ list.size() ] );
     }
 
 }

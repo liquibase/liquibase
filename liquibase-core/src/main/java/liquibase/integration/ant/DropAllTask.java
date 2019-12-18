@@ -28,7 +28,7 @@ public class DropAllTask extends BaseLiquibaseTask {
                 liquibase.dropAll();
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to drop all objects from database. " + e.toString(), e);
+            throw new BuildException("Unable to drop all objects from database: " + e.getMessage(), e);
         }
     }
 

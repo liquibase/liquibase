@@ -21,7 +21,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
     public boolean supports(SetColumnRemarksStatement statement, Database database) {
         return (database instanceof OracleDatabase) || (database instanceof PostgresDatabase) || (database instanceof
             AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof H2Database) || (database
-            instanceof SybaseASADatabase);
+            instanceof SybaseASADatabase) || (database instanceof MySQLDatabase);
     }
 
     @Override
@@ -37,7 +37,10 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 
         String remarksEscaped = database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks()));
 
-        if (database instanceof MSSQLDatabase) {
+        if (database instanceof MySQLDatabase) {
+            return new Sql[]{new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " COMMENT = '" + remarksEscaped
+                    + "'", getAffectedColumn(statement))};
+        } else if (database instanceof MSSQLDatabase) {
             String schemaName = statement.getSchemaName();
             if (schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
