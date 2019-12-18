@@ -931,6 +931,13 @@ public class Main {
      * @param stream the output stream to write the help text to
      */
     protected void printHelp(PrintStream stream) {
+        Main main = null;
+        main = new Main();
+        this.logLevel = Level.ERROR.toString();
+        main.reconfigureLogging();
+        ch.qos.logback.classic.Logger rootLogger = 
+          (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        rootLogger.setLevel(Level.ERROR);
         stream.println(CommandLineUtils.getBanner());
         String helpText = commandLineHelpBundle.getString("commandline-helptext");
         stream.println(helpText);
