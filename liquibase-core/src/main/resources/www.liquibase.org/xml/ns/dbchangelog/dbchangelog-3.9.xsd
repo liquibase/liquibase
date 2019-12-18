@@ -82,6 +82,15 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:simpleType name="selectNoResults">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="" />
+            <xsd:enumeration value="IGNORE" />
+            <xsd:enumeration value="NOINSERT" />
+            <xsd:enumeration value="ERROR" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <!-- This is the main (root) part of the xsd -->
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
@@ -582,10 +591,11 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="loadData">
-        <xsd:complexType mixed="true">
-            <xsd:sequence>
-                <xsd:element name="column" minOccurs="0" maxOccurs="unbounded">
+    <!-- Children for loadData -->
+    <xsd:group name="loadDataChildren">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="column">
                     <xsd:complexType>
                         <xsd:attribute name="index" type="integerExp"/>
                         <xsd:attribute name="header" type="xsd:string"/>
@@ -596,9 +606,24 @@
                         <xsd:attribute name="defaultValueDate" type="xsd:string"/>
                         <xsd:attribute name="defaultValueBoolean" type="booleanExp"/>
                         <xsd:attribute name="defaultValueComputed" type="xsd:string"/>
+                        <xsd:attribute name="select" type="xsd:string" />
+                        <xsd:attribute name="selectNoResults" type="selectNoResults" />
                     </xsd:complexType>
                 </xsd:element>
-            </xsd:sequence>
+                <xsd:element name="variable">
+                    <xsd:complexType>
+                        <xsd:attribute name="name" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:group>
+
+    <xsd:element name="loadData">
+        <xsd:complexType mixed="true">
+            <xsd:choice>
+                <xsd:group ref="loadDataChildren" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:choice>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="file" type="xsd:string"/>
@@ -1377,6 +1402,6 @@
                          maxOccurs="unbounded"/>
             </xsd:choice>
         </xsd:sequence>
-
     </xsd:group>
+
 </xsd:schema>
