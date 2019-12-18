@@ -136,7 +136,7 @@ public class Main {
                                                  360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
                                                  8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
                                                 };
-    private static class CodePointCheck {
+    protected static class CodePointCheck {
         public int position;
         public char ch;
     }
@@ -949,7 +949,7 @@ public class Main {
      * @return  int             A CodePointCheck object, or null to indicate all good
      *
      */
-    private static CodePointCheck checkArg(String arg) {
+    protected static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
         for (int i=0; i < chars.length; i++) {
             for (int j = 0; j < suspiciousCodePoints.length; j++) {
