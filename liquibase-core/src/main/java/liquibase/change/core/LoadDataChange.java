@@ -53,7 +53,6 @@ import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 
-@SuppressWarnings("ALL")
 @DatabaseChange(name = "loadData",
         description = "Loads data from a CSV file into an existing table. A value of NULL in a cell will be " +
                 "converted to a database NULL rather than the string 'NULL'.\n" +
@@ -460,7 +459,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                     valueConfig.setValue(null);
                                 } else {
                                     valueConfig.setValue(value.toString());
-                                }                                
+                                }
                             } else {
                                 throw new UnexpectedLiquibaseException(
                                     String.format(coreBundle.getString("loaddata.type.is.not.supported"),
