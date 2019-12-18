@@ -1,6 +1,11 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.3 (2019.12.19)
+
+- Liquibase-Maven plugin now works with Java 9+.
+- Expired license messages should be far less verbose and excitable.
+
 Changes in version 3.8.2 (2019.11.26)
 
 - Pro stored logic snapshot logic now supports postgresql and db2
