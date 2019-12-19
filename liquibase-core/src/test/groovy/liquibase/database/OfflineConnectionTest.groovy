@@ -101,6 +101,15 @@ class OfflineConnectionTest extends Specification {
     def "GetURL"() {
     }
 
+    def "SetConnectionUserName"() {
+        when:
+        offlineConnection.setConnectionUserName("")
+
+        then:
+        null == offlineConnection.getConnectionUserName()
+
+    }
+
     def "GetConnectionUserName"() {
         when:
         def username = offlineConnection.getConnectionUserName()
