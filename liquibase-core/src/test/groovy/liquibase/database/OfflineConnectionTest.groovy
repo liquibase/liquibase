@@ -106,7 +106,7 @@ class OfflineConnectionTest extends Specification {
         offlineConnection.setConnectionUserName("")
 
         then:
-        null == offlineConnection.getConnectionUserName()
+        offlineConnection.getConnectionUserName() == null
 
     }
 
