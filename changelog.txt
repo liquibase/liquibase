@@ -1,6 +1,12 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.4 (2019.12.23)
+
+- Fixed a 'Class not Found' exception error when using Java +9.
+- Fixed a 'Cannot Use Default Schema Name' error when users diff against an SQL Server snapshot file.
+- Fixed an 'Unexpected type: java.util.Date' error when using a defaultValueDate attribute in a YAML changelog.
+
 Changes in version 3.8.3 (2019.12.19)
 
 - Liquibase-Maven plugin now works with Java 9+.
