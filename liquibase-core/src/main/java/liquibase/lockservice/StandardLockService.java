@@ -207,19 +207,18 @@ public class StandardLockService implements LockService {
     @Override
     public void waitForLock() throws LockException {
 
-        boolean locked = false;
-        long timeToGiveUp = new Date().getTime() + (getChangeLogLockWaitTime() * 1000 * 60);
-        while (!locked && (new Date().getTime() < timeToGiveUp)) {
-            locked = acquireLock();
-            if (!locked) {
-                LogService.getLog(getClass()).info(LogType.LOG, "Waiting for changelog lock....");
-                try {
-                    Thread.sleep(getChangeLogLockRecheckTime() * 1000);
-                } catch (InterruptedException e) {
-                    // Restore thread interrupt status
-                    Thread.currentThread().interrupt();
-                }
+        long timeToGiveUp = System.currentTimeMillis() + (getChangeLogLockWaitTime() * 1000 * 60);
+        boolean locked = acquireLock();
+        while (!locked && (System.currentTimeMillis() < timeToGiveUp)) {
+            LogService.getLog(getClass()).info(LogType.LOG, "Waiting for changelog lock....");
+            try {
+                Thread.sleep(getChangeLogLockRecheckTime() * 1000);
+            } catch (InterruptedException e) {
+                // Restore thread interrupt status
+                Thread.currentThread().interrupt();
+                throw new LockException(e);
             }
+            locked = acquireLock();
         }
 
         if (!locked) {
