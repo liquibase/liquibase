@@ -351,14 +351,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, ReflectiveOperationException {
         for (String field : new HashSet<>(object.getAttributes())) {
             Object fieldValue = object.getAttribute(field, Object.class);
-            if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index
-                    .class) || (object.getClass() == UniqueConstraint.class))) {
-                if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
-                    String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
-                    if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC") || columnName.endsWith(" RANDOM")) {
-                        continue;
-                    }
-                }
+            if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index.class) || (object.getClass() == UniqueConstraint.class))) {
+                continue;
             }
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
