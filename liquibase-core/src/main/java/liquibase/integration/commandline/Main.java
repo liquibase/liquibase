@@ -210,7 +210,8 @@ public class Main {
                     String message =
                         "A non-standard character '" + codePointCheck.ch +
                         "' was detected on the command line at position " +
-                        (codePointCheck.position + 1) + ".\nIf problems occur, please remove the character and try again.";
+                        (codePointCheck.position + 1) + " of argument number " + (i+1) +
+                        ".\nIf problems occur, please remove the character and try again.";
                     LOG.warning(message);
                     System.err.println(message);
                 }
