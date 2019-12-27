@@ -49,43 +49,30 @@ class CreateProcedureGeneratorTest extends Specification {
 
     }
 
-    def "correct SQL is generated for a procedure"() {
+    @Unroll
+    def "addSchemaToText for databases"() {
       when:
-      String procedureText =
+      String sql = CreateProcedureGenerator.addSchemaToText(body, "MYSCHEMA", "PROCEDURE", database)
+      then:
+      sql != null && sql.contains(expectedSchema)
+
+      where:
+      [database, body, expectedSchema] <<
+      [[new MSSQLDatabase(),
       """
-      --sql/lbpro_master_proc.sql
       CREATE PROCEDURE [procPrintHelloWorld] AS
       BEGIN
       PRINT N'Hello, World! I am a MSSQL procedure.'
       END
-      """
-      String sql = CreateProcedureGenerator.addSchemaToText(procedureText, "MYSCHEMA", "PROCEDURE", new MSSQLDatabase())
-      then:
-      sql != null
-    }
-    def "correct SQL is generated for a package"() {
-      when:
-      String procedureText =
-          """
+       """, "MYSCHEMA.[procPrintHelloWorld]"],
+       [new OracleDatabase(),
+       """
         CREATE OR REPLACE PACKAGE PKG1 AS
         PROCEDURE add_test (col1_in NUMBER, col2_in CHAR);
         PROCEDURE del_test (col1_in NUMBER);
         END PKG1;
-        """
-      String sql = CreateProcedureGenerator.addSchemaToText(procedureText, "MYSCHEMA", "PACKAGE", new OracleDatabase())
-      then:
-      sql != null && sql.contains("MYSCHEMA.PKG1")
+        """,
+        "PACKAGE PKG1"
+      ]]
     }
-
-        /*
-             when:
-             LiquibaseConfiguration.getInstance().getConfiguration(ChangeLogParserCofiguration.class).setUseProcedureSchema(false);
-             statement = new CreateProcedureStatement("cat", "schema", "proc", procedureText, ";")
-             def sql = SqlGeneratorFactory.instance.generateSql(statement, new OracleDatabase())
-
-             then:
-             sql.length == 3
-             sql[0].toString().startsWith("ALTER SESSION SET CURRENT_SCHEMA")
-         }
-         */
 }
