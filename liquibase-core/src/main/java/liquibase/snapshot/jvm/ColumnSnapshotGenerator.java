@@ -57,9 +57,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
 
         Relation relation = ((Column) example).getRelation();
-        if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
-            return example;
-        }
 
         Schema schema = relation.getSchema();
         try {
