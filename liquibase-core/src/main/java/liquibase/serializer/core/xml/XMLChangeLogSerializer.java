@@ -383,7 +383,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 constraintsElement.setAttribute("referencedTableName", constraints.getReferencedTableName());
             }
             if (constraints.getReferencedColumnNames() != null) {
-                constraintsElement.setAttribute("referencedTableName", constraints.getReferencedColumnNames());
+                constraintsElement.setAttribute("referencedColumnNames", constraints.getReferencedColumnNames());
             }
             if (constraints.isDeferrable() != null) {
                 constraintsElement.setAttribute("deferrable", constraints.isDeferrable().toString());
@@ -415,17 +415,23 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (constraints.isUnique() != null) {
                 constraintsElement.setAttribute("unique", constraints.isUnique().toString());
             }
-
             if (constraints.getUniqueConstraintName() != null) {
                 constraintsElement.setAttribute("uniqueConstraintName", constraints.getUniqueConstraintName());
             }
-
             if (constraints.getPrimaryKeyName() != null) {
                 constraintsElement.setAttribute("primaryKeyName", constraints.getPrimaryKeyName());
             }
-
             if (constraints.getPrimaryKeyTablespace() != null) {
                 constraintsElement.setAttribute("primaryKeyTablespace", constraints.getPrimaryKeyTablespace());
+            }
+            if (constraints.getNotNullConstraintName() != null) {
+                constraintsElement.setAttribute("notNullConstraintName", constraints.getNotNullConstraintName());
+            }
+            if (constraints.getReferencedTableCatalogName() != null) {
+                constraintsElement.setAttribute("referencedTableCatalogName", constraints.getReferencedTableCatalogName());
+            }
+            if (constraints.getReferencedTableSchemaName() != null) {
+                constraintsElement.setAttribute("referencedTableSchemaName", constraints.getReferencedTableSchemaName());
             }
             element.appendChild(constraintsElement);
         }
