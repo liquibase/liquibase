@@ -39,7 +39,7 @@ public class LicenseServiceFactory {
             }
           }
         }
-        catch (InstantiationException | IllegalAccessException e) {
+        catch (Throwable e) {
           LOG.severe("Unable to instantiate LicenseService", e);
         }
       }
