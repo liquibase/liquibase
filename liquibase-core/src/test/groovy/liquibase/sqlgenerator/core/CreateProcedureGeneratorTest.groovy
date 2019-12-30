@@ -1,5 +1,11 @@
 package liquibase.sqlgenerator.core
 
+import liquibase.configuration.LiquibaseConfiguration
+import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.OracleDatabase
+import liquibase.parser.ChangeLogParserCofiguration
+import liquibase.sqlgenerator.SqlGeneratorFactory
+import liquibase.statement.core.CreateProcedureStatement
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -41,5 +47,32 @@ class CreateProcedureGeneratorTest extends Specification {
         "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;\n/\n--last comment\n/*****another\nblock\n***/"                  | "/"       | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;\n"
         "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;\n/\t--last comment\n\n\n\t--another\n/*****another\nblock\n***/" | "/"       | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;\n"
 
+    }
+
+    @Unroll
+    def "addSchemaToText for databases"() {
+      when:
+      String sql = CreateProcedureGenerator.addSchemaToText(body, "MYSCHEMA", "PROCEDURE", database)
+      then:
+      sql != null && sql.contains(expectedSchema)
+
+      where:
+      [database, body, expectedSchema] <<
+      [[new MSSQLDatabase(),
+      """
+      CREATE PROCEDURE [procPrintHelloWorld] AS
+      BEGIN
+      PRINT N'Hello, World! I am a MSSQL procedure.'
+      END
+       """, "MYSCHEMA.[procPrintHelloWorld]"],
+       [new OracleDatabase(),
+       """
+        CREATE OR REPLACE PACKAGE PKG1 AS
+        PROCEDURE add_test (col1_in NUMBER, col2_in CHAR);
+        PROCEDURE del_test (col1_in NUMBER);
+        END PKG1;
+        """,
+        "PACKAGE PKG1"
+      ]]
     }
 }
