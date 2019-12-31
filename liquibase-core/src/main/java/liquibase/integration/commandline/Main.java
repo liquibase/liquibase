@@ -125,6 +125,7 @@ public class Main {
     protected String outputSchemasAs;
     protected String referenceSchemas;
     protected String schemas;
+    protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
