@@ -106,10 +106,7 @@ public class SqlGeneratorFactory {
         String key = statement.getClass().getName()+":"+ databaseName+":"+ version;
 
         if (generatorsByKey.containsKey(key) && !generatorsByKey.get(key).isEmpty()) {
-            SortedSet<SqlGenerator> result = new TreeSet<>(new SqlGeneratorComparator());
-            result.addAll(generatorsByKey.get(key));
-            result.retainAll(getGenerators());
-            return result;
+            return Collections.unmodifiableSortedSet(generatorsByKey.get(key));
         }
 
         SortedSet<SqlGenerator> validGenerators = new TreeSet<>(new SqlGeneratorComparator());
