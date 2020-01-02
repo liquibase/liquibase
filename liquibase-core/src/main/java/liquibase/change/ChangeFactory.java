@@ -68,15 +68,13 @@ public class ChangeFactory implements SingletonObject {
      */
     public void register(Class<? extends Change> changeClass) {
         try {
-            Change instance = changeClass.newInstance();
-            ChangeMetaData metaData = getChangeMetaData(instance);
-            String name = metaData.getName();
+            String name = changeClass.getAnnotation(DatabaseChange.class).name();
             if (registry.get(name) == null) {
                 registry.put(name, new TreeSet<>(new Comparator<Class<? extends Change>>() {
                     @Override
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
-                            return -1 * Integer.valueOf(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
+                            return o2.getAnnotation(DatabaseChange.class).priority() - o1.getAnnotation(DatabaseChange.class).priority();
                         } catch (Exception e) {
                             throw new UnexpectedLiquibaseException(e);
                         }
