@@ -1,6 +1,9 @@
 package liquibase.integration.commandline;
 
 import org.junit.Test;
+import org.junit.Assert;
+
+import java.util.List;
 
 
 /**
@@ -17,6 +20,22 @@ public class MainTest {
     public void placeHolder() {
 
     }
+
+    @Test
+    public void checkSetup() {
+        Main main = new Main();
+        main.command = "snapshot";
+        main.url = "jdbc:oracle://localhost:1521/ORCL";
+        main.commandParams.add("--outputSchemasAs");
+        List<String> messages = main.checkSetup();
+        Assert.assertTrue("There should be no messages from Main.checkSetup", messages.size() == 0);
+
+        main.command = "update";
+        main.changeLogFile = "changelog.xml";
+        messages = main.checkSetup();
+        Assert.assertTrue("There should be one message from Main.checkSetup", messages.size() == 1);
+    }
+
 //    @Rule
 //    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 //

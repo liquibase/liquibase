@@ -183,8 +183,12 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                         constraintsConfig.setNullable(false);
                     }
                 }
-            } else if ((column.isNullable() != null) && !column.isNullable()) {
-                constraintsConfig = new ConstraintsConfig();
+            }
+
+            if ((column.isNullable() != null) && !column.isNullable()) {
+                if (constraintsConfig == null) {
+                    constraintsConfig = new ConstraintsConfig();
+                }
                 constraintsConfig.setNullable(false);
                 if (!column.shouldValidateNullable()) {
                     constraintsConfig.setShouldValidateNullable(false);
