@@ -279,13 +279,13 @@ public abstract class AbstractJdbcDatabaseTest {
     @Test
     public void test_escapeObjectName() {
         String tableName = database.escapeObjectName("My Table  ", Table.class);
-        assertTrue(tableName.matches("[\\[\\\"]?My Table  [\\]\\\"]?"));
+        assertTrue(tableName.matches("[\\[\\\"`]?My Table  [\\]\\\"`]?"));
 
         tableName = database.escapeObjectName("MyTable", Table.class);
         assertTrue(tableName.equals("MyTable"));
 
         tableName = database.escapeObjectName("My Table", Table.class);
-        assertTrue(tableName.matches("[\\[\\\"]?My Table[\\]\\\"]?"));
+        assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
     }
 
 //    @Test
