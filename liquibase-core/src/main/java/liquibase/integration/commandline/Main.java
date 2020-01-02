@@ -133,6 +133,18 @@ public class Main {
     protected String delimiter;
     protected String rollbackScript;
 
+    private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
+                                                 204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
+                                                 220, 222, 223, 232, 233, 234, 235, 236, 237, 238, 239, 241,
+                                                 249, 250, 251, 252, 255, 284, 332, 333, 334, 335, 336, 337, 359,
+                                                 360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
+                                                 8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
+                                                };
+    protected static class CodePointCheck {
+        public int position;
+        public char ch;
+    }
+
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
      * a simple wrapper so that an errorlevel of != 0 is guaranteed in case of an uncaught exception.
@@ -211,6 +223,22 @@ public class Main {
                     stream.println(licenseService.getLicenseInfo());
                 }
                 return 0;
+            }
+
+            //
+            // Look for characters which cannot be handled
+            //
+            for (int i=0; i < args.length; i++) {
+                CodePointCheck codePointCheck = checkArg(args[i]);
+                if (codePointCheck != null) {
+                    String message =
+                        "A non-standard character '" + codePointCheck.ch +
+                        "' was detected on the command line at position " +
+                        (codePointCheck.position + 1) + " of argument number " + (i+1) +
+                        ".\nIf problems occur, please remove the character and try again.";
+                    LOG.warning(message);
+                    System.err.println(message);
+                }
             }
 
             try {
@@ -944,6 +972,29 @@ public class Main {
         stream.println(CommandLineUtils.getBanner());
         String helpText = commandLineHelpBundle.getString("commandline-helptext");
         stream.println(helpText);
+    }
+
+    /**
+     *
+     * Check the string for known characters which cannot be handled
+     *
+     * @param   arg             Input parameter to check
+     * @return  int             A CodePointCheck object, or null to indicate all good
+     *
+     */
+    protected static CodePointCheck checkArg(String arg) {
+        char[] chars = arg.toCharArray();
+        for (int i=0; i < chars.length; i++) {
+            for (int j = 0; j < suspiciousCodePoints.length; j++) {
+                if (suspiciousCodePoints[j] == chars[i]) {
+                    CodePointCheck codePointCheck = new CodePointCheck();
+                    codePointCheck.position = i;
+                    codePointCheck.ch = chars[i];
+                    return codePointCheck;
+                }
+            }
+        }
+        return null;
     }
 
     /**

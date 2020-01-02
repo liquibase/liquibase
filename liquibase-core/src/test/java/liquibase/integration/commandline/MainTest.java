@@ -22,6 +22,34 @@ public class MainTest {
     }
 
     @Test
+    public void testCodePointCheck() {
+      char badChar = 8192;
+      char anotherBadChar = 160;
+      Main.CodePointCheck codePointCheck = Main.checkArg("test");
+      Assert.assertTrue("This should be a valid string", codePointCheck == null);
+
+      StringBuilder builder = new StringBuilder();
+      builder.append(badChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The first character should be invalid",codePointCheck.position == 0);
+
+      builder = new StringBuilder();
+      builder.append("A");
+      builder.append(badChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The last character should be invalid",codePointCheck.position == builder.length()-1);
+
+      builder = new StringBuilder();
+      builder.append("ABC");
+      builder.append(anotherBadChar);
+      builder.append("DEF");
+      int pos = builder.toString().indexOf(anotherBadChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The character in position " + pos + " should be invalid",codePointCheck.position == pos);
+    }
+
+
+    @Test
     public void checkSetup() {
         Main main = new Main();
         main.command = "snapshot";
