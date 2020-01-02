@@ -3,6 +3,8 @@ package liquibase.integration.commandline;
 import org.junit.Test;
 import org.junit.Assert;
 
+import java.util.List;
+
 
 /**
  * Tests for {@link Main}
@@ -44,6 +46,22 @@ public class MainTest {
       int pos = builder.toString().indexOf(anotherBadChar);
       codePointCheck = Main.checkArg(builder.toString());
       Assert.assertTrue("The character in position " + pos + " should be invalid",codePointCheck.position == pos);
+    }
+
+
+    @Test
+    public void checkSetup() {
+        Main main = new Main();
+        main.command = "snapshot";
+        main.url = "jdbc:oracle://localhost:1521/ORCL";
+        main.commandParams.add("--outputSchemasAs");
+        List<String> messages = main.checkSetup();
+        Assert.assertTrue("There should be no messages from Main.checkSetup", messages.size() == 0);
+
+        main.command = "update";
+        main.changeLogFile = "changelog.xml";
+        messages = main.checkSetup();
+        Assert.assertTrue("There should be one message from Main.checkSetup", messages.size() == 1);
     }
 
 //    @Rule

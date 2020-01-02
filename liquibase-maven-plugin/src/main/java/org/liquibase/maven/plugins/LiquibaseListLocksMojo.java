@@ -14,7 +14,7 @@ public class LiquibaseListLocksMojo extends AbstractLiquibaseMojo {
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-		liquibase.listLocks();
+		liquibase.reportLocks(System.out);
 	}
 
 }
