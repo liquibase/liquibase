@@ -20,6 +20,7 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
+import liquibase.util.BooleanUtils;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
@@ -356,7 +357,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
                     final Column column = (Column) ((Collection) fieldValue).iterator().next();
                     String columnName = column.getName();
-                    if ((column.getDescending() != null && column.getDescending()) || columnName.endsWith(" ASC") || columnName.endsWith(" DESC") || columnName.endsWith(" RANDOM")) {
+                    if (BooleanUtils.isTrue(column.getDescending()) || columnName.endsWith(" ASC") || columnName.endsWith(" DESC") || columnName.endsWith(" RANDOM")) {
                         continue;
                     }
                 }
