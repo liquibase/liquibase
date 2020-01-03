@@ -24,3 +24,19 @@ Test:
 
 POST MESSAGES TO:
 - blog
+
+
+To update Homebrew with the latest Liquibase installtion tar file do the following:
+1. From a Linux/Mac machine, visit the following page https://download.liquibase.org/download/?frm=n
+2.Download the tar.gz from the link provided on that page.
+For example: Linux/Unix/Mac: Download liquibase-<current liquibase version>-bin.tar.gz
+3. Then run SHA256 Checksum on that file.  For example: shasum -a 256 /path/to/file/Download liquibase-<current liquibase version>-bin.tar.gz
+You should see a hash key printed on the Console output.
+4. Go to Homebrew/liquibase page.  For example: https://formulae.brew.sh/formula/liquibase
+5. Click on the "Formula code on GitHub" link
+6. This should bring you to the Homebrew-core/Formula/liquibase.rb file, located in the "Homebrew-core" repository
+From the Github Web UI 
+7. Edit the liquibase.rb by updating the line where url is to the actual/current url from Liquibase download site mentioned in step 2.
+8. Edit the liquibase.rb by updating the line where sha256 with the SHA256 Checksum key generated in step 3.
+9. Hit the "Propose file change" - This will write it to a new branch in your fork <your username>/homebrew-core, so you can send a pull request.
+Note (OPTIONAL): There is a way to use the "brew bump-formula-pr" command, it should help to update url and hash at once (this hasn't been tested yet).
