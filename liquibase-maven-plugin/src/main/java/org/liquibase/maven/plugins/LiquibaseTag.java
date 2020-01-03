@@ -5,7 +5,7 @@ import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
- * Writes a Liquibase tag to the database.
+ * <p>Writes a Liquibase tag to the database.</p>
  * 
  * @author Peter Murray
  * @goal tag

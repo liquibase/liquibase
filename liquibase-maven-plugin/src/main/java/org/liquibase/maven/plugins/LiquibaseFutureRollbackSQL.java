@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Generates the SQL that is required to rollback the database to current state after the next update.
+ * <p>Generates the SQL that is required to rollback the database to current state after the next update.</p>
  *
  * @description Liquibase FutureRollbackSQL Maven plugin
  * @goal futureRollbackSQL

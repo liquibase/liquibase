@@ -291,6 +291,20 @@
                     </execution>
                 </executions>
             </plugin>
+            
+            <!-- We don't use the site plugin for anything except where we use the generated
+                 documentation for the liquibase-maven-plugin. This custom template is much
+                 simplified from the default template and allows us to just use Jekyll's
+                 include_relative instruction to include the generated pages in our markdown
+                 pages. -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-site-plugin</artifactId>
+              <version>3.8.2</version>
+              <configuration>
+                <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
+              </configuration>
+            </plugin>            
         </plugins>
 
         <pluginManagement>
@@ -309,7 +323,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.7.1</version>
+                    <version>3.8.2</version>
                 </plugin>
 
                 <plugin>
