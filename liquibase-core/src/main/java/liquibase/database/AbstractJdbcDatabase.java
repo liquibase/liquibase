@@ -106,6 +106,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean defaultSchemaSet = false;
 
     private Map<String, Object> attributes = new HashMap<String, Object>();
+    protected String dbFullVersion;
 
     public String getName() {
         return toString();
@@ -232,6 +233,11 @@ public abstract class AbstractJdbcDatabase implements Database {
         } catch (DatabaseException e) {
             throw new DatabaseException(e);
         }
+    }
+
+    @Override
+    public String getDatabaseFullVersion() throws DatabaseException {
+        throw new AssertionError("Method can't be invoked directly in abstract level !");
     }
 
     @Override

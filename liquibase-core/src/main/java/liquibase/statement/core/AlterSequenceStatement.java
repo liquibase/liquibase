@@ -15,6 +15,7 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
     private BigInteger cacheSize;
     private Boolean cycle;
     private Boolean ordered;
+    private String dataType;
 
     public AlterSequenceStatement(String catalogName, String schemaName, String sequenceName) {
         this.catalogName = catalogName;
@@ -90,6 +91,15 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
 
     public AlterSequenceStatement setCycle(Boolean cycle) {
         this.cycle = cycle;
+        return this;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public AlterSequenceStatement setDataType(String dataType) {
+        this.dataType = dataType;
         return this;
     }
 }
