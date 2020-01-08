@@ -259,7 +259,7 @@
     </build>
 
     <profiles>
-        <profile>
+        <!-- <profile>
             <id>liquibase-pro</id>
             <activation>
                 <file>
@@ -280,7 +280,7 @@
                     <version>${liquibase.version}</version>
                 </dependency>
             </dependencies>
-        </profile>
+        </profile> -->
 
 
         <profile>
