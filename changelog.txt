@@ -1,6 +1,19 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.5 (2020.1.13)
+
+- Fixes issue in which Liquibase did not add `DESC` to an `id` column
+- CLI once again accepts sqlFile, delimiter, rollbackScript, and outputSchemaAs arguments
+- Fixes Stored Procedure whitespace impacting update calls
+- Fixes generateChangelog failure when there are missing NOT NULL constraints.
+- Fixes multi_schema_tokenizer_oracle: updateSQL, which was not including schemaName for package bodies.
+- Fixes features/multi_schema_oracle.feature, which was not always capturing `create package body` while generating changeLog
+- Liquibase CLI now gives a more useful error message when an invalid character is passed to a command.
+- Fixes an MSSQL issue. which threw an exception when doing diff/diffChangeLog between offline connections (such as when snapshotting json files)
+- Fixes am MSSQL issue, which incorrectly generated `datetime` data type column when using`diff` & `diffChangeLog`
+- Liquibase Maven plugin fails while executing/using "diff" and "generateChangeLog" with PostgreSQL)
+
 Changes in version 3.8.4 (2019.12.23)
 
 - Fixed a 'Class not Found' exception error when using Java +9.
