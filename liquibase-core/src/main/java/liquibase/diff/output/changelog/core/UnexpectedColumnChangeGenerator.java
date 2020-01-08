@@ -11,6 +11,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.BooleanUtils;
 
 public class UnexpectedColumnChangeGenerator extends AbstractChangeGenerator implements UnexpectedObjectChangeGenerator {
     @Override
@@ -42,7 +43,7 @@ public class UnexpectedColumnChangeGenerator extends AbstractChangeGenerator imp
 //            continue;
 //        }
 
-        if ((column.getComputed() != null) && column.getComputed()) { //not really a column to drop, probably part of an index or something
+        if (BooleanUtils.isTrue(column.getComputed()) || BooleanUtils.isTrue(column.getDescending()) ) { //not really a column to drop, probably part of an index or something
             return null;
         }
         if (column.getRelation() instanceof View) {
