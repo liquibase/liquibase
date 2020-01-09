@@ -342,6 +342,37 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+        <!-- install4j packager dependency. WARNING, rpmbuild required to build -->
+        <id>install4j</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonatype.install4j</groupId>
+                    <artifactId>install4j-maven-plugin</artifactId>
+                    <version>1.1.1</version>
+                    <executions>
+                        <execution>
+                            <id>install4j</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>install-license</goal>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <projectFile>${project.basedir}/src/main/install4j/liquibase.install4j</projectFile>
+                                <destination>${project.build.directory}</destination>
+                                <variables>
+                                    <liquibaseVersion>${liquibase.version}</liquibaseVersion>
+                                </variables>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+        </profile>
     </profiles>
 
 </project>
