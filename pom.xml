@@ -136,7 +136,7 @@
 
     </build>
 
-    <!-- <profiles>
+    <profiles>
         <profile>
             <id>liquibase-pro</id>
             <activation>
@@ -148,5 +148,5 @@
                 <module>../liquibase-pro</module>
             </modules>
         </profile>
-    </profiles> -->
+    </profiles>
 </project>
