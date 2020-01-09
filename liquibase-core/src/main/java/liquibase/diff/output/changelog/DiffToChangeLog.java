@@ -221,8 +221,7 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
-
+    public void print(final PrintStream out, final ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = generateChangeSets();
 
         changeLogSerializer.write(changeSets, out);
@@ -340,8 +339,7 @@ public class DiffToChangeLog {
 
     private List<DatabaseObject> sortObjects(final String type, Collection<DatabaseObject> objects, Database database) {
 
-        if ((diffOutputControl.getSchemaComparisons() != null) && !objects.isEmpty() && supportsSortingObjects
-            (database) && (database.getConnection() != null) && !(database.getConnection() instanceof OfflineConnection)) {
+        if (!objects.isEmpty() && supportsSortingObjects(database) && (database.getConnection() != null) && !(database.getConnection() instanceof OfflineConnection)) {
             List<String> schemas = new ArrayList<>();
             CompareControl.SchemaComparison[] schemaComparisons = this.diffOutputControl.getSchemaComparisons();
             if (schemaComparisons != null) {

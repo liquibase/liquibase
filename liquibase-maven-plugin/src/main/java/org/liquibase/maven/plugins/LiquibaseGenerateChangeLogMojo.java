@@ -9,6 +9,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.util.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -118,7 +119,22 @@ public class LiquibaseGenerateChangeLogMojo extends
         }
     }
 
-	@Override
+    /**
+     * Performs some validation after the properties file has been loaded checking that all
+     * properties required have been specified.
+     *
+     * @throws MojoFailureException If any property that is required has not been
+     *                              specified.
+     */
+    @Override
+    protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
+        super.checkRequiredParametersAreSpecified();
+        if (outputChangeLogFile == null) {
+            throw new MojoFailureException("The output changeLogFile must be specified.");
+        }
+    }
+
+    @Override
 	protected void printSettings(String indent) {
 		super.printSettings(indent);
         getLog().info(indent + "defaultSchemaName: " + defaultSchemaName);

@@ -129,7 +129,21 @@ public class Main {
     protected String liquibaseProLicenseKey;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
-    private String sqlFile;
+    protected String sqlFile;
+    protected String delimiter;
+    protected String rollbackScript;
+
+    private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
+                                                 204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
+                                                 220, 222, 223, 232, 233, 234, 235, 236, 237, 238, 239, 241,
+                                                 249, 250, 251, 252, 255, 284, 332, 333, 334, 335, 336, 337, 359,
+                                                 360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
+                                                 8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
+                                                };
+    protected static class CodePointCheck {
+        public int position;
+        public char ch;
+    }
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -183,12 +197,48 @@ public class Main {
             if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                 main.printHelp(System.out);
                 return 0;
-            } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
-                log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
-                log.info(LogType.USER_MESSAGE,
+            } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
+                main.command = "";
+                main.reconfigureLogging();
+                main.parseDefaultPropertyFiles();
+                PrintStream stream = System.out;
+                stream.println(CommandLineUtils.getBanner());
+                stream.println(
                         String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
                                 StreamUtil.getLineSeparator()));
+                LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+                if (licenseService != null) {
+                    if (main.liquibaseProLicenseKey == null) {
+                        log.info(LogType.LOG, "No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                    } 
+                    else {
+                        Location licenseKeyLocation = 
+                            new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                        LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                        if (result.code != 0) {
+                            String allMessages = String.join("\n", result.messages);
+                            log.warning(LogType.USER_MESSAGE, allMessages);
+                        }
+                    }
+                    stream.println(licenseService.getLicenseInfo());
+                }
                 return 0;
+            }
+
+            //
+            // Look for characters which cannot be handled
+            //
+            for (int i=0; i < args.length; i++) {
+                CodePointCheck codePointCheck = checkArg(args[i]);
+                if (codePointCheck != null) {
+                    String message =
+                        "A non-standard character '" + codePointCheck.ch +
+                        "' was detected on the command line at position " +
+                        (codePointCheck.position + 1) + " of argument number " + (i+1) +
+                        ".\nIf problems occur, please remove the character and try again.";
+                    LOG.warning(message);
+                    System.err.println(message);
+                }
             }
 
             try {
@@ -773,7 +823,8 @@ public class Main {
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
                         && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
-                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
+                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)
+                        && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -911,9 +962,39 @@ public class Main {
      * @param stream the output stream to write the help text to
      */
     protected void printHelp(PrintStream stream) {
+        Main main = null;
+        main = new Main();
+        this.logLevel = Level.ERROR.toString();
+        main.reconfigureLogging();
+        ch.qos.logback.classic.Logger rootLogger = 
+          (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        rootLogger.setLevel(Level.ERROR);
         stream.println(CommandLineUtils.getBanner());
         String helpText = commandLineHelpBundle.getString("commandline-helptext");
         stream.println(helpText);
+    }
+
+    /**
+     *
+     * Check the string for known characters which cannot be handled
+     *
+     * @param   arg             Input parameter to check
+     * @return  int             A CodePointCheck object, or null to indicate all good
+     *
+     */
+    protected static CodePointCheck checkArg(String arg) {
+        char[] chars = arg.toCharArray();
+        for (int i=0; i < chars.length; i++) {
+            for (int j = 0; j < suspiciousCodePoints.length; j++) {
+                if (suspiciousCodePoints[j] == chars[i]) {
+                    CodePointCheck codePointCheck = new CodePointCheck();
+                    codePointCheck.position = i;
+                    codePointCheck.ch = chars[i];
+                    return codePointCheck;
+                }
+            }
+        }
+        return null;
     }
 
     /**

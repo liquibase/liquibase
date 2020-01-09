@@ -458,6 +458,8 @@ public abstract class AbstractJdbcDatabase implements Database {
             return getTimeLiteral(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return getDateTimeLiteral(((java.sql.Timestamp) date));
+        } else if(date instanceof java.util.Date) {
+            return getDateTimeLiteral(new java.sql.Timestamp(date.getTime()));
         } else {
             throw new RuntimeException("Unexpected type: " + date.getClass().getName());
         }
@@ -986,12 +988,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeObjectName(String objectName, final Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
-            objectName = objectName.trim();
             if (mustQuoteObjectName(objectName, objectType)) {
-                return quoteObject(objectName, objectType);
+                return quoteObject(objectName, objectType).trim();
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-                return quoteObject(objectName, objectType);
+                return quoteObject(objectName, objectType).trim();
             }
+            objectName = objectName.trim();
         }
         return objectName;
     }

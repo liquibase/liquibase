@@ -264,6 +264,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private File driverPropertiesFile;
 
+    /**
+     *
+     * Liquibase PRO license key value 
+     *
+     * @parameter property="liquibase.liquibaseProLicenseKey"
+     *
+     */
+    protected String liquibaseProLicenseKey;
+
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding==null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
@@ -298,6 +307,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().warn("Liquibase skipped due to maven configuration");
             return;
         }
+
+        //
+        // Check for a LiquibasePro license
+        //
+        MavenUtils.checkProLicense(liquibaseProLicenseKey, getLog());
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
         ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
