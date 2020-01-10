@@ -82,38 +82,9 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <configuration>
-                    <includes>
-                        <include>**/*.java</include>
-                    </includes>
-                </configuration>
-                <executions>
-                  <execution>
-                    <goals>
-                      <goal>prepare-agent</goal>
-                    </goals>
-                  </execution>
-                  <execution>
-                    <id>report</id>
-                    <phase>verify</phase>
-                    <goals>
-                      <goal>report</goal>
-                    </goals>
-                  </execution>
-                  <execution>
-                    <id>report-aggregate</id>
-                    <phase>verify</phase>
-                    <goals>
-                      <goal>report-aggregate</goal>
-                    </goals>
-                  </execution>
-                </executions>
-              </plugin>        
 
-<!--            <plugin>-->
+
+            <!--            <plugin>-->
 <!--                <artifactId>maven-install-plugin</artifactId>-->
 <!--                <version>2.5.2</version>-->
 <!--                <configuration>-->
@@ -135,7 +106,7 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.5</version>
-                </plugin>        
+                </plugin>
             </plugins>
         </pluginManagement>
 
