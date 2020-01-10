@@ -442,5 +442,12 @@ return console.askYesNo(message, true);
         </modules>
       </jreBundle>
     </windows>
+    <macosFolder name="macOS Folder" id="154">
+      <jreBundle jreBundleSource="generated">
+        <modules>
+          <defaultModules set="jre" />
+        </modules>
+      </jreBundle>
+    </macosFolder>
   </mediaSets>
 </install4j>
