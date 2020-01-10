@@ -15,7 +15,9 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
+import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.DropAllCommand;
 import liquibase.command.core.ExecuteSqlCommand;
 import liquibase.command.core.SnapshotCommand;
@@ -101,7 +103,10 @@ public class Main {
     protected Boolean strict = Boolean.TRUE;
     protected String defaultsFile = "liquibase.properties";
     protected String diffTypes;
+    protected String changeSetId;
     protected String changeSetAuthor;
+    protected String filePath;
+    protected String force;
     protected String changeSetContext;
     protected String dataOutputDirectory;
     protected String referenceDriver;
@@ -809,14 +814,14 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
+
                             && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
             }
         } else if ((COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
-                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
-        )
+                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command))
                 && (!commandParams.isEmpty())) {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
@@ -828,8 +833,18 @@ public class Main {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
+        } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
+                            && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
+                            && !cmdParm.startsWith("--" + OPTIONS.FORCE)
+                            && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
+                            && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
+                            && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                }
+            }
         }
-
     }
 
     /**
@@ -1419,6 +1434,18 @@ public class Main {
                     );
                 }
                 return;
+            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
+                LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand(COMMANDS.ROLLBACK_ONE_CHANGE_SET));
+                AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
+                Map<String, Object> argsMap = new HashMap<String, Object>();
+                argsMap.put(OPTIONS.CHANGE_SET_ID, changeSetId);
+                argsMap.put(OPTIONS.CHANGE_SET_AUTHOR, changeSetAuthor);
+                argsMap.put(OPTIONS.CHANGE_SET_PATH, filePath);
+                argsMap.put(OPTIONS.FORCE, Boolean.parseBoolean(force));
+                argsMap.put(OPTIONS.ROLLBACK_SCRIPT, rollbackScript);
+                argsMap.put("database", database);
+                configuratingCommand.configure(argsMap);
+                liquibaseCommand.execute();
             } else if (COMMANDS.DROP_ALL.equals(command)) {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
                         (COMMANDS.DROP_ALL);
@@ -1753,6 +1780,7 @@ public class Main {
         private static final String MIGRATE = "migrate";
         private static final String MIGRATE_SQL = "migrateSQL";
         private static final String RELEASE_LOCKS = "releaseLocks";
+        private static final String ROLLBACK_ONE_CHANGE_SET = "rollbackOneChangeSet";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
         private static final String ROLLBACK_COUNT_SQL = "rollbackCountSQL";
@@ -1783,6 +1811,11 @@ public class Main {
         private static final String CHANGELOG_FILE = "changeLogFile";
         private static final String DATA_OUTPUT_DIRECTORY = "dataOutputDirectory";
         private static final String DIFF_TYPES = "diffTypes";
+        private static final String CHANGE_SET_ID = "changeSetId";
+        private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
+        private static final String CHANGE_SET_PATH = "changeSetPath";
+        private static final String FORCE = "force";
+        private static final String ROLLBACK_SCRIPT = "rollbackScript";
         private static final String EXCLUDE_OBJECTS = "excludeObjects";
         private static final String INCLUDE_CATALOG = "includeCatalog";
         private static final String INCLUDE_OBJECTS = "includeObjects";
