@@ -14,9 +14,17 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
+import liquibase.structure.DatabaseObject
+import liquibase.structure.core.Column
+import liquibase.structure.core.DataType
+import liquibase.structure.core.Table
 import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
+import liquibase.util.csv.CSVReader
 import spock.lang.Unroll
+
+import java.sql.Timestamp
+import java.time.LocalDateTime
 
 public class LoadDataChangeTest extends StandardChangeTest {
 
@@ -149,11 +157,11 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
 
         where:
-        fileName | separator | quotChar
-        "liquibase/change/core/sample.data1.tsv" | "\t" | null
-        "liquibase/change/core/sample.quotchar.tsv" | "\t" | "'"
-        "liquibase/change/core/sample.data1.csv" | "," | null
-        "liquibase/change/core/sample.data1.csv" | null | null
+        fileName                                    | separator | quotChar
+        "liquibase/change/core/sample.data1.tsv"    | "\t"      | null
+        "liquibase/change/core/sample.quotchar.tsv" | "\t"      | "'"
+        "liquibase/change/core/sample.data1.csv"    | ","       | null
+        "liquibase/change/core/sample.data1.csv"    | null      | null
     }
 
     def "generateStatement_excel using InsertSetStatement"() throws Exception {
@@ -243,8 +251,8 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "21" == ((InsertStatement) sqlStatements[1]).getColumnValue("age").toString()
         Boolean.FALSE == ((InsertStatement) sqlStatements[1]).getColumnValue("active")
     }
-    
-        def "generateStatement_uuid not using InsertStatement"() throws Exception {
+
+    def "generateStatement_uuid not using InsertStatement"() throws Exception {
         when:
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -270,12 +278,12 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assert sqlStatements[1] instanceof InsertStatement
         println sqlStatements[0]
         println sqlStatements[1]
-        
+
         "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
         "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
         "c7ac2480-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[0]).getColumnValue("id")
         "NULL" == ((InsertStatement) sqlStatements[0]).getColumnValue("parent_id")
-        
+
         "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
         "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
         "c801be90-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[1]).getColumnValue("id")
@@ -290,7 +298,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setFile("FILE_NAME");
 
         then:
-        "Data loaded from FILE_NAME into TABLE_NAME" == refactoring.getConfirmationMessage()
+        "Data loaded from 'FILE_NAME' into table 'TABLE_NAME'" == refactoring.getConfirmationMessage()
     }
 
     def "generateChecksum produces different values with each field"() {
@@ -343,6 +351,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         }
 
         then:
+        change.quotchar == "" + CSVReader.DEFAULT_QUOTE_CHARACTER
         change.columns.size() == 2
         change.columns[0].name == "id"
         change.columns[0].header == null
@@ -401,6 +410,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         then:
         assert md5sum1.equals(md5sum2)
     }
+
     def "checksum changes when there are comments in CSV"() {
         when:
         LoadDataChange refactoring = new LoadDataChange();
@@ -439,4 +449,223 @@ public class LoadDataChangeTest extends StandardChangeTest {
         then:
         assert md5sum1.equals(md5sum2)
     }
+
+
+    enum Col {
+        name, num, date, bool, id
+
+        String s() {
+            return name();
+        }
+    }
+
+    class ColDef {
+        ColDef(Object n, String type) {
+            this.name = n.toString()
+            this.type = type
+        }
+        String name
+        String type
+    }
+
+    Table addColumns(Table table, ColDef... colunms) {
+        colunms.each {
+            table.addColumn(new Column(Table.class, table.schema.catalogName, table.schema.name, table.name
+                    , it.name).setType(new DataType(it.type))
+            )
+        }
+        table
+    }
+
+    Table newTable(String tableName, String schemaName = null, String catName = "DEFAULT") {
+        new Table(catName, schemaName, tableName)
+    }
+
+    Table testTable(String tableName, String schemaName = null, String catName = "DEFAULT") {
+        def table = newTable(tableName, schemaName, catName)
+        addColumns(table, new ColDef(Col.name, "varchar(123)"),
+                new ColDef(Col.num, "decimal()"),
+                new ColDef(Col.id, "int"),
+                new ColDef(Col.date, "timestamp"),
+                new ColDef(Col.bool, "bit"))
+    }
+
+    def mockDB = new MockDatabase() {
+        @Override
+        public String correctObjectName(final String name, final Class<? extends DatabaseObject> objectType) {
+            return name;
+        }
+    }
+
+    def columnValue(SqlStatement sqlStatement, Object colName) {
+        ((InsertStatement) sqlStatement).getColumnValue(colName.toString())
+    }
+
+    def "empty values"() {
+        when:
+        def table = testTable("table")
+        LoadDataChange change = new LoadDataChange()
+        change.setFile("liquibase/change/core/sample.data.with.emptys.csv")
+        change.setTableName(table.name)
+        change.setResourceAccessor(new ClassLoaderResourceAccessor())
+
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
+
+        then:
+        change.columns[0].type() == LoadDataChange.LOAD_DATA_TYPE.STRING
+        change.columns[1].type() == LoadDataChange.LOAD_DATA_TYPE.NUMERIC
+        change.columns[2].type() == LoadDataChange.LOAD_DATA_TYPE.DATE
+        change.columns[3].type() == LoadDataChange.LOAD_DATA_TYPE.BOOLEAN
+
+        columnValue(sqlStatements[0], Col.name) == "Fred"
+        columnValue(sqlStatements[0], Col.num) == 2
+        def dCol = columnValue(sqlStatements[0], Col.date)
+        assert dCol instanceof Timestamp
+        ((Timestamp) dCol).toLocalDateTime() == LocalDateTime.parse("2008-03-02T12:13:00")
+        columnValue(sqlStatements[0], Col.bool) == Boolean.TRUE
+
+        // All other NULL or empty fields are null
+        [Col.name, Col.num, Col.num, Col.bool].each {
+            columnValue(sqlStatements[1], it) == "NULL"
+            columnValue(sqlStatements[2], it) == "NULL"
+        }
+    }
+
+    def "defaultXXX"() {
+        when:
+        def table = testTable("table")
+        LoadDataChange change = new LoadDataChange()
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/change/core/sample.data.with.emptys.csv",
+                tableName: table.name
+        ]).setValue([
+                [column: [name: "id", header: "num", defaultValueNumeric: 1]],
+                [column: [name: "name", defaultValue: "defName"]],
+                [column: [name: "date", defaultValueDate: "2020-01-02 03:04:05"]],
+                [column: [name: "bool", defaultValueBoolean: "true"]]
+        ]), new ClassLoaderResourceAccessor())
+
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
+
+        then:
+        columnValue(sqlStatements[0], Col.name) == "Fred"
+        columnValue(sqlStatements[0], Col.id) == 2
+        def dCol = columnValue(sqlStatements[0], Col.date)
+        assert dCol instanceof Timestamp
+        ((Timestamp) dCol).toLocalDateTime() == LocalDateTime.parse("2008-03-02T12:13:00")
+        columnValue(sqlStatements[0], Col.bool) == Boolean.TRUE
+        // All  NULL fields are still null
+        for (Col n : [Col.name, Col.id, Col.date, Col.bool]) {
+            columnValue(sqlStatements[1], n) == null
+        }
+        columnValue(sqlStatements[2], Col.name) == "defName"
+        columnValue(sqlStatements[2], Col.id) == 1
+        def dCol2 = columnValue(sqlStatements[2], Col.date)
+        assert dCol2 instanceof Timestamp
+        ((Timestamp) dCol2).toLocalDateTime() == LocalDateTime.parse("2020-01-02T03:04:05")
+        columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
+    }
+
+    def "defaults"() {
+        when:
+        def table = testTable("table")
+        LoadDataChange change = new LoadDataChange()
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/change/core/sample.data.with.emptys.csv",
+                tableName: table.name
+        ]).setValue([
+                [column: [name: "id", header: "num", defaultValue: 1]],
+                [column: [name: "name", defaultValue: "defName"]],
+                [column: [name: "date", defaultValue: "2020-01-02 03:04:05"]],
+                [column: [name: "bool", defaultValue: "t"]]
+        ]), new ClassLoaderResourceAccessor())
+
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
+
+        then:
+        columnValue(sqlStatements[0], Col.name) == "Fred"
+        columnValue(sqlStatements[0], Col.id) == 2
+        def dCol = columnValue(sqlStatements[0], Col.date)
+        assert dCol instanceof Timestamp
+        ((Timestamp) dCol).toLocalDateTime() == LocalDateTime.parse("2008-03-02T12:13:00")
+        columnValue(sqlStatements[0], Col.bool) == Boolean.TRUE
+        // All  NULL fields are still null
+        [Col.name, Col.id, Col.date, Col.bool].each {
+            columnValue( sqlStatements[1], it) == null
+        }
+        columnValue(sqlStatements[2], Col.name) == "defName"
+        columnValue(sqlStatements[2], Col.id) == 1
+        def dCol2 = columnValue(sqlStatements[2], Col.date)
+        assert dCol2 instanceof Timestamp
+        ((Timestamp) dCol2).toLocalDateTime() == LocalDateTime.parse("2020-01-02T03:04:05")
+        columnValue(sqlStatements[2], Col.bool) == Boolean.TRUE
+    }
+
+    enum Cols2 {
+        regular, space_left, space_right, space_both, empty
+    }
+
+    def "string with space + DB def"() {
+        when:
+        Table table = newTable("t");
+        Cols2.values().each {
+            addColumns(table, new ColDef(it, "varchar(123)"))
+        }
+        LoadDataChange change = new LoadDataChange()
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/change/core/strings.csv",
+                tableName: table.name, quotchar: "'"]), new ClassLoaderResourceAccessor())
+
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
+
+        then:
+        columnValue(sqlStatements[i], Cols2.regular) == regular
+        columnValue(sqlStatements[i], Cols2.space_left) == left
+        columnValue(sqlStatements[i], Cols2.space_right) == right
+        columnValue(sqlStatements[i], Cols2.space_both) == both
+        columnValue(sqlStatements[i], Cols2.empty) == ""
+
+        where:
+        i | regular | left    | right   | both
+        0 | "NULL"  | ""      | " "     | ""
+        1 | "NULL"  | " null" | "null " | " null "   // NULL variants
+        2 | ""      | " '"    | "' "    | " ' "      // quoted empty string
+        3 | " "     | " ' "   | " ' "   | " ' ' "    // quoted space
+        4 | "a"     | " a"    | "a "    | " a "      // a
+        5 | "a"     | " 'a"   | "a' "   | " 'a' "    // quoted a
+    }
+
+    def "inconsistent NULL handling"() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/change/core/sample.data.with.emptys.csv",
+                tableName: "table.name"
+        ]).setValue([
+                [column: [name: "name", type: "STRING"]],
+                [column: [name: "date"]],
+        ]), new ClassLoaderResourceAccessor())
+
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
+
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
+        then:
+        columnValue(sqlStatements[1], Col.name) == "NULL"
+        columnValue(sqlStatements[1], Col.num) == ""    // FIXME this should be NULL also
+        columnValue(sqlStatements[1], Col.date) == ""   // FIXME this should be NULL also
+    }
 }
+
+

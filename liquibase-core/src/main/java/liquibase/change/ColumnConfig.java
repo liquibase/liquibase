@@ -207,7 +207,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     }
 
     public ColumnConfig setName(String name) {
-        this.name = name;
+        this.name = StringUtils.trimToNull(name);
         return this;
     }
 

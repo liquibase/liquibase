@@ -32,4 +32,19 @@ public class LoadDataColumnConfig extends ColumnConfig {
         this.index = parsedNode.getChildValue(null, "index", Integer.class);
         this.header = parsedNode.getChildValue(null, "header", String.class);
     }
+
+    private LoadDataChange.LOAD_DATA_TYPE loadType;
+
+    public ColumnConfig setType(LoadDataChange.LOAD_DATA_TYPE value) {
+        super.setType(value.toString());
+        this.loadType = value;
+        return this;
+    }
+
+    public LoadDataChange.LOAD_DATA_TYPE type() {
+        if (null == this.loadType) {
+            this.loadType = LoadDataChange.LOAD_DATA_TYPE.valueOf(this.getType().toUpperCase());
+        }
+        return this.loadType;
+    }
 }

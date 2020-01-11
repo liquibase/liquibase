@@ -10,10 +10,7 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DateParseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.Warnings;
+import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
@@ -56,7 +53,7 @@ import static java.util.ResourceBundle.getBundle;
                 "If the data type for a load column is set to NUMERIC, numbers are parsed in US locale (e.g. 123.45)." +
                 "\n" +
                 "Date/Time values included in the CSV file should be in ISO format " +
-            "http://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by Liquibase. Liquibase will " +
+                "http://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by Liquibase. Liquibase will " +
                 "initially set the date format to be 'yyyy-MM-dd'T'HH:mm:ss' and then it checks for two special " +
                 "cases which will override the data format string.\n" +
                 "\n" +
@@ -64,7 +61,7 @@ import static java.util.ResourceBundle.getBundle;
                 "'yyyy-MM-dd'T'HH:mm:ss.SSS'\n" +
                 "If the string representing the date/time includes a space, then the date format is changed " +
                 "to 'yyyy-MM-dd HH:mm:ss'\n" +
-            "Once the date format string is set, Liquibase will then call the SimpleDateFormat.parse() method " +
+                "Once the date format string is set, Liquibase will then call the SimpleDateFormat.parse() method " +
                 "attempting to parse the input string so that it can return a Date/Time. If problems occur, " +
                 "then a ParseException is thrown and the input string is treated as a String for the INSERT command " +
                 "to be generated.\n" +
@@ -85,8 +82,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
     private Boolean relativeToChangelogFile;
     private String encoding;
-    private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
-    private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
+    private String separator = CSVReader.DEFAULT_SEPARATOR + "";
+    private String quotchar = CSVReader.DEFAULT_QUOTE_CHARACTER + "";
     private List<LoadDataColumnConfig> columns = new ArrayList<>();
 
     private Boolean usePreparedStatements;
@@ -124,9 +121,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @DatabaseChangeProperty(
-        since = "3.0",
-        mustEqualExisting = "table.catalog"
-    )
+            since = "3.0",
+            mustEqualExisting = "table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -145,29 +141,28 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @DatabaseChangeProperty(
-        description = "Name of the table to insert data into",
-        requiredForDatabase = "all",
-        mustEqualExisting = "table"
-    )
+            description = "Name of the table to insert data into",
+            requiredForDatabase = "all",
+            mustEqualExisting = "table" )
     public String getTableName() {
         return tableName;
     }
 
     public void setTableName(String tableName) {
-        this.tableName = tableName;
+        this.tableName = StringUtils.trimToNull(tableName);
     }
 
     @DatabaseChangeProperty(
-        description = "CSV file to load",
-        exampleValue = "com/example/users.csv",
-        requiredForDatabase = "all"
-    )
+            description = "CSV file to load",
+            exampleValue = "com/example/users.csv",
+            requiredForDatabase = "all")
     public String getFile() {
         return file;
     }
 
-    public void setFile(String file) {
-        this.file = file;
+    public LoadDataChange setFile(String file) {
+        this.file = StringUtils.trimToNull(file);
+        return this;
     }
 
     public Boolean getUsePreparedStatements() {
@@ -203,9 +198,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @DatabaseChangeProperty(
-        description = "Encoding of the CSV file (defaults to UTF-8)",
-        exampleValue = "UTF-8"
-    )
+            description = "Encoding of the CSV file (defaults to UTF-8)",
+            exampleValue = "UTF-8")
     public String getEncoding() {
         return encoding;
     }
@@ -273,11 +267,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
             }
 
-            // If we do not have a column list yet, take the column list we interpolated from the CSV headers
-            // earlier.
-            if (columns.isEmpty()) {
-                columns.addAll(getColumnsFromHeaders(headers));
-            }
+            // Make sure all take the column list we interpolated from the CSV headers
+            addColumnsFromHeaders(headers);
 
             // If we have an real JDBC connection to the database, ask the database for any missing column types.
             try {
@@ -297,9 +288,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             List<SqlStatement> statements = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
-                if
-                ((line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
-                    (isCommentingEnabled && isLineCommented(line))
+                if((line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
+                        (isCommentingEnabled && isLineCommented(line))
                 ) {
                     //nothing interesting on this line
                     continue;
@@ -309,9 +299,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 // (Failure could indicate unquoted strings with commas, for example).
                 if (line.length != headers.length) {
                     throw new UnexpectedLiquibaseException(
-                        "CSV file " + getFile() + " Line " + lineNumber + " has " + line.length +
-                            " values defined, Header has " + headers.length +
-                            ". Numbers MUST be equal (check for unquoted string with embedded commas)"
+                            "CSV file " + getFile() + " Line " + lineNumber + " has " + line.length +
+                                    " values defined, Header has " + headers.length +
+                                    ". Numbers MUST be equal (check for unquoted string with embedded commas)"
                     );
                 }
 
@@ -322,12 +312,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                 List<ColumnConfig> columnsFromCsv = new ArrayList<>();
                 for (int i = 0; i < headers.length; i++) {
-                    Object value = line[i];
+                    String value = line[i];
                     String columnName = headers[i].trim();
 
                     ColumnConfig valueConfig = new ColumnConfig();
 
-                    ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
+                    LoadDataColumnConfig columnConfig = getColumnConfig(i, columnName);
                     if (columnConfig != null) {
                         if ("skip".equalsIgnoreCase(columnConfig.getType())) {
                             continue;
@@ -340,94 +330,76 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                         valueConfig.setName(columnName);
 
+                        if (value.isEmpty()) {
+                            value = columnConfig.getDefaultValue();
+                        }
+
                         if (columnConfig.getType() != null) {
-                            if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BOOLEAN.toString())) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    valueConfig.setValue(null);
-                                } else {
-                                    valueConfig.setValueBoolean(
-                                        BooleanParser.parseBoolean(value.toString().toLowerCase())
-                                    );
-                                }
-                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.NUMERIC.toString())) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    valueConfig.setValue(null);
-                                } else {
-                                    valueConfig.setValueNumeric(value.toString());
-                                }
-                            } else if
-                            (
-                                columnConfig.getType().toLowerCase().contains("date")
-                                    || columnConfig.getType().toLowerCase().contains("time")
-                            ) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    valueConfig.setValue(null);
-                                } else {
+                            if ("NULL".equalsIgnoreCase(value)) {
+                                valueConfig.setValue(null);
+                            } else {
+
+                                if (columnConfig.type() == LOAD_DATA_TYPE.BOOLEAN) {
+                                    if (null != value) {
+                                        valueConfig.setValueBoolean(BooleanParser.parseBoolean(value));
+                                    } else { // TODO getDefaultValueBoolean should use BooleanParser.parseBoolean also for consistent behaviour
+                                        valueConfig.setValueBoolean(columnConfig.getDefaultValueBoolean());
+                                    }
+                                } else if (columnConfig.type() == LOAD_DATA_TYPE.NUMERIC) {
+                                    if (null != value) {
+                                        valueConfig.setValueNumeric(value);
+                                    } else {
+                                        valueConfig.setValueNumeric(columnConfig.getDefaultValueNumeric());
+                                    }
+                                } else if ( columnConfig.getType().toLowerCase().contains("date")
+                                         || columnConfig.getType().toLowerCase().contains("time")
+                                ) {
                                     try {
                                         // Need the column type for handling 'NOW' or 'TODAY' type column value
                                         valueConfig.setType(columnConfig.getType());
-                                        valueConfig.setValueDate(value.toString());
+                                        if (null != value) {
+                                            valueConfig.setValueDate(value);
+                                        } else {
+                                            valueConfig.setValueDate(columnConfig.getDefaultValueDate());
+                                        }
                                     } catch (DateParseException e) {
                                         throw new UnexpectedLiquibaseException(e);
                                     }
-                                }
-                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.STRING.toString())) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    valueConfig.setValue(null);
-                                } else {
-                                    valueConfig.setValue(value.toString());
-                                }
-                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.COMPUTED.toString())) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    valueConfig.setValue(null);
-                                } else {
-                                    liquibase.statement.DatabaseFunction function =
-                                        new liquibase.statement.DatabaseFunction(value.toString());
-                                    valueConfig.setValueComputed(function);
-                                }
-                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.SEQUENCE.toString())) {
-                                String sequenceName;
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    sequenceName = columnConfig.getDefaultValue();
-                                    if (sequenceName == null) {
+                                } else if (columnConfig.type() == LOAD_DATA_TYPE.STRING) {
+                                    valueConfig.setValue(value == null ? "" : value);
+                                } else if (columnConfig.type() == LOAD_DATA_TYPE.COMPUTED) {
+                                    if (null != value) {
+                                        liquibase.statement.DatabaseFunction function =
+                                                new liquibase.statement.DatabaseFunction(value);
+                                        valueConfig.setValueComputed(function);
+                                    } else {
+                                        valueConfig.setValueComputed(columnConfig.getDefaultValueComputed());
+                                    }
+                                } else if (columnConfig.type() == LOAD_DATA_TYPE.SEQUENCE) {
+                                    if (value == null) {
                                         throw new UnexpectedLiquibaseException(
-                                            "Must set a sequence name in the loadData column defaultValue attribute"
+                                                "Must set a sequence name in the loadData column defaultValue attribute"
                                         );
                                     }
-                                } else {
-                                    sequenceName = value.toString();
-                                }
-                                liquibase.statement.SequenceNextValueFunction function =
-                                    new liquibase.statement.SequenceNextValueFunction(sequenceName);
-                                valueConfig.setValueComputed(function);
-
-                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BLOB.toString())) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    valueConfig.setValue(null);
-                                } else {
-                                    valueConfig.setValueBlobFile(value.toString());
+                                    liquibase.statement.SequenceNextValueFunction function =
+                                            new liquibase.statement.SequenceNextValueFunction(value);
+                                    valueConfig.setValueComputed(function);
+                                } else if (columnConfig.type() == LOAD_DATA_TYPE.BLOB) {
+                                    valueConfig.setValueBlobFile(value);
                                     needsPreparedStatement = true;
-                                }
-                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.CLOB.toString())) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    valueConfig.setValue(null);
-                                } else {
-                                    valueConfig.setValueClobFile(value.toString());
+                                } else if (columnConfig.type() == LOAD_DATA_TYPE.CLOB) {
+                                    valueConfig.setValueClobFile(value);
                                     needsPreparedStatement = true;
-                                }
-                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.UUID.toString())) {
-                                valueConfig.setType(columnConfig.getType());
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
-                                    valueConfig.setValue(null);
+                                } else if (columnConfig.type() == LOAD_DATA_TYPE.UUID) {
+                                    valueConfig.setType(columnConfig.getType());
+                                    valueConfig.setValue(value);
                                 } else {
-                                    valueConfig.setValue(value.toString());
-                                }                                
-                            } else {
-                                throw new UnexpectedLiquibaseException(
-                                    String.format(coreBundle.getString("loaddata.type.is.not.supported"),
-                                        columnConfig.getType()
-                                    )
-                                );
+                                    throw new UnexpectedLiquibaseException(
+                                            String.format(coreBundle.getString("loaddata.type.is.not.supported"),
+                                                    columnConfig.getType()
+                                            )
+                                    );
+                                }
                             }
                         } else {
                             // columnConfig did not specify a type
@@ -436,7 +408,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     } else {
                         // No columnConfig found. Assume header column name to be the table column name.
                         if (columnName.contains("(") || (columnName.contains(")") && (database instanceof
-                            AbstractJdbcDatabase))) {
+                                AbstractJdbcDatabase))) {
                             columnName = ((AbstractJdbcDatabase) database).quoteObject(columnName, Column.class);
                         }
 
@@ -452,25 +424,23 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 // 1. There is no other option than using a prepared statement (e.g. in cases of LOBs)
                 // 2. The database supports batched statements (for improved performance) AND we are not in an
                 //    "SQL" mode (i.e. we generate an SQL file instead of actually modifying the database).
-                if
-                (
-                    (needsPreparedStatement ||
+                if((needsPreparedStatement ||
                         (databaseSupportsBatchUpdates &&
-                                !(ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor)
+                            !(ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor)
                         )
-                    )
+                   )
                     && hasPreparedStatementsImplemented()
                 ) {
                     anyPreparedStatements = true;
                     ExecutablePreparedStatementBase stmt =
-                        this.createPreparedStatement(
-                            database, getCatalogName(), getSchemaName(), getTableName(), columnsFromCsv,
-                            getChangeSet(), getResourceAccessor()
-                        );
+                            this.createPreparedStatement(
+                                    database, getCatalogName(), getSchemaName(), getTableName(), columnsFromCsv,
+                                    getChangeSet(), getResourceAccessor()
+                            );
                     batchedStatements.add(stmt);
                 } else {
                     InsertStatement insertStatement =
-                        this.createStatement(getCatalogName(), getSchemaName(), getTableName());
+                            this.createStatement(getCatalogName(), getSchemaName(), getTableName());
 
                     for (ColumnConfig column : columnsFromCsv) {
                         String columnName = column.getName();
@@ -490,10 +460,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             // end of: loop for every input line from the CSV file
 
             if (anyPreparedStatements) {
-
                 // If we have only prepared statements and the database supports batching, let's roll
                 if (databaseSupportsBatchUpdates && statements.isEmpty() && (!batchedStatements.isEmpty())) {
-                    return new SqlStatement[] {
+                    return new SqlStatement[]{
                             new BatchDmlExecutablePreparedStatement(
                                     database, getCatalogName(), getSchemaName(),
                                     getTableName(), columns,
@@ -504,10 +473,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     return statements.toArray(new SqlStatement[statements.size()]);
                 }
             } else {
-            	if (statements.isEmpty()) {
-            		// avoid returning unnecessary dummy statement
-            		return new SqlStatement[0];
-            	}
+                if (statements.isEmpty()) {
+                    // avoid returning unnecessary dummy statement
+                    return new SqlStatement[0];
+                }
 
                 InsertSetStatement statementSet = this.createStatementSet(
                         getCatalogName(), getSchemaName(), getTableName()
@@ -517,10 +486,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 }
 
                 if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database
-                    instanceof PostgresDatabase)) {
+                        instanceof PostgresDatabase)) {
                     List<InsertStatement> innerStatements = statementSet.getStatements();
                     if ((innerStatements != null) && (!innerStatements.isEmpty()) && (innerStatements.get(0)
-                        instanceof InsertOrUpdateStatement)) {
+                            instanceof InsertOrUpdateStatement)) {
                         //cannot do insert or update in a single statement
                         return statementSet.getStatementsArray();
                     }
@@ -531,13 +500,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     return statementSet.getStatementsArray();
                 }
             }
-        } catch (IOException e) {
+        } catch ( IOException e) {
             throw new RuntimeException(e);
-        } catch (UnexpectedLiquibaseException ule) {
+        } catch ( UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
-                .getFailOnError()) {
+                    .getFailOnError()) {
                 LOG.info(LogType.LOG, "Change set " + getChangeSet().toString(false) +
-                         " failed, but failOnError was false.  Error: " + ule.getMessage());
+                        " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {
                 throw ule;
@@ -567,6 +536,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         for (LoadDataColumnConfig c : columns) {
             if (c.getType() == null) {
                 matched = true;
+                break;
             }
         }
         if (!matched) {
@@ -586,8 +556,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         Table snapshotOfTable;
         try {
             snapshotOfTable = SnapshotGeneratorFactory.getInstance().createSnapshot(
-                        targetTable,
-                        database);
+                    targetTable,
+                    database);
         } catch (InvalidExampleException e) {
             throw new DatabaseException(e);
         }
@@ -616,8 +586,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         Map<String, LoadDataColumnConfig> columnConfigs = new HashMap<>();
         for (LoadDataColumnConfig c : columns) {
             columnConfigs.put(
-                database.correctObjectName(c.getName(), Column.class),
-                c
+                    database.correctObjectName(c.getName(), Column.class),
+                    c
             );
         }
         /* The above is the JDK7 version of:
@@ -628,23 +598,29 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         */
 
         for (Map.Entry<String, LoadDataColumnConfig> entry : columnConfigs.entrySet()) {
-            if (!(entry.getValue().getType() == null)) {
+            if (entry.getValue().getType() != null) {
                 continue;
             }
             LoadDataColumnConfig columnConfig = entry.getValue();
-            DataType dataType = tableColumns.get(entry.getKey()).getType();
-            if (dataType == null) {
-                LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.find.load.data.type"),
-                    columnConfig.toString(), snapshotOfTable.toString()));
-                columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
+            Column c = tableColumns.get(entry.getKey());
+            if (null == c) {
+                LOG.severe(LogType.LOG, String.format(coreBundle.getString("unable.to.find.column.in.table"),
+                        columnConfig.getName(), snapshotOfTable.toString()));
             } else {
-                LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance()
-                    .fromDescription(dataType.toString(), database);
-                if (liquibaseDataType != null) {
-                    columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
+                DataType dataType = c.getType();
+                if (dataType == null) {
+                    LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.find.load.data.type"),
+                            columnConfig.toString(), snapshotOfTable.toString()));
+                    columnConfig.setType(LOAD_DATA_TYPE.STRING);
                 } else {
-                    LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.convert.load.data.type"),
-                        columnConfig.toString(), snapshotOfTable.toString(), dataType.toString()));
+                    LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance()
+                            .fromDescription(dataType.toString(), database);
+                    if (liquibaseDataType != null) {
+                        columnConfig.setType(liquibaseDataType.getLoadTypeName());
+                    } else {
+                        LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.convert.load.data.type"),
+                                columnConfig.toString(), snapshotOfTable.toString(), dataType.toString()));
+                    }
                 }
             }
         }
@@ -674,24 +650,58 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         */
     }
 
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.addAll(super.validate(database));
+
+        if (columns != null) {
+            for (ColumnConfig columnConfig : columns) {
+                if (columnConfig.getName() == null) {
+                    validationErrors.addError("column 'name' is required for all columns");
+                }
+            }
+        }
+        return validationErrors;
+    }
+
     /**
-     * If no columns (and their data types) are specified in the loadData change, we interpolate their names from
+     * Get the column using the name, index or the header
+     * @param name name or header of the column searched
+     * @param idx the index of the column searched
+     * @return The column having the name or header equal to "name" or the index equal to idx
+     *  or a new LoadDataColumnConfig if not found
+     */
+    protected LoadDataColumnConfig columnConfigFromName(String name, Integer idx) {
+        for (LoadDataColumnConfig c : this.columns) {
+            if (name.equals(c.getName()) || name.equals(c.getHeader()) || idx.equals(c.getIndex())) {
+                return c;
+            }
+        }
+        if(null == StringUtils.trimToNull(name)) {
+            throw new UnexpectedLiquibaseException("Unreferenced unnamed column is not supported");
+        }
+        LoadDataColumnConfig cfg = new LoadDataColumnConfig();
+        columns.add(cfg);
+        cfg.setName(name);
+        return cfg;
+    }
+
+    /**
+     * Add columns if they were not specified in the loadData change, we interpolate their names from
      * the header columns of the CSV file.
+     *
      * @param headers the headers of the CSV file
      * @return a List of LoadDataColumnConfigs
      */
-    private List<LoadDataColumnConfig> getColumnsFromHeaders(String[] headers) {
-        ArrayList<LoadDataColumnConfig> result = new ArrayList<>();
-        int i=0;
+    private void addColumnsFromHeaders(String[] headers) {
+        int i = 0;
         for (String columnNameFromHeader : headers) {
-            LoadDataColumnConfig loadDataColumnConfig = new LoadDataColumnConfig();
+            LoadDataColumnConfig loadDataColumnConfig = columnConfigFromName(columnNameFromHeader,i);
             loadDataColumnConfig.setIndex(i);
             loadDataColumnConfig.setHeader(columnNameFromHeader);
-            loadDataColumnConfig.setName(columnNameFromHeader);
-            result.add(loadDataColumnConfig);
             i++;
         }
-        return result;
     }
 
     private boolean isLineCommented(String[] line) {
@@ -728,7 +738,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
 
         if (separator == null) {
-            separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
+            separator = CSVReader.DEFAULT_SEPARATOR + "";
         }
 
         return new CSVReader(streamReader, separator.charAt(0), quotchar);
@@ -749,7 +759,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return new InsertSetStatement(catalogName, schemaName, tableName);
     }
 
-    protected ColumnConfig getColumnConfig(int index, String header) {
+    protected LoadDataColumnConfig getColumnConfig(int index, String header) {
         for (LoadDataColumnConfig config : columns) {
             if ((config.getIndex() != null) && config.getIndex().equals(index)) {
                 return config;
@@ -772,7 +782,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     @Override
     public String getConfirmationMessage() {
-        return "Data loaded from " + getFile() + " into " + getTableName();
+        return String.format(coreBundle.getString("loaddata.successful"), getFile(), getTableName());
     }
 
     @Override
@@ -781,7 +791,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         try {
             stream = StreamUtil.openStream(file, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
             if (stream == null) {
-                throw new UnexpectedLiquibaseException(getFile() + " could not be found");
+                throw new UnexpectedLiquibaseException(String.format(
+                        coreBundle.getString("file.not.found"), file));
             }
             stream = new EmptyLineAndCommentSkippingInputStream(stream, commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
@@ -810,6 +821,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID
+        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID
     }
 }
