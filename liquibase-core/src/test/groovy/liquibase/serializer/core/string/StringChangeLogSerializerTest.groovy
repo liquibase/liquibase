@@ -300,6 +300,8 @@ public class StringChangeLogSerializerTest extends Specification {
                 //nothing
             } else if (field.getType().equals(InputStream.class)) {
                 //nothing
+            } else if (field.getType().equals(LoadDataChange.LOAD_DATA_TYPE.class)) {
+                //nothing
             } else if (field.getType().equals(long.class)) {
                 field.set(object, createInteger().longValue());
             } else if (field.getType().equals(String.class)) {

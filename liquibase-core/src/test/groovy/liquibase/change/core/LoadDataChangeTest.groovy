@@ -5,6 +5,8 @@ import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
+import liquibase.exception.ValidationErrors
+import liquibase.exception.ValidationErrorsTests
 import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
@@ -20,7 +22,6 @@ import liquibase.structure.core.DataType
 import liquibase.structure.core.Table
 import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
-import liquibase.util.csv.CSVReader
 import spock.lang.Unroll
 
 import java.sql.Timestamp
@@ -351,7 +352,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         }
 
         then:
-        change.quotchar == "" + CSVReader.DEFAULT_QUOTE_CHARACTER
         change.columns.size() == 2
         change.columns[0].name == "id"
         change.columns[0].header == null
@@ -504,12 +504,12 @@ public class LoadDataChangeTest extends StandardChangeTest {
     def "empty values"() {
         when:
         def table = testTable("table")
+        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
+
         LoadDataChange change = new LoadDataChange()
         change.setFile("liquibase/change/core/sample.data.with.emptys.csv")
         change.setTableName(table.name)
         change.setResourceAccessor(new ClassLoaderResourceAccessor())
-
-        SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory(table)
 
         SqlStatement[] sqlStatements = change.generateStatements(mockDB)
 
@@ -660,11 +660,66 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         SnapshotGeneratorFactory.instance = new MockSnapshotGeneratorFactory()
 
-        SqlStatement[] sqlStatements = change.generateStatements(mockDB);
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
         then:
         columnValue(sqlStatements[1], Col.name) == "NULL"
-        columnValue(sqlStatements[1], Col.num) == ""    // FIXME this should be NULL also
-        columnValue(sqlStatements[1], Col.date) == ""   // FIXME this should be NULL also
+        columnValue(sqlStatements[1], Col.num) == "NULL"    // FIX this was ""
+        columnValue(sqlStatements[1], Col.date) == "NULL"   // FIX this was" "
+
+        columnValue(sqlStatements[3], Col.name) == " s"
+        columnValue(sqlStatements[3], Col.num) == " s"    // FIX this was "s"
+        columnValue(sqlStatements[3], Col.date) == " s"   // FIX this was "s"
+    }
+
+    def "all columns defined" () {
+        when:
+        LoadDataChange change = new LoadDataChange()
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/change/core/sample.data1.csv",
+                tableName: "table.name"
+        ]).setValue([
+                [column: [name: "a", header:"name", index:1, type: "STRING"]],
+                [column: [name: "username", type: "STRING"]]
+        ]), new ClassLoaderResourceAccessor())
+        ValidationErrors foundErrors = change.validate(mockDB);
+        SqlStatement[] sqlStatements = change.generateStatements(mockDB)
+
+        then:
+        assert foundErrors.getWarningMessages().size() == 1
+        foundErrors.getWarningMessages().get(0) == "Since attribute 'header' is also defined, " +
+        "'index' ignored for loadData / column[1] (name:'a')"
+        columnValue(sqlStatements[0], "a") == "Bob Johnson"
+        columnValue(sqlStatements[0], "username") == "bjohnson"
+    }
+
+    def validate_Columns() {
+        when:
+        LoadDataChange change = new LoadDataChange()
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "loadData").addChildren([
+                file     : "liquibase/change/core/sample.data1.csv",
+                tableName: ""
+        ]).setValue([
+                [column: [name: "a", header:"", index:1, type: "STRING"]],
+                [column: [name: "", type: ""]],
+                [column: []]
+        ]), new ClassLoaderResourceAccessor())
+
+        ValidationErrors errors = change.validate(mockDB)
+        then:
+        errors.getErrorMessages().size() == 3
+        errors.getErrorMessages().get(i) == message
+
+        errors.getWarningMessages().size() == 1
+        errors.getWarningMessages().get(0) ==
+                "Since attribute 'header' is also defined, 'index' ignored for loadData / column[1] (name:'a')"
+
+        where:
+        i | message
+        0 | "tableName is empty for loadData on mock"
+        1 | "name is empty for loadData / column[2]"
+        2 | "name is required for loadData / column[3]"
     }
 }
 

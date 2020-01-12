@@ -23,7 +23,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         refactoring.setFile("FILE_NAME");
 
         then:
-        "Data loaded from FILE_NAME into TABLE_NAME" == refactoring.getConfirmationMessage()
+        "Data loaded from 'FILE_NAME' into table 'TABLE_NAME'" == refactoring.getConfirmationMessage()
     }
 
 	def "loadUpdateEmpty database agnostic"() throws Exception {

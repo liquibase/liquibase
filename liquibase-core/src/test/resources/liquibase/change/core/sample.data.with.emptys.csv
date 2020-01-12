@@ -2,4 +2,4 @@ name,num,date,bool
 Fred,2,2008-03-02T12:13:00,true
 null,null,null,null
 ,,,
- , , ,
+ s, s, s,
