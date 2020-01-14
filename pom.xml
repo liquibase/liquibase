@@ -122,7 +122,7 @@
             </activation>
             <modules>
 <!--                <module>../liquibase-pro/licensing/keygen</module>-->
-                <module>../liquibase-pro/licensing/keymgr</module>
+<!--                <module>../liquibase-pro/licensing/keymgr</module>-->
 <!--                <module>../liquibase-pro/pro</module>-->
             </modules>
         </profile>
