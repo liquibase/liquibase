@@ -288,11 +288,11 @@
             </activation>
 
             <dependencies>
-                <dependency>
-                    <groupId>com.datical.lb</groupId>
-                    <artifactId>liquibase-pro</artifactId>
-                    <version>${liquibase.version}</version>
-                </dependency>
+<!--                <dependency>-->
+<!--                    <groupId>com.datical.lb</groupId>-->
+<!--                    <artifactId>liquibase-pro</artifactId>-->
+<!--                    <version>${liquibase.version}</version>-->
+<!--                </dependency>-->
 
                 <dependency>
                     <groupId>com.datical.lb</groupId>
