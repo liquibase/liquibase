@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="8.0.3" transformSequenceNumber="8">
-  <directoryPresets config="../../../target" />
+  <directoryPresets config="." />
   <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Liquibase" publisherWeb="http://liquibase.org" version="${liquibase.version}" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
+    <languages>
+      <principalLanguage id="en" customLocalizationFile="./messages.properties" />
+    </languages>
     <variables>
       <variable name="liquibaseVersion" value="3.8.6-local-SNAPSHOT" />
     </variables>
@@ -15,6 +18,11 @@
       <dirEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}" subDirectory="liquibase-${compiler:liquibaseVersion}" />
     </entries>
   </files>
+  <launchers>
+    <launcher name="Dir ${installDir}" id="156" external="true" menuName="Liquibase Home Directory" externalFile="${installer:sys.installationDir}" />
+    <launcher name="README.txt" id="158" external="true" menuName="Liquibase Readme" externalFile="README.txt" />
+    <launcher name="uninstall.exe" id="159" external="true" menuName="Uninstall Liquibase" externalFile="uninstall.exe" />
+  </launchers>
   <installerGui>
     <applications>
       <application id="installer" beanClass="com.install4j.runtime.beans.applications.InstallerApplication">
@@ -105,10 +113,11 @@ return console.askOkCancel(message, true);
               </formComponent>
             </formComponents>
           </screen>
-          <screen name="Banner with header at the top" id="67" beanClass="com.install4j.runtime.beans.screens.FormScreen" styleId="41" rollbackBarrierExitCode="0">
+          <screen name="Install Options" id="67" beanClass="com.install4j.runtime.beans.screens.FormScreen" styleId="41" rollbackBarrierExitCode="0">
             <serializedBean>
               <property name="title" type="string">Installation Options</property>
             </serializedBean>
+            <condition>return !System.getenv("path").contains(context.getVariable("sys.installationDir").toString());</condition>
             <formComponents>
               <formComponent name="Add to path" id="71" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                 <serializedBean>
