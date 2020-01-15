@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="8.0.3" transformSequenceNumber="8">
-  <directoryPresets config="." />
+  <directoryPresets config="../../../target/liquibase-3.8.6-local-SNAPSHOT/liquibase" />
   <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Liquibase" publisherWeb="http://liquibase.org" version="${liquibase.version}" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./messages.properties" />
@@ -16,10 +16,11 @@
     </mountPoints>
     <entries>
       <dirEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}" subDirectory="liquibase-${compiler:liquibaseVersion}" />
+      <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/liquibase" fileMode="755" overrideFileMode="true" />
     </entries>
   </files>
   <launchers>
-    <launcher name="Dir ${installDir}" id="156" external="true" menuName="Liquibase Home Directory" externalFile="${installer:sys.installationDir}" />
+    <launcher name="Open Install Dir" id="156" external="true" menuName="Liquibase Home Directory" externalFile="${installer:sys.installationDir}" />
     <launcher name="README.txt" id="158" external="true" menuName="Liquibase Readme" externalFile="README.txt" />
     <launcher name="uninstall.exe" id="159" external="true" menuName="Uninstall Liquibase" externalFile="uninstall.exe" />
   </launchers>
@@ -29,7 +30,11 @@
         <startup>
           <screen id="1" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
             <actions>
-              <action id="22" beanClass="com.install4j.runtime.beans.actions.misc.RequestPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
+              <action id="22" beanClass="com.install4j.runtime.beans.actions.misc.RequestPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="obtainIfAdminMac" type="boolean" value="true" />
+                </serializedBean>
+              </action>
             </actions>
           </screen>
         </startup>
@@ -117,7 +122,11 @@ return console.askOkCancel(message, true);
             <serializedBean>
               <property name="title" type="string">Installation Options</property>
             </serializedBean>
-            <condition>return !System.getenv("path").contains(context.getVariable("sys.installationDir").toString());</condition>
+            <condition>return 
+(Util.isWindows() &amp;&amp; !System.getenv("path").contains(context.getVariable("sys.installationDir").toString()))
+    ||
+(Util.isMacOS() &amp;&amp; !(new File("/etc/paths.d/liquibase")).exists())
+;</condition>
             <formComponents>
               <formComponent name="Add to path" id="71" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                 <serializedBean>
@@ -149,8 +158,22 @@ return console.askOkCancel(message, true);
                   <property name="value" type="string">${installer:sys.installationDir}</property>
                   <property name="variableName" type="string">PATH</property>
                 </serializedBean>
-                <condition>context.getBooleanVariable("liquibase.addToPath") &amp;&amp;
+                <condition>Util.isWindows() &amp;&amp;
+context.getBooleanVariable("liquibase.addToPath") &amp;&amp;
 !WinEnvVars.getenv("PATH").contains(context.getInstallationDirectory().getAbsolutePath())</condition>
+              </action>
+              <action name="Create Mac Path" id="259" beanClass="com.install4j.runtime.beans.actions.text.WriteTextFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="file">
+                    <object class="java.io.File">
+                      <string>/etc/paths.d/liquibase</string>
+                    </object>
+                  </property>
+                  <property name="text" type="string">${installer:sys.installationDir}
+</property>
+                </serializedBean>
+                <condition>com.install4j.api.Util.isMacOS() &amp;&amp;
+context.getBooleanVariable("liquibase.addToPath")</condition>
               </action>
             </actions>
             <formComponents>
@@ -162,10 +185,30 @@ return console.askOkCancel(message, true);
             </formComponents>
           </screen>
           <screen id="20" beanClass="com.install4j.runtime.beans.screens.FinishedScreen" styleId="41" rollbackBarrierExitCode="0" finishScreen="true">
+            <actions>
+              <action name="Open Install Directory" id="336" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="script">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">Util.showPath((String) context.getVariable("sys.installationDir"));
+return true;</property>
+                    </object>
+                  </property>
+                </serializedBean>
+                <condition>return Boolean.TRUE.equals(context.getVariable("liquibase.openInstallDirectory"));</condition>
+              </action>
+            </actions>
             <formComponents>
               <formComponent id="21" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetBottom="10">
                 <serializedBean>
                   <property name="labelText" type="string">${form:finishedMessage}</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent name="Show Installed Dir" id="335" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                <serializedBean>
+                  <property name="checkboxText" type="string">Open Installed Location</property>
+                  <property name="initiallySelected" type="boolean" value="true" />
+                  <property name="variableName" type="string">liquibase.openInstallDirectory</property>
                 </serializedBean>
               </formComponent>
             </formComponents>
@@ -451,7 +494,12 @@ return console.askYesNo(message, true);
         </modules>
       </jreBundle>
     </windows>
-    <macosFolder name="macOS Folder" id="154">
+    <macosFolder name="macOS Folder" id="154" installDir="liquibase" customInstallBaseDir="/usr/local/opt">
+      <excludedLaunchers>
+        <launcher id="156" />
+        <launcher id="158" />
+        <launcher id="159" />
+      </excludedLaunchers>
       <jreBundle jreBundleSource="generated">
         <modules>
           <defaultModules set="jre" />
