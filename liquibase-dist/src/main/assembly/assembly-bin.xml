@@ -86,6 +86,7 @@
                 <include>com.sun.xml.bind:jaxb-impl:jar:</include>
                 <include>com.sun.xml.bind:jaxb-core:jar:</include>
                 <include>commons-cli:commons-cli:jar:</include>
+                <include>com.h2database:h2:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>
