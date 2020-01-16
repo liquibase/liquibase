@@ -47,9 +47,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder queryStringBuilder = new StringBuilder();
         queryStringBuilder.append("CREATE SEQUENCE ");
-        if (database instanceof PostgresDatabase) {
-            queryStringBuilder.append(" IF NOT EXISTS ");
-        }
+       // if (database instanceof PostgresDatabase) {
+       //     queryStringBuilder.append(" IF NOT EXISTS ");
+       // }
         queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
