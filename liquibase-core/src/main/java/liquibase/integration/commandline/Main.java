@@ -852,6 +852,7 @@ public class Main {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
                             && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
+                            && !cmdParm.startsWith("--" + OPTIONS.HELP)
                             && !cmdParm.startsWith("--" + OPTIONS.FORCE)
                             && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
                             && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
@@ -1084,9 +1085,13 @@ public class Main {
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
-        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
+        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE)) {
             return;
+        }
 
+        if (arg.toLowerCase().equals("--" + OPTIONS.HELP)) {
+            return;
+        }
         String[] splitArg = splitArg(arg);
 
         String attributeName = splitArg[0];
@@ -1472,6 +1477,9 @@ public class Main {
                     clp.set(entry.getKey(), entry.getValue());
                 }
                 argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_LOG_PARAMETERS, clp);
+                if (this.commandParams.contains("--help")) {
+                    argsMap.put("help", true);
+                }
                 configuratingCommand.configure(argsMap);
                 liquibaseCommand.execute();
                 return;
