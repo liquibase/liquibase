@@ -9,12 +9,15 @@ import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.joran.spi.ConsoleTarget;
 import ch.qos.logback.core.spi.FilterReply;
-import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
+import liquibase.*;
 import liquibase.change.CheckSum;
+import liquibase.changelog.*;
+import liquibase.changelog.filter.AlreadyRanChangeSetFilter;
+import liquibase.changelog.filter.ChangeSetFilter;
+import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.ChangeSetVisitor;
+import liquibase.changelog.visitor.DetermineNumberChangesFollowingVisitor;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
@@ -103,10 +106,16 @@ public class Main {
     protected Boolean strict = Boolean.TRUE;
     protected String defaultsFile = "liquibase.properties";
     protected String diffTypes;
+
+    //
+    // Precise rollback
+    //
     protected String changeSetId;
     protected String changeSetAuthor;
-    protected String filePath;
+    protected String changeSetPath;
     protected String force;
+    protected String rollbackScript;
+
     protected String changeSetContext;
     protected String dataOutputDirectory;
     protected String referenceDriver;
@@ -132,11 +141,11 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
+    private boolean liquibaseProLicenseValid=false;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
     protected String delimiter;
-    protected String rollbackScript;
 
     private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
                                                  204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
@@ -268,6 +277,9 @@ public class Main {
                     if (result.code != 0) {
                         String allMessages = String.join("\n", result.messages);
                         log.warning(LogType.USER_MESSAGE, allMessages);
+                    }
+                    else {
+                        main.liquibaseProLicenseValid = true;
                     }
                 }
                 log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
@@ -522,14 +534,16 @@ public class Main {
      */
     private static boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith(COMMANDS.UPDATE)
-                || command.toLowerCase().startsWith(COMMANDS.ROLLBACK)
+                || (command.toLowerCase().startsWith(COMMANDS.ROLLBACK) &&
+                    ! command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET))
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.STATUS.equalsIgnoreCase(command)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
                 || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
-                || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command);
+                || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command);
     }
 
     /**
@@ -578,7 +592,8 @@ public class Main {
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(arg)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(arg)
-                || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(arg);
+                || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(arg)
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(arg);
     }
 
     /**
@@ -1435,17 +1450,31 @@ public class Main {
                 }
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
+                 if (! liquibaseProLicenseValid) {
+                    String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
+                    throw new LiquibaseException(messageString);
+                }
+
                 LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand(COMMANDS.ROLLBACK_ONE_CHANGE_SET));
                 AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
                 Map<String, Object> argsMap = new HashMap<String, Object>();
-                argsMap.put(OPTIONS.CHANGE_SET_ID, changeSetId);
-                argsMap.put(OPTIONS.CHANGE_SET_AUTHOR, changeSetAuthor);
-                argsMap.put(OPTIONS.CHANGE_SET_PATH, filePath);
-                argsMap.put(OPTIONS.FORCE, Boolean.parseBoolean(force));
-                argsMap.put(OPTIONS.ROLLBACK_SCRIPT, rollbackScript);
-                argsMap.put("database", database);
+                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_SET_ID, changeSetId);
+                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_SET_AUTHOR, changeSetAuthor);
+                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_SET_PATH, changeSetPath);
+                argsMap.put(AbstractSelfConfiguratingCommand.FORCE, force);
+                argsMap.put(AbstractSelfConfiguratingCommand.ROLLBACK_SCRIPT, rollbackScript);
+                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_LOG_FILE, changeLogFile);
+                argsMap.put(AbstractSelfConfiguratingCommand.DATABASE, database);
+                argsMap.put(AbstractSelfConfiguratingCommand.CHANGELOG, liquibase.getDatabaseChangeLog());
+                argsMap.put(AbstractSelfConfiguratingCommand.RESOURCE_ACCESSOR, liquibase.getResourceAccessor());
+                ChangeLogParameters clp = new ChangeLogParameters(database);
+                for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
+                    clp.set(entry.getKey(), entry.getValue());
+                }
+                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_LOG_PARAMETERS, clp);
                 configuratingCommand.configure(argsMap);
                 liquibaseCommand.execute();
+                return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
                         (COMMANDS.DROP_ALL);
