@@ -9,15 +9,13 @@ import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.joran.spi.ConsoleTarget;
 import ch.qos.logback.core.spi.FilterReply;
-import liquibase.*;
+import liquibase.CatalogAndSchema;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
 import liquibase.change.CheckSum;
-import liquibase.changelog.*;
-import liquibase.changelog.filter.AlreadyRanChangeSetFilter;
-import liquibase.changelog.filter.ChangeSetFilter;
-import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
-import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.changelog.visitor.DetermineNumberChangesFollowingVisitor;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
@@ -106,16 +104,7 @@ public class Main {
     protected Boolean strict = Boolean.TRUE;
     protected String defaultsFile = "liquibase.properties";
     protected String diffTypes;
-
-    //
-    // Precise rollback
-    //
-    protected String changeSetId;
     protected String changeSetAuthor;
-    protected String changeSetPath;
-    protected String force;
-    protected String rollbackScript;
-
     protected String changeSetContext;
     protected String dataOutputDirectory;
     protected String referenceDriver;
@@ -141,19 +130,21 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
-    private boolean liquibaseProLicenseValid=false;
+    private boolean liquibaseProLicenseValid = false;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
     protected String delimiter;
+    protected String rollbackScript;
 
     private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
-                                                 204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
-                                                 220, 222, 223, 232, 233, 234, 235, 236, 237, 238, 239, 241,
-                                                 249, 250, 251, 252, 255, 284, 332, 333, 334, 335, 336, 337, 359,
-                                                 360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
-                                                 8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
-                                                };
+            204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
+            220, 222, 223, 232, 233, 234, 235, 236, 237, 238, 239, 241,
+            249, 250, 251, 252, 255, 284, 332, 333, 334, 335, 336, 337, 359,
+            360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
+            8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
+    };
+
     protected static class CodePointCheck {
         public int position;
         public char ch;
@@ -224,10 +215,9 @@ public class Main {
                 if (licenseService != null) {
                     if (main.liquibaseProLicenseKey == null) {
                         log.info(LogType.LOG, "No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
-                    } 
-                    else {
-                        Location licenseKeyLocation = 
-                            new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                    } else {
+                        Location licenseKeyLocation =
+                                new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                         LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                         if (result.code != 0) {
                             String allMessages = String.join("\n", result.messages);
@@ -242,14 +232,14 @@ public class Main {
             //
             // Look for characters which cannot be handled
             //
-            for (int i=0; i < args.length; i++) {
+            for (int i = 0; i < args.length; i++) {
                 CodePointCheck codePointCheck = checkArg(args[i]);
                 if (codePointCheck != null) {
                     String message =
-                        "A non-standard character '" + codePointCheck.ch +
-                        "' was detected on the command line at position " +
-                        (codePointCheck.position + 1) + " of argument number " + (i+1) +
-                        ".\nIf problems occur, please remove the character and try again.";
+                            "A non-standard character '" + codePointCheck.ch +
+                                    "' was detected on the command line at position " +
+                                    (codePointCheck.position + 1) + " of argument number " + (i + 1) +
+                                    ".\nIf problems occur, please remove the character and try again.";
                     LOG.warning(message);
                     System.err.println(message);
                 }
@@ -277,8 +267,7 @@ public class Main {
                     if (result.code != 0) {
                         String allMessages = String.join("\n", result.messages);
                         log.warning(LogType.USER_MESSAGE, allMessages);
-                    }
-                    else {
+                    } else {
                         main.liquibaseProLicenseValid = true;
                     }
                 }
@@ -535,7 +524,7 @@ public class Main {
     private static boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith(COMMANDS.UPDATE)
                 || (command.toLowerCase().startsWith(COMMANDS.ROLLBACK) &&
-                    ! command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET))
+                !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET))
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.STATUS.equalsIgnoreCase(command)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
@@ -851,12 +840,12 @@ public class Main {
         } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
-                            && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
-                            && !cmdParm.startsWith("--" + OPTIONS.HELP)
-                            && !cmdParm.startsWith("--" + OPTIONS.FORCE)
-                            && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
-                            && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
-                            && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
+                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
+                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -997,8 +986,8 @@ public class Main {
         main = new Main();
         this.logLevel = Level.ERROR.toString();
         main.reconfigureLogging();
-        ch.qos.logback.classic.Logger rootLogger = 
-          (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        ch.qos.logback.classic.Logger rootLogger =
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
         rootLogger.setLevel(Level.ERROR);
         stream.println(CommandLineUtils.getBanner());
         String helpText = commandLineHelpBundle.getString("commandline-helptext");
@@ -1006,16 +995,14 @@ public class Main {
     }
 
     /**
-     *
      * Check the string for known characters which cannot be handled
      *
-     * @param   arg             Input parameter to check
-     * @return  int             A CodePointCheck object, or null to indicate all good
-     *
+     * @param arg Input parameter to check
+     * @return int             A CodePointCheck object, or null to indicate all good
      */
     protected static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
-        for (int i=0; i < chars.length; i++) {
+        for (int i = 0; i < chars.length; i++) {
             for (int j = 0; j < suspiciousCodePoints.length; j++) {
                 if (suspiciousCodePoints[j] == chars[i]) {
                     CodePointCheck codePointCheck = new CodePointCheck();
@@ -1060,11 +1047,11 @@ public class Main {
                 } else {
                     commandParams.add(arg);
                     if (arg.startsWith("--")) {
-                        parseOptionArgument(arg);
+                        parseOptionArgument(arg, true);
                     }
                 }
             } else if (arg.startsWith("--")) {
-                parseOptionArgument(arg);
+                parseOptionArgument(arg, false);
             } else {
                 throw new CommandLineParsingException(
                         String.format(coreBundle.getString("unexpected.value"), arg));
@@ -1082,16 +1069,17 @@ public class Main {
      * @param arg the option to parse (including the "--")
      * @throws CommandLineParsingException if a problem occurs
      */
-    private void parseOptionArgument(String arg) throws CommandLineParsingException {
+    private void parseOptionArgument(String arg, boolean okIfNotAField) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
         if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE)) {
             return;
         }
 
-        if (arg.toLowerCase().equals("--" + OPTIONS.HELP)) {
-            return;
+        if (arg.toLowerCase().equals("--" + OPTIONS.FORCE) || arg.toLowerCase().equals("--" + OPTIONS.HELP)) {
+            arg = arg + "=true";
         }
+
         String[] splitArg = splitArg(arg);
 
         String attributeName = splitArg[0];
@@ -1121,9 +1109,11 @@ public class Main {
                 field.set(this, value);
             }
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new CommandLineParsingException(
-                    String.format(coreBundle.getString("option.unknown"), attributeName)
-            );
+            if (!okIfNotAField) {
+                throw new CommandLineParsingException(
+                        String.format(coreBundle.getString("option.unknown"), attributeName)
+                );
+            }
         }
     }
 
@@ -1455,28 +1445,31 @@ public class Main {
                 }
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
-                 if (! liquibaseProLicenseValid) {
+                if (!liquibaseProLicenseValid) {
                     String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
                     throw new LiquibaseException(messageString);
                 }
 
                 LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand(COMMANDS.ROLLBACK_ONE_CHANGE_SET));
-                AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
+                AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
                 Map<String, Object> argsMap = new HashMap<String, Object>();
-                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_SET_ID, changeSetId);
-                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_SET_AUTHOR, changeSetAuthor);
-                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_SET_PATH, changeSetPath);
-                argsMap.put(AbstractSelfConfiguratingCommand.FORCE, force);
-                argsMap.put(AbstractSelfConfiguratingCommand.ROLLBACK_SCRIPT, rollbackScript);
-                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_LOG_FILE, changeLogFile);
-                argsMap.put(AbstractSelfConfiguratingCommand.DATABASE, database);
-                argsMap.put(AbstractSelfConfiguratingCommand.CHANGELOG, liquibase.getDatabaseChangeLog());
-                argsMap.put(AbstractSelfConfiguratingCommand.RESOURCE_ACCESSOR, liquibase.getResourceAccessor());
+                argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
+                argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
+                argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
+                argsMap.put("rollbackScript", rollbackScript);
+                argsMap.put("changeLogFile", changeLogFile);
+                argsMap.put("database", database);
+                argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
+                argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
                 ChangeLogParameters clp = new ChangeLogParameters(database);
                 for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
                     clp.set(entry.getKey(), entry.getValue());
                 }
-                argsMap.put(AbstractSelfConfiguratingCommand.CHANGE_LOG_PARAMETERS, clp);
+                argsMap.put("changeLogParameters", clp);
+
+                if (this.commandParams.contains("--force")) {
+                    argsMap.put("force", true);
+                }
                 if (this.commandParams.contains("--help")) {
                     argsMap.put("help", true);
                 }
