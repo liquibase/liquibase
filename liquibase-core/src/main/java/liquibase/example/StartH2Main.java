@@ -1,5 +1,6 @@
 package liquibase.example;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -82,7 +83,16 @@ public class StartH2Main {
         String url = (String) webServer.getClass().getMethod("addSession", Connection.class).invoke(webServer, connection);
 
         if (openBrowser) {
-            serverClass.getMethod("openBrowser", String.class).invoke(null, url);
+            try {
+                serverClass.getMethod("openBrowser", String.class).invoke(null, url);
+            } catch (Exception e) {
+                String message = e.getMessage();
+                if (message == null && e.getCause() != null) {
+                    message = e.getCause().getMessage();
+                }
+                System.out.println("Cannot open browser: "+ message);
+                System.out.println("");
+            }
         }
 
         return url;

@@ -28,16 +28,4 @@ if "%JAVA_HOME%"=="" (
     set JAVA_PATH=%JAVA_HOME%\bin\java
 )
 
-set EXAMPLES_HOME=%~dp0
-
-set H2_USERNAME=sample
-set H2_PASSWORD=letmein
-set H2_URL=jdbc:h2:./example
-
-rem echo JAVA_HOME is %JAVA_HOME%
-rem echo JAVA_PATH is %JAVA_PATH%
-rem echo LIQUIBASE HOME IS %LIQUIBASE_HOME%
-rem echo EXAMPLES_HOME is %EXAMPLES_HOME%
-
-
 "%JAVA_PATH%" -cp "%LIQUIBASE_HOME%\lib\h2-1.4.200.jar;%LIQUIBASE_HOME%\liquibase.jar" liquibase.example.StartH2Main

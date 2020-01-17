@@ -15,6 +15,7 @@
             <lineEnding>unix</lineEnding>
             <includes>
                 <include>liquibase</include>
+                <include>examples/start-h2</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
