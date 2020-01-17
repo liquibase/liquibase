@@ -32,10 +32,10 @@
             <column name="city" type="varchar(30)"/>
         </createTable>
     </changeSet>
-    
+
     <changeSet id="2" author="other.dev">
         <addColumn tableName="person">
-            <column name="country" type="varchar(2)"></column>
+            <column name="country" type="varchar(2)"/>
         </addColumn>
     </changeSet>
 

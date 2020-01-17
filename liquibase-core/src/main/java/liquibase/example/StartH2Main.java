@@ -10,7 +10,6 @@ public class StartH2Main {
 
     private static final String dbPort = "9090";
     private static final String webPort = "8090";
-    private static final String tcpUrl = "jdbc:h2:tcp://localhost:" + dbPort + "/mem:example";
     private static final String username = "dbuser";
     private static final String password = "letmein";
 
@@ -21,18 +20,29 @@ public class StartH2Main {
 
         Class.forName("org.h2.Driver");
 
-        try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:example", username, password)) {
-
-            System.out.println("Connection Information:" + System.lineSeparator() +
-                    "  Database URL: " + tcpUrl + System.lineSeparator() +
-                    "  Username: " + username + System.lineSeparator() +
-                    "  Password: " + password + System.lineSeparator() +
-                    "" + System.lineSeparator() +
-                    "Opening Database Console in Browser..." + System.lineSeparator() +
-                    "  Web URL: http://localhost:" + webPort + System.lineSeparator());
+        try (Connection devConnection = DriverManager.getConnection("jdbc:h2:mem:dev", username, password);
+             Connection intConnection = DriverManager.getConnection("jdbc:h2:mem:integration", username, password)) {
 
             startTcpServer();
-            startWebServer(conn);
+
+            Object webServer = startWebServer();
+            String devUrl = createWebSession(devConnection, webServer, true);
+            String intUrl = createWebSession(intConnection, webServer, false);
+
+            System.out.println("Connection Information:" + System.lineSeparator() +
+                    "  Dev database: " + System.lineSeparator() +
+                    "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:dev" + System.lineSeparator() +
+                    "    Username: " + username + System.lineSeparator() +
+                    "    Password: " + password + System.lineSeparator() +
+                    "  Integration database: " + System.lineSeparator() +
+                    "    JDBC URL: jdbc:h2:tcp://localhost:" + dbPort + "/mem:integration" + System.lineSeparator() +
+                    "    Username: " + username + System.lineSeparator() +
+                    "    Password: " + password + System.lineSeparator() +
+                    "" + System.lineSeparator() +
+                    "Opening Database Console in Browser..." + System.lineSeparator() +
+                    "  Dev Web URL: " + devUrl + System.lineSeparator() +
+                    "  Integration Web URL: " + intUrl + System.lineSeparator());
+
 
             while (true) {
                 Thread.sleep(60 * 1000);
@@ -56,23 +66,26 @@ public class StartH2Main {
                 .invoke(tcpServer);
     }
 
-    protected static void startWebServer(Connection conn) throws Exception {
+    protected static Object startWebServer() throws Exception {
         final Class<?> serverClass = Class.forName("org.h2.tools.Server");
-
-//        final Object webServer = serverClass.getMethod("startWebServer", Connection.class)
-//                .invoke(serverClass, conn);
 
         final Object webServer = Class.forName("org.h2.server.web.WebServer").newInstance();
         Object web = serverClass.getConstructor(Class.forName("org.h2.server.Service"), String[].class).newInstance(webServer, (Object) new String[]{"-webPort", webPort});
         web.getClass().getMethod("start").invoke(web);
 
-        Object url = webServer.getClass().getMethod("addSession", Connection.class).invoke(webServer, conn);
-        System.out.println(url);
+        return webServer;
+    }
 
-        serverClass.getMethod("openBrowser", String.class).invoke(null, url);
+    private static String createWebSession(Connection connection, Object webServer, boolean openBrowser) throws Exception {
+        final Class<?> serverClass = Class.forName("org.h2.tools.Server");
 
-//        webServer.getClass().getMethod("start")
-//                .invoke(webServer);
+        String url = (String) webServer.getClass().getMethod("addSession", Connection.class).invoke(webServer, connection);
+
+        if (openBrowser) {
+            serverClass.getMethod("openBrowser", String.class).invoke(null, url);
+        }
+
+        return url;
     }
 
 }
