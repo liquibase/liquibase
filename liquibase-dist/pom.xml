@@ -134,7 +134,16 @@
                         <descriptor>src/main/assembly/assembly-bin.xml</descriptor>
                     </descriptors>
                     <archive>
-                        <manifestFile>src/main/assembly/MANIFEST.MF</manifestFile>
+						<manifest>
+							<addClasspath>true</addClasspath>
+                            <mainClass>liquibase.integration.commandline.Main</mainClass>
+						</manifest>
+                        <manifestEntries>
+                            <Build-Time>${build.timestamp}</Build-Time>
+                            <Build-Number>${build.number}</Build-Number>
+                            <Liquibase-Package>liquibase.change,liquibase.command,liquibase.changelog,liquibase.database,liquibase.parser,liquibase.precondition,liquibase.datatype,liquibase.serializer,liquibase.sqlgenerator,liquibase.executor,liquibase.snapshot,liquibase.logging,liquibase.diff,liquibase.structure,liquibase.structurecompare,liquibase.lockservice,liquibase.sdk.database,liquibase.ext,liquibase.pro,com.datical.liquibase</Liquibase-Package>
+                            <Liquibase-Version>${project.version}</Liquibase-Version>
+                        </manifestEntries>
                     </archive>
                 </configuration>
                 <executions>
