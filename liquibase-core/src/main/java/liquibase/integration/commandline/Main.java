@@ -274,10 +274,14 @@ public class Main {
                 log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
             }
 
-            List<String> setupMessages = main.checkSetup();
-            if (!setupMessages.isEmpty()) {
-                main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
-                return 1;
+            if (main.commandParams.contains("--help") && main.command.equals("rollbackOneChangeSet")) {
+                //don't need to check setup
+            } else {
+                List<String> setupMessages = main.checkSetup();
+                if (!setupMessages.isEmpty()) {
+                    main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
+                    return 1;
+                }
             }
 
             main.applyDefaults();
@@ -1257,13 +1261,16 @@ public class Main {
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
         CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
-        Database database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
-                this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName,
-                Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema),
-                this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
-                this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
-                this.databaseChangeLogLockTableName);
-        database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+        Database database = null;
+        if (this.url != null) {
+            database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
+                    this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName,
+                    Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema),
+                    this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
+                    this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
+                    this.databaseChangeLogLockTableName);
+            database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+        }
         try {
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
@@ -1397,7 +1404,9 @@ public class Main {
                     changeExecListenerClass, changeExecListenerPropertiesFile);
             liquibase.setChangeExecListener(listener);
 
-            database.setCurrentDateTimeFunction(currentDateTimeFunction);
+            if (database != null) {
+                database.setCurrentDateTimeFunction(currentDateTimeFunction);
+            }
             for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
@@ -1445,7 +1454,7 @@ public class Main {
                 }
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
-                if (!liquibaseProLicenseValid) {
+                if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
                     String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
                     throw new LiquibaseException(messageString);
                 }
@@ -1459,7 +1468,9 @@ public class Main {
                 argsMap.put("rollbackScript", rollbackScript);
                 argsMap.put("changeLogFile", changeLogFile);
                 argsMap.put("database", database);
-                argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
+                if (!commandParams.contains("--help")) {
+                    argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
+                }
                 argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
                 ChangeLogParameters clp = new ChangeLogParameters(database);
                 for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
@@ -1650,8 +1661,10 @@ public class Main {
             }
         } finally {
             try {
-                database.rollback();
-                database.close();
+                if (database != null) {
+                    database.rollback();
+                    database.close();
+                }
             } catch (DatabaseException e) {
                 LogService.getLog(getClass()).warning(
                         LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
