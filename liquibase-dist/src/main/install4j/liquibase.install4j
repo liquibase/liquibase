@@ -22,7 +22,6 @@
   <launchers>
     <launcher name="Open Install Dir" id="156" external="true" menuName="Liquibase Home Directory" externalFile="${installer:sys.installationDir}" />
     <launcher name="README.txt" id="158" external="true" menuName="Liquibase Readme" externalFile="README.txt" />
-    <launcher name="uninstall.exe" id="159" external="true" menuName="Uninstall Liquibase" externalFile="uninstall.exe" />
   </launchers>
   <installerGui>
     <applications>
@@ -498,7 +497,6 @@ return console.askYesNo(message, true);
       <excludedLaunchers>
         <launcher id="156" />
         <launcher id="158" />
-        <launcher id="159" />
       </excludedLaunchers>
       <jreBundle jreBundleSource="generated">
         <modules>
