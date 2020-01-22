@@ -106,7 +106,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
         if (force != null) {
-            argsMap.put("force", "true");
+            argsMap.put("force", Boolean.TRUE);
         }
         configuratingCommand.configure(argsMap);
         try {
