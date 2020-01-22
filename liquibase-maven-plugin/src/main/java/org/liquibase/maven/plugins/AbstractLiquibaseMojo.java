@@ -264,6 +264,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private File driverPropertiesFile;
 
+    private boolean hasProLicense;
+
     /**
      *
      * Liquibase PRO license key value 
@@ -272,6 +274,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      */
     protected String liquibaseProLicenseKey;
+
+    protected boolean hasProLicense() {
+        return hasProLicense;
+    }
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding==null) {
@@ -311,7 +317,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         //
         // Check for a LiquibasePro license
         //
-        MavenUtils.checkProLicense(liquibaseProLicenseKey, getLog());
+        hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, getLog());
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
         ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
