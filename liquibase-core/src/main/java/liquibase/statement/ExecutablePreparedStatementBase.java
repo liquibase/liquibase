@@ -201,7 +201,16 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
             LOG.debug(LogType.LOG, "value is explicit null");
-            stmt.setNull(i, java.sql.Types.NULL);
+            if (col.getType() != null) {
+                if (col.getType().toLowerCase().contains("date") || col.getType().toLowerCase().contains("time")) {
+                    stmt.setNull(i, java.sql.Types.TIMESTAMP);
+                } else {
+                    // TODO Add support for other types 
+                    stmt.setNull(i, java.sql.Types.NULL);
+                }
+            } else {
+                stmt.setNull(i, java.sql.Types.NULL);
+            }
         }
     }
 
