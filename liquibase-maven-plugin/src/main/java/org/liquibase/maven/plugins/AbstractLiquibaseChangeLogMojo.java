@@ -8,14 +8,12 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Liquibase MOJO that requires the user to provide a DatabaseChangeLogFile to be able
