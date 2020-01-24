@@ -8,21 +8,29 @@ import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import org.apache.maven.plugin.MojoFailureException;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
+
+import static java.util.ResourceBundle.getBundle;
 
 /**
  *
  * Invokes Liquibase targeted rollback
  *
- * @goal rollbackOneChangeSet
+ * @goal rollbackOneChangeSetSQL
  *
  */
-public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLogMojo {
+public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLogMojo {
     /**
      *
      * The change set ID to rollback
@@ -69,6 +77,28 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
      */
     protected String rollbackScript;
 
+    /**
+     *
+     * The path to an output file
+     *
+     * @parameter property="liquibase.outputFile"
+     *
+     */
+    protected String outputFile;
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    @Override
+    protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
+      super.checkRequiredParametersAreSpecified();
+      checkRequiredRollbackParameters();
+    }
+
+    protected void checkRequiredRollbackParameters() throws MojoFailureException {
+
+      String message = "Cannot specify multiple rollbackXXX options, please select only"
+                       + " one of rollbackTag, rollbackCount, rollbackDate.";
+
+    }
+
     @Override
     protected void printSettings(String indent) {
       super.printSettings(indent);
@@ -91,11 +121,15 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
-        argsMap.put("changeLogParameters", clp);
-        if (force != null && ! Boolean.parseBoolean(force)) {
-            throw new LiquibaseException("Invalid value for --force.  You must specify --force=true to use rollbackOneChangeSet.");
+        Writer outputWriter = null;
+        try {
+            outputWriter = createOutputWriter();
+            argsMap.put("outputWriter", outputWriter);
         }
-        argsMap.put("force", Boolean.TRUE);
+        catch (IOException ioe) {
+            throw new LiquibaseException("Error executing rollbackOneChangeSet.  Unable to create output writer.", ioe);
+        }
+        argsMap.put("changeLogParameters", clp);
         argsMap.put("liquibase", liquibase);
         configuratingCommand.configure(argsMap);
         try {
@@ -104,6 +138,40 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         catch (CommandExecutionException cee) {
             throw new LiquibaseException("Error executing rollbackOneChangeSet", cee);
         }
+        finally {
+            try {
+                outputWriter.flush();
+                outputWriter.close();
+            }
+            catch (IOException ioe) {
+                LogService.getLog(getClass()).info(LogType.LOG, String.format("Unable to close output file"));
+            }
+            finally {
+            }
+        }
+    }
+
+    private OutputStream getOutputStream() throws IOException {
+        if (outputFile == null) {
+            return System.out;
+        }
+        FileOutputStream fileOut;
+        try {
+            fileOut = new FileOutputStream(outputFile, false);
+        } catch (IOException e) {
+            LogService.getLog(getClass()).severe(LogType.LOG, String.format(
+                    coreBundle.getString("could.not.create.output.file"),
+            outputFile));
+            throw e;
+        }
+        return fileOut;
+    }
+
+    private Writer createOutputWriter() throws IOException {
+        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                .getOutputEncoding();
+
+        return new OutputStreamWriter(getOutputStream(), charsetName);
     }
 
     private Map<String, Object> getCommandArgsObjectMap(Liquibase liquibase) throws LiquibaseException {
@@ -112,7 +180,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         argsMap.put("changeSetId", this.changeSetId);
         argsMap.put("changeSetAuthor", this.changeSetAuthor);
         argsMap.put("changeSetPath", this.changeSetPath);
-        argsMap.put("force", this.force);
+        argsMap.put("force", true);
         argsMap.put("rollbackScript", this.rollbackScript);
         argsMap.put("changeLogFile", this.changeLogFile);
         argsMap.put("database", database);

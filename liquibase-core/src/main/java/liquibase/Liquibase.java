@@ -437,7 +437,7 @@ public class Liquibase {
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
-    private void outputHeader(String message) throws DatabaseException {
+    public void outputHeader(String message) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         executor.comment("*********************************************************************");
         executor.comment(message);

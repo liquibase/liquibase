@@ -586,7 +586,8 @@ public class Main {
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(arg)
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(arg)
-                || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(arg);
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(arg)
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(arg);
     }
 
     /**
@@ -850,6 +851,19 @@ public class Main {
                         && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
                         && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
                         && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                }
+            }
+        } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
+                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
+                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)
+                        && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_FILE)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -1365,7 +1379,6 @@ public class Main {
                 String result = snapshotCommand.execute().print();
                 outputWriter.write(result);
                 outputWriter.flush();
-                outputWriter.close();
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
                 ExecuteSqlCommand executeSqlCommand = (ExecuteSqlCommand) CommandFactory.getInstance().getCommand(
@@ -1459,8 +1472,6 @@ public class Main {
                     throw new LiquibaseException(messageString);
                 }
 
-                LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand(COMMANDS.ROLLBACK_ONE_CHANGE_SET));
-                AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
                 Map<String, Object> argsMap = new HashMap<String, Object>();
                 argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
                 argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
@@ -1484,8 +1495,22 @@ public class Main {
                 if (this.commandParams.contains("--help")) {
                     argsMap.put("help", true);
                 }
-                configuratingCommand.configure(argsMap);
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, argsMap);
                 liquibaseCommand.execute();
+                return;
+            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
+                if (!liquibaseProLicenseValid) {
+                    String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
+                    throw new LiquibaseException(messageString);
+                }
+                Writer outputWriter = getOutputWriter();
+                Map<String, Object> argsMap = new HashMap<String, Object>();
+                argsMap.put("outputWriter", outputWriter);
+                argsMap.put("force", true);
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, argsMap);
+                liquibaseCommand.execute();
+                outputWriter.flush();
+                outputWriter.close();
                 return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
@@ -1672,6 +1697,35 @@ public class Main {
         }
     }
 
+    private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, Map<String, Object> argsMap)
+            throws CommandLineParsingException, LiquibaseException {
+        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand(COMMANDS.ROLLBACK_ONE_CHANGE_SET));
+        AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
+        argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
+        argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
+        argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
+        argsMap.put("rollbackScript", rollbackScript);
+        argsMap.put("changeLogFile", changeLogFile);
+        argsMap.put("database", database);
+        argsMap.put("liquibase", liquibase);
+        argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
+        argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
+        ChangeLogParameters clp = new ChangeLogParameters(database);
+        for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
+            clp.set(entry.getKey(), entry.getValue());
+        }
+        argsMap.put("changeLogParameters", clp);
+
+        if (this.commandParams.contains("--force")) {
+            argsMap.put("force", true);
+        }
+        if (this.commandParams.contains("--help")) {
+            argsMap.put("help", true);
+        }
+        configuratingCommand.configure(argsMap);
+        return liquibaseCommand;
+    }
+
     /**
      * Return the first "parameter" from the command line that does NOT have the form of parameter=value. A parameter
      * is a command line argument that follows the main action (e.g. update/rollback/...). Example:
@@ -1824,6 +1878,7 @@ public class Main {
         private static final String MIGRATE_SQL = "migrateSQL";
         private static final String RELEASE_LOCKS = "releaseLocks";
         private static final String ROLLBACK_ONE_CHANGE_SET = "rollbackOneChangeSet";
+        private static final String ROLLBACK_ONE_CHANGE_SET_SQL = "rollbackOneChangeSetSQL";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
         private static final String ROLLBACK_COUNT_SQL = "rollbackCountSQL";
@@ -1857,6 +1912,7 @@ public class Main {
         private static final String CHANGE_SET_ID = "changeSetId";
         private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
         private static final String CHANGE_SET_PATH = "changeSetPath";
+        private static final String OUTPUT_FILE = "outputFile";
         private static final String FORCE = "force";
         private static final String ROLLBACK_SCRIPT = "rollbackScript";
         private static final String EXCLUDE_OBJECTS = "excludeObjects";
