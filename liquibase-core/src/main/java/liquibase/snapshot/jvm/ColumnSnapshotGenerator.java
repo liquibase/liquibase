@@ -21,6 +21,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.BooleanUtils;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 
@@ -51,15 +52,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-        if ((((Column) example).getComputed() != null) && ((Column) example).getComputed()) {
+        if (BooleanUtils.isTrue(((Column) example).getComputed()) || BooleanUtils.isTrue(((Column) example).getDescending())) {
             return example;
         }
         Database database = snapshot.getDatabase();
 
         Relation relation = ((Column) example).getRelation();
-        if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
-            return example;
-        }
 
         Schema schema = relation.getSchema();
         try {

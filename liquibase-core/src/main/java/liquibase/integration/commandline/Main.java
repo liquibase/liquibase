@@ -1325,7 +1325,7 @@ public class Main {
             if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(
                         createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons, new PrintStream(getOutputStream()));
+                        database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,

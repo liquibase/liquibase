@@ -50,7 +50,7 @@
     </scm>
 
     <properties>
-        <liquibase.base.version>3.8.5</liquibase.base.version>
+        <liquibase.base.version>3.8.6</liquibase.base.version>
         <liquibase.version.qualifier>-local</liquibase.version.qualifier>
         <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
         <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}</liquibase.version>
@@ -246,6 +246,18 @@
                             <goal>compileTests</goal>
                             <goal>removeStubs</goal>
                             <goal>removeTestStubs</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                 </executions>
