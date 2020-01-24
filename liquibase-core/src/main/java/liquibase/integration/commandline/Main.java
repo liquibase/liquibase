@@ -222,7 +222,7 @@ public class Main {
                     stream.println(licenseService.getLicenseInfo());
                 }
 
-                stream.println(String.format("Running under %s (Version %s)",
+                stream.println(String.format("Running Java under %s (Version %s)",
                         System.getProperties().getProperty("java.home"),
                         System.getProperty("java.version")
                 ));
