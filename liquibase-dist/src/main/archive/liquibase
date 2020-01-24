@@ -51,7 +51,7 @@ else
   done
 fi
 
-if [ -z "${JAVA_HOME}"]; then
+if [ -z "${JAVA_HOME}" ]; then
   #JAVA_HOME not set, try to find a bundled version
   if [ -d "${LIQUIBASE_HOME}/jre" ]; then
     JAVA_HOME="$LIQUIBASE_HOME/jre"
