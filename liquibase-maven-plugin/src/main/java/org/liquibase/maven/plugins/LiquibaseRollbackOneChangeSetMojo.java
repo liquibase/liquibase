@@ -93,7 +93,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
         if (force != null && ! Boolean.parseBoolean(force)) {
-            throw new LiquibaseException("Invalid value for --force.  You must specify --force=true to use rollbackOneChangeSet.");
+            throw new LiquibaseException("Invalid value for --force.  You must specify 'liquibase.force=true' to use rollbackOneChangeSet.");
         }
         argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);

@@ -86,18 +86,6 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      */
     protected String outputFile;
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    @Override
-    protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-      super.checkRequiredParametersAreSpecified();
-      checkRequiredRollbackParameters();
-    }
-
-    protected void checkRequiredRollbackParameters() throws MojoFailureException {
-
-      String message = "Cannot specify multiple rollbackXXX options, please select only"
-                       + " one of rollbackTag, rollbackCount, rollbackDate.";
-
-    }
 
     @Override
     protected void printSettings(String indent) {

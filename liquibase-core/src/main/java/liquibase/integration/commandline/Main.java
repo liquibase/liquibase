@@ -862,8 +862,7 @@ public class Main {
                         && !cmdParm.startsWith("--" + OPTIONS.FORCE)
                         && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
                         && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
-                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)
-                        && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_FILE)) {
+                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -1379,6 +1378,7 @@ public class Main {
                 String result = snapshotCommand.execute().print();
                 outputWriter.write(result);
                 outputWriter.flush();
+                outputWriter.close();
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
                 ExecuteSqlCommand executeSqlCommand = (ExecuteSqlCommand) CommandFactory.getInstance().getCommand(
