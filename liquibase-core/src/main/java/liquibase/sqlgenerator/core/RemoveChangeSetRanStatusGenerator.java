@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -23,11 +24,17 @@ public class RemoveChangeSetRanStatusGenerator extends AbstractSqlGenerator<Remo
     public Sql[] generateSql(RemoveChangeSetRanStatusStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ChangeSet changeSet = statement.getChangeSet();
 
-        return SqlGeneratorFactory.getInstance().generateSql(new DeleteStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                        .setWhere(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
-                                "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
-                                "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
-                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath())
-                , database);
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        try {
+            return SqlGeneratorFactory.getInstance().generateSql(new DeleteStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                            .setWhere(database.escapeObjectName("ID", LiquibaseColumn.class) + " = ? " +
+                                    "AND " + database.escapeObjectName("AUTHOR", LiquibaseColumn.class) + " = ? " +
+                                    "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
+                            .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath())
+                    , database);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
+        }
     }
 }
