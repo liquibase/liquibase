@@ -2,9 +2,12 @@ package liquibase.change.core
 
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
+import liquibase.database.core.MySQLDatabase
 import liquibase.sdk.database.MockDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
+import liquibase.sql.Sql
+import liquibase.sqlgenerator.core.UpdateGenerator
 
 public class UpdateDataChangeTest extends StandardChangeTest {
 
@@ -44,8 +47,13 @@ public class UpdateDataChangeTest extends StandardChangeTest {
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
+        def db = new MySQLDatabase()
+        def stmts = change.generateStatements(db)
+
+        Sql[] sqls = (new UpdateGenerator()).generateSql(stmts[0], db, null)
 
         then:
+        def sql = sqls[0].toString()
         change.tableName == "updateTest"
         change.whereParams.size() == 2
         change.whereParams[0].valueNumeric == 134

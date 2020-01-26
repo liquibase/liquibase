@@ -4,9 +4,6 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -14,7 +11,10 @@ import liquibase.statement.core.UpdateStatement;
 import java.util.ArrayList;
 import java.util.List;
 
-@DatabaseChange(name = "update", description = "Updates data in an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
+@DatabaseChange(name = "update", description = "Updates data in an existing table"
+        , priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class UpdateDataChange extends AbstractModifyDataChange implements ChangeWithColumns<ColumnConfig> {
 
     private List<ColumnConfig> columns;
@@ -31,7 +31,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    @DatabaseChangeProperty(description = "Data to update", requiredForDatabase = "all")
+    @DatabaseChangeProperty(description = "Data to update", requiredForDatabase = ALL)
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -115,24 +115,4 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         return "Data updated in " + getTableName();
     }
 
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    @Override
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        ParsedNode whereParams = parsedNode.getChild(null, "whereParams");
-        if (whereParams != null) {
-            for (ParsedNode param : whereParams.getChildren(null, "param")) {
-                ColumnConfig columnConfig = new ColumnConfig();
-                try {
-                    columnConfig.load(param, resourceAccessor);
-                } catch (ParsedNodeException e) {
-                    e.printStackTrace();
-                }
-                addWhereParam(columnConfig);
-            }
-        }
-    }
 }

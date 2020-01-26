@@ -1,8 +1,12 @@
 package liquibase.change.core
 
+import liquibase.database.core.MSSQLDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
+import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.sql.Sql
+import liquibase.sqlgenerator.core.DeleteGenerator
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -22,12 +26,18 @@ class DeleteDataChangeTest extends Specification {
             e.printStackTrace()
         }
 
+        def statements = change.generateStatements(new MockDatabase())
+        DeleteGenerator generator = new DeleteGenerator();
+        Sql[] sqls = generator.generateSql(statements[0], new MSSQLDatabase(),null)
+
         then:
+        def s = sqls.toString()
         change.tableName == "deleteTest"
         change.whereParams.size() == 2
         change.whereParams[0].valueNumeric == 134
         change.whereParams[1].name == "other_val"
         change.whereParams[1].value == "asdf"
+
     }
 
 }
