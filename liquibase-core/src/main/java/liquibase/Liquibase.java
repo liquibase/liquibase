@@ -58,7 +58,7 @@ import static java.util.ResourceBundle.getBundle;
  * Primary facade class for interacting with Liquibase.
  * The built in command line, Ant, Maven and other ways of running Liquibase are wrappers around methods in this class.
  */
-public class Liquibase {
+public class Liquibase implements AutoCloseable {
 
     private static final Logger LOG = LogService.getLog(Liquibase.class);
     protected static final int CHANGESET_ID_NUM_PARTS = 3;
@@ -1676,5 +1676,11 @@ public class Liquibase {
         }
     }
 
+    @Override
+    public void close() throws Exception {
+        if (database != null) {
+            database.close();
+        }
+    }
 }
 
