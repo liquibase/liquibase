@@ -271,6 +271,13 @@ public class Main {
                         main.liquibaseProLicenseValid = true;
                     }
                 }
+
+                //
+                // Check to see if we have an expired license
+                //
+                if (licenseService.daysTilExpiration() < 0) {
+                    main.liquibaseProLicenseValid = false;
+                }
                 log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
             }
 
@@ -1260,6 +1267,16 @@ public class Main {
             return;
         }
 
+        //
+        // Check for a valid license to run PRO commands
+        //
+        if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command) || COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
+            if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
+                String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
+                throw new LiquibaseException(messageString);
+            }
+        }
+
         try {
 //            if (null != logFile) {
 //                LogService.getLog(getClass()).setLogLevel(logLevel, logFile);
@@ -1284,6 +1301,7 @@ public class Main {
                     this.databaseChangeLogLockTableName);
             database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
         }
+
         try {
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
@@ -1467,11 +1485,6 @@ public class Main {
                 }
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
-                if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
-                    String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
-                    throw new LiquibaseException(messageString);
-                }
-
                 Map<String, Object> argsMap = new HashMap<String, Object>();
                 argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
                 argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
@@ -1499,10 +1512,6 @@ public class Main {
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
-                if (!liquibaseProLicenseValid) {
-                    String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
-                    throw new LiquibaseException(messageString);
-                }
                 Writer outputWriter = getOutputWriter();
                 Map<String, Object> argsMap = new HashMap<String, Object>();
                 argsMap.put("outputWriter", outputWriter);
