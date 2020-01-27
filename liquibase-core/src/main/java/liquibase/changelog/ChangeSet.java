@@ -13,6 +13,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -203,6 +204,20 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private String runOrder;
 
+    /**
+     * If the targetSchema attribute is used, then current username used to create connection is used as a proxy schema
+     * and a proxy session is created for this changeSet. Intended for Oracle Database.
+     */
+    private String targetSchema;
+
+    public String getTargetSchema() {
+        return targetSchema;
+    }
+
+    public void setTargetSchema(String targetSchema) {
+        this.targetSchema = targetSchema;
+    }
+
     private Map<String, Object> attributes = new HashMap<>();
 
     public boolean shouldAlwaysRun() {
@@ -288,6 +303,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.created = node.getChildValue(null, "created", String.class);
         this.runOrder = node.getChildValue(null, "runOrder", String.class);
         this.ignore = node.getChildValue(null, "ignore", false);
+        this.targetSchema = node.getChildValue(null, "targetSchema", String.class);
         this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
@@ -587,6 +603,16 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
 
             if (!skipChange) {
+                // if target schema is set, a proxy session should be established
+                if (getTargetSchema() != null && database.getDatabaseProductName().equalsIgnoreCase("Oracle")) {
+                    // if proxy session was already established and target schema name changed, session need to be recreated
+                    // TODO: check previous schema name
+                    if (((OracleDatabase) database).isProxySession() ) {
+                        ((OracleDatabase) database).closeProxySession();
+                        ((OracleDatabase) database).openProxySession(targetSchema);
+                    }
+                }
+
                 for (Change change : changes) {
                     try {
                         change.finishInitialization();
@@ -1127,6 +1153,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("created".equals(field)) {
             return getCreated();
+        }
+
+        if ("targetSchema".equals(field)) {
+            return getTargetSchema();
         }
 
         if ("rollback".equals(field)) {
