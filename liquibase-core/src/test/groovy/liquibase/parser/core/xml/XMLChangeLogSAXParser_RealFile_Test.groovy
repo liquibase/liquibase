@@ -573,6 +573,13 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         and: "forms of update parse correctly"
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).tableName == "updateTest"
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).where == "id=:value and other_val=:value"
+        UpdateDataChange update0 = (UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]
+        update0.columns.size() == 3
+        update0.columns[0].name == "varcharColumn"
+        update0.columns[0].value == "new column 1 value"
+        update0.columns[1].name == "dateCol"
+        update0.columns[2].name == "intCol"
+        update0.columns[2].valueNumeric == 11
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams.size() == 2
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams[0].valueNumeric == 134
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams[1].name == "other_val"

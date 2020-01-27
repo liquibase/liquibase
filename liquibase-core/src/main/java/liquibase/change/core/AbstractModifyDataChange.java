@@ -6,6 +6,7 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ public abstract class AbstractModifyDataChange extends AbstractTableChange {
 
     @DatabaseChangeProperty( supportsDatabase = ALL, serializationType = SerializationType.NESTED_OBJECT,
         description = "Parameters for the 'where' condition. The 'param'(s) are inserted in the order they are " +
-                    "defined")
+                    "defined in place of ':name' and ':value' placeholders.")
     public List<ColumnConfig> getWhereParams() { return whereParams; }
     public void setWhereParams(List<ColumnConfig> params) { this.whereParams = params; }
 

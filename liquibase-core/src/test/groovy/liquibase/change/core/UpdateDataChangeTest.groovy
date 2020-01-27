@@ -38,12 +38,21 @@ public class UpdateDataChangeTest extends StandardChangeTest {
 
     def "load with whereParams"() {
         when:
+        def where = "colA = :value AND :name = :value"
         def change = new UpdateDataChange()
         def whereParams = new ParsedNode(null, "whereParams")
-                .addChild(new ParsedNode(null, "param").addChild(null, "valueNumeric", "134"))
-                .addChild(new ParsedNode(null, "param").addChildren([name: "other_val", value: "asdf"]))
+                .setValue([[param:[valueNumeric:134]]
+                             ,[param:[name: "other_val", value: "asdf"]]
+                ])
         try {
-            change.load(new liquibase.parser.core.ParsedNode(null, "updateData").addChild(null, "tableName", "updateTest").addChild(whereParams), resourceSupplier.simpleResourceAccessor)
+            change.load(new liquibase.parser.core.ParsedNode(null, "updateData")
+                    .addChild(null, "tableName", "updateTest")
+                    .setValue([ whereParams
+                               ,[where: where]
+                               ,[column: [name: "colB", value: "colBVal", type: "STRING"]]
+                               ,[column: [name: "colC", valueNumeric: 5, type: "NUMERIC"]]
+                    ])
+                   , resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -52,6 +61,7 @@ public class UpdateDataChangeTest extends StandardChangeTest {
 
         Sql[] sqls = (new UpdateGenerator()).generateSql(stmts[0], db, null)
 
+
         then:
         def sql = sqls[0].toString()
         change.tableName == "updateTest"
@@ -59,6 +69,26 @@ public class UpdateDataChangeTest extends StandardChangeTest {
         change.whereParams[0].valueNumeric == 134
         change.whereParams[1].name == "other_val"
         change.whereParams[1].value == "asdf"
+        change.columns.size() == 2
+        change.columns[0].name == "colB"
+        change.columns[0].value == "colBVal"
+        change.columns[1].name == "colC"
+        change.columns[1].valueNumeric == 5
+        change.where == where
+/*
+        when:
+        def db = new MySQLDatabase()
+        def stmts = change.generateStatements(db)
+
+        then:
+        stmts.length == 1
+
+        when:
+        Sql[] sqls = (new UpdateGenerator()).generateSql(stmts[0], db, null)
+
+        then:
+        sqls.length == 1
+        sqls[0].toSql() == "UPDATE updateTest SET colB = 5 WHERE colA = 134 AND other_val = 'asdf'"*/
     }
 
 }
