@@ -33,7 +33,7 @@ import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 import liquibase.util.BooleanParser;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+import static liquibase.util.StringUtils.*;
 import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
@@ -42,12 +42,14 @@ import java.io.Reader;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
+import static liquibase.change.ChangeParameterMetaData.ALL;
+import static liquibase.statement.SqlStatement.NULL;
 
 @DatabaseChange(name = "loadData",
         description = "Loads data from a CSV file into an existing table. A value of NULL in a cell will be " +
                 "converted to a database NULL rather than the string 'NULL'.\n" +
                 "Lines starting with # (hash) sign are treated as comments. You can change comment pattern by " +
-                "specifying 'commentLineStartsWith' property in loadData tag." +
+                "specifying 'commentLineStartsWith' attribute." +
                 "To disable comments set 'commentLineStartsWith' to empty value'\n" +
                 "\n" +
                 "If the data type for a load column is set to NUMERIC, numbers are parsed in US locale (e.g. 123.45)." +
@@ -65,21 +67,16 @@ import static java.util.ResourceBundle.getBundle;
                 "attempting to parse the input string so that it can return a Date/Time. If problems occur, " +
                 "then a ParseException is thrown and the input string is treated as a String for the INSERT command " +
                 "to be generated.\n" +
-                "If UUID type is used UUID value is stored as string and NULL in cell is supported.'\n" +
-                "Column config needs to be defined only if the column name different as the header in the CSV" +
-                "or default value shall be used",
+                "If UUID type is used UUID value is stored as string and NULL in cell is supported.",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
         since = "1.7")
-public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
+public class LoadDataChange extends AbstractTableChange implements ChangeWithColumns<LoadDataColumnConfig> {
     /**
      * CSV Lines starting with that sign(s) will be treated as comments by default
      */
     public static final String DEFAULT_COMMENT_PATTERN = "#";
     private static final Logger LOG = LogService.getLog(LoadDataChange.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
     private String file;
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
     private Boolean relativeToChangelogFile;
@@ -97,60 +94,32 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public boolean supports(Database database) {
-        return true;
-    }
+    public boolean supports(Database database) { return true; }
 
     @Override
     public boolean generateRollbackStatementsVolatile(Database database) {
         return true;
     }
 
-    @DatabaseChangeProperty(
-        since = "3.0",
-        mustEqualExisting = "table.catalog")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting = "table.schema")
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    @DatabaseChangeProperty(
-        description = "Name of the table to insert data into",
-        requiredForDatabase = "all",
-        mustEqualExisting = "table" )
+    @DatabaseChangeProperty( description = "Name of the table to insert data into",
+            requiredForDatabase = ALL,  mustEqualExisting = "table" )
     public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+        return super.getTableName();
     }
 
     @DatabaseChangeProperty(
-        description = "CSV file to load",
-        exampleValue = "com/example/users.csv",
-        requiredForDatabase = "all")
+        description = "CSV file to load", exampleValue = "com/example/users.csv",
+        requiredForDatabase = ALL)
     public String getFile() {
         return file;
     }
 
-    public LoadDataChange setFile(String file) {
+    public void setFile(String file) {
         this.file = file;
-        return this;
     }
 
+    @DatabaseChangeProperty(
+       description = "Use prepared statements instead of insert statement strings if the DB supports it")
     public Boolean getUsePreparedStatements() {
         return usePreparedStatements;
     }
@@ -159,6 +128,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.usePreparedStatements = usePreparedStatements;
     }
 
+    @DatabaseChangeProperty( supportsDatabase = ALL,
+        description = "Lines staring with this are treated as comment and ignored. Default: " + DEFAULT_COMMENT_PATTERN)
     public String getCommentLineStartsWith() {
         return commentLineStartsWith;
     }
@@ -174,6 +145,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
     }
 
+    @DatabaseChangeProperty( supportsDatabase = ALL,
+        description = "Option whether the 'file' is relative to the changelog file")
     public Boolean isRelativeToChangelogFile() {
         return relativeToChangelogFile;
     }
@@ -182,9 +155,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    @DatabaseChangeProperty(
-        description = "Encoding of the CSV file (defaults to UTF-8)",
-        exampleValue = "UTF-8")
+    @DatabaseChangeProperty(exampleValue = "UTF-8", supportsDatabase = ALL,
+        description = "Encoding of the CSV file (defaults to UTF-8)")
     public String getEncoding() {
         return encoding;
     }
@@ -193,7 +165,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.encoding = encoding;
     }
 
-    @DatabaseChangeProperty(exampleValue = ",")
+    @DatabaseChangeProperty(exampleValue = ",", supportsDatabase = ALL,
+        description = "Character separating the fields. Default: " + CSVReader.DEFAULT_SEPARATOR)
     public String getSeparator() {
         return separator;
     }
@@ -205,7 +178,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.separator = separator;
     }
 
-    @DatabaseChangeProperty(exampleValue = "'")
+    @DatabaseChangeProperty(exampleValue = "'", supportsDatabase = ALL,
+        description = "The quote character for string fields containing the separator character. " +
+            "Default: " + CSVReader.DEFAULT_QUOTE_CHARACTER)
     public String getQuotchar() {
         return quotchar;
     }
@@ -215,15 +190,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public void addColumn(LoadDataColumnConfig column) {
-        columns.add(column);
-    }
-
-    @Override
-    @DatabaseChangeProperty(description = "Defines how the data should be loaded.")
-    public List<LoadDataColumnConfig> getColumns() {
-        return columns;
-    }
+    @DatabaseChangeProperty( supportsDatabase = ALL, serializationType = SerializationType.NESTED_OBJECT,
+        description = "Column mapping and defaults can be defined.\n\n" +
+                "'header' or 'index' attributes needs to be defined if the header name in the CSV " +
+                "is different than the column name needs to be inserted\n" +
+                "Not defined column type it is taken from the DB.\n" +
+                "The 'defaultValue[XXX]' attributes can define value for empty fields.")
+    public List<LoadDataColumnConfig> getColumns() { return columns; }
 
     @Override
     public void setColumns(List<LoadDataColumnConfig> columns) {
@@ -268,12 +241,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             // Start at '1' to take into account the header (already processed):
             int lineNumber = 1;
 
-            boolean isCommentingEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
+            boolean isCommentingEnabled = isNotEmpty(commentLineStartsWith);
 
             List<SqlStatement> statements = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
-                if((line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
+                if((line.length == 0) || ((line.length == 1) && (trimToNull(line[0]) == null)) ||
                     (isCommentingEnabled && isLineCommented(line))
                 ) {
                     //nothing interesting on this line
@@ -318,7 +291,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         if (value.isEmpty()) {
                             value = columnConfig.getDefaultValue();
                         }
-                        if ("NULL".equalsIgnoreCase(value)) {
+                        if (equalsNULL(value)) {
                             valueConfig.setValue(null);
                         } else if (columnConfig.getType() == null) {
                             // columnConfig did not specify a type
@@ -393,7 +366,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                         valueConfig.setName(columnName);
 
-                        valueConfig.setValue( "NULL".equalsIgnoreCase(value) ? null : value);
+                        valueConfig.setValue( equalsNULL(value) ? null : value);
                     }
                     columnsFromCsv.add(valueConfig);
                 }
@@ -428,7 +401,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         Object value = column.getValueObject();
 
                         if (value == null) {
-                            value = "NULL";
+                            value = NULL;
                         }
 
                         insertStatement.addColumnValue(columnName, value);
@@ -653,7 +626,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 return c;
             }
         }
-        if(null == StringUtils.trimToNull(name)) {
+        if(null == trimToNull(name)) {
             throw new UnexpectedLiquibaseException("Unreferenced unnamed column is not supported");
         }
         LoadDataColumnConfig cfg = new LoadDataColumnConfig();
@@ -680,7 +653,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     private boolean isLineCommented(String[] line) {
-        return StringUtils.startsWith(line[0], commentLineStartsWith);
+        return startsWith(line[0], commentLineStartsWith);
     }
 
     @Override
@@ -705,7 +678,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
 
         char quotchar;
-        if (StringUtils.trimToEmpty(this.quotchar).isEmpty()) {
+        if (trimToEmpty(this.quotchar).isEmpty()) {
             // hope this is impossible to have a field surrounded with non ascii char 0x01
             quotchar = '\1';
         } else {

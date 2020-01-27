@@ -18,5 +18,5 @@ public interface SqlStatement {
 
     boolean continueOnError();
 
-
+    String NULL = "NULL";
 }
