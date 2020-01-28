@@ -585,7 +585,7 @@ public class Liquibase {
         try {
             Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
             if ((streams == null) || streams.isEmpty()) {
-                throw new LiquibaseException("WARNING: The rollback script was not located.  Please check your parameters. No rollback was performed");
+                throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
             } else if (streams.size() > 1) {
                 throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
             }
