@@ -455,9 +455,6 @@ public class Liquibase {
             StreamUtil.getLineSeparator()
         );
 
-        if (database instanceof OracleDatabase) {
-            executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
-        }
         if ((database instanceof MSSQLDatabase) && (database.getDefaultCatalogName() != null)) {
             executor.execute(new RawSqlStatement("USE " +
                 database.escapeObjectName(database.getDefaultCatalogName(), Catalog.class) + ";")
