@@ -76,7 +76,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             boolean reallyMerge = false;
             while (clauseIterator.hasNext()) {
                 Object clause = clauseIterator.nextNonWhitespace();
-                if (((String) clause).equalsIgnoreCase("merge")) {
+                String clauseString = clause == null ? null : clause.toString();
+                if ("merge".equalsIgnoreCase(clauseString)) {
                     reallyMerge = true;
                 }
             }
