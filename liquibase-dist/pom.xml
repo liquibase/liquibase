@@ -35,6 +35,13 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <optional>true</optional>
+        </dependency>
+
         <!-- needed for inclusion in CLI when running in newer java versions -->
 
         <dependency>

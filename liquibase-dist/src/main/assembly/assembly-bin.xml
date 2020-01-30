@@ -15,6 +15,7 @@
             <lineEnding>unix</lineEnding>
             <includes>
                 <include>liquibase</include>
+                <include>examples/start-h2</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -86,6 +87,7 @@
                 <include>com.sun.xml.bind:jaxb-impl:jar:</include>
                 <include>com.sun.xml.bind:jaxb-core:jar:</include>
                 <include>commons-cli:commons-cli:jar:</include>
+                <include>com.h2database:h2:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>
