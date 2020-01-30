@@ -26,7 +26,10 @@ import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.lang.reflect.Method;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
