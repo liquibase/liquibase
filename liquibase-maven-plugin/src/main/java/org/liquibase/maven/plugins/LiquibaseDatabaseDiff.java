@@ -22,8 +22,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Generates a diff between the specified database and the reference database.
- * The output is either a report or a changelog depending on the value of the diffChangeLogFile parameter.
+ * <p>Generates a diff between the specified database and the reference database.
+ * The output is either a report or a changelog depending on the value of the diffChangeLogFile parameter.</p>
  *
  * @author Peter Murray
  * @goal diff

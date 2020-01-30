@@ -15,7 +15,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 /**
- * Generates SQL that marks all unapplied changes as applied.
+ * <p>Generates a changelog based on the current database schema. Typically used when
+ * beginning to use Liquibase on an existing project and database schema.</p>
  *
  * @author Marcello Teodori
  * @goal generateChangeLog

@@ -1,0 +1,14 @@
+#parse( "default-site-macros.vm" )
+##
+<html xmlns="http://www.w3.org/1999/xhtml"#if ( $locale ) xml:lang="$locale.language" lang="$locale.language"#end>
+  <body class="composite">
+    <div id="bodyColumn">
+      <div id="contentBox">
+#*   *#$bodyContent
+      </div>
+    </div>
+    <div class="clear">
+      <hr/>
+    </div>
+  </body>
+</html>
