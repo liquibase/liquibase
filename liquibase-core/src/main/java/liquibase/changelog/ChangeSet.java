@@ -207,7 +207,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * If the targetSchema attribute is used, then current username used to create connection is used as a proxy schema
      * and a proxy session is created for this changeSet. Changes are then applied to the targetSchema,
-     * which needs to have CONNECT THROUGH <proxy_schema> granted. Intended for Oracle Database.
+     * which needs to have CONNECT THROUGH <proxy_schema> privilege granted. Intended for Oracle Database.
      */
     private String targetSchema;
 
