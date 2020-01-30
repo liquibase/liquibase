@@ -21,7 +21,7 @@
   </files>
   <launchers>
     <launcher name="Open Install Dir" id="156" external="true" menuName="Liquibase Home Directory" externalFile="${installer:sys.installationDir}" />
-    <launcher name="README.txt" id="158" external="true" menuName="Liquibase Readme" externalFile="README.txt" />
+    <launcher name="GETTING_STARTED.txt" id="158" external="true" menuName="Liquibase Getting Started" externalFile="GETTING_STARTED.txt" />
   </launchers>
   <installerGui>
     <applications>
