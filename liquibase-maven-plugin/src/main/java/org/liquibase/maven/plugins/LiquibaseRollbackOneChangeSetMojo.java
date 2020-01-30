@@ -10,6 +10,7 @@ import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.util.HashMap;
@@ -68,6 +69,12 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
      *
      */
     protected String rollbackScript;
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        commandName = "rollbackOneChangeSet";
+        super.execute();
+    }
 
     @Override
     protected void printSettings(String indent) {

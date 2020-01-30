@@ -275,6 +275,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected String liquibaseProLicenseKey;
 
+    protected String commandName;
+
     protected boolean hasProLicense() {
         return hasProLicense;
     }
@@ -317,7 +319,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         //
         // Check for a LiquibasePro license
         //
-        hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, getLog());
+        hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
         ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);

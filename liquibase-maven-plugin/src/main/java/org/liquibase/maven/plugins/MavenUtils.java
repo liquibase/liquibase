@@ -91,7 +91,7 @@ public class MavenUtils {
     return new URLClassLoader(urlArray, clazz.getClassLoader());
   }
 
-  public static boolean checkProLicense(String liquibaseProLicenseKey, Log log) {
+  public static boolean checkProLicense(String liquibaseProLicenseKey, String commandName, Log log) {
       boolean hasProLicense = true;
       LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
       if (licenseService == null) {
@@ -102,6 +102,7 @@ public class MavenUtils {
           log.info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line " +
                    "or in liquibase.properties to use Liquibase Pro features.");
           log.info("");
+          log.info("The command " + commandName + " requires a Liquibase Pro License, available at http://liquibase.org");
           hasProLicense = false;
       }
       else {
