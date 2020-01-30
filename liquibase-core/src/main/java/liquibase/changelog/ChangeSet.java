@@ -206,7 +206,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     /**
      * If the targetSchema attribute is used, then current username used to create connection is used as a proxy schema
-     * and a proxy session is created for this changeSet. Intended for Oracle Database.
+     * and a proxy session is created for this changeSet. Changes are then applied to the targetSchema,
+     * which needs to have CONNECT THROUGH <proxy_schema> granted. Intended for Oracle Database.
      */
     private String targetSchema;
 
@@ -605,12 +606,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (!skipChange) {
                 // if target schema is set, a proxy session should be established
                 if (getTargetSchema() != null && database.getDatabaseProductName().equalsIgnoreCase("Oracle")) {
-                    // if proxy session was already established and target schema name changed, session need to be recreated
-                    // TODO: check previous schema name
-                    if (((OracleDatabase) database).isProxySession() ) {
-                        ((OracleDatabase) database).closeProxySession();
-                        ((OracleDatabase) database).openProxySession(targetSchema);
-                    }
+                    ((OracleDatabase) database).openProxySession(targetSchema);
                 }
 
                 for (Change change : changes) {
@@ -673,6 +669,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
             }
         } finally {
+            if (this.getTargetSchema() != null && database.getDatabaseProductName().equalsIgnoreCase("Oracle") && ((OracleDatabase) database).isProxySession()) {
+                ((OracleDatabase) database).closeProxySession();
+            }
+
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
             if (!runInTransaction && database.supportsDDLInTransaction()) {
@@ -700,6 +700,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             // set auto-commit based on runInTransaction if database supports DDL in transactions
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
+            }
+
+            // if target schema is set, a proxy session should be established
+            if (getTargetSchema() != null && database.getDatabaseProductName().equalsIgnoreCase("Oracle")) {
+                ((OracleDatabase) database).openProxySession(targetSchema);
             }
 
             RanChangeSet ranChangeSet = database.getRanChangeSet(this);
@@ -750,6 +755,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
             throw new RollbackFailedException(e);
         } finally {
+            if (this.getTargetSchema() != null && database.getDatabaseProductName().equalsIgnoreCase("Oracle") && ((OracleDatabase) database).isProxySession()) {
+                ((OracleDatabase) database).closeProxySession();
+            }
+
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
             if (!runInTransaction && database.supportsDDLInTransaction()) {

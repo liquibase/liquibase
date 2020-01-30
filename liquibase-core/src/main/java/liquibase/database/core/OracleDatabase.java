@@ -26,10 +26,7 @@ import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -102,7 +99,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         DatabaseConnection conn = getConnection();
 
         if (conn instanceof OfflineConnection) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "01 Could not open proxy session on OracleDatabase: " + targetSchema);
+            LogService.getLog(getClass()).info(LogType.LOG, "01 Could not open proxy session on OracleDatabase: " + targetSchema);
             return;
         }
 
@@ -116,24 +113,19 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
 
         try {
-            Method method = conn.getClass().getMethod("openProxySession", int.class, Properties.class);
+            Method method = sqlConn.getClass().getMethod("openProxySession", int.class, Properties.class);
             method.setAccessible(true);
             method.invoke(sqlConn, 1, props);
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "DONE :    open proxy session on OracleDatabase: " + targetSchema); // TODO: delete log
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+            LogService.getLog(getClass()).info(LogType.LOG, "Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
         }
     }
 
     public final boolean isProxySession () {
         boolean isProxy = false;
         DatabaseConnection conn = getConnection();
-
-        if (conn instanceof OfflineConnection) {
-            return false;
-        }
-
         Connection sqlConn = null;
+
         try {
             if (conn instanceof JdbcConnection) {
                 sqlConn = ((JdbcConnection) conn).getWrappedConnection();
@@ -146,24 +138,20 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return false;
 
         try {
-            Method method = conn.getClass().getMethod("isProxySession");
+            Method method = sqlConn.getClass().getMethod("isProxySession");
             method.setAccessible(true);
             isProxy = (boolean) method.invoke(sqlConn);
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not check if a session is a proxy session on OracleDatabase: " + e.getCause().getMessage());
+            LogService.getLog(getClass()).info(LogType.LOG, "Could not check if a session is a proxy session on OracleDatabase: " + e.getCause().getMessage());
         }
 
         return isProxy;
     }
 
-    public final void closeProxySession (/*final Connection conn*/) {
-
+    public final void closeProxySession () {
         DatabaseConnection conn = getConnection();
-        if (conn instanceof OfflineConnection) {
-            return; // TODO: check if logging is needed
-        }
-
         Connection sqlConn = null;
+
         try {
             if (conn instanceof JdbcConnection) {
                 sqlConn = ((JdbcConnection) conn).getWrappedConnection();
@@ -176,12 +164,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return; // TODO: check if logging is needed
 
         try {
-            Method method = conn.getClass().getMethod("close", int.class);
+            Method method = sqlConn.getClass().getMethod("close", int.class);
             method.setAccessible(true);
             method.invoke(sqlConn, 1);
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "DONE :    close proxy session on OracleDatabase: " + "..."); // TODO: delete log
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not check if a session is a proxy session on OracleDatabase: " + e.getCause().getMessage());
+            LogService.getLog(getClass()).info(LogType.LOG, "Could not close proxy session on OracleDatabase: " + e.getCause().getMessage());
         }
     }
 
