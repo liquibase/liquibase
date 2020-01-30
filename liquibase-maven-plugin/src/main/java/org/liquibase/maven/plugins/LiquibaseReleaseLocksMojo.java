@@ -4,7 +4,7 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * Removes any Liquibase updater locks from the current database.
+ * <p>Removes any Liquibase updater locks from the current database.</p>
  * 
  * @author JAmes Atwill
  * @goal releaseLocks

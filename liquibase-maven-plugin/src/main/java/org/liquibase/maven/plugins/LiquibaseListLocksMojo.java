@@ -4,7 +4,7 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * Lists all Liquibase updater locks on the current database.
+ * <p>Lists all Liquibase updater locks on the current database.</p>
  * 
  * @author JAmes Atwill
  * @goal listLocks

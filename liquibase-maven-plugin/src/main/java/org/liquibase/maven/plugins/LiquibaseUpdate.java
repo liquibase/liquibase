@@ -6,8 +6,8 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * Applies the DatabaseChangeLogs to the database. Useful as part of the build
- * process.
+ * <p>Applies the DatabaseChangeLogs to the database. Useful as part of the build
+ * process.</p>
  * 
  * @author Peter Murray
  * @description Liquibase Update Maven plugin
