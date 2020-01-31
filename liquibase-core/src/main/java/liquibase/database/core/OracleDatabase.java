@@ -164,7 +164,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
 
         if (sqlConn == null)
-            return; // TODO: check if logging is needed
+            return;
 
         try {
             Method method = sqlConn.getClass().getMethod("close", int.class);
