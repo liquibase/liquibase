@@ -23,6 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
@@ -130,6 +131,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             LOG.debug(LogType.LOG, "value is string = " + col.getValue());
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
                 stmt.setObject(i, UUID.fromString(col.getValue()));
+            } else if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.OTHER.name())) {
+                stmt.setObject(i, col.getValue(), Types.OTHER);
             } else {
                 stmt.setString(i, col.getValue());
             }

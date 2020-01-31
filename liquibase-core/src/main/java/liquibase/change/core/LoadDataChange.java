@@ -422,6 +422,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                 } else {
                                     valueConfig.setValue(value.toString());
                                 }                                
+                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
+                                valueConfig.setType(columnConfig.getType());
+                                if ("NULL".equalsIgnoreCase(value.toString())) {
+                                    valueConfig.setValue(null);
+                                } else {
+                                    valueConfig.setValue(value.toString());
+                                }
                             } else {
                                 throw new UnexpectedLiquibaseException(
                                     String.format(coreBundle.getString("loaddata.type.is.not.supported"),
@@ -810,6 +817,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID
+        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID, OTHER
     }
 }
