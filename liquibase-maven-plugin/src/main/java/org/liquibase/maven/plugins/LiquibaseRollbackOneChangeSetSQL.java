@@ -14,6 +14,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.*;
@@ -85,6 +86,9 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      *
      */
     protected String outputFile;
+
+
+
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     @Override
@@ -97,12 +101,21 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
     }
 
     @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        //
+        // We override in order to set the command name for later use
+        //
+        commandName="rollbackOneChangeSetSQL";
+        super.execute();
+    }
+
+    @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         //
         // Check the Pro license
         //
         if (! hasProLicense()) {
-            return;
+            throw new LiquibaseException("The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://liquibase.org.");
         }
         Database database = liquibase.getDatabase();
         LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneChangeSet"));
