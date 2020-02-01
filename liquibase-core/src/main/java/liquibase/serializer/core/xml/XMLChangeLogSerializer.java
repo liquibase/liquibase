@@ -13,6 +13,7 @@ import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.serializer.LiquibaseSerializable.SerializationType;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -197,7 +198,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
                 Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, qualifyName(objectName, objectNamespace, parentNamespace));
-                setValueOnNode(mapNode, objectNamespace, (String) entry.getKey(), entry.getValue(), serializationType, objectNamespace);
+                if (serializationType == SerializationType.NESTED_OBJECT) {
+                    setValueOnNode(mapNode, objectNamespace, (String) entry.getKey(), entry.getValue(), serializationType, objectNamespace);
+                } else {
+                    setValueOnNode(mapNode, objectNamespace, "name", entry.getKey(), SerializationType.NAMED_FIELD, objectNamespace);
+                    setValueOnNode(mapNode, objectNamespace, "value", entry.getValue(), serializationType, objectNamespace);
+                }
                 node.appendChild(mapNode);
             }
         } else if (value instanceof LiquibaseSerializable) {

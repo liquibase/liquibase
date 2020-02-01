@@ -273,7 +273,7 @@ public class CustomChangeWrapper extends AbstractChange {
             case "class":
                 return SerializationType.NAMED_FIELD;
             case "param":
-                return SerializationType.NESTED_OBJECT;
+                return SerializationType.NAMED_FIELD;
             default:
                 throw new UnexpectedLiquibaseException("Unexpected CustomChangeWrapper field " + field);
         }
