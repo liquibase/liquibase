@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
+import liquibase.LabelExpression;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 
 import java.util.Arrays;
@@ -11,10 +12,11 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
     private String file;
     private Boolean relativeToChangelogFile;
     private ContextExpression context;
+    private LabelExpression labels;
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile", "context"));
+        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile", "context", "labels"));
     }
 
     @Override
@@ -49,5 +51,13 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
 
     public void setContext(ContextExpression context) {
         this.context = context;
+    }
+
+    public LabelExpression getLabels() {
+        return labels;
+    }
+
+    public void setLabels(LabelExpression labels) {
+        this.labels = labels;
     }
 }
