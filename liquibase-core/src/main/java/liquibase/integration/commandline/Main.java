@@ -214,7 +214,7 @@ public class Main {
                 LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
                 if (licenseService != null) {
                     if (main.liquibaseProLicenseKey == null) {
-                        log.info(LogType.LOG, "The command " + main.command + " requires a Liquibase Pro license, available at http://liquibase.org");
+                        log.info(LogType.LOG, "The command '" + main.command + "' requires a Liquibase Pro license, available at http://liquibase.org.");
                     } else {
                         Location licenseKeyLocation =
                                 new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);

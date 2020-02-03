@@ -99,10 +99,8 @@ public class MavenUtils {
       }
       if (liquibaseProLicenseKey == null) {
           log.info("");
-          log.info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line " +
-                   "or in liquibase.properties to use Liquibase Pro features.");
+          log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://liquibase.org.");
           log.info("");
-          log.info("The command " + commandName + " requires a Liquibase Pro License, available at http://liquibase.org");
           hasProLicense = false;
       }
       else {

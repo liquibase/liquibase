@@ -20,6 +20,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
+import javax.xml.bind.annotation.XmlSchema;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -27,8 +28,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.*;
-
-import javax.xml.bind.annotation.XmlSchema;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
@@ -394,7 +393,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         catch (LiquibaseException e) {
             cleanup(database);
-            throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
+            throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
         }
 
         cleanup(database);
