@@ -55,9 +55,7 @@ To start the example database:
     * run `examples/start-h2`.
 
 To stop the example database:
-    * open your command line or Terminal app
-    * navigate to your ...examples/sql directory (or xml)
-    * run `ctrl-c`. 
+    * run `ctrl-c' in the terminal running examples/start-h2
 
 Notes
 Running `examples/start-h2` starts local H2 databases that listen on port 9090 and it opens a browser to the database console on the same port. 
