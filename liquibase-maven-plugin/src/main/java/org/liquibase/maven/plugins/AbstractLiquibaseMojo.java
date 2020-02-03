@@ -393,7 +393,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         catch (LiquibaseException e) {
             cleanup(database);
-            throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
+            throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
         }
 
         cleanup(database);
