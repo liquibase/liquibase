@@ -67,6 +67,13 @@
 
     <build>
         <finalName>liquibase-${liquibase.version}</finalName>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/archive</directory>
+                <targetPath>${project.build.directory}/archive</targetPath>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
 
             <plugin>
@@ -185,7 +192,7 @@
                                 </data>
                                 <data>
                                     <src>
-                                        ${project.basedir}/../liquibase-dist/src/main/archive/lib/liquibase_autocomplete.sh
+                                        ${project.basedir}/../liquibase-dist/target/archive/lib/liquibase_autocomplete.sh
                                     </src>
                                     <type>file</type>
                                     <mapper>

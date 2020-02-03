@@ -3,7 +3,9 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd ">
 
     <changeSet id="1" author="your.name">
         <createTable tableName="person">
@@ -39,4 +41,19 @@
         </addColumn>
     </changeSet>
 
+    <!--Uncomment the XML example changeSet code -->
+
+    <!--
+    <changeSet id="3" author="your.name">
+        <addColumn tableName="person">
+            <column name="worksfor_company_id" type="int"/>
+        </addColumn>
+    </changeSet>
+​
+    <changeSet id="4" author="your.name">
+        <addForeignKeyConstraint constraintName="fk_person_worksfor"
+                                 baseTableName="person" baseColumnNames="worksfor_company_id"
+                                 referencedTableName="company" referencedColumnNames="id"/>
+    </changeSet>
+    -->
 </databaseChangeLog>

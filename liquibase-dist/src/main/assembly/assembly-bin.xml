@@ -10,7 +10,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>src/main/archive</directory>
+            <directory>${project.build.directory}/archive</directory>
             <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>unix</lineEnding>
             <includes>
@@ -20,7 +20,7 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
-            <directory>src/main/archive</directory>
+            <directory>${project.build.directory}/archive</directory>
             <!-- <outputDirectory>${file.separator}</outputDirectory> is there because maven-assembly-plugin would
                  complain on Windows otherwise:
                  "OS=Windows and the assembly descriptor contains a *nix-specific root-relative-reference (starting with slash) /"
@@ -32,7 +32,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>src/main/archive</directory>
+            <directory>${project.build.directory}/archive</directory>
             <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>unix</lineEnding>
             <excludes>
