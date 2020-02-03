@@ -8,7 +8,7 @@
     <variables>
       <variable name="liquibaseVersion" value="3.8.6-local-SNAPSHOT" />
     </variables>
-    <codeSigning macPkcs12File="../../../../../build-logic/certs/code-signing/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../../../build-logic/certs/code-signing/datical_windows.pfx" />
+    <codeSigning macEnabled="true" macPkcs12File="../../../../../build-logic/certs/code-signing/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../../../build-logic/certs/code-signing/datical_windows.pfx" />
     <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk13/jdk-13.0.1+9" />
   </application>
   <files>
