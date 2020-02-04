@@ -9,9 +9,9 @@ This is a great way to understand the core concepts with direct command-line exp
 
 What was Installed
 --------------------------------------------
-The default install location on Windows is "Program Files/liquibase"
+The default install location on Windows is "\Program Files\liquibase"
 
-The default install location on Mac is "usr/local/opt/liquibase"
+The default install location on Mac is "/usr/local/opt/liquibase"
 
 The following software was installed:
 	* Liquibase ( http://liquibase.org )
