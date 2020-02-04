@@ -281,7 +281,7 @@ public class Main {
                 log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
             }
 
-            if (main.commandParams.contains("--help") && main.command.equals("rollbackOneChangeSet")) {
+            if (main.commandParams.contains("--help") && main.command.startsWith("rollbackOneChangeSet")) {
                 //don't need to check setup
             } else {
                 List<String> setupMessages = main.checkSetup();
@@ -1717,7 +1717,9 @@ public class Main {
         argsMap.put("changeLogFile", changeLogFile);
         argsMap.put("database", database);
         argsMap.put("liquibase", liquibase);
-        argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
+        if (!commandParams.contains("--help")) {
+            argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
+        }
         argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
         ChangeLogParameters clp = new ChangeLogParameters(database);
         for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
