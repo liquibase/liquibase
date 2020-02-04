@@ -60,7 +60,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         }
     }
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog")
+    @DatabaseChangeProperty(description = "Catalog name of the base table",
+            since = "3.0", mustEqualExisting ="column.relation.catalog")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -69,7 +70,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(description = "Schema name of the base table"
+            , mustEqualExisting ="column.relation.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -104,7 +106,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseColumnNames = baseColumnNames;
     }
 
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column")
+    @DatabaseChangeProperty(description = "Schema name of the referenced table",
+            since = "3.0", mustEqualExisting = "column.relation.catalog")
     public String getReferencedTableCatalogName() {
         return referencedTableCatalogName;
     }
@@ -112,7 +115,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     public void setReferencedTableCatalogName(String referencedTableCatalogName) {
         this.referencedTableCatalogName = referencedTableCatalogName;
     }
-
+    @DatabaseChangeProperty(description = "Schema name of the referenced table",
+            since = "3.0", mustEqualExisting = "column.relation.schema")
     public String getReferencedTableSchemaName() {
         return referencedTableSchemaName;
     }

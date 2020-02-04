@@ -18,6 +18,7 @@ import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
@@ -31,6 +32,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static liquibase.change.ChangeParameterMetaData.ALL;
+import static liquibase.change.ChangeParameterMetaData.NONE;
 
 /**
  * Executes a given shell executable.
@@ -42,10 +47,31 @@ import java.util.regex.Pattern;
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
 
+    public static class Arg extends AbstractLiquibaseSerializable{
+        private String value;
+        public Arg() {}
+        public Arg(String val){
+            setValue(val);
+        }
+        public String getValue() { return this.value; }
+        public void setValue(String newVal) { this.value = newVal; }
+
+        @Override
+        public String getSerializedObjectName() {
+            return "arg";
+        }
+
+        @Override
+        public String getSerializedObjectNamespace() {
+            return STANDARD_CHANGELOG_NAMESPACE;
+        }
+        @Override
+        public String toString() { return getValue(); }
+    }
     protected List<String> finalCommandArray;
     private String executable;
     private List<String> os;
-    private List<String> args = new ArrayList<String>();
+    private List<Arg> args = new ArrayList<>();
     private String timeout;
     private static final Pattern TIMEOUT_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*([sSmMhH]?)\\s*$");
     private static final Long SECS_IN_MILLIS = 1000L;
@@ -65,7 +91,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(description = "Name of the executable to run",
-            exampleValue = "mysqldump", requiredForDatabase = "all")
+            exampleValue = "mysqldump", requiredForDatabase = ALL)
     public String getExecutable() {
         return executable;
     }
@@ -75,14 +101,25 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     public void addArg(String arg) {
-        this.args.add(arg);
+        this.args.add(new Arg(arg));
     }
 
-    public List<String> getArgs() {
-        return Collections.unmodifiableList(args);
+    @DatabaseChangeProperty(description = "Arguments for the executable",
+            supportsDatabase = ALL, requiredForDatabase = NONE)
+    public List<Arg> getArgs() {
+        return args;
     }
 
-    @DatabaseChangeProperty(description = "Timeout value for executable to run", exampleValue = "10s")
+    public List<String> getStringArgs() {
+        return args.stream().map(Arg::toString).collect(Collectors.toList());
+    }
+
+    public void setArgs(List<Arg> args) { // For testing
+        this.args = args;
+    }
+
+    @DatabaseChangeProperty(description = "Timeout value for executable to run", exampleValue = "10s",
+            supportsDatabase = ALL, requiredForDatabase = NONE)
     public String getTimeout() {
         return timeout;
     }
@@ -91,10 +128,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.timeout = timeout;
     }
 
-    @DatabaseChangeProperty(description = "List of operating systems on which to execute the command (taken from the os.name Java system property)", exampleValue = "Windows 7")
-    public List<String> getOs() {
-        return os;
-    }
+    @DatabaseChangeProperty( supportsDatabase = ALL, requiredForDatabase = NONE,
+        description = "List of operating systems on which to execute the command " +
+                "(taken from the os.name Java system property)", exampleValue = "Windows 7")
+    public String getOs() { return String.join(",", os); }
+
+    @DatabaseChangeProperty(isChangeProperty = false)
+    public List<String> getOsList() { return os; }
 
     public void setOs(String os) {
         this.os = StringUtils.splitAndTrim(os, ",");
@@ -142,8 +182,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.finalCommandArray = createFinalCommandArray(database);
 
         if (shouldRun && !nonExecutedMode) {
-
-
             return new SqlStatement[]{new RuntimeStatement() {
 
                 @Override
@@ -180,7 +218,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     protected List<String> createFinalCommandArray(Database database) {
         List<String> commandArray = new ArrayList<>();
         commandArray.add(getExecutable());
-        commandArray.addAll(getArgs());
+        commandArray.addAll(getStringArgs());
         return commandArray;
     }
 
@@ -340,7 +378,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     protected String getCommandString() {
-        return getExecutable() + " " + StringUtils.join(args, " ");
+        return getExecutable() + " " + StringUtils.join(getStringArgs(), " ");
     }
 
     @Override
@@ -348,30 +386,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
-    @Override
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws
-            ParsedNodeException {
-        ParsedNode argsNode = parsedNode.getChild(null, "args");
-        if (argsNode == null) {
-            argsNode = parsedNode;
-        }
-
-        for (ParsedNode arg : argsNode.getChildren(null, "arg")) {
-            addArg(arg.getChildValue(null, "value", String.class));
-        }
-        String passedValue = StringUtils.trimToNull(parsedNode.getChildValue(null, "os", String.class));
-        if (passedValue == null) {
-            this.os = new ArrayList<>();
-        } else {
-            List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os",
-                    String.class)), ",");
-            if ((os.size() == 1) && ("".equals(os.get(0)))) {
-                this.os = null;
-            } else if (!os.isEmpty()) {
-                this.os = os;
-            }
-        }
-    }
     private class StreamGobbler extends Thread {
         private static final int THREAD_SLEEP_MILLIS = 100;
         private final OutputStream outputStream;

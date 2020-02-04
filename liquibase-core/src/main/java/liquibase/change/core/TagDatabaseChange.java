@@ -9,12 +9,14 @@ import liquibase.sqlgenerator.core.MarkChangeSetRanGenerator;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 @DatabaseChange(name="tagDatabase", description = "Applies a tag to the database for future rollback", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.6")
 public class TagDatabaseChange extends AbstractChange {
 
     private String tag;
 
-    @DatabaseChangeProperty(description = "Tag to apply", exampleValue = "version_1.3")
+    @DatabaseChangeProperty(description = "Tag to apply", exampleValue = "version_1.3", requiredForDatabase = ALL)
     public String getTag() {
         return tag;
     }

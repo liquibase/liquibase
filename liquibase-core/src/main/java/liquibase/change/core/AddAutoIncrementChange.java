@@ -30,44 +30,14 @@ import java.util.Locale;
         database = "sqlite", notes = "If the column type is not INTEGER it is converted to INTEGER"
     )}
 )
-public class AddAutoIncrementChange extends AbstractChange {
+public class AddAutoIncrementChange extends AbstractTableChange {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
     private String columnName;
     private String columnDataType;
     private BigInteger startWith;
     private BigInteger incrementBy;
     private Boolean defaultOnNull;
     private String generationType;
-
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.catalog")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema")
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation")
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
 
     @DatabaseChangeProperty(mustEqualExisting = "column")
     public String getColumnName() {
@@ -88,16 +58,15 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    @DatabaseChangeProperty(exampleValue = "100")
-    public BigInteger getStartWith() {
-        return startWith;
-    }
+    @DatabaseChangeProperty(description = "Initial integer value of the increment", exampleValue = "100")
+    public BigInteger getStartWith() { return startWith; }
 
     public void setStartWith(BigInteger startWith) {
         this.startWith = startWith;
     }
 
-    @DatabaseChangeProperty(exampleValue = "1")
+    @DatabaseChangeProperty(description = "Integer value the increment increments at each call",
+            exampleValue = "1")
     public BigInteger getIncrementBy() {
         return incrementBy;
     }
@@ -105,7 +74,10 @@ public class AddAutoIncrementChange extends AbstractChange {
     public void setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
     }
-@DatabaseChangeProperty(exampleValue = "true", since = "3.6")
+
+    @DatabaseChangeProperty(description = "Using GenerationType 'BY DEFAULT' defaultOnNull = true" +
+            " allows the identity to be used if the identity column is referenced, but a value of NULL is specified."
+           , exampleValue = "true", since = "3.6", supportsDatabase = {"oracle"} )
     public Boolean getDefaultOnNull() {
         return defaultOnNull;
     }
@@ -114,7 +86,9 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.defaultOnNull = defaultOnNull;
     }
 
-    @DatabaseChangeProperty(exampleValue = "ALWAYS", since = "3.6")
+    @DatabaseChangeProperty( description = "Type of the generation in 'GENERATED %s AS IDENTITY'. ALWAYS | BY DEFAULT"
+            , exampleValue = "ALWAYS",
+            since = "3.6")
     public String getGenerationType() {
         return generationType;
     }
@@ -122,6 +96,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     public void setGenerationType(String generationType) {
         this.generationType = generationType;
     }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         if (database instanceof PostgresDatabase) {
@@ -194,10 +169,5 @@ public class AddAutoIncrementChange extends AbstractChange {
         } catch (DatabaseException|InvalidExampleException e) {
             return result.unknown(e);
         }
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

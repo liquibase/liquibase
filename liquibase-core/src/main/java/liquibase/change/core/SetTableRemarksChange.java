@@ -1,19 +1,16 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 
-@DatabaseChange(name="setTableRemarks", description = "Set remarks on a table", priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class SetTableRemarksChange extends AbstractChange {
+import static liquibase.change.ChangeParameterMetaData.ALL;
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+@DatabaseChange(name="setTableRemarks", description = "Set remarks on a table", priority = ChangeMetaData.PRIORITY_DEFAULT)
+public class SetTableRemarksChange extends AbstractTableChange {
+
     private String remarks;
 
     @Override
@@ -27,34 +24,11 @@ public class SetTableRemarksChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
-                new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks)
+                new SetTableRemarksStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks())
         };
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
+    @DatabaseChangeProperty(description = "Comment to set on the table", requiredForDatabase = ALL)
     public String getRemarks() {
         return remarks;
     }

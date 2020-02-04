@@ -219,6 +219,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.changeLog = databaseChangeLog;
     }
 
+    public ChangeSet(DatabaseChangeLog databaseChangeLog, String id) {
+        this(databaseChangeLog);
+        this.contexts = new ContextExpression("");
+        this.id = id;
+    }
+
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, DatabaseChangeLog databaseChangeLog) {
         this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
@@ -1039,8 +1045,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return new LinkedHashSet<>(
             Arrays.asList(
                 "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
-                "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
-                "objectQuotingStrategy", "created"
+                "comment", "preconditions", "changes", "rollback", "labels", "objectQuotingStrategy", "created"
             )
         );
     }
@@ -1142,7 +1147,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if ("comment".equals(field) || "preconditions".equals(field) || "changes".equals(field) || "rollback".equals
+        if ("comment".equals(field) || "preconditions".equals(field) || "rollback".equals
             (field)) {
             return SerializationType.NESTED_OBJECT;
         } else {

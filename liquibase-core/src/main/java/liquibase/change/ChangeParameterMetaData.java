@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.change.core.ExecuteShellCommandChange.Arg;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -20,6 +21,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.*;
+
+import static liquibase.change.core.LoadDataChange.LOAD_DATA_TYPE.*;
 
 /**
  * Static metadata about a {@link Change} parameter.
@@ -387,8 +390,6 @@ public class ChangeParameterMetaData {
         standardExamples.put("constraintName", "const_name");
         standardExamples.put("primaryKey", "pk_id");
 
-
-
         if (standardExamples.containsKey(parameterName)) {
             return standardExamples.get(parameterName);
         }
@@ -429,10 +430,21 @@ public class ChangeParameterMetaData {
                 return list;
             }
             case "list of loadDataColumnConfig": {
-                ArrayList<ColumnConfig> list = new ArrayList<>();
-                list.add(new LoadDataColumnConfig().setName("id").setType("int"));
-                return list;
+                LoadDataColumnConfig cfg = new LoadDataColumnConfig();
+                cfg.setName("id");
+                cfg.setType(NUMERIC + "");
+                cfg.setHeader("header1");
+                LoadDataColumnConfig cfg2 = new LoadDataColumnConfig();
+                cfg2.setName("name");
+                cfg2.setType(BOOLEAN + "");
+                cfg2.setIndex(3);
+                return Arrays.asList(cfg, cfg2);
             }
+            case "list of param":
+                return Arrays.asList(new Param().setName("id").setValue("str")
+                        ,new Param().setValueNumeric("123"));
+            case "list of arg":
+                return Arrays.asList(new Arg("-out"),new Arg("-param2"));
             default:
                 throw new UnexpectedLiquibaseException("Unknown dataType " + dataType + " for " + getParameterName());
         }

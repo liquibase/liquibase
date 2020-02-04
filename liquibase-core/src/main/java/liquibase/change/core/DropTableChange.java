@@ -45,9 +45,8 @@ public class DropTableChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public Boolean isCascadeConstraints() {
-        return cascadeConstraints;
-    }
+    @DatabaseChangeProperty(description = "Add the `CASCADE CONSTRAINTS` to the statement")
+    public Boolean isCascadeConstraints() { return cascadeConstraints; }
 
     public void setCascadeConstraints(Boolean cascadeConstraints) {
         this.cascadeConstraints = cascadeConstraints;

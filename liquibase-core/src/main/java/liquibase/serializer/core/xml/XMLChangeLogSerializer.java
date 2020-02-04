@@ -184,16 +184,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         return node;
     }
-
     private void setValueOnNode(Element node, String objectNamespace, String objectName, Object value, LiquibaseSerializable.SerializationType serializationType, String parentNamespace) {
         if (value == null) {
             return;
         }
 
         if (value instanceof Collection) {
-            for (Object child : (Collection) value) {
-                setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
-            }
+            createChildren(node, objectNamespace, objectName, (Collection) value, serializationType, parentNamespace);
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
                 Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, qualifyName(objectName, objectNamespace, parentNamespace));
@@ -203,25 +200,15 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } else if (value instanceof LiquibaseSerializable) {
             node.appendChild(createNode((LiquibaseSerializable) value));
         } else if (value instanceof Object[]) {
-            if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
-                String namespace = LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
-                Element newNode = createNode(namespace, objectName, "");
-                for (Object child : (Object[]) value) {
-                    setValueOnNode(newNode, namespace, objectName, child, serializationType, parentNamespace);
-                }
-                node.appendChild(newNode);
-            } else {
-                for (Object child : (Object[]) value) {
-                    setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
-                }
-            }
+            createChildren(node, objectNamespace, objectName, Arrays.asList((Object[])value), serializationType,
+                    parentNamespace);
         } else {
             if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
                 String namespace = LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
                 node.appendChild(createNode(namespace, objectName, value.toString()));
             } else if (serializationType.equals(LiquibaseSerializable.SerializationType.DIRECT_VALUE)) {
                 try {
-                    node.setTextContent(checkString(value.toString()));
+                    node.appendChild(currentChangeLogFileDOM.createTextNode(checkString(value.toString())));
                 } catch (UnexpectedLiquibaseException e) {
                     if (e.getMessage().startsWith(INVALID_STRING_ENCODING_MESSAGE)) {
                         throw new UnexpectedLiquibaseException(e.getMessage() + " in text of " + node.getTagName() + ". To resolve, remove the invalid character on the database and try again");
@@ -237,6 +224,18 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     }
                 }
             }
+        }
+    }
+
+    /** Create children for Iterable property Create new parent node for them if the SerializationType is NESTED */
+    private void createChildren(Element nodeParent, String objectNamespace, String objectName, Collection children
+            , LiquibaseSerializable.SerializationType serializationType, String parentNamespace) {
+        if ( !children.isEmpty()
+            && serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
+            nodeParent = (Element) nodeParent.appendChild( createNode(objectNamespace, objectName, ""));
+        }
+        for (Object child : children) {
+            setValueOnNode(nodeParent, objectNamespace, objectName, child, serializationType, parentNamespace);
         }
     }
 
@@ -290,8 +289,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
     }
 
-
-    // create a XML node with nodeName and simple text content
+    /** create a XML node with nodeName and simple text content */
     public Element createNode(String nodeNamespace, String nodeName, String nodeContent) {
         Element element = currentChangeLogFileDOM.createElementNS(nodeNamespace, nodeName);
         element.setTextContent(nodeContent);

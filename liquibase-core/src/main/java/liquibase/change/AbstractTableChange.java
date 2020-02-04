@@ -1,6 +1,10 @@
 package liquibase.change;
 
+/** Abstract parent for table related changes having catalogName, schemaName and mandatory string properties */
 public abstract class AbstractTableChange extends AbstractChange {
+    public enum Params{
+        catalogName,schemaName,tableName,column;
+    }
     protected String catalogName;
     protected String schemaName;
     protected String tableName;
@@ -31,5 +35,10 @@ public abstract class AbstractTableChange extends AbstractChange {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

@@ -12,11 +12,8 @@ import liquibase.structure.core.UniqueConstraint;
  * Adds a unique constraint to an existing column.
  */
 @DatabaseChange(name="addUniqueConstraint", description = "Adds a unique constrant to an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
-public class AddUniqueConstraintChange extends AbstractChange {
+public class AddUniqueConstraintChange extends AbstractTableChange {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
     private String columnNames;
     private String constraintName;
     private String tablespace;
@@ -32,33 +29,9 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "column.relation",
         description = "Name of the table to create the unique constraint on")
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
+    public String getTableName() { return super.getTableName(); }
 
     @DatabaseChangeProperty(mustEqualExisting = "column", description =
         "Name of the column(s) to create the unique constraint on. Comma separated if multiple")
@@ -78,7 +51,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
     public void setConstraintName(String constraintName) {
         this.constraintName = constraintName;
     }
-
 
     @DatabaseChangeProperty(description = "'Tablespace' to create the index in. Corresponds to file group in mssql")
     public String getTablespace() {
@@ -138,6 +110,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.shouldValidate = validate;
     }
 
+    @DatabaseChangeProperty(description = "Whether create a clustered index")
     public Boolean getClustered() {
         return clustered;
     }
@@ -217,7 +190,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
             ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
     }
 
-
     @Override
     public ChangeStatus checkStatus(Database database) {
         ChangeStatus result = new ChangeStatus();
@@ -251,10 +223,5 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return new Change[]{
                 inverse,
         };
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

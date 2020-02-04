@@ -358,6 +358,9 @@ public class StringChangeLogSerializerTest extends Specification {
                         } else if (typeToCreate.equals(String.class)) {
                             collection.add(createString());
                             collection.add(createString());
+                        } else if (typeToCreate.equals(ExecuteShellCommandChange.Arg.class)) {
+                            collection.add(new ExecuteShellCommandChange.Arg(createString()));
+                            collection.add(new ExecuteShellCommandChange.Arg(createString()));
                         } else {
                             throw new RuntimeException("Unknown generic type for " + clazz.getName() + "." + field.getName() + ": " + typeToCreate.getName());
                         }

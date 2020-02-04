@@ -1,19 +1,16 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 
-@DatabaseChange(name="setColumnRemarks", description = "Set remarks on a column", priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class SetColumnRemarksChange extends AbstractChange {
+import static liquibase.change.ChangeParameterMetaData.ALL;
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+@DatabaseChange(name="setColumnRemarks", description = "Set remarks on a column", priority = ChangeMetaData.PRIORITY_DEFAULT)
+public class SetColumnRemarksChange extends AbstractTableChange {
+
     private String columnName;
     private String remarks;
 
@@ -28,32 +25,8 @@ public class SetColumnRemarksChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
-                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks)
+                new SetColumnRemarksStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getRemarks())
         };
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
     }
 
     public String getColumnName() {
@@ -64,6 +37,7 @@ public class SetColumnRemarksChange extends AbstractChange {
         this.columnName = columnName;
     }
 
+    @DatabaseChangeProperty(description = "Comment to set on the column", requiredForDatabase = ALL)
     public String getRemarks() {
         return remarks;
     }

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog"
             xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -100,8 +99,7 @@
                     </xsd:complexType>
                 </xsd:element>
 
-                <xsd:element name="preConditions" minOccurs="0"
-                             maxOccurs="1">
+                <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
                     <xsd:complexType>
                         <xsd:choice>
                             <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
@@ -121,8 +119,7 @@
                     <xsd:element name="changeSet" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:sequence>
-                                <xsd:element name="validCheckSum" minOccurs="0"
-                                             maxOccurs="unbounded">
+                                <xsd:element name="validCheckSum" minOccurs="0" maxOccurs="unbounded">
                                     <xsd:complexType mixed="true">
                                         <xsd:sequence>
                                             <xsd:element ref="comment" minOccurs="0"
@@ -332,10 +329,7 @@
         <xsd:attribute name="defaultValueSequenceNext" type="xsd:string"/>
         <xsd:attribute name="defaultValueConstraintName" type="xsd:string"/>
         <xsd:attribute name="autoIncrement" type="booleanExp"/>
-        <xsd:attribute name="startWith" type="xsd:long"/>
-        <xsd:attribute name="incrementBy" type="xsd:long"/>
-        <xsd:attribute name="generationType" type="xsd:string"/>
-        <xsd:attribute name="defaultOnNull" type="booleanExp"/>
+        <xsd:attributeGroup ref="autoIncrementAttributes"/>
         <xsd:attribute name="remarks" type="xsd:string"/>
         <xsd:attribute name="encoding" type="xsd:string">
             <xsd:annotation>
@@ -358,7 +352,7 @@
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:complexType>
 
-    <xsd:attributeGroup name="param">
+    <xsd:attributeGroup name="paramAttributes">
         <xsd:attribute name="name" type="xsd:string"/>
         <xsd:attribute name="value" type="xsd:string"/>
         <xsd:attribute name="valueNumeric" type="xsd:string"/>
@@ -456,7 +450,6 @@
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:attributeGroup>
 
-
     <xsd:element name="addPrimaryKey">
         <xsd:complexType>
             <xsd:choice maxOccurs="unbounded">
@@ -488,7 +481,7 @@
     <xsd:element name="addUniqueConstraint">
         <xsd:complexType>
             <xsd:choice maxOccurs="unbounded">
-				<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+				<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
 			</xsd:choice>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
@@ -546,14 +539,20 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:attributeGroup name="autoIncrementAttributes">
+        <xsd:attribute name="startWith" type="xsd:long"/>
+        <xsd:attribute name="incrementBy" type="xsd:long"/>
+        <xsd:attribute name="generationType" type="xsd:string"/>
+        <xsd:attribute name="defaultOnNull" type="booleanExp"/>
+    </xsd:attributeGroup>
+
     <xsd:element name="addAutoIncrement">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attributeGroup ref="autoIncrementAttributes"/>
             <xsd:attribute name="columnName" type="xsd:string" use="required"/>
             <xsd:attribute name="columnDataType" type="xsd:string"/>
-            <xsd:attribute name="startWith" type="xsd:long"/>
-            <xsd:attribute name="incrementBy" type="xsd:long"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -641,11 +640,11 @@
 
     <xsd:simpleType name="fkCascadeActionOptions">
         <xsd:restriction base="xsd:token">
-            <xsd:enumeration value="CASCADE"></xsd:enumeration>
-            <xsd:enumeration value="SET NULL"></xsd:enumeration>
-            <xsd:enumeration value="SET DEFAULT"></xsd:enumeration>
-            <xsd:enumeration value="RESTRICT"></xsd:enumeration>
-            <xsd:enumeration value="NO ACTION"></xsd:enumeration>
+            <xsd:enumeration value="CASCADE"/>
+            <xsd:enumeration value="SET NULL"/>
+            <xsd:enumeration value="SET DEFAULT"/>
+            <xsd:enumeration value="RESTRICT"/>
+            <xsd:enumeration value="NO ACTION"/>
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -682,7 +681,6 @@
         <xsd:attribute name="validate" type="booleanExp"/>
     </xsd:attributeGroup>
 
-
     <xsd:element name="addNotNullConstraint">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
@@ -717,17 +715,13 @@
 
     <xsd:element name="tableExists">
         <xsd:complexType>
-            <xsd:attribute name="catalogName" type="xsd:string"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="columnExists">
         <xsd:complexType>
-            <xsd:attribute name="catalogName" type="xsd:string"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="columnName" type="xsd:string" use="required"/>
         </xsd:complexType>
     </xsd:element>
@@ -761,18 +755,14 @@
 
     <xsd:element name="rowCount">
         <xsd:complexType>
-            <xsd:attribute name="catalogName" type="xsd:string"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="expectedRows" type="xsd:int"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="tableIsEmpty">
         <xsd:complexType>
-            <xsd:attribute name="catalogName" type="xsd:string"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -900,9 +890,7 @@
     <xsd:element name="dropNotNullConstraint">
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
-            <xsd:attribute name="catalogName" type="xsd:string"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+			<xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="columnName" type="xsd:string" use="required"/>
             <xsd:attribute name="columnDataType" type="xsd:string"/>
         </xsd:complexType>
@@ -910,18 +898,14 @@
 
     <xsd:element name="setTableRemarks">
         <xsd:complexType>
-            <xsd:attribute name="catalogName" type="xsd:string"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="setColumnRemarks">
         <xsd:complexType>
-            <xsd:attribute name="catalogName" type="xsd:string"/>
-            <xsd:attribute name="schemaName" type="xsd:string"/>
-            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="columnName" type="xsd:string" use="required"/>
             <xsd:attribute name="remarks" type="xsd:string"/>
         </xsd:complexType>
@@ -946,7 +930,7 @@
 
     <xsd:element name="param">
         <xsd:complexType>
-            <xsd:attributeGroup ref="param"/>
+            <xsd:attributeGroup ref="paramAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1287,7 +1271,7 @@
             </xsd:sequence>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="class" type="xsd:string" use="required"/>
-			<xsd:anyAttribute processContents="lax" />
+			<xsd:anyAttribute processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -1322,8 +1306,7 @@
             <xsd:element ref="dropNotNullConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="addForeignKeyConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="dropForeignKeyConstraint" maxOccurs="unbounded"/>
-            <xsd:element ref="dropAllForeignKeyConstraints"
-                         maxOccurs="unbounded"/>
+            <xsd:element ref="dropAllForeignKeyConstraints" maxOccurs="unbounded"/>
             <xsd:element ref="addPrimaryKey" maxOccurs="unbounded"/>
             <xsd:element ref="dropPrimaryKey" maxOccurs="unbounded"/>
             <xsd:element ref="addLookupTable" maxOccurs="unbounded"/>
