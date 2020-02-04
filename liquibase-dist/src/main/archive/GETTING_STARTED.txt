@@ -139,7 +139,7 @@ To add this changeSet, open the sample changelog file in your existing editor, a
     ALTER TABLE person ADD worksfor_company_id INT;
 
     --changeset your.name:4
-    ALTER TABLE person ADD FOREIGN KEY (fk_person_worksfor) REFERENCES company(id) ;
+    ALTER TABLE person ADD CONSTRAINT fk_person_worksfor FOREIGN KEY (worksfor_company_id) REFERENCES company(id);
 
 NOTE: It's best practice to wrap every statement in its own changeSet block.
 
