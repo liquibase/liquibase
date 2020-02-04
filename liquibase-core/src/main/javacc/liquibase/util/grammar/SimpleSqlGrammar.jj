@@ -68,12 +68,12 @@ TOKEN : /* Numeric Constants */
 
 TOKEN:
 {
-    < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (["\r","\n"," "])* (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>))+ >
+    < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (["\r","\n"," "])* (<S_IDENTIFIER> | <QUOTED_IDENTIFIER>))+ >
 |	< S_IDENTIFIER: ( <LETTER> | <UNICODE_LETTERS> )+ ( <DIGIT> | <LETTER> | <UNICODE_LETTERS> | <SPECIAL_CHARS> )* >
 | 	< #LETTER: ["a"-"z", "A"-"Z", "_", "$"] >
 |   < #SPECIAL_CHARS: "$" | "_" | "#" | "@" >
-|   < S_CHAR_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
-|   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
+|   < QUOTED_STRING: ("N'" | "'") (~["'"])* "'" ("'" (~["'"])* "'")*>
+|   < QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
 |    <EMPTY_QUOTE: "\"" "\"">
 
 /*

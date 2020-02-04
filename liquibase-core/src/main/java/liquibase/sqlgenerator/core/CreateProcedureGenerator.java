@@ -76,7 +76,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             boolean reallyMerge = false;
             while (clauseIterator.hasNext()) {
                 Object clause = clauseIterator.nextNonWhitespace();
-                if (((String) clause).equalsIgnoreCase("merge")) {
+                String clauseString = clause == null ? null : clause.toString();
+                if ("merge".equalsIgnoreCase(clauseString)) {
                     reallyMerge = true;
                 }
             }
@@ -145,8 +146,9 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             }
             if (next != null && clauseIterator.hasNext()) {
                 Object procNameClause = clauseIterator.nextNonWhitespace();
-                if (procNameClause instanceof String) {
-                    String[] nameParts = ((String) procNameClause).split("\\.");
+                if (procNameClause instanceof StringClauses.QuotedIdentifier || procNameClause instanceof String) {
+                    String procName = procNameClause.toString();
+                    String[] nameParts = procName.split("\\.");
                     String finalName;
                     if (nameParts.length == 1) {
                         finalName = database.escapeObjectName(schemaName, Schema.class) + "." + nameParts[0];
@@ -155,7 +157,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                     } else if (nameParts.length == 3) {
                         finalName = nameParts[0] + "." + database.escapeObjectName(schemaName, Schema.class) + "." + nameParts[2];
                     } else {
-                        finalName = (String) procNameClause; //just go with what was there
+                        finalName = procName; //just go with what was there
                     }
                     clauseIterator.replace(finalName);
                 }

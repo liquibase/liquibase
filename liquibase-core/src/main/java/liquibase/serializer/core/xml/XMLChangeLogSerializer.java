@@ -450,6 +450,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 } else {
                     buffer.append(" ");
                 }
+                value = escapeXml(value);
                 buffer.append(entry.getKey()).append("=\"").append(value).append("\"");
                 firstAttribute = false;
             }

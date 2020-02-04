@@ -33,6 +33,10 @@ public class SqlParser {
                         }
                         clauses.append(new StringClauses.Comment(comment));
                     }
+                } else if (token.kind == SimpleSqlGrammarConstants.QUOTED_IDENTIFIER) {
+                    clauses.append(new StringClauses.QuotedIdentifier(token.image));
+                } else if (token.kind == SimpleSqlGrammarConstants.QUOTED_STRING) {
+                    clauses.append(new StringClauses.QuotedString(token.image));
                 } else {
                     clauses.append(token.image);
                 }
