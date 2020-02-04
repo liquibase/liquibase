@@ -40,20 +40,4 @@
             <column name="country" type="varchar(2)"/>
         </addColumn>
     </changeSet>
-
-    <!--Uncomment the XML example changeSet code -->
-
-    <!--
-    <changeSet id="3" author="your.name">
-        <addColumn tableName="person">
-            <column name="worksfor_company_id" type="int"/>
-        </addColumn>
-    </changeSet>
-​
-    <changeSet id="4" author="your.name">
-        <addForeignKeyConstraint constraintName="fk_person_worksfor"
-                                 baseTableName="person" baseColumnNames="worksfor_company_id"
-                                 referencedTableName="company" referencedColumnNames="id"/>
-    </changeSet>
-    -->
 </databaseChangeLog>
