@@ -97,7 +97,7 @@ By running `liquibase update`, your database now matches the desired database st
 
 The DATABASECHANGELOG and DATABASECHANGELOGLOCK tables are liquibase-metadata tables, the COMPANY and PERSON tables were created by the changelog.
 
-Now, open the com/example/sample.changelog.xml or com/example/sample.changelog.sql file in your favorite text editor.
+Now, open the sample.changelog.xml or sample.changelog.sql file in your favorite text editor.
 
 In each file you can see how changes were defined as a series of changeSets. Each changeSet is uniquely identified by the "id" and "author" fields. Liquibase uses these fields to track what changes have been run and what has not.
 
