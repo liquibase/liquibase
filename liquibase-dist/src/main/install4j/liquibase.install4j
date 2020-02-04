@@ -18,6 +18,7 @@
     <entries>
       <dirEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}" subDirectory="liquibase-${compiler:liquibaseVersion}" />
       <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/liquibase" fileMode="755" overrideFileMode="true" />
+      <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" fileMode="755" overrideFileMode="true" />
     </entries>
   </files>
   <launchers>

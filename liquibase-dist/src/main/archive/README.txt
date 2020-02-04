@@ -14,9 +14,9 @@ The Default install location on Windows is "Program Files/liquibase"
 The Default install location on Mac is "usr/local/opt/liquibase"
 
 The following software was installed:
-	* Liquibase (http://liquibase.org)
-	* H2 Database (https://www.h2database.com/)
-	* AdoptOpenJDK 13 (https://adoptopenjdk.net/)
+	* Liquibase ( http://liquibase.org )
+	* H2 Database ( https://www.h2database.com/ )
+	* AdoptOpenJDK 13 ( https://adoptopenjdk.net/ )
 
 This installer creates the following directories:
 	* liquibase/lib

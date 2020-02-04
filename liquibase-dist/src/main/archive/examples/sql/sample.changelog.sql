@@ -7,7 +7,7 @@ create table person (
     address1 varchar(50),
     address2 varchar(50),
     city varchar(30)
-);
+)
 
 --changeset your.name:2
 create table company (
@@ -16,10 +16,10 @@ create table company (
     address1 varchar(50),
     address2 varchar(50),
     city varchar(30)
-);
+)
 
 --changest other.dev:2
-alter table person add column country varchar(2);
+alter table person add column country varchar(2)
 
 /* Uncomment the following code snippet to add the changeSet */
 /*
