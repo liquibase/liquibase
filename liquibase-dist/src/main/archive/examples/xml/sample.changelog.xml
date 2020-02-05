@@ -35,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="2" author="other.dev">
+    <changeSet id="3" author="other.dev">
         <addColumn tableName="person">
             <column name="country" type="varchar(2)"/>
         </addColumn>
