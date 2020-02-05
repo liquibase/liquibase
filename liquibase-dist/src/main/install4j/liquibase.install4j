@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="8.0.3" transformSequenceNumber="8">
-  <directoryPresets config="../../../../../build-logic/certs/code-signing/datical_apple.p12" />
+  <directoryPresets config="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" />
   <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Datical" publisherWeb="http://liquibase.org" version="${liquibase.version}" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
     <languages>
       <principalLanguage id="en" customLocalizationFile="./messages.properties" />
@@ -14,11 +14,17 @@
   <files>
     <mountPoints>
       <mountPoint id="58" />
+      <mountPoint id="411" location="examples" />
     </mountPoints>
     <entries>
-      <dirEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}" subDirectory="liquibase-${compiler:liquibaseVersion}" />
+      <dirEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}" subDirectory="liquibase-${compiler:liquibaseVersion}">
+        <exclude>
+          <entry location="examples/start-h2" />
+          <entry location="liquibase" />
+        </exclude>
+      </dirEntry>
       <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/liquibase" fileMode="755" overrideFileMode="true" />
-      <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" fileMode="755" overrideFileMode="true" />
+      <fileEntry mountPoint="411" file="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" fileMode="755" overrideFileMode="true" />
     </entries>
   </files>
   <launchers>
