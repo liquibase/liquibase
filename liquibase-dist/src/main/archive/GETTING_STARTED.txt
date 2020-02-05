@@ -123,12 +123,17 @@ To add this changeSet, open the sample changelog file in your existing editor, a
   XML changelog example code
   ---------------------------
 <changeSet id="4" author="your.name">
-<addColumn tableName="person">
-<column name="worksfor_company_id" type="int"/>
-</addColumn>
+    <addColumn tableName="person">
+        <column name="worksfor_company_id" type="int"/>
+    </addColumn>
 </changeSet>
 <changeSet id="5" author="your.name">
-<addForeignKeyConstraint constraintName="fk_person_worksfor" baseTableName="person" baseColumnNames="worksfor_company_id" referencedTableName="company" referencedColumnNames="id"></addForeignKeyConstraint>
+    <addForeignKeyConstraint
+        constraintName="fk_person_worksfor"
+        baseTableName="person"
+        baseColumnNames="worksfor_company_id"
+        referencedTableName="company"
+        referencedColumnNames="id"/>
 </changeSet>
 
   SQL changelog example code
