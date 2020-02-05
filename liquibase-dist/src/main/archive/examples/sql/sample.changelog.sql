@@ -18,6 +18,6 @@ create table company (
     city varchar(30)
 )
 
---changeset other.dev:2
+--changeset other.dev:3
 alter table person add column country varchar(2)
 
