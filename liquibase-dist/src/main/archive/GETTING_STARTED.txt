@@ -35,7 +35,7 @@ In both ".../examples/sql" and "example/xml" there is a liquibase.properties fil
 
 In both ".../examples/sql" and "example/xml" there is a sample changelogfile.
 
-While not required, it is a best practice to keep your changelogs in a unique and descriptive directory structure. Changelogs are normally stored in your version control system along with your application code and matches the directory structures you use there.
+While not required, it is a best practice to keep your changelogs in a unique and descriptive directory structure. Changelogs are normally stored in your version control system along with your application code and match the directory structures you use there.
 
 
 Configuring your liquibase.properties file
