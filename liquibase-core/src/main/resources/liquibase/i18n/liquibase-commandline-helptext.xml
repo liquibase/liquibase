@@ -30,7 +30,7 @@ Standard Commands:
  rollbackOneChangeSet <args>    Rolls back one specific changeset, without rolling back
                                 changesets deployed before or afterwards.
                                 (Liquibase Pro key required)
- rollbackOneChangeSetSql <args> Writes SQL to roll back one specific changeset, without
+ rollbackOneChangeSetSQL <args> Writes SQL to roll back one specific changeset, without
                                 rolling back changesets deployed before or afterwards.
                                 (Liquibase Pro key required)
  rollbackToDate <date/time>     Rolls back the database to the the state is was
