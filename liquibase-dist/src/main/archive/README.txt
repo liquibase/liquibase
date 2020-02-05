@@ -33,7 +33,6 @@ Files are:
 	* liquibase/liquibase.sh
 	* liquibase/liquibase.bat
 	* liquibase/liquibase.jar
-	* liquibase/liquibase.properties
 	* liquibase/README.txt
 	* liquibase/GETTING_STARTED.txt
 	* liquibase/examples/start-h2
