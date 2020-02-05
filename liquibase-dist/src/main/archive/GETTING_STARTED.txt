@@ -78,12 +78,13 @@ About the console:
 
 NOTE: If you run formatted SQL or XML on the H2 database, then want to attempt using the other method, you must restart the H2 database before running it again or you will receive an update failure due to objects already existing on the database.
 
+
 Running Your First Update
 -------------------------
 The main Liquibase command you will use is "update", which applies any changes not yet run in your changelog to your database.
 
 First,
-1. Open a command-line or Terminal app.
+1. Open a different command-line or Terminal app.
 2. Navigate to your ...examples/sql directory (or xml)
 
 
@@ -121,14 +122,21 @@ To add this changeSet, open the sample changelog file in your existing editor, a
 
   XML changelog example code
   ---------------------------
-    <changeSet id="4" author="your.name">
-        <addForeignKeyConstraint constraintName="fk_person_worksfor" baseTableName="person" baseColumnNames="worksfor_company_id" referencedTableName="company" referencedColumnNames="id"></addForeignKeyConstraint>
-    </changeSet>
+<changeSet id="4" author="your.name">
+<addColumn tableName="person">
+<column name="worksfor_company_id" type="int"/>
+</addColumn>
+</changeSet>
+<changeSet id="5" author="your.name">
+<addForeignKeyConstraint constraintName="fk_person_worksfor" baseTableName="person" baseColumnNames="worksfor_company_id" referencedTableName="company" referencedColumnNames="id"></addForeignKeyConstraint>
+</changeSet>
 
   SQL changelog example code
   ---------------------------
-      --changeset your.name:4
-    ALTER TABLE person ADD FOREIGN KEY (fk_person_worksfor) REFERENCES company(id) ;
+--changeset your.name:4
+ALTER TABLE person ADD worksfor_company_id INT;
+--changeset your.name:5
+ALTER TABLE person ADD FOREIGN KEY (fk_person_worksfor) REFERENCES company(id);
 
 NOTE: It's best practice to wrap every statement in its own changeSet block.
 
@@ -137,6 +145,7 @@ Now, run `liquibase update` again & refresh your database console.
 You will see the new column on the person table.
 
 NOTE: If you run formatted SQL or XML on the H2 database, then want to attempt using the other method, you must restart the H2 database before running it again or you will receive an update failure due to objects already existing on the database.
+
 
 Promoting Changes
 -----------------
