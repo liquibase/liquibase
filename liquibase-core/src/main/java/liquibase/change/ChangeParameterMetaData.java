@@ -94,6 +94,12 @@ public class ChangeParameterMetaData {
         this.requiredForDatabaseArg = requiredForDatabase;
     }
 
+    public ChangeParameterMetaData withAccessors(Method readMethod, Method writeMethod) {
+        this.readMethodRef = (readMethod == null) ? NO_METHOD_REF : readMethod;
+        this.writeMethodRef = (writeMethod == null) ? NO_METHOD_REF : writeMethod;
+        return this;
+    }
+
     protected Set<String> analyzeSupportedDatabases(String[] supportedDatabases) {
         if (supportedDatabases == null) {
             supportedDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
