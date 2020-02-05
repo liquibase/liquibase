@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.Param;
 import liquibase.change.DatabaseChange;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
@@ -18,7 +18,7 @@ public class DeleteDataChange extends AbstractModifyDataChange {
 
         statement.setWhere(where);
 
-        for (ColumnConfig whereParam : whereParams) {
+        for (Param whereParam : whereParams) {
             if (whereParam.getName() != null) {
                 statement.addWhereColumnName(whereParam.getName());
             }

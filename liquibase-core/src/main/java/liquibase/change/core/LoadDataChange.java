@@ -210,9 +210,10 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     @Override
     @DatabaseChangeProperty( supportsDatabase = ALL,
         description = "Column mapping and defaults can be defined.\n\n" +
-                "'header' or 'index' attributes needs to be defined if the header name in the CSV " +
+                "The 'header' or 'index' attributes needs to be defined if the header name in the CSV " +
                 "is different than the column name needs to be inserted\n" +
-                "Not defined column type it is taken from the DB.\n")
+                "If no `column` defined at all, the type it is taken from the DB. " +
+                "Otherwise for non-string columns the type definition might be required\n")
     public List<LoadDataColumnConfig> getColumns() { return columns; }
 
     @Override

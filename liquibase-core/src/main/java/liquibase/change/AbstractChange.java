@@ -21,6 +21,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is
  * purely for convenience but recommended.
@@ -99,8 +101,12 @@ public abstract class AbstractChange implements Change {
         }
     }
 
+    protected static final String[] defaultSkipList = {"metaClass", "class", "resourceAccessor",
+            "serializedObjectName", "serializableFields"};
+    /** Filter out object parameters */
+    protected List<String> skipProperties = Arrays.asList(defaultSkipList);
     protected boolean isInvalidProperty(PropertyDescriptor property) {
-        return "metaClass".equals(property.getDisplayName());
+        return skipProperties.contains(property.getDisplayName());
     }
 
     /**
@@ -111,7 +117,6 @@ public abstract class AbstractChange implements Change {
      * @throws UnexpectedLiquibaseException if the passed parameter does not exist
      */
     protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) {
-
         try {
             String displayName = parameterName.replaceAll("([A-Z])", " $1");
             displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
@@ -219,7 +224,7 @@ public abstract class AbstractChange implements Change {
         }
 
         Map<String, Object> examples = new HashMap<>();
-        examples.put("all", StringUtils.trimToNull(changePropertyAnnotation.exampleValue()));
+        examples.put(ALL, StringUtils.trimToNull(changePropertyAnnotation.exampleValue()));
 
         return examples;
     }
@@ -526,6 +531,7 @@ public abstract class AbstractChange implements Change {
      * Returns empty set if change is not supported for the passed database
      */
     @Override
+    @DatabaseChangeProperty(isChangeProperty = false)
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
         if (this.generateStatementsVolatile(database)) {
             return new HashSet<>();
@@ -547,6 +553,7 @@ public abstract class AbstractChange implements Change {
      * Returns the fields on this change that are serializable.
      */
     @Override
+    @DatabaseChangeProperty(isChangeProperty = false)
     public Set<String> getSerializableFields() {
         return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().keySet();
     }
@@ -597,45 +604,12 @@ public abstract class AbstractChange implements Change {
                 if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
                     if (param.getDataTypeClassParameters().length == 1) {
                         Class collectionType = (Class) param.getDataTypeClassParameters()[0];
-                        if (ColumnConfig.class.isAssignableFrom(collectionType)) {
-                            List<ParsedNode> columnNodes = new ArrayList<>(
-                                parsedNode.getChildren(null, param.getParameterName())
-                            );
-                            columnNodes.addAll(parsedNode.getChildren(null, NODENAME_COLUMN));
-
-                            Object nodeValue = parsedNode.getValue();
-                            if (nodeValue instanceof ParsedNode) {
-                                columnNodes.add((ParsedNode) nodeValue);
-                            } else if (nodeValue instanceof Collection) {
-                                for (Object nodeValueChild : ((Collection) nodeValue)) {
-                                    if (nodeValueChild instanceof ParsedNode) {
-                                        columnNodes.add((ParsedNode) nodeValueChild);
-                                    }
-                                }
-                            }
-
-                            for (ParsedNode child : columnNodes) {
-                                if (NODENAME_COLUMN.equals(child.getName()) || "columns".equals(child.getName())) {
-                                    List<ParsedNode> columnChildren = child.getChildren(null, NODENAME_COLUMN);
-                                    if ((columnChildren != null) && !columnChildren.isEmpty()) {
-                                        for (ParsedNode columnChild : columnChildren) {
-                                            ColumnConfig columnConfig = createEmptyColumnConfig(collectionType);
-                                            columnConfig.load(columnChild, resourceAccessor);
-                                            ((ChangeWithColumns) this).addColumn(columnConfig);
-                                        }
-                                    } else {
-                                        ColumnConfig columnConfig = createEmptyColumnConfig(collectionType);
-                                        columnConfig.load(child, resourceAccessor);
-                                        ((ChangeWithColumns) this).addColumn(columnConfig);
-                                    }
-                                }
-                            }
-                        } else if (
-                            (LiquibaseSerializable.class.isAssignableFrom(collectionType))
-                            && (!collectionType.isInterface())
-                            && (!Modifier.isAbstract(collectionType.getModifiers()))
+                        if (
+                            LiquibaseSerializable.class.isAssignableFrom(collectionType)
+                            && !collectionType.isInterface()
+                            && !Modifier.isAbstract(collectionType.getModifiers())
                         ) {
-                            String elementName = ((LiquibaseSerializable) collectionType.getConstructor().newInstance())
+                            String elementName = LiquibaseSerializable.from( collectionType )
                                 .getSerializedObjectName();
                             List<ParsedNode> nodes = new ArrayList<>(
                                  parsedNode.getChildren(null, param.getParameterName())
@@ -661,16 +635,10 @@ public abstract class AbstractChange implements Change {
                                     List<ParsedNode> childNodes = node.getChildren(null, elementName);
                                     if ((childNodes != null) && !childNodes.isEmpty()) {
                                         for (ParsedNode childNode : childNodes) {
-                                            LiquibaseSerializable childObject =
-                                                (LiquibaseSerializable)collectionType.getConstructor().newInstance();
-                                            childObject.load(childNode, resourceAccessor);
-                                            ((Collection) param.getCurrentValue(this)).add(childObject);
+                                            addToCollection(resourceAccessor, param, collectionType, childNode);
                                         }
                                     } else {
-                                        LiquibaseSerializable childObject =
-                                            (LiquibaseSerializable) collectionType.getConstructor().newInstance();
-                                        childObject.load(node, resourceAccessor);
-                                        ((Collection) param.getCurrentValue(this)).add(childObject);
+                                        addToCollection(resourceAccessor, param, collectionType, node);
                                     }
                                }
                             }
@@ -684,7 +652,7 @@ public abstract class AbstractChange implements Change {
                             ParsedNode child = parsedNode.getChild(null, param.getParameterName());
                             if (child != null) {
                                 LiquibaseSerializable serializableChild =
-                                    (LiquibaseSerializable) param.getDataTypeClass().getConstructor().newInstance();
+                                    LiquibaseSerializable.from(param.getDataTypeClass());
                                 serializableChild.load(child, resourceAccessor);
                                 param.setValue(this, serializableChild);
                             }
@@ -713,9 +681,22 @@ public abstract class AbstractChange implements Change {
         }
     }
 
-    protected ColumnConfig createEmptyColumnConfig(Class collectionType)
-        throws ReflectiveOperationException {
-        return (ColumnConfig) collectionType.getConstructor().newInstance();
+    @SuppressWarnings("unchecked")
+    protected void addToCollection(ResourceAccessor resourceAccessor, ChangeParameterMetaData param
+            , Class collectionType, ParsedNode node)
+            throws ReflectiveOperationException, ParsedNodeException {
+        LiquibaseSerializable childObject = LiquibaseSerializable.from( collectionType );
+
+        childObject.load(node, resourceAccessor);
+
+        if(NODENAME_COLUMN.equals(childObject.getSerializedObjectName())
+            && "columns".equals(param.getParameterName())
+            && childObject instanceof ColumnConfig && this instanceof ChangeWithColumns) {
+            // For legacy code
+            ((ChangeWithColumns) this).addColumn((ColumnConfig)childObject);
+        } else {
+            ((Collection) param.getCurrentValue(this)).add(childObject);
+        }
     }
 
     protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor)

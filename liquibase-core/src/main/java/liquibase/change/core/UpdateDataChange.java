@@ -42,15 +42,6 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public void addColumn(ColumnConfig column) {
-        columns.add(column);
-    }
-
-    public void removeColumn(ColumnConfig column) {
-        columns.remove(column);
-    }
-
-    @Override
     public SqlStatement[] generateStatements(Database database) {
 
     	boolean needsPreparedStatement = false;
@@ -73,7 +64,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             
             statement.setWhereClause(where);
             
-            for (ColumnConfig whereParam : whereParams) {
+            for (Param whereParam : whereParams) {
                 if (whereParam.getName() != null) {
                     statement.addWhereColumnName(whereParam.getName());
                 }
@@ -93,7 +84,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
 
         statement.setWhereClause(where);
 
-        for (ColumnConfig whereParam : whereParams) {
+        for (Param whereParam : whereParams) {
             if (whereParam.getName() != null) {
                 statement.addWhereColumnName(whereParam.getName());
             }

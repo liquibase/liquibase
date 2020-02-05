@@ -14,7 +14,7 @@ public interface LiquibaseSerializable {
     String STANDARD_SNAPSHOT_NAMESPACE = "http://www.liquibase.org/xml/ns/snapshot";
     String GENERIC_SNAPSHOT_EXTENSION_NAMESPACE = "http://www.liquibase.org/xml/ns/snapshot-ext";
 
-    public enum SerializationType {
+    enum SerializationType {
         NAMED_FIELD,
         NESTED_OBJECT,
         DIRECT_VALUE
@@ -26,14 +26,18 @@ public interface LiquibaseSerializable {
 
     Object getSerializableFieldValue(String field);
 
-    public SerializationType getSerializableFieldType(String field);
+    SerializationType getSerializableFieldType(String field);
 
     String getSerializableFieldNamespace(String field);
 
     String getSerializedObjectNamespace();
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException;
+    void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException;
 
-    public ParsedNode serialize() throws ParsedNodeException;
+    ParsedNode serialize() throws ParsedNodeException;
 
+    /** Create an instance of class 'cls' that must be implement LiquibaseSerializable */
+    static LiquibaseSerializable from(Class cls) throws ReflectiveOperationException {
+        return (LiquibaseSerializable) cls.getConstructor().newInstance();
+    }
 }

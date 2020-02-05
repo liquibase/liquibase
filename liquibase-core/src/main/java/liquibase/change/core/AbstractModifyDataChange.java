@@ -1,12 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractTableChange;
-import liquibase.change.ColumnConfig;
+import liquibase.change.Param;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +14,13 @@ import static liquibase.change.ChangeParameterMetaData.ALL;
  */
 public abstract class AbstractModifyDataChange extends AbstractTableChange {
 
-    protected List<ColumnConfig> whereParams = new ArrayList<>();
+    protected List<Param> whereParams = new ArrayList<>();
 
     protected String where;
 
     @DatabaseChangeProperty( supportsDatabase = ALL,
-        description="Allows to define the 'where' condition as string",
-        serializationType = SerializationType.NESTED_OBJECT, exampleValue = "name='Bob'")
+        description="Allows to define the 'where' condition(s) string",
+        serializationType = SerializationType.NESTED_OBJECT, exampleValue = "name='Bob' and :name=:value or id=:value")
     public String getWhere() {
         return where;
     }
@@ -44,36 +40,15 @@ public abstract class AbstractModifyDataChange extends AbstractTableChange {
         this.where = where;
     }
 
-    public void addWhereParam(ColumnConfig param) { whereParams.add(param); }
+    public void addWhereParam(Param param) { whereParams.add(param); }
 
-    public void removeWhereParam(ColumnConfig param) {
+    public void removeWhereParam(Param param) {
         whereParams.remove(param);
     }
 
     @DatabaseChangeProperty( supportsDatabase = ALL, serializationType = SerializationType.NESTED_OBJECT,
-        description = "Parameters for the 'where' condition. The 'param'(s) are inserted in the order they are " +
-                    "defined in place of ':name' and ':value' placeholders.")
-    public List<ColumnConfig> getWhereParams() { return whereParams; }
-    public void setWhereParams(List<ColumnConfig> params) { this.whereParams = params; }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
-    @Override
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        ParsedNode whereParams = parsedNode.getChild(null, "whereParams");
-        if (whereParams != null) {
-            for (ParsedNode param : whereParams.getChildren(null, "param")) {
-                ColumnConfig columnConfig = new ColumnConfig();
-                try {
-                    columnConfig.load(param, resourceAccessor);
-                } catch (ParsedNodeException e) {
-                    e.printStackTrace();
-                }
-                addWhereParam(columnConfig);
-            }
-        }
-    }
+        description = "Parameters for the 'where' condition.\n\nThe 'param'(s) are inserted in the order they " +
+                "are defined in place of the ':name' and ':value' placeholders.")
+    public List<Param> getWhereParams() { return whereParams; }
+    public void setWhereParams(List<Param> params) { this.whereParams = params; }
 }

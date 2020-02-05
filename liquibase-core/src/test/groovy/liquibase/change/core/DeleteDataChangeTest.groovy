@@ -31,13 +31,11 @@ class DeleteDataChangeTest extends Specification {
         Sql[] sqls = generator.generateSql(statements[0], new MSSQLDatabase(),null)
 
         then:
-        def s = sqls.toString()
         change.tableName == "deleteTest"
         change.whereParams.size() == 2
         change.whereParams[0].valueNumeric == 134
         change.whereParams[1].name == "other_val"
         change.whereParams[1].value == "asdf"
-
     }
 
 }

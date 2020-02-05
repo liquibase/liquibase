@@ -26,12 +26,13 @@ import java.util.*;
         " want to create your own custom refactoring class.\n" +
          "\n" +
         "To create your own custom refactoring, simply create a class that implements the " +
-        "`liquibase.change.custom.CustomSqlChange` or `liquibase.change.custom.CustomTaskChange` interface and use the " +
-        "`<customChange>` tag in your change set.\n" +
+        "[liquibase.change.custom.CustomSqlChange](/javadoc/liquibase/change/custom/CustomSqlChange.html) " +
+        "or [liquibase.change.custom.CustomTaskChange](/javadoc/liquibase/change/custom/CustomTaskChange.html)" +
+         " interface <customChange> tag in your change set.\n" +
         "\n" +
         "If your change can be rolled back, implement the liquibase.change.custom.CustomSqlRollback interface as well.\n" +
         "\n" +
-        "For a sample custom change class, see `liquibase.change.custom.ExampleCustomSqlChange`",
+        "For a sample custom change class, see liquibase.change.custom.ExampleCustomSqlChange in the test folder",
     priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CustomChangeWrapper extends AbstractChange {
 
@@ -74,8 +75,6 @@ public class CustomChangeWrapper extends AbstractChange {
     public void setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
-
-
 
     /**
      * Specify the name of the class to use as the CustomChange. This method instantiates the class using {@link #getClassLoader()} or fallback methods

@@ -184,6 +184,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         return node;
     }
+
     private void setValueOnNode(Element node, String objectNamespace, String objectName, Object value, LiquibaseSerializable.SerializationType serializationType, String parentNamespace) {
         if (value == null) {
             return;

@@ -443,11 +443,10 @@ databaseChangeLog:
         - createIndex:
             indexName: idx_new
             tableName: new_table
+            unique: true
             columns:
             - column:
                 name: id
-                constraints:
-                    unique: true
         - loadData:
             tableName: new_table
             columns:
@@ -481,6 +480,12 @@ databaseChangeLog:
                 name: intCol
                 valueNumeric: 11
             where: id=:value and other_val=:value
+            whereParams:
+            - param:
+               valueNumeric: 134
+            - param:
+               name: other_val
+               valueNumeric: 768
         - update:
             tableName: updateTest
             columns:

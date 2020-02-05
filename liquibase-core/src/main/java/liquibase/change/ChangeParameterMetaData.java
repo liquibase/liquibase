@@ -420,14 +420,10 @@ public class ChangeParameterMetaData {
             case "databaseFunction":
                 return new DatabaseFunction("now");
             case "list of columnConfig": {
-                ArrayList<ColumnConfig> list = new ArrayList<>();
-                list.add(new ColumnConfig().setName("id").setType("int"));
-                return list;
+                return Arrays.asList(new ColumnConfig().setName("id").setType("int"));
             }
             case "list of addColumnConfig": {
-                ArrayList<ColumnConfig> list = new ArrayList<>();
-                list.add(new AddColumnConfig().setName("id").setType("int"));
-                return list;
+                return Arrays.asList(new AddColumnConfig().setName("id").setType("int"));
             }
             case "list of loadDataColumnConfig": {
                 LoadDataColumnConfig cfg = new LoadDataColumnConfig();
@@ -442,7 +438,7 @@ public class ChangeParameterMetaData {
             }
             case "list of param":
                 return Arrays.asList(new Param().setName("id").setValue("str")
-                        ,new Param().setValueNumeric("123"));
+                                    ,new Param().setValueNumeric("123"));
             case "list of arg":
                 return Arrays.asList(new Arg("-out"),new Arg("-param2"));
             default:

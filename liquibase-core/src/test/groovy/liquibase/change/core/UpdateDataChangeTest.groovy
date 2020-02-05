@@ -44,23 +44,20 @@ public class UpdateDataChangeTest extends StandardChangeTest {
                 .setValue([[param:[valueNumeric:134]]
                              ,[param:[name: "other_val", value: "asdf"]]
                 ])
-        try {
-            change.load(new liquibase.parser.core.ParsedNode(null, "updateData")
-                    .addChild(null, "tableName", "updateTest")
-                    .setValue([ whereParams
-                               ,[where: where]
-                               ,[column: [name: "colB", value: "colBVal", type: "STRING"]]
-                               ,[column: [name: "colC", valueNumeric: 5, type: "NUMERIC"]]
-                    ])
-                   , resourceSupplier.simpleResourceAccessor)
-        } catch (ParsedNodeException e) {
-            e.printStackTrace()
-        }
+
+        change.load(new liquibase.parser.core.ParsedNode(null, "updateData")
+                .addChild(null, "tableName", "updateTest")
+                .setValue([ whereParams
+                           ,[where: where]
+                           ,[column: [name: "colB", value: "colBVal", type: "STRING"]]
+                           ,[column: [name: "colC", valueNumeric: 5, type: "NUMERIC"]]
+                ])
+               , resourceSupplier.simpleResourceAccessor)
+
         def db = new MySQLDatabase()
         def stmts = change.generateStatements(db)
 
         Sql[] sqls = (new UpdateGenerator()).generateSql(stmts[0], db, null)
-
 
         then:
         def sql = sqls[0].toString()
@@ -75,20 +72,6 @@ public class UpdateDataChangeTest extends StandardChangeTest {
         change.columns[1].name == "colC"
         change.columns[1].valueNumeric == 5
         change.where == where
-/*
-        when:
-        def db = new MySQLDatabase()
-        def stmts = change.generateStatements(db)
-
-        then:
-        stmts.length == 1
-
-        when:
-        Sql[] sqls = (new UpdateGenerator()).generateSql(stmts[0], db, null)
-
-        then:
-        sqls.length == 1
-        sqls[0].toSql() == "UPDATE updateTest SET colB = 5 WHERE colA = 134 AND other_val = 'asdf'"*/
     }
 
 }

@@ -8,6 +8,8 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Drops a not-null constraint from an existing column.
  */
@@ -16,48 +18,22 @@ import liquibase.structure.core.Table;
     description = "Makes a column nullable",
     priority = ChangeMetaData.PRIORITY_DEFAULT,
     appliesTo = "column")
-public class DropNotNullConstraintChange extends AbstractChange {
+public class DropNotNullConstraintChange extends AbstractTableChange {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
     private String columnName;
     private String columnDataType;
-    private Boolean shouldValidate;
-
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="notNullConstraint.table.catalog")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting ="notNullConstraint.table.schema")
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
 
     @DatabaseChangeProperty(
         description = "Name of the table containing that the column to drop the constraint from",
-        mustEqualExisting = "notNullConstraint.table"
+        mustEqualExisting = "notNullConstraint.table", requiredForDatabase = ALL
     )
     public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+        return super.getTableName();
     }
 
     @DatabaseChangeProperty(
         description = "Name of the column to drop the constraint from",
-        mustEqualExisting = "notNullConstraint.column"
+        mustEqualExisting = "notNullConstraint.column", requiredForDatabase = ALL
     )
     public String getColumnName() {
         return columnName;
@@ -118,10 +94,5 @@ public class DropNotNullConstraintChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Null constraint dropped from " + getTableName() + "." + getColumnName();
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

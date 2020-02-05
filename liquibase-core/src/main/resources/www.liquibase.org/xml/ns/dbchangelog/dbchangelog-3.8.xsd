@@ -122,13 +122,11 @@
                                 <xsd:element name="validCheckSum" minOccurs="0" maxOccurs="unbounded">
                                     <xsd:complexType mixed="true">
                                         <xsd:sequence>
-                                            <xsd:element ref="comment" minOccurs="0"
-                                                         maxOccurs="1"/>
+                                            <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
                                         </xsd:sequence>
                                     </xsd:complexType>
                                 </xsd:element>
-                                <xsd:element name="preConditions" minOccurs="0"
-                                             maxOccurs="1">
+                                <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
                                     <xsd:annotation>
                                         <xsd:appinfo>
                                             <xsd:documentation>onChangeLogPreconditionOnSqlOutput determines what should
@@ -158,8 +156,7 @@
                                                maxOccurs="unbounded"/>
                                 </xsd:choice>
 
-                                <xsd:element name="modifySql" minOccurs="0"
-                                             maxOccurs="unbounded">
+                                <xsd:element name="modifySql" minOccurs="0" maxOccurs="unbounded">
                                     <xsd:complexType>
                                         <xsd:choice>
                                             <xsd:group ref="modifySqlChildren" minOccurs="1"
@@ -218,8 +215,7 @@
                     <xsd:attribute name="with" type="xsd:string" use="required"/>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="regExpReplace" minOccurs="0"
-                         maxOccurs="unbounded">
+            <xsd:element name="regExpReplace" minOccurs="0" maxOccurs="unbounded">
                 <xsd:complexType>
                     <xsd:attribute name="replace" type="xsd:string" use="required"/>
                     <xsd:attribute name="with" type="xsd:string" use="required"/>
@@ -1113,7 +1109,7 @@
         <xsd:complexType>
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attribute name="tag" type="xsd:string" use="required"/>
-			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
+			<xsd:anyAttribute namespace="##other" processContents="lax"/>
         </xsd:complexType>
     </xsd:element>
 

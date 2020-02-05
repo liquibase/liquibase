@@ -13,25 +13,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Creates an index on an existing column.
  */
 @DatabaseChange(name="createIndex", description = "Creates an index on an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
-public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
+public class CreateIndexChange extends AbstractTableChange implements ChangeWithColumns<AddColumnConfig> {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
     private String indexName;
     private Boolean unique;
     private String tablespace;
     private List<AddColumnConfig> columns;
 
-    // Contain associations of index
+    // Contains associations of index
     // for example: foreignKey, primaryKey or uniqueConstraint
     private String associatedWith;
     private Boolean clustered;
-
 
     public CreateIndexChange() {
         columns = new ArrayList<>();
@@ -46,26 +44,14 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.indexName = indexName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="index.schema")
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index to", exampleValue = "person")
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", requiredForDatabase = ALL,
+            description = "Name of the table to add the index to", exampleValue = "person")
     public String getTableName() {
-        return tableName;
+        return super.getTableName();
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    @Override
-    @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) to add to the index", requiredForDatabase = "all")
+    @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) to add to the index",
+            requiredForDatabase = ALL)
     public List<AddColumnConfig> getColumns() {
         if (columns == null) {
             return new ArrayList<>();
@@ -78,13 +64,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.columns = columns;
     }
 
-    @Override
-    public void addColumn(AddColumnConfig column) {
-        columns.add(column);
-    }
-
-
-    @DatabaseChangeProperty(description = "Tablepace to create the index in.")
+    @DatabaseChangeProperty(description = "Tablespace to create the index in.")
     public String getTablespace() {
         return tablespace;
     }
@@ -181,27 +161,13 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.associatedWith = associatedWith;
     }
 
-
-    @DatabaseChangeProperty(since = "3.0")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
+    @DatabaseChangeProperty(description = "Create clustered index.")
     public Boolean getClustered() {
         return clustered;
     }
 
     public void setClustered(Boolean clustered) {
         this.clustered = clustered;
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override

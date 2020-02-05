@@ -74,15 +74,6 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public void addColumn(AddColumnConfig column) {
-        this.columns.add(column);
-    }
-
-    public void removeColumn(ColumnConfig column) {
-        this.columns.remove(column);
-    }
-
-    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> sql = new ArrayList<>();

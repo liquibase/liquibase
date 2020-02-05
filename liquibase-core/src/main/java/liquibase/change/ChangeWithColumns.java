@@ -21,7 +21,7 @@ public interface ChangeWithColumns<T extends ColumnConfig> {
 
     void setColumns(List<T> columns);
 
-    default void remove(T col) {
+    default void removeColumn(T col) {
         getColumns().remove(col);
     }
 }

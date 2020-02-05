@@ -3,7 +3,7 @@
 <!-- ChangeLog used to hold general test cases -->
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="standard changeSet" author="nvoxland">
         <sql>select * from simple</sql>
@@ -240,11 +240,9 @@
             <column name="new_col_seq" type="int" defaultValueSequenceNext="seq_test"/>
         </addColumn>
         <createIndex tableName="new_table" indexName="idx_new">
-            <column name="id">
-                <constraints unique="true"/>
-            </column>
+            <column name="id"/>
         </createIndex>
-        <loadData tableName="new_table">
+        <loadData tableName="new_table" file="fileName">
             <column name="id"/>
             <column name="new_col" header="new_col_header"/>
         </loadData>

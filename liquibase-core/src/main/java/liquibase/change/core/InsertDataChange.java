@@ -18,12 +18,11 @@ import static liquibase.change.ChangeParameterMetaData.ALL;
 /**
  * Inserts data into an existing table.
  */
-@DatabaseChange(name="insert", description = "Inserts data into an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
-public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig>, DbmsTargetedChange {
+@DatabaseChange(name="insert", description = "Inserts data into an existing table",
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+public class InsertDataChange extends AbstractTableChange implements ChangeWithColumns<ColumnConfig>,
+        DbmsTargetedChange {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
     private List<ColumnConfig> columns;
     private String dbms;
 
@@ -38,32 +37,11 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         return validate;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to insert data into")
     public String getTableName() {
-        return tableName;
+        return super.getTableName();
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
 
     @Override
     @DatabaseChangeProperty(mustEqualExisting = "table.column"
@@ -76,15 +54,6 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     @Override
     public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
-    }
-
-    @Override
-    public void addColumn(ColumnConfig column) {
-        columns.add(column);
-    }
-
-    public void removeColumn(ColumnConfig column) {
-        columns.remove(column);
     }
 
     @Override
@@ -149,7 +118,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
-    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "!h2, mysql")
     public String getDbms() {
         return dbms;
     }
@@ -157,10 +126,5 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     @Override
     public void setDbms(final String dbms) {
         this.dbms = dbms;
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

@@ -46,7 +46,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     @Override
-    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "!h2, oracle, mysql")
     public String getDbms() {
         return dbms;
     }
@@ -86,11 +86,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * <p></p>
      * This will always return a non-null value and should be a boolean rather than a Boolean, but that breaks the Bean Standard.
      */
-    @DatabaseChangeProperty(description = "Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set")
+    @DatabaseChangeProperty(description = "Set to true to remove any comments in the SQL before executing, otherwise false.")
     public Boolean isStripComments() {
         return stripComments;
     }
-
 
     /**
      * Return true if comments should be stripped from the SQL before passing it to the database.
@@ -198,7 +197,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
         }
     }
-
 
     /**
      * Generates one or more SqlStatements depending on how the SQL should be parsed.

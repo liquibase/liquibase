@@ -143,7 +143,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @DatabaseChangeProperty(
-        exampleValue = "h2, oracle",
+        exampleValue = "h2, !oracle, mysql",
         since = "3.1"
     )
     public String getDbms() {

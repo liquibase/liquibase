@@ -893,6 +893,53 @@ public class XMLChangeLogSerializerTest {
         assertEquals("TAG_NAME", node.getAttribute("tag"));
     }
 
+    @Test
+    public void createNode_UpdateChange() throws Exception {
+        String whereValue = "colB=2 and colC=:value and :name=:value";
+        UpdateDataChange change = new UpdateDataChange();
+        change.addColumn(new ColumnConfig().setName("colA").setValue("col_A_val"));
+        change.addColumn(new ColumnConfig().setName("colB").setValueNumeric(1));
+        change.setTableName(TABLE_NAME);
+        change.setWhere(whereValue);
+        change.getWhereParams().add(new Param().setValueNumeric(123));
+        change.getWhereParams().add(new Param().setName("colD").setValue("strVal"));
+
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+
+        assertEquals("update", node.getTagName());
+        assertFalse(node.hasAttribute(schemaName.name()));
+        assertEquals(TABLE_NAME, node.getAttribute(tableName.name()));
+
+        NodeList nodeColumns = node.getElementsByTagName("column");
+        assertEquals(2, nodeColumns.getLength());
+        assertTrue(nodeColumns.item(0) instanceof Element);
+        Element col = ((Element)nodeColumns.item(0));
+        assertEquals("colA", col.getAttribute("name"));
+        assertEquals("col_A_val", col.getAttribute("value"));
+
+        assertTrue(nodeColumns.item(1) instanceof Element);
+        col = ((Element)nodeColumns.item(1));
+        assertEquals("colB", col.getAttribute("name"));
+        assertEquals(1, Integer.parseInt(col.getAttribute("valueNumeric")));
+
+        NodeList nodeWhere = node.getElementsByTagName("where");
+        assertEquals(1, nodeWhere.getLength());
+        assertTrue(nodeWhere.item(0) instanceof Element);
+        assertEquals(whereValue, ((Element)nodeWhere.item(0)).getTextContent());
+
+        NodeList nodeWhereParams = node.getElementsByTagName("whereParams");
+        assertEquals(1, nodeWhereParams.getLength());
+        assertTrue(nodeWhereParams.item(0) instanceof Element);
+        NodeList nodeParams = ((Element)nodeWhereParams.item(0)).getElementsByTagName("param");
+        assertEquals(2, nodeParams.getLength());
+        assertTrue(nodeParams.item(0) instanceof Element);
+        Element param = ((Element)nodeParams.item(0));
+        assertEquals(123, Integer.parseInt(param.getAttribute("valueNumeric")));
+        assertTrue(nodeParams.item(0) instanceof Element);
+        param = ((Element)nodeParams.item(1));
+        assertEquals("colD", param.getAttribute("name"));
+        assertEquals("strVal", param.getAttribute("value"));
+    }
 
     @Test
     public void createNode_CreateViewChange() throws Exception {
