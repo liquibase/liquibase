@@ -42,6 +42,8 @@ public class ChangeParameterMetaData {
     private Set<String> supportedDatabases;
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
+    private String[] requiredForDatabaseArg;
+    private String[] supportedDatabasesArg;
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
@@ -84,8 +86,8 @@ public class ChangeParameterMetaData {
         this.serializationType = serializationType;
         this.since = since;
 
-        this.supportedDatabases = Collections.unmodifiableSet(analyzeSupportedDatabases(supportedDatabases));
-        this.requiredForDatabase = Collections.unmodifiableSet(analyzeRequiredDatabases(requiredForDatabase));
+        this.supportedDatabasesArg = supportedDatabases;
+        this.requiredForDatabaseArg = requiredForDatabase;
     }
 
     protected Set<String> analyzeSupportedDatabases(String[] supportedDatabases) {
@@ -234,10 +236,16 @@ public class ChangeParameterMetaData {
      * This method will never return a null value
      */
     public Set<String> getRequiredForDatabase() {
+        if (requiredForDatabase == null) {
+            requiredForDatabase = Collections.unmodifiableSet(analyzeRequiredDatabases(requiredForDatabaseArg));
+        }
         return requiredForDatabase;
     }
 
     public Set<String> getSupportedDatabases() {
+        if (supportedDatabases == null) {
+            supportedDatabases = Collections.unmodifiableSet(analyzeSupportedDatabases(supportedDatabasesArg));
+        }
         return supportedDatabases;
     }
 
@@ -247,11 +255,11 @@ public class ChangeParameterMetaData {
      * required database list contains the string "all"
      */
     public boolean isRequiredFor(Database database) {
-        return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName());
+        return getRequiredForDatabase().contains("all") || getRequiredForDatabase().contains(database.getShortName());
     }
 
     public boolean supports(Database database) {
-        return supportedDatabases.contains("all") || supportedDatabases.contains(database.getShortName());
+        return getSupportedDatabases().contains("all") || getSupportedDatabases().contains(database.getShortName());
     }
 
 
