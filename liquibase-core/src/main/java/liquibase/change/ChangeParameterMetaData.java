@@ -29,6 +29,8 @@ public class ChangeParameterMetaData {
 
     public static final String COMPUTE = "COMPUTE";
 
+    private static final Object NO_METHOD_REF = new Object();
+
     private Change change;
     private String parameterName;
     private String description;
@@ -44,6 +46,8 @@ public class ChangeParameterMetaData {
     private LiquibaseSerializable.SerializationType serializationType;
     private String[] requiredForDatabaseArg;
     private String[] supportedDatabasesArg;
+    private Object readMethodRef;
+    private Object writeMethodRef;
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
@@ -268,6 +272,23 @@ public class ChangeParameterMetaData {
      */
     public Object getCurrentValue(Change change) {
         try {
+            return getReadMethod(change).invoke(change);
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private Method getReadMethod(Change change) {
+        if (readMethodRef == NO_METHOD_REF) {
+            throw new UnexpectedLiquibaseException("No readMethod for " + parameterName);
+        } else if (readMethodRef != null) {
+            return (Method) readMethodRef;
+        }
+
+        try {
+            readMethodRef = NO_METHOD_REF;
             for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method readMethod = descriptor.getReadMethod();
@@ -276,13 +297,14 @@ public class ChangeParameterMetaData {
                             "is" + StringUtils.upperCaseFirst(descriptor.getName())
                         );
                     }
-                    return readMethod.invoke(change);
+                    readMethodRef = readMethod;
+                    return readMethod;
                 }
             }
-            throw new RuntimeException("Could not find readMethod for " + this.parameterName);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
+        throw new UnexpectedLiquibaseException("Could not find readMethod for " + this.parameterName);
     }
 
     /**
@@ -308,30 +330,50 @@ public class ChangeParameterMetaData {
         }
 
         try {
+            Method writeMethod = getWriteMethod(change);
+            Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
+            if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
+                if (expectedWriteType.equals(String.class)) {
+                    value = value.toString();
+                } else {
+                    throw new UnexpectedLiquibaseException(
+                        "Could not convert " + value.getClass().getName() +
+                        " to " +
+                        expectedWriteType.getName()
+                    );
+                }
+            }
+            writeMethod.invoke(change, value);
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
+        }
+    }
+
+    private Method getWriteMethod(Change change) {
+        if (writeMethodRef == NO_METHOD_REF) {
+            throw new UnexpectedLiquibaseException("No writeMethod for " + parameterName);
+        } else if (writeMethodRef != null) {
+            return (Method) writeMethodRef;
+        }
+
+        try {
+            writeMethodRef = NO_METHOD_REF;
             for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method writeMethod = descriptor.getWriteMethod();
                     if (writeMethod == null) {
-                        throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
+                        break;
                     }
-                    Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
-                    if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
-                        if (expectedWriteType.equals(String.class)) {
-                            value = value.toString();
-                        } else {
-                            throw new UnexpectedLiquibaseException(
-                                "Could not convert " + value.getClass().getName() +
-                                " to " +
-                                expectedWriteType.getName()
-                            );
-                        }
-                    }
-                    writeMethod.invoke(change, value);
+                    writeMethodRef = writeMethod;
+                    return writeMethod;
                 }
             }
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
+            throw new UnexpectedLiquibaseException(e);
         }
+        throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
     }
 
     /**
