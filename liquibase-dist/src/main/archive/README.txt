@@ -62,7 +62,7 @@ Liquibase Developer Forum: https://forum.liquibase.org/#Forum/liquibase-developm
 
 Liquibase Documentation: http://liquibase.org/documentation
 
-Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: https://support.liquibase.org/
+Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: https://support.liquibase.org
 
 
 ----------------------------------------
