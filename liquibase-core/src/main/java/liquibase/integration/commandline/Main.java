@@ -203,9 +203,8 @@ public class Main {
                 main.parseDefaultPropertyFiles();
                 PrintStream stream = System.out;
                 stream.println(CommandLineUtils.getBanner());
-                stream.println(
-                        String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
-                                StreamUtil.getLineSeparator()));
+                stream.println(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
+
                 LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
                 if (licenseService != null) {
                     if (main.liquibaseProLicenseKey == null) {
@@ -222,6 +221,11 @@ public class Main {
                     }
                     stream.println(licenseService.getLicenseInfo());
                 }
+
+                stream.println(String.format("Running Java under %s (Version %s)",
+                        System.getProperties().getProperty("java.home"),
+                        System.getProperty("java.version")
+                ));
                 return 0;
             }
 
