@@ -18,12 +18,13 @@ import java.util.Map;
 
 /**
  *
- * Invokes Liquibase targeted rollback
+ * Reverts (rolls back) one non-sequential <i>changeSet</i> made during a previous change to your database. It is only available for Liquibase Pro users.
  *
  * @goal rollbackOneChangeSet
  *
  */
 public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLogMojo {
+
     /**
      *
      * The change set ID to rollback
@@ -35,7 +36,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
 
     /**
      *
-     * The change set author to rollback
+     * Specifies the author of the <i>changeSet</i> you want to rollback.
      *
      * @parameter property="liquibase.changeSetAuthor"
      *
@@ -44,8 +45,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
 
     /**
      *
-     * The path to the changelog where this
-     * change set to rollback lives
+     * Specifies the path to the <i>changelog</i> which contains the <i>change-set</i> you want to rollback.
      *
      * @parameter property="liquibase.changeSetPath"
      *
@@ -54,7 +54,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
 
     /**
      *
-     * Required flag for RollbackOneChangeSet
+     * A required flag which indicates you intend to run rollbackOneChangeSet
      *
      * @parameter property="liquibase.force"
      *
@@ -63,7 +63,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
 
     /**
      *
-     * The path to a rollback script
+     * Specifies the path to a rollback script
      *
      * @parameter property="liquibase.rollbackScript"
      *

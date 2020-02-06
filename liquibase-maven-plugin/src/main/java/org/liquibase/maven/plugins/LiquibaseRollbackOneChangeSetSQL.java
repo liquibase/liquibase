@@ -26,12 +26,13 @@ import static java.util.ResourceBundle.getBundle;
 
 /**
  *
- * Invokes Liquibase targeted rollback
+ * A helper command that allows you to inspect the SQL Liquibase will run to revert the changeSet specified in the rollbackOneChangeSet command. It is only available for Liquibase Pro users.
  *
  * @goal rollbackOneChangeSetSQL
  *
  */
 public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLogMojo {
+
     /**
      *
      * The change set ID to rollback
@@ -43,7 +44,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
 
     /**
      *
-     * The change set author to rollback
+     * Specifies the author of the <i>changeSet</i> you want to rollback.
      *
      * @parameter property="liquibase.changeSetAuthor"
      *
@@ -52,8 +53,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
 
     /**
      *
-     * The path to the changelog where this
-     * change set to rollback lives
+     * Specifies the path to the <i>changelog</i> which contains the <i>change-set</i> you want to rollback.
      *
      * @parameter property="liquibase.changeSetPath"
      *
@@ -62,16 +62,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
 
     /**
      *
-     * Required flag for RollbackOneChangeSet
-     *
-     * @parameter property="liquibase.force"
-     *
-     */
-    protected String force;
-
-    /**
-     *
-     * The path to a rollback script
+     * Specifies the path to a rollback script
      *
      * @parameter property="liquibase.rollbackScript"
      *
@@ -80,7 +71,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
 
     /**
      *
-     * The path to an output file
+     * Specifies the path to the generated SQL output file.
      *
      * @parameter property="liquibase.outputFile"
      *
