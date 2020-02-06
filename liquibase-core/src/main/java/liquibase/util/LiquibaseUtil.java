@@ -1,7 +1,6 @@
 package liquibase.util;
 
 import liquibase.Scope;
-import liquibase.resource.ClassLoaderResourceAccessor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +27,7 @@ public class LiquibaseUtil {
     private static String getBuildInfo(String propertyId) {
         String value = "UNKONWN";
         if (liquibaseBuildProperties == null) {
-            try (InputStream buildProperties =Scope.getCurrentScope().getResourceAccessor().openStream(null, "/liquibase.build.properties")) {
+            try (InputStream buildProperties = Scope.getCurrentScope().getClassLoader().getResourceAsStream("liquibase.build.properties")) {
                 liquibaseBuildProperties = new Properties();
                 if (buildProperties != null) {
                     liquibaseBuildProperties.load(buildProperties);

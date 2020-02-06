@@ -295,7 +295,7 @@ public class CommandLineUtils {
         String myVersion = "";
         String buildTimeString = "";
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
         myVersion = LiquibaseUtil.getBuildVersion();
         buildTimeString = LiquibaseUtil.getBuildTime();

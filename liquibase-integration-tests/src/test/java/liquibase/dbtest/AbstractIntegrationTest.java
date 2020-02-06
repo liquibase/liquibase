@@ -894,7 +894,7 @@ public abstract class AbstractIntegrationTest {
         } else {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
-        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor());
+        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor(File.listRoots()));
         clearDatabase();
 
         liquibase.update(this.contexts);

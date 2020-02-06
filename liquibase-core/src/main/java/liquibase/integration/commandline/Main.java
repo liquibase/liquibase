@@ -178,8 +178,6 @@ public class Main {
                         return 0;
                     }
 
-                    log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
-
                     if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                         main.printHelp(System.out);
                         return 0;
@@ -233,7 +231,6 @@ public class Main {
                         throw e;
                     }
 
-                    log.info(LogType.LOG, CommandLineUtils.getBanner());
                     LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                     if (licenseService != null) {
 
@@ -255,6 +252,8 @@ public class Main {
                         main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
                         return 1;
                     }
+
+                    log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
 
                     main.applyDefaults();
                     Scope.child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {
@@ -819,7 +818,6 @@ public class Main {
     protected void printHelp(PrintStream stream) {
         this.logLevel = Level.WARNING.toString();
 
-        stream.println(CommandLineUtils.getBanner());
         String helpText = commandLineHelpBundle.getString("commandline-helptext");
         stream.println(helpText);
     }
