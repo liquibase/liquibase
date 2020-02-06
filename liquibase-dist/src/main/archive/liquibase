@@ -51,7 +51,27 @@ else
   done
 fi
 
+if [ -z "${JAVA_HOME}" ]; then
+  #JAVA_HOME not set, try to find a bundled version
+  if [ -d "${LIQUIBASE_HOME}/jre" ]; then
+    JAVA_HOME="$LIQUIBASE_HOME/jre"
+  elif [ -d "${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home" ]; then
+    JAVA_HOME="${LIQUIBASE_HOME}/.install4j/jre.bundle/Contents/Home"
+  fi
+fi
+
+if [ -z "${JAVA_HOME}" ]; then
+  JAVA_PATH="$(which java)"
+
+  if [ -z "${JAVA_PATH}" ]; then
+    echo "Cannot find java in your path. Install java or use the JAVA_HOME environment variable"
+  fi
+else
+    #Use path in JAVA_HOME
+    JAVA_PATH="${JAVA_HOME}/bin/java"
+fi
+
 # add any JVM options here
 JAVA_OPTS="${JAVA_OPTS-}"
 
-java -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main ${1+"$@"}
+${JAVA_PATH} -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main ${1+"$@"}
