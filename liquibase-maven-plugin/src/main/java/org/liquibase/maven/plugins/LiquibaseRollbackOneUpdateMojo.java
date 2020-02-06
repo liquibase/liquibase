@@ -53,7 +53,7 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        commandName = "rollbackOneChangeSet";
+        commandName = "rollbackOneUpdate";
         super.execute();
     }
 
