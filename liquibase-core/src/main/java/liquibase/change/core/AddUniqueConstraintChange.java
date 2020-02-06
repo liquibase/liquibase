@@ -94,9 +94,10 @@ public class AddUniqueConstraintChange extends AbstractTableChange {
      * uniqueness constraint or not. 
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    @DatabaseChangeProperty(description = "This is true if the unique constraint has 'ENABLE VALIDATE' set, or false if the foreign key has 'ENABLE NOVALIDATE' set.")
+    @DatabaseChangeProperty(description = "Should be true if the unique constraint shall 'ENABLE VALIDATE' set, or " +
+            "false if the 'ENABLE NOVALIDATE' shall.")
     public Boolean getValidate() {
-        return shouldValidate;
+        return shouldValidate == null || shouldValidate;
     }
 
     /**
@@ -165,18 +166,13 @@ public class AddUniqueConstraintChange extends AbstractTableChange {
             clustered = getClustered();
         }
 
-        boolean shouldValidate = true;
-        if (getValidate() != null) {
-            shouldValidate = getValidate();
-        }
-
         AddUniqueConstraintStatement statement = createAddUniqueConstraintStatement();
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
                         .setDisabled(disabled)
                         .setClustered(clustered)
-                        .setShouldValidate(shouldValidate);
+                        .setShouldValidate(getValidate());
 
         statement.setForIndexName(getForIndexName());
         statement.setForIndexSchemaName(getForIndexSchemaName());

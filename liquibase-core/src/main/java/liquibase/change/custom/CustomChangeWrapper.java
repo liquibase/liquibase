@@ -14,6 +14,8 @@ import liquibase.util.ObjectUtil;
 
 import java.util.*;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Adapts CustomChange implementations to the standard change system used by Liquibase.
  * Custom change implementations should implement CustomSqlChange or CustomTaskChange
@@ -109,7 +111,8 @@ public class CustomChangeWrapper extends AbstractChange {
     /**
      * Returns the name of the custom class set in {@link #setClass(String)}
      */
-    @DatabaseChangeProperty(description = "Name class that implements the custom change.")
+    @DatabaseChangeProperty(description = "Name of the class that implements the custom change.",
+            requiredForDatabase = ALL, supportsDatabase = ALL, exampleValue = "liquibase.change.custom.ExampleCustomSqlChange")
     public String getClassName() {
         return className;
     }
