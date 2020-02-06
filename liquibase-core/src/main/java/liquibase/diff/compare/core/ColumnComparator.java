@@ -35,6 +35,9 @@ public class ColumnComparator implements DatabaseObjectComparator {
         if (BooleanUtils.isTrue(column.getComputed())) {
             hash += ":computed";
         }
+        if (BooleanUtils.isTrue(column.getDescending())) {
+            hash += ":descending";
+        }
         return new String[] {hash.toLowerCase(Locale.US)};
     }
 
@@ -57,6 +60,10 @@ public class ColumnComparator implements DatabaseObjectComparator {
         }
 
         if (BooleanUtils.isTrue(thisColumn.getComputed()) != BooleanUtils.isTrue(otherColumn.getComputed())) {
+            return false;
+        }
+
+        if (BooleanUtils.isTrue(thisColumn.getDescending()) != BooleanUtils.isTrue(otherColumn.getDescending())) {
             return false;
         }
 

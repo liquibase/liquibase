@@ -18,10 +18,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.license.LicenseService;
-import liquibase.license.LicenseServiceFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.RawSqlStatement;
@@ -31,12 +28,10 @@ import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.net.URL;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.ResourceBundle;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -189,14 +184,24 @@ public class CommandLineUtils {
 
     public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
                               CompareControl.SchemaComparison[] schemaComparisons) throws LiquibaseException {
+        doDiff(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, System.out);
+    }
+
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+                              CompareControl.SchemaComparison[] schemaComparisons, PrintStream output) throws LiquibaseException {
+        doDiff(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, null, output);
+    }
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
         DiffCommand diffCommand = (DiffCommand) CommandFactory.getInstance().getCommand("diff");
 
         diffCommand
                 .setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
                 .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
+                .setObjectChangeFilter(objectChangeFilter)
                 .setSnapshotTypes(snapshotTypes)
-                .setOutputStream(System.out);
+                .setOutputStream(output);
 
         System.out.println("");
         System.out.println(coreBundle.getString("diff.results"));
@@ -302,8 +307,8 @@ public class CommandLineUtils {
         ));
 
         if (StringUtil.isNotEmpty(myVersion) && StringUtil.isNotEmpty(buildTimeString)) {
-            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion,
-                buildTimeString));
+            myVersion = myVersion + " #"+ LiquibaseUtil.getBuildNumber();
+            banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion, buildTimeString));
         }
 
         return banner.toString();

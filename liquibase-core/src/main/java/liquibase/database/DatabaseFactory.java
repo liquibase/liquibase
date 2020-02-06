@@ -230,7 +230,11 @@ public class DatabaseFactory {
 
             LOG.fine(LogType.LOG, "Properties:");
             for (Map.Entry entry : driverProperties.entrySet()) {
-                LOG.fine(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+                if (entry.getKey().toString().toLowerCase().contains("password")) {
+                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'**********'");
+                } else {
+                    LOG.fine(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+                }
             }
 
             if(driver.contains("oracle")) {

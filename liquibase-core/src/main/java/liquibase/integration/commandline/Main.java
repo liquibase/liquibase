@@ -43,6 +43,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -113,6 +114,24 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
+    private Boolean managingLogConfig = null;
+    private boolean outputsLogMessages = false;
+    protected String sqlFile;
+    protected String delimiter;
+    protected String rollbackScript;
+
+    private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
+            204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
+            220, 222, 223, 232, 233, 234, 235, 236, 237, 238, 239, 241,
+            249, 250, 251, 252, 255, 284, 332, 333, 334, 335, 336, 337, 359,
+            360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
+            8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
+    };
+
+    protected static class CodePointCheck {
+        public int position;
+        public char ch;
+    }
 
     /**
      * Entry point. This is what gets executes when starting this program from the command line. This is actually
@@ -145,6 +164,8 @@ public class Main {
                 Logger log = Scope.getCurrentScope().getLog(Main.class);
                 boolean outputLoggingEnabled = false;
 
+                Main main = new Main();
+
                 try {
                     GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration
                             (GlobalConfiguration.class);
@@ -157,43 +178,81 @@ public class Main {
                         return 0;
                     }
 
-
-                    Main main = new Main();
                     log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
 
-                    if ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0])) {
+                    if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                         main.printHelp(System.out);
                         return 0;
-                    } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
-                        log.info(LogType.USER_MESSAGE,
+                    } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
+                        main.command = "";
+                        main.parseDefaultPropertyFiles();
+                        PrintStream stream = System.out;
+                        stream.println(CommandLineUtils.getBanner());
+                        stream.println(
                                 String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
                                         StreamUtil.getLineSeparator()));
+                        LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+                        if (licenseService != null) {
+                            if (main.liquibaseProLicenseKey == null) {
+                                log.info(LogType.LOG, "No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                            } else {
+                                Location licenseKeyLocation =
+                                        new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                                LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                                if (result.code != 0) {
+                                    String allMessages = String.join("\n", result.messages);
+                                    log.warning(LogType.USER_MESSAGE, allMessages);
+                                }
+                            }
+                            stream.println(licenseService.getLicenseInfo());
+                        }
                         return 0;
+                    }
+
+                    //
+                    // Look for characters which cannot be handled
+                    //
+                    for (int i = 0; i < args.length; i++) {
+                        CodePointCheck codePointCheck = checkArg(args[i]);
+                        if (codePointCheck != null) {
+                            String message =
+                                    "A non-standard character '" + codePointCheck.ch +
+                                            "' was detected on the command line at position " +
+                                            (codePointCheck.position + 1) + " of argument number " + (i + 1) +
+                                            ".\nIf problems occur, please remove the character and try again.";
+                            LOG.warning(message);
+                            System.err.println(message);
+                        }
                     }
 
                     try {
                         main.parseOptions(args);
                     } catch (CommandLineParsingException e) {
+                        log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
                         log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
                         throw e;
                     }
 
+                    log.info(LogType.LOG, CommandLineUtils.getBanner());
                     LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-            if (licenseService != null) {
-                if(main.liquibaseProLicenseKey != null) {
-                    Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
-                    LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
-                    if (result.code != 0) {
-                        String allMessages = String.join("\n", result.messages);
-                        log.warning(LogType.USER_MESSAGE, allMessages);
+                    if (licenseService != null) {
+
+                        if (main.liquibaseProLicenseKey == null) {
+                            log.info(LogType.LOG, "No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                        } else {
+                            Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                            LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                            if (result.code != 0) {
+                                String allMessages = String.join("\n", result.messages);
+                                log.warning(LogType.USER_MESSAGE, allMessages);
+                            }
+                        }
+                        log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
                     }
-                }
-                log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
-            } else {
-                log.info(LogType.USER_MESSAGE, String.format("Liquibase Community %s by Datical", LiquibaseUtil.getBuildVersion()));
-            }List<String> setupMessages = main.checkSetup();
+
+                    List<String> setupMessages = main.checkSetup();
                     if (!setupMessages.isEmpty()) {
-                        main.printHelp(setupMessages, System.err);
+                        main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
                         return 1;
                     }
 
@@ -210,7 +269,7 @@ public class Main {
                         }
 
                     });
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     String message = e.getMessage();
                     if (e.getCause() != null) {
                         message = e.getCause().getMessage();
@@ -224,9 +283,15 @@ public class Main {
                         if (e.getCause() instanceof ValidationFailedException) {
                             ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                         } else {
-                            log.severe(LogType.USER_MESSAGE,
-                                    (String.format(coreBundle.getString("unexpected.error"), message)), e);
-                            log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
+                            if (main.outputsLogMessages) {
+                                log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)), e);
+                            } else {
+                                log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)));
+                                log.severe(LogType.USER_MESSAGE, coreBundle.getString("for.more.information.use.loglevel.flag"));
+
+                                //send it to the LOG in case we're using logFile
+                                log.severe(LogType.LOG, (String.format(coreBundle.getString("unexpected.error"), message)), e);
+                            }
                         }
                     } catch (IllegalFormatException e1) {
                         e1.printStackTrace();
@@ -277,6 +342,28 @@ public class Main {
     }
 
     /**
+     * Returns true if the given command requires stdout
+     *
+     * @param command the command to check
+     * @return true if stdout needs for a command, false if not
+     */
+    private static boolean isStandardOutputRequired(String command) {
+        return COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
+                || COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)
+                || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
+                || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(command)
+                || COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)
+                || COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)
+                || COMMANDS.UPDATE_SQL.equalsIgnoreCase(command)
+                || COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)
+                || COMMANDS.ROLLBACK_TO_DATE_SQL.equalsIgnoreCase(command)
+                || COMMANDS.ROLLBACK_COUNT_SQL.equalsIgnoreCase(command)
+                || COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(command)
+                || COMMANDS.FUTURE_ROLLBACK_COUNT_SQL.equalsIgnoreCase(command)
+                || COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL.equalsIgnoreCase(command);
+    }
+
+    /**
      * Returns true if the parameter --changeLogFile is requited for a given command
      *
      * @param command the command to test
@@ -290,7 +377,8 @@ public class Main {
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
-                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command);
+                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
+                || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command);
     }
 
     /**
@@ -575,7 +663,7 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
-                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
+                            && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -589,7 +677,9 @@ public class Main {
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_CATALOG)
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
                         && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
-                    && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
+                        && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)
+                        && !cmdParm.startsWith("--" + OPTIONS.DATA_OUTPUT_DIRECTORY)
+                        && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -727,8 +817,32 @@ public class Main {
      * @param stream the output stream to write the help text to
      */
     protected void printHelp(PrintStream stream) {
+        this.logLevel = Level.WARNING.toString();
+
+        stream.println(CommandLineUtils.getBanner());
         String helpText = commandLineHelpBundle.getString("commandline-helptext");
         stream.println(helpText);
+    }
+
+    /**
+     * Check the string for known characters which cannot be handled
+     *
+     * @param arg Input parameter to check
+     * @return int             A CodePointCheck object, or null to indicate all good
+     */
+    protected static CodePointCheck checkArg(String arg) {
+        char[] chars = arg.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            for (int j = 0; j < suspiciousCodePoints.length; j++) {
+                if (suspiciousCodePoints[j] == chars[i]) {
+                    CodePointCheck codePointCheck = new CodePointCheck();
+                    codePointCheck.position = i;
+                    codePointCheck.ch = chars[i];
+                    return codePointCheck;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -788,7 +902,7 @@ public class Main {
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
-        if(arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
+        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
             return;
 
         String[] splitArg = splitArg(arg);
@@ -1014,8 +1128,7 @@ public class Main {
             if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(
                         createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database, StringUtil.trimToNull(diffTypes), finalSchemaComparisons
-                );
+                        database, StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
@@ -1424,15 +1537,12 @@ public class Main {
                 this.liquibaseSchemaName, this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
     }
 
-    private Writer getOutputWriter() throws IOException {
-        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getOutputEncoding();
-
+    private OutputStream getOutputStream() throws IOException {
         if (outputFile != null) {
             FileOutputStream fileOut;
             try {
                 fileOut = new FileOutputStream(outputFile, false);
-                return new OutputStreamWriter(fileOut, charsetName);
+                return fileOut;
             } catch (IOException e) {
                 Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, String.format(
                         coreBundle.getString("could.not.create.output.file"),
@@ -1440,8 +1550,16 @@ public class Main {
                 throw e;
             }
         } else {
-            return new OutputStreamWriter(System.out, charsetName);
+            return System.out;
         }
+
+    }
+
+    private Writer getOutputWriter() throws IOException {
+        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                .getOutputEncoding();
+
+        return new OutputStreamWriter(getOutputStream(), charsetName);
     }
 
     /**
@@ -1534,19 +1652,7 @@ public class Main {
         private static final String HELP = "help";
         private static final String VERSION = "version";
         private static final String SNAPSHOT_FORMAT = "snapshotFormat";
+        private static final String LOG_FILE = "logFile";
+        private static final String LOG_LEVEL = "logLevel";
     }
-
-//    private static class ConsoleLogFilter extends AbstractMatcherFilter {
-//
-//        private boolean outputLogs;
-//
-//        @Override
-//        public FilterReply decide(Object event) {
-//            if (outputLogs) {
-//                return FilterReply.ACCEPT;
-//            } else {
-//                return FilterReply.DENY;
-//            }
-//        }
-//    }
 }

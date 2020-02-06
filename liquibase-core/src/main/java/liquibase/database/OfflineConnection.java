@@ -274,7 +274,7 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     public void setConnectionUserName(String connectionUserName) {
-        this.connectionUserName = connectionUserName;
+        this.connectionUserName = StringUtil.isEmpty(connectionUserName) ? null : connectionUserName;
     }
 
     @Override

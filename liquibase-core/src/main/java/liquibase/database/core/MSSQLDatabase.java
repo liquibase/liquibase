@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import java.sql.Connection;
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -111,6 +112,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         defaultDataTypeParameters.put("money", 4);
         defaultDataTypeParameters.put("smallmoney", 0);
 
+        unmodifiableDataTypes.add("datetime");
+
         addReservedWords(createReservedWordsCollection());
     }
 
@@ -121,11 +124,15 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setDefaultSchemaName(String schemaName) {
-        if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
-            throw new RuntimeException(String.format(
-                "Cannot use default schema name %s on Microsoft SQL Server because the login " +
-                    "schema of the current user (%s) is different and MSSQL does not support " +
-                    "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+        if(this.getConnection() instanceof OfflineConnection) {
+            //skip the check below, when working with offline connection
+        } else {
+            if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
+                throw new RuntimeException(String.format(
+                        "Cannot use default schema name %s on Microsoft SQL Server because the login " +
+                                "schema of the current user (%s) is different and MSSQL does not support " +
+                                "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+            }
         }
         super.setDefaultSchemaName(schemaName);
     }

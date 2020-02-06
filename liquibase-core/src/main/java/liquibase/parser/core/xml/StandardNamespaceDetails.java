@@ -63,16 +63,16 @@ public class StandardNamespaceDetails implements NamespaceDetails {
     public String getLocalPath(String namespaceOrUrl) {
 
         if (namespaceOrUrl.equals(GENERIC_EXTENSION_XSD)) {
-            return "liquibase/parser/core/xml/dbchangelog-ext.xsd";
+            return "www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd";
         }
         Matcher matcher = standardUrlPattern.matcher(namespaceOrUrl);
         if (matcher.matches()) {
-            return "liquibase/parser/core/xml/"+matcher.group(1);
+            return "www.liquibase.org/xml/ns/dbchangelog/"+matcher.group(1);
         }
 
         matcher = oldStandardUrlPattern.matcher(namespaceOrUrl);
         if (matcher.matches()) {
-            return "liquibase/parser/core/xml/"+matcher.group(1);
+            return "www.liquibase.org/xml/ns/dbchangelog/"+matcher.group(1);
         }
 
         return null;

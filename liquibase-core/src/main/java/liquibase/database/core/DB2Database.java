@@ -58,4 +58,9 @@ public class DB2Database extends AbstractDb2Database {
 		return null;
 	}
 
+	@Override
+	protected String getDefaultDatabaseProductName() {
+		return "DB2/LUW";
+	}
+
 }

@@ -176,6 +176,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public ValidationErrors validate(Database database) {
         // Not falling back to default because of path/procedureText option group. Need to specify everything.
         ValidationErrors validate = new ValidationErrors();
+
+        validate.checkDisallowedField("catalogName", this.getCatalogName(), database, MSSQLDatabase.class);
+
         if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
             validate.addError(
                 "Cannot specify both 'path' and a nested procedure text in " +

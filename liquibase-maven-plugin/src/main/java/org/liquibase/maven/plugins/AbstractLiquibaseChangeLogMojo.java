@@ -30,14 +30,14 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     /**
      * Specifies the change log directory into which liquibase can find the change log file.
      *
-     * @parameter expression="${liquibase.changeLogDirectory}"
+   * @parameter property="liquibase.changeLogDirectory"
      */
     protected String changeLogDirectory;
 
     /**
      * Specifies the change log file to use for Liquibase.
      *
-     * @parameter expression="${liquibase.changeLogFile}"
+     * @parameter property="liquibase.changeLogFile"
      */
     protected String changeLogFile;
 
@@ -46,7 +46,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      * The Liquibase contexts to execute, which can be "," separated if multiple contexts
      * are required. If no context is specified then ALL contexts will be executed.
      *
-     * @parameter expression="${liquibase.contexts}" default-value=""
+     * @parameter property="liquibase.contexts" default-value=""
      */
     protected String contexts;
 
@@ -54,7 +54,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      * The Liquibase labels to execute, which can be "," separated if multiple labels
      * are required or a more complex expression. If no label is specified then ALL all will be executed.
      *
-     * @parameter expression="${liquibase.labels}" default-value=""
+     * @parameter property="liquibase.labels" default-value=""
      */
     protected String labels;
 

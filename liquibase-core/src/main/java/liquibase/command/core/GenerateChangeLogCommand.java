@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.command.CommandResult;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -10,10 +11,16 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StringUtil;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 
 import java.io.PrintStream;
 
 public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
+    private static final String INFO_MESSAGE =
+        "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
+        "should be split (splitStatements:true is the default behavior) or not (splitStatements:false).\n" +
+        "See http://liquibase.org for additional documentation.";
 
     private String author;
     private String context;
@@ -43,6 +50,14 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     @Override
     protected CommandResult run() throws Exception {
+        String changeLogFile = StringUtil.trimToNull(getChangeLogFile());
+        if (changeLogFile.toLowerCase().endsWith(".sql")) {
+          System.out.println("\n" + INFO_MESSAGE + "\n");
+            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "\n" + INFO_MESSAGE + "\n");
+        }
+
+        SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
+
         DiffResult diffResult = createDiffResult();
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, getDiffOutputControl());

@@ -43,4 +43,9 @@ public class Db2zDatabase extends AbstractDb2Database {
         return isSystemIndex || isSystemColumn || super.isSystemObject(example);
     }
 
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "DB2/z";
+    }
+
 }
