@@ -131,7 +131,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @DatabaseChangeProperty( supportsDatabase = ALL, requiredForDatabase = NONE,
         description = "List of operating systems on which to execute the command " +
                 "(taken from the os.name Java system property)", exampleValue = "Windows 7")
-    public String getOs() { return String.join(",", os); }
+    public String getOs() { return StringUtils.join(os,","); }
 
     @DatabaseChangeProperty(isChangeProperty = false)
     public List<String> getOsList() { return os; }
@@ -153,7 +153,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
         return validationErrors;
     }
-
 
     @Override
     public Warnings warn(Database database) {

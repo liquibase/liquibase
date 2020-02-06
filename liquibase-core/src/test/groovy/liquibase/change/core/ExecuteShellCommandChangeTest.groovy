@@ -20,6 +20,11 @@ class ExecuteShellCommandChangeTest extends Specification {
     def "load works correctly"() {
         when:
         def change = new ExecuteShellCommandChange()
+
+        then:
+        null == change.getOs()
+
+        when:
         try {
             change.load(new liquibase.parser.core.ParsedNode(null, "executeCommand")
                     .addChildren([executable: "/usr/bin/test", os: "linux,mac"])

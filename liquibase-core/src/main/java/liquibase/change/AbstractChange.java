@@ -101,7 +101,7 @@ public abstract class AbstractChange implements Change {
         }
     }
 
-    protected static final String[] defaultSkipList = {"metaClass", "class", "resourceAccessor",
+    protected static final String[] defaultSkipList = {"metaClass", "resourceAccessor",
             "serializedObjectName", "serializableFields"};
     /** Filter out object parameters */
     protected List<String> skipProperties = Arrays.asList(defaultSkipList);
