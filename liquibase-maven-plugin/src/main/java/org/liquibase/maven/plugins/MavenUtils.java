@@ -91,14 +91,17 @@ public class MavenUtils {
     return new URLClassLoader(urlArray, clazz.getClassLoader());
   }
 
-  public static void checkProLicense(String liquibaseProLicenseKey, Log log) {
+  public static boolean checkProLicense(String liquibaseProLicenseKey, String commandName, Log log) {
+      boolean hasProLicense = true;
       LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
       if (licenseService == null) {
-        return;
+        return false;
       }
       if (liquibaseProLicenseKey == null) {
-          log.info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line " + 
-                   "or in liquibase.properties to use Liquibase Pro features.");
+          log.info("");
+          log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://liquibase.org.");
+          log.info("");
+          hasProLicense = false;
       }
       else {
           Location licenseKeyLocation = 
@@ -107,6 +110,7 @@ public class MavenUtils {
           if (result.code != 0) {
               String allMessages = String.join("\n", result.messages);
               log.warn(allMessages);
+              hasProLicense = false;
           }
           String licenseInfo = licenseService.getLicenseInfo();
           log.info(licenseInfo);
@@ -115,10 +119,12 @@ public class MavenUtils {
           // If the license has expired then just disable the service
           //
           if (licenseService.daysTilExpiration() < 0) {
-            licenseService.disable();
+              licenseService.disable();
+              hasProLicense = false;
           }
       }
       log.info(licenseService.getLicenseInfo());
+      return hasProLicense;
   }
 
   /**
