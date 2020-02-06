@@ -38,7 +38,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     private Boolean deferrable;
     private Boolean initiallyDeferred;
-    private Boolean shouldValidate;
+    private Boolean shouldValidate = true;
 
     private String onUpdate;
     private String onDelete;
@@ -81,7 +81,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(
-        description = "Name of the table containing the column to constrain",
+        description = "Name of the table containing the column to constraint",
         exampleValue = "address",
         mustEqualExisting = "column.relation"
     )
@@ -175,7 +175,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    @DatabaseChangeProperty(description = "This is true if the foreign key has 'ENABLE VALIDATE' set, or false if the foreign key has 'ENABLE NOVALIDATE' set.")
+    @DatabaseChangeProperty(description = "Shall be true if the foreign key should 'ENABLE VALIDATE' set, or false " +
+            "if the foreign key should 'ENABLE NOVALIDATE' set.", since = "3.6")
     public Boolean getValidate() {
         return shouldValidate;
     }
@@ -208,8 +209,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     @DatabaseChangeProperty(
         description = "ON UPDATE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', " +
-            "'RESTRICT', 'NO ACTION'",
-        exampleValue = "RESTRICT")
+            "'RESTRICT', 'NO ACTION'", exampleValue = "RESTRICT" )
     public String getOnUpdate() {
         return onUpdate;
     }
@@ -220,7 +220,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     @DatabaseChangeProperty(description = "ON DELETE functionality. Possible values: 'CASCADE', 'SET NULL', " +
         "'SET DEFAULT', 'RESTRICT', 'NO ACTION'",
-        exampleValue = "CASCADE")
+        exampleValue = "CASCADE", since = "2.0")
     public String getOnDelete() {
         return this.onDelete;
     }

@@ -128,7 +128,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
     }
 
     @DatabaseChangeProperty(
-        description = "CSV file to load", exampleValue = "com/example/users.csv",
+        description = "CSV file to load", exampleValue = "example/users.csv",
         requiredForDatabase = ALL)
     public String getFile() {
         return file;
@@ -148,7 +148,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         this.usePreparedStatements = usePreparedStatements;
     }
 
-    @DatabaseChangeProperty( supportsDatabase = ALL,
+    @DatabaseChangeProperty( supportsDatabase = ALL, exampleValue = "//",
         description = "Lines starting with this are treated as comment and ignored.")
     public String getCommentLineStartsWith() {
         return commentLineStartsWith;
@@ -184,7 +184,7 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         this.encoding = encoding;
     }
 
-    @DatabaseChangeProperty(exampleValue = ",", supportsDatabase = ALL,
+    @DatabaseChangeProperty(exampleValue = ";", supportsDatabase = ALL,
         description = "Character separating the fields.")
     public String getSeparator() {
         return separator;

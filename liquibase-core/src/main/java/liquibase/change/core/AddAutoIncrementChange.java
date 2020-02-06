@@ -75,8 +75,8 @@ public class AddAutoIncrementChange extends AbstractTableChange {
         this.incrementBy = incrementBy;
     }
 
-    @DatabaseChangeProperty(description = "Using GenerationType 'BY DEFAULT' defaultOnNull = true" +
-            " allows the identity to be used if the identity column is referenced, but a value of NULL is specified."
+    @DatabaseChangeProperty(description = "When using generationType 'BY DEFAULT' then defaultOnNull = true" +
+        " allows the identity to be used if the identity column is referenced, but a value of NULL is specified."
            , exampleValue = "true", since = "3.6", supportsDatabase = {"oracle"} )
     public Boolean getDefaultOnNull() {
         return defaultOnNull;
