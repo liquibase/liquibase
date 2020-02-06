@@ -3,6 +3,7 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandExecutionException;
@@ -136,7 +137,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
                 outputWriter.close();
             }
             catch (IOException ioe) {
-                LogService.getLog(getClass()).info(LogType.LOG, String.format("Unable to close output file"));
+                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, String.format("Unable to close output file"));
             }
             finally {
             }
@@ -151,7 +152,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         try {
             fileOut = new FileOutputStream(outputFile, false);
         } catch (IOException e) {
-            LogService.getLog(getClass()).severe(LogType.LOG, String.format(
+            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, String.format(
                     coreBundle.getString("could.not.create.output.file"),
             outputFile));
             throw e;
