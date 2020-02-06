@@ -116,7 +116,7 @@ Adding New ChangeSets
 ---------------------
 Running the update command allowed your developer database to match the defined state. Now that they match, you can start adding additional changes you need. If you have not run your first update, please follow the instructions in the previous section to do so before completing this section.
 
-In this example, we will add a new changeSet to create a "works for" column in the persons table.
+In this example, we will add a new changeSet to create a "works for" column in the persons table with a foreign key to the company table.
 
 To add this changeSet, open the sample changelog file in your existing editor, and copy + paste one of the following changeSet examples:
 
@@ -148,7 +148,7 @@ NOTE: It's best practice to wrap every statement in its own changeSet block.
 
 Now, run `liquibase update` again & refresh your database console.
 
-You will see the new column on the person table.
+You will see the new column on the person table and the new constraint.
 
 NOTE: If you run formatted SQL or XML on the H2 database, then want to attempt using the other method, you must restart the H2 database before running it again or you will receive an update failure due to objects already existing on the database.
 
