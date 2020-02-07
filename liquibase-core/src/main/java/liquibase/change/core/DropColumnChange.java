@@ -22,16 +22,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static liquibase.change.ChangeParameterMetaData.NONE;
+
 /**
  * Drops an existing column from a table.
  */
 @DatabaseChange(name = "dropColumn", description = "Drop existing column(s)", priority = ChangeMetaData
 .PRIORITY_DEFAULT, appliesTo = "column")
-public class DropColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
-    
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+public class DropColumnChange extends AbstractTableChange implements ChangeWithColumns<ColumnConfig> {
+
     private String columnName;
     private List<ColumnConfig> columns = new ArrayList<>();
     
@@ -60,8 +59,8 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         return super.validate(database);
     }
     
-    @DatabaseChangeProperty(description = "Name of the column to drop", requiredForDatabase = "none",
-        mustEqualExisting = "column")
+    @DatabaseChangeProperty( requiredForDatabase = NONE, mustEqualExisting = "column",
+            description = "Name of the column to drop. Ignored if nested 'column's are defined" )
     public String getColumnName() {
         return columnName;
     }
@@ -69,36 +68,13 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
-    
-    
-    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.schema.catalog")
-    public String getCatalogName() {
-        return catalogName;
-    }
-    
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-    
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema")
-    public String getSchemaName() {
-        return schemaName;
-    }
-    
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-    
-    @DatabaseChangeProperty(description = "Name of the table containing the column to drop",
+
+    @DatabaseChangeProperty(description = "Name of the table containing the column(s) to drop",
         mustEqualExisting = "column.relation")
     public String getTableName() {
-        return tableName;
+        return super.getTableName();
     }
-    
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-    
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         try {
@@ -169,7 +145,6 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         } catch (InvalidExampleException|DatabaseException e) {
             return new ChangeStatus().unknown(e);
         }
-    
     }
     
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) throws DatabaseException {
@@ -225,12 +200,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             return "Column " + getTableName() + "." + getColumnName() + " dropped";
         }
     }
-    
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-    
+
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
@@ -239,14 +209,9 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         }
         return value;
     }
-    
+
     @Override
-    public void addColumn(ColumnConfig column) {
-        columns.add(column);
-    }
-    
-    @Override
-    @DatabaseChangeProperty(description = "Columns to be dropped.", requiredForDatabase = "none")
+    @DatabaseChangeProperty(description = "Columns to be dropped.", requiredForDatabase = NONE)
     public List<ColumnConfig> getColumns() {
         return columns;
     }
