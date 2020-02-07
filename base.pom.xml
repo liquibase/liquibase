@@ -251,6 +251,18 @@
                 </executions>
             </plugin>
 
+<!--            <plugin>-->
+<!--                <groupId>org.jacoco</groupId>-->
+<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>prepare-agent</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.1</version>
@@ -291,6 +303,20 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- We don't use the site plugin for anything except where we use the generated
+                 documentation for the liquibase-maven-plugin. This custom template is much
+                 simplified from the default template and allows us to just use Jekyll's
+                 include_relative instruction to include the generated pages in our markdown
+                 pages. -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-site-plugin</artifactId>
+              <version>3.8.2</version>
+              <configuration>
+                <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
+              </configuration>
+            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -305,8 +331,19 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.1.1</version>
                 </plugin>
-            </plugins>
 
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.8.2</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+            </plugins>
         </pluginManagement>
     </build>
 </project>

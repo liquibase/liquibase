@@ -437,7 +437,7 @@ public class Liquibase {
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
-    private void outputHeader(String message) throws DatabaseException {
+    public void outputHeader(String message) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         executor.comment("*********************************************************************");
         executor.comment(message);
@@ -455,9 +455,6 @@ public class Liquibase {
             StreamUtil.getLineSeparator()
         );
 
-        if (database instanceof OracleDatabase) {
-            executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
-        }
         if ((database instanceof MSSQLDatabase) && (database.getDefaultCatalogName() != null)) {
             executor.execute(new RawSqlStatement("USE " +
                 database.escapeObjectName(database.getDefaultCatalogName(), Catalog.class) + ";")
@@ -588,7 +585,7 @@ public class Liquibase {
         try {
             Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
             if ((streams == null) || streams.isEmpty()) {
-                throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
+                throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
             } else if (streams.size() > 1) {
                 throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
             }
@@ -610,15 +607,12 @@ public class Liquibase {
         try {
             executor.execute(rollbackChange);
         } catch (DatabaseException e) {
-            DatabaseException ex = new DatabaseException(
-                "Error executing rollback script. ChangeSets will still be marked as rolled back: " + e.getMessage(),
-                e
-            );
-            LogService.getLog(getClass()).severe(LogType.LOG, ex.getMessage());
-            LOG.severe(LogType.LOG, "Error executing rollback script", ex);
+            LogService.getLog(getClass()).severe(LogType.LOG, e.getMessage());
+            LOG.severe(LogType.LOG, "Error executing rollback script: "+e.getMessage());
             if (changeExecListener != null) {
-                changeExecListener.runFailed(null, databaseChangeLog, database, ex);
+                changeExecListener.runFailed(null, databaseChangeLog, database, e);
             }
+            throw new DatabaseException("Error executing rollback script", e);
         }
         database.commit();
     }

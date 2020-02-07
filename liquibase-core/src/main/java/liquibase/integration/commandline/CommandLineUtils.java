@@ -189,12 +189,17 @@ public class CommandLineUtils {
 
     public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
                               CompareControl.SchemaComparison[] schemaComparisons, PrintStream output) throws LiquibaseException {
+        doDiff(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, null, output);
+    }
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
         DiffCommand diffCommand = (DiffCommand) CommandFactory.getInstance().getCommand("diff");
 
         diffCommand
                 .setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
                 .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
+                .setObjectChangeFilter(objectChangeFilter)
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(output);
 
