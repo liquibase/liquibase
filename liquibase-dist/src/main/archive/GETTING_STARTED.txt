@@ -56,7 +56,7 @@ USING H2
 H2 is a standard SQL database and can be used to simulate working in a more complex database.
 To start the example database: 
     * open your command line or Terminal app
-    * navigate to your ...examples/sql directory (or xml)
+    * navigate to the directory where you placed "examples" directory
     * run `examples/start-h2`.
 
 To stop the example database:
