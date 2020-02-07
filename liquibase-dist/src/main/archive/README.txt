@@ -54,7 +54,7 @@ All AdoptOpenJDK binaries and scripts are open-source licensed and available for
 
 Help & Support
 ----------------------------------------
-For questions regarding Liquibase, you can submit an email to answers@liquibase.org or submit a post on stack overflow and use the #liquibase tag: https://stackoverflow.com/questions/tagged/liquibase
+For questions regarding Liquibase, you can submit an email to support@liquibase.org or submit a post on stack overflow and use the #liquibase tag: https://stackoverflow.com/questions/tagged/liquibase
 
 You can also post questions to these Liquibase forums:
 Liquibase User Forum: https://forum.liquibase.org/#Forum/liquibase-users
