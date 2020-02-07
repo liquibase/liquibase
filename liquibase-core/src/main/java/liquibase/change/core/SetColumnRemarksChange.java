@@ -50,9 +50,4 @@ public class SetColumnRemarksChange extends AbstractTableChange {
     public String getConfirmationMessage() {
         return "Remarks set on " + tableName+"."+columnName;
     }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
 }

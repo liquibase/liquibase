@@ -773,13 +773,8 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
         return null;
     }
 
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_CHANGELOG_NAMESPACE;
-    }
-
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID
+        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP, UUID
     }
 }

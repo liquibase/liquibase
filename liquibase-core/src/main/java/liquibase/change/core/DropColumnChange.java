@@ -60,7 +60,7 @@ public class DropColumnChange extends AbstractTableChange implements ChangeWithC
     }
     
     @DatabaseChangeProperty( requiredForDatabase = NONE, mustEqualExisting = "column",
-            description = "Name of the column to drop. Ignored if nested 'column's are defined" )
+            description = "Name of the column to drop, if dropping a single column. Ignored if nested 'column's are defined" )
     public String getColumnName() {
         return columnName;
     }

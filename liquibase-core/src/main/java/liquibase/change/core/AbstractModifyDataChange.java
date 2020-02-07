@@ -48,7 +48,8 @@ public abstract class AbstractModifyDataChange extends AbstractTableChange {
 
     @DatabaseChangeProperty( supportsDatabase = ALL, serializationType = SerializationType.NESTED_OBJECT,
         description = "Parameters for the 'where' condition.\n\nThe 'param'(s) are inserted in the order they " +
-                "are defined in place of the ':name' and ':value' placeholders.")
+                "are defined in place of the <code>:name</code> and <code>:value</code> placeholders. See generated " +
+                "SQL Sample below")
     public List<Param> getWhereParams() { return whereParams; }
     public void setWhereParams(List<Param> params) { this.whereParams = params; }
 }
