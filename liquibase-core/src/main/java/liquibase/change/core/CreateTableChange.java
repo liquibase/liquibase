@@ -21,6 +21,8 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Creates a new table.
  */
@@ -202,7 +204,7 @@ public class CreateTableChange extends AbstractTableChange implements ChangeWith
     }
 
     @Override
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(description = "Column definitions", requiredForDatabase = ALL)
     public List<ColumnConfig> getColumns() {
         if (columns == null) {
             return new ArrayList<>();
