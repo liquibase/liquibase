@@ -56,13 +56,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return false;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
+    public String getCatalogName() { return catalogName; }
 
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
+    public void setCatalogName(String catalogName) { this.catalogName = catalogName; }
 
     public String getSchemaName() {
         return schemaName;
@@ -72,7 +68,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(exampleValue = "new_customer")
+    @DatabaseChangeProperty( exampleValue = "new_customer", supportsDatabase = {"mssql"},
+            description ="Name of the procedure. Required if <code>replaceIfExists</code> = true")
     public String getProcedureName() {
         return procedureName;
     }
@@ -111,13 +108,14 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    @DatabaseChangeProperty(
-        exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
-                "    IS\n" +
-                "    BEGIN\n" +
-                "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
-                "    END;",
-        serializationType = SerializationType.DIRECT_VALUE)
+    @DatabaseChangeProperty( description = "The SQL creating the procedure. Either this or the <code>path</code> " +
+            "attribute needs to be defined.",
+            exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
+                    "    IS\n" +
+                    "    BEGIN\n" +
+                    "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
+                    "    END;",
+            serializationType = SerializationType.DIRECT_VALUE)
     /**
      * @deprecated Use getProcedureText() instead
      */
@@ -130,7 +128,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Deprecated
     public void setProcedureBody(String procedureText) {
-        this.procedureText = procedureText;
+        setProcedureText(procedureText);
     }
 
     @DatabaseChangeProperty(isChangeProperty = false)
@@ -154,6 +152,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.dbms = dbms;
     }
 
+    @DatabaseChangeProperty(isChangeProperty = false, description = "TODO: NOT USED!  NESTED_OBJECT in XSD")
     public String getComments() {
         return comments;
     }
@@ -162,7 +161,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.comments = comments;
     }
 
-    @DatabaseChangeProperty
+    @DatabaseChangeProperty(description = "If the stored procedure defined by <code>procedureName</code> already " +
+            "exits alter it instead of creating it.")
     public Boolean getReplaceIfExists() {
         return replaceIfExists;
     }
