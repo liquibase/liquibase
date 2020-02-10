@@ -266,7 +266,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
      * Returns true if the given path is a compressed file.
      */
     protected boolean isCompressedFile(Path path) {
-        return path != null && (path.toString().startsWith("jar:") || path.toString().toLowerCase().endsWith(".jar") || path.toString().toLowerCase().endsWith(".zip"));
+        return path != null && path.toFile().exists() && (path.toString().startsWith("jar:") || path.toString().toLowerCase().endsWith(".jar") || path.toString().toLowerCase().endsWith(".zip"));
     }
 
     @Override
