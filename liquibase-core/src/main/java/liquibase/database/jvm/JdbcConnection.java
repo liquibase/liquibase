@@ -29,7 +29,7 @@ public class JdbcConnection implements DatabaseConnection {
         try {
             database.addReservedWords(Arrays.asList(this.getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
         } catch (SQLException e) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error fetching reserved words list from JDBC driver", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error fetching reserved words list from JDBC driver", e);
         }
 
 

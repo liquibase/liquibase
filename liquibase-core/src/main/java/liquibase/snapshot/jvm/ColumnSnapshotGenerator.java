@@ -188,7 +188,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     int rsOrdinal = row.getInt("ORDINAL_POSITION");
                     if (rsOrdinal != currentOrdinal) {
                         log.fine(
-                                LogType.LOG, String.format(
+                                String.format(
                                         "Repairing ORDINAL_POSITION with gaps for table=%s, column name=%s, " +
                                                 "bad ordinal=%d, new ordinal=%d",
                                         relation.getName(),
@@ -247,7 +247,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     snapshot.setScratchData("autoIncrementColumns", autoIncrementColumns);
                 } catch (DatabaseException e) {
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not read identity information", e);
+                    Scope.getCurrentScope().getLog(getClass()).info("Could not read identity information", e);
                 }
             }
             if ((column.getRelation() != null) && (column.getSchema() != null)) {
@@ -302,7 +302,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else if (nullable == DatabaseMetaData.columnNullable) {
                     column.setNullable(true);
                 } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Unknown nullable state for column "
+                    Scope.getCurrentScope().getLog(getClass()).info("Unknown nullable state for column "
                             + column.toString() + ". Assuming nullable");
                     column.setNullable(true);
                 }
@@ -520,7 +520,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 enumClause = enumClause.replaceFirst(", $", "");
                 return new DataType(columnTypeName + "(" + enumClause + ")");
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Error fetching enum values", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Error fetching enum values", e);
             }
         }
 

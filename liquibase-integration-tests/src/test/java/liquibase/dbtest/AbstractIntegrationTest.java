@@ -22,6 +22,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogType;
@@ -209,7 +210,9 @@ public abstract class AbstractIntegrationTest {
             try {
                 if (database.getConnection() != null) {
                     String sql = "DROP TABLE " + database.getDatabaseChangeLogLockTableName();
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.writeSqlWillRun(sql);
+                    }
                     ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
                             sql
                     );
@@ -413,7 +416,9 @@ public abstract class AbstractIntegrationTest {
                 "tag VARCHAR(255)" + nullableKeyword + ", " +
                 "liquibase VARCHAR(10)" + nullableKeyword + ", " +
                 "PRIMARY KEY (id, author, filename))";
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
+        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+            listener.writeSqlWillRun(sql);
+        }
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
         boolean savedAcSetting = conn.getAutoCommit();
@@ -481,12 +486,14 @@ public abstract class AbstractIntegrationTest {
                                     database.getLiquibaseSchemaName(),
                                     database.getDatabaseChangeLogTableName()
                             );
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.writeSqlWillRun(sql);
+                    }
                     statement.execute(sql);
                     database.commit();
                 }
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangelog table");
+                Scope.getCurrentScope().getLog(getClass()).warning("Probably expected error dropping databasechangelog table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -509,12 +516,14 @@ public abstract class AbstractIntegrationTest {
                                     database.getLiquibaseSchemaName(),
                                     database.getDatabaseChangeLogLockTableName()
                             );
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.writeSqlWillRun(sql);
+                    }
                     statement.execute(sql);
                     database.commit();
                 }
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangeloglock table");
+                Scope.getCurrentScope().getLog(getClass()).warning("Probably expected error dropping databasechangeloglock table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -727,7 +736,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             liquibase = createLiquibase(tempFile.getName());
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "updating from "+tempFile.getCanonicalPath());
+            Scope.getCurrentScope().getLog(getClass()).info("updating from "+tempFile.getCanonicalPath());
             try {
                 liquibase.update(this.contexts);
             } catch (LiquibaseException e) {
@@ -950,7 +959,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts);
 
         Path outputDir = tempDirectory.newFolder().toPath().normalize();
-        logger.fine(LogType.LOG, "Database documentation will be written to this temporary folder: " + outputDir);
+        logger.fine("Database documentation will be written to this temporary folder: " + outputDir);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());

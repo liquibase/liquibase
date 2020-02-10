@@ -231,7 +231,7 @@ public class DatabaseFactory {
             LOG.fine(LogType.LOG, "Properties:");
             for (Map.Entry entry : driverProperties.entrySet()) {
                 if (entry.getKey().toString().toLowerCase().contains("password")) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'**********'");
+                    Scope.getCurrentScope().getLog(getClass()).fine("Key:'" + entry.getKey().toString() + "' Value:'**********'");
                 } else {
                     LOG.fine(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
                 }

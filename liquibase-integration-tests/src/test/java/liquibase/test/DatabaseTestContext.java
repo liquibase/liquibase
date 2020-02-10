@@ -1,16 +1,18 @@
 package liquibase.test;
 
 import liquibase.Scope;
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.example.ExampleCustomDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
+import liquibase.listener.SqlListener;
 import liquibase.logging.LogType;
 import liquibase.resource.ResourceAccessor;
-import liquibase.database.core.MockDatabase;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -24,24 +26,24 @@ public class DatabaseTestContext {
     private static final String TEST_DATABASES_PROPERTY = "test.databases";
     private static DatabaseTestContext instance = new DatabaseTestContext();
     private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
-    /* @todo Extract all remaining connection string examples into liquibase.integrationtest.properties, then delete this code block. */
-    /*
-            new DatabaseTestURL("Cache","jdbc:Cache://"+AbstractIntegrationTest.getDatabaseServerHostname("Cache")+":1972/liquibase"),
-            new DatabaseTestURL("DB2","jdbc:db2://"+AbstractIntegrationTest.getDatabaseServerHostname("DB2")+":50000/liquibas"),
-            new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
-            new DatabaseTestURL("FireBird","jdbc:firebirdsql:"+AbstractIntegrationTest.getDatabaseServerHostname("Firebird")+"/3050:c:\\firebird\\liquibase.fdb"),
-            new DatabaseTestURL("H2","jdbc:h2:mem:liquibase"),
-            new DatabaseTestURL("Hsql","jdbc:hsqldb:mem:liquibase"),
-            new DatabaseTestURL("MssqlJtds","jdbc:jtds:sqlserver://"+AbstractIntegrationTest.getDatabaseServerHostname("MSSQL")+";databaseName=liquibase"),
-//            "jdbc:sqlserver://localhost;databaseName=liquibase",
-            new DatabaseTestURL("MySQL","jdbc:mysql://"+AbstractIntegrationTest.getDatabaseServerHostname("mysql")+"/liquibase"),
-            new DatabaseTestURL("Oracle","jdbc:oracle:thin:@"+AbstractIntegrationTest.getDatabaseServerHostname("oracle")+"/XE"),
-//            "jdbc:jtds:sybase://localhost/nathan:5000",
-//            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
-            new DatabaseTestURL("SAPDB","jdbc:sapdb://"+AbstractIntegrationTest.getDatabaseServerHostname("sapdb")+"/liquibas"),
-            new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
-            new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
-            */
+            /* @todo Extract all remaining connection string examples into liquibase.integrationtest.properties, then delete this code block. */
+            /*
+                    new DatabaseTestURL("Cache","jdbc:Cache://"+AbstractIntegrationTest.getDatabaseServerHostname("Cache")+":1972/liquibase"),
+                    new DatabaseTestURL("DB2","jdbc:db2://"+AbstractIntegrationTest.getDatabaseServerHostname("DB2")+":50000/liquibas"),
+                    new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
+                    new DatabaseTestURL("FireBird","jdbc:firebirdsql:"+AbstractIntegrationTest.getDatabaseServerHostname("Firebird")+"/3050:c:\\firebird\\liquibase.fdb"),
+                    new DatabaseTestURL("H2","jdbc:h2:mem:liquibase"),
+                    new DatabaseTestURL("Hsql","jdbc:hsqldb:mem:liquibase"),
+                    new DatabaseTestURL("MssqlJtds","jdbc:jtds:sqlserver://"+AbstractIntegrationTest.getDatabaseServerHostname("MSSQL")+";databaseName=liquibase"),
+        //            "jdbc:sqlserver://localhost;databaseName=liquibase",
+                    new DatabaseTestURL("MySQL","jdbc:mysql://"+AbstractIntegrationTest.getDatabaseServerHostname("mysql")+"/liquibase"),
+                    new DatabaseTestURL("Oracle","jdbc:oracle:thin:@"+AbstractIntegrationTest.getDatabaseServerHostname("oracle")+"/XE"),
+        //            "jdbc:jtds:sybase://localhost/nathan:5000",
+        //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
+                    new DatabaseTestURL("SAPDB","jdbc:sapdb://"+AbstractIntegrationTest.getDatabaseServerHostname("sapdb")+"/liquibas"),
+                    new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
+                    new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
+                    */
     };
     private Set<Database> availableDatabases = new HashSet<Database>();
     private Set<Database> allDatabases;
@@ -73,8 +75,7 @@ public class DatabaseTestContext {
             // Close the JDBC connection
             databaseConnection.getUnderlyingConnection().close();
         } catch (SQLException e) {
-            Scope.getCurrentScope().getLog(DatabaseTestContext.class).warning(LogType.USER_MESSAGE,
-                "Could not close the following connection: " + databaseConnection.getURL(), e);
+            Scope.getCurrentScope().getLog(DatabaseTestContext.class).warning("Could not close the following connection: " + databaseConnection.getURL(), e);
         }
     }
 
@@ -103,7 +104,7 @@ public class DatabaseTestContext {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
             if (connection == null) {
                 return null;
-            } else if (connection.getUnderlyingConnection().isClosed()){
+            } else if (connection.getUnderlyingConnection().isClosed()) {
                 connectionsByUrl.put(url, openDatabaseConnection(url, username, password));
             }
             return connectionsByUrl.get(url);
@@ -126,7 +127,7 @@ public class DatabaseTestContext {
             }
         }
 
-        DatabaseConnection connection = openDatabaseConnection(url, username,password);
+        DatabaseConnection connection = openDatabaseConnection(url, username, password);
         if (connection == null) {
             return null;
         }
@@ -141,13 +142,17 @@ public class DatabaseTestContext {
         try {
             if (url.startsWith("jdbc:hsql")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA";
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                    listener.writeSqlWillRun(sql);
+                }
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             } else if (url.startsWith("jdbc:sqlserver")
-                || url.startsWith("jdbc:postgresql")
-                || url.startsWith("jdbc:h2")) {
+                    || url.startsWith("jdbc:postgresql")
+                    || url.startsWith("jdbc:h2")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA;
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                    listener.writeSqlWillRun(sql);
+                }
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             }
             if (!databaseConnection.getAutoCommit()) {
@@ -195,7 +200,7 @@ public class DatabaseTestContext {
     }
 
     public DatabaseConnection openDatabaseConnection(String url,
-        String username, String password) throws Exception {
+                                                     String username, String password) throws Exception {
 
         JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
         final Driver driver;
@@ -241,7 +246,7 @@ public class DatabaseTestContext {
             List<Database> toRemove = new ArrayList<Database>();
             for (Database database : allDatabases) {
                 if ((database instanceof SQLiteDatabase) //todo: re-enable sqlite testing
-                    || (database instanceof MockDatabase) || (database instanceof ExampleCustomDatabase)) {
+                        || (database instanceof MockDatabase) || (database instanceof ExampleCustomDatabase)) {
                     toRemove.add(database);
                 }
             }
@@ -253,14 +258,14 @@ public class DatabaseTestContext {
     public Set<Database> getAvailableDatabases() throws Exception {
         if (availableDatabases.isEmpty()) {
             for (DatabaseConnection conn : getAvailableConnections()) {
-                    availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+                availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
             }
         }
         //Check to don't return closed databases
-        Iterator<Database> iter=availableDatabases.iterator();
-        while(iter.hasNext()) {
-            Database database=iter.next();
-            if(database.getConnection().isClosed())
+        Iterator<Database> iter = availableDatabases.iterator();
+        while (iter.hasNext()) {
+            Database database = iter.next();
+            if (database.getConnection().isClosed())
                 iter.remove();
         }
 
@@ -282,10 +287,10 @@ public class DatabaseTestContext {
         }
 
         //Check to don't return closed connections
-        Iterator<DatabaseConnection> iter=availableConnections.iterator();
-        while(iter.hasNext()) {
-            DatabaseConnection connection=iter.next();
-            if(connection.isClosed())
+        Iterator<DatabaseConnection> iter = availableConnections.iterator();
+        while (iter.hasNext()) {
+            DatabaseConnection connection = iter.next();
+            if (connection.isClosed())
                 iter.remove();
         }
 
@@ -298,7 +303,7 @@ public class DatabaseTestContext {
 
     public String getTestUrl(Database database) throws Exception {
         for (DatabaseTestURL turl : getTestUrls()) {
-            String url=turl.getUrl();
+            String url = turl.getUrl();
             if (database.getDefaultDriver(url) != null) {
                 return url;
             }

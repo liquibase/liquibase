@@ -46,7 +46,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -203,7 +203,7 @@ public class Main {
                                 LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                                 if (result.code != 0) {
                                     String allMessages = String.join("\n", result.messages);
-                                    log.warning(LogType.USER_MESSAGE, allMessages);
+                                    Scope.getCurrentScope().getUI().sendErrorMessage(allMessages);
                                 }
                             }
                             stream.println(licenseService.getLicenseInfo());
@@ -235,8 +235,8 @@ public class Main {
                     try {
                         main.parseOptions(args);
                     } catch (CommandLineParsingException e) {
-                        log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
-                        log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
+                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("how.to.display.help"));
                         throw e;
                     }
 
@@ -244,7 +244,7 @@ public class Main {
                     if (licenseService != null) {
 
                         if (main.liquibaseProLicenseKey == null) {
-                            log.info(LogType.LOG, "No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
+                            Scope.getCurrentScope().getLog(getClass()).info("No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
                         } else {
                             Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                             LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
@@ -262,7 +262,7 @@ public class Main {
                 if (licenseService.daysTilExpiration() < 0) {
                     main.liquibaseProLicenseValid = false;
                 }
-                        log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
+                        Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                     }
 
             if (main.commandParams.contains("--help") && main.command.startsWith("rollbackOneChangeSet")) {
@@ -275,7 +275,7 @@ public class Main {
                     }
             }
 
-                    log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
+                    Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
                     main.applyDefaults();
                     Scope.child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {
@@ -305,13 +305,13 @@ public class Main {
                             ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                         } else {
                             if (main.outputsLogMessages) {
-                                log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
                             } else {
-                                log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)));
-                                log.severe(LogType.USER_MESSAGE, coreBundle.getString("for.more.information.use.loglevel.flag"));
+                                Scope.getCurrentScope().getUI().sendMessage((String.format(coreBundle.getString("unexpected.error"), message)));
+                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
 
                                 //send it to the LOG in case we're using logFile
-                                log.severe(LogType.LOG, (String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                Scope.getCurrentScope().getLog(getClass()).warning((String.format(coreBundle.getString("unexpected.error"), message)), e);
                             }
                         }
                     } catch (IllegalFormatException e1) {

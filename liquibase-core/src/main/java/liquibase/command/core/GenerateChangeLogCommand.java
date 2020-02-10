@@ -53,7 +53,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         String changeLogFile = StringUtil.trimToNull(getChangeLogFile());
         if (changeLogFile.toLowerCase().endsWith(".sql")) {
           System.out.println("\n" + INFO_MESSAGE + "\n");
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "\n" + INFO_MESSAGE + "\n");
+            Scope.getCurrentScope().getLog(getClass()).info("\n" + INFO_MESSAGE + "\n");
         }
 
         SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());

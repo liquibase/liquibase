@@ -137,7 +137,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
                 outputWriter.close();
             }
             catch (IOException ioe) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, String.format("Unable to close output file"));
+                Scope.getCurrentScope().getLog(getClass()).info(String.format("Unable to close output file"));
             }
             finally {
             }
@@ -152,9 +152,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         try {
             fileOut = new FileOutputStream(outputFile, false);
         } catch (IOException e) {
-            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, String.format(
-                    coreBundle.getString("could.not.create.output.file"),
-            outputFile));
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format(coreBundle.getString("could.not.create.output.file"), outputFile));
             throw e;
         }
         return fileOut;

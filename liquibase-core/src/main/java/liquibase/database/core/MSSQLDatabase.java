@@ -193,7 +193,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         if (isRealSqlServerConnection && (majorVersion < MSSQL_SERVER_VERSIONS.MSSQL2008)) {
             Scope.getCurrentScope().getLog(getClass()).warning(
-                LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your " +
+                String.format("Your SQL Server major version (%d) seems to indicate that your " +
                         "software is older than SQL Server 2008. Unfortunately, this is not supported, and this " +
                         "connection cannot be used.",
                  majorVersion));
@@ -419,7 +419,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from MSSQL", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
         return (caseSensitive != null) && caseSensitive;
@@ -564,7 +564,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 }
             } catch (SQLException | DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                    LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                    "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
@@ -600,7 +600,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     .queryForObject(new RawSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Could not determine engine edition", e);
+            Scope.getCurrentScope().getLog(getClass()).warning("Could not determine engine edition", e);
         }
         return "Unknown";
     }
