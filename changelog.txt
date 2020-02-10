@@ -1,6 +1,15 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.5 (2020.2.6)
+
+- New graphical installer for Windows and Mac
+- New examples directory with sample xml and sql changelogs and test h2 database
+- [Pro] New RollbackOneChangeSet and RollbackOneChangeSetSQL commands
+- Updated default Mysql driver to com.mysql.cj.jdbc.Driver
+- Removed non-jdbc compatible "SET DEFINE OFF" from generated SQL on Oracle
+- Fixed --excludeObjects/--includeObjects arguments in diff
+
 Changes in version 3.8.5 (2020.1.13)
 
 - Fixes issue in which Liquibase did not add `DESC` to an `id` column
