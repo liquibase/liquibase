@@ -101,7 +101,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         {
             
             if (propertiesStream == null) {
-                log.info(LogType.LOG, "Could not open properties file " + property.get("file"));
+                log.info("Could not open properties file " + property.get("file"));
             } else {
                 props.load(propertiesStream);
 

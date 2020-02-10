@@ -537,7 +537,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                 .getFailOnError()) {
-                LOG.info(LogType.LOG, "Change set " + getChangeSet().toString(false) +
+                LOG.info("Change set " + getChangeSet().toString(false) +
                          " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {
@@ -593,7 +593,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new DatabaseException(e);
         }
         if (snapshotOfTable == null) {
-            LOG.warning(LogType.LOG, String.format(
+            LOG.warning(String.format(
                     coreBundle.getString("could.not.snapshot.table.to.get.the.missing.column.type.information"),
                     database.escapeTableName(
                             targetTable.getSchema().getCatalogName(),
@@ -635,7 +635,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             LoadDataColumnConfig columnConfig = entry.getValue();
             DataType dataType = tableColumns.get(entry.getKey()).getType();
             if (dataType == null) {
-                LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.find.load.data.type"),
+                LOG.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
                     columnConfig.toString(), snapshotOfTable.toString()));
                 columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
             } else {
@@ -644,7 +644,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 if (liquibaseDataType != null) {
                     columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
                 } else {
-                    LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.convert.load.data.type"),
+                    LOG.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
                         columnConfig.toString(), snapshotOfTable.toString(), dataType.toString()));
                 }
             }

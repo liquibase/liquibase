@@ -102,7 +102,7 @@ public class StandardLockService implements LockService {
                 executor.execute(new CreateDatabaseChangeLogLockTableStatement());
                 database.commit();
                 Scope.getCurrentScope().getLog(getClass()).fine(
-                        LogType.LOG, "Created database lock table with name: " +
+                        "Created database lock table with name: " +
                                 database.escapeTableName(
                                         database.getLiquibaseCatalogName(),
                                         database.getLiquibaseSchemaName(),
@@ -112,7 +112,7 @@ public class StandardLockService implements LockService {
             } catch (DatabaseException e) {
                 if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
                     //hit a race condition where the table got created by another node.
-                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Database lock table already appears to exist " +
+                    Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
                             "due to exception: " + e.getMessage() + ". Continuing on");
                 }  else {
                     throw e;
@@ -212,7 +212,7 @@ public class StandardLockService implements LockService {
         while (!locked && (new Date().getTime() < timeToGiveUp)) {
             locked = acquireLock();
             if (!locked) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Waiting for changelog lock....");
+                Scope.getCurrentScope().getLog(getClass()).info("Waiting for changelog lock....");
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
@@ -263,7 +263,7 @@ public class StandardLockService implements LockService {
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
                 if ((rowsUpdated == -1) && (database instanceof MSSQLDatabase)) {
                     Scope.getCurrentScope().getLog(getClass()).fine(
-                            LogType.LOG, "Database did not return a proper row count (Might have NOCOUNT enabled)"
+                            "Database did not return a proper row count (Might have NOCOUNT enabled)"
                     );
                     database.rollback();
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(
@@ -284,7 +284,7 @@ public class StandardLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, coreBundle.getString("successfully.acquired.change.log.lock"));
+                Scope.getCurrentScope().getLog(getClass()).info(coreBundle.getString("successfully.acquired.change.log.lock"));
 
                 hasChangeLogLock = true;
 
@@ -319,7 +319,7 @@ public class StandardLockService implements LockService {
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
                 if ((updatedRows == -1) && (database instanceof MSSQLDatabase)) {
                     Scope.getCurrentScope().getLog(getClass()).fine(
-                            LogType.LOG, "Database did not return a proper row count (Might have NOCOUNT enabled.)"
+                            "Database did not return a proper row count (Might have NOCOUNT enabled.)"
                     );
                     database.rollback();
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(
@@ -360,7 +360,7 @@ public class StandardLockService implements LockService {
                 hasChangeLogLock = false;
 
                 database.setCanCacheLiquibaseTableInfo(false);
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Successfully released change log lock");
+                Scope.getCurrentScope().getLog(getClass()).info("Successfully released change log lock");
                 database.rollback();
             } catch (DatabaseException e) {
             }

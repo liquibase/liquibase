@@ -83,7 +83,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             lockService.waitForLock();
 
             for (CatalogAndSchema schema : schemas) {
-                log.info(LogType.LOG, "Dropping Database Objects in schema: " + schema);
+                log.info("Dropping Database Objects in schema: " + schema);
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }

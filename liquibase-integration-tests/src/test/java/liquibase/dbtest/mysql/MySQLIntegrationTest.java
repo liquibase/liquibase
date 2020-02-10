@@ -96,7 +96,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
                                                                                                          ")"));
         } catch (DatabaseException e) {
             if (e.getCause() instanceof SQLSyntaxErrorException) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "MySQL returned DatabaseException", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("MySQL returned DatabaseException", e);
                 assumeTrue("MySQL seems to run in strict mode (no datetime literals with 0000-00-00 allowed). " + "Cannot run this test", false);
                 
             } else {

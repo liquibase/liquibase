@@ -279,7 +279,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
-            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, message);
+            Scope.getCurrentScope().getLog(getClass()).warning(message);
         }
 
         if (!validatingVisitor.validationPassed()) {
@@ -376,7 +376,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         resourceComparator = (Comparator<String>) Class.forName(resourceComparatorDef).getConstructor().newInstance();
                     } catch (ReflectiveOperationException e) {
                         //take default comparator
-                        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "no resourceComparator defined - taking default " +
+                        Scope.getCurrentScope().getLog(getClass()).info("no resourceComparator defined - taking default " +
                          "implementation");
                         resourceComparator = getStandardChangeLogComparator();
                     }
@@ -432,7 +432,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         Properties props = new Properties();
                         InputStream propertiesStream = resourceAccessor.openStream(null, file);
                         if (propertiesStream == null) {
-                            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not open properties file " + file);
+                            Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
                         } else {
                             props.load(propertiesStream);
 
@@ -488,8 +488,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (!(pathName.endsWith("/"))) {
                 pathName = pathName + '/';
             }
-            LOG.fine(LogType.LOG, "includeAll for " + pathName);
-            LOG.fine(LogType.LOG, "Using file opener for includeAll: " + resourceAccessor.toString());
+            LOG.fine("includeAll for " + pathName);
+            LOG.fine("Using file opener for includeAll: " + resourceAccessor.toString());
 
             String relativeTo = null;
             if (isRelativeToChangelogFile) {
@@ -519,7 +519,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             for (String path : resources) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Reading resource: " + path);
+                Scope.getCurrentScope().getLog(getClass()).info("Reading resource: " + path);
                 include(path, false, resourceAccessor, includeContexts, labelExpression, ignore, false);
             }
         } catch (Exception e) {
@@ -579,7 +579,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
             if (matchesFileExtension || logEveryUnknownFileFormat) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        LogType.LOG, "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
+                        "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
                 );
             }
             return false;

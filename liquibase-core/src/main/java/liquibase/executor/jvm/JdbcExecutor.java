@@ -1,7 +1,6 @@
 package liquibase.executor.jvm;
 
 import liquibase.Scope;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -10,6 +9,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
+import liquibase.listener.SqlListener;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.sql.CallableSql;
@@ -238,7 +238,9 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                Scope.getCurrentScope().getLog(getClass()).fine(LogType.WRITE_SQL, sqlToExecute[0]);
+                for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                    listener.writeSqlWillRun(sqlToExecute[0]);
+                }
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -274,7 +276,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, message);
+        Scope.getCurrentScope().getLog(getClass()).fine(message);
     }
 
     private void executeDb2ZosComplexStatement(SqlStatement sqlStatement) throws DatabaseException {
@@ -354,7 +356,10 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.info(LogType.WRITE_SQL, String.format("%s", statement));
+                for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                    listener.writeSqlWillRun(String.format("%s", statement));
+                }
+
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -426,11 +431,16 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.READ_SQL, sqlToExecute[0]);
 
-                rs = stmt.executeQuery(sqlToExecute[0]);
-                ResultSet rsToUse = rs;
-                return rse.extractData(rsToUse);
+                try {
+                    rs = stmt.executeQuery(sqlToExecute[0]);
+                    ResultSet rsToUse = rs;
+                    return rse.extractData(rsToUse);
+                } finally {
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.readSqlWillRun(sqlToExecute[0]);
+                    }
+                }
             }
             finally {
                 if (rs != null) {

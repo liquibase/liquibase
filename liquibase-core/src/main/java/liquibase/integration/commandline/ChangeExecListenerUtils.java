@@ -27,7 +27,7 @@ public final class ChangeExecListenerUtils {
         if (changeExecListenerClass != null) {
             Logger logger = Scope.getCurrentScope().getLog(ChangeExecListenerUtils.class);
 
-            logger.fine(LogType.LOG, "Setting ChangeExecListener: " + changeExecListenerClass);
+            logger.fine("Setting ChangeExecListener: " + changeExecListenerClass);
 
             ClassLoader classLoader = Scope.getCurrentScope().getClassLoader();
             Class<?> clazz = Class.forName(changeExecListenerClass, true, classLoader);
@@ -35,25 +35,25 @@ public final class ChangeExecListenerUtils {
             Properties properties = loadProperties(changeExecListenerPropertiesFile);
             Constructor<?> cons = getConstructor(clazz, Database.class, Properties.class);
             if (cons != null) {
-                logger.fine(LogType.LOG, "Create " + clazz.getSimpleName() + "(Database, Properties)");
+                logger.fine("Create " + clazz.getSimpleName() + "(Database, Properties)");
                 changeExecListener = (ChangeExecListener) cons.newInstance(database, properties);
             } else {
                 cons = getConstructor(clazz, Properties.class, Database.class);
                 if (cons != null) {
-                    logger.fine(LogType.LOG, "Create " + clazz.getSimpleName() + "(Properties, Database)");
+                    logger.fine("Create " + clazz.getSimpleName() + "(Properties, Database)");
                     changeExecListener = (ChangeExecListener) cons.newInstance(properties, database);
                 } else {
                     cons = getConstructor(clazz, Database.class);
                     if (cons != null) {
-                        logger.fine(LogType.LOG, "Create " + clazz.getSimpleName() + "(Database)");
+                        logger.fine("Create " + clazz.getSimpleName() + "(Database)");
                         changeExecListener = (ChangeExecListener) cons.newInstance(database);
                     } else {
                         cons = getConstructor(clazz, Properties.class);
                         if (cons != null) {
-                            logger.fine(LogType.LOG, "Create " + clazz.getSimpleName() + "(Properties)");
+                            logger.fine("Create " + clazz.getSimpleName() + "(Properties)");
                             changeExecListener = (ChangeExecListener) cons.newInstance(properties);
                         } else {
-                            logger.fine(LogType.LOG, "Create " + clazz.getSimpleName() + "()");
+                            logger.fine("Create " + clazz.getSimpleName() + "()");
                             changeExecListener = (ChangeExecListener) clazz.getConstructor().newInstance();
                         }
                     }

@@ -179,13 +179,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if ((setting != null) && "on".equals(setting)) {
-                        LOG.warning(LogType.LOG, "EnterpriseDB " + conn.getURL() + " does not store DATE columns. Instead, it auto-converts " +
+                        LOG.warning("EnterpriseDB " + conn.getURL() + " does not store DATE columns. Instead, it auto-converts " +
                                 "them " +
                                 "to TIMESTAMPs. (edb_redwood_date=true)");
                     }
                 }
             } catch (SQLException | DatabaseException e) {
-                LOG.info(LogType.LOG, "Cannot check pg_settings", e);
+                LOG.info("Cannot check pg_settings", e);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
@@ -331,7 +331,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             minor = getDatabaseMinorVersion();
         } catch (DatabaseException x) {
             Scope.getCurrentScope().getLog(getClass()).warning(
-                    LogType.LOG, "Unable to determine exact database server version"
+                    "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;

@@ -110,7 +110,7 @@ public class TimestampType extends DateTimeType {
             }
             int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
             if (maxFractionalDigits < fractionalDigits) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, String.format(
+                Scope.getCurrentScope().getLog(getClass()).warning(String.format(
                         "A timestamp datatype with %d fractional digits was requested, but the DBMS %s only supports " +
                                 "%d digits. Because of this, the number of digits was reduced to %d.",
                         fractionalDigits, database.getDatabaseProductName(), maxFractionalDigits, maxFractionalDigits)

@@ -28,12 +28,12 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
 
     @Override
     public void execute(Database database) throws CustomChangeException {
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Hello "+getHelloTo());
+        Scope.getCurrentScope().getLog(getClass()).info("Hello "+getHelloTo());
     }
 
     @Override
     public void rollback(Database database) throws CustomChangeException, RollbackImpossibleException {
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Goodbye "+getHelloTo());
+        Scope.getCurrentScope().getLog(getClass()).info("Goodbye "+getHelloTo());
     }
 
     @Override

@@ -249,7 +249,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                 return schemaName.trim();
             }
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting connection schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting connection schema", e);
         }
         return null;
     }

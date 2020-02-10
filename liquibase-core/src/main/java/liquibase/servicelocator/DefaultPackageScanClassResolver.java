@@ -61,7 +61,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             classLoaders = new HashSet<ClassLoader>();
             ClassLoader ccl = Thread.currentThread().getContextClassLoader();
             if (ccl != null) {
-                log.fine(LogType.LOG, "The thread context class loader: " + ccl + "  is used to load the class");
+                log.fine("The thread context class loader: " + ccl + "  is used to load the class");
                 classLoaders.add(ccl);
             }
             classLoaders.add(DefaultPackageScanClassResolver.class.getClassLoader());
@@ -81,7 +81,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             return Collections.EMPTY_SET;
         }
 
-        log.fine(LogType.LOG, "Searching for implementations of " + parent.getName() + " in packages: " + Arrays.asList(packageNames));
+        log.fine("Searching for implementations of " + parent.getName() + " in packages: " + Arrays.asList(packageNames));
 
         PackageScanFilter test = getCompositeFilter(new AssignableToPackageScanFilter(parent));
         Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
@@ -89,7 +89,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             find(test, pkg, classes);
         }
 
-        log.fine(LogType.LOG, "Found: " + classes);
+        log.fine("Found: " + classes);
 
         return classes;
     }
@@ -106,7 +106,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             find(filter, pkg, classes);
         }
 
-        log.fine(LogType.LOG, "Found: " + classes);
+        log.fine("Found: " + classes);
 
         return classes;
     }
@@ -127,16 +127,16 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     }
 
     protected void findAllClasses(String packageName, ClassLoader loader) {
-        log.fine(LogType.LOG, "Searching for all classes in package: " + packageName + " using classloader: " + loader.getClass().getName());
+        log.fine("Searching for all classes in package: " + packageName + " using classloader: " + loader.getClass().getName());
 
         Enumeration<URL> urls;
         try {
             urls = getResources(loader, packageName);
             if (!urls.hasMoreElements()) {
-                log.fine(LogType.LOG, "No URLs returned by classloader");
+                log.fine("No URLs returned by classloader");
             }
         } catch (IOException ioe) {
-            log.warning(LogType.LOG, "Cannot read package: " + packageName, ioe);
+            log.warning("Cannot read package: " + packageName, ioe);
             return;
         }
 
@@ -144,7 +144,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             URL url = null;
             try {
                 url = urls.nextElement();
-                log.fine(LogType.LOG, "URL from classloader: " + url);
+                log.fine("URL from classloader: " + url);
 
                 url = customResourceLocator(url);
 
@@ -159,7 +159,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     urlPath = "vfszip:"+urlPath;
                 }
 
-                log.fine(LogType.LOG, "Decoded urlPath: " + urlPath + " with protocol: " + url.getProtocol());
+                log.fine("Decoded urlPath: " + urlPath + " with protocol: " + url.getProtocol());
 
                 // If it's a file in a directory, trim the stupid file: spec
                 if (urlPath.startsWith("file:")) {
@@ -182,14 +182,14 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
                 // osgi bundles should be skipped
                 if (url.toString().startsWith("bundle:") || urlPath.startsWith("bundle:")) {
-                    log.fine(LogType.LOG, "It's a virtual osgi bundle, skipping");
+                    log.fine("It's a virtual osgi bundle, skipping");
                     continue;
                 }
 
                 // manifold classes should be skipped (no physical jar file present)
                 // see http://manifold.systems/ for details about manifold
                 if (url.toString().startsWith("manifoldclass:") || urlPath.startsWith("manifoldclass:")) {
-                    log.fine(LogType.LOG, "It's a manifold classes url, skipping");
+                    log.fine("It's a manifold classes url, skipping");
                     continue;
                 }
 
@@ -215,7 +215,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
                 File file = new File(urlPath);
                 if (file.isDirectory()) {
-                    log.fine(LogType.LOG, "Loading from directory using file: " + file);
+                    log.fine("Loading from directory using file: " + file);
                     loadImplementationsInDirectory(packageName, file, loader);
                 } else {
                     InputStream stream;
@@ -224,37 +224,37 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                         // load resources using http/https
                         // sonic ESB requires to be loaded using a regular URLConnection
                         URL urlStream = new URL(urlPath);
-                        log.fine(LogType.LOG, "Loading from jar using "+urlStream.getProtocol()+": " + urlPath);
+                        log.fine("Loading from jar using "+urlStream.getProtocol()+": " + urlPath);
                         URLConnection con = urlStream.openConnection();
                         // disable cache mainly to avoid jar file locking on Windows
                         con.setUseCaches(false);
                         stream = con.getInputStream();
                     } else {
-                        log.fine(LogType.LOG, "Loading from jar using file: " + file);
+                        log.fine("Loading from jar using file: " + file);
                         stream = new FileInputStream(file);
                     }
 
                     try {
                         loadImplementationsInJar(packageName, stream, loader, urlPath, null);
                     } catch (IOException ioe) {
-                        log.warning(LogType.LOG, "Cannot search jar file '" + urlPath + "' for classes due to an IOException: " + ioe.getMessage(), ioe);
+                        log.warning("Cannot search jar file '" + urlPath + "' for classes due to an IOException: " + ioe.getMessage(), ioe);
                     } finally {
                         stream.close();
                     }
                 }
             } catch (IOException e) {
                 // use debug logging to avoid being to noisy in logs
-                log.fine(LogType.LOG, "Cannot read entries in url: " + url, e);
+                log.fine("Cannot read entries in url: " + url, e);
             }
         }
     }
 
     protected void findInAllClasses(PackageScanFilter test, String packageName, Set<Class<?>> classes) {
-        log.fine(LogType.LOG, "Searching for: " + test + " in package: " + packageName );
+        log.fine("Searching for: " + test + " in package: " + packageName );
 
         Set<Class> packageClasses = getFoundClasses(packageName);
         if (packageClasses == null) {
-            log.fine(LogType.LOG, "No classes found in package: " + packageName );
+            log.fine("No classes found in package: " + packageName );
             return;
         }
         for (Class type : packageClasses) {
@@ -312,7 +312,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
      * @throws IOException is thrown by the classloader
      */
     protected Enumeration<URL> getResources(ClassLoader loader, String packageName) throws IOException {
-        log.fine(LogType.LOG, "Getting resource URL for package: " + packageName + " with classloader: " + loader);
+        log.fine("Getting resource URL for package: " + packageName + " with classloader: " + loader);
 
         // If the URL is a jar, the URLClassloader.getResources() seems to require a trailing slash.  The
         // trailing slash is harmless for other URLs
@@ -377,7 +377,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         try {
             String externalName = className.substring(0, className.indexOf('.')).replace('/', '.');
             Class<?> type = classLoader.loadClass(externalName);
-            log.fine(LogType.LOG, "Loaded the class: " + type + " in classloader: " + classLoader);
+            log.fine("Loaded the class: " + type + " in classloader: " + classLoader);
 
             if (Modifier.isAbstract(type.getModifiers()) || Modifier.isInterface(type.getModifiers())) {
                 return;
@@ -386,13 +386,13 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             addFoundClass(type);
 
         } catch (ClassNotFoundException e) {
-            log.fine(LogType.LOG, "Cannot find class '" + className + "' in classloader: " + classLoader
+            log.fine("Cannot find class '" + className + "' in classloader: " + classLoader
                     + ". Reason: " + e, e);
         } catch (LinkageError e) {
-            log.fine(LogType.LOG, "Cannot find the class definition '" + className + "' in classloader: " + classLoader
+            log.fine("Cannot find the class definition '" + className + "' in classloader: " + classLoader
                     + ". Reason: " + e, e);
         } catch (Exception e) {
-            log.severe(LogType.LOG, "Cannot load class '"+className+"' in classloader: "+classLoader+".  Reason: "+e, e);
+            log.severe("Cannot load class '"+className+"' in classloader: "+classLoader+".  Reason: "+e, e);
         }
 
     }
@@ -441,7 +441,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 String name = entry.getName();
                 if (name != null) {
                     if (name.endsWith(".jar")) { //in a nested jar
-                        log.fine(LogType.LOG, "Found nested jar " + name);
+                        log.fine("Found nested jar " + name);
 
                         // To avoid needing to unzip 'parentFile' in its entirety, as that
                         // may take a very long time (see CORE-2115) or not even be possible
@@ -497,32 +497,32 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             Set<ClassLoader> set = getClassLoaders();
             boolean found = false;
             for (ClassLoader classLoader : set) {
-                log.fine(LogType.LOG, "Testing that class " + externalName + " matches criteria [" + test + "] using classloader:" + classLoader);
+                log.fine("Testing that class " + externalName + " matches criteria [" + test + "] using classloader:" + classLoader);
                 try {
                     Class<?> type = classLoader.loadClass(externalName);
-                    log.fine(LogType.LOG, "Loaded the class: " + type + " in classloader: " + classLoader);
+                    log.fine("Loaded the class: " + type + " in classloader: " + classLoader);
                     if (test.matches(type)) {
-                        log.fine(LogType.LOG, "Found class: " + type + " which matches the filter in classloader: " + classLoader);
+                        log.fine("Found class: " + type + " which matches the filter in classloader: " + classLoader);
                         classes.add(type);
                     }
                     found = true;
                     break;
                 } catch (ClassNotFoundException e) {
-                    log.fine(LogType.LOG, "Cannot find class '" + fqn + "' in classloader: " + classLoader
+                    log.fine("Cannot find class '" + fqn + "' in classloader: " + classLoader
                             + ". Reason: " + e, e);
                 } catch (LinkageError e) {
-                    log.fine(LogType.LOG, "Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
+                    log.fine("Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
                             + ". Reason: " + e, e);
                 } catch (Exception e) {
-                    log.severe(LogType.LOG, "Cannot load class '"+fqn+"' in classloader: "+classLoader+".  Reason: "+e, e);
+                    log.severe("Cannot load class '"+fqn+"' in classloader: "+classLoader+".  Reason: "+e, e);
                 }
             }
             if (!found) {
                 // use debug to avoid being noisy in logs
-                log.fine(LogType.LOG, "Cannot find class '" + fqn + "' in any classloaders: " + set);
+                log.fine("Cannot find class '" + fqn + "' in any classloaders: " + set);
             }
         } catch (Exception e) {
-            log.warning(LogType.LOG, "Cannot examine class '" + fqn + "' due to a " + e.getClass().getName()
+            log.warning("Cannot examine class '" + fqn + "' due to a " + e.getClass().getName()
                     + " with message: " + e.getMessage(), e);
         }
     }

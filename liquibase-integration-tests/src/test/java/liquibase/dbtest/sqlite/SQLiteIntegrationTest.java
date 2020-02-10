@@ -70,7 +70,7 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
 
     @Override
     public void testOutputChangeLog() throws Exception {
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Due to several unimplemented ALTER TABLE substatements in SQLite, " +
+        Scope.getCurrentScope().getLog(getClass()).info("Due to several unimplemented ALTER TABLE substatements in SQLite, " +
                 "this test is technically impossible on this RDBMS.");
         assertTrue(true);
     }

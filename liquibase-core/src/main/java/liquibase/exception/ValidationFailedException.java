@@ -101,7 +101,7 @@ public class ValidationFailedException extends MigrationFailedException {
                     coreBundle.getString("changes.have.validation.errors"), changeValidationExceptions.size())
                 ).append(separator);
             for (Throwable invalid : changeValidationExceptions) {
-                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, coreBundle.getString("validation.exception"), invalid);
+                Scope.getCurrentScope().getLog(getClass()).fine(coreBundle.getString("validation.exception"), invalid);
                 message.append("          ").append(invalid.toString());
                 message.append(separator);
             }

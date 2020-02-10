@@ -150,7 +150,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
         GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Liquibase did not run on " + hostName
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
                     + " because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                             + " was set to false");
             return false;

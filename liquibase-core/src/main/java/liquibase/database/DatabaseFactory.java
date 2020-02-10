@@ -105,7 +105,7 @@ public class DatabaseFactory {
         }
 
         if (foundDatabases.isEmpty()) {
-            LOG.warning(LogType.LOG, "Unknown database: " + connection.getDatabaseProductName());
+            LOG.warning("Unknown database: " + connection.getDatabaseProductName());
             UnsupportedDatabase unsupportedDB = new UnsupportedDatabase();
             unsupportedDB.setConnection(connection);
             return unsupportedDB;
@@ -213,7 +213,7 @@ public class DatabaseFactory {
                 File propertiesFile = new File(driverPropertiesFile);
                 if (propertiesFile.exists()) {
                     LOG.fine(
-                            LogType.LOG, "Loading properties from the file:'" + driverPropertiesFile + "'"
+                            "Loading properties from the file:'" + driverPropertiesFile + "'"
                     );
                     FileInputStream inputStream = new FileInputStream(propertiesFile);
                     try {
@@ -228,12 +228,12 @@ public class DatabaseFactory {
             }
 
 
-            LOG.fine(LogType.LOG, "Properties:");
+            LOG.fine("Properties:");
             for (Map.Entry entry : driverProperties.entrySet()) {
                 if (entry.getKey().toString().toLowerCase().contains("password")) {
                     Scope.getCurrentScope().getLog(getClass()).fine("Key:'" + entry.getKey().toString() + "' Value:'**********'");
                 } else {
-                    LOG.fine(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+                    LOG.fine("Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
                 }
             }
 
@@ -243,9 +243,9 @@ public class DatabaseFactory {
               driverProperties.put("useInformationSchema", "true");
             }
 
-            LOG.fine(LogType.LOG, "Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
+            LOG.fine("Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
             Connection connection = driverObject.connect(url, driverProperties);
-            LOG.fine(LogType.LOG, "Connection has been created");
+            LOG.fine("Connection has been created");
             if (connection == null) {
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }

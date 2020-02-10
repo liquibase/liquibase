@@ -15,16 +15,6 @@ public interface LogService extends Plugin {
     int getPriority();
 
     /**
-     * Returns the {@link Level} for this logger. Logs that are not using {@link java.util.logging.Logger} still translate to this standard.
-     */
-    Level getLogLevel();
-
-    /**
-     * Sets the {@link Level} for this logger.
-     */
-    void setLogLevel(Level level);
-
-    /**
      * Creates a logger for logging from the given class.
      * Unlike most logging systems, there is no exposed getLog(String) method in order to provide more consistency in how logs are named.
      */

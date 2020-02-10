@@ -191,7 +191,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         } finally {
             executors.shutdown();
         }
@@ -220,7 +220,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         } finally {
             executors.shutdown();
         }

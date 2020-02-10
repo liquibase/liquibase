@@ -61,7 +61,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
+        Scope.getCurrentScope().getLog(getClass()).warning("Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
         return resolveEntity(null, publicId, null, systemId);
     }
 }

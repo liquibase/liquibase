@@ -279,7 +279,7 @@ public class H2Database extends AbstractJdbcDatabase {
                         this.connectionSchemaName = schemaName;
                     }
                 } catch (SQLException e) {
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not read current schema name: "+e.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).info("Could not read current schema name: "+e.getMessage());
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }

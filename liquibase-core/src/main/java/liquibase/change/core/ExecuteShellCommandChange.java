@@ -128,7 +128,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
+                Scope.getCurrentScope().getLog(getClass()).info("Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
         }
@@ -224,9 +224,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 (GlobalConfiguration.class).getOutputEncoding());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, errorStreamOut);
+            Scope.getCurrentScope().getLog(getClass()).severe(errorStreamOut);
         }
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, infoStreamOut);
+        Scope.getCurrentScope().getLog(getClass()).info(infoStreamOut);
 
         processResult(returnCode, errorStreamOut, infoStreamOut, database);
     }

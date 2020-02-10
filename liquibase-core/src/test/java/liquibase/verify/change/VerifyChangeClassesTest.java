@@ -113,7 +113,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 for (SqlStatement statement : sqlStatements) {
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
                     if (sql == null) {
-                        Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, "Null sql for " + statement + " on " + database.getShortName());
+                        Scope.getCurrentScope().getLog(getClass()).severe("Null sql for " + statement + " on " + database.getShortName());
                     } else {
                         for (Sql line : sql) {
                             String sqlLine = line.toSql();

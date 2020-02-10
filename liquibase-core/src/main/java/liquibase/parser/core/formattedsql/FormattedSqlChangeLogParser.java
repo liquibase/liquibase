@@ -42,14 +42,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 return false;
             }
         } catch (IOException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Exception reading " + changeLogFile, e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Exception reading " + changeLogFile, e);
             return false;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Exception closing " + changeLogFile, e);
+                    Scope.getCurrentScope().getLog(getClass()).fine("Exception closing " + changeLogFile, e);
                 }
             }
         }

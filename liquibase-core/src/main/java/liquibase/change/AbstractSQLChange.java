@@ -193,7 +193,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Error closing stream", e);
+                    Scope.getCurrentScope().getLog(getClass()).fine("Error closing stream", e);
                 }
             }
         }

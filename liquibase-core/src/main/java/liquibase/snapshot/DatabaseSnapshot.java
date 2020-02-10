@@ -294,7 +294,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
 
         if (!snapshotControl.shouldInclude(example)) {
-            LOGGER.fine(LogType.LOG, "Excluding " + example);
+            LOGGER.fine("Excluding " + example);
             return example;
         }
 
@@ -325,11 +325,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
             if (example instanceof Schema) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Did not find schema '" + example + "' to snapshot");
+                    Scope.getCurrentScope().getLog(getClass()).warning("Did not find schema '" + example + "' to snapshot");
             }
             if (example instanceof Catalog) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Did not find catalog '" + example + "' to snapshot");
+                    Scope.getCurrentScope().getLog(getClass()).warning("Did not find catalog '" + example + "' to snapshot");
             }
 
         } else {

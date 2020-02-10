@@ -48,10 +48,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
             preconditions.check(database, changeLog, null, null);
         } catch (PreconditionFailedException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Precondition Failed: "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Precondition Error: "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Precondition Error: "+e.getMessage(), e);
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {
@@ -59,7 +59,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     database.rollback();
                 }
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Error rolling back after precondition check", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Error rolling back after precondition check", e);
             }
         }
     }
@@ -115,13 +115,13 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                         if (foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
                                 (ChangeSet.ValidationFailOption.MARK_RAN))) {
                             Scope.getCurrentScope().getLog(getClass()).info(
-                                    LogType.LOG, "Skipping change set " + changeSet + " due to validation error(s): " +
+                                    "Skipping change set " + changeSet + " due to validation error(s): " +
                                             StringUtil.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                         } else {
                             if (!foundErrors.getWarningMessages().isEmpty())
                                 Scope.getCurrentScope().getLog(getClass()).warning(
-                                        LogType.LOG, "Change set " + changeSet + ": " +
+                                        "Change set " + changeSet + ": " +
                                                 StringUtil.join(foundErrors.getWarningMessages(), ", "));
                             validationErrors.addAll(foundErrors, changeSet);
                         }

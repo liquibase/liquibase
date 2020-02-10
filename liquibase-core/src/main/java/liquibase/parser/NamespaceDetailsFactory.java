@@ -50,7 +50,7 @@ public class NamespaceDetailsFactory {
         }
 
         if (validNamespaceDetails.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
+            Scope.getCurrentScope().getLog(getClass()).fine("No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
         }
 
         return validNamespaceDetails.iterator().next();
@@ -66,7 +66,7 @@ public class NamespaceDetailsFactory {
         }
 
         if (validNamespaceDetails.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
+            Scope.getCurrentScope().getLog(getClass()).fine("No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
         }
 
         return validNamespaceDetails.iterator().next();

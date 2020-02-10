@@ -138,7 +138,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
                 } else {
                     url += ";shutdown=true";
                 }
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Shutting down derby connection: " + url);
+                Scope.getCurrentScope().getLog(getClass()).info("Shutting down derby connection: " + url);
                 // this cleans up the lock files in the embedded derby database folder
                 JdbcConnection connection = (JdbcConnection) getConnection();
                 ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
@@ -196,7 +196,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }
         return null;
     }

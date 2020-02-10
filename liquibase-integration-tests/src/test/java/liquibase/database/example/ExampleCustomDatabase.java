@@ -15,7 +15,7 @@ public class ExampleCustomDatabase extends H2Database {
 
     @Override
     public void tag(String tagString) throws DatabaseException {
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Custom tagging");
+        Scope.getCurrentScope().getLog(getClass()).info("Custom tagging");
         super.tag(tagString);
     }
 }

@@ -60,7 +60,7 @@ public class ChangedTableChangeGenerator extends AbstractChangeGenerator impleme
         
         if (changedTablespace != null) {
             // TODO: Implement moveTableToDifferentTablespace change type!
-            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "A change of the tablespace was detected, however, the change " +
+            Scope.getCurrentScope().getLog(getClass()).warning("A change of the tablespace was detected, however, the change " +
              "type to move a table from tablespace A to tablespace B has not been implemented yet. Sorry.");
         }
 

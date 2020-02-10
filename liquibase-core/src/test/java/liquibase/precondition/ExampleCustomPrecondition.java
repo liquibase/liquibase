@@ -30,7 +30,7 @@ public class ExampleCustomPrecondition implements CustomPrecondition {
 
     @Override
     public void check(Database database) throws CustomPreconditionFailedException {
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Custom precondition ran. Name: "+name+", count: "+count  );
+        Scope.getCurrentScope().getLog(getClass()).info("Custom precondition ran. Name: "+name+", count: "+count  );
 
 //        throw new CustomPreconditionFailedException("custom precondition failed", new RuntimeException());
     }

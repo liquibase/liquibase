@@ -125,7 +125,7 @@ public class DiffToChangeLog {
                             //print changeLog only if there are available changeSets to print instead of printing it always
                             printNew(changeLogSerializer, file);
                         } else {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " exists, appending");
+            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
 
@@ -135,7 +135,7 @@ public class DiffToChangeLog {
                             innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
                             innerXml = innerXml.trim();
                             if ("".equals(innerXml)) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "No changes found, nothing to do");
+                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
                                 return;
                             }
 
@@ -203,9 +203,9 @@ public class DiffToChangeLog {
 
         List<ChangeSet> changeSets = generateChangeSets();
 
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "changeSets count: " + changeSets.size());
+        Scope.getCurrentScope().getLog(getClass()).info("changeSets count: " + changeSets.size());
         if (changeSets.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "No changesets to add.");
+            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add.");
         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
@@ -419,7 +419,7 @@ public class DiffToChangeLog {
                     return toSort;
                 }
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Cannot get object dependencies: " + e.getMessage());
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot get object dependencies: " + e.getMessage());
             }
         }
 
@@ -728,7 +728,7 @@ public class DiffToChangeLog {
             for (Class<? extends DatabaseObject> type : types) {
                 log += "    " + type.getName();
             }
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, log);
+            Scope.getCurrentScope().getLog(getClass()).fine(log);
             loggedOrderFor.add(generatorType);
         }
 
