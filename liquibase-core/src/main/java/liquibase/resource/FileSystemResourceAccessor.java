@@ -43,6 +43,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     protected void addRootPath(Path path) {
+        Scope.getCurrentScope().getLog(getClass()).fine("Adding path "+path+" to resourceAccessor "+getClass().getName());
         rootPaths.add(path);
     }
 

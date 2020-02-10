@@ -317,7 +317,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected Liquibase createLiquibase(String changeLogFile) throws Exception {
-        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(new JUnitResourceAccessor(), new FileSystemResourceAccessor());
+        ResourceAccessor fileOpener = new JUnitResourceAccessor();
         return createLiquibase(changeLogFile, fileOpener);
     }
 

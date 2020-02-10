@@ -1,13 +1,10 @@
 package liquibase.parser.core.xml;
 
 import liquibase.Scope;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
-import liquibase.parser.LiquibaseParser;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.InputStreamList;
-import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializer;
-import liquibase.util.file.FilenameUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
@@ -35,7 +32,9 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         String path = systemId.toLowerCase()
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
-        InputStreamList streams = Scope.getCurrentScope().getResourceAccessor().openStreams(null, path);
+
+        //need to ensure XSD can be loaded from the system classpath, even if resourceAccessor is not configured to look there
+        InputStreamList streams = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new ClassLoaderResourceAccessor(getClass().getClassLoader())).openStreams(null, path);
         if (streams.isEmpty()) {
             log.fine("Unable to resolve XML entity locally. Will load from network.");
             return null;
