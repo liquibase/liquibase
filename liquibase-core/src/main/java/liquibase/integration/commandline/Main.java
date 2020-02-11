@@ -1625,7 +1625,6 @@ public class Main {
         if (!commandParams.contains("--help")) {
             argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         }
-        argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
         ChangeLogParameters clp = new ChangeLogParameters(database);
         for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
             clp.set(entry.getKey(), entry.getValue());

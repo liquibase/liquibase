@@ -20,6 +20,7 @@ import liquibase.snapshot.SnapshotGenerator
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.structure.DatabaseObject
 import liquibase.util.TestUtil
+import org.junit.Assume
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -35,7 +36,9 @@ class StandardServiceLocatorTest extends Specification {
                 })
         def subclassText = new TreeSet(subclasses.collect({ it.name })).join("\n")
 
-        def loaderFile = getClass().getResourceAsStream("/META-INF/services/" + type.getName())
+        Assume.assumeTrue("No "+type.name+" classes found", subclasses.size() > 0)
+
+        def loaderFile = new File("src/main/resources/META-INF/services/" + type.getName())
 
         then:
         loaderFile.text.trim().replace("\r", "") == subclassText

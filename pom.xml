@@ -115,11 +115,11 @@
     <profiles>
         <profile>
             <id>liquibase-pro</id>
-<!--            <activation>-->
-<!--                <file>-->
-<!--                    <exists>../liquibase-pro/pom.xml</exists>-->
-<!--                </file>-->
-<!--            </activation>-->
+            <activation>
+                <file>
+                    <exists>../liquibase-pro/pom.xml</exists>
+                </file>
+            </activation>
             <modules>
                 <module>../liquibase-pro</module>
             </modules>
