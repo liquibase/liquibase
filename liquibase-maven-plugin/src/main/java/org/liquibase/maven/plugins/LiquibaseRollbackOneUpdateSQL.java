@@ -26,48 +26,29 @@ import static java.util.ResourceBundle.getBundle;
 
 /**
  *
- * A helper command that allows you to inspect the SQL Liquibase will run to revert the changeSet specified in the rollbackOneChangeSet command. It is only available for Liquibase Pro users.
+ * Invokes Liquibase rollback by Deployment ID
  *
- * @goal rollbackOneChangeSetSQL
+ * @goal rollbackOneUpdateSQL
  *
  */
-public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLogMojo {
+public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMojo {
+    /**
+     *
+     * The Deployment ID to rollback
+     *
+     * @parameter property="liquibase.deploymentId"
+     *
+     */
+    protected String deploymentId;
 
     /**
      *
-     * The change set ID to rollback
+     * Required flag for RollbackOneChangeSet
      *
-     * @parameter property="liquibase.changeSetId"
-     *
-     */
-    protected String changeSetId;
-
-    /**
-     *
-     * Specifies the author of the <i>changeSet</i> you want to rollback.
-     *
-     * @parameter property="liquibase.changeSetAuthor"
+     * @parameter property="liquibase.force"
      *
      */
-    protected String changeSetAuthor;
-
-    /**
-     *
-     * Specifies the path to the <i>changelog</i> which contains the <i>change-set</i> you want to rollback.
-     *
-     * @parameter property="liquibase.changeSetPath"
-     *
-     */
-    protected String changeSetPath;
-
-    /**
-     *
-     * Specifies the path to a rollback script
-     *
-     * @parameter property="liquibase.rollbackScript"
-     *
-     */
-    protected String rollbackScript;
+    protected String force;
 
     /**
      *
@@ -78,25 +59,11 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
      */
     protected String outputFile;
 
-
-
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     @Override
-    protected void printSettings(String indent) {
-      super.printSettings(indent);
-        getLog().info(indent + "Change Set ID:     " + changeSetId);
-        getLog().info(indent + "Change Set Author: " + changeSetAuthor);
-        getLog().info(indent + "Change Set Path:   " + changeSetPath);
-        getLog().info(indent + "Rollback script:   " + rollbackScript);
-    }
-
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        //
-        // We override in order to set the command name for later use
-        //
-        commandName="rollbackOneChangeSetSQL";
+        commandName = "rollbackOneUpdate";
         super.execute();
     }
 
@@ -106,29 +73,33 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         // Check the Pro license
         //
         if (! hasProLicense()) {
-            throw new LiquibaseException("The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://liquibase.org.");
+            throw new LiquibaseException("The command 'rollbackOneUpdateSQL' requires a Liquibase Pro License, available at http://liquibase.org.");
         }
         Database database = liquibase.getDatabase();
-        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneChangeSet"));
+        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneUpdate"));
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
-        ChangeLogParameters clp = new ChangeLogParameters(database);
         Writer outputWriter = null;
         try {
             outputWriter = createOutputWriter();
             argsMap.put("outputWriter", outputWriter);
         }
         catch (IOException ioe) {
-            throw new LiquibaseException("Error executing rollbackOneChangeSet.  Unable to create output writer.", ioe);
+            throw new LiquibaseException("Error executing rollbackOneChangeSetSQL.  Unable to create output writer.", ioe);
         }
+        ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
+        if (force == null || (force != null && ! Boolean.parseBoolean(force))) {
+            throw new LiquibaseException("Invalid value for --force.  You must specify 'liquibase.force=true' to use rollbackOneUpdate.");
+        }
+        argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);
         configuratingCommand.configure(argsMap);
         try {
             liquibaseCommand.execute();
         }
         catch (CommandExecutionException cee) {
-            throw new LiquibaseException("Error executing rollbackOneChangeSet", cee);
+            throw new LiquibaseException("Error executing rollbackOneUpdate", cee);
         }
         finally {
             try {
@@ -141,6 +112,12 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         }
     }
 
+    private Writer createOutputWriter() throws IOException {
+        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                .getOutputEncoding();
+
+        return new OutputStreamWriter(getOutputStream(), charsetName);
+    }
     private OutputStream getOutputStream() throws IOException {
         if (outputFile == null) {
             return System.out;
@@ -151,27 +128,21 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         } catch (IOException e) {
             LogService.getLog(getClass()).severe(LogType.LOG, String.format(
                     coreBundle.getString("could.not.create.output.file"),
-            outputFile));
+                    outputFile));
             throw e;
         }
         return fileOut;
     }
 
-    private Writer createOutputWriter() throws IOException {
-        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getOutputEncoding();
-
-        return new OutputStreamWriter(getOutputStream(), charsetName);
-    }
-
     private Map<String, Object> getCommandArgsObjectMap(Liquibase liquibase) throws LiquibaseException {
         Database database = liquibase.getDatabase();
         Map<String, Object> argsMap = new HashMap<String, Object>();
-        argsMap.put("force", true);
-        argsMap.put("changeLogFile", this.changeLogFile);
+        argsMap.put("deploymentId", this.deploymentId);
+        argsMap.put("force", this.force);
         argsMap.put("database", database);
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
         return argsMap;
     }
+
 }
