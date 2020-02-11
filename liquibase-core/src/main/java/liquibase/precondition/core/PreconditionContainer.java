@@ -220,6 +220,13 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                     changeExecListener.preconditionFailed(e, FailOption.WARN);
                 }
             } else {
+                if (this.getOnFail().equals(FailOption.MARK_RAN)) {
+                    LogFactory.getLogger().info(String.format("Executing: " + ranOn + " despite precondition failure due to onFail='%s':\n " + message,
+                            this.getOnFail().toString()));
+                    if (changeExecListener != null) {
+                        changeExecListener.preconditionFailed(e, this.getOnFail());
+                    }
+                }
                 if (getOnFailMessage() == null) {
                     throw e;
                 } else {
