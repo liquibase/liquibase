@@ -220,9 +220,9 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                     changeExecListener.preconditionFailed(e, FailOption.WARN);
                 }
             } else {
-                if (this.getOnFail().equals(FailOption.MARK_RAN)) {
-                    LogFactory.getLogger().info(String.format("Executing: " + ranOn + " despite precondition failure due to onFail='%s':\n " + message,
-                            this.getOnFail().toString()));
+                if (FailOption.MARK_RAN.equals(this.getOnFail())) {
+                    LogFactory.getLogger().info(String.format("Executing: %s despite precondition failure due to " +
+                            "onFail='%s':\n %s ",ranOn, message, FailOption.MARK_RAN.key));
                     if (changeExecListener != null) {
                         changeExecListener.preconditionFailed(e, this.getOnFail());
                     }
