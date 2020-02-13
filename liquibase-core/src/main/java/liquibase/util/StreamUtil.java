@@ -188,7 +188,7 @@ public class StreamUtil {
             return null;
         }
         if (streams.size() != 1) {
-            if ((streams.size() > 1) && (path != null) && path.startsWith("liquibase/parser/core/xml/") && path
+            if ((streams.size() > 1) && (path != null) && path.startsWith("www.liquibase.org/xml/ns/") && path
                 .endsWith(".xsd")) {
                 LogService.getLog(StreamUtil.class).debug(LogType.LOG, "Found " + streams.size() + " files that match " + path+", but choosing one at random.");
                 InputStream returnStream = null;

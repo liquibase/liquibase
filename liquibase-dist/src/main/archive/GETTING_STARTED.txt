@@ -1,0 +1,258 @@
+Liquibase Version ${liquibase.version}
+
+
+Getting Started
+--------------------------------------------
+Thanks for downloading and installing Liquibase ${liquibase.version} from Datical.
+
+By using the installer, you already have all the dependencies, directories, config, 
+and properties files to get started exploring the Liquibase examples provided, which 
+is a great way to understand the core concepts with a direct command-line introductory 
+experience.
+
+
+Adding Liquibase to Your Path
+--------------------------------------------
+If you do not want always to provide an absolute path to the liquibase command, 
+add `/path/to/installed/liquibase` to your PATH. If you selected this option 
+during the installation process, this should have been done for you. 
+
+
+EXAMPLE PROJECTS
+--------------------------------------------
+This installation contains an "examples" directory, which includes everything 
+required to use Liquibase against a sample in-memory database.
+
+There are two projects under the examples directory: 
+   * "examples/sql" directory shows how to use a SQL formatted changelog
+   * "examples/xml" directory shows how to use an XML formatted changelog
+
+Both projects utilize the same setup & examples and only differ in the changelog type.
+
+
+Setting Up Your Workspace
+-------------------------
+Copy the "examples" directory to another location on your machine.
+    * Installed location: "<chosen_install_dir>/liquibase/examples"
+    * Example new location: "<USER_HOME>/apps/liquibase-projects/examples"
+
+What got copied?
+
+In both ".../examples/sql" and "example/xml" there is a liquibase.properties file, 
+which provides default values that allow you to run command-line (CLI) commands 
+immediately with Liquibase. This file is pre-configured to point to the changelog 
+you copied and the `start-h2` developer database.
+
+In both ".../examples/sql" and "example/xml" there is a sample changelogfile.
+
+While not required, it is a best practice to keep your changelogs in a unique and 
+descriptive directory structure. Changelogs are normally stored in your version 
+control system along with your application code and match the directory structures 
+you use there.
+
+
+Configuring your liquibase.properties file
+--------------------------------------------
+*** NOTE: You do not need to change any settings to be able to run liquibase examples ***
+
+In your command line or Terminal app, navigate to the sql or xml sub-directory in 
+the example directory to examine your pre-configured liquibase.properties files.
+
+The liquibase.properties file stores properties which rarely change, such as 
+database connection information. Properties stored here save time and reduce the 
+risk of mistyped command line arguments.  Any parameter that could be specified on 
+the command line can also be specified in the properties file. If a parameter is 
+specified in both the properties file and the command line, the command line value 
+will override the value in the file.
+
+Learn more: https://www.liquibase.org/documentation/config_properties.html
+
+
+Starting the Example H2 Database
+--------------------------------------------
+USING H2
+
+H2 is a standard SQL database and can be used to simulate working in a more 
+complex database.
+
+To start the example database: 
+    * open your command line or Terminal app
+    * navigate to the directory where you placed "examples" directory
+    * run `examples/start-h2`.
+
+To stop the example database:
+    * run `ctrl-c' in the terminal running examples/start-h2
+
+Notes
+
+Running `examples/start-h2` starts local H2 databases that listen on port 9090, and 
+it opens a browser to the database console on the same port. 
+    * The Example h2 databases do not store data and will reset when the start-h2 
+      process ends via "ctrl-c".
+
+The start-h2 script starts two databases:
+    1. A Developer Database: Corresponds to what you may use as a local database.
+    2. An Integration Database: Corresponds to another database in your pipeline.
+
+About the console:
+    * The web-based console allows you to see all objects in your database in the 
+      left navigation and run SQL statements on the right side.
+    * Along the top is a toolbar that includes a Refresh button which can be used 
+      to reload the left-side object view if changes are made to your database 
+      outside of the console (like with Liquibase).
+    * The Integration database can be viewed with the link provided to you from 
+      the Developer database browser. You can also see which database you are 
+      connected to by looking at the URL at the top of the object view.
+    * As a test, try entering `create table test_table (id int)` in the text area 
+      and hit "Run". After, you should see "TEST_TABLE" appear in the object view.
+
+NOTE: If you run formatted SQL or XML on the H2 database, and then want to attempt 
+using the other method, you must restart the H2 database before running it again 
+or you will receive an update failure due to objects already existing on the database.
+
+
+Running Your First Update
+-------------------------
+The main Liquibase command you will use is "update", which applies any changes not 
+yet run in your changelog to your database.
+
+First,
+1. Open a different command-line or Terminal app.
+2. Navigate to your ...examples/sql directory (or xml)
+
+
+To run the update command:
+1. In your command prompt run: `liquibase update`
+
+You should see a message saying: "Update has been successful."
+
+2. Refresh your developer database console page.
+
+You should now see the following tables added to the object view:
+    - COMPANY
+    - DATABASECHANGELOG
+    - DATABASECHANGELOGLOCK
+    - PERSON
+
+By running `liquibase update`, your database now matches the desired database state 
+as defined by the changelog script.
+
+The DATABASECHANGELOG and DATABASECHANGELOGLOCK tables are liquibase-metadata tables. 
+Also, the changelog created the COMPANY and PERSON tables.
+
+Now, open the sample.changelog.xml or sample.changelog.sql file in your favorite 
+text editor.
+
+In each file, you can see how changes were defined as a series of changeSets. Each 
+changeSet is uniquely identified by the "id" and "author" fields. Liquibase uses 
+these fields to track what changes have been run and what has not.
+
+When you ran the "update" command, Liquibase evaluated which changeSets had not 
+been run against your target database, then ran them.
+
+
+Adding New ChangeSets
+---------------------
+Running the update command allowed your developer database to match the defined 
+state. Now that they match, you can start adding additional changes you need. If 
+you have not run your first update, please follow the instructions in the previous 
+section before completing this section.
+
+In this example, we will add a new changeSet to create a "works for" column in the 
+persons table with a foreign key to the company table.
+
+To add this changeSet, open the sample changelog file in your existing editor, and 
+copy + paste one of the following changeSet examples:
+
+  XML changelog example code
+  ---------------------------
+<changeSet id="4" author="your.name">
+    <addColumn tableName="person">
+        <column name="worksfor_company_id" type="int"/>
+    </addColumn>
+</changeSet>
+<changeSet id="5" author="your.name">
+    <addForeignKeyConstraint
+        constraintName="fk_person_worksfor"
+        baseTableName="person"
+        baseColumnNames="worksfor_company_id"
+        referencedTableName="company"
+        referencedColumnNames="id"/>
+</changeSet>
+
+  SQL changelog example code
+  ---------------------------
+--changeset your.name:4
+ALTER TABLE person ADD worksfor_company_id INT;
+--changeset your.name:5
+ALTER TABLE person ADD CONSTRAINT fk_person_worksfor FOREIGN KEY (worksfor_company_id) REFERENCES company(id);
+
+
+NOTE: It's best practice to wrap every statement in its own changeSet block.
+
+Now, run `liquibase update` again & refresh your database console.
+
+You will see the new column on the person table and the new constraint.
+
+NOTE: If you run formatted SQL or XML on the H2 database, then want to attempt using 
+the other method, you must restart the H2 database before running it again or you 
+will receive an update failure due to objects already existing on the database.
+
+
+Promoting Changes
+-----------------
+Now that we added a new changeSet and the database structure is what we want, we 
+are ready to apply those changes to our integration database.
+
+At this time in the workflow, you should commit your changelog to version control 
+and/or build an artifact containing it. However, for this tutorial, we will run 
+it directly against our other database.
+
+To apply the changes to the integration database run: 
+`liquibase --url=jdbc:h2:tcp://localhost:9090/mem:integration update`
+
+By passing the --url parameter, you override the URL value specified in the 
+liquibase.properties file, but still use all the other parameters in the file.
+
+After running "update" against the integration database, you should now see the 
+COMPANY and PERSON tables in your integration web console.
+
+
+Standard Development Workflow
+-----------------------------
+For more information on the Standard Development Workflow you just completed, see: 
+https://www.liquibase.org/documentation/workflows/lb-developer-workflow.html
+
+
+Next Steps
+----------
+Now that you have a feel for Liquibase against your sample database, you can try 
+it against your standard databases.
+
+Just add your database's jdbc drivers to the "lib" directory in the Liquibase 
+install directory and update the URL, username, and password in the 
+liquibase.properties file.
+
+Also, check the documentation associated with your specific database to locate 
+the correct url format and download the driver jar. Then use the Standard 
+Development Workflow to make changes against your database.
+
+
+Help & Support
+----------------------------------------
+For questions regarding Liquibase, you can submit an email to support@liquibase.org 
+or submit a post on stack overflow and use the #liquibase tag here: 
+https://stackoverflow.com/questions/tagged/liquibase
+
+You can also post questions to these Liquibase forums:
+Liquibase User Forum: https://forum.liquibase.org/#Forum/liquibase-users
+Liquibase Developer Forum: https://forum.liquibase.org/#Forum/liquibase-development.
+
+Liquibase Documentation: www.liquibase.org/documentation/index.html
+
+Need Liquibase Support? Get customer support by upgrading to Liquibase Pro here: 
+https://support.liquibase.org/
+
+
+Copyright 2020 Datical, Inc. All rights reserved. The program is subject to the 
+license agreement, copyright, trademark, patent, and other laws.

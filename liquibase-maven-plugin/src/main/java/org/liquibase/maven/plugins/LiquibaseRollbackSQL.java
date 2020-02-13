@@ -14,8 +14,8 @@ import java.io.Writer;
 import java.text.ParseException;
 
 /**
- * Generates the SQL that is required to rollback the database using one or more of the specified
- * attributes 'rollbackCount', 'rollbackTag' and/or 'rollbackDate'
+ * <p>Generates the SQL that is required to rollback the database using one or more of the specified
+ * attributes 'rollbackCount', 'rollbackTag' and/or 'rollbackDate'</p>
  *
  * @description Liquibase RollbackSQL Maven plugin
  * @goal rollbackSQL
@@ -26,7 +26,7 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
      * The file to output the Rollback SQL script to, if it exists it will be
      * overwritten.
      *
-     * @parameter expression="${liquibase.migrationSqlOutputFile}"
+     * @parameter property="liquibase.migrationSqlOutputFile"
      *            default-value=
      *            "${project.build.directory}/liquibase/migrate.sql"
      */

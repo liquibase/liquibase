@@ -1,25 +1,9 @@
 package liquibase.integration.commandline;
 
-import liquibase.command.CommandFactory;
-import liquibase.command.core.SnapshotCommand;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.CommandLineParsingException;
-import liquibase.util.StringUtils;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.junit.Assert;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
-
-import static org.junit.Assert.*;
 
 
 /**
@@ -36,6 +20,50 @@ public class MainTest {
     public void placeHolder() {
 
     }
+
+    @Test
+    public void testCodePointCheck() {
+      char badChar = 8192;
+      char anotherBadChar = 160;
+      Main.CodePointCheck codePointCheck = Main.checkArg("test");
+      Assert.assertTrue("This should be a valid string", codePointCheck == null);
+
+      StringBuilder builder = new StringBuilder();
+      builder.append(badChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The first character should be invalid",codePointCheck.position == 0);
+
+      builder = new StringBuilder();
+      builder.append("A");
+      builder.append(badChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The last character should be invalid",codePointCheck.position == builder.length()-1);
+
+      builder = new StringBuilder();
+      builder.append("ABC");
+      builder.append(anotherBadChar);
+      builder.append("DEF");
+      int pos = builder.toString().indexOf(anotherBadChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The character in position " + pos + " should be invalid",codePointCheck.position == pos);
+    }
+
+
+    @Test
+    public void checkSetup() {
+        Main main = new Main();
+        main.command = "snapshot";
+        main.url = "jdbc:oracle://localhost:1521/ORCL";
+        main.commandParams.add("--outputSchemasAs");
+        List<String> messages = main.checkSetup();
+        Assert.assertTrue("There should be no messages from Main.checkSetup", messages.size() == 0);
+
+        main.command = "update";
+        main.changeLogFile = "changelog.xml";
+        messages = main.checkSetup();
+        Assert.assertTrue("There should be one message from Main.checkSetup", messages.size() == 1);
+    }
+
 //    @Rule
 //    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 //

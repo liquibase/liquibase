@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Generates the SQL that is required to update the database to the current
- * version as specified in the DatabaseChangeLogs.
+ * <p>Generates the SQL that is required to update the database to the current
+ * version as specified in the DatabaseChangeLogs.</p>
  * 
  * @author Peter Murray
  * @description Liquibase UpdateSQL Maven plugin
@@ -26,7 +26,7 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 	 * The file to output the Migration SQL script to, if it exists it will be
 	 * overwritten.
 	 * 
-	 * @parameter expression="${liquibase.migrationSqlOutputFile}"
+	 * @parameter property="liquibase.migrationSqlOutputFile"
 	 *            default-value=
 	 *            "${project.build.directory}/liquibase/migrate.sql"
 	 */

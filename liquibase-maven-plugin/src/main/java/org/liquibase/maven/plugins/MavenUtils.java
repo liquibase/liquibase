@@ -3,6 +3,11 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.exception.LiquibaseException;
+import liquibase.license.Location;
+import liquibase.license.LocationType;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
+import liquibase.license.LicenseInstallResult;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -84,6 +89,42 @@ public class MavenUtils {
         urlArray[i] = uriList.get(i).toURL();
     }
     return new URLClassLoader(urlArray, clazz.getClassLoader());
+  }
+
+  public static boolean checkProLicense(String liquibaseProLicenseKey, String commandName, Log log) {
+      boolean hasProLicense = true;
+      LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+      if (licenseService == null) {
+        return false;
+      }
+      if (liquibaseProLicenseKey == null) {
+          log.info("");
+          log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://liquibase.org.");
+          log.info("");
+          hasProLicense = false;
+      }
+      else {
+          Location licenseKeyLocation = 
+              new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, liquibaseProLicenseKey);
+          LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+          if (result.code != 0) {
+              String allMessages = String.join("\n", result.messages);
+              log.warn(allMessages);
+              hasProLicense = false;
+          }
+          String licenseInfo = licenseService.getLicenseInfo();
+          log.info(licenseInfo);
+
+          //
+          // If the license has expired then just disable the service
+          //
+          if (licenseService.daysTilExpiration() < 0) {
+              licenseService.disable();
+              hasProLicense = false;
+          }
+      }
+      log.info(licenseService.getLicenseInfo());
+      return hasProLicense;
   }
 
   /**

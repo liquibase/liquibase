@@ -65,17 +65,4 @@ public abstract class AbstractSqlGenerator<T extends SqlStatement> implements Sq
             value.equalsIgnoreCase(database.getCurrentDateTimeFunction());
     }
 
-
-
-    /**
-     * Convenience method for when the catalogName is set but we don't want to parse the body
-     */
-    public static void surroundWithCatalogSets(List<Sql> sql, String catalogName, Database database) {
-        if (database instanceof MSSQLDatabase) {
-            String defaultCatalogName = database.getDefaultCatalogName();
-            sql.add(0, new UnparsedSql("USE [" + catalogName + "]"));
-            sql.add(new UnparsedSql("USE [" + defaultCatalogName + "]"));
-        }
-    }
-
 }

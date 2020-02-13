@@ -86,8 +86,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:mysql")) {
-            return "com.mysql.cj.jdbc.Driver";
+        if (url != null && url.toLowerCase().startsWith("jdbc:mysql")) {
+            try {
+                String cjDriverClassName = "com.mysql.cj.jdbc.Driver";
+
+                //make sure we don't have an old jdbc driver that doesn't have this class
+                Class.forName(cjDriverClassName);
+                return cjDriverClassName;
+            } catch (ClassNotFoundException e) {
+                return "com.mysql.jdbc.Driver";
+            }
+
         }
         return null;
     }
