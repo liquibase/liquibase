@@ -44,7 +44,6 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.xml.XMLResourceBundle;
 import liquibase.util.xml.XmlResourceBundleControl;
@@ -136,6 +135,7 @@ public class Main {
     protected String sqlFile;
     protected String delimiter;
     protected String rollbackScript;
+    protected String deploymentId;
 
     private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
             204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
@@ -285,7 +285,9 @@ public class Main {
                 log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
             }
 
-            if (main.commandParams.contains("--help") && main.command.startsWith("rollbackOneChangeSet")) {
+            if (main.commandParams.contains("--help") &&
+                (main.command.startsWith("rollbackOneChangeSet") ||
+                 main.command.startsWith("rollbackOneUpdate"))) {
                 //don't need to check setup
             } else {
                 List<String> setupMessages = main.checkSetup();
@@ -539,7 +541,8 @@ public class Main {
     private static boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith(COMMANDS.UPDATE)
                 || (command.toLowerCase().startsWith(COMMANDS.ROLLBACK) &&
-                !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET))
+                    (!command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET) &&
+                     !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_UPDATE)))
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.STATUS.equalsIgnoreCase(command)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
@@ -547,7 +550,8 @@ public class Main {
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
                 || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
                 || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-                || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command);
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)
+                || COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command);
     }
 
     /**
@@ -598,7 +602,9 @@ public class Main {
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(arg)
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(arg)
-                || COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(arg);
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(arg)
+                || COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(arg)
+                || COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(arg);
     }
 
     /**
@@ -857,7 +863,6 @@ public class Main {
         } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
                         && !cmdParm.startsWith("--" + OPTIONS.HELP)
                         && !cmdParm.startsWith("--" + OPTIONS.FORCE)
                         && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
@@ -869,12 +874,29 @@ public class Main {
         } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
-                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
                         && !cmdParm.startsWith("--" + OPTIONS.HELP)
                         && !cmdParm.startsWith("--" + OPTIONS.FORCE)
                         && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
                         && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
                         && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                }
+            }
+        }
+        else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
+                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                }
+            }
+        }
+        else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
+                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
@@ -1275,7 +1297,10 @@ public class Main {
         //
         // Check for a valid license to run PRO commands
         //
-        if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command) || COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
+        if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command) ||
+            COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command) ||
+            COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
+            COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)){
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
                 String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
                 throw new LiquibaseException(messageString);
@@ -1513,7 +1538,7 @@ public class Main {
                 if (this.commandParams.contains("--help")) {
                     argsMap.put("help", true);
                 }
-                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, argsMap);
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
@@ -1521,7 +1546,42 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<String, Object>();
                 argsMap.put("outputWriter", outputWriter);
                 argsMap.put("force", true);
-                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, argsMap);
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
+                liquibaseCommand.execute();
+                outputWriter.flush();
+                outputWriter.close();
+                return;
+            } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equals(command)) {
+                Map<String, Object> argsMap = new HashMap<String, Object>();
+                argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
+                argsMap.put("changeLogFile", changeLogFile);
+                argsMap.put("database", database);
+                if (!commandParams.contains("--help")) {
+                    argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
+                }
+                argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
+                ChangeLogParameters clp = new ChangeLogParameters(database);
+                for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
+                    clp.set(entry.getKey(), entry.getValue());
+                }
+                argsMap.put("changeLogParameters", clp);
+
+                if (this.commandParams.contains("--force")) {
+                    argsMap.put("force", true);
+                }
+                if (this.commandParams.contains("--help")) {
+                    argsMap.put("help", true);
+                }
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_UPDATE, argsMap);
+                liquibaseCommand.execute();
+                return;
+            } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)) {
+                Writer outputWriter = getOutputWriter();
+                Map<String, Object> argsMap = new HashMap<String, Object>();
+                argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
+                argsMap.put("outputWriter", outputWriter);
+                argsMap.put("force", true);
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_UPDATE, argsMap);
                 liquibaseCommand.execute();
                 outputWriter.flush();
                 outputWriter.close();
@@ -1711,9 +1771,9 @@ public class Main {
         }
     }
 
-    private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, Map<String, Object> argsMap)
+    private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, String commandName, Map<String, Object> argsMap)
             throws CommandLineParsingException, LiquibaseException {
-        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand(COMMANDS.ROLLBACK_ONE_CHANGE_SET));
+        LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(commandName);
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
         argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
         argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
@@ -1895,6 +1955,8 @@ public class Main {
         private static final String RELEASE_LOCKS = "releaseLocks";
         private static final String ROLLBACK_ONE_CHANGE_SET = "rollbackOneChangeSet";
         private static final String ROLLBACK_ONE_CHANGE_SET_SQL = "rollbackOneChangeSetSQL";
+        private static final String ROLLBACK_ONE_UPDATE = "rollbackOneUpdate";
+        private static final String ROLLBACK_ONE_UPDATE_SQL = "rollbackOneUpdateSQL";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
         private static final String ROLLBACK_COUNT_SQL = "rollbackCountSQL";
@@ -1928,6 +1990,7 @@ public class Main {
         private static final String CHANGE_SET_ID = "changeSetId";
         private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
         private static final String CHANGE_SET_PATH = "changeSetPath";
+        private static final String DEPLOYMENT_ID = "deploymentId";
         private static final String OUTPUT_FILE = "outputFile";
         private static final String FORCE = "force";
         private static final String ROLLBACK_SCRIPT = "rollbackScript";
