@@ -106,8 +106,10 @@ Liquibase History for jdbc:test://url
   com/example/test.xml::13::test-user
   com/example/test.xml::14::other-user
   com/example/test.xml::15::test-user
+
 - Database updated at 7/9/19 2:18 PM. Applied 1 changeSet(s), DeploymentId: 2
   com/example/test2.xml::13::test-user
+
 - Database updated at 7/9/19 6:22 PM. Applied 3 changeSet(s) in 241.982s, DeploymentId: 3
   com/example/test.xml::1::test-user
   com/example/test.xml3::2::other-user

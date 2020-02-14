@@ -104,6 +104,8 @@ public class HistoryCommand extends AbstractCommand {
             for (RanChangeSet changeSet : changeSets) {
                 outputStream.println("  " + changeSet.toString());
             }
+
+            outputStream.println("");
         }
 
         String getDeploymentId() {
