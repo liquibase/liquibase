@@ -1,5 +1,3 @@
-// Version:   $Id: $
-// Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
@@ -90,7 +88,8 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         //
         // Check the Pro license
         //
-        if (! hasProLicense()) {
+        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+        if (! hasProLicense) {
             throw new LiquibaseException("The command 'rollbackOneChangeSet' requires a Liquibase Pro License, available at http://liquibase.org.");
         }
         Database database = liquibase.getDatabase();

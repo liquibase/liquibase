@@ -1,5 +1,3 @@
-// Version:   $Id: $
-// Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
@@ -18,7 +16,10 @@ import java.util.Map;
 
 /**
  *
- * Invokes Liquibase rollback by Deployment ID
+ * Reverts (rolls back) all the changesets from one update, identified by
+ * "deploymentId", if all the changesets can be rolled back.  If not, a
+ * WARNING message will provide details.  A Liquibase Pro license key is required.
+ * Note:  A list of deploymentIds may be viewed by using the "history" command.
  *
  * @goal rollbackOneUpdate
  *
@@ -68,7 +69,8 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
         //
         // Check the Pro license
         //
-        if (! hasProLicense()) {
+        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+        if (! hasProLicense) {
             throw new LiquibaseException("The command 'rollbackOneUpdate' requires a Liquibase Pro License, available at http://liquibase.org.");
         }
         Database database = liquibase.getDatabase();

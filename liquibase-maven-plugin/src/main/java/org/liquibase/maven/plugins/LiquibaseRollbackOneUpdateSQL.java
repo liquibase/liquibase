@@ -1,5 +1,3 @@
-// Version:   $Id: $
-// Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
@@ -26,7 +24,9 @@ import static java.util.ResourceBundle.getBundle;
 
 /**
  *
- * Invokes Liquibase rollback by Deployment ID
+ * Displays the SQL which will be executed when the corresponding rollbackOneUpdate
+ * command is executed.  This command does not perform the actual rollback.
+ * A Liquibase Pro license key is required.
  *
  * @goal rollbackOneUpdateSQL
  *
@@ -72,7 +72,8 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         //
         // Check the Pro license
         //
-        if (! hasProLicense()) {
+        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+        if (! hasProLicense) {
             throw new LiquibaseException("The command 'rollbackOneUpdateSQL' requires a Liquibase Pro License, available at http://liquibase.org.");
         }
         Database database = liquibase.getDatabase();

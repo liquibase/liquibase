@@ -1,5 +1,3 @@
-// Version:   $Id: $
-// Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
@@ -26,7 +24,8 @@ import static java.util.ResourceBundle.getBundle;
 
 /**
  *
- * A helper command that allows you to inspect the SQL Liquibase will run to revert the changeSet specified in the rollbackOneChangeSet command. It is only available for Liquibase Pro users.
+ * Displays the SQL which will be executed when the corresponding rollbackOneChangeSet command is
+ * executed.  This command does not perform the actual rollback.  A Liquibase Pro license key is required.
  *
  * @goal rollbackOneChangeSetSQL
  *
@@ -105,7 +104,8 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         //
         // Check the Pro license
         //
-        if (! hasProLicense()) {
+        boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+        if (! hasProLicense) {
             throw new LiquibaseException("The command 'rollbackOneChangeSetSQL' requires a Liquibase Pro License, available at http://liquibase.org.");
         }
         Database database = liquibase.getDatabase();
