@@ -74,6 +74,8 @@ Diff Commands
 Documentation Commands
  dbDoc <outputDirectory>         Generates Javadoc-like documentation
                                  based on current database and change log
+ history                         Writes details about what changeSets have been
+                                 applied to the database to standard out
 
 Maintenance Commands
  tag <tag string>          'Tags' the current database state for future rollback
