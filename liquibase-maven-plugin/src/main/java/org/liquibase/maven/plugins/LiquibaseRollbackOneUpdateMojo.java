@@ -16,10 +16,9 @@ import java.util.Map;
 
 /**
  *
- * Reverts (rolls back) all the changesets from one update, identified by
- * "deploymentId", if all the changesets can be rolled back.  If not, a
- * WARNING message will provide details.  A Liquibase Pro license key is required.
- * Note:  A list of deploymentIds may be viewed by using the "history" command.
+ * Reverts (rolls back) all non-sequential change sets related by a specific deployment ID
+ * that were made during a previous change to your database in a non-sequential manner.
+ * It is only available for Liquibase Pro users.
  *
  * @goal rollbackOneUpdate
  *
@@ -27,7 +26,7 @@ import java.util.Map;
 public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMojo {
     /**
      *
-     * The Deployment ID to rollback
+     * Specifies the Deployment ID you want to rollback
      *
      * @parameter property="liquibase.deploymentId"
      *
@@ -36,32 +35,17 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
 
     /**
      *
-     * Required flag for RollbackOneChangeSet
+     * A required flag for rollbackOneUpdate.
      *
      * @parameter property="liquibase.force"
      *
      */
     protected String force;
 
-    /**
-     *
-     * The path to a rollback script
-     *
-     * @parameter property="liquibase.rollbackScript"
-     *
-     */
-    protected String rollbackScript;
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         commandName = "rollbackOneUpdate";
         super.execute();
-    }
-
-    @Override
-    protected void printSettings(String indent) {
-      super.printSettings(indent);
-        getLog().info(indent + "Rollback script:   " + rollbackScript);
     }
 
     @Override
@@ -98,7 +82,6 @@ public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMo
         Map<String, Object> argsMap = new HashMap<String, Object>();
         argsMap.put("deploymentId", this.deploymentId);
         argsMap.put("force", this.force);
-        argsMap.put("rollbackScript", this.rollbackScript);
         argsMap.put("database", database);
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
