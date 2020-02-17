@@ -23,14 +23,14 @@ import java.util.List;
 public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo {
 
   /**
-   * Specifies the directory where Liquibase can find your <i>change-log</i> file.
+   * Specifies the directory where Liquibase can find your <i>changelog</i> file.
    *
    * @parameter property="liquibase.changeLogDirectory"
    */
   protected String changeLogDirectory;
 
   /**
-   * Specifies the <i>change-log</i> file for Liquibase to use.
+   * Specifies the <i>changelog</i> file for Liquibase to use.
    * @parameter property="liquibase.changeLogFile"
    */
   protected String changeLogFile;
