@@ -324,14 +324,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             return;
         }
 
+        ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
+        ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
+        configureFieldsAndValues(fileOpener);
+
         //
         // Check for a LiquibasePro license
         //
         hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-
-        ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-        ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
-        configureFieldsAndValues(fileOpener);
 
 //        LogService.getInstance().setDefaultLoggingLevel(logging);
         getLog().info(CommandLineUtils.getBanner());
