@@ -99,7 +99,9 @@ public class MavenUtils {
       }
       if (liquibaseProLicenseKey == null) {
           log.info("");
-          log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://liquibase.org.");
+          if (commandName != null) {
+            log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://liquibase.org.");
+          }
           log.info("");
           hasProLicense = false;
       }
