@@ -25,6 +25,7 @@ import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -121,6 +122,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             method.invoke(sqlConn, 1, props);
         } catch (Exception e) {
             LogService.getLog(getClass()).info(LogType.LOG, "Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+            throw new UnexpectedLiquibaseException(e);
         }
     }
 
@@ -146,6 +148,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             isProxy = (boolean) method.invoke(sqlConn);
         } catch (Exception e) {
             LogService.getLog(getClass()).info(LogType.LOG, "Could not check if a session is a proxy session on OracleDatabase: " + e.getCause().getMessage());
+            throw new UnexpectedLiquibaseException(e);
         }
 
         return isProxy;
@@ -172,6 +175,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             method.invoke(sqlConn, 1);
         } catch (Exception e) {
             LogService.getLog(getClass()).info(LogType.LOG, "Could not close proxy session on OracleDatabase: " + e.getCause().getMessage());
+            throw new UnexpectedLiquibaseException(e);
         }
     }
 
