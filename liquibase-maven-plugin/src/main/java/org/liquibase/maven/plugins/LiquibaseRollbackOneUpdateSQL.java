@@ -91,8 +91,8 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         }
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
-        if (force == null || (force != null && ! Boolean.parseBoolean(force))) {
-            throw new LiquibaseException("Invalid value for --force.  You must specify 'liquibase.force=true' to use rollbackOneUpdate.");
+        if (force != null && ! Boolean.parseBoolean(force)) {
+            throw new LiquibaseException("Invalid value for --force.  You must specify 'liquibase.force=true' to use rollbackOneUpdateSQL.");
         }
         argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);
