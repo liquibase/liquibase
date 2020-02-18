@@ -21,8 +21,8 @@ public class LicenseServiceUtils {
         return new ValidationErrors();
       }
       if (licenseService.licenseIsValid(licenseType)) {
-        String message = String.format("Found valid license with subject '%s'",licenseType);
-        LOG.info(message);
+        String message = String.format("Found valid license with subject '%s' for '%s'",licenseType, change.getDescription());
+        LOG.debug(message);
         return new ValidationErrors();
       }
 
