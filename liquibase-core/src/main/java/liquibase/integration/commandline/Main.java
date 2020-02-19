@@ -371,6 +371,8 @@ public class Main {
             logLevel = Level.FINE;
         } else if (logLevelName.equals("WARN")) {
             logLevel = Level.WARNING;
+        } else if (logLevelName.equals("ERROR")) {
+            logLevel = Level.SEVERE;
         } else {
             try {
                 logLevel = Level.parse(logLevelName);

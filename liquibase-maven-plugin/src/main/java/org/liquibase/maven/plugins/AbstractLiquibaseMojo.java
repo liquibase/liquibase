@@ -330,9 +330,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         //
         hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
 
-        ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
+        ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
         try {
-            Scope.child(Scope.Attr.resourceAccessor, getResourceAccessor(artifactClassLoader), () -> {
+            Map<String, Object> scopeValues = new HashMap<>();
+            scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
+            scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
+
+            Scope.child(scopeValues, () -> {
 
                 configureFieldsAndValues();
 
@@ -349,7 +353,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 try {
                     String dbPassword = (emptyPassword || (password == null)) ? "" : password;
                     String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
-                    database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
+                    database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
                             url,
                             username,
                             dbPassword,
