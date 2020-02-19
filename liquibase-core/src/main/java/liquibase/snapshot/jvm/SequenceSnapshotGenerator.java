@@ -207,16 +207,16 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + ignore);
             }
             if (version < 10) { // 'pg_sequence' view does not exists yet
-                return "SELECT c.relname AS SEQUENCE_NAME FROM pg_class c " +
+                return "SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c " +
                         "join pg_namespace on c.relnamespace = pg_namespace.oid " +
                         "WHERE c.relkind='S' " +
                         "AND nspname = '" + schema.getName() + "' " +
                         "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)";
             } else {
-                return "SELECT c.relname AS SEQUENCE_NAME, " +
-                        "  s.seqmin AS MIN_VALUE, s.seqmax AS MAX_VALUE, s.seqincrement AS INCREMENT_BY, " +
-                        "  s.seqcycle AS WILL_CYCLE, s.seqstart AS START_VALUE, s.seqcache AS CACHE_SIZE, " +
-                        "  pg_catalog.format_type(s.seqtypid, NULL) AS SEQ_TYPE " +
+                return "SELECT c.relname AS \"SEQUENCE_NAME\", " +
+                        "  s.seqmin AS \"MIN_VALUE\", s.seqmax AS \"MAX_VALUE\", s.seqincrement AS \"INCREMENT_BY\", " +
+                        "  s.seqcycle AS \"WILL_CYCLE\", s.seqstart AS \"START_VALUE\", s.seqcache AS \"CACHE_SIZE\", " +
+                        "  pg_catalog.format_type(s.seqtypid, NULL) AS \"SEQ_TYPE\" " +
                         "FROM pg_class c " +
                         "JOIN pg_namespace ns on c.relnamespace = ns.oid " +
                         "JOIN pg_sequence s on c.oid = s.seqrelid " +
