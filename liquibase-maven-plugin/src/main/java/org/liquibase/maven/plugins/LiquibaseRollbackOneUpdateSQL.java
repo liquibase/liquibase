@@ -106,12 +106,19 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         finally {
             try {
                 outputWriter.flush();
-                outputWriter.close();
+                closeOutputWriter(outputWriter);
             }
             catch (IOException ioe) {
                 LogService.getLog(getClass()).info(LogType.LOG, String.format("Unable to close output file"));
             }
         }
+    }
+
+    private void closeOutputWriter(Writer outputWriter) throws IOException {
+        if (outputFile == null) {
+            return;
+        }
+        outputWriter.close();
     }
 
     private Writer createOutputWriter() throws IOException {
