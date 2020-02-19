@@ -1304,7 +1304,7 @@ public class Main {
             COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)){
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
-                String messageString = String.format(coreBundle.getString("no.pro.license.found"), COMMANDS.ROLLBACK_ONE_CHANGE_SET);
+                String messageString = String.format(coreBundle.getString("no.pro.license.found"), command);
                 throw new LiquibaseException(messageString);
             }
         }
