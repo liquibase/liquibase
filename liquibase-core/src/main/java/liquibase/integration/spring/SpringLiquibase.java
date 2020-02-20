@@ -487,7 +487,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     public class SpringResourceAccessor extends ClassLoaderResourceAccessor {
-
-
-    }
+		public SpringResourceAccessor() {
+			super(Thread.currentThread().getContextClassLoader());
+		}
+	}
 }

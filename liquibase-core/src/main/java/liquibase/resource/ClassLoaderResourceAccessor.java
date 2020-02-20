@@ -93,8 +93,8 @@ public class ClassLoaderResourceAccessor extends FileSystemResourceAccessor {
                 String originalUrl = metaInfoPathUrls.nextElement().toExternalForm();
                 String finalUrl = originalUrl.replaceFirst("/META-INF", "");
                 if (finalUrl.startsWith("jar:")) {
-                    if (finalUrl.endsWith("!")) {
-                        finalUrl = finalUrl.replaceFirst("^jar:", "").replaceFirst("!$", "");
+                    if (finalUrl.endsWith("!") || finalUrl.endsWith("!/")) {
+                        finalUrl = finalUrl.replaceFirst("^jar:", "").replaceFirst("!/?$", "");
                     } else {
                         logger.warning("ClassLoader URL " + finalUrl + " starts with jar: but does not end with !, don't knnow how to handle it. Skipping");
                         continue;
