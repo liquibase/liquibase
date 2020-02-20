@@ -6,8 +6,8 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * Applies the DatabaseChangeLogs to the database, testing rollback. This is
- * done by updating the database, rolling it back then updating it again.
+ * <p>Applies the DatabaseChangeLogs to the database, testing rollback. This is
+ * done by updating the database, rolling it back then updating it again.</p>
  * 
  * @description Liquibase UpdateTestingRollback Maven plugin
  * @goal updateTestingRollback

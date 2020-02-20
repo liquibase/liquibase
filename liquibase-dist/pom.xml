@@ -35,6 +35,13 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <optional>true</optional>
+        </dependency>
+
         <!-- needed for inclusion in CLI when running in newer java versions -->
 
         <dependency>
@@ -60,6 +67,13 @@
 
     <build>
         <finalName>liquibase-${liquibase.version}</finalName>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/archive</directory>
+                <targetPath>${project.build.directory}/archive</targetPath>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
 
             <plugin>
@@ -178,7 +192,7 @@
                                 </data>
                                 <data>
                                     <src>
-                                        ${project.basedir}/../liquibase-dist/src/main/archive/lib/liquibase_autocomplete.sh
+                                        ${project.basedir}/../liquibase-dist/target/archive/lib/liquibase_autocomplete.sh
                                     </src>
                                     <type>file</type>
                                     <mapper>
@@ -255,6 +269,26 @@
                     </execution>
                 </executions>
             </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>org.jacoco</groupId>-->
+<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>report-aggregate</id>-->
+<!--                        <phase>test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>report-aggregate</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>prepare-agent</goal>-->
+<!--                        </goals>-->
+<!--                        <phase>none</phase>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
@@ -341,6 +375,37 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+        <!-- install4j packager dependency. WARNING, rpmbuild required to build -->
+        <id>install4j</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonatype.install4j</groupId>
+                    <artifactId>install4j-maven-plugin</artifactId>
+                    <version>1.1.1</version>
+                    <executions>
+                        <execution>
+                            <id>install4j</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>install-license</goal>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <projectFile>${project.basedir}/src/main/install4j/liquibase.install4j</projectFile>
+                                <destination>${project.build.directory}</destination>
+                                <variables>
+                                    <liquibaseVersion>${liquibase.version}</liquibaseVersion>
+                                </variables>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
         </profile>
     </profiles>
 

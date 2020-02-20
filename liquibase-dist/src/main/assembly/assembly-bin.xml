@@ -10,16 +10,17 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>src/main/archive</directory>
+            <directory>${project.build.directory}/archive</directory>
             <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>unix</lineEnding>
             <includes>
                 <include>liquibase</include>
+                <include>examples/start-h2</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
-            <directory>src/main/archive</directory>
+            <directory>${project.build.directory}/archive</directory>
             <!-- <outputDirectory>${file.separator}</outputDirectory> is there because maven-assembly-plugin would
                  complain on Windows otherwise:
                  "OS=Windows and the assembly descriptor contains a *nix-specific root-relative-reference (starting with slash) /"
@@ -31,7 +32,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>src/main/archive</directory>
+            <directory>${project.build.directory}/archive</directory>
             <outputDirectory>${file.separator}</outputDirectory>
             <lineEnding>unix</lineEnding>
             <excludes>
@@ -86,6 +87,7 @@
                 <include>com.sun.xml.bind:jaxb-impl:jar:</include>
                 <include>com.sun.xml.bind:jaxb-core:jar:</include>
                 <include>commons-cli:commons-cli:jar:</include>
+                <include>com.h2database:h2:jar:</include>
             </includes>
         </dependencySet>
     </dependencySets>

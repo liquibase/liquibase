@@ -4,7 +4,7 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * Generates dbDocs against the database.
+ * <p>Generates dbDocs against the database.</p>
  *
  * @author Ryan Connolly
  * @goal dbDoc

@@ -12,7 +12,6 @@ release.properties
 /out
 /bin
 liquibase.integrationtest.local.properties
-/liquibase
 derby.log
 .idea
 *.iml

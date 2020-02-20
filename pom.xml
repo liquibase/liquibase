@@ -82,7 +82,9 @@
                 </executions>
             </plugin>
 
-<!--            <plugin>-->
+
+
+            <!--            <plugin>-->
 <!--                <artifactId>maven-install-plugin</artifactId>-->
 <!--                <version>2.5.2</version>-->
 <!--                <configuration>-->
@@ -98,6 +100,15 @@
 <!--            </plugin>-->
 
         </plugins>
+<!--        <pluginManagement>-->
+<!--            <plugins>-->
+<!--                <plugin>-->
+<!--                    <groupId>org.jacoco</groupId>-->
+<!--                    <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--                    <version>0.8.5</version>-->
+<!--                </plugin>-->
+<!--            </plugins>-->
+<!--        </pluginManagement>-->
 
     </build>
 
