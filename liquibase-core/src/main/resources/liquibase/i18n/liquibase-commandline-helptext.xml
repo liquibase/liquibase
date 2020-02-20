@@ -80,9 +80,10 @@ Diff Commands
 Documentation Commands
  dbDoc <outputDirectory>         Generates Javadoc-like documentation
                                  based on current database and change log
- history                         Writes details about what changeSets have been
-                                 applied to the database to standard out
-
+ history                         Displays the changesets already deployed to the
+                                 database in the specified connection url, grouped
+                                 by default according to their update command’s
+                                 “deployment_id” value.
 Maintenance Commands
  tag <tag string>          'Tags' the current database state for future rollback
  tagExists <tag string>    Checks whether the given tag is already existing
