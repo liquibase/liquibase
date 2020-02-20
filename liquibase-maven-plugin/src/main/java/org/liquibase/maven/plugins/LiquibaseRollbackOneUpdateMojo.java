@@ -16,9 +16,9 @@ import java.util.Map;
 
 /**
  *
- * Reverts (rolls back) all non-sequential change sets related by a specific deployment ID
- * that were made during a previous change to your database in a non-sequential manner.
- * It is only available for Liquibase Pro users.
+ * Rolls back all changesets from any specific update, if all changesets can be rolled back.
+ * By default, the last update is rolled back, but an optional deployentId parameter can target any update.
+ * (Liquibase Pro only).
  *
  * @goal rollbackOneUpdate
  *
@@ -26,7 +26,8 @@ import java.util.Map;
 public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMojo {
     /**
      *
-     * Specifies the Deployment ID you want to rollback
+     * Specifies the update your want to rollback.  A list of the updates's
+     * changesets grouped by their deploymentId can be found by using the <i>history</i> command.
      *
      * @parameter property="liquibase.deploymentId"
      *
