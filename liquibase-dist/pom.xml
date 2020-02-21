@@ -19,6 +19,7 @@
     <properties>
         <deploy.repositoryId>sonatype-nexus-staging</deploy.repositoryId>
         <deploy.url>https://oss.sonatype.org/content/repositories/snapshots</deploy.url>
+        <install4j.jre.root>PASS_IN_AS_SYSTEM_PROPERTY</install4j.jre.root>
     </properties>
 
     <dependencies>
@@ -270,25 +271,25 @@
                 </executions>
             </plugin>
 
-<!--            <plugin>-->
-<!--                <groupId>org.jacoco</groupId>-->
-<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>report-aggregate</id>-->
-<!--                        <phase>test</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>report-aggregate</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>prepare-agent</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>none</phase>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+            <!--            <plugin>-->
+            <!--                <groupId>org.jacoco</groupId>-->
+            <!--                <artifactId>jacoco-maven-plugin</artifactId>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>report-aggregate</id>-->
+            <!--                        <phase>test</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>report-aggregate</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                    <execution>-->
+            <!--                        <goals>-->
+            <!--                            <goal>prepare-agent</goal>-->
+            <!--                        </goals>-->
+            <!--                        <phase>none</phase>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
         </plugins>
     </build>
 
@@ -378,34 +379,70 @@
         </profile>
 
         <profile>
-        <!-- install4j packager dependency. WARNING, rpmbuild required to build -->
-        <id>install4j</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.sonatype.install4j</groupId>
-                    <artifactId>install4j-maven-plugin</artifactId>
-                    <version>1.1.1</version>
-                    <executions>
-                        <execution>
-                            <id>install4j</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>install-license</goal>
-                                <goal>compile</goal>
-                            </goals>
-                            <configuration>
-                                <projectFile>${project.basedir}/src/main/install4j/liquibase.install4j</projectFile>
-                                <destination>${project.build.directory}</destination>
-                                <variables>
-                                    <liquibaseVersion>${liquibase.version}</liquibaseVersion>
-                                </variables>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
+            <!-- install4j packager dependency. WARNING, rpmbuild required to build -->
+            <id>install4j</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.4.1</version>
+                        <executions>
+                            <execution>
+                                <id>openjdk-windows</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>
+                                        ${install4j.jre.root}/adopt-openjdk-windows-amd64-13.0.1.tar.gz
+                                    </url>
+                                    <unpack>false</unpack>
+                                    <outputDirectory>${project.build.directory}/downloaded</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>openjdk-mac</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>
+                                        ${install4j.jre.root}/adopt-openjdk-macos-amd64-13.0.1.tar.gz
+                                    </url>
+                                    <unpack>false</unpack>
+                                    <outputDirectory>${project.build.directory}/downloaded</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.install4j</groupId>
+                        <artifactId>install4j-maven-plugin</artifactId>
+                        <version>1.1.1</version>
+                        <executions>
+                            <execution>
+                                <id>install4j</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>install-license</goal>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <projectFile>${project.basedir}/src/main/install4j/liquibase.install4j</projectFile>
+                                    <destination>${project.build.directory}</destination>
+                                    <variables>
+                                        <liquibaseVersion>${liquibase.version}</liquibaseVersion>
+                                    </variables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
