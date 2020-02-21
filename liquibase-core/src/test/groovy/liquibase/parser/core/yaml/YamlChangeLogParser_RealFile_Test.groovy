@@ -546,8 +546,9 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].name == "new_col_seq"
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].defaultValueSequenceNext.toString() == "seq_test"
 
-        ((CreateIndexChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[2]).columns[0].name == "id"
-        assert ((CreateIndexChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[2]).columns[0].constraints.isUnique()
+        CreateIndexChange createIndex = (CreateIndexChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[2]
+        createIndex.columns[0].name == "id"
+
 
         ((LoadDataChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[3]).columns[0].name == "id"
         ((LoadDataChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[3]).columns[1].name == "new_col"
@@ -557,12 +558,17 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[4]).columns[0].value == "false"
 
         and: "forms of update parse correctly"
-//        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).tableName == "updateTest"
-//        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).where == "id=:value and other_val=:value"
-//        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams.size() == 2
-//        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams[0].valueNumeric == 134
-//        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams[1].name == "other_val"
-//        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams[1].valueNumeric == 768
+        UpdateDataChange update = (UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]
+        update.tableName == "updateTest"
+        update.columns.size() == 3
+        update.columns[1].name == "dateCol"
+        update.columns[2].name == "intCol"
+        update.columns[2].valueNumeric == 11
+        update.where == "id=:value and other_val=:value"
+        update.whereParams.size() == 2
+        update.whereParams[0].valueNumeric == 134
+        update.whereParams[1].name == "other_val"
+        update.whereParams[1].valueNumeric == 768
 
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[1]).tableName == "updateTest"
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[1]).where == "id=2"

@@ -7,6 +7,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Drops an existing table.
  */
@@ -36,7 +38,8 @@ public class DropTableChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "table", requiredForDatabase = ALL,
+            description = "Name of the table to drop")
     public String getTableName() {
         return tableName;
     }
@@ -45,6 +48,7 @@ public class DropTableChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @DatabaseChangeProperty(description = "Add the `CASCADE CONSTRAINTS` to the statement")
     public Boolean isCascadeConstraints() {
         return cascadeConstraints;
     }

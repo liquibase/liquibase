@@ -9,6 +9,8 @@ import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Modifies properties of an existing sequence. StartValue is not allowed since we cannot alter the starting sequence number
  */
@@ -44,7 +46,8 @@ public class AlterSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "sequence")
+    @DatabaseChangeProperty(mustEqualExisting = "sequence", requiredForDatabase = ALL,
+            description = "Name of the sequence to alter")
     public String getSequenceName() {
         return sequenceName;
     }
@@ -99,6 +102,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.cacheSize = cacheSize;
     }
 
+    @DatabaseChangeProperty(description = "Can the sequence cycle when it hits the max value?")
     public Boolean getCycle() {
         return cycle;
     }

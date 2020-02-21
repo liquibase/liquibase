@@ -8,6 +8,8 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Drops a not-null constraint from an existing column.
  */
@@ -45,7 +47,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
     @DatabaseChangeProperty(
         description = "Name of the table containing that the column to drop the constraint from",
-        mustEqualExisting = "notNullConstraint.table"
+        mustEqualExisting = "notNullConstraint.table", requiredForDatabase = ALL
     )
     public String getTableName() {
         return tableName;
@@ -57,7 +59,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
     @DatabaseChangeProperty(
         description = "Name of the column to drop the constraint from",
-        mustEqualExisting = "notNullConstraint.column"
+        mustEqualExisting = "notNullConstraint.column", requiredForDatabase = ALL
     )
     public String getColumnName() {
         return columnName;

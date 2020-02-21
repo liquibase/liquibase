@@ -18,14 +18,18 @@ import liquibase.structure.core.Table;
 
 import java.util.*;
 
-@DatabaseChange(name="dropAllForeignKeyConstraints", description = "Drops all foreign key constraints for a table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
+@DatabaseChange(name="dropAllForeignKeyConstraints", description = "Drops all foreign key constraints for a table",
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", description = "Name of the table containing columns constrained by foreign keys", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0",
+            description = "Catalog name of the table containing columns constrained by foreign keys")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -34,7 +38,8 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="table.schema",
+            description = "Schema name of the table containing columns constrained by foreign keys")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -43,7 +48,8 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "table", requiredForDatabase = "all")
+    @DatabaseChangeProperty(mustEqualExisting = "table", requiredForDatabase = ALL,
+            description = "Name of the table containing columns constrained by foreign keys")
     public String getBaseTableName() {
         return baseTableName;
     }

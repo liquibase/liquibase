@@ -3,10 +3,13 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
+
+import static liquibase.change.ChangeParameterMetaData.ALL;
 
 @DatabaseChange(name="setTableRemarks", description = "Set remarks on a table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SetTableRemarksChange extends AbstractChange {
@@ -55,6 +58,7 @@ public class SetTableRemarksChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @DatabaseChangeProperty(description = "Comment to set on the table", requiredForDatabase = ALL)
     public String getRemarks() {
         return remarks;
     }

@@ -13,6 +13,8 @@ import liquibase.structure.core.Column;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Inserts data into an existing table.
  */
@@ -54,7 +56,8 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to insert data into")
+    @DatabaseChangeProperty(mustEqualExisting = "table", requiredForDatabase = ALL,
+            description = "Name of the table to insert data into")
     public String getTableName() {
         return tableName;
     }
@@ -64,7 +67,8 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
-    @DatabaseChangeProperty(mustEqualExisting = "table.column", description = "Data to insert into columns", requiredForDatabase = "all")
+    @DatabaseChangeProperty(mustEqualExisting = "table.column", requiredForDatabase = ALL,
+            description = "Data to insert into columns")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -145,7 +149,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
-    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "!h2, mysql")
     public String getDbms() {
         return dbms;
     }

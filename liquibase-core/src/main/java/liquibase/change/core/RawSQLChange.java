@@ -9,6 +9,8 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
  * are not flexible enough, or buggy. 
@@ -48,7 +50,8 @@ public class RawSQLChange extends AbstractSQLChange {
     }
 
     @Override
-    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, exampleValue = "insert into person (name) values ('Bob')", requiredForDatabase = "all")
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, description = "The SQL to execute",
+            exampleValue = "insert into person (name) values ('Bob')", requiredForDatabase = ALL, supportsDatabase = ALL)
     public String getSql() {
         return super.getSql();
     }

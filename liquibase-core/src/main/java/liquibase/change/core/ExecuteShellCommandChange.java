@@ -32,6 +32,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+import static liquibase.change.ChangeParameterMetaData.NONE;
+
 /**
  * Executes a given shell executable.
  */
@@ -78,11 +81,14 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.args.add(arg);
     }
 
+    @DatabaseChangeProperty(supportsDatabase = ALL, requiredForDatabase = NONE,
+            description = "Arguments for the executable" )
     public List<String> getArgs() {
         return Collections.unmodifiableList(args);
     }
 
-    @DatabaseChangeProperty(description = "Timeout value for executable to run", exampleValue = "10s")
+    @DatabaseChangeProperty(supportsDatabase = ALL, requiredForDatabase = NONE,
+            description = "Timeout value for executable to run", exampleValue = "10s")
     public String getTimeout() {
         return timeout;
     }
@@ -91,7 +97,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.timeout = timeout;
     }
 
-    @DatabaseChangeProperty(description = "List of operating systems on which to execute the command (taken from the os.name Java system property)", exampleValue = "Windows 7")
+    @DatabaseChangeProperty( supportsDatabase = ALL, requiredForDatabase = NONE,
+            description = "List of operating systems on which to execute the command " +
+            "(taken from the os.name Java system property)", exampleValue = "Windows 7")
     public List<String> getOs() {
         return os;
     }
@@ -113,7 +121,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
         return validationErrors;
     }
-
 
     @Override
     public Warnings warn(Database database) {

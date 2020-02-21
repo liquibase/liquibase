@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static liquibase.change.ChangeParameterMetaData.NONE;
+
 /**
  * Drops an existing column from a table.
  */
@@ -67,8 +69,8 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         return super.validate(database);
     }
     
-    @DatabaseChangeProperty(description = "Name of the column to drop, if dropping a single column", requiredForDatabase = "none",
-        mustEqualExisting = "column")
+    @DatabaseChangeProperty( requiredForDatabase = NONE, mustEqualExisting = "column",
+            description = "Name of the column to drop, if dropping a single column. Ignored if nested 'column's are defined" )
     public String getColumnName() {
         return columnName;
     }
@@ -96,7 +98,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = schemaName;
     }
     
-    @DatabaseChangeProperty(description = "Name of the table containing the column to drop",
+    @DatabaseChangeProperty(description = "Name of the table containing the column(s) to drop",
         mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
@@ -176,7 +178,6 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         } catch (InvalidExampleException|DatabaseException e) {
             return new ChangeStatus().unknown(e);
         }
-    
     }
     
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) throws DatabaseException {
@@ -253,7 +254,9 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
     
     @Override
-    @DatabaseChangeProperty(description = "Columns to be dropped if dropping multiple columns. If this is populated, the columnName attribute is ignored.", requiredForDatabase = "none")
+    @DatabaseChangeProperty(requiredForDatabase = NONE,
+            description = "Columns to be dropped if dropping multiple columns. If this is populated, " +
+            "the columnName attribute is ignored.")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

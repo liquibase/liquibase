@@ -423,7 +423,6 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
 
-
         then: "comment in sql is parsed correctly"
         changeLog.getChangeSet(path, "nvoxland", "comment in sql").comments == "This is a changeSet level comment"
         ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "comment in sql").changes[0]).comment == "There is a comment in the SQL"
@@ -573,10 +572,17 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         and: "forms of update parse correctly"
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).tableName == "updateTest"
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).where == "id=:value and other_val=:value"
-        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams.size() == 2
-        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams[0].valueNumeric == 134
-        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams[1].name == "other_val"
-        ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]).whereParams[1].valueNumeric == 768
+        UpdateDataChange update0 = (UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[0]
+        update0.columns.size() == 3
+        update0.columns[0].name == "varcharColumn"
+        update0.columns[0].value == "new column 1 value"
+        update0.columns[1].name == "dateCol"
+        update0.columns[2].name == "intCol"
+        update0.columns[2].valueNumeric == 11
+        update0.whereParams.size() == 2
+        update0.whereParams[0].valueNumeric == 134
+        update0.whereParams[1].name == "other_val"
+        update0.whereParams[1].valueNumeric == 768
 
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[1]).tableName == "updateTest"
         ((UpdateDataChange) changeLog.getChangeSet(path, "nvoxland", "update with whereParams").changes[1]).where == "id=2"

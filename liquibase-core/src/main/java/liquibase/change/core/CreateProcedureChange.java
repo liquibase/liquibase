@@ -72,7 +72,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(exampleValue = "new_customer")
+    @DatabaseChangeProperty( exampleValue = "new_customer", supportsDatabase = {"mssql"},
+            description ="Name of the procedure. Required if <code>replaceIfExists</code> = true")
     public String getProcedureName() {
         return procedureName;
     }
@@ -111,7 +112,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.relativeToChangelogFile = relativeToChangelogFile;
     }
 
-    @DatabaseChangeProperty(
+    @DatabaseChangeProperty( description = "The SQL creating the procedure. Either this or the <code>path</code> " +
+            "attribute needs to be defined.",
         exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
                 "    IS\n" +
                 "    BEGIN\n" +
@@ -143,7 +145,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @DatabaseChangeProperty(
-        exampleValue = "h2, oracle",
+        exampleValue = "h2, !oracle, mysql",
         since = "3.1"
     )
     public String getDbms() {
@@ -154,6 +156,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.dbms = dbms;
     }
 
+    @DatabaseChangeProperty(isChangeProperty = false,
+            description = "TODO: NOT USED! NESTED_OBJECT in XSD")
     public String getComments() {
         return comments;
     }
@@ -162,7 +166,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.comments = comments;
     }
 
-    @DatabaseChangeProperty
+    @DatabaseChangeProperty(description = "If the stored procedure defined by <code>procedureName</code> already " +
+            "exits alter it instead of creating it.")
     public Boolean getReplaceIfExists() {
         return replaceIfExists;
     }

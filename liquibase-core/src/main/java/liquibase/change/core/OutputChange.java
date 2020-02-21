@@ -15,11 +15,14 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+import static liquibase.change.ChangeParameterMetaData.NONE;
+
 @DatabaseChange(name="output", description = "Logs a message and continues execution.", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "3.3")
 public class OutputChange extends AbstractChange {
 
     private String message;
-    private String target = "";
+    private String target;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -28,7 +31,8 @@ public class OutputChange extends AbstractChange {
         return validate;
     }
 
-    @DatabaseChangeProperty(description = "Message to output", exampleValue = "Make sure you feed the cat", serializationType = LiquibaseSerializable.SerializationType.DIRECT_VALUE)
+    @DatabaseChangeProperty(description = "Message to output", exampleValue = "Make sure you feed the cat",
+            serializationType = SerializationType.DIRECT_VALUE, supportsDatabase = ALL, requiredForDatabase = ALL)
     public String getMessage() {
         return message;
     }
@@ -37,7 +41,8 @@ public class OutputChange extends AbstractChange {
         this.message = StringUtils.trimToNull(message);
     }
 
-    @DatabaseChangeProperty(description = "Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG. Default value: STDERR", exampleValue = "STDERR")
+    @DatabaseChangeProperty(description = "Target for message. Possible values: STDOUT, STDERR, FATAL, WARN, INFO, DEBUG",
+            exampleValue = "STDERR", supportsDatabase = ALL, requiredForDatabase = NONE)
     public String getTarget() {
         if (target == null) {
             return "STDERR";
@@ -48,7 +53,6 @@ public class OutputChange extends AbstractChange {
     public void setTarget(String target) {
         this.target = StringUtils.trimToNull(target);
     }
-
 
     @Override
     public SqlStatement[] generateStatements(Database database) {

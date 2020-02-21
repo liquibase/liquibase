@@ -21,6 +21,8 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.*;
 
+import static liquibase.change.core.LoadDataChange.LOAD_DATA_TYPE.*;
+
 /**
  * Static metadata about a {@link Change} parameter.
  * Instances of this class are tracked within {@link ChangeMetaData} and are immutable.
@@ -28,6 +30,8 @@ import java.util.*;
 public class ChangeParameterMetaData {
 
     public static final String COMPUTE = "COMPUTE";
+    public static final String ALL = "all";
+    public static final String NONE = "none";
 
     private Change change;
     private String parameterName;
@@ -90,13 +94,13 @@ public class ChangeParameterMetaData {
 
     protected Set<String> analyzeSupportedDatabases(String[] supportedDatabases) {
         if (supportedDatabases == null) {
-            supportedDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
+            supportedDatabases = new String[]{COMPUTE};
         }
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if ((supportedDatabases.length == 1) && StringUtils.join(supportedDatabases, ",").equals
-            (ChangeParameterMetaData.COMPUTE)) {
+        if ((supportedDatabases.length == 1)
+          && StringUtils.join(supportedDatabases, ",").equals(COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 if ((database.getShortName() == null) || "unsupported".equals(database.getShortName())) {
@@ -124,12 +128,12 @@ public class ChangeParameterMetaData {
             }
 
             if (validDatabases == 0) {
-                return new HashSet<>(Arrays.asList("all"));
+                return new HashSet<>(Arrays.asList(ALL));
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<>(Arrays.asList("all"));
+                computedDatabases = new HashSet<>(Arrays.asList(ALL));
             }
 
-            computedDatabases.remove("none");
+            computedDatabases.remove(NONE);
 
             return computedDatabases;
         } else {
@@ -140,13 +144,13 @@ public class ChangeParameterMetaData {
 
     protected Set<String> analyzeRequiredDatabases(String[] requiredDatabases) {
         if (requiredDatabases == null) {
-            requiredDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
+            requiredDatabases = new String[]{COMPUTE};
         }
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if ((requiredDatabases.length == 1) && StringUtils.join(requiredDatabases, ",").equals
-            (ChangeParameterMetaData.COMPUTE)) {
+        if ((requiredDatabases.length == 1)
+           && StringUtils.join(requiredDatabases, ",").equals(COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
@@ -170,14 +174,14 @@ public class ChangeParameterMetaData {
             if (validDatabases == 0) {
                 return new HashSet<>();
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<>(Arrays.asList("all"));
+                computedDatabases = new HashSet<>(Arrays.asList(ALL));
             }
 
-            computedDatabases.remove("none");
+            computedDatabases.remove(NONE);
         } else {
             computedDatabases = new HashSet<>(Arrays.asList(requiredDatabases));
         }
-        computedDatabases.remove("none");
+        computedDatabases.remove(NONE);
         return computedDatabases;
     }
 
@@ -247,11 +251,11 @@ public class ChangeParameterMetaData {
      * required database list contains the string "all"
      */
     public boolean isRequiredFor(Database database) {
-        return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName());
+        return requiredForDatabase.contains(ALL) || requiredForDatabase.contains(database.getShortName());
     }
 
     public boolean supports(Database database) {
-        return supportedDatabases.contains("all") || supportedDatabases.contains(database.getShortName());
+        return supportedDatabases.contains(ALL) || supportedDatabases.contains(database.getShortName());
     }
 
 
@@ -357,7 +361,7 @@ public class ChangeParameterMetaData {
             Object exampleValue = null;
 
             for (Map.Entry<String, Object> entry: exampleValues.entrySet()) {
-                if ("all".equalsIgnoreCase(entry.getKey())) {
+                if (ALL.equalsIgnoreCase(entry.getKey())) {
                     exampleValue = entry.getValue();
                 } else if (DatabaseList.definitionMatches(entry.getKey(), database, false)) {
                     return entry.getValue();
@@ -384,8 +388,6 @@ public class ChangeParameterMetaData {
         standardExamples.put("viewName", "v_person");
         standardExamples.put("constraintName", "const_name");
         standardExamples.put("primaryKey", "pk_id");
-
-
 
         if (standardExamples.containsKey(parameterName)) {
             return standardExamples.get(parameterName);
@@ -427,9 +429,15 @@ public class ChangeParameterMetaData {
                 return list;
             }
             case "list of loadDataColumnConfig": {
-                ArrayList<ColumnConfig> list = new ArrayList<>();
-                list.add(new LoadDataColumnConfig().setName("id").setType("int"));
-                return list;
+                LoadDataColumnConfig cfg = new LoadDataColumnConfig();
+                cfg.setName("id");
+                cfg.setType(NUMERIC + "");
+                cfg.setHeader("header1");
+                LoadDataColumnConfig cfg2 = new LoadDataColumnConfig();
+                cfg2.setName("name");
+                cfg2.setType(BOOLEAN + "");
+                cfg2.setIndex(3);
+                return Arrays.asList(cfg, cfg2);
             }
             default:
                 throw new UnexpectedLiquibaseException("Unknown dataType " + dataType + " for " + getParameterName());

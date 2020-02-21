@@ -7,6 +7,8 @@ import liquibase.change.DatabaseChangeProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Encapsulates common fields for update and delete changes.
  */
@@ -47,7 +49,8 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, exampleValue = "name='Bob'")
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, exampleValue = "name='Bob'",
+        description="Allows to define the 'where' condition(s) string", supportsDatabase = ALL)
     public String getWhere() {
         return where;
     }

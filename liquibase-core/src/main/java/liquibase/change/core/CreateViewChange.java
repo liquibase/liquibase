@@ -126,6 +126,7 @@ public class CreateViewChange extends AbstractChange {
         this.encoding = encoding;
     }
 
+    @DatabaseChangeProperty(description = "Comments stored for the view")
     public String getRemarks() {
         return remarks;
     }

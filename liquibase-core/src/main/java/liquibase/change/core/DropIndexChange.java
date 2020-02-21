@@ -7,6 +7,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
 import liquibase.structure.core.Index;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Drops an existing index.
  */
@@ -29,7 +31,8 @@ public class DropIndexChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "index", requiredForDatabase = ALL,
+            description = "Name of the index to drop")
     public String getIndexName() {
         return indexName;
     }
@@ -38,7 +41,8 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name fo the indexed table.", requiredForDatabase = { "sybase","mysql","mssql","mariadb", "asany" })
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the indexed table.",
+            requiredForDatabase = { "sybase","mysql","mssql","mariadb", "asany" })
     public String getTableName() {
         return tableName;
     }

@@ -88,7 +88,8 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    @DatabaseChangeProperty(exampleValue = "100")
+    @DatabaseChangeProperty(exampleValue = "100",
+            description = "Initial value of the increment")
     public BigInteger getStartWith() {
         return startWith;
     }
@@ -97,7 +98,8 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.startWith = startWith;
     }
 
-    @DatabaseChangeProperty(exampleValue = "1")
+    @DatabaseChangeProperty(exampleValue = "1",
+            description = "The value the increment incremented by each call")
     public BigInteger getIncrementBy() {
         return incrementBy;
     }
@@ -105,7 +107,10 @@ public class AddAutoIncrementChange extends AbstractChange {
     public void setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
     }
-@DatabaseChangeProperty(exampleValue = "true", since = "3.6")
+
+    @DatabaseChangeProperty(exampleValue = "true", since = "3.6", supportsDatabase = {"oracle"},
+            description = "When using generationType 'BY DEFAULT' then defaultOnNull = true" +
+            " allows the identity to be used if the identity column is referenced, but a value of NULL is specified.")
     public Boolean getDefaultOnNull() {
         return defaultOnNull;
     }
@@ -114,7 +119,8 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.defaultOnNull = defaultOnNull;
     }
 
-    @DatabaseChangeProperty(exampleValue = "ALWAYS", since = "3.6")
+    @DatabaseChangeProperty(exampleValue = "ALWAYS", since = "3.6",
+            description = "Type of the generation in 'GENERATED %s AS IDENTITY'. ALWAYS | BY DEFAULT")
     public String getGenerationType() {
         return generationType;
     }

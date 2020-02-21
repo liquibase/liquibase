@@ -21,6 +21,8 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static liquibase.change.ChangeParameterMetaData.ALL;
+
 /**
  * Creates a new table.
  */
@@ -205,7 +207,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = ALL, description = "Column definitions")
     public List<ColumnConfig> getColumns() {
         if (columns == null) {
             return new ArrayList<>();
@@ -244,7 +246,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
-
+    @DatabaseChangeProperty(description = "Name of the tablespace, the table created in")
     public String getTablespace() {
         return tablespace;
     }
@@ -258,6 +260,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         columns.add(column);
     }
 
+    @DatabaseChangeProperty(description = "Comments stored for the table")
     public String getRemarks() {
         return remarks;
     }
