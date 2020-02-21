@@ -4,6 +4,7 @@ import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -95,12 +96,39 @@ public class CompositeResourceAccessor implements ResourceAccessor {
             } else {
                 throw new ClassNotFoundException(name);
             }
-
-
         }
 
-        
 
+        @Override
+        public URL getResource(String name) {
+            for (ClassLoader cl : classLoaders) {
+                URL url = cl.getResource(name);
+                if (url != null)
+                    return url;
+            }
+
+            // Try with the context class loader associated with the current thread.
+            return Thread.currentThread().getContextClassLoader().getResource(name);
+        }
+
+        @Override
+        public Enumeration<URL> getResources(String name) throws IOException {
+            List<URL> urls = new ArrayList<>();
+
+            for (ClassLoader cl : classLoaders) {
+                Enumeration<URL> resources = cl.getResources(name);
+                while (resources.hasMoreElements()) {
+                    urls.add(resources.nextElement());
+                }
+            }
+
+            if (!urls.isEmpty()) {
+                return Collections.enumeration(urls);
+            }
+
+            // Try with the context class loader associated with the current thread.
+            return Thread.currentThread().getContextClassLoader().getResources(name);
+        }
     }
 
     @Override
