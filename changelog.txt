@@ -1,7 +1,14 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 3.8.5 (2020.2.6)
+Changes in version 3.8.7 (2020.2.21)
+
+- New liquibase history command
+- [Pro] New liquibase rollbackOneUpdate command
+- PR#927 CompositeClassLoader does not implement getResource(String)
+- `liquibase --help` was improved to include missing commands and correct information
+
+Changes in version 3.8.6 (2020.2.6)
 
 - New graphical installer for Windows and Mac
 - New examples directory with sample xml and sql changelogs and test h2 database

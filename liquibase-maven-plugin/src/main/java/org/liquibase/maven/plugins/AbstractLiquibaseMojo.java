@@ -131,20 +131,20 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected String propertyProviderClass;
     /**
-     * Controls whether users are prompted before executing changese to a non-local database.
+     * Controls whether users are prompted before executing changeSet to a non-local database.
      *
      * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="true"
      */
     protected boolean promptOnNonLocalDatabase;
 
     /**
-     * Includes a maven project artifcat in the class loader which obtains the Liquibase property and changeLog files.
+     * Includes a Maven project artifact in the class loader which obtains the liquibase.properties and changelog files.
      *
      * @parameter property="liquibase.includeArtifact" default-value="true"
      */
     protected boolean includeArtifact;
     /**
-     * Includes the maven test output directory in the class loader which obtainst he Liquibase property and changeLog files.
+     * Includes the Maven test output directory in the class loader which obtains the liquibase.properties and changelog files.
      *
      * @parameter property="liquibase.includeTestOutputDirectory" default-value="true"
      */
@@ -186,7 +186,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected boolean clearCheckSums;
     /**
-     * A list of system properties you want to to pass to the database.
+     * Specifies a list of system properties you want to to pass to the database.
      *
      * @parameter
      */
@@ -202,7 +202,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * Specifies whether to skip running Liquibase.
-     * The use of this parameter is NOT RECOMMENDED, but can be used when needed.
+     * The use of this parameter is NOT RECOMMENDED but can be used when needed.
      *
      * @parameter property="liquibase.skip" default-value="false"
      */
@@ -253,14 +253,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Liquibase liquibase;
 
     /**
-     * A property-based collection of <i>changeLog</i> properties to apply.
+     * A property-based collection of <i>changelog</i> properties to apply.
      *
      * @parameter
      */
     private Properties expressionVars;
 
     /**
-     * A map-based collection of <i>changeLog</i> properties to apply.
+     * A map-based collection of <i>changelog</i> properties to apply.
      *
      * @parameter
      */
@@ -289,7 +289,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean hasProLicense() {
         return hasProLicense;
     }
-
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
@@ -321,14 +320,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             return;
         }
         if (skip) {
-            getLog().warn("Liquibase skipped due to maven configuration");
+            getLog().warn("Liquibase skipped due to Maven configuration");
             return;
         }
-
-        //
-        // Check for a LiquibasePro license
-        //
-        hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
 
         ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
         try {
@@ -339,6 +333,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             Scope.child(scopeValues, () -> {
 
                 configureFieldsAndValues();
+
+        //
+        // Check for a LiquibasePro license
+        //
+        hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
 
                 //        LogService.getInstance().setDefaultLoggingLevel(logging);
                 getLog().info(CommandLineUtils.getBanner());

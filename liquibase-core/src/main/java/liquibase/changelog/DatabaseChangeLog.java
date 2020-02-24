@@ -9,8 +9,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
-import liquibase.logging.LogFactory;
-import liquibase.exception.*;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
@@ -24,7 +22,6 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import liquibase.util.file.FilenameUtils;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

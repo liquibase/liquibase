@@ -9,14 +9,14 @@
       <variable name="liquibaseVersion" value="3.8.6-local-SNAPSHOT" />
     </variables>
     <codeSigning macEnabled="true" macPkcs12File="../../../../../build-logic/certs/code-signing/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../../../build-logic/certs/code-signing/datical_windows.pfx" />
-    <jreBundles jdkProviderId="AdoptOpenJDK" release="openjdk13/jdk-13.0.1+9" />
   </application>
   <files>
     <mountPoints>
-      <mountPoint id="58" />
       <mountPoint id="411" location="examples" />
+      <mountPoint id="58" />
     </mountPoints>
     <entries>
+      <fileEntry mountPoint="411" file="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" fileMode="755" overrideFileMode="true" />
       <dirEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}" subDirectory="liquibase-${compiler:liquibaseVersion}">
         <exclude>
           <entry location="examples/start-h2" />
@@ -24,7 +24,6 @@
         </exclude>
       </dirEntry>
       <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/liquibase" fileMode="755" overrideFileMode="true" />
-      <fileEntry mountPoint="411" file="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" fileMode="755" overrideFileMode="true" />
     </entries>
   </files>
   <launchers>
@@ -497,7 +496,7 @@ return console.askYesNo(message, true);
   </installerGui>
   <mediaSets>
     <windows name="Windows" id="153">
-      <jreBundle jreBundleSource="generated">
+      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/adopt-openjdk-windows-amd64-13.0.1.tar.gz" manualJreEntry="true">
         <modules>
           <defaultModules set="jre" />
         </modules>
@@ -508,7 +507,7 @@ return console.askYesNo(message, true);
         <launcher id="156" />
         <launcher id="158" />
       </excludedLaunchers>
-      <jreBundle jreBundleSource="generated">
+      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/adopt-openjdk-macos-amd64-13.0.1.tar.gz" manualJreEntry="true">
         <modules>
           <defaultModules set="jre" />
         </modules>

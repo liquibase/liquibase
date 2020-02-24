@@ -16,71 +16,37 @@ import java.util.Map;
 
 /**
  *
- * Reverts (rolls back) one non-sequential <i>changeSet</i> made during a previous change to your database. It is only available for Liquibase Pro users.
+ * Rolls back all changesets from any specific update, if all changesets can be rolled back.
+ * By default, the last update is rolled back, but an optional deployentId parameter can target any update.
+ * (Liquibase Pro only).
  *
- * @goal rollbackOneChangeSet
+ * @goal rollbackOneUpdate
  *
  */
-public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLogMojo {
-
+public class LiquibaseRollbackOneUpdateMojo extends AbstractLiquibaseChangeLogMojo {
     /**
      *
-     * The change set ID to rollback
+     * Specifies the update your want to rollback.  A list of the updates's
+     * changesets grouped by their deploymentId can be found by using the <i>history</i> command.
      *
-     * @parameter property="liquibase.changeSetId"
+     * @parameter property="liquibase.deploymentId"
      *
      */
-    protected String changeSetId;
+    protected String deploymentId;
 
     /**
      *
-     * Specifies the author of the <i>changeSet</i> you want to rollback.
-     *
-     * @parameter property="liquibase.changeSetAuthor"
-     *
-     */
-    protected String changeSetAuthor;
-
-    /**
-     *
-     * Specifies the path to the <i>changelog</i> which contains the <i>change-set</i> you want to rollback.
-     *
-     * @parameter property="liquibase.changeSetPath"
-     *
-     */
-    protected String changeSetPath;
-
-    /**
-     *
-     * A required flag which indicates you intend to run rollbackOneChangeSet
+     * A required flag for rollbackOneUpdate.
      *
      * @parameter property="liquibase.force"
      *
      */
     protected String force;
 
-    /**
-     *
-     * Specifies the path to a rollback script
-     *
-     * @parameter property="liquibase.rollbackScript"
-     *
-     */
-    protected String rollbackScript;
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        commandName = "rollbackOneChangeSet";
+        commandName = "rollbackOneUpdate";
         super.execute();
-    }
-
-    @Override
-    protected void printSettings(String indent) {
-      super.printSettings(indent);
-        getLog().info(indent + "Change Set ID:     " + changeSetId);
-        getLog().info(indent + "Change Set Author: " + changeSetAuthor);
-        getLog().info(indent + "Change Set Path:   " + changeSetPath);
-        getLog().info(indent + "Rollback script:   " + rollbackScript);
     }
 
     @Override
@@ -90,16 +56,16 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         //
         boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
         if (! hasProLicense) {
-            throw new LiquibaseException("The command 'rollbackOneChangeSet' requires a Liquibase Pro License, available at http://liquibase.org.");
+            throw new LiquibaseException("The command 'rollbackOneUpdate' requires a Liquibase Pro License, available at http://liquibase.org.");
         }
         Database database = liquibase.getDatabase();
-        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneChangeSet"));
+        LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneUpdate"));
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
         if (force == null || (force != null && ! Boolean.parseBoolean(force))) {
-            throw new LiquibaseException("Invalid value for --force.  You must specify 'liquibase.force=true' to use rollbackOneChangeSet.");
+            throw new LiquibaseException("Invalid value for --force.  You must specify 'liquibase.force=true' to use rollbackOneUpdate.");
         }
         argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);
@@ -108,22 +74,19 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
             liquibaseCommand.execute();
         }
         catch (CommandExecutionException cee) {
-            throw new LiquibaseException("Error executing rollbackOneChangeSet", cee);
+            throw new LiquibaseException("Error executing rollbackOneUpdate", cee);
         }
     }
 
     private Map<String, Object> getCommandArgsObjectMap(Liquibase liquibase) throws LiquibaseException {
         Database database = liquibase.getDatabase();
         Map<String, Object> argsMap = new HashMap<String, Object>();
-        argsMap.put("changeSetId", this.changeSetId);
-        argsMap.put("changeSetAuthor", this.changeSetAuthor);
-        argsMap.put("changeSetPath", this.changeSetPath);
+        argsMap.put("deploymentId", this.deploymentId);
         argsMap.put("force", this.force);
-        argsMap.put("rollbackScript", this.rollbackScript);
-        argsMap.put("changeLogFile", this.changeLogFile);
         argsMap.put("database", database);
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
         return argsMap;
     }
+
 }
