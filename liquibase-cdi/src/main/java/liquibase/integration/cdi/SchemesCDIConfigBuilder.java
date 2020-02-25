@@ -3,7 +3,6 @@ package liquibase.integration.cdi;
 import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;

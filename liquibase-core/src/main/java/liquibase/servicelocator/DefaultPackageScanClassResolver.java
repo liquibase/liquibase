@@ -3,7 +3,6 @@ package liquibase.servicelocator;
 import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 

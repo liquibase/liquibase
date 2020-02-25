@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
 import liquibase.integration.cdi.exceptions.CyclicDependencyException;
 import liquibase.integration.cdi.exceptions.DependencyNotFoundException;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

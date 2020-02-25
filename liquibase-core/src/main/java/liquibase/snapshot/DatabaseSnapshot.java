@@ -11,7 +11,6 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;

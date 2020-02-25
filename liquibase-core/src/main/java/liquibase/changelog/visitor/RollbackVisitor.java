@@ -9,8 +9,6 @@ import liquibase.changelog.RollbackContainer;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 
 import java.util.List;
 import java.util.Set;

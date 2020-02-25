@@ -5,8 +5,6 @@ import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.ValidationFailedException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import org.junit.Test;
 
 import java.io.File;

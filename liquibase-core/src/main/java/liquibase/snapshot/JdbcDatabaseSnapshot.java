@@ -17,8 +17,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperNotNullConstraintsResultSetExtractor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;

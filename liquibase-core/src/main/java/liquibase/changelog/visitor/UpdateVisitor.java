@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
-import liquibase.logging.LogType;
 
 import java.util.Set;
 

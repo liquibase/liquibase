@@ -8,7 +8,6 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.logging.LogType;
 
 import java.util.Date;
 

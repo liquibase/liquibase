@@ -9,7 +9,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.SqlListener;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;

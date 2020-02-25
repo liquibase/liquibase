@@ -1,7 +1,6 @@
 package liquibase.util;
 
 import liquibase.Scope;
-import liquibase.logging.LogType;
 
 import java.util.ArrayList;
 import java.util.HashMap;

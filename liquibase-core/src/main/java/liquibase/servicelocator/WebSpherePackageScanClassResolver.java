@@ -1,7 +1,5 @@
 package liquibase.servicelocator;
 
-import liquibase.logging.LogType;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;

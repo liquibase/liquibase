@@ -7,8 +7,6 @@ import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;

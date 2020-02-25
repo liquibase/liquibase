@@ -32,7 +32,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -61,7 +60,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.NowAndTodayUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.NowAndTodayUtil;
 
 import java.io.IOException;
 import java.io.Writer;

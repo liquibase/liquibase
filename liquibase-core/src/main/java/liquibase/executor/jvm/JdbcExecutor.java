@@ -10,7 +10,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.listener.SqlListener;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;

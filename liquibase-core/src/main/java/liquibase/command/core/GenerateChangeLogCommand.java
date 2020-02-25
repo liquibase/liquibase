@@ -11,8 +11,6 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StringUtil;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 
 import java.io.PrintStream;
 

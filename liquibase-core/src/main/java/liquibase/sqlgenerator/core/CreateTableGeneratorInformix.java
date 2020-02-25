@@ -3,8 +3,6 @@ package liquibase.sqlgenerator.core;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;

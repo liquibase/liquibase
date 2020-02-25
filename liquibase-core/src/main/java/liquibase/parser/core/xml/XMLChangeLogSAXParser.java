@@ -3,19 +3,13 @@ package liquibase.parser.core.xml;
 import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
-import liquibase.util.file.FilenameUtils;
 import org.xml.sax.*;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 import java.io.IOException;
 import java.io.InputStream;
 

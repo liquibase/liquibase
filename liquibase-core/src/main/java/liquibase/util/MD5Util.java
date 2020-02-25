@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogType;
 
 import java.io.InputStream;
 import java.security.DigestInputStream;

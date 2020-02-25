@@ -16,8 +16,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 

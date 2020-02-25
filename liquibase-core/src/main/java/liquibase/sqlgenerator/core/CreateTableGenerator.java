@@ -15,7 +15,6 @@ import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogType;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;

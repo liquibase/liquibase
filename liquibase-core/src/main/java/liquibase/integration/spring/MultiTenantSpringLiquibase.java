@@ -5,7 +5,6 @@ package liquibase.integration.spring;
 
 import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;

@@ -5,7 +5,6 @@ import java.util.Arrays;
 import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogType;
 import liquibase.util.StringUtil;
 
 

@@ -7,7 +7,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;

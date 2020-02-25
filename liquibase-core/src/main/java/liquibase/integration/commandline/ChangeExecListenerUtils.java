@@ -3,7 +3,6 @@ package liquibase.integration.commandline;
 import liquibase.Scope;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 

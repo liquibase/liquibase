@@ -2,7 +2,6 @@ package liquibase.parser;
 
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializer;
 
 import java.util.*;

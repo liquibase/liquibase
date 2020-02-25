@@ -1,7 +1,6 @@
 package liquibase.util;
 
 import liquibase.Scope;
-import liquibase.logging.LogType;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;

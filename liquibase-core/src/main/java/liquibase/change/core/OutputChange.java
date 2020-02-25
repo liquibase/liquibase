@@ -8,7 +8,6 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;

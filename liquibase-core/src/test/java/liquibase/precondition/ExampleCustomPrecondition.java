@@ -3,8 +3,6 @@ package liquibase.precondition;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.CustomPreconditionFailedException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 
 public class ExampleCustomPrecondition implements CustomPrecondition {
 

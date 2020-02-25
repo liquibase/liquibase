@@ -10,8 +10,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sql.Sql;

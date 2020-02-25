@@ -3,8 +3,6 @@ package liquibase.structure.core;
 import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
 

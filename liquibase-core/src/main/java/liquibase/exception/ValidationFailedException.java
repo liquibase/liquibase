@@ -3,7 +3,6 @@ package liquibase.exception;
 import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ValidatingVisitor;
-import liquibase.logging.LogType;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.util.StreamUtil;

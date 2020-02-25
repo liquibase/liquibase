@@ -8,9 +8,6 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 

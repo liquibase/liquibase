@@ -10,7 +10,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.license.LicenseServiceUtils;
-import liquibase.logging.LogType;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;

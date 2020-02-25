@@ -12,12 +12,8 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseIncapableOfOperation;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.util.StringUtil;
 import liquibase.util.grammar.ParseException;
-
-import java.util.Locale;
 
 /**
  * Data type support for TIMESTAMP data types in various DBMS. All DBMS are at least expected to support the

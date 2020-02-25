@@ -11,7 +11,6 @@ import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.listener.SqlListener;
-import liquibase.logging.LogType;
 import liquibase.resource.ResourceAccessor;
 
 import java.sql.Connection;
