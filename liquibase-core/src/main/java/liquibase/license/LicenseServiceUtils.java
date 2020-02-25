@@ -20,7 +20,7 @@ public class LicenseServiceUtils {
       }
       if (licenseService.licenseIsValid(licenseType)) {
         String message = String.format("Found valid license with subject '%s' for '%s'",licenseType, change.getDescription());
-        Scope.getCurrentScope().getLog(LicenseService.class).debug(message);
+        Scope.getCurrentScope().getLog(LicenseService.class).fine(message);
         return new ValidationErrors();
       }
 

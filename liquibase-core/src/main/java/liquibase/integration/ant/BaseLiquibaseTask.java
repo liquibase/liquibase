@@ -9,6 +9,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
 import liquibase.logging.Logger;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.AntClassLoader;
@@ -170,7 +172,10 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return A ResourceAccessor.
      */
     private ResourceAccessor createResourceAccessor(AntClassLoader classLoader) {
-        return new AntResourceAccessor(classLoader, getChangeLogDirectory());
+        return new CompositeResourceAccessor(
+                new AntResourceAccessor(classLoader, getChangeLogDirectory()),
+                new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader())
+        );
     }
 
     /*
