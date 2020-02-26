@@ -265,4 +265,8 @@ public abstract class LiquibaseDataType implements PrioritizedService {
      */
     public abstract LoadDataChange.LOAD_DATA_TYPE getLoadTypeName();
 
+    public boolean isAutoIncrement() {
+        return false;
+    }
+
 }
