@@ -38,14 +38,14 @@ public abstract class TestUtil {
     static SortedSet<Class> getClasses(Class baseClass) {
         if (allClasses == null) {
             allClasses = [:]
-            findAllClasses("liquibase")
+            findAllClasses()
         }
 
         return allClasses.get(baseClass)
     }
 
 
-    private static findAllClasses(String basePackage) {
+    private static findAllClasses() {
         def workingDir = new File(".")
 
         def startDir = new File(workingDir, "target/classes")

@@ -2,6 +2,7 @@ package liquibase.servicelocator;
 
 import liquibase.Scope;
 import liquibase.exception.ServiceNotFoundException;
+import liquibase.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +15,9 @@ public class StandardServiceLocator implements ServiceLocator {
     public <T> List<T> findInstances(Class<T> interfaceType) throws ServiceNotFoundException {
         List<T> allInstances = new ArrayList<>();
 
+        final Logger log = Scope.getCurrentScope().getLog(getClass());
         for (T t : ServiceLoader.load(interfaceType, Scope.getCurrentScope().getClassLoader(true))) {
+            log.fine("Loaded "+interfaceType.getName()+" instance "+t.getClass().getName());
             allInstances.add(t);
         }
 
