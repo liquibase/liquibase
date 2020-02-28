@@ -238,7 +238,7 @@ public class CustomChangeWrapper extends AbstractChange {
             for (String param : params) {
                 ObjectUtil.setProperty(customChange, param, paramValues.get(param));
             }
-            customChange.setFileOpener(getResourceAccessor());
+            customChange.setFileOpener(Scope.getCurrentScope().getResourceAccessor());
             customChange.setUp();
 
             configured = true;

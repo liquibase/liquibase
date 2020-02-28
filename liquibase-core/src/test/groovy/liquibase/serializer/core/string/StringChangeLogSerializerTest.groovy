@@ -56,7 +56,6 @@ public class StringChangeLogSerializerTest extends Specification {
                 "]";
 
         CustomChangeWrapper wrapper = new CustomChangeWrapper();
-        wrapper.setResourceAccessor(new JUnitResourceAccessor());
         wrapper.setClass("liquibase.change.custom.ExampleCustomSqlChange");
         wrapper.setParam("columnName", "column_name");
         wrapper.setParam("newValue", "new_value");

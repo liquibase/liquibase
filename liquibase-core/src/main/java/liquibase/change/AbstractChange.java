@@ -506,18 +506,16 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     /**
      * @inheritDoc
+     * @deprecated Should get from {@link Scope}
      */
     @DatabaseChangeProperty(isChangeProperty = false)
     public ResourceAccessor getResourceAccessor() {
         return Scope.getCurrentScope().getResourceAccessor();
     }
 
-    /**
-     * @deprecated this is now set via {@link Scope}
-     */
     @Override
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
-        Scope.getCurrentScope().getLog(getClass()).warning("As of Liquibase 4.0, cannot set resource accessor on "+getClass().getName()+". Must add it to the Scope");
+        Scope.getCurrentScope().getLog(getClass()).info("As of Liquibase 4.0, cannot set resource accessor on "+getClass().getName()+". Must add it to the Scope");
     }
 
     /**

@@ -217,7 +217,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             if (isRelativeToChangelogFile()) {
                 relativeTo = getChangeSet().getFilePath();
             }
-            return getResourceAccessor().openStream(relativeTo, path);
+            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException(
                 "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +

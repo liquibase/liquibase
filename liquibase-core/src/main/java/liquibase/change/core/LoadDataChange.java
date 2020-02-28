@@ -465,7 +465,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     ExecutablePreparedStatementBase stmt =
                         this.createPreparedStatement(
                             database, getCatalogName(), getSchemaName(), getTableName(), columnsFromCsv,
-                            getChangeSet(), getResourceAccessor()
+                            getChangeSet(), Scope.getCurrentScope().getResourceAccessor()
                         );
                     batchedStatements.add(stmt);
                 } else {
@@ -497,7 +497,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             new BatchDmlExecutablePreparedStatement(
                                     database, getCatalogName(), getSchemaName(),
                                     getTableName(), columns,
-                                    getChangeSet(), getResourceAccessor(),
+                                    getChangeSet(), Scope.getCurrentScope().getResourceAccessor(),
                                     batchedStatements)
                     };
                 } else {
@@ -704,7 +704,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     public CSVReader getCSVReader() throws IOException, LiquibaseException {
-        ResourceAccessor resourceAccessor = getResourceAccessor();
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         if (resourceAccessor == null) {
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
         }
@@ -783,7 +783,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = getResourceAccessor().openStream(getRelativeTo(), file);
+            stream = Scope.getCurrentScope().getResourceAccessor().openStream(getRelativeTo(), file);
             if (stream == null) {
                 throw new UnexpectedLiquibaseException(getFile() + " could not be found");
             }

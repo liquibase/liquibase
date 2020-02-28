@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.ExtensibleObject;
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.RollbackImpossibleException;
@@ -46,6 +47,7 @@ public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject 
     /**
     * Sets the {@link ResourceAccessor} that should be used for any file and/or resource loading needed by this Change.
     * Called automatically by Liquibase during the changelog parsing process.
+     * @deprecated this is now set via {@link Scope}
     */
     public void setResourceAccessor(ResourceAccessor resourceAccessor);
 
