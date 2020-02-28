@@ -1,12 +1,21 @@
 package liquibase.integration.ant;
 
+import liquibase.Scope;
+import liquibase.TestScopeManager;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import org.junit.BeforeClass;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 public abstract class AbstractAntTaskTest {
+
+    @BeforeClass
+    public static void setup() {
+        Scope.setScopeManager(new TestScopeManager());
+    }
+
     protected static void setProperties() {
         // Main source root
         String name = BaseLiquibaseTask.class.getName();
