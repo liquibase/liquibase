@@ -201,7 +201,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     change = new RawSQLChange();
                     change.setSql(finalCurrentSql);
-                    change.setResourceAccessor(resourceAccessor);
                     change.setSplitStatements(splitStatements);
                     change.setStripComments(stripComments);
                     change.setEndDelimiter(endDelimiter);

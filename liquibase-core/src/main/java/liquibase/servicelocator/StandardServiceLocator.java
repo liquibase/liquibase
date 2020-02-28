@@ -4,10 +4,7 @@ import liquibase.Scope;
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.logging.Logger;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
 public class StandardServiceLocator implements ServiceLocator {
 
@@ -16,9 +13,15 @@ public class StandardServiceLocator implements ServiceLocator {
         List<T> allInstances = new ArrayList<>();
 
         final Logger log = Scope.getCurrentScope().getLog(getClass());
-        for (T t : ServiceLoader.load(interfaceType, Scope.getCurrentScope().getClassLoader(true))) {
-            log.fine("Loaded "+interfaceType.getName()+" instance "+t.getClass().getName());
-            allInstances.add(t);
+        final Iterator<T> services = ServiceLoader.load(interfaceType, Scope.getCurrentScope().getClassLoader(true)).iterator();
+        while (services.hasNext()) {
+            try {
+                final T service = services.next();
+                log.fine("Loaded "+interfaceType.getName()+" instance "+service.getClass().getName());
+                allInstances.add(service);
+            } catch (Throwable e) {
+                log.info("Cannot load service: "+e.getMessage());
+            }
         }
 
         return Collections.unmodifiableList(allInstances);

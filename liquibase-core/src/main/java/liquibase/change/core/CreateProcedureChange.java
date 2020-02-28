@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -293,20 +294,25 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         if (path == null) {
             procedureText = StringUtil.trimToNull(getProcedureText());
         } else {
-            try {
-                InputStream stream = openSqlStream();
-                if (stream == null) {
-                    throw new IOException("File does not exist: " + path);
-                }
-                procedureText = StreamUtil.readStreamAsString(stream, encoding);
-                if (getChangeSet() != null) {
-                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
-                    if (parameters != null) {
-                        procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
+            if (getChangeSet() == null) {
+                //only try to read a file when inside a changest. Not when analyizing supported
+                procedureText = "NO CHANGESET";
+            } else {
+                try {
+                    InputStream stream = openSqlStream();
+                    if (stream == null) {
+                        throw new IOException("File does not exist: " + path);
                     }
+                    procedureText = StreamUtil.readStreamAsString(stream, encoding);
+                    if (getChangeSet() != null) {
+                        ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+                        if (parameters != null) {
+                            procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new UnexpectedLiquibaseException(e);
                 }
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
             }
         }
         return generateStatements(procedureText, endDelimiter, database);
