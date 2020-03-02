@@ -10,8 +10,13 @@ public class AntResourceAccessor extends FileSystemResourceAccessor {
 
     public AntResourceAccessor(AntClassLoader classLoader, String changeLogDirectory) {
 
+        if (changeLogDirectory != null) {
+            changeLogDirectory = changeLogDirectory.replace("\\", "/");
+        }
+
         if (changeLogDirectory == null) {
-            this.addRootPath(new File(".").getAbsoluteFile().toPath());
+            this.addRootPath(new File("").getAbsoluteFile().toPath());
+            this.addRootPath(new File("/").getAbsoluteFile().toPath());
         } else {
             this.addRootPath(new File(changeLogDirectory).getAbsoluteFile().toPath());
         }
