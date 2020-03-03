@@ -85,10 +85,10 @@ jobs:
             mkdir /home/circleci/circle_artifacts
             export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts
 
-            cp liquibase-dist/target/liquibase* ${CIRCLE_ARTIFACTS}
-            #cp liquibase-dist/target/liquibase*.{jar,asc,deb,gz,zip,dmg,exe} ${CIRCLE_ARTIFACTS}
-            cp liquibase-maven-plugin/target/liquibase-maven-plugin* ${CIRCLE_ARTIFACTS}
-            #cp -r liquibase-maven-plugin/target/liquibase-maven-plugin*.{jar,asc} ${CIRCLE_ARTIFACTS}
+            #cp liquibase-dist/target/liquibase* ${CIRCLE_ARTIFACTS}
+            cp liquibase-dist/target/liquibase*.{jar,deb,gz,zip} ${CIRCLE_ARTIFACTS}
+            #cp liquibase-maven-plugin/target/liquibase-maven-plugin* ${CIRCLE_ARTIFACTS}
+            cp liquibase-maven-plugin/target/liquibase-maven-plugin*.jar ${CIRCLE_ARTIFACTS}
             cp target/* ${CIRCLE_ARTIFACTS}
             #cp -r target/licensing-keygen*.zip ${CIRCLE_ARTIFACTS}
             
