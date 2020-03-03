@@ -24,12 +24,11 @@ jobs:
       # Surefire crashes without disableClassPathURLCheck:
       _JAVA_OPTIONS: "-Xms512m -Xmx1024m -Djdk.net.URLClassPath.disableClassPathURLCheck=true"
     steps:
-      # - run:
-      #     name: Install 3rd party software
-      #     command: |
-      #       # So that we can fetch .deb packages from Microsoft, who only deliver by https:
-              # the rpm pkg isnt working at the moment.  Probably deprecated in the newer ubuntu image.
-      #       sudo apt-get install -y apt-transport-https rpm
+      - run:
+          name: Install 3rd party software
+          command: |
+            # So that we can fetch .deb packages from Microsoft, who only deliver by https:
+            sudo apt-get install -y apt-transport-https rpmbuild
 
       #
       #            # Install the Microsoft repository for the MSSQL client tools:
