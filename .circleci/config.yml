@@ -85,11 +85,15 @@ jobs:
             mkdir /home/circleci/circle_artifacts
             export CIRCLE_ARTIFACTS=/home/circleci/circle_artifacts
 
-            cp liquibase-core/target/liquibase*-bin.zip ${CIRCLE_ARTIFACTS}
-            cp liquibase-core/target/liquibase*-bin.tar.gz ${CIRCLE_ARTIFACTS}
-            cp liquibase-core/target/liquibase*-SNAPSHOT.jar ${CIRCLE_ARTIFACTS}
-            cp liquibase-rpm/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm ${CIRCLE_ARTIFACTS}
-            cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
+            cp liquibase-dist/target/liquibase*.{jar,asc,deb,gz,zip,dmg,exe} ${CIRCLE_ARTIFACTS}
+            cp liquibase-maven-plugin/target/liquibase-maven-plugin*.{jar,asc} ${CIRCLE_ARTIFACTS}
+            cp target/licensing-keygen*.zip ${CIRCLE_ARTIFACTS}
+            
+            #cp liquibase-core/target/liquibase*-bin.zip ${CIRCLE_ARTIFACTS}
+            #cp liquibase-core/target/liquibase*-bin.tar.gz ${CIRCLE_ARTIFACTS}
+            #cp liquibase-core/target/liquibase*-SNAPSHOT.jar ${CIRCLE_ARTIFACTS}
+            #cp liquibase-rpm/target/rpm/liquibase/RPMS/noarch/liquibase-*.noarch.rpm ${CIRCLE_ARTIFACTS}
+            #cp liquibase-debian/target/*.deb ${CIRCLE_ARTIFACTS}
       - store_artifacts:
           path: /home/circleci/circle_artifacts
           destination: artifacts
