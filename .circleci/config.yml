@@ -89,7 +89,7 @@ jobs:
             cp liquibase-dist/target/liquibase*.{jar,deb,gz,zip} ${CIRCLE_ARTIFACTS}
             #cp liquibase-maven-plugin/target/liquibase-maven-plugin* ${CIRCLE_ARTIFACTS}
             cp liquibase-maven-plugin/target/liquibase-maven-plugin*.jar ${CIRCLE_ARTIFACTS}
-            cp target/* ${CIRCLE_ARTIFACTS}
+            cp target/*.* ${CIRCLE_ARTIFACTS}
             #cp -r target/licensing-keygen*.zip ${CIRCLE_ARTIFACTS}
             
             #cp liquibase-core/target/liquibase*-bin.zip ${CIRCLE_ARTIFACTS}
