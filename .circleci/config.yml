@@ -79,8 +79,7 @@ jobs:
 
       - store_test_results:
           path: /home/circleci/circle_test_reports
-      - store_artifacts:
-          path: /home/circleci/circle_test_reports
+
       - run:
           name: Collect build artifacts
           command: |
