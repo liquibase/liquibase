@@ -1678,7 +1678,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws LiquibaseException {
         if (database != null) {
             database.close();
         }
