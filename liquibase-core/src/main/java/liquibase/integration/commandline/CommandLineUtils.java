@@ -1,6 +1,7 @@
 package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.core.DiffCommand;
@@ -203,8 +204,8 @@ public class CommandLineUtils {
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(output);
 
-        System.out.println("");
-        System.out.println(coreBundle.getString("diff.results"));
+        Scope.getCurrentScope().getUI().sendMessage("");
+        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
         try {
             diffCommand.execute();
         } catch (CommandExecutionException e) {

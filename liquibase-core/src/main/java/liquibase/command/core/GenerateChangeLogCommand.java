@@ -50,7 +50,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
     protected CommandResult run() throws Exception {
         String changeLogFile = StringUtil.trimToNull(getChangeLogFile());
         if (changeLogFile.toLowerCase().endsWith(".sql")) {
-          System.out.println("\n" + INFO_MESSAGE + "\n");
+            Scope.getCurrentScope().getUI().sendMessage("\n" + INFO_MESSAGE + "\n");
             Scope.getCurrentScope().getLog(getClass()).info("\n" + INFO_MESSAGE + "\n");
         }
 
