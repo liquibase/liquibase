@@ -169,8 +169,6 @@ public class Main {
         return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
             @Override
             public Integer run() throws Exception {
-                boolean outputLoggingEnabled = false;
-
                 Main main = new Main();
 
                 try {
@@ -191,28 +189,23 @@ public class Main {
                     } else if (("--" + OPTIONS.VERSION).equals(args[0])) {
                         main.command = "";
                         main.parseDefaultPropertyFiles();
-                        PrintStream stream = System.out;
-                        stream.println(CommandLineUtils.getBanner());
-                        stream.println(
-                                String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() ));
+                        Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                        Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() ));
 
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService != null) {
-                            if (main.liquibaseProLicenseKey == null) {
-                                Scope.getCurrentScope().getUI().sendErrorMessage("The command '" + main.command + "' requires a Liquibase Pro license, available at http://liquibase.org.");
-                            } else {
-                                Location licenseKeyLocation =
-                                        new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                            if (main.liquibaseProLicenseKey != null) {
+                                Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                                 LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                                 if (result.code != 0) {
                                     String allMessages = String.join("\n", result.messages);
                                     Scope.getCurrentScope().getUI().sendErrorMessage(allMessages);
                                 }
                             }
-                            stream.println(licenseService.getLicenseInfo());
+                            Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                         }
 
-                        stream.println(String.format("Running Java under %s (Version %s)",
+                        Scope.getCurrentScope().getUI().sendMessage(String.format("Running Java under %s (Version %s)",
                                 System.getProperties().getProperty("java.home"),
                                 System.getProperty("java.version")
                         ));
