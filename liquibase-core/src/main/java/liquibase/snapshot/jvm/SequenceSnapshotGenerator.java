@@ -250,6 +250,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             .queryForList(new RawSqlStatement("select SUBSTRING( NAME FROM LOCATE( '/' ,NAME ) + 1 ) AS SEQUENCE_NAME "
                 + "from information_schema.INNODB_SYS_TABLES "
                 + "where NAME like '" + schema.getName() +"/%' AND FLAG & 12288 ;"));
+            // see https://mariadb.com/kb/en/information-schema-innodb_sys_tables-table/#flag for 12288 value of (3 << 12)
             if (res.size() == 0) {
               return "SELECT name AS SEQUENCE_NAME WHERE 1=0";
             }
