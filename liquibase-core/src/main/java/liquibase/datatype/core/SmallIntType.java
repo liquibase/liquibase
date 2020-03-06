@@ -55,6 +55,9 @@ public class SmallIntType extends LiquibaseDataType {
                 if (majorVersion < 10) {
                     return new DatabaseDataType("SMALLSERIAL");
                 }
+            } 
+            else {
+                return new DatabaseDataType("SMALLINT");
             }
         }
 
