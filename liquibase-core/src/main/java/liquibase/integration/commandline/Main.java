@@ -350,7 +350,7 @@ public class Main {
                                 Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
 
                                 //send it to the LOG in case we're using logFile
-                                Scope.getCurrentScope().getLog(getClass()).warning((String.format(coreBundle.getString("unexpected.error"), message)), e);
+                                Scope.getCurrentScope().getLog(getClass()).severe((String.format(coreBundle.getString("unexpected.error"), message)), e);
                             }
                         }
                     } catch (IllegalFormatException e1) {
