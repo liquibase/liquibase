@@ -1384,6 +1384,11 @@ public class Main {
                 );
                 return;
             } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
+                //
+                // Set the global configuration option based on presence of the dataOutputDirectory
+                //
+                boolean b = dataOutputDirectory != null;
+                LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
                 String currentChangeLogFile = this.changeLogFile;
                 if (currentChangeLogFile == null) {
                     //will output to stdout:
@@ -1881,6 +1886,8 @@ public class Main {
                 defSchemaName = value;
             } else if (OPTIONS.DATA_OUTPUT_DIRECTORY.equalsIgnoreCase(attributeName)) {
                 dataOutputDirectory = value;
+                boolean b = dataOutputDirectory != null;
+                LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
             }
         }
 
