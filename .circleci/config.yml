@@ -10,7 +10,7 @@ jobs:
       - checkout
       - run:
           name: Analyze on SonarCloud
-          command: mvn verify sonar:sonar
+          command: mvn verify -DskipTests sonar:sonar
   build:
     working_directory: ~/liquibase
     docker:
