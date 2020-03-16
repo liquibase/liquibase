@@ -1,6 +1,9 @@
 version: 2.1
 jobs:
   scan:
+    environment:
+      # SonarCloud scan crashes
+      _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
     docker:
       - image: 'circleci/openjdk:8'
     steps:
