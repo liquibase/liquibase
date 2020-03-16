@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   scan:
     docker:
@@ -108,5 +108,5 @@ jobs:
 workflows:
   main:
     jobs:
-      - test:
+      - scan:
           context: SonarCloud
