@@ -67,6 +67,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.version>5.0.12.RELEASE</spring.version>
         <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
+        <sonar.projectKey>liquibase_liquibase</sonar.projectKey>
+        <sonar.organization>lb</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
@@ -316,6 +319,26 @@
               <configuration>
                 <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
               </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.5.201505241946</version>
+                <executions>
+                    <execution>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                    </execution>
+                    <execution>
+                    <id>report</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
 
