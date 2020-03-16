@@ -83,6 +83,9 @@ jobs:
 
               ##Output any dumpstream files
               find . -type f -regex ".*\.dumpstream$" -exec cat {} \;
+
+              ## Upload to CodeCov.io
+              bash <(curl -s https://codecov.io/bash)
           when: always
 
       - store_test_results:
@@ -108,5 +111,6 @@ jobs:
 workflows:
   main:
     jobs:
-      - scan:
-          context: SonarCloud
+      - build
+      # - scan:
+      #     context: SonarCloud
