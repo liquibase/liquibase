@@ -61,6 +61,7 @@ jobs:
           name: Analyze on SonarCloud
           command: mvn verify -DskipTests sonar:sonar
 
+      -run:
           name: Build and test
           command: mvn --batch-mode clean package
 
