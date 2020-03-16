@@ -99,7 +99,7 @@ jobs:
 
             cp liquibase-dist/target/liquibase*.{jar,deb,gz,zip} ${CIRCLE_ARTIFACTS}
             cp liquibase-maven-plugin/target/liquibase-maven-plugin*.jar ${CIRCLE_ARTIFACTS}
-            cp liquibase-core/target/* ${CIRCLE_ARTIFACTS}
+            cp liquibase-core/target/*.* ${CIRCLE_ARTIFACTS}
 
       - store_artifacts:
           path: /home/circleci/circle_artifacts
