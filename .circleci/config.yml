@@ -1,5 +1,13 @@
 version: 2
 jobs:
+  scan:
+    docker:
+      - image: 'circleci/openjdk:11-jdk'
+    steps:
+      - checkout
+      - run:
+          name: Analyze on SonarCloud
+          command: mvn verify sonar:sonar
   build:
     working_directory: ~/liquibase
     docker:
@@ -96,3 +104,9 @@ jobs:
           paths:
             - ~/.m2
           key: liquibase-{{ checksum "pom.xml" }}
+
+workflows:
+  main:
+    jobs:
+      - test:
+          context: SonarCloud
