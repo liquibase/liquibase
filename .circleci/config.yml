@@ -1,5 +1,16 @@
-version: 2
+version: 2.1
 jobs:
+  scan:
+    environment:
+      # SonarCloud scan crashes
+      _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
+    docker:
+      - image: 'circleci/openjdk:8'
+    steps:
+      - checkout
+      - run:
+          name: Analyze on SonarCloud
+          command: mvn verify sonar:sonar
   build:
     working_directory: ~/liquibase
     docker:
@@ -91,4 +102,8 @@ jobs:
       - store_artifacts:
           path: /home/circleci/circle_artifacts
           destination:
-
+workflows:
+  main:
+    jobs:
+      - scan:
+          context: SonarCloud
