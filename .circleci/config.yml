@@ -10,7 +10,7 @@ jobs:
       - checkout
       - run:
           name: Analyze on SonarCloud
-          command: mvn sonar:sonar
+          command: mvn verify -DskipTests sonar:sonar
   build:
     working_directory: ~/liquibase
     docker:
@@ -58,6 +58,9 @@ jobs:
           key: liquibase-{{ checksum "pom.xml" }}
 
       - run:
+          name: Analyze on SonarCloud
+          command: mvn verify -DskipTests sonar:sonar
+
           name: Build and test
           command: mvn --batch-mode clean package
 
@@ -105,5 +108,5 @@ jobs:
 workflows:
   main:
     jobs:
-      - scan:
+      - build:
           context: SonarCloud
