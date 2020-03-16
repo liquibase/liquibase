@@ -67,7 +67,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.version>5.0.12.RELEASE</spring.version>
         <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
-        <sonar.projectKey>liquibase_liquibase</sonar.projectKey>
+        <!-- <sonar.projectKey>liquibase_liquibase</sonar.projectKey> -->
         <sonar.organization>lb</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
