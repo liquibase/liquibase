@@ -111,6 +111,5 @@ jobs:
 workflows:
   main:
     jobs:
-      - build
-      # - scan:
-      #     context: SonarCloud
+      - scan:
+          context: SonarCloud
