@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   scan:
     docker:
-      - image: 'circleci/openjdk:11-jdk'
+      - image: 'circleci/openjdk:8'
     steps:
       - checkout
       - run:
