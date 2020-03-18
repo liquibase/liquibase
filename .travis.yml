@@ -1,16 +1,16 @@
 language: java
-
 jdk: openjdk8
-
 install: true
-
-script: mvn package -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-
+#script: mvn package -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=liquibase_liquibase
 cache:
   directories:
-  - ~/.m2
-
+  - "~/.m2"
 addons:
   apt:
     packages:
-    - rpm  
+    - rpm
+  sonarcloud:
+    organization: "liquibase-oss"
+    token:
+      secure: LnotzNSdNvo46OiOwqCpuvG48auUnwdn78T6c2RXk39k9gtK/yBLrrSbnuBqShbYn4llXxHSLkvalfBa8Ck5w6BpMOoTInpsOWverK+0PyVmgJUv9wNIAV/9+CJS7QsBivLUf6STT7ABfbcoUiWSZUJnOS5zIZukySk+/lmMnRW2h5GniRw3N0MFPtu4G+IZ1jqWhlHovjq41JWHEGCs1+jKQPmajQLOu4RKtihEfBAVXBIorjJIXl9TcPQAbTltYPe4oRSLMRQ/Qj3PMpgsSMLRKmzJ/sgzmgzPSdlTDcsnLOjnnp6f/5mt7arZx/k78xJ+CVezr+QIIU4tpaWZqPC7T7mRh9nixQnXhNpg91zibMTb8XUIdJ8fpMlqPeHHUcKzYJ6074e0BM9JEqXSW9hvWtuscoN1nNJFyGocqaeuZ7/sUxa6zEVNRaUZ3kWoZbttkQ5AKAuYS/oVnWmkMGx5AhNqVCynGv78jIyxHSR3n4gla66+lWZqKVb1ySt8qpeHE9Ep8O0Z9EouykTCYDKJiPvwbYns5auAJdqUCuQadGh0wRBJccEDlC0LcPVilQiCrEpMOCNLmYmjVbwKm6ZFMnHfS/xB7TjgSA0CmbkX0lsDIWypwkm+TkHVg6Uw6fEpgNMOBd8W6b7XMGEUfqZcbYfPvJVSN0aeUKoYPN8=
