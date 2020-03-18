@@ -42,7 +42,7 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
             contents.addAll(super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive));
         }
         if (contents.isEmpty()) {
-            return null;
+            return new TreeSet<>();
         }
         return contents;
     }

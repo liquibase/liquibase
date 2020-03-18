@@ -33,7 +33,10 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         SortedSet<String> returnSet = new TreeSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnSet.addAll(accessor.list(relativeTo, path, recursive, includeFiles, includeDirectories));
+            final SortedSet<String> list = accessor.list(relativeTo, path, recursive, includeFiles, includeDirectories);
+            if (list != null) {
+                returnSet.addAll(list);
+            }
         }
 
         return returnSet;
