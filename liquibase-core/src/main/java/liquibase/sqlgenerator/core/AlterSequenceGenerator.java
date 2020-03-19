@@ -68,7 +68,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
 
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
-                buffer.append(" ORDER");
+                buffer.append(" ORDER ");
             } else {
                 buffer.append(" NOORDER ");
             }
