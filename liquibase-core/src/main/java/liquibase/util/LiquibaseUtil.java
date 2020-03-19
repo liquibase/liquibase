@@ -25,7 +25,7 @@ public class LiquibaseUtil {
     // will extract the information from liquibase.build.properties, which should be a properties file in
     // the jar file.
     private static String getBuildInfo(String propertyId) {
-        String value = "UNKONWN";
+        String value = "UNKNOWN";
         if (liquibaseBuildProperties == null) {
             try (InputStream buildProperties = Scope.getCurrentScope().getClassLoader().getResourceAsStream("liquibase.build.properties")) {
                 liquibaseBuildProperties = new Properties();
