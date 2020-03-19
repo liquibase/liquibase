@@ -69,6 +69,8 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
                 buffer.append(" ORDER");
+            } else {
+                buffer.append(" NOORDER ");
             }
         }
 
@@ -88,8 +90,8 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        return new Sql[]{
-                new UnparsedSql(buffer.toString(), getAffectedSequence(statement))
+        return new Sql[] {
+            new UnparsedSql(buffer.toString(), getAffectedSequence(statement))
         };
     }
 
