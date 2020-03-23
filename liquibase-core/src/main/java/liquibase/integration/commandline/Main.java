@@ -266,7 +266,7 @@ public class Main {
                         }
                     }
 
-                    if (main.command.toLowerCase().endsWith("sql")) {
+                    if (main.command != null && main.command.toLowerCase().endsWith("sql")) {
                         ui.setOutputStream(System.err);
                     }
 
