@@ -65,7 +65,6 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     @Override
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         streamPath = streamPath.replace("\\", "/");
-        streamPath = streamPath.replaceFirst("^classpath:", "");
         streamPath = streamPath.replaceFirst("^[\\\\/]([a-zA-Z]:)", "$1");
         final InputStreamList streams = new InputStreamList();
 

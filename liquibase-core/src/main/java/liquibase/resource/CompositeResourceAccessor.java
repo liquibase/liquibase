@@ -20,6 +20,12 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         this.resourceAccessors = new ArrayList<>(resourceAccessors);
     }
 
+    public CompositeResourceAccessor addResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessors.add(resourceAccessor);
+
+        return this;
+    }
+
     @Override
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList returnList = new InputStreamList();

@@ -26,7 +26,11 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
         this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f",
                 null), ChangeSet.ExecType.EXECUTED);
-        String version = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
+        String version = LiquibaseUtil.getBuildVersion()
+                .replaceAll("SNAPSHOT", "SNP")
+                .replaceAll("beta", "b")
+                .replaceAll("alpha", "a")
+                ;
         assertCorrect("insert into [databasechangelog] ([id], [author], [filename], [dateexecuted], " +
                         "[orderexecuted], [md5sum], [description], [comments], [exectype], [contexts], [labels], " +
                         "[liquibase], [deployment_id]) values ('a', 'b', 'c', getdate(), 1, " +
