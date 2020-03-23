@@ -47,20 +47,19 @@ public class SmallIntType extends LiquibaseDataType {
 
         if (database instanceof PostgresDatabase)
         {
-            if (! isAutoIncrement()) {
-                return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
+            if (isAutoIncrement()) {
+                int majorVersion = 9;
+                try {
+                    majorVersion = database.getDatabaseMajorVersion();
+                } catch (DatabaseException e) {
+                    // ignore
+                }
+                if (majorVersion < 10) {
+                    return new DatabaseDataType("SMALLSERIAL");
+                }
             }
-            int majorVersion = 9;
-            try {
-                majorVersion = database.getDatabaseMajorVersion();
-            } catch (DatabaseException e) {
-                // ignore
-            }
-            if (majorVersion < 10) {
-                return new DatabaseDataType("SMALLSERIAL");
-            }
+            return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
-
 
         return super.toDatabaseDataType(database);
     }
