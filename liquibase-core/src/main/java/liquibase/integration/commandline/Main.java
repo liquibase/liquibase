@@ -1417,7 +1417,7 @@ public class Main {
                 SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
                         .getCommand(COMMANDS.SNAPSHOT);
                 snapshotCommand.setDatabase(database);
-                snapshotCommand.setSchemas(getSchemaParams());
+                snapshotCommand.setSchemas(getSchemaParams(database));
                 snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 String result = snapshotCommand.execute().print();
@@ -1442,7 +1442,7 @@ public class Main {
                         .getCommand(COMMANDS.SNAPSHOT);
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 snapshotCommand.setDatabase(referenceDatabase);
-                snapshotCommand.setSchemas(getSchemaParams());
+                snapshotCommand.setSchemas(getSchemaParams(database));
                 snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 outputWriter.write(snapshotCommand.execute().print());
@@ -1583,7 +1583,7 @@ public class Main {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
                         (COMMANDS.DROP_ALL);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
-                dropAllCommand.setSchemas(getSchemaParams());
+                dropAllCommand.setSchemas(getSchemaParams(database));
                 LogService.getLog(getClass()).info(LogType.USER_MESSAGE, dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
@@ -1766,8 +1766,8 @@ public class Main {
         }
     }
 
-    private String getSchemaParams() throws CommandLineParsingException {
-        return getCommandParam(OPTIONS.SCHEMAS, schemas);
+    private String getSchemaParams(Database database) throws CommandLineParsingException {
+        return getCommandParam(OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName());
     }
 
     private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, String commandName, Map<String, Object> argsMap)
