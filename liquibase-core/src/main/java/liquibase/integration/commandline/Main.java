@@ -18,7 +18,6 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
-import liquibase.command.CommandResult;
 import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.DropAllCommand;
 import liquibase.command.core.ExecuteSqlCommand;
@@ -1418,11 +1417,7 @@ public class Main {
                 SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
                         .getCommand(COMMANDS.SNAPSHOT);
                 snapshotCommand.setDatabase(database);
-                snapshotCommand.setSchemas(
-                        getCommandParam(
-                                OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName()
-                        )
-                );
+                snapshotCommand.setSchemas(getSchemaParams());
                 snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 String result = snapshotCommand.execute().print();
@@ -1447,11 +1442,7 @@ public class Main {
                         .getCommand(COMMANDS.SNAPSHOT);
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 snapshotCommand.setDatabase(referenceDatabase);
-                snapshotCommand.setSchemas(
-                        getCommandParam(
-                                OPTIONS.SCHEMAS, referenceDatabase.getDefaultSchema().getSchemaName()
-                        )
-                );
+                snapshotCommand.setSchemas(getSchemaParams());
                 snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 outputWriter.write(snapshotCommand.execute().print());
@@ -1592,10 +1583,7 @@ public class Main {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
                         (COMMANDS.DROP_ALL);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
-                dropAllCommand.setSchemas(getCommandParam(
-                        OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName())
-                );
-
+                dropAllCommand.setSchemas(getSchemaParams());
                 LogService.getLog(getClass()).info(LogType.USER_MESSAGE, dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
@@ -1776,6 +1764,10 @@ public class Main {
                         LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
             }
         }
+    }
+
+    private String getSchemaParams() throws CommandLineParsingException {
+        return getCommandParam(OPTIONS.SCHEMAS, schemas);
     }
 
     private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, String commandName, Map<String, Object> argsMap)
