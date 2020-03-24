@@ -1767,7 +1767,11 @@ public class Main {
     }
 
     private String getSchemaParams(Database database) throws CommandLineParsingException {
-        return getCommandParam(OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName());
+        String schemaParams = getCommandParam(OPTIONS.SCHEMAS, schemas);
+        if (schemaParams == null || schemaParams.isEmpty()) {
+            return database.getDefaultSchema().getSchemaName();
+        }
+        return schemaParams;
     }
 
     private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, String commandName, Map<String, Object> argsMap)
