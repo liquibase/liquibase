@@ -44,7 +44,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 for (URL url : urls) {
                     try {
                         this.rootPaths.add(FileSystems.newFileSystem(Paths.get(url.toURI()), this.getClass().getClassLoader()));
-                        System.out.println("Found path "+url.toExternalForm());
                     } catch (ProviderNotFoundException e) {
                         if (url.toExternalForm().startsWith("file:/")) {
                             //that is expected, the classloader itself will handle it

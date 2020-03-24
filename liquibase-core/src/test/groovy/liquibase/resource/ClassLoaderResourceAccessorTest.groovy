@@ -12,7 +12,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                     Thread.currentThread().getContextClassLoader().getResource("simple-files.jar"),
                     Thread.currentThread().getContextClassLoader().getResource("simple-files.zip"),
             ] as URL[],
-            getClass().getClassLoader()))
+            Thread.currentThread().getContextClassLoader()))
 
     @Unroll("#featureName: #relativeTo #streamPath")
     def "getFinalPath"() {
@@ -143,14 +143,5 @@ class ClassLoaderResourceAccessorTest extends Specification {
                         ]
                 ],
         ]
-    }
-
-    def "can recursively enumerate files inside JARs on the classpath"() {
-        when:
-        def listedResources = testResourceAccessor.list(null, "org/junit", true, true, false)
-
-        then:
-        listedResources.contains("org/junit/Assert.class")
-        listedResources.contains("org/junit/runner/Runner.class")
     }
 }
