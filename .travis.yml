@@ -2,7 +2,7 @@ language: java
 jdk: openjdk8
 install: true
 #script: mvn package -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=liquibase_liquibase
+script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent deploy sonar:sonar -Dsonar.projectKey=liquibase_liquibase
 cache:
   directories:
   - "~/.m2"

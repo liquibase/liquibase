@@ -17,8 +17,8 @@
     <description>Liquibase is a tool for managing and executing database changes.</description>
 
     <properties>
-        <deploy.repositoryId>sonatype-nexus-staging</deploy.repositoryId>
-        <deploy.url>https://oss.sonatype.org/content/repositories/snapshots</deploy.url>
+        <deploy.repositoryId>github</deploy.repositoryId>
+        <deploy.url>https://maven.pkg.github.com/liquibase</deploy.url>
         <install4j.jre.root>PASS_IN_AS_SYSTEM_PROPERTY</install4j.jre.root>
     </properties>
 
