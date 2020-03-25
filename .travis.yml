@@ -1,15 +1,15 @@
 language: java
 jdk: openjdk8
-install: true
-#script: mvn package -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent deploy sonar:sonar -Dsonar.projectKey=liquibase_liquibase
+install: cp ./.travis/maven.settings.xml $HOME/.m2/settings.xml
+env:
+  global:
+    - secure: BR9Nu8Kt5knJnDHf01/AwaSauNsfcEYoP/nWdQc/LRFDeNUUI7HD3fzwoe0clR6q9mKHL1/l5kiLrz/+3dbKuMC9DbA7R04AeH+kYI/T9kVerW1KJTNNQUaCv0IZtMV7XDuqNKNQjtDQxsp34iHefRl3be0g5RKsf6KxoyFJ+418gU0B2B9A2+1ZANzIGePSbBz2ncW2Zj6ub7As664gGTtywIl8FE9kHMNrLobhFc2MuW1idur/Vqn50r1xGYgQUPV9rGLVI40yEfrST+FP7hsCSRIbUjmRyHZCjoFdJO3BTpjl2wBbytAPxoIWIxMBFtnGklBSuyMyyDpPYTPmKyDMOV4CNMUd/WcL8i04NV9qDXLEGDLyaD94CCxHqOVznGVmfHdvDsOMP0mbHzPRUfj9yTELbadUDZtglJ2MJ+9RqKbGR0/uSjG70f3ayY5WsUPBBP502UoxjJrCPRLVBvjja1t0GNB/zGtFXw36a0XCbR5iu5LoHDdgUSIIufVjc8qy38G1HWiEZAmKeYqGpfqeKiOs01ASLbTcvWvBNGrijRowqGNwuV0ldxqxuPWVWhzf5WCOQ52dp7vTX7jf4wBKZJxwEYsiyV6iZ6nk61SXFOyQ5eBesMTTWfIaH15Y2yoMvp2WBYf9PPqJPgPCEBVxVjAP4Ms+U+CDAae35KI=
+
+script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent deploy sonar:sonar -Dsonar.projectKey=liquibase_liquibase -Ddeploy.url=https://maven.pkg.github.com/liquibase -Ddeploy.repositoryId=github
 cache:
   directories:
   - "~/.m2"
 addons:
-  apt:
-    packages:
-    - rpm
   sonarcloud:
     organization: "liquibase-oss"
     token:
