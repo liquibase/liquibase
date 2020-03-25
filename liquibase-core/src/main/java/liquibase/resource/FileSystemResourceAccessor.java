@@ -2,7 +2,6 @@ package liquibase.resource;
 
 import liquibase.Scope;
 import liquibase.util.CollectionUtil;
-import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.net.URI;
@@ -12,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -270,7 +270,8 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public String toString() {
-        return getClass().getName() + " (" + StringUtil.join(getRootPaths(), ", ", new StringUtil.ToStringFormatter()) + ")";
+        return getClass().getName() + getRootPaths().stream().map(Path::toString)
+                .collect(Collectors.joining(", ", " (", ")"));
     }
 
     private static class CloseChildWillCloseParentStream extends FilterInputStream {

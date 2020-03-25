@@ -11,6 +11,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtil;
 
+import static java.util.stream.Collectors.joining;
+
 public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -76,12 +78,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
             }
         }
 
-        change.setReferencedColumnNames(StringUtil.join(fk.getPrimaryKeyColumns(), ",", new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.getName();
-            }
-        }));
+        change.setReferencedColumnNames(fk.getPrimaryKeyColumns().stream().map(Column::getName).collect(joining(",")));
 
         change.setBaseTableName(fk.getForeignKeyTable().getName());
         if (control.getIncludeCatalog()) {
@@ -90,12 +87,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
         if (control.getIncludeSchema()) {
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
         }
-        change.setBaseColumnNames(StringUtil.join(fk.getForeignKeyColumns(), ",", new StringUtil.StringUtilFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.getName();
-            }
-        }));
+        change.setBaseColumnNames(fk.getForeignKeyColumns().stream().map(Column::getName).collect(joining(",")));
 
         change.setDeferrable(fk.isDeferrable());
         change.setInitiallyDeferred(fk.isInitiallyDeferred());
