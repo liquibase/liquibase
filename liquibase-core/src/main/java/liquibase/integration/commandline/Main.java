@@ -252,6 +252,10 @@ public class Main {
 
             try {
                 main.parseOptions(args);
+                if (main.command == null) {
+                    main.printHelp(System.out);
+                    return 0;
+                }
             } catch (CommandLineParsingException e) {
                 log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
                 log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
@@ -1125,7 +1129,8 @@ public class Main {
     private void parseOptionArgument(String arg, boolean okIfNotAField) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
-        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE)) {
+        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE) ||
+            arg.toLowerCase().startsWith("--" + OPTIONS.HELP)) {
             return;
         }
 
