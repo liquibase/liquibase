@@ -23,8 +23,8 @@
     </modules>
 
     <ciManagement>
-        <system>CircleCI</system>
-        <url>https://circleci.com/gh/liquibase/liquibase/tree/master</url>
+        <system>Travis</system>
+        <url>https://travis-ci.com/github/liquibase/liquibase</url>
     </ciManagement>
 
     <build>
@@ -44,7 +44,7 @@
                 </executions>
                 <configuration>
                     <outputDirectory>${project.build.directory}</outputDirectory>
-                    <finalName>liquibase-${liquibase.version}</finalName>
+                    <finalName>liquibase-core-oss-${liquibase.version}</finalName>
                     <attach>true</attach>
                     <excludes>
                         <exclude>com/datical/**</exclude>
@@ -111,18 +111,4 @@
 <!--        </pluginManagement>-->
 
     </build>
-
-    <profiles>
-        <profile>
-            <id>liquibase-pro</id>
-            <activation>
-                <file>
-                    <exists>../liquibase-pro/pom.xml</exists>
-                </file>
-            </activation>
-            <modules>
-                <module>../liquibase-pro</module>
-            </modules>
-        </profile>
-    </profiles>
 </project>

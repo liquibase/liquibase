@@ -1,6 +1,5 @@
 language: java
 jdk: openjdk8
-install: cp ./.travis/maven.settings.xml $HOME/.m2/settings.xml
 env:
   global:
     #SONATYPE_USERNAME
@@ -8,6 +7,13 @@ env:
     #SONATYPE_PASSWORD
     - secure: YYHA3coDwAeycaXVE26ih+Au0GbxRdjzxDKex0y77mKnLclHWLBysVygj1S/7zVUCLqdvPBhgG4kFhVkHvSTHcDREIPqGg4wcCHdhA/RXO+ZtdGsnUxh9mZVbekbiS/nIw4YvzKkfK2hf78upnybqx9hrB/o/3UyOsyaQxOREZsmFwXbdUUKgXHbgbvurCTNjuIjiQf9K88AcWHSEBbvjKsqD9qkh+toY7k6tnGGTUVVmM07ZB00BcHlabVIijg/6wTLj17e1EtKtT2CJ4Wci/vQ6WL2NThkoLGzzX+RWh1yEQq4kbdeQO+LMf/afosSsKb4lhxLuu/USwRgCoD13ryjs1GT9V41LcXynZ0d6yHTZW6XQ5TTa6ar1YBpUaqNew62jhm0NV3lH8/H6lod84duefibt2lOfQSDavc1wleV3tCQnEOnxyvX9nrx1Vxb/IXYSi+pHLLc0+SXbYhX6UWf1WRuiiJbil/M7oRUXNqHVoLHC516oSK6dU8vff9/uzV0Qx6ExC8JAc2jIQEwO7UMwr1GIWU5LdmPHUM2eYXkib7YlHeLcnyUGSjDbYToeOEcdbqzGYYgoWDuaIK9brWQ1LTXPzZ3gmS0i8E4ms7kjdD4vRzn5Otyc3Ktq6znpEs1bNZhvBJwPQ4DITPgi9hz6m6w6nFX07uH+6sTaIo=
 
+services:
+  - docker
+
+before_install:
+  - docker pull mysql:5
+
+install: cp ./.travis/maven.settings.xml $HOME/.m2/settings.xml
 script: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent deploy sonar:sonar -Dsonar.projectKey=liquibase_liquibase -Ddeploy.url=https://oss.sonatype.org/content/repositories/snapshots -Ddeploy.repositoryId=sonatype -Dliquibase.version.qualifier="-${TRAVIS_BRANCH}" -Dbuild.number=${TRAVIS_BUILD_NUMBER} -Dbuild.commit=${TRAVIS_COMMIT}
 cache:
   directories:
