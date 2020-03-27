@@ -68,7 +68,7 @@
                     <quiet>true</quiet>
                     <doclint>none</doclint>
                     <encoding>UTF-8</encoding>
-                    <finalName>liquibase-${version}</finalName>
+                    <finalName>liquibase-core-oss-${version}</finalName>
                     <jarOutputDirectory>${project.build.directory}</jarOutputDirectory>
                 </configuration>
                 <executions>
