@@ -190,7 +190,7 @@
                     <artifactId>liquibase-core</artifactId>
                     <version>${liquibase.version}</version>
                     <url>${deploy.url}</url>
-                    <file>${project.build.directory}/liquibase-${liquibase.version}.jar</file>
+                    <file>${project.build.directory}/liquibase-core-oss-${liquibase.version}.jar</file>
                     <files>
                         target/liquibase-core-oss-${liquibase.version}.tar.gz,target/liquibase-core-oss-${liquibase.version}.zip
                     </files>
