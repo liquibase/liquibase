@@ -167,7 +167,7 @@
                 <artifactId>maven-install-plugin</artifactId>
                 <configuration>
                     <artifactId>liquibase-core</artifactId>
-                    <file>${project.build.directory}/liquibase-core-${version}.jar</file>
+                    <file>${project.build.directory}/liquibase-core-oss-${version}.jar</file>
                     <sources>${project.basedir}/../target/liquibase-core-oss-${version}-sources.jar</sources>
                     <javadoc>${project.basedir}/../target/liquibase-core-oss-${version}-javadoc.jar</javadoc>
                     <pomFile>${project.build.directory}/release.pom.xml</pomFile>
