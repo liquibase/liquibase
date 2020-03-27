@@ -114,7 +114,10 @@ public class LoggingExecutor extends AbstractExecutor {
 
                 output.write(statement);
 
-                if ((database instanceof MSSQLDatabase) || (database instanceof SybaseDatabase) || (database
+                if(System.getProperty("liquibase.delimiter.override") != null) {
+                    output.write(StreamUtil.getLineSeparator());
+                    output.write(System.getProperty("liquibase.delimiter.override"));
+                } else if ((database instanceof MSSQLDatabase) || (database instanceof SybaseDatabase) || (database
                     instanceof SybaseASADatabase)) {
                     output.write(StreamUtil.getLineSeparator());
                     output.write("GO");
