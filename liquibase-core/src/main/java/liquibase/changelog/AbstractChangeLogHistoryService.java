@@ -11,6 +11,7 @@ import liquibase.exception.DatabaseHistoryException;
 import liquibase.logging.LogType;
 
 import java.util.Date;
+import java.util.List;
 
 public abstract class AbstractChangeLogHistoryService implements ChangeLogHistoryService {
 
@@ -61,19 +62,19 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         }
     }
 
-    public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts,
-                                 LabelExpression labels) throws DatabaseException {
+    public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
         for (RanChangeSet ranChangeSet : this.getRanChangeSets()) {
             if (ranChangeSet.getLastCheckSum() == null) {
-                ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
-                if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
-                    new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()
-                    ) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(
-                            LogType.LOG, "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
-                    );
-                    replaceChecksum(changeSet);
-                }
+                List<ChangeSet> changeSets = databaseChangeLog.getChangeSets(ranChangeSet);
+	            for (ChangeSet changeSet : changeSets) {
+		            if (new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() && new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted())
+		            {
+			            Scope.getCurrentScope().getLog(getClass()).fine(
+					            LogType.LOG, "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
+			            );
+			            replaceChecksum(changeSet);
+		            }
+	            }
             }
         }
     }
