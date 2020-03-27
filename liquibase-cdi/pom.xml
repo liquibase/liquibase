@@ -136,18 +136,8 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
+                <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
-                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                    <gpgArguments>
-                        <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                        <arg>--batch</arg>
-                        <arg>--no-tty</arg>
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
-
                     <skip>false</skip>
                     <repositoryId>${deploy.repositoryId}</repositoryId>
                     <artifactId>${project.artifactId}</artifactId>
@@ -163,7 +153,7 @@
                         <id>custom-deploy</id>
                         <phase>deploy</phase>
                         <goals>
-                            <goal>sign-and-deploy-file</goal>
+                            <goal>deploy-file</goal>
                         </goals>
                     </execution>
                 </executions>

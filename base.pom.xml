@@ -66,7 +66,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring.version>5.0.12.RELEASE</spring.version>
-        <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
+        <sonar.projectKey>org.liquibase:liquibase-parent</sonar.projectKey>
+        <sonar.organization>liquibase-core</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.moduleKey>${artifactId}</sonar.moduleKey>
     </properties>
 
     <dependencies>
@@ -163,19 +166,6 @@
                 <version>3.0.2</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
-                <configuration>
-                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                    <gpgArguments>
-                        <arg>--batch</arg>
-                        <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -281,7 +271,6 @@
 
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -306,6 +295,26 @@
                 <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
               </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.7.5.201505241946</version>
+                <executions>
+                    <execution>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                    </execution>
+                    <execution>
+                    <id>report</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -313,6 +322,11 @@
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
                     <version>2.5.2</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
                 </plugin>
 
                 <plugin>
