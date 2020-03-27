@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
@@ -13,8 +14,6 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -22,7 +21,7 @@ import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.*;
@@ -97,13 +96,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     public void setOs(String os) {
-        this.os = StringUtils.splitAndTrim(os, ",");
+        this.os = StringUtil.splitAndTrim(os, ",");
     }
 
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (!StringUtils.isEmpty(timeout)) {
+        if (!StringUtil.isEmpty(timeout)) {
             // check for the timeout values, accept only positive value with one letter unit (s/m/h)
             Matcher matcher = TIMEOUT_PATTERN.matcher(timeout);
             if (!matcher.matches()) {
@@ -127,7 +126,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                LogService.getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
+                Scope.getCurrentScope().getLog(getClass()).info("Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
         }
@@ -223,9 +222,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 (GlobalConfiguration.class).getOutputEncoding());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
-            LogService.getLog(getClass()).severe(LogType.LOG, errorStreamOut);
+            Scope.getCurrentScope().getLog(getClass()).severe(errorStreamOut);
         }
-        LogService.getLog(getClass()).info(LogType.LOG, infoStreamOut);
+        Scope.getCurrentScope().getLog(getClass()).info(infoStreamOut);
 
         processResult(returnCode, errorStreamOut, infoStreamOut, database);
     }
@@ -295,7 +294,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 try {
                     long valLong = Long.parseLong(val);
                     String unit = matcher.group(2);
-                    if (StringUtils.isEmpty(unit)) {
+                    if (StringUtil.isEmpty(unit)) {
                         return valLong * SECS_IN_MILLIS;
                     }
                     char u = unit.toLowerCase().charAt(0);
@@ -340,7 +339,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     protected String getCommandString() {
-        return getExecutable() + " " + StringUtils.join(args, " ");
+        return getExecutable() + " " + StringUtil.join(args, " ");
     }
 
     @Override
@@ -359,11 +358,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
         for (ParsedNode arg : argsNode.getChildren(null, "arg")) {
             addArg(arg.getChildValue(null, "value", String.class));
         }
-        String passedValue = StringUtils.trimToNull(parsedNode.getChildValue(null, "os", String.class));
+        String passedValue = StringUtil.trimToNull(parsedNode.getChildValue(null, "os", String.class));
         if (passedValue == null) {
             this.os = new ArrayList<>();
         } else {
-            List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os",
+            List<String> os = StringUtil.splitAndTrim(StringUtil.trimToEmpty(parsedNode.getChildValue(null, "os",
                     String.class)), ",");
             if ((os.size() == 1) && ("".equals(os.get(0)))) {
                 this.os = null;

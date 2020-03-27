@@ -8,7 +8,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<ClearDatabaseChangeLogTableStatement> {
 
@@ -20,7 +20,7 @@ public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<C
     @Override
     public Sql[] generateSql(ClearDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String schemaName;
-        if (StringUtils.isNotEmpty(statement.getSchemaName())) {
+        if (StringUtil.isNotEmpty(statement.getSchemaName())) {
             schemaName = statement.getSchemaName();
         } else {
             schemaName = database.getLiquibaseSchemaName();

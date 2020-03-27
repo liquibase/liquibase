@@ -9,7 +9,7 @@ import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.BooleanUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -363,7 +363,7 @@ public class Column extends AbstractDatabaseObject {
             return null;
         }
 
-        List<String> columnNameList = StringUtils.splitAndTrim(columnNames, ",");
+        List<String> columnNameList = StringUtil.splitAndTrim(columnNames, ",");
         Column[] returnArray = new Column[columnNameList.size()];
         for (int i = 0; i < columnNameList.size(); i++) {
             returnArray[i] = fromName(columnNameList.get(i));

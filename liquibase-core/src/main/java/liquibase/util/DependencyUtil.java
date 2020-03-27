@@ -1,7 +1,6 @@
 package liquibase.util;
 
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
+import liquibase.Scope;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,7 +98,7 @@ public class DependencyUtil {
                             nodeToRemoveLinks = links.size();
                         }
                     }
-                    LogService.getLog(getClass()).debug(LogType.LOG, "Potential StackOverflowException. Pro-actively removing "+nodeToRemove.value+" with "+nodeToRemoveLinks+" incoming nodes");
+                    Scope.getCurrentScope().getLog(getClass()).fine("Potential StackOverflowException. Pro-actively removing "+nodeToRemove.value+" with "+nodeToRemoveLinks+" incoming nodes");
                     nextNodesToDisplay.remove(nodeToRemove);
                 }
 

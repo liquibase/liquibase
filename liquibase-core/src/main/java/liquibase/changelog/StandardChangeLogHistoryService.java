@@ -1,9 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.ContextExpression;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Labels;
+import liquibase.*;
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
@@ -19,8 +16,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -274,7 +269,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            LogService.getLog(getClass()).info(LogType.LOG, "Creating database history table with name: " +
+            Scope.getCurrentScope().getLog(getClass()).info("Creating database history table with name: " +
                 getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
                     getDatabaseChangeLogTableName()));
         }
@@ -284,7 +279,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 executor.execute(sql);
                 getDatabase().commit();
             } else {
-                LogService.getLog(getClass()).info(LogType.LOG, "Cannot run " + sql.getClass().getSimpleName() + " on" +
+                Scope.getCurrentScope().getLog(getClass()).info("Cannot run " + sql.getClass().getSimpleName() + " on" +
                     " " + getDatabase().getShortName() + " when checking databasechangelog table");
             }
         }
@@ -308,7 +303,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
             List<RanChangeSet> ranChangeSets = new ArrayList<>();
             if (hasDatabaseChangeLogTable()) {
-                LogService.getLog(getClass()).info(LogType.LOG, "Reading from " + databaseChangeLogTableName);
+                Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
                 for (Map rs : results) {
                     String fileName = rs.get("FILENAME").toString();
@@ -345,7 +340,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         ranChangeSet.setOrderExecuted(orderExecuted);
                         ranChangeSets.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
-                        LogService.getLog(getClass()).severe(LogType.LOG, "Unknown EXECTYPE from database: " +
+                        Scope.getCurrentScope().getLog(getClass()).severe("Unknown EXECTYPE from database: " +
                             execType);
                         throw e;
                     }

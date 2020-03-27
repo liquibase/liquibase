@@ -1,6 +1,6 @@
 package liquibase.diff.output
 
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
 import liquibase.structure.core.Table

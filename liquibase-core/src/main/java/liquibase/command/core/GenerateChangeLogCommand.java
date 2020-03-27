@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.command.CommandResult;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -9,14 +10,12 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.util.StringUtils;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
+import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
 public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
-    private static final String INFO_MESSAGE = 
+    private static final String INFO_MESSAGE =
         "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
         "should be split (splitStatements:true is the default behavior) or not (splitStatements:false).\n" +
         "See http://liquibase.org for additional documentation.";
@@ -49,12 +48,12 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     @Override
     protected CommandResult run() throws Exception {
-        String changeLogFile = StringUtils.trimToNull(getChangeLogFile());
+        String changeLogFile = StringUtil.trimToNull(getChangeLogFile());
         if (changeLogFile.toLowerCase().endsWith(".sql")) {
-          System.out.println("\n" + INFO_MESSAGE + "\n");
-          LogService.getLog(getClass()).info(LogType.LOG, "\n" + INFO_MESSAGE + "\n");
+            Scope.getCurrentScope().getUI().sendMessage("\n" + INFO_MESSAGE + "\n");
+            Scope.getCurrentScope().getLog(getClass()).info("\n" + INFO_MESSAGE + "\n");
         }
- 
+
         SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
 
         DiffResult diffResult = createDiffResult();
@@ -65,7 +64,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         changeLogWriter.setChangeSetContext(context);
         changeLogWriter.setChangeSetPath(getChangeLogFile());
 
-        if (StringUtils.trimToNull(getChangeLogFile()) != null) {
+        if (StringUtil.trimToNull(getChangeLogFile()) != null) {
             changeLogWriter.print(getChangeLogFile());
         } else {
             PrintStream outputStream = getOutputStream();

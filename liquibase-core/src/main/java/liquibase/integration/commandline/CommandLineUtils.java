@@ -1,6 +1,7 @@
 package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.core.DiffCommand;
@@ -24,7 +25,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -87,12 +88,12 @@ public class CommandLineUtils {
                                                 String databaseChangeLogTableName,
                                                 String databaseChangeLogLockTableName) throws DatabaseException {
         try {
-            liquibaseCatalogName = StringUtils.trimToNull(liquibaseCatalogName);
-            liquibaseSchemaName = StringUtils.trimToNull(liquibaseSchemaName);
-            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
-            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
-            databaseChangeLogTableName = StringUtils.trimToNull(databaseChangeLogTableName);
-            databaseChangeLogLockTableName = StringUtils.trimToNull(databaseChangeLogLockTableName);
+            liquibaseCatalogName = StringUtil.trimToNull(liquibaseCatalogName);
+            liquibaseSchemaName = StringUtil.trimToNull(liquibaseSchemaName);
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
+            databaseChangeLogTableName = StringUtil.trimToNull(databaseChangeLogTableName);
+            databaseChangeLogLockTableName = StringUtil.trimToNull(databaseChangeLogLockTableName);
 
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
@@ -106,8 +107,8 @@ public class CommandLineUtils {
                 }
             }
 
-            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
-            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
 
             database.setDefaultCatalogName(defaultCatalogName);
             database.setDefaultSchemaName(defaultSchemaName);
@@ -203,8 +204,8 @@ public class CommandLineUtils {
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(output);
 
-        System.out.println("");
-        System.out.println(coreBundle.getString("diff.results"));
+        Scope.getCurrentScope().getUI().sendMessage("");
+        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
         try {
             diffCommand.execute();
         } catch (CommandExecutionException e) {
@@ -295,18 +296,18 @@ public class CommandLineUtils {
         String myVersion = "";
         String buildTimeString = "";
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
         myVersion = LiquibaseUtil.getBuildVersion();
         buildTimeString = LiquibaseUtil.getBuildTime();
 
-        StringBuffer banner = new StringBuffer();
+        StringBuilder banner = new StringBuilder();
 
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
         ));
 
-        if (StringUtils.isNotEmpty(myVersion) && StringUtils.isNotEmpty(buildTimeString)) {
+        if (StringUtil.isNotEmpty(myVersion) && StringUtil.isNotEmpty(buildTimeString)) {
             myVersion = myVersion + " #"+ LiquibaseUtil.getBuildNumber();
             banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion, buildTimeString));
         }

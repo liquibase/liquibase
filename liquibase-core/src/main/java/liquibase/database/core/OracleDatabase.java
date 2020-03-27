@@ -1,5 +1,24 @@
 package liquibase.database.core;
 
+import static java.util.ResourceBundle.getBundle;
+
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
@@ -10,8 +29,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -23,24 +40,13 @@ import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
-
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.util.ResourceBundle.getBundle;
+import liquibase.util.StringUtil;
 
 /**
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-    private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
+	private static final Pattern PROXY_USER = Pattern.compile(".*(?:thin|oci)\\:(.+)/@.*");
 
     public static final String PRODUCT_NAME = "oracle";
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -81,7 +87,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return PRIORITY_DEFAULT;
     }
 
-    private final void tryProxySessionn(final String url, final Connection con) {
+    private final void tryProxySession(final String url, final Connection con) {
         Matcher m = PROXY_USER.matcher(url);
         if (m.matches()) {
             Properties props = new Properties();
@@ -91,7 +97,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 method.setAccessible(true);
                 method.invoke(con, 1, props);
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+                Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
         }
     }
@@ -120,14 +126,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             }
 
             if (sqlConn != null) {
-                tryProxySessionn(conn.getURL(), sqlConn);
+                tryProxySession(conn.getURL(), sqlConn);
 
                 try {
                     //noinspection HardCodedStringLiteral
                     reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
                 } catch (SQLException e) {
                     //noinspection HardCodedStringLiteral
-                    LogService.getLog(getClass()).info(LogType.LOG, "Could get sql keywords on OracleDatabase: " + e.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).info("Could get sql keywords on OracleDatabase: " + e.getMessage());
                     //can not get keywords. Continue on
                 }
                 try {
@@ -136,7 +142,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     method.invoke(sqlConn, true);
                 } catch (Exception e) {
                     //noinspection HardCodedStringLiteral
-                    LogService.getLog(getClass()).info(LogType.LOG, "Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
 
                     //cannot set it. That is OK
                 }
@@ -163,7 +169,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     @SuppressWarnings("HardCodedStringLiteral") String message = "Cannot read from v$parameter: " + e.getMessage();
 
                     //noinspection HardCodedStringLiteral
-                    LogService.getLog(getClass()).info(LogType.LOG, "Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
+                    Scope.getCurrentScope().getLog(getClass()).info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }
@@ -221,7 +227,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
-        if (StringUtils.isEmpty(generationType)) {
+        if (StringUtil.isEmpty(generationType)) {
             return "";
         }
 
@@ -279,7 +285,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
             //noinspection HardCodedStringLiteral
-            LogService.getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }
         return null;
     }
@@ -322,43 +328,18 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         String normalLiteral = super.getDateLiteral(isoDate);
 
         if (isDateOnly(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            //noinspection HardCodedStringLiteral
-            val.append("TO_DATE(");
-            val.append(normalLiteral);
-            //noinspection HardCodedStringLiteral
-            val.append(", 'YYYY-MM-DD')");
-            return val.toString();
+            return "TO_DATE(" + normalLiteral + ", 'YYYY-MM-DD')";
         } else if (isTimeOnly(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            //noinspection HardCodedStringLiteral
-            val.append("TO_DATE(");
-            val.append(normalLiteral);
-            //noinspection HardCodedStringLiteral
-            val.append(", 'HH24:MI:SS')");
-            return val.toString();
+            return "TO_DATE(" + normalLiteral + ", 'HH24:MI:SS')";
         } else if (isTimestamp(isoDate)) {
-            StringBuffer val = new StringBuffer(26);
-            //noinspection HardCodedStringLiteral
-            val.append("TO_TIMESTAMP(");
-            val.append(normalLiteral);
-            //noinspection HardCodedStringLiteral
-            val.append(", 'YYYY-MM-DD HH24:MI:SS.FF')");
-            return val.toString();
+            return "TO_TIMESTAMP(" + normalLiteral + ", 'YYYY-MM-DD HH24:MI:SS.FF')";
         } else if (isDateTime(isoDate)) {
             int seppos = normalLiteral.lastIndexOf('.');
             if (seppos != -1) {
                 normalLiteral = normalLiteral.substring(0, seppos) + "'";
             }
-            StringBuffer val = new StringBuffer(26);
-            //noinspection HardCodedStringLiteral
-            val.append("TO_DATE(");
-            val.append(normalLiteral);
-            //noinspection HardCodedStringLiteral
-            val.append(", 'YYYY-MM-DD HH24:MI:SS')");
-            return val.toString();
+            return "TO_DATE(" + normalLiteral + ", 'YYYY-MM-DD HH24:MI:SS')";
         }
-        //noinspection HardCodedStringLiteral
         return "UNSUPPORTED:" + isoDate;
     }
 
@@ -394,7 +375,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
                 boolean filteredInOriginalQuery = this.canAccessDbaRecycleBin();
                 if (!filteredInOriginalQuery) {
-                    filteredInOriginalQuery = StringUtils.trimToEmpty(example.getSchema().getName()).equalsIgnoreCase(this.getConnection().getConnectionUserName());
+                    filteredInOriginalQuery = StringUtil.trimToEmpty(example.getSchema().getName()).equalsIgnoreCase(this.getConnection().getConnectionUserName());
                 }
 
                 if (filteredInOriginalQuery) {
@@ -524,10 +505,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 "USLOG$",
                 "SYS_FBA"));
 
-        for (int i = 0; i < clauses.size(); i++) {
-            clauses.set(i, tableNameColumn + " NOT LIKE '" + clauses.get(i) + "%'");
-        }
-        return "(" + StringUtils.join(clauses, " AND ") + ")";
+        for (int i = 0;i<clauses.size(); i++) {
+            clauses.set(i, tableNameColumn+" NOT LIKE '"+clauses.get(i)+"%'");
+            }
+        return "("+ StringUtil.join(clauses, " AND ") + ")";
     }
 
     @Override
@@ -579,7 +560,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         DatabaseConnection connection = getConnection();
         if ((connection == null) || (connection instanceof OfflineConnection)) {
             //noinspection HardCodedStringLiteral
-            LogService.getLog(getClass()).info(LogType.LOG, "Cannot validate offline database");
+            Scope.getCurrentScope().getLog(getClass()).info("Cannot validate offline database");
             return errors;
         }
 
@@ -626,7 +607,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 } else {
                     //noinspection HardCodedStringLiteral
-                    LogService.getLog(getClass()).warning(LogType.LOG, "Cannot check dba_recyclebin access", e);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Cannot check dba_recyclebin access", e);
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {

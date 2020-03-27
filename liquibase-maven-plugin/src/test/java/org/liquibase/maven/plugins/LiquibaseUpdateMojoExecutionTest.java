@@ -15,6 +15,7 @@ import liquibase.changelog.ChangeLogParameters;
  * @author Martin Meyer <martin.meyer@inftec.ch>
  */
 public class LiquibaseUpdateMojoExecutionTest extends AbstractLiquibaseMojoTest {
+
     public void testPlaceholder() {
 
     }

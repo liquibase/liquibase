@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
@@ -16,12 +17,9 @@ public class ChangeGeneratorFactory {
     private List<ChangeGenerator> generators = new ArrayList<>();
 
     private ChangeGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeGenerator.class);
-
-            for (Class clazz : classes) {
-                register((ChangeGenerator) clazz.getConstructor().newInstance());
+            for (ChangeGenerator generator : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeGenerator.class)) {
+                register(generator);
             }
 
         } catch (Exception e) {

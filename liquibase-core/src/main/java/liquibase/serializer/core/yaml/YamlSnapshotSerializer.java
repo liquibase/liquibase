@@ -15,7 +15,7 @@ import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.util.BooleanUtils;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
@@ -74,7 +74,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                         name = ((DatabaseObject) object).getSchema().toString() + "." + name;
                     }
 
-                    throw new UnexpectedLiquibaseException("Found a null snapshotId for " + StringUtils.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
+                    throw new UnexpectedLiquibaseException("Found a null snapshotId for " + StringUtil.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
                 }
                 return ((DatabaseObject) object).getClass().getName() + "#" + snapshotId;
             } else {

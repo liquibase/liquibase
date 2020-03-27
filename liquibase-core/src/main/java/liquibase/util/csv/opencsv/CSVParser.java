@@ -16,7 +16,7 @@ package liquibase.util.csv.opencsv;
  limitations under the License.
  */
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.csv.opencsv.enums.CSVReaderNullFieldIndicator;
 
 import java.io.IOException;
@@ -443,7 +443,7 @@ public class CSVParser {
     }
 
     /**
-     * Appends the next character in the line to the stringbuffer.
+     * Appends the next character in the line to the StringBuilder.
      *
      * @param line - line to process
      * @param sb   - contains the processed character
@@ -540,7 +540,7 @@ public class CSVParser {
      * @return true if every character in the sequence is whitespace
      */
     protected boolean isAllWhiteSpace(CharSequence sb) {
-        return StringUtils.isWhitespace(sb);
+        return StringUtil.isWhitespace(sb);
     }
 
     /**

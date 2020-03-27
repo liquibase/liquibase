@@ -4,7 +4,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         if ((changeSet.getDbmsSet() == null) || changeSet.getDbmsSet().isEmpty()) {
             dbmsList = "all databases";
         } else {
-            dbmsList = "'"+StringUtils.join(changeSet.getDbmsSet(), ", ") + "'";
+            dbmsList = "'"+ StringUtil.join(changeSet.getDbmsSet(), ", ") + "'";
         }
 
         if (DatabaseList.definitionMatches(changeSet.getDbmsSet(), database, true)) {

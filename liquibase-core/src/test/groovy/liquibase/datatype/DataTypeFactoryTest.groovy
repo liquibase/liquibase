@@ -2,7 +2,7 @@ package liquibase.datatype
 
 import liquibase.database.core.*
 import liquibase.datatype.core.*
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 

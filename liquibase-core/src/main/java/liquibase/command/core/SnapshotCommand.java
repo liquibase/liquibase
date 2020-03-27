@@ -10,13 +10,12 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.license.LicenseServiceUtils;
-import liquibase.logging.LogType;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotListener;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +55,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
             return this;
         }
 
-        schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
+        schemas = StringUtil.join(schemas, ",").split("\\s*,\\s*");
         List<CatalogAndSchema> finalList = new ArrayList<>();
         for (String schema : schemas) {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
@@ -159,7 +158,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
                || database instanceof OracleDatabase
                || database instanceof DB2Database
                || database instanceof PostgresDatabase)) {
-                Scope.getCurrentScope().getLog(callingClass).info(LogType.USER_MESSAGE, "INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
+                Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
             }
         }
     }

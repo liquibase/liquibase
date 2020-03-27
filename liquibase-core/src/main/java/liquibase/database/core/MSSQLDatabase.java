@@ -1,7 +1,7 @@
 package liquibase.database.core;
 
-import java.sql.Connection;
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -10,21 +10,27 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -184,8 +190,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
 
         if (isRealSqlServerConnection && (majorVersion < MSSQL_SERVER_VERSIONS.MSSQL2008)) {
-            LogService.getLog(getClass()).warning(
-                LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your " +
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                String.format("Your SQL Server major version (%d) seems to indicate that your " +
                         "software is older than SQL Server 2008. Unfortunately, this is not supported, and this " +
                         "connection cannot be used.",
                  majorVersion));
@@ -248,7 +254,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getConcatSql(String... values) {
-        StringBuffer returnString = new StringBuffer();
+        StringBuilder returnString = new StringBuilder();
         for (String value : values) {
             returnString.append(value).append(" + ");
         }
@@ -334,7 +340,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName),
                 String.class
             );
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (String defLine : defLines) {
             sb.append(defLine);
         }
@@ -376,10 +382,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
             String name = this.escapeObjectName(objectName, objectType);
-            if (StringUtils.isEmpty(schemaName)) {
+            if (StringUtil.isEmpty(schemaName)) {
                 schemaName = this.getDefaultSchemaName();
             }
-            if ((!StringUtils.isEmpty(schemaName) && (!schemaName.equals(getConnectionSchemaName())))) {
+            if ((!StringUtil.isEmpty(schemaName) && (!schemaName.equals(getConnectionSchemaName())))) {
                 name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
             }
             return name;
@@ -411,7 +417,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from MSSQL", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
         return (caseSensitive != null) && caseSensitive;
@@ -480,7 +486,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             schemaName = escapeObjectName(schemaName, Schema.class);
         }
 
-        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1);
         if (!dataTypeName.startsWith(getQuotingStartCharacter())) {
             dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
         }
@@ -505,7 +511,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             schemaName = schemaName.substring(1, schemaName.length() - 1);
         }
 
-        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1);
         if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
             dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
         }
@@ -555,8 +561,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
                 }
             } catch (SQLException | DatabaseException e) {
-                LogService.getLog(getClass()).warning(
-                    LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                Scope.getCurrentScope().getLog(getClass()).warning(
+                    "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
@@ -592,7 +598,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     .queryForObject(new RawSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
-            LogService.getLog(getClass()).warning(LogType.LOG, "Could not determine engine edition", e);
+            Scope.getCurrentScope().getLog(getClass()).warning("Could not determine engine edition", e);
         }
         return "Unknown";
     }

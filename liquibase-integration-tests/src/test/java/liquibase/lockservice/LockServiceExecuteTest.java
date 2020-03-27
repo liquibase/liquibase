@@ -1,12 +1,12 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
+import liquibase.listener.SqlListener;
 import liquibase.test.TestContext;
 import org.junit.After;
 import org.junit.Before;
@@ -38,7 +38,9 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogTableName()
                                 );
-                        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                            listener.writeSqlWillRun(sql);
+                        }
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok
@@ -50,7 +52,9 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogLockTableName()
                                 );
-                        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                            listener.writeSqlWillRun(sql);
+                        }
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok

@@ -10,8 +10,9 @@ import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.SqlPrecondition
 import liquibase.resource.ResourceAccessor
+import liquibase.servicelocator.LiquibaseService
 import liquibase.test.JUnitResourceAccessor
-import liquibase.util.StringUtils
+import liquibase.util.StringUtil
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -148,7 +149,7 @@ select 1
         assert changeLog.getChangeSets().get(1).isRunOnChange()
         assert !changeLog.getChangeSets().get(1).isRunInTransaction()
         changeLog.getChangeSets().get(1).getContexts().toString() == "y"
-        StringUtils.join(changeLog.getChangeSets().get(1).getDbmsSet(), ",") == "mysql"
+        StringUtil.join(changeLog.getChangeSets().get(1).getDbmsSet(), ",") == "mysql"
         changeLog.getChangeSets().get(1).rollback.changes.size() == 1
         ((RawSQLChange) changeLog.getChangeSets().get(1).rollback.changes[0]).getSql().replace("\r\n", "\n") == "delete from table1;\ndrop table table1;"
 
@@ -300,6 +301,7 @@ select 1
         "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
     }
 
+    @LiquibaseService(skip = true)
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
         private String changeLog
 

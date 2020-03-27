@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
@@ -23,7 +24,7 @@ public class ExecutorService {
     public Executor getExecutor(Database database) {
         return executors.computeIfAbsent(database, db -> {
             try {
-                Executor executor = (Executor) ServiceLocator.getInstance().newInstance(Executor.class);
+                Executor executor = Scope.getCurrentScope().getServiceLocator().findInstances(Executor.class).get(0);
                 executor.setDatabase(db);
                 return executor;
             } catch (Exception e) {

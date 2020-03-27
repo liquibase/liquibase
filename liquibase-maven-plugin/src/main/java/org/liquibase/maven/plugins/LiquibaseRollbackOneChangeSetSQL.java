@@ -1,6 +1,7 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandExecutionException;
@@ -10,8 +11,6 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -136,7 +135,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
                 closeOutputWriter(outputWriter);
             }
             catch (IOException ioe) {
-                LogService.getLog(getClass()).info(LogType.LOG, String.format("Unable to close output file"));
+                Scope.getCurrentScope().getLog(getClass()).info(String.format("Unable to close output file"));
             }
         }
     }
@@ -149,9 +148,7 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         try {
             fileOut = new FileOutputStream(outputFile, false);
         } catch (IOException e) {
-            LogService.getLog(getClass()).severe(LogType.LOG, String.format(
-                    coreBundle.getString("could.not.create.output.file"),
-            outputFile));
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format(coreBundle.getString("could.not.create.output.file"), outputFile));
             throw e;
         }
         return fileOut;
@@ -179,6 +176,9 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         argsMap.put("database", database);
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
+        argsMap.put("changeSetId", this.changeSetId);
+        argsMap.put("changeSetAuthor", this.changeSetAuthor);
+        argsMap.put("changeSetPath", this.changeSetPath);
         return argsMap;
     }
 }

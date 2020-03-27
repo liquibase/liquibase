@@ -20,7 +20,7 @@ public class DatabaseUpdateTestingRollbackTask extends AbstractChangeLogBasedTas
             }
             liquibase.updateTestingRollback(new Contexts(getContexts()), getLabels());
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to update database with a rollback test. " + e.toString(), e);
+            throw new BuildException("Unable to update database with a rollback test: " + e.getMessage(), e);
         }
     }
 

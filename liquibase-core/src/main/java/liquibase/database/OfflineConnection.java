@@ -1,13 +1,12 @@
 package liquibase.database;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
@@ -18,7 +17,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -51,7 +50,7 @@ public class OfflineConnection implements DatabaseConnection {
             throw new UnexpectedLiquibaseException("Could not parse offline url " + url);
         }
         this.databaseShortName = matcher.group(1).toLowerCase();
-        String params = StringUtils.trimToNull(matcher.group(2));
+        String params = StringUtil.trimToNull(matcher.group(2));
         try {
             Map<String, String> params1 = new HashMap<String, String>();
             if (params != null) {
@@ -75,7 +74,7 @@ public class OfflineConnection implements DatabaseConnection {
                             this.databaseMinorVersion = Integer.parseInt(versionParts[1]);
                         }
                     } catch (NumberFormatException e) {
-                        LogService.getLog(getClass()).warning(LogType.LOG, "Cannot parse database version " + productVersion);
+                        Scope.getCurrentScope().getLog(getClass()).warning("Cannot parse database version " + productVersion);
                     }
                 } else if ("productName".equals(paramEntry.getKey())) {
                     this.productName = paramEntry.getValue();
@@ -125,7 +124,7 @@ public class OfflineConnection implements DatabaseConnection {
             try {
                 ObjectUtil.setProperty(database, param.getKey(), param.getValue());
             } catch (Exception e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
             }
         }
         if (database instanceof AbstractJdbcDatabase) {
@@ -273,7 +272,7 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     public void setConnectionUserName(String connectionUserName) {
-        this.connectionUserName = StringUtils.isEmpty(connectionUserName) ? null : connectionUserName;
+        this.connectionUserName = StringUtil.isEmpty(connectionUserName) ? null : connectionUserName;
     }
 
     @Override

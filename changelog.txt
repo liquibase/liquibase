@@ -1,6 +1,10 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.8 (2020.3.19)
+- `rollbackOneChangeSetSQL` now works correctly with the Liquibase Maven plugin.
+- Liquibase Pro no longer generates procedural code with incorrect SQL syntax when running `generateChangeLog` against a MySQL database.
+
 Changes in version 3.8.7 (2020.2.21)
 
 - New liquibase history command

@@ -2,6 +2,7 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 import liquibase.license.Location;
 import liquibase.license.LocationType;
@@ -93,7 +94,7 @@ public class MavenUtils {
 
   public static boolean checkProLicense(String liquibaseProLicenseKey, String commandName, Log log) {
       boolean hasProLicense = true;
-      LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+      LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
       if (licenseService == null) {
         return false;
       }
@@ -104,8 +105,7 @@ public class MavenUtils {
           }
           log.info("");
           hasProLicense = false;
-      }
-      else {
+      } else {
           Location licenseKeyLocation = 
               new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, liquibaseProLicenseKey);
           LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
