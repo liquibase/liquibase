@@ -32,6 +32,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
         "com/example"                      | "/my/test.sql"                   | "com/example/my/test.sql"
         "com/example/other.file"           | "/my/test.sql"                   | "com/example/my/test.sql"
         "classpath:com/example/other.file" | "my/test.sql"                    | "com/example/my/test.sql"
+        "changelog.xml"                    | "sql/function.sql"               | "sql/function.sql"
     }
 
     @Unroll("#featureName: #relativeTo #streamPath")

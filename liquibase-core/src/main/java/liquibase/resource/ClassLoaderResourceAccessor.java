@@ -105,6 +105,13 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 }
             }
 
+            //
+            // If this is a simple file name then set the
+            // relativeTo value as if it is a root path
+            //
+            if (! relativeTo.contains("/") && relativeTo.contains(".")) {
+                relativeTo = "/";
+            }
             streamPath = relativeTo + "/" + streamPath;
         }
 
