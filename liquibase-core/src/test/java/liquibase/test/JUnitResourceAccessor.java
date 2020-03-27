@@ -13,7 +13,6 @@ public class JUnitResourceAccessor extends ClassLoaderResourceAccessor {
                 new File(TestContext.getInstance().findIntegrationTestProjectRoot(), "src/test/resources/packaged-changelog.jar").toURI().toURL(),
                 new File(System.getProperty("java.io.tmpdir")).toURI().toURL(),
                 new File(".", "target/test-classes").getCanonicalFile().toURI().toURL(),
-        }));
-
+        }, null));
     }
 }

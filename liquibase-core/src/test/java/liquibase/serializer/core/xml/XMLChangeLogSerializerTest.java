@@ -780,7 +780,6 @@ public class XMLChangeLogSerializerTest {
         String fileName = "liquibase/change/core/SQLFileTestData.sql";
         SQLFileChange change = new SQLFileChange();
         ClassLoaderResourceAccessor opener = new ClassLoaderResourceAccessor();
-        change.setResourceAccessor(opener);
         change.setPath(fileName);
 
         Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);

@@ -12,6 +12,8 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.DatabaseObjectComparator;
+import liquibase.structure.core.Column;
+import liquibase.util.BooleanUtils;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.nodes.Node;
@@ -53,7 +55,10 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     @Override
     protected Object toMap(final LiquibaseSerializable object) {
         if (object instanceof DatabaseObject) {
-            if (alreadySerializingObject) {
+            if (object instanceof Column && (BooleanUtils.isTrue(((Column) object).getDescending()) || BooleanUtils.isTrue(((Column) object).getComputed()))) {
+                //not really a "real" column that has a snapshot to reference, just serialize it
+                return super.toMap(object);
+            } else if (alreadySerializingObject) {
                 String snapshotId = ((DatabaseObject) object).getSnapshotId();
                 if (snapshotId == null) {
                     String name = ((DatabaseObject) object).getName();

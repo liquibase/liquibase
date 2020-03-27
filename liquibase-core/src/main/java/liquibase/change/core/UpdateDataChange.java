@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
@@ -69,7 +70,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         }
 
         if (needsPreparedStatement) {
-            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor());
+            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), Scope.getCurrentScope().getResourceAccessor());
             
             statement.setWhereClause(where);
             

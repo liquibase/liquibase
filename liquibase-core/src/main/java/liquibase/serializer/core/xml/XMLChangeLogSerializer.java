@@ -111,7 +111,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         for (NamespaceDetails details : NamespaceDetailsFactory.getInstance().getNamespaceDetails()) {
             for (String namespace : details.getNamespaces()) {
-                if (details.supports(this, namespace)) {
+                if (details.getPriority() > 0 && details.supports(this, namespace)) {
                     String shortName = details.getShortName(namespace);
                     String url = details.getSchemaUrl(namespace);
                     if (shortName != null) {

@@ -11,7 +11,6 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -20,6 +19,7 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
+import liquibase.util.BooleanUtils;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
@@ -293,7 +293,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
 
         if (!snapshotControl.shouldInclude(example)) {
-            LOGGER.fine(LogType.LOG, "Excluding " + example);
+            LOGGER.fine("Excluding " + example);
             return example;
         }
 
@@ -324,11 +324,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
             if (example instanceof Schema) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Did not find schema '" + example + "' to snapshot");
+                    Scope.getCurrentScope().getLog(getClass()).warning("Did not find schema '" + example + "' to snapshot");
             }
             if (example instanceof Catalog) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Did not find catalog '" + example + "' to snapshot");
+                    Scope.getCurrentScope().getLog(getClass()).warning("Did not find catalog '" + example + "' to snapshot");
             }
 
         } else {
@@ -354,8 +354,9 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index
                     .class) || (object.getClass() == UniqueConstraint.class))) {
                 if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
-                    String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
-                    if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC") || columnName.endsWith(" RANDOM")) {
+                    final Column column = (Column) ((Collection) fieldValue).iterator().next();
+                    String columnName = column.getName();
+                    if (BooleanUtils.isTrue(column.getDescending()) || columnName.endsWith(" ASC") || columnName.endsWith(" DESC") || columnName.endsWith(" RANDOM")) {
                         continue;
                     }
                 }

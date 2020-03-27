@@ -104,7 +104,6 @@ public class SQLFileChangeTest extends StandardChangeTest {
         when:
         def change = new SQLFileChange()
         change.path = "non-existing.sql"
-        change.resourceAccessor = new MockResourceAccessor()
         change.openSqlStream()
 
         then:

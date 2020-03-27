@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -176,6 +177,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public ValidationErrors validate(Database database) {
         // Not falling back to default because of path/procedureText option group. Need to specify everything.
         ValidationErrors validate = new ValidationErrors();
+
+        validate.checkDisallowedField("catalogName", this.getCatalogName(), database, MSSQLDatabase.class);
+
         if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
             validate.addError(
                 "Cannot specify both 'path' and a nested procedure text in " +
@@ -210,10 +214,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         try {
             String path = getPath();
             String relativeTo = null;
-            if (isRelativeToChangelogFile()) {
+            final Boolean isRelative = isRelativeToChangelogFile();
+            if (isRelative != null && isRelative) {
                 relativeTo = getChangeSet().getFilePath();
             }
-            return getResourceAccessor().openStream(relativeTo, path);
+            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException(
                 "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
@@ -290,20 +295,25 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         if (path == null) {
             procedureText = StringUtil.trimToNull(getProcedureText());
         } else {
-            try {
-                InputStream stream = openSqlStream();
-                if (stream == null) {
-                    throw new IOException("File does not exist: " + path);
-                }
-                procedureText = StreamUtil.readStreamAsString(stream, encoding);
-                if (getChangeSet() != null) {
-                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
-                    if (parameters != null) {
-                        procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
+            if (getChangeSet() == null) {
+                //only try to read a file when inside a changest. Not when analyizing supported
+                procedureText = "NO CHANGESET";
+            } else {
+                try {
+                    InputStream stream = openSqlStream();
+                    if (stream == null) {
+                        throw new IOException("File does not exist: " + path);
                     }
+                    procedureText = StreamUtil.readStreamAsString(stream, encoding);
+                    if (getChangeSet() != null) {
+                        ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+                        if (parameters != null) {
+                            procedureText = parameters.expandExpressions(procedureText, getChangeSet().getChangeLog());
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new UnexpectedLiquibaseException(e);
                 }
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
             }
         }
         return generateStatements(procedureText, endDelimiter, database);

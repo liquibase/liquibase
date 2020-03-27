@@ -7,6 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.test.TestContext;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -18,8 +19,8 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
     protected static final String SEQUENCE_NAME = "SEQUENCE_NAME";
     protected static final String CATALOG_NAME = "CATALOG_NAME";
     protected static final String SCHEMA_NAME = "SCHEMA_NAME";
-	private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
-    private DatabaseConnection mockedSupportedMinMaxSequenceConnection;
+//	private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
+//    private DatabaseConnection mockedSupportedMinMaxSequenceConnection;
     public AlterSequenceGeneratorTest() throws Exception {
         super(new AlterSequenceGenerator());
     }
@@ -87,7 +88,7 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
 //
 //		assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
 //	}
-
+//
 //    @Test
 //    public void h2DatabaseDoesNotSupportsSequenceMinValue() throws Exception {
 //

@@ -29,7 +29,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -98,7 +97,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 method.setAccessible(true);
                 method.invoke(con, 1, props);
             } catch (Exception e) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+                Scope.getCurrentScope().getLog(getClass()).info("Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
             }
         }
     }
@@ -134,7 +133,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
                 } catch (SQLException e) {
                     //noinspection HardCodedStringLiteral
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could get sql keywords on OracleDatabase: " + e.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).info("Could get sql keywords on OracleDatabase: " + e.getMessage());
                     //can not get keywords. Continue on
                 }
                 try {
@@ -143,7 +142,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     method.invoke(sqlConn, true);
                 } catch (Exception e) {
                     //noinspection HardCodedStringLiteral
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
 
                     //cannot set it. That is OK
                 }
@@ -170,7 +169,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     @SuppressWarnings("HardCodedStringLiteral") String message = "Cannot read from v$parameter: " + e.getMessage();
 
                     //noinspection HardCodedStringLiteral
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
+                    Scope.getCurrentScope().getLog(getClass()).info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }
@@ -286,7 +285,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
             //noinspection HardCodedStringLiteral
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }
         return null;
     }
@@ -561,7 +560,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         DatabaseConnection connection = getConnection();
         if ((connection == null) || (connection instanceof OfflineConnection)) {
             //noinspection HardCodedStringLiteral
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Cannot validate offline database");
+            Scope.getCurrentScope().getLog(getClass()).info("Cannot validate offline database");
             return errors;
         }
 
@@ -608,7 +607,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 } else {
                     //noinspection HardCodedStringLiteral
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Cannot check dba_recyclebin access", e);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Cannot check dba_recyclebin access", e);
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {

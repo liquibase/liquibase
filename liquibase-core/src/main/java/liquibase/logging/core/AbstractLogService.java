@@ -10,27 +10,12 @@ import java.util.logging.Level;
  */
 public abstract class AbstractLogService implements LogService {
 
-    private Level logLevel;
-
     public AbstractLogService() {
-        String defaultLoggerLevel = System.getProperty("liquibase.log.level");
-        if (defaultLoggerLevel == null) {
-            setLogLevel(Level.SEVERE);
-        } else {
-            setLogLevel(Level.parse(defaultLoggerLevel));
-        }
     }
 
-    @Override
-    public Level getLogLevel() {
-        return this.logLevel;
-    }
-
-    @Override
-    public void setLogLevel(Level level) {
-        this.logLevel = level;
-    }
-
+    /**
+     * Default implementation does nothing.
+     */
     @Override
     public void close() {
 

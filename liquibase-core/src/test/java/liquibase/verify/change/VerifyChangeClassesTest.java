@@ -1,6 +1,7 @@
 package liquibase.verify.change;
 
 import liquibase.Scope;
+import liquibase.TestScopeManager;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeMetaData;
@@ -10,8 +11,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.Db2zDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sql.Sql;
@@ -20,6 +19,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StringUtil;
 import liquibase.verify.AbstractVerifyTest;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -31,6 +31,12 @@ import static org.junit.Assert.assertTrue;
 
 public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
+
+    @BeforeClass
+    public static void setUpClass() {
+        Scope.setScopeManager(new TestScopeManager());
+    }
+
     @Test
     public void compareGeneratedSqlWithExpectedSqlForMinimalChangesets() throws Exception {
         ChangeFactory changeFactory = Scope.getCurrentScope().getSingleton(ChangeFactory.class);
@@ -38,6 +44,11 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
             if ("addDefaultValue".equals(changeName)) {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
             }
+
+            if ("createProcedure".equals(changeName)) {
+                continue; //need to better handle strange "one of path or body is required" logic
+            }
+
             if ("changeWithNestedTags".equals(changeName) || "sampleChange".equals(changeName)
                 || "output".equals(changeName) || "tagDatabase".equals(changeName)){
                 continue; //not a real change
@@ -58,8 +69,6 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     continue;
                 }
                 ChangeMetaData changeMetaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change);
-
-                change.setResourceAccessor(new JUnitResourceAccessor());
 
                 // Prepare a list of required parameters, plus a few extra for complicated cases (e.g. where at least
                 // one of two parameters in a group is required.
@@ -113,7 +122,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 for (SqlStatement statement : sqlStatements) {
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
                     if (sql == null) {
-                        Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, "Null sql for " + statement + " on " + database.getShortName());
+                        Scope.getCurrentScope().getLog(getClass()).severe("Null sql for " + statement + " on " + database.getShortName());
                     } else {
                         for (Sql line : sql) {
                             String sqlLine = line.toSql();
@@ -143,6 +152,10 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     continue;
                 }
 
+                if ("createProcedure".equals(changeName)) {
+                    continue; //need to better handle strange "one of path or body is required" logic
+                }
+
                 Change change = changeFactory.create(changeName);
                 if (!change.supports(database)) {
                     continue;
@@ -151,8 +164,6 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     continue;
                 }
                 ChangeMetaData changeMetaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change);
-
-                change.setResourceAccessor(new JUnitResourceAccessor());
 
                 ArrayList<String> requiredParams = new ArrayList<String>(changeMetaData.getRequiredParameters(database).keySet());
                 for (String paramName : requiredParams) {
@@ -219,7 +230,6 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 });
                 for (List<String> permutation : paramLists) {
                     Change change = changeFactory.create(changeName);
-                    change.setResourceAccessor(new JUnitResourceAccessor());
 //
                     for (String paramName : new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet())) {
                         ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);

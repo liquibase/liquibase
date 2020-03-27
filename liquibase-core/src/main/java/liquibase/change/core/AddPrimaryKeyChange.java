@@ -13,7 +13,7 @@ import liquibase.structure.core.PrimaryKey;
 /**
  * Creates a primary key out of an existing column or set of columns.
  */
-@DatabaseChange(name="addPrimaryKey", description = "Adds creates a primary key out of an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addPrimaryKey", description = "Adds a primary key out of an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddPrimaryKeyChange extends AbstractChange {
 
     private String catalogName;
