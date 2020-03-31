@@ -16,7 +16,7 @@ before_install:
 install: cp ./.travis/maven.settings.xml $HOME/.m2/settings.xml
 before_script: docker-compose -f ./.travis/databases.docker-compose.yml up -d
 script:
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent integration-test verify sonar:sonar -Dliquibase.version.qualifier="-${TRAVIS_BRANCH}" -Dbuild.number=${TRAVIS_BUILD_NUMBER} -Dbuild.commit=${TRAVIS_COMMIT}"; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent integration-test verify -Dliquibase.version.qualifier="-${TRAVIS_BRANCH}" -Dbuild.number=${TRAVIS_BUILD_NUMBER} -Dbuild.commit=${TRAVIS_COMMIT}"; fi'
   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash -c "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent integration-test deploy sonar:sonar -Dsonar.projectKey=liquibase_liquibase -Ddeploy.url=https://oss.sonatype.org/content/repositories/snapshots -Ddeploy.repositoryId=sonatype -Dliquibase.version.qualifier="-${TRAVIS_BRANCH}" -Dbuild.number=${TRAVIS_BUILD_NUMBER} -Dbuild.commit=${TRAVIS_COMMIT}"; fi'
 after_script: docker-compose -f ./.travis/databases.docker-compose.yml down
 
