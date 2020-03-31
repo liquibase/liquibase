@@ -31,7 +31,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             //cannot check
         }
 
-        return !((database instanceof FirebirdDatabase) || (database instanceof SQLiteDatabase));
+        return !(database instanceof SQLiteDatabase);
     }
 
     @Override
@@ -74,6 +74,8 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
                 nullableString = "";
             }
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString + ")";
+        } else if (database instanceof FirebirdDatabase && !(database instanceof Firebird3Database)) {
+            sql = "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = " + (statement.isNullable() ? "1" : "NULL") + " WHERE RDB$RELATION_NAME = " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " AND RDB$FIELD_NAME = " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName());
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
         }
