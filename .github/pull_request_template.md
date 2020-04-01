@@ -1,29 +1,49 @@
 ---
-name: Pull Request
-about: Create a report to help us improve
-title: ''
-labels: Status:Discovery
-assignees: ''
+Liquibase Version: ''
+Liquibase Integration/Interface: '<CLI, maven, gradle, spring boot, servlet>'
+Liquibase Extension/Vesion: ''
+Database Vendor/Version: ''
+Operating System Type/Version: ''
 
 ---
+## Type of Change
+<!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] Enhancement/New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to change)
 
-**Description**
-A clear and concise description of what the issue being addressed is.
+## Description
 
-**To Reproduce**
-Steps to reproduce the behavior. Please be as precise as possible. Ideally, include things like the files used if possible, the commands used, how the product was installed and how it is used, what database platform and version is being used, properties files/POM files/config files, extensions used... 
+A clear and concise description of the issue being addressed.
 
-Ensure private information is redacted.
+Describe the actual problematic behavior. Include console output if relevant, log files if available. Ensure private information is redacted.
 
-Please specify the exact commands used, from CLI, from maven, etc.
+## Steps To Reproduce
 
-Describe the actual problematic behavior. Include console outout if relevant, log files if available. Ensure private information is redacted.
+List the steps to reproduce the behavior.
+- Please be precise and ensure private information is redacted
+- Include things like
+  - Files used - sql scripts, changelog file(s), property file(s), config files, POM Files
+  - Exact commands used - CLI, maven, gradle, spring boot, servlet, etc.)
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Actual Behavior
+A clear and concise description of what happens in the software **before** this pull request.
 
-**Screenshots**
+## Expected/Desired Behavior
+A clear and concise description of what happens in the software **after** this pull request.
+
+## Screenshots (if appropriate)
 If applicable, add screenshots to help explain your problem.
 
-**Additional context**
+## Additional Context
 Add any other context about the problem here.
+
+## Criteria for easy/fast acceptance of Pull Request (PR):
+<!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
+<!--- If you're unsure about any of these, just ask us in a comment. We're here to help! -->
+- [ ] Build is successful
+- [ ] Added Unit Test(s)
+- [ ] Added Integration Test(s)
+- [ ] Documentation Updated
+- [ ] All new and existing tests pass
+
