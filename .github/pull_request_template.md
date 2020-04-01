@@ -41,7 +41,8 @@ If applicable, add screenshots to help explain your problem.
 Add any other context about the problem here.
 
 ## Fast Track PR Acceptance Checklist:
-<!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
+<!--- Completing these speeds up the acceptance of your pull request -->
+<!--- Put an `x` in all the boxes that apply. -->
 <!--- If you're unsure about any of these, just ask us in a comment. We're here to help! -->
 - [ ] Build is successful
 - [ ] Added Unit Test(s)
