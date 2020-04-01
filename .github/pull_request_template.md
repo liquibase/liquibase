@@ -1,10 +1,10 @@
 ---
+<!-- what version are you using that demonstrates the issue? -->
 Liquibase Version: ''
 Liquibase Integration: 'Pick one: CLI, maven, gradle, spring boot, servlet, etc.' 
-Liquibase Extension & Version: ''
+Liquibase Extension(s) & Version: ''
 Database Vendor & Version: ''
 Operating System Type & Version: ''
-
 ---
 
 <!--- What types of changes does your code introduce?
