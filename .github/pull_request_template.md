@@ -44,9 +44,8 @@ Add any other context about the problem here.
 <!--- Completing these speeds up the acceptance of your pull request -->
 <!--- Put an `x` in all the boxes that apply. -->
 <!--- If you're unsure about any of these, just ask us in a comment. We're here to help! -->
-- [ ] Build is successful
+- [ ] Build is successful and all new and existing tests pass
 - [ ] Added Unit Test(s)
 - [ ] Added Integration Test(s)
 - [ ] Documentation Updated
-- [ ] All new and existing tests pass
 
