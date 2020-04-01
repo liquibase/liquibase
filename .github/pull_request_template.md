@@ -1,5 +1,4 @@
 ---
-<!-- what version are you using that demonstrates the issue? -->
 Liquibase Version: ''
 Liquibase Integration: 'Pick one: CLI, maven, gradle, spring boot, servlet, etc.' 
 Liquibase Extension(s) & Version: ''
