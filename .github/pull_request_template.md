@@ -6,7 +6,7 @@ Database Vendor/Version: ''
 Operating System Type/Version: ''
 
 ---
-## Type of Change
+
 <!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] Enhancement/New feature (non-breaking change which adds functionality)
@@ -38,7 +38,7 @@ If applicable, add screenshots to help explain your problem.
 ## Additional Context
 Add any other context about the problem here.
 
-## Criteria for easy/fast acceptance of Pull Request (PR):
+## Fast Track PR Acceptance Checklist:
 <!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
 <!--- If you're unsure about any of these, just ask us in a comment. We're here to help! -->
 - [ ] Build is successful
