@@ -1,13 +1,14 @@
 ---
 Liquibase Version: ''
-Liquibase Integration/Interface: '<CLI, maven, gradle, spring boot, servlet>'
-Liquibase Extension/Vesion: ''
+Liquibase Integration/Interface: 'Pick one: CLI, maven, gradle, spring boot, servlet' 
+Liquibase Extension/Version: ''
 Database Vendor/Version: ''
 Operating System Type/Version: ''
 
 ---
 
-<!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
+<!--- What types of changes does your code introduce?
+      Put an `x` in all the boxes that apply: -->
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] Enhancement/New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to change)
@@ -15,8 +16,9 @@ Operating System Type/Version: ''
 ## Description
 
 A clear and concise description of the issue being addressed.
-
-Describe the actual problematic behavior. Include console output if relevant, log files if available. Ensure private information is redacted.
+- Describe the actual problematic behavior.
+- Include console output if relevant, log files if available. 
+- Ensure private information is redacted.
 
 ## Steps To Reproduce
 
