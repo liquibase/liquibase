@@ -1,9 +1,9 @@
 ---
 Liquibase Version: ''
-Liquibase Integration/Interface: 'Pick one: CLI, maven, gradle, spring boot, servlet' 
-Liquibase Extension/Version: ''
-Database Vendor/Version: ''
-Operating System Type/Version: ''
+Liquibase Integration: 'Pick one: CLI, maven, gradle, spring boot, servlet, etc.' 
+Liquibase Extension & Version: ''
+Database Vendor & Version: ''
+Operating System Type & Version: ''
 
 ---
 
