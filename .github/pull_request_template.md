@@ -16,7 +16,6 @@ Operating System Type & Version: ''
 
 A clear and concise description of the issue being addressed.
 - Describe the actual problematic behavior.
-- Include console output if relevant, log files if available. 
 - Ensure private information is redacted.
 
 ## Steps To Reproduce
@@ -29,6 +28,8 @@ List the steps to reproduce the behavior.
 
 ## Actual Behavior
 A clear and concise description of what happens in the software **before** this pull request.
+- Include console output if relevant
+- Include log files if available.
 
 ## Expected/Desired Behavior
 A clear and concise description of what happens in the software **after** this pull request.
