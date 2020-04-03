@@ -10,7 +10,15 @@ import spock.lang.Unroll
 
 class HistoryCommandTest extends Specification {
 
+    def lastDefaultLocale;
+
+    def setup() {
+        lastDefaultLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+    }
+
     def cleanup() {
+        Locale.setDefault(lastDefaultLocale);
         ChangeLogHistoryServiceFactory.reset()
     }
 
