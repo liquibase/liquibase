@@ -1,0 +1,2 @@
+-- Database: firebird3
+-- Change Parameter: path=my/path/file.sql

@@ -50,7 +50,7 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="verify_strings_variant3" author="abuschka" dbms="firebird">
+    <changeSet id="verify_strings_variant3" author="abuschka" dbms="firebird,firebird3">
         <preConditions>
             <!-- After a successful import of the sample CSV file, the number of all characters in all strings of
                  the name column should match our expectation -->

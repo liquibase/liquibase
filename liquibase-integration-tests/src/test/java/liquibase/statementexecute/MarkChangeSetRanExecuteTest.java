@@ -134,8 +134,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
         assertCorrect("update [databasechangelog] set [dateexecuted] = current_timestamp, deployment_id = null, " +
                         "exectype = 'reran', md5sum = '8:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where " +
                         "id = 'a' and author = 'b' and filename = 'c'",
-                FirebirdDatabase.class,
-                DerbyDatabase.class);
+                FirebirdDatabase.class, Firebird3Database.class, DerbyDatabase.class);
         assertCorrect("update [databasechangelog] set [dateexecuted] = NOW(), deployment_id = null, exectype = " +
                         "'reran', md5sum = '8:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
                         " author = 'b' and filename = 'c'",
