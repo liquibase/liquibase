@@ -7,8 +7,10 @@ Operating System Type & Version: ''
 ---
 
 <!--- What types of changes does your code introduce?
-      Put an `x` in all the boxes that apply: -->
-- [ ] Bug fix (non-breaking change which fixes an issue)
+      Put an `x` in all the boxes that apply: 
+      If this PR fixes an existing GH issue, edit the next line to add "closes #XXXX" to auto-link.
+      If this PR fixes an existing CORE Jira issue, note that as well, although there will be no auto-linking. -->
+- [ ] Bug fix (non-breaking change which fixes an issue.)
 - [ ] Enhancement/New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to change)
 
