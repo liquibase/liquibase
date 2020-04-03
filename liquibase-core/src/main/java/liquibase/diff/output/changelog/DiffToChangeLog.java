@@ -632,13 +632,15 @@ public class DiffToChangeLog {
             final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
-                String bName = StringUtils.trimToNull(StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) +
-                        "." + StringUtils.trimToNull(row.get("REFERENCING_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
-                String tabName = StringUtils.trimToNull(StringUtils.trimToNull(row.get("REFERENCED_SCHEMA_NAME").toString()) +
-                        "." + StringUtils.trimToNull(row.get("REFERENCED_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
+                String bName = StringUtils.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCING_NAME"));
+                String tabName = StringUtils.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
-                if (tabName != null && bName != null) {
-                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                if (!(tabName.isEmpty() || bName.isEmpty())) {
+                  graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                  graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
+                            tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
                 }
             }
         }
