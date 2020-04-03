@@ -15,7 +15,15 @@ class HistoryCommandTest extends Specification {
     @Shared
     def dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
 
+    def lastDefaultLocale;
+
+    def setup() {
+        lastDefaultLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+    }
+
     def cleanup() {
+        Locale.setDefault(lastDefaultLocale);
         ChangeLogHistoryServiceFactory.reset()
     }
 
