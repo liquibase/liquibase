@@ -1341,6 +1341,12 @@ public class Main {
                                 OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
 
+            //
+            // Set the global configuration option based on presence of the dataOutputDirectory
+            //
+            boolean b = dataOutputDirectory != null;
+            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
+
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
                     schemas,
