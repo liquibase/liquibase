@@ -1,6 +1,13 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.9 (2020.4.06)
+- Fixed an issue with how Liquibase handles SMALLINT columns in PostgreSQL when generating a changelog.
+- Improved `generateChangeLog` command to assume a `diffTypes` that includes "data" when the `dataOutputDirectory` parameter is used. Most users looking to export data as part of `generateChangeLog` can now simply use the `dataOuputDirectory` parameter without needing to specify `diffTypes`.
+- Enabled the use of the `--schemas` parameter to work on either side of the `snapshot` command.
+- Enabled `generatechangelog` in PostgreSQL to correctly order `create`, `function`, and `trigger` statements.
+- Improved the use of dblink objects when using `diff` command.
+
 Changes in version 3.8.8 (2020.3.19)
 - `rollbackOneChangeSetSQL` now works correctly with the Liquibase Maven plugin.
 - Liquibase Pro no longer generates procedural code with incorrect SQL syntax when running `generateChangeLog` against a MySQL database.
