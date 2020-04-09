@@ -630,10 +630,10 @@ public class DiffToChangeLog {
             final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
-                String bName = StringUtils.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
-                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCING_NAME"));
-                String tabName = StringUtils.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
-                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCED_NAME"));
+                String bName = StringUtil.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
+                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCING_NAME"));
+                String tabName = StringUtil.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
+                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
                 if (!(tabName.isEmpty() || bName.isEmpty())) {
                   graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
