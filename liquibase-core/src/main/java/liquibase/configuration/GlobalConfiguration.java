@@ -22,6 +22,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA = "alwaysOverrideStoredLogicSchema";
     public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
     public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
+    public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -95,6 +96,10 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(INCLUDE_CATALOG_IN_SPECIFICATION, Boolean.class)
                 .setDescription("Should Liquibase include the catalog name when determining equality?")
                 .setDefaultValue(false);
+
+        getContainer().addProperty(SHOULD_SNAPSHOT_DATA, Boolean.class)
+                .setDescription("Should Liquibase snapshot data by default?")
+                .setDefaultValue(false);
     }
 
     /**
@@ -166,6 +171,20 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setLiquibaseTablespaceName(String name) {
         getContainer().setValue(LIQUIBASE_TABLESPACE_NAME, name);
+        return this;
+    }
+
+    /**
+     *
+     * Should Liquibase snapshot data for table by default
+     *
+     */
+    public boolean getShouldSnapshotData() {
+        return getContainer().getValue(SHOULD_SNAPSHOT_DATA, Boolean.class);
+    }
+
+    public GlobalConfiguration setShouldSnapshotData(boolean shouldSnapshotData) {
+        getContainer().setValue(SHOULD_SNAPSHOT_DATA, shouldSnapshotData);
         return this;
     }
 
