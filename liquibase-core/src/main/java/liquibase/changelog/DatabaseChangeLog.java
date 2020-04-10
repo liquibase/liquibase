@@ -545,6 +545,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
             }
         }
+
+        fileName = fileName.replaceFirst("classpath:", "");
         DatabaseChangeLog changeLog;
         try {
             DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();

@@ -306,7 +306,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
                 for (Map rs : results) {
-                    String fileName = rs.get("FILENAME").toString();
+                    String fileName = rs.get("FILENAME").toString()
+                            .replaceFirst("^classpath:", "")
+                            .replaceAll("\\\\", "/")
+                            .replaceFirst("^/", "");
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
                     String md5sum = ((rs.get("MD5SUM") == null) || !databaseChecksumsCompatible) ? null : rs.get
