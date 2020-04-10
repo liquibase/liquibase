@@ -1216,9 +1216,11 @@ public class Main {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
 
-        FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile());
-        CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
-        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
+        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(
+                new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                new CommandLineResourceAccessor(classLoader),
+                new FileSystemResourceAccessor(Paths.get("/").toAbsolutePath().toFile())
+                );
 
         Database database = null;
         if (this.url != null) {
