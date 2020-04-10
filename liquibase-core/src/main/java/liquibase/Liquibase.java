@@ -286,7 +286,7 @@ public class Liquibase implements AutoCloseable {
 
                     update(contexts, labelExpression, checkLiquibaseTables);
 
-                    output.flush();
+                    loggingExecutor.flush();
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 }
@@ -420,7 +420,7 @@ public class Liquibase implements AutoCloseable {
                 update(changesToApply, contexts, labelExpression);
 
                 try {
-                    output.flush();
+                    loggingExecutor.flush();
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 }
@@ -466,7 +466,7 @@ public class Liquibase implements AutoCloseable {
                 update(tag, contexts, labelExpression);
 
                 try {
-                    output.flush();
+                    loggingExecutor.flush();
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 }
@@ -537,16 +537,15 @@ public class Liquibase implements AutoCloseable {
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
                 Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-                ExecutorService.getInstance().setExecutor(database,
-                        new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database)
-                );
+                LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+                ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
                 outputHeader("Rollback " + changesToRollback + " Change(s) Script");
 
                 rollback(changesToRollback, rollbackScript, contexts, labelExpression);
 
                 try {
-                    output.flush();
+                    loggingExecutor.flush();
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 }
@@ -709,16 +708,15 @@ public class Liquibase implements AutoCloseable {
         /* We have no other choice than to save the current Executor here. */
         @SuppressWarnings("squid:S1941")
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(
-                ExecutorService.getInstance().getExecutor(database), output, database)
-        );
+        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
         outputHeader("Rollback to '" + tagToRollBackTo + "' Script");
 
         rollback(tagToRollBackTo, contexts, labelExpression);
 
         try {
-            output.flush();
+            loggingExecutor.flush();
         } catch (IOException e) {
             throw new LiquibaseException(e);
         }
@@ -817,15 +815,15 @@ public class Liquibase implements AutoCloseable {
         /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database,
-                new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
+        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
         outputHeader("Rollback to " + dateToRollBackTo + " Script");
 
         rollback(dateToRollBackTo, contexts, labelExpression);
 
         try {
-            output.flush();
+            loggingExecutor.flush();
         } catch (IOException e) {
             throw new LiquibaseException(e);
         }
@@ -920,7 +918,7 @@ public class Liquibase implements AutoCloseable {
                 changeLogSync(contexts, labelExpression);
 
                 try {
-                    output.flush();
+                    outputTemplate.flush();
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 }
@@ -1011,7 +1009,7 @@ public class Liquibase implements AutoCloseable {
                 markNextChangeSetRan(contexts, labelExpression);
 
                 try {
-                    output.flush();
+                    outputTemplate.flush();
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 }
@@ -1218,7 +1216,7 @@ public class Liquibase implements AutoCloseable {
                 }
 
                 try {
-                    output.flush();
+                    outputTemplate.flush();
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 }

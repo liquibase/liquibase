@@ -45,6 +45,10 @@ public class LoggingExecutor extends AbstractExecutor {
         return output;
     }
 
+    public void flush() throws IOException {
+        output.flush();
+    }
+
     @Override
     public void execute(SqlStatement sql) throws DatabaseException {
         outputStatement(sql);
