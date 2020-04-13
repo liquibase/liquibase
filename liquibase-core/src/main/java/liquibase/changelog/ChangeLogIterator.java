@@ -30,9 +30,7 @@ public class ChangeLogIterator {
         for (RanChangeSet ranChangeSet : changeSetList) {
             ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
             if (changeSet != null) {
-                if (changeLog.ignoreClasspathPrefix()) {
-                    changeSet.setFilePath(ranChangeSet.getChangeLog());
-                }
+                changeSet.setFilePath(DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()));
                 changeSets.add(changeSet);
             }
         }

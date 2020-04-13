@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.List;
 
 /**
  * Encapsulates the information stored in the change log XML file.
@@ -43,7 +42,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private ChangeLogParameters changeLogParameters;
 
     private RuntimeEnvironment runtimeEnvironment;
-    private boolean ignoreClasspathPrefix;
 
     private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
 
@@ -123,7 +121,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (logicalFilePath == null) {
             returnPath = physicalFilePath;
         }
-        return returnPath.replaceAll("\\\\", "/");
+        return returnPath
+                .replaceAll("\\\\", "/")
+                .replaceFirst("^/", "");
     }
 
     public void setLogicalFilePath(String logicalFilePath) {
@@ -134,7 +134,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (logicalFilePath == null) {
             return physicalFilePath;
         } else {
-            return logicalFilePath;
+            return getLogicalFilePath();
         }
     }
 
@@ -158,13 +158,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return includeContexts;
     }
 
-    public void setIncludeLabels(LabelExpression labels) { this.includeLabels = labels; }
+    public void setIncludeLabels(LabelExpression labels) {
+        this.includeLabels = labels;
+    }
 
-    public LabelExpression getIncludeLabels() { return includeLabels; }
+    public LabelExpression getIncludeLabels() {
+        return includeLabels;
+    }
 
-    public void setIncludeIgnore(boolean ignore) { this.includeIgnore = ignore; }
+    public void setIncludeIgnore(boolean ignore) {
+        this.includeIgnore = ignore;
+    }
 
-    public boolean isIncludeIgnore() { return this.includeIgnore; }
+    public boolean isIncludeIgnore() {
+        return this.includeIgnore;
+    }
 
     public void setIncludeContexts(ContextExpression includeContexts) {
         this.includeContexts = includeContexts;
@@ -325,28 +333,31 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         expandExpressions(node);
         String nodeName = node.getName();
         switch (nodeName) {
-            case"changeSet":
-            if (isDbmsMatch(node.getChildValue(null, "dbms", String.class))) {this.addChangeSet(createChangeSet(node, resourceAccessor));}
-        break;
-            case"include": {
-            String path = node.getChildValue(null, "file", String.class);
-            if (path == null) {
-                throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
-            }
-            path = path.replace('\\', '/');
-            ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
-            LabelExpression labelExpression = new LabelExpression(node.getChildValue(null, "labels", String.class));
-            Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
-            try {
-                include(path,
-                        node.getChildValue(null, "relativeToChangelogFile", false),
-                        resourceAccessor,
-                        includeContexts,
-                        labelExpression,
-                        ignore,
-                        true);
-            } catch (LiquibaseException e) {
-                throw new SetupException(e);}
+            case "changeSet":
+                if (isDbmsMatch(node.getChildValue(null, "dbms", String.class))) {
+                    this.addChangeSet(createChangeSet(node, resourceAccessor));
+                }
+                break;
+            case "include": {
+                String path = node.getChildValue(null, "file", String.class);
+                if (path == null) {
+                    throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
+                }
+                path = path.replace('\\', '/');
+                ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
+                LabelExpression labelExpression = new LabelExpression(node.getChildValue(null, "labels", String.class));
+                Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
+                try {
+                    include(path,
+                            node.getChildValue(null, "relativeToChangelogFile", false),
+                            resourceAccessor,
+                            includeContexts,
+                            labelExpression,
+                            ignore,
+                            true);
+                } catch (LiquibaseException e) {
+                    throw new SetupException(e);
+                }
                 break;
             }
             case "includeAll": {
@@ -372,26 +383,27 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     } catch (ReflectiveOperationException e) {
                         //take default comparator
                         Scope.getCurrentScope().getLog(getClass()).info("no resourceComparator defined - taking default " +
-                         "implementation");
+                                "implementation");
                         resourceComparator = getStandardChangeLogComparator();
                     }
                 }
 
                 ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
                 LabelExpression labelExpression = new LabelExpression(node.getChildValue(null, "labels", String.class));
-            if (labelExpression == null) {
-                labelExpression = new LabelExpression();
-            }
-            Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
-            if (ignore == null) {
-                ignore = false;
-            }includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
+                if (labelExpression == null) {
+                    labelExpression = new LabelExpression();
+                }
+                Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
+                if (ignore == null) {
+                    ignore = false;
+                }
+                includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
                         node.getChildValue(null, "errorIfMissingOrEmpty", true),
                         resourceComparator,
-                       resourceAccessor,
-                       includeContexts,
-                       labelExpression,
-                       ignore);
+                        resourceAccessor,
+                        includeContexts,
+                        labelExpression,
+                        ignore);
                 break;
             }
             case "preConditions": {
@@ -613,19 +625,15 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         };
     }
 
-    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
-        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
-    }
-
-    public boolean ignoreClasspathPrefix() {
-        return ignoreClasspathPrefix;
-    }
-
-    protected String normalizePath(String filePath) {
-        if (ignoreClasspathPrefix) {
-            return filePath.replaceFirst("^classpath:", "");
+    public static String normalizePath(String filePath) {
+        if (filePath == null) {
+            return null;
         }
-        return filePath;
+        return filePath.replaceFirst("^classpath:", "")
+                        .replaceAll("\\\\", "/")
+                        .replaceAll("//+", "/")
+                        .replaceFirst("^/", "");
+
     }
 
     public void clearCheckSums() {

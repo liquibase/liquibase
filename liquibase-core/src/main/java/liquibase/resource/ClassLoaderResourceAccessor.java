@@ -1,6 +1,7 @@
 package liquibase.resource;
 
 import liquibase.Scope;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.util.StreamUtil;
 
 import java.io.File;
@@ -118,7 +119,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         streamPath = streamPath.replaceAll("//+", "/");
         streamPath = streamPath.replaceFirst("^/", "");
 
-        return streamPath;
+        return DatabaseChangeLog.normalizePath(streamPath);
     }
 
     @Override
