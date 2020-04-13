@@ -4,7 +4,7 @@
 
 **Liquibase Version**:
 
-**Liquibase Integration**: <Pick one: CLI, maven, gradle, spring boot, servlet, etc.>
+**Liquibase Integration & Version**: <Pick one: CLI, maven, gradle, spring boot, servlet, etc.>
 
 **Liquibase Extension(s) & Version**: 
 
