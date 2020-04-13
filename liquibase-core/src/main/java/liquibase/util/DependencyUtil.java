@@ -3,7 +3,7 @@ package liquibase.util;
 import liquibase.Scope;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -12,7 +12,7 @@ public class DependencyUtil {
 
     public static class DependencyGraph<T> {
 
-        private HashMap<T, GraphNode<T>> nodes = new HashMap<>();
+        private LinkedHashMap<T, GraphNode<T>> nodes = new LinkedHashMap<>();
         private NodeValueListener<T> listener;
         private List<GraphNode<T>> evaluatedNodes = new ArrayList<>();
 
