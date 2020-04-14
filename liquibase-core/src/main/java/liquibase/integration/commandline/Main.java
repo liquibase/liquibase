@@ -19,10 +19,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
-import liquibase.command.core.DropAllCommand;
-import liquibase.command.core.ExecuteSqlCommand;
-import liquibase.command.core.HistoryCommand;
-import liquibase.command.core.SnapshotCommand;
+import liquibase.command.core.*;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -841,8 +838,11 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
-
+                            && !cmdParm.startsWith("--" + OPTIONS.FORMAT)
                             && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
+                        messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                    }
+                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) &&  cmdParm.startsWith("--" + OPTIONS.FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -1301,7 +1301,8 @@ public class Main {
         if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command) ||
             COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
-            COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)){
+            COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command) ||
+            (COMMANDS.DIFF.equals(command) && isDiffToJson())){
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
                 String messageString = String.format(coreBundle.getString("no.pro.license.found"), command);
                 throw new LiquibaseException(messageString);
@@ -1376,10 +1377,25 @@ public class Main {
                 diffOutputControl.addIncludedSchema(schema.getComparisonSchema());
             }
 
-            if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiff(
-                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+            if (COMMANDS.DIFF.equals(command)) {
+                if (isDiffToJson()) {
+                    LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(COMMANDS.FORMATTED_DIFF);
+                    DiffCommand diffCommand = CommandLineUtils.createDiffCommand(
+                            createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                            database,
+                            StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                    Map<String, Object> argsMap = new HashMap<String, Object>();
+                    argsMap.put("format", getCommandParam(OPTIONS.FORMAT, "JSON"));
+                    argsMap.put("diffCommand", diffCommand);
+                    ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
+                    liquibaseCommand.execute();
+                }
+                else {
+                    CommandLineUtils.doDiff(
+                                createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                                database,
+                                StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                }
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
@@ -1513,36 +1529,17 @@ public class Main {
                     );
                 }
                 return;
-            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
+            }
+            else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
                 Map<String, Object> argsMap = new HashMap<String, Object>();
-                argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
-                argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
-                argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
-                argsMap.put("rollbackScript", rollbackScript);
-                argsMap.put("changeLogFile", changeLogFile);
-                argsMap.put("database", database);
-                if (!commandParams.contains("--help")) {
-                    argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
-                }
-                argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
-                ChangeLogParameters clp = new ChangeLogParameters(database);
-                for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
-                    clp.set(entry.getKey(), entry.getValue());
-                }
-                argsMap.put("changeLogParameters", clp);
-
-                if (this.commandParams.contains("--force")) {
-                    argsMap.put("force", true);
-                }
-                if (this.commandParams.contains("--help")) {
-                    argsMap.put("help", true);
-                }
+                loadChangeSetInfoToMap(argsMap);
                 LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
                 Writer outputWriter = getOutputWriter();
                 Map<String, Object> argsMap = new HashMap<String, Object>();
+                loadChangeSetInfoToMap(argsMap);
                 argsMap.put("outputWriter", outputWriter);
                 argsMap.put("force", true);
                 LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
@@ -1553,24 +1550,6 @@ public class Main {
             } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equals(command)) {
                 Map<String, Object> argsMap = new HashMap<String, Object>();
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                argsMap.put("changeLogFile", changeLogFile);
-                argsMap.put("database", database);
-                if (!commandParams.contains("--help")) {
-                    argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
-                }
-                argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
-                ChangeLogParameters clp = new ChangeLogParameters(database);
-                for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
-                    clp.set(entry.getKey(), entry.getValue());
-                }
-                argsMap.put("changeLogParameters", clp);
-
-                if (this.commandParams.contains("--force")) {
-                    argsMap.put("force", true);
-                }
-                if (this.commandParams.contains("--help")) {
-                    argsMap.put("help", true);
-                }
                 LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_UPDATE, argsMap);
                 liquibaseCommand.execute();
                 return;
@@ -1772,6 +1751,16 @@ public class Main {
         }
     }
 
+    private void loadChangeSetInfoToMap(Map<String, Object> argsMap) throws CommandLineParsingException {
+        argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
+        argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
+        argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
+    }
+
+    private boolean isDiffToJson() throws CommandLineParsingException {
+        return getCommandParam(OPTIONS.FORMAT, "txt").equalsIgnoreCase("json");
+    }
+
     private String getSchemaParams(Database database) throws CommandLineParsingException {
         String schemaParams = getCommandParam(OPTIONS.SCHEMAS, schemas);
         if (schemaParams == null || schemaParams.isEmpty()) {
@@ -1784,9 +1773,6 @@ public class Main {
             throws CommandLineParsingException, LiquibaseException {
         LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(commandName);
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
-        argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
-        argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
-        argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
         argsMap.put("rollbackScript", rollbackScript);
         argsMap.put("changeLogFile", changeLogFile);
         argsMap.put("database", database);
@@ -1967,6 +1953,7 @@ public class Main {
         private static final String ROLLBACK_ONE_CHANGE_SET_SQL = "rollbackOneChangeSetSQL";
         private static final String ROLLBACK_ONE_UPDATE = "rollbackOneUpdate";
         private static final String ROLLBACK_ONE_UPDATE_SQL = "rollbackOneUpdateSQL";
+        private static final String FORMATTED_DIFF = "formattedDiff";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
         private static final String ROLLBACK_COUNT_SQL = "rollbackCountSQL";
@@ -2003,6 +1990,7 @@ public class Main {
         private static final String DEPLOYMENT_ID = "deploymentId";
         private static final String OUTPUT_FILE = "outputFile";
         private static final String FORCE = "force";
+        private static final String FORMAT = "format";
         private static final String ROLLBACK_SCRIPT = "rollbackScript";
         private static final String EXCLUDE_OBJECTS = "excludeObjects";
         private static final String INCLUDE_CATALOG = "includeCatalog";
