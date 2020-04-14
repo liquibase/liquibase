@@ -4,6 +4,11 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.command.AbstractSelfConfiguratingCommand;
+import liquibase.command.CommandExecutionException;
+import liquibase.command.CommandFactory;
+import liquibase.command.LiquibaseCommand;
+import liquibase.command.core.DiffCommand;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
@@ -11,6 +16,7 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.Main;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -20,6 +26,9 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>Generates a diff between the specified database and the reference database.
@@ -124,21 +133,39 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      */
     private String referenceServer;
 
+    /**
+     *
+     * The format in which to display the diff output
+     * TXT or JSON
+     *
+     * @parameter property="liquibase.format"
+     *
+     */
+    protected String format;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-    	if(referenceServer!=null) {
-    		AuthenticationInfo referenceInfo = wagonManager.getAuthenticationInfo(referenceServer);
-    		if (referenceInfo != null) {
-    			referenceUsername = referenceInfo.getUserName();
-    			referencePassword = referenceInfo.getPassword();
-    		}
-    	}
-
+        if (this.referenceServer != null) {
+            AuthenticationInfo referenceInfo = wagonManager.getAuthenticationInfo(referenceServer);
+            if (referenceInfo != null) {
+                referenceUsername = referenceInfo.getUserName();
+                referencePassword = referenceInfo.getPassword();
+            }
+        }
         super.execute();
     }
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+        //
+        // Check the Pro license if --format=JSON is specified
+        //
+        if (isDiffToJson()) {
+            boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+            if (!hasProLicense) {
+                throw new LiquibaseException("The diff command with output to JSON requires a Liquibase Pro License, available at http://liquibase.org.");
+            }
+        }
         ClassLoader cl = null;
         ResourceAccessor fileOpener;
         try {
@@ -183,8 +210,30 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 throw new LiquibaseException(e);
             }
         } else {
-            CommandLineUtils.doDiff(referenceDatabase, db, StringUtils.trimToNull(diffTypes), null, objectChangeFilter, System.out);
+            if (isDiffToJson()) {
+                LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
+                DiffCommand diffCommand =
+                        CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtils.trimToNull(diffTypes),
+                                       null, objectChangeFilter, new PrintStream(System.out));
+                Map<String, Object> argsMap = new HashMap<>();
+                argsMap.put("format", format);
+                argsMap.put("diffCommand", diffCommand);
+                ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
+                try {
+                    liquibaseCommand.execute();
+                }
+                catch (CommandExecutionException cee) {
+                    throw new LiquibaseException(cee);
+                }
+            }
+            else {
+                CommandLineUtils.doDiff(referenceDatabase, db, StringUtils.trimToNull(diffTypes), null, objectChangeFilter, System.out);
+            }
         }
+    }
+
+    private boolean isDiffToJson() {
+        return format != null && format.toUpperCase().equals("JSON");
     }
 
     @Override
