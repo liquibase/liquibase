@@ -13,3 +13,15 @@ services:
       MYSQL_PASSWORD: LiquibasePass1
     volumes:
       - "./mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql"
+
+  postgres-9:
+    image: postgres:9
+    ports:
+      - "54321:5432"
+    environment:
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: LbRootPass1
+      POSTGRES_DB: lbcat
+    volumes:
+      - "./postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql"
