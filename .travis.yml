@@ -18,7 +18,6 @@ before_script: docker-compose -f ./.travis/databases.docker-compose.yml up -d
 script:
   - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent integration-test verify -Dliquibase.version.qualifier="-${TRAVIS_BRANCH}" -Dbuild.number=${TRAVIS_BUILD_NUMBER} -Dbuild.commit=${TRAVIS_COMMIT}
 after_script: 
-  - cat cat liquibase-integration-tests/target/surefire-reports/liquibase.dbtest.pgsql.PostgreSQLIntegrationTest-output.txt 
   - docker-compose -f ./.travis/databases.docker-compose.yml down
 
 cache:
