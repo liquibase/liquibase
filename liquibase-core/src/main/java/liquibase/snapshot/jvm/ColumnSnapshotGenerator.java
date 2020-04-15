@@ -404,6 +404,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         } else if (database instanceof PostgresDatabase) {
             columnTypeName = database.unescapeDataTypeName(columnTypeName);
+            if (columnTypeName.startsWith("_")) {
+                columnTypeName = columnTypeName.replaceFirst("_", "").concat("[]");
+            }
         }
 
         if (database instanceof FirebirdDatabase) {
