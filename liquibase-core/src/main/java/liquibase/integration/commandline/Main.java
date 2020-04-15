@@ -1302,10 +1302,10 @@ public class Main {
             COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command) ||
-            (COMMANDS.DIFF.equals(command) && isDiffToJson())){
+            (COMMANDS.DIFF.equals(command) && isFormattedDiff())){
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
                 String warningAboutCommand = command;
-                if (isDiffToJson()) {
+                if (isFormattedDiff()) {
                     warningAboutCommand = "diff --format=JSON";
                 }
                 String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
@@ -1382,7 +1382,7 @@ public class Main {
             }
 
             if (COMMANDS.DIFF.equals(command)) {
-                if (isDiffToJson()) {
+                if (isFormattedDiff()) {
                     LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(COMMANDS.FORMATTED_DIFF);
                     DiffCommand diffCommand = CommandLineUtils.createDiffCommand(
                             createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
@@ -1761,8 +1761,8 @@ public class Main {
         argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
     }
 
-    private boolean isDiffToJson() throws CommandLineParsingException {
-        return getCommandParam(OPTIONS.FORMAT, "txt").equalsIgnoreCase("json");
+    private boolean isFormattedDiff() throws CommandLineParsingException {
+        return ! getCommandParam(OPTIONS.FORMAT, "txt").equalsIgnoreCase("txt");
     }
 
     private String getSchemaParams(Database database) throws CommandLineParsingException {
@@ -1774,7 +1774,7 @@ public class Main {
     }
 
     private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, String commandName, Map<String, Object> argsMap)
-            throws CommandLineParsingException, LiquibaseException {
+            throws LiquibaseException {
         LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(commandName);
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
         argsMap.put("rollbackScript", rollbackScript);

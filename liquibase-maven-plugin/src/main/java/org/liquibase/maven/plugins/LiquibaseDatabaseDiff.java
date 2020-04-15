@@ -16,7 +16,6 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
-import liquibase.integration.commandline.Main;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -160,7 +159,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         //
         // Check the Pro license if --format=JSON is specified
         //
-        if (isDiffToJson()) {
+        if (isFormattedDiff()) {
             boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
             if (!hasProLicense) {
                 throw new LiquibaseException("The command 'diff --format=JSON' requires a Liquibase Pro License, available at http://liquibase.org.");
@@ -210,7 +209,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 throw new LiquibaseException(e);
             }
         } else {
-            if (isDiffToJson()) {
+            if (isFormattedDiff()) {
                 LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
                 DiffCommand diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtils.trimToNull(diffTypes),
@@ -232,7 +231,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         }
     }
 
-    private boolean isDiffToJson() {
+    private boolean isFormattedDiff() {
         return format != null && format.toUpperCase().equals("JSON");
     }
 
