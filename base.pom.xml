@@ -164,8 +164,14 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>6.0.6</version>
             <scope>test</scope>
-        </dependency>
+    	</dependency>
 
+	<dependency>
+    	    <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.12</version>
+	    <scope>test</scope>
+	</dependency>
     </dependencies>
 
     <build>
