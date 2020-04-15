@@ -1304,7 +1304,11 @@ public class Main {
             COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command) ||
             (COMMANDS.DIFF.equals(command) && isDiffToJson())){
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
-                String messageString = String.format(coreBundle.getString("no.pro.license.found"), command);
+                String warningAboutCommand = command;
+                if (isDiffToJson()) {
+                    warningAboutCommand = "diff --format=JSON";
+                }
+                String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
                 throw new LiquibaseException(messageString);
             }
         }
