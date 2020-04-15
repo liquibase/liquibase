@@ -284,7 +284,8 @@ public class Main {
 
             if (main.commandParams.contains("--help") &&
                 (main.command.startsWith("rollbackOneChangeSet") ||
-                 main.command.startsWith("rollbackOneUpdate"))) {
+                 main.command.startsWith("rollbackOneUpdate") ||
+                 (main.command.startsWith("diff") && main.isFormattedDiff()))) {
                 //don't need to check setup
             } else {
                 List<String> setupMessages = main.checkSetup();
@@ -839,6 +840,7 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
                             && !cmdParm.startsWith("--" + OPTIONS.FORMAT)
+                            && !cmdParm.startsWith("--" + OPTIONS.HELP)
                             && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
@@ -1382,6 +1384,12 @@ public class Main {
             }
 
             if (COMMANDS.DIFF.equals(command)) {
+                if (commandParams.contains("--help")) {
+                    System.out.println("liquibase diff" +
+                                       "\n" +
+                                       "          Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option\n");
+                    System.exit(0);
+                }
                 if (isFormattedDiff()) {
                     LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(COMMANDS.FORMATTED_DIFF);
                     DiffCommand diffCommand = CommandLineUtils.createDiffCommand(
