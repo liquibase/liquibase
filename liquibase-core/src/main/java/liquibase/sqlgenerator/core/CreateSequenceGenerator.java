@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -48,7 +49,15 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         StringBuffer queryStringBuilder = new StringBuffer();
         queryStringBuilder.append("CREATE SEQUENCE ");
         if (database instanceof PostgresDatabase) {
-            queryStringBuilder.append(" IF NOT EXISTS ");
+            // supported only for version >= 9.5 https://www.postgresql.org/docs/9.5/sql-createsequence.html
+            try {
+                if (database.getDatabaseMajorVersion() > 9
+                        || (database.getDatabaseMajorVersion() == 9 && database.getDatabaseMinorVersion() >= 5)) {
+                    queryStringBuilder.append(" IF NOT EXISTS ");
+                }
+            } catch (DatabaseException e) {
+                // we can not determinate the PostgreSQL version so we do not add this statement
+            }
         }
         queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
