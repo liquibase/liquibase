@@ -24,6 +24,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -134,6 +135,15 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
     /**
      *
+     * Write the output of the diff to a file
+     *
+     * @parameter property="liquibase.outputFile"
+     *
+     */
+    protected String outputFile;
+
+    /**
+     *
      * The format in which to display the diff output
      * TXT or JSON
      *
@@ -209,11 +219,12 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 throw new LiquibaseException(e);
             }
         } else {
+            PrintStream printStream = createPrintStream();
             if (isFormattedDiff()) {
                 LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
                 DiffCommand diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtils.trimToNull(diffTypes),
-                                       null, objectChangeFilter, new PrintStream(System.out));
+                                       null, objectChangeFilter, printStream);
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("format", format);
                 argsMap.put("diffCommand", diffCommand);
@@ -226,8 +237,18 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 }
             }
             else {
-                CommandLineUtils.doDiff(referenceDatabase, db, StringUtils.trimToNull(diffTypes), null, objectChangeFilter, System.out);
+                CommandLineUtils.doDiff(referenceDatabase, db, StringUtils.trimToNull(diffTypes), null, objectChangeFilter, printStream);
             }
+        }
+    }
+
+    private PrintStream createPrintStream() throws LiquibaseException {
+        try {
+            PrintStream printStream = (outputFile != null ? new PrintStream(outputFile) : System.out);
+            return printStream;
+        }
+        catch (FileNotFoundException fnfe) {
+            throw new LiquibaseException(fnfe);
         }
     }
 
