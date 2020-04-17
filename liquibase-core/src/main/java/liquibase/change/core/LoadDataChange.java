@@ -315,9 +315,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     );
                 }
 
-                boolean needsPreparedStatement = false;
-                if (usePreparedStatements != null && usePreparedStatements) {
-                    needsPreparedStatement = true;
+                boolean needsPreparedStatement = true;
+                if (usePreparedStatements != null && !usePreparedStatements) {
+                    needsPreparedStatement = false;
                 }
 
                 List<ColumnConfig> columnsFromCsv = new ArrayList<>();
@@ -421,7 +421,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                     valueConfig.setValue(null);
                                 } else {
                                     valueConfig.setValue(value.toString());
-                                }                                
+                                }
                             } else {
                                 throw new UnexpectedLiquibaseException(
                                     String.format(coreBundle.getString("loaddata.type.is.not.supported"),
@@ -448,18 +448,19 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 }
                 // end of: iterate through all the columns of a CSV line
 
-                // Try to use prepared statements if any of the two following conditions apply:
-                // 1. There is no other option than using a prepared statement (e.g. in cases of LOBs)
+                // Try to use prepared statements if any of the following conditions apply:
+                // 1. There is no other option than using a prepared statement (e.g. in cases of LOBs) regardless
+                //     of whether the 'usePreparedStatement' is set to false
                 // 2. The database supports batched statements (for improved performance) AND we are not in an
                 //    "SQL" mode (i.e. we generate an SQL file instead of actually modifying the database).
                 if
                 (
-                    (needsPreparedStatement ||
+                    (needsPreparedStatement &&
                         (databaseSupportsBatchUpdates &&
-                                !(ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor)
+                            !(ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor)
                         )
                     )
-                    && hasPreparedStatementsImplemented()
+                        && hasPreparedStatementsImplemented()
                 ) {
                     anyPreparedStatements = true;
                     ExecutablePreparedStatementBase stmt =
