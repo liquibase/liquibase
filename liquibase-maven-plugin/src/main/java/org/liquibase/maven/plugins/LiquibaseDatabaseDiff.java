@@ -10,6 +10,7 @@ import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.DiffCommand;
 import liquibase.database.Database;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
@@ -135,7 +136,34 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
     /**
      *
+     * Schemas on target database to use in diff.  This is a CSV list.
+     *
+     * @parameter property="liquibase.schemas"
+     *
+     */
+    protected String schemas;
+
+    /**
+     *
+     * Schemas names on reference database to use in diff.  This is a CSV list.
+     *
+     * @parameter property="liquibase.referenceSchemas"
+     *
+     */
+    protected String referenceSchemas;
+
+    /**
+     *
+     * Output schemas names.  This is a CSV list.
+     *
+     * @parameter property="liquibase.outputSchemas"
+     *
+     */
+    protected String outputSchemas;
+
+    /**
      * Write the output of the diff to a file
+     *
      *
      * @parameter property="liquibase.outputFile"
      *
@@ -143,12 +171,10 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     protected String outputFile;
 
     /**
-     *
      * The format in which to display the diff output
      * TXT or JSON
      *
      * @parameter property="liquibase.format"
-     *
      */
     protected String format;
 
@@ -183,8 +209,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
             ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
             fileOpener = getFileOpener(artifactClassLoader);
-        }
-        catch (MojoExecutionException e) {
+        } catch (MojoExecutionException e) {
             throw new LiquibaseException("Could not create the class loader, " + e, e);
         }
 
@@ -198,12 +223,10 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         }
         ObjectChangeFilter objectChangeFilter = null;
         if (diffExcludeObjects != null) {
-            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType
-                    .EXCLUDE, diffExcludeObjects);
+            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, diffExcludeObjects);
         }
         if (diffIncludeObjects != null) {
-            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType
-                    .INCLUDE, diffIncludeObjects);
+            objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects);
         }
 
         if (diffChangeLogFile != null) {
@@ -214,34 +237,44 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 if (new File(diffChangeLogFile).exists()) {
                     getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
                 }
-            }
-            catch (IOException|ParserConfigurationException e) {
+            } catch (IOException | ParserConfigurationException e) {
                 throw new LiquibaseException(e);
             }
         } else {
             PrintStream printStream = createPrintStream();
+            CompareControl.SchemaComparison[] schemaComparisons = createSchemaComparisons(db);
             if (isFormattedDiff()) {
                 LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
                 DiffCommand diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtils.trimToNull(diffTypes),
-                                       null, objectChangeFilter, printStream);
+                                schemaComparisons, objectChangeFilter, printStream);
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("format", format);
                 argsMap.put("diffCommand", diffCommand);
                 ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
                 try {
                     liquibaseCommand.execute();
-                }
-                catch (CommandExecutionException cee) {
+                } catch (CommandExecutionException cee) {
                     throw new LiquibaseException(cee);
                 }
-            }
-            else {
-                CommandLineUtils.doDiff(referenceDatabase, db, StringUtils.trimToNull(diffTypes), null, objectChangeFilter, printStream);
+            } else {
+                CommandLineUtils.doDiff(referenceDatabase, db, StringUtils.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
             }
         }
     }
 
+    private CompareControl.SchemaComparison[] createSchemaComparisons(Database database) {
+        CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
+                schemas,
+                referenceSchemas,
+                outputSchemas,
+                defaultCatalogName, defaultSchemaName,
+                referenceDefaultCatalogName, referenceDefaultSchemaName,
+                database);
+
+        CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
+        return finalSchemaComparisons;
+    }
     private PrintStream createPrintStream() throws LiquibaseException {
         try {
             PrintStream printStream = (outputFile != null ? new PrintStream(outputFile) : System.out);
