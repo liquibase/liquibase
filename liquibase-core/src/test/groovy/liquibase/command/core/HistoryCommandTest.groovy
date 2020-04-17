@@ -5,16 +5,15 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
+
 import java.text.*
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class HistoryCommandTest extends Specification {
-    static DateFormat dateFormat
-
-    static {
-        dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-    }
+    @Shared
+    def dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
 
     def cleanup() {
         ChangeLogHistoryServiceFactory.reset()
