@@ -10,8 +10,6 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
@@ -60,7 +58,7 @@ public class ChangedTableChangeGenerator extends AbstractChangeGenerator impleme
         
         if (changedTablespace != null) {
             // TODO: Implement moveTableToDifferentTablespace change type!
-            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "A change of the tablespace was detected, however, the change " +
+            Scope.getCurrentScope().getLog(getClass()).warning("A change of the tablespace was detected, however, the change " +
              "type to move a table from tablespace A to tablespace B has not been implemented yet. Sorry.");
         }
 

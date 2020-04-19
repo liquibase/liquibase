@@ -1,5 +1,6 @@
 package liquibase.structure.core;
 
+import liquibase.license.LicenseServiceUtils;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtil;
@@ -10,6 +11,15 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
         return new DatabaseObject[]{
                 getSchema()
         };
+    }
+
+    @Override
+    public boolean snapshotByDefault() {
+        if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

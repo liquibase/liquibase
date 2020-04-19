@@ -10,7 +10,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -111,6 +110,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         defaultDataTypeParameters.put("money", 4);
         defaultDataTypeParameters.put("smallmoney", 0);
 
+        unmodifiableDataTypes.add("datetime");
+
         addReservedWords(createReservedWordsCollection());
     }
 
@@ -121,11 +122,15 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setDefaultSchemaName(String schemaName) {
-        if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
-            throw new RuntimeException(String.format(
-                "Cannot use default schema name %s on Microsoft SQL Server because the login " +
-                    "schema of the current user (%s) is different and MSSQL does not support " +
-                    "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+        if(this.getConnection() instanceof OfflineConnection) {
+            //skip the check below, when working with offline connection
+        } else {
+            if (schemaName != null && !schemaName.equalsIgnoreCase(getConnectionSchemaName())) {
+                throw new RuntimeException(String.format(
+                        "Cannot use default schema name %s on Microsoft SQL Server because the login " +
+                                "schema of the current user (%s) is different and MSSQL does not support " +
+                                "setting the default schema per session.", schemaName, getConnectionSchemaName()));
+            }
         }
         super.setDefaultSchemaName(schemaName);
     }
@@ -186,7 +191,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         if (isRealSqlServerConnection && (majorVersion < MSSQL_SERVER_VERSIONS.MSSQL2008)) {
             Scope.getCurrentScope().getLog(getClass()).warning(
-                LogType.LOG, String.format("Your SQL Server major version (%d) seems to indicate that your " +
+                String.format("Your SQL Server major version (%d) seems to indicate that your " +
                         "software is older than SQL Server 2008. Unfortunately, this is not supported, and this " +
                         "connection cannot be used.",
                  majorVersion));
@@ -412,7 +417,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from MSSQL", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
         return (caseSensitive != null) && caseSensitive;
@@ -557,7 +562,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 }
             } catch (SQLException | DatabaseException e) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                    LogType.LOG, "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                    "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
@@ -593,7 +598,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     .queryForObject(new RawSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Could not determine engine edition", e);
+            Scope.getCurrentScope().getLog(getClass()).warning("Could not determine engine edition", e);
         }
         return "Unknown";
     }

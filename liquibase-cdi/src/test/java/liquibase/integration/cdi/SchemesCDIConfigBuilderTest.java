@@ -3,8 +3,6 @@ package liquibase.integration.cdi;
 import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.junit.Assert;
 import org.junit.Before;
@@ -191,7 +189,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         } finally {
             executors.shutdown();
         }
@@ -220,7 +218,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         } finally {
             executors.shutdown();
         }

@@ -1,6 +1,65 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.8.8 (2020.3.19)
+- `rollbackOneChangeSetSQL` now works correctly with the Liquibase Maven plugin.
+- Liquibase Pro no longer generates procedural code with incorrect SQL syntax when running `generateChangeLog` against a MySQL database.
+
+Changes in version 3.8.7 (2020.2.21)
+
+- New liquibase history command
+- [Pro] New liquibase rollbackOneUpdate command
+- PR#927 CompositeClassLoader does not implement getResource(String)
+- `liquibase --help` was improved to include missing commands and correct information
+
+Changes in version 3.8.6 (2020.2.6)
+
+- New graphical installer for Windows and Mac
+- New examples directory with sample xml and sql changelogs and test h2 database
+- [Pro] New RollbackOneChangeSet and RollbackOneChangeSetSQL commands
+- Updated default Mysql driver to com.mysql.cj.jdbc.Driver
+- Removed non-jdbc compatible "SET DEFINE OFF" from generated SQL on Oracle
+- Fixed --excludeObjects/--includeObjects arguments in diff
+
+Changes in version 3.8.5 (2020.1.13)
+
+- Fixes issue in which Liquibase did not add `DESC` to an `id` column
+- CLI once again accepts sqlFile, delimiter, rollbackScript, and outputSchemaAs arguments
+- Fixes Stored Procedure whitespace impacting update calls
+- Fixes generateChangelog failure when there are missing NOT NULL constraints.
+- Fixes updateSQL, which was not including schemaName for package bodies.
+- Fixes bug in which Liquibase was not always capturing `create package body` while generating changeLog
+- Liquibase CLI now gives a more useful error message when an invalid character is passed to a command.
+- Fixes an MSSQL issue, which threw an exception when doing diff/diffChangeLog between offline connections (such as when snapshotting json files)
+- Fixes an MSSQL issue, which incorrectly generated `datetime` data type column when using`diff` & `diffChangeLog`
+- Liquibase Maven plugin fails while executing/using "diff" and "generateChangeLog" with PostgreSQL)
+
+Changes in version 3.8.4 (2019.12.23)
+
+- Fixed a 'Class not Found' exception error when using Java +9.
+- Fixed a 'Cannot Use Default Schema Name' error when users diff against an SQL Server snapshot file.
+- Fixed an 'Unexpected type: java.util.Date' error when using a defaultValueDate attribute in a YAML changelog.
+
+Changes in version 3.8.3 (2019.12.19)
+
+- Liquibase-Maven plugin now works with Java 9+.
+- Expired license messages should be far less verbose and excitable.
+
+Changes in version 3.8.2 (2019.11.26)
+
+- Pro stored logic snapshot logic now supports postgresql and db2
+- Using generateChangeLog/diffChangeLog to generate formatted sql changelogs now works with Liquibase Pro's stored logic support
+- CDI-related classes moved back out of the main liquibase jar into an optional jar
+- Fixed issue with indexes backing foreign keys not always being caputured in diffChangeLog/generateChangeLog
+- Fixed issue with diffChangeLog/generateChangeLog generating primary keys when column order doesn't match the table's column order
+
+Changes in version 3.8.1 (2019.11.5)
+
+- [PRO] Oracle and SQL Server users can now reverse engineer database changes for stored logic such as triggers, functions & procedures using generateChangeLog, snapshot, diff, and diffChangeLog commands.  
+- diff command writes to an external file using --outputFile flag
+- updateSQL command no longer outputs to liquibase.log
+- Cleaned up unexpected entries in diffchangelog.xml for SQL Server
+
 Changes in version 3.8.0 (2019.8.16)
 
 - [CORE-3462] - Add new procedural database code change types for Liquibase Pro

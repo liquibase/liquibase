@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Generates SQL that marks all unapplied changes as applied.
+ * <p>Generates SQL that marks all unapplied changes as applied.</p>
  * 
  * @author JAmes Atwill
  * @goal changelogSyncSQL
@@ -25,7 +25,7 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	 * The file to output the Migration SQL script to, if it exists it will be
 	 * overwritten.
 	 * 
-	 * @parameter expression="${liquibase.migrationSqlOutputFile}"
+	 * @parameter property="liquibase.migrationSqlOutputFile"
 	 *            default-value=
 	 *            "${project.build.directory}/liquibase/migrate.sql"
 	 */

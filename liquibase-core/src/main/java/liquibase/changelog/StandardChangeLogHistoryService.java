@@ -16,8 +16,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -204,32 +202,32 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (hasContexts) {
                 Integer columnSize = changeLogTable.getColumn("CONTEXTS").getType().getColumnSize();
-                if ((columnSize != null) && (columnSize < Integer.parseInt(CONTEXTS_SIZE))) {
+                if ((columnSize != null) && (columnSize < Integer.parseInt(getContextsSize()))) {
                     executor.comment("Modifying size of databasechangelog.contexts column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS",
-                        charTypeName + "("+ CONTEXTS_SIZE+")"));
+                        charTypeName + "("+ getContextsSize()+")"));
                 }
             } else {
                 executor.comment("Adding missing databasechangelog.contexts column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
                     getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "("
-                    + CONTEXTS_SIZE+")", null));
+                    + getContextsSize() + ")", null));
             }
 
             if (hasLabels) {
                 Integer columnSize = changeLogTable.getColumn("LABELS").getType().getColumnSize();
-                if ((columnSize != null) && (columnSize < Integer.parseInt(LABELS_SIZE))) {
+                if ((columnSize != null) && (columnSize < Integer.parseInt(getLabelsSize()))) {
                     executor.comment("Modifying size of databasechangelog.labels column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(),
                         getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS",
-                        charTypeName + "(" + LABELS_SIZE + ")"));
+                        charTypeName + "(" + getLabelsSize() + ")"));
                 }
             } else {
                 executor.comment("Adding missing databasechangelog.labels column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
                     getDatabaseChangeLogTableName(), "LABELS", charTypeName + "(" +
-                    LABELS_SIZE + ")", null));
+                    getLabelsSize() + ")", null));
             }
 
             if (!hasDeploymentIdColumn) {
@@ -271,7 +269,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Creating database history table with name: " +
+            Scope.getCurrentScope().getLog(getClass()).info("Creating database history table with name: " +
                 getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(),
                     getDatabaseChangeLogTableName()));
         }
@@ -281,7 +279,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 executor.execute(sql);
                 getDatabase().commit();
             } else {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Cannot run " + sql.getClass().getSimpleName() + " on" +
+                Scope.getCurrentScope().getLog(getClass()).info("Cannot run " + sql.getClass().getSimpleName() + " on" +
                     " " + getDatabase().getShortName() + " when checking databasechangelog table");
             }
         }
@@ -305,7 +303,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
             List<RanChangeSet> ranChangeSets = new ArrayList<>();
             if (hasDatabaseChangeLogTable()) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Reading from " + databaseChangeLogTableName);
+                Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
                 for (Map rs : results) {
                     String fileName = rs.get("FILENAME").toString();
@@ -342,7 +340,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         ranChangeSet.setOrderExecuted(orderExecuted);
                         ranChangeSets.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
-                        Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, "Unknown EXECTYPE from database: " +
+                        Scope.getCurrentScope().getLog(getClass()).severe("Unknown EXECTYPE from database: " +
                             execType);
                         throw e;
                     }
@@ -487,5 +485,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    protected String getLabelsSize() {
+        return LABELS_SIZE;
+    }
+
+    protected String getContextsSize() {
+        return CONTEXTS_SIZE;
     }
 }

@@ -1,15 +1,5 @@
 package liquibase.diff.output.changelog;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.*;
@@ -29,9 +19,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogType;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
+import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
@@ -49,6 +39,8 @@ public class DiffToChangeLog {
 
     public static final String ORDER_ATTRIBUTE = "order";
     public static final String DATABASE_CHANGE_LOG_CLOSING_XML_TAG = "</databaseChangeLog>";
+    public static final String EXTERNAL_FILE_DIR_SCOPE_KEY = "DiffToChangeLog.externalFilesDir";
+    public static final String DIFF_OUTPUT_CONTROL_SCOPE_KEY = "diffOutputControl";
 
     private String idRoot = String.valueOf(new Date().getTime());
     private boolean overriddenIdRoot;
@@ -101,75 +93,121 @@ public class DiffToChangeLog {
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
         File file = new File(changeLogFile);
-        if (!file.exists()) {
-            //print changeLog only if there are available changeSets to print instead of printing it always
-            printNew(changeLogSerializer, file);
+
+        final Map<String, Object> newScopeObjects = new HashMap<>();
+
+        File objectsDir = null;
+        if (changeLogFile.toLowerCase().endsWith("sql")) {
+            System.setProperty("liquibase.pro.sql.inline", "true");
+        } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
+            objectsDir = new File(file.getParentFile(), "objects");
         } else {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " exists, appending");
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
+            objectsDir = new File(file.getParentFile(), "objects-" + new Date().getTime());
+        }
 
-            String xml = new String(out.toByteArray(), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-            String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
-
-            innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
-            innerXml = innerXml.trim();
-            if ("".equals(innerXml)) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "No changes found, nothing to do");
-                return;
+        if (objectsDir != null) {
+            if (objectsDir.exists()) {
+                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir.getCanonicalPath()+"' dir in your local project directory");
             }
+            newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
+        }
 
-            try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
 
-                String line;
-                long offset = 0;
-                boolean foundEndTag = false;
-                while ((line = randomAccessFile.readLine()) != null) {
-                    int index = line.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
-                    if (index >= 0) {
-                        foundEndTag = true;
-                        break;
-                    } else {
-                        offset = randomAccessFile.getFilePointer();
+        newScopeObjects.put(DIFF_OUTPUT_CONTROL_SCOPE_KEY, diffOutputControl);
+
+        try {
+            Scope.child(newScopeObjects, new Scope.ScopedRunner() {
+                @Override
+                public void run() {
+                    try {
+                        if (!file.exists()) {
+                            //print changeLog only if there are available changeSets to print instead of printing it always
+                            printNew(changeLogSerializer, file);
+                        } else {
+            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
+                            ByteArrayOutputStream out = new ByteArrayOutputStream();
+                            print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
+
+                            String xml = new String(out.toByteArray(), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+                            String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
+
+                            innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
+                            innerXml = innerXml.trim();
+                            if ("".equals(innerXml)) {
+                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
+                                return;
+                            }
+
+                            try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
+
+                                String line;
+                                long offset = 0;
+                                boolean foundEndTag = false;
+                                while ((line = randomAccessFile.readLine()) != null) {
+                                    int index = line.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
+                                    if (index >= 0) {
+                                        foundEndTag = true;
+                                        break;
+                                    } else {
+                                        offset = randomAccessFile.getFilePointer();
+                                    }
+                                }
+
+                                String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration
+                                        .class).getOutputLineSeparator();
+
+                                if (foundEndTag) {
+                                    randomAccessFile.seek(offset);
+                                    randomAccessFile.writeBytes("    ");
+                                    randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
+                                            (GlobalConfiguration.class).getOutputEncoding()));
+                                    randomAccessFile.writeBytes(lineSeparator);
+                                    randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
+                                } else {
+                                    randomAccessFile.seek(0);
+                                    randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
+                                            (GlobalConfiguration.class).getOutputEncoding()));
+                                }
+                                randomAccessFile.close();
+                            }
+
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 }
-
-                String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration
-                .class).getOutputLineSeparator();
-
-                if (foundEndTag) {
-                    randomAccessFile.seek(offset);
-                    randomAccessFile.writeBytes("    ");
-                    randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
-                    (GlobalConfiguration.class).getOutputEncoding()));
-                    randomAccessFile.writeBytes(lineSeparator);
-                    randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
-                } else {
-                    randomAccessFile.seek(0);
-                    randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
-                    (GlobalConfiguration.class).getOutputEncoding()));
-                }
-                randomAccessFile.close();
+            });
+        } catch (Exception e) {
+            //rethrow known exceptions. TODO: Fix this up with final Scope API
+            final Throwable cause = e.getCause();
+            if (cause instanceof ParserConfigurationException) {
+                throw (ParserConfigurationException) cause;
+            }
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            if (cause instanceof DatabaseException) {
+                throw (DatabaseException) cause;
             }
 
+            throw new RuntimeException(e);
         }
     }
 
     /**
      * Prints changeLog that would bring the target database to be the same as
-     * the reference database only when there are available changeSets to print
+     * the reference database
      */
     public void printNew(ChangeLogSerializer changeLogSerializer, File file) throws ParserConfigurationException, IOException, DatabaseException {
 
         List<ChangeSet> changeSets = generateChangeSets();
 
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "changeSets count: " + changeSets.size());
+        Scope.getCurrentScope().getLog(getClass()).info("changeSets count: " + changeSets.size());
         if (changeSets.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Skipping creation of empty file.");
-            return;
+            Scope.getCurrentScope().getLog(getClass()).info("No changesets to add.");
+        } else {
+            Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
-
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, file + " does not exist, creating");
 
         try (FileOutputStream stream = new FileOutputStream(file);
              PrintStream out = new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())) {
@@ -181,8 +219,7 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
-
+    public void print(final PrintStream out, final ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         List<ChangeSet> changeSets = generateChangeSets();
 
         changeLogSerializer.write(changeSets, out);
@@ -272,14 +309,14 @@ public class DiffToChangeLog {
         return new DatabaseObjectComparator() {
             @Override
             public int compare(DatabaseObject o1, DatabaseObject o2) {
-                if (o1 instanceof Column && o1.getAttribute("order", Integer.class) != null && o2.getAttribute("order", Integer.class) != null) {
-                    int i = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
+                if (o1 instanceof Column && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
+                    int i = o1.getAttribute(ORDER_ATTRIBUTE, Integer.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Integer.class));
                     if (i != 0) {
                         return i;
                     }
-                } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute("order", Integer.class) != null
-                        && o2.getAttribute("order", Integer.class) != null) {
-                    int order = o1.getAttribute("order", Long.class).compareTo(o2.getAttribute("order", Long.class));
+                } else if (o1 instanceof StoredDatabaseLogic && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null
+                        && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
+                    int order = o1.getAttribute(ORDER_ATTRIBUTE, Long.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Long.class));
                     if (order != 0) {
                         return order;
                     }
@@ -300,8 +337,7 @@ public class DiffToChangeLog {
 
     private List<DatabaseObject> sortObjects(final String type, Collection<DatabaseObject> objects, Database database) {
 
-        if ((diffOutputControl.getSchemaComparisons() != null) && !objects.isEmpty() && supportsSortingObjects
-            (database) && (database.getConnection() != null) && !(database.getConnection() instanceof OfflineConnection)) {
+        if (!objects.isEmpty() && supportsSortingObjects(database) && (database.getConnection() != null) && !(database.getConnection() instanceof OfflineConnection)) {
             List<String> schemas = new ArrayList<>();
             CompareControl.SchemaComparison[] schemaComparisons = this.diffOutputControl.getSchemaComparisons();
             if (schemaComparisons != null) {
@@ -382,7 +418,7 @@ public class DiffToChangeLog {
                     return toSort;
                 }
             } catch (DatabaseException e) {
-                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Cannot get object dependencies: " + e.getMessage());
+                Scope.getCurrentScope().getLog(getClass()).fine("Cannot get object dependencies: " + e.getMessage());
             }
         }
 
@@ -606,7 +642,7 @@ public class DiffToChangeLog {
         }
     }
 
-    private String queryForDependenciesPostgreSql(List<String> schemas){
+    private String queryForDependenciesPostgreSql(List<String> schemas) {
         //SQL adapted from https://wiki.postgresql.org/wiki/Pg_depend_display
         return "WITH RECURSIVE preference AS (\n" +
                 "    SELECT 10 AS max_depth  -- The deeper the recursion goes, the slower it performs.\n" +
@@ -619,7 +655,7 @@ public class DiffToChangeLog {
                 "               dependency_pair AS (\n" +
                 "                   WITH relation_object AS ( SELECT oid, oid::regclass::text AS object_name  FROM pg_class )\n" +
                 "                   SELECT DISTINCT " +
-                "                         substring(pg_identify_object(classid, objid, 0)::text, E'(\\\\w+?)\\\\.') as referenced_schema_name, "+
+                "                         substring(pg_identify_object(classid, objid, 0)::text, E'(\\\\w+?)\\\\.') as referenced_schema_name, " +
                 "                         CASE classid\n" +
                 "                              WHEN 'pg_attrdef'::regclass THEN (SELECT attname FROM pg_attrdef d JOIN pg_attribute c ON (c.attrelid,c.attnum)=(d.adrelid,d.adnum) WHERE d.oid = objid)\n" +
                 "                              WHEN 'pg_cast'::regclass THEN (SELECT concat(castsource::regtype::text, ' AS ', casttarget::regtype::text,' WITH ', castfunc::regprocedure::text) FROM pg_cast WHERE oid = objid)\n" +
@@ -636,7 +672,7 @@ public class DiffToChangeLog {
                 "                              WHEN 'pg_type'::regclass THEN objid::regtype::text\n" +
                 "                              ELSE objid::text\n" +
                 "                              END AS REFERENCED_NAME,\n" +
-                "                          substring(pg_identify_object(refclassid, refobjid, 0)::text, E'(\\\\w+?)\\\\.') as referencing_schema_name, "+
+                "                          substring(pg_identify_object(refclassid, refobjid, 0)::text, E'(\\\\w+?)\\\\.') as referencing_schema_name, " +
                 "                          CASE refclassid\n" +
                 "                              WHEN 'pg_namespace'::regclass THEN (SELECT nspname FROM pg_namespace WHERE oid = refobjid)\n" +
                 "                              WHEN 'pg_class'::regclass THEN rrel.object_name\n" +
@@ -673,7 +709,7 @@ public class DiffToChangeLog {
                     public String toString(String obj) {
                         return " REFERENCED_NAME like '" + obj + ".%' OR REFERENCED_NAME NOT LIKE '%.%'";
                     }
-                })+ ") " +
+                }) + ") " +
                 " AND referencing_schema_name is not null and referencing_name is not null";
     }
 
@@ -691,7 +727,7 @@ public class DiffToChangeLog {
             for (Class<? extends DatabaseObject> type : types) {
                 log += "    " + type.getName();
             }
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, log);
+            Scope.getCurrentScope().getLog(getClass()).fine(log);
             loggedOrderFor.add(generatorType);
         }
 
@@ -704,7 +740,7 @@ public class DiffToChangeLog {
 
             if (diffOutputControl.getContext() != null) {
                 csContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "")
-                .replaceFirst("\\)$", "");
+                        .replaceFirst("\\)$", "");
             }
 
             if (useSeparateChangeSets(changes)) {
@@ -891,7 +927,7 @@ public class DiffToChangeLog {
             for (Node n : allNodes.values()) {
                 if (!n.inEdges.isEmpty()) {
                     String message = "Could not resolve " + generatorType.getSimpleName() + " dependencies due " +
-                     "to dependency cycle. Dependencies: \n";
+                            "to dependency cycle. Dependencies: \n";
 
                     for (Node node : allNodes.values()) {
                         SortedSet<String> fromTypes = new TreeSet<>();

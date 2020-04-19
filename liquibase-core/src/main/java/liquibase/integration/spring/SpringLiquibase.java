@@ -14,30 +14,20 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
-import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.ResourcePatternUtils;
 
 import javax.sql.DataSource;
 import java.io.*;
-import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * A Spring-ified wrapper for Liquibase.
@@ -170,7 +160,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 					}
 					connection.close();
                 } catch (SQLException e) {
-					log.warning(LogType.LOG, "problem closing connection", e);
+					log.warning("problem closing connection", e);
 				}
 			}
 		}
@@ -296,12 +286,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             .getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Liquibase did not run because " + LiquibaseConfiguration
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " + LiquibaseConfiguration
                 .getInstance().describeValueLookupLogic(shouldRunProperty) + " was set to false");
             return;
 		}
 		if (!shouldRun) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Liquibase did not run because 'shouldRun' " + "property was set " +
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because 'shouldRun' " + "property was set " +
                 "to false on " + getBeanName() + " Liquibase Spring bean.");
             return;
 		}
@@ -398,8 +388,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         DatabaseConnection liquibaseConnection;
         if (c == null) {
-            log.warning(LogType.LOG,
-                "Null connection returned by liquibase datasource. Using offline unknown database");
+            log.warning("Null connection returned by liquibase datasource. Using offline unknown database");
             liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
 
         } else {
@@ -488,7 +477,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     public class SpringResourceAccessor extends ClassLoaderResourceAccessor {
-
-
-    }
+		public SpringResourceAccessor() {
+			super(Thread.currentThread().getContextClassLoader());
+		}
+	}
 }

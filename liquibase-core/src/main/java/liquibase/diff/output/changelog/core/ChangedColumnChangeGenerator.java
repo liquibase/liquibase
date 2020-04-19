@@ -17,8 +17,6 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -127,7 +125,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
         Difference difference = differences.getDifference("autoIncrementInformation");
         if (difference != null) {
             if (difference.getReferenceValue() == null) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "ChangedColumnChangeGenerator cannot fix dropped auto increment values");
+                Scope.getCurrentScope().getLog(getClass()).info("ChangedColumnChangeGenerator cannot fix dropped auto increment values");
                 //todo: Support dropping auto increments
             } else {
                 AddAutoIncrementChange change = new AddAutoIncrementChange();
@@ -263,9 +261,10 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                         if (value instanceof DatabaseFunction) {
                             if (value.equals(new DatabaseFunction("'false'"))) {
                                 change.setDefaultValueBoolean(false);
-                            }
-                            else {
+                            } else if (value.equals(new DatabaseFunction("'true'"))) {
                                 change.setDefaultValueBoolean(true);
+                            } else {
+                                change.setDefaultValueComputed(((DatabaseFunction) value));
                             }
                         }
                     }

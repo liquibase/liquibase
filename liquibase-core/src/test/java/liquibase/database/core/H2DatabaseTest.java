@@ -2,8 +2,6 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.exception.DatabaseException;
 import org.junit.Assert;
 import org.junit.Test;
 

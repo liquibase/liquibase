@@ -5,7 +5,6 @@ import java.util.Arrays;
 import liquibase.Scope;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogType;
 import liquibase.util.StringUtil;
 
 
@@ -56,7 +55,7 @@ public class MariaDBDatabase extends MySQLDatabase {
             patch = getDatabasePatchVersion();
         } catch (DatabaseException x) {
             Scope.getCurrentScope().getLog(getClass()).warning(
-                    LogType.LOG, "Unable to determine exact database server version"
+                    "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;
@@ -98,7 +97,7 @@ public class MariaDBDatabase extends MySQLDatabase {
         try {
             return getDatabaseMajorVersion() >= 10 && getDatabaseMinorVersion() >= 3;
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Cannot retrieve database version", e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Cannot retrieve database version", e);
             return false;
         }
     }

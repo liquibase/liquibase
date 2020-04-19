@@ -24,7 +24,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -39,7 +38,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,7 +50,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -555,12 +552,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
 
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    Scope.getCurrentScope().getLog(getClass()).info("Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info(LogType.LOG, "Marking ChangeSet: " + toString() + " ran despite precondition failure due to onFail='MARK_RAN': " + message);
+                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition failure due to onFail='MARK_RAN': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
                     execType = null; //already warned
                 } else {
@@ -588,7 +585,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info(LogType.LOG, "Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
+                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
                     execType = null; //already logged
                 } else {
@@ -609,7 +606,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     }
                 }
 
-                log.fine(LogType.LOG, "Reading ChangeSet: " + toString());
+                log.fine("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
                     if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         if (listener != null) {
@@ -621,24 +618,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
 
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
-                        log.info(LogType.LOG, change.getConfirmationMessage());
+                        log.info(change.getConfirmationMessage());
                         if (listener != null) {
                             listener.ran(change, this, changeLog, database);
                         }
                     } else {
-                        log.fine(LogType.LOG, "Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+                        log.fine("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
                 }
 
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.info(LogType.LOG, "ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
             } else {
-                log.fine(LogType.LOG, "Skipping ChangeSet: " + toString());
+                log.fine("Skipping ChangeSet: " + toString());
             }
 
         } catch (Exception e) {
@@ -648,12 +645,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 throw new MigrationFailedException(this, e);
             }
             if ((getFailOnError() != null) && !getFailOnError()) {
-                log.info(LogType.LOG, "Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
-                log.fine(LogType.LOG, "Failure Stacktrace", e);
+                log.info("Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
+                log.fine("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
-                // just log the message, dont log the stacktrace by appending exception. Its logged anyway to stdout
-                log.severe(LogType.LOG, "Change Set " + toString(false) + " failed.  Error: " + e.getMessage());
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
                 } else {
@@ -729,7 +724,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (runInTransaction) {
                 database.commit();
             }
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "ChangeSet " + toString() + " has been successfully rolled back.");
+            Scope.getCurrentScope().getLog(getClass()).fine("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             try {
                 database.rollback();

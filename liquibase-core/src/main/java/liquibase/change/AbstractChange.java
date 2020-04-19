@@ -34,7 +34,6 @@ import java.util.*;
 public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     protected static final String NODENAME_COLUMN = "column";
-    private ResourceAccessor resourceAccessor;
 
     private ChangeSet changeSet;
 
@@ -507,18 +506,16 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     /**
      * @inheritDoc
+     * @deprecated Should get from {@link Scope}
      */
     @DatabaseChangeProperty(isChangeProperty = false)
     public ResourceAccessor getResourceAccessor() {
-        return resourceAccessor;
+        return Scope.getCurrentScope().getResourceAccessor();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
-        this.resourceAccessor = resourceAccessor;
+        Scope.getCurrentScope().getLog(getClass()).info("As of Liquibase 4.0, cannot set resource accessor on "+getClass().getName()+". Must add it to the Scope");
     }
 
     /**
@@ -591,7 +588,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         ChangeMetaData metaData = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this);
-        this.setResourceAccessor(resourceAccessor);
+
         try {
             Collection<ChangeParameterMetaData> changeParameters = metaData.getParameters().values();
 

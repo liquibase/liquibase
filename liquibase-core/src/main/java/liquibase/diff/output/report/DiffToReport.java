@@ -146,6 +146,10 @@ public class DiffToReport {
         } else {
             out.println();
             for (DatabaseObject object : objects) {
+                if (!diffResult.getReferenceSnapshot().getSnapshotControl().shouldInclude(object)) {
+                    continue;
+                }
+
                 if (getIncludeSchema() && (object.getSchema() != null) && ((lastSchema == null) || !lastSchema.equals
                     (object.getSchema()))) {
                     lastSchema = object.getSchema();

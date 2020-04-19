@@ -5,8 +5,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtil;
 
@@ -53,9 +51,14 @@ public class DB2Database extends AbstractDb2Database {
 					new RawSqlStatement("SELECT fixpack_num FROM TABLE (sysproc.env_get_inst_info()) as INSTANCEINFO"),
 					Integer.class);
 		} catch (final Exception e) {
-			Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting fix pack number", e);
+			Scope.getCurrentScope().getLog(getClass()).info("Error getting fix pack number", e);
 		}
 		return null;
+	}
+
+	@Override
+	protected String getDefaultDatabaseProductName() {
+		return "DB2/LUW";
 	}
 
 }

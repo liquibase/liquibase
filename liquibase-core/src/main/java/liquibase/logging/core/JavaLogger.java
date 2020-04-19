@@ -1,7 +1,5 @@
 package liquibase.logging.core;
 
-import liquibase.logging.LogType;
-
 import java.util.logging.Level;
 
 /**
@@ -9,14 +7,16 @@ import java.util.logging.Level;
  */
 public class JavaLogger extends AbstractLogger {
 
+    private final String className;
     private java.util.logging.Logger logger;
 
     public JavaLogger(java.util.logging.Logger logger) {
         this.logger = logger;
+        this.className = logger.getName();
     }
 
     @Override
-    public void log(Level level, LogType target, String message, Throwable e) {
-        logger.log(level, message, e);
+    public void log(Level level, String message, Throwable e) {
+        logger.logp(level, className, null, message, e);
     }
 }
