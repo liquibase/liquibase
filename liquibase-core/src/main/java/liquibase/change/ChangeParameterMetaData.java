@@ -29,8 +29,6 @@ public class ChangeParameterMetaData {
 
     public static final String COMPUTE = "COMPUTE";
 
-    private static final Object NO_METHOD_REF = new Object();
-
     private Change change;
     private String parameterName;
     private String description;
@@ -46,8 +44,8 @@ public class ChangeParameterMetaData {
     private LiquibaseSerializable.SerializationType serializationType;
     private String[] requiredForDatabaseArg;
     private String[] supportedDatabasesArg;
-    private Object readMethodRef;
-    private Object writeMethodRef;
+    private Optional<Method> readMethodRef;
+    private Optional<Method> writeMethodRef;
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
@@ -95,8 +93,8 @@ public class ChangeParameterMetaData {
     }
 
     public ChangeParameterMetaData withAccessors(Method readMethod, Method writeMethod) {
-        this.readMethodRef = (readMethod == null) ? NO_METHOD_REF : readMethod;
-        this.writeMethodRef = (writeMethod == null) ? NO_METHOD_REF : writeMethod;
+        this.readMethodRef = Optional.ofNullable(readMethod);
+        this.writeMethodRef = Optional.ofNullable(writeMethod);
         return this;
     }
 
@@ -287,14 +285,12 @@ public class ChangeParameterMetaData {
     }
 
     private Method getReadMethod(Change change) {
-        if (readMethodRef == NO_METHOD_REF) {
-            throw new UnexpectedLiquibaseException("No readMethod for " + parameterName);
-        } else if (readMethodRef != null) {
-            return (Method) readMethodRef;
+        if (readMethodRef != null) {
+            return readMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No readMethod for " + parameterName));
         }
 
         try {
-            readMethodRef = NO_METHOD_REF;
+            readMethodRef = Optional.empty();
             for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method readMethod = descriptor.getReadMethod();
@@ -303,7 +299,7 @@ public class ChangeParameterMetaData {
                             "is" + StringUtils.upperCaseFirst(descriptor.getName())
                         );
                     }
-                    readMethodRef = readMethod;
+                    readMethodRef = Optional.of(readMethod);
                     return readMethod;
                 }
             }
@@ -358,21 +354,19 @@ public class ChangeParameterMetaData {
     }
 
     private Method getWriteMethod(Change change) {
-        if (writeMethodRef == NO_METHOD_REF) {
-            throw new UnexpectedLiquibaseException("No writeMethod for " + parameterName);
-        } else if (writeMethodRef != null) {
-            return (Method) writeMethodRef;
+        if (writeMethodRef != null) {
+            return writeMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No writeMethod for " + parameterName));
         }
 
         try {
-            writeMethodRef = NO_METHOD_REF;
+            writeMethodRef = Optional.empty();
             for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method writeMethod = descriptor.getWriteMethod();
                     if (writeMethod == null) {
                         break;
                     }
-                    writeMethodRef = writeMethod;
+                    writeMethodRef = Optional.of(writeMethod);
                     return writeMethod;
                 }
             }
