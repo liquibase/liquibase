@@ -227,8 +227,9 @@ Optional Diff Parameters:
                                             If this is null then the default
                                             types will be: tables, views,
                                             columns, indexes, foreignkeys,
-                                             primarykeys, uniqueconstraints.
-
+                                            primarykeys, uniqueconstraints.
+--format=<format type>                      Liquibase Pro option only only for diff command.
+                                            Output results in the the specified format ("JSON" or "TXT")
 Change Log Properties:
  -D<property.name>=<property.value>         Pass a name/value pair for
                                             substitution in the change log(s)
