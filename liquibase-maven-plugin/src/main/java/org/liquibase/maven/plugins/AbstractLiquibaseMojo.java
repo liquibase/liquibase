@@ -346,7 +346,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         try {
             String dbPassword = (emptyPassword || (password == null)) ? "" : password;
             String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
-            database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
+            database = CommandLineUtils.createDatabaseObject(fileOpener,
                     url,
                     username,
                     dbPassword,
