@@ -229,11 +229,13 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects);
         }
 
+        CompareControl.SchemaComparison[] schemaComparisons = createSchemaComparisons(db);
         if (diffChangeLogFile != null) {
             try {
                 DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
                 diffOutputControl.setObjectChangeFilter(objectChangeFilter);
-                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, objectChangeFilter, StringUtils.trimToNull(diffTypes));
+                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl,
+                                                   objectChangeFilter, StringUtils.trimToNull(diffTypes), schemaComparisons);
                 if (new File(diffChangeLogFile).exists()) {
                     getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
                 }
@@ -242,7 +244,6 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             }
         } else {
             PrintStream printStream = createPrintStream();
-            CompareControl.SchemaComparison[] schemaComparisons = createSchemaComparisons(db);
             if (isFormattedDiff()) {
                 LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
                 DiffCommand diffCommand =
