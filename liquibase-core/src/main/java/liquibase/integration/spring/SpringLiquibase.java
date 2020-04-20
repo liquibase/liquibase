@@ -79,41 +79,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected boolean shouldRun = true;
 	protected File rollbackFile;
 
-	/**
-     * Ignores classpath prefix during changeset comparison.
-     * This is particularly useful if Liquibase is run in different ways.
-     *
-     * For instance, if Maven plugin is used to run changesets, as in:
-     * <code>
-     *      &lt;configuration&gt;
-     *          ...
-     *          &lt;changeLogFile&gt;path/to/changelog&lt;/changeLogFile&gt;
-     *      &lt;/configuration&gt;
-     * </code>
-     *
-     * And {@link SpringLiquibase} is configured like:
-     * <code>
-     *     SpringLiquibase springLiquibase = new SpringLiquibase();
-     *     springLiquibase.setChangeLog("classpath:path/to/changelog");
-     * </code>
-     *
-     * or, in equivalent XML configuration:
-     * <code>
-     *     &lt;bean id="springLiquibase" class="liquibase.integration.spring.SpringLiquibase"&gt;
-     *         &lt;property name="changeLog" value="path/to/changelog" /&gt;
-     *      &lt;/bean&gt;
-     * </code>
-     *
-     * {@link Liquibase#listUnrunChangeSets(Contexts, )} will
-     * always, by default, return changesets, regardless of their
-     * execution by Maven.
-     * Maven-executed changeset path name are not be prepended by
-     * "classpath:" whereas the ones parsed via SpringLiquibase are.
-     *
-     * To avoid this issue, just set ignoreClasspathPrefix to true.
-     */
-    private boolean ignoreClasspathPrefix = true;
-
 	protected boolean testRollbackOnUpdate = false;
 
 	public SpringLiquibase() {
@@ -362,7 +327,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
 		SpringResourceAccessor resourceAccessor = createResourceOpener();
 		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
-        liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
 		if (parameters != null) {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
 				liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
@@ -464,11 +428,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     public boolean isIgnoreClasspathPrefix() {
-        return ignoreClasspathPrefix;
+        return true;
     }
 
-    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
-        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
+	/**
+	 * @deprecated Always ignoring classpath prefix
+	 */
+	public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
+
 	}
 
 	@Override

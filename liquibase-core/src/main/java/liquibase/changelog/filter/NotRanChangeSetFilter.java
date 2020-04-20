@@ -1,6 +1,7 @@
 package liquibase.changelog.filter;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class NotRanChangeSetFilter implements ChangeSetFilter {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())
                     && ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
-                    && ranChangeSet.getChangeLog().replaceFirst("^classpath:", "").equalsIgnoreCase(changeSet.getFilePath().replaceFirst("^classpath:", ""))) {
+                    && DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog()).equalsIgnoreCase(DatabaseChangeLog.normalizePath(changeSet.getFilePath()))) {
                 return new ChangeSetFilterResult(false, "Change set already ran", this.getClass());
             }
         }

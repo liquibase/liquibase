@@ -78,8 +78,6 @@ public class Liquibase implements AutoCloseable {
     private ChangeExecListener changeExecListener;
     private ChangeLogSyncListener changeLogSyncListener;
 
-    private boolean ignoreClasspathPrefix = true;
-
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
      *
@@ -241,7 +239,7 @@ public class Liquibase implements AutoCloseable {
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
+                new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database),
@@ -322,7 +320,7 @@ public class Liquibase implements AutoCloseable {
                     changeLog.validate(database, contexts, labelExpression);
 
                     ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                            new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
+                            new ShouldRunChangeSetFilter(database),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),
                             new DbmsChangeSetFilter(database),
@@ -375,7 +373,7 @@ public class Liquibase implements AutoCloseable {
 
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                            new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
+                            new ShouldRunChangeSetFilter(database),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),
                             new DbmsChangeSetFilter(database),
@@ -587,10 +585,9 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(false, changeLog, contexts, labelExpression);
 
                     changeLog.validate(database, contexts, labelExpression);
-                    changeLog.setIgnoreClasspathPrefix(ignoreClasspathPrefix);
 
                     ChangeLogIterator logIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
-                            new AlreadyRanChangeSetFilter(database.getRanChangeSetList(), ignoreClasspathPrefix),
+                            new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),
                             new DbmsChangeSetFilter(database),
@@ -765,12 +762,11 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(false, changeLog, contexts, labelExpression);
 
                     changeLog.validate(database, contexts, labelExpression);
-                    changeLog.setIgnoreClasspathPrefix(ignoreClasspathPrefix);
 
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                             new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
-                            new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
+                            new AlreadyRanChangeSetFilter(ranChangeSetList),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
@@ -862,12 +858,11 @@ public class Liquibase implements AutoCloseable {
                     DatabaseChangeLog changeLog = getDatabaseChangeLog();
                     checkLiquibaseTables(false, changeLog, contexts, labelExpression);
                     changeLog.validate(database, contexts, labelExpression);
-                    changeLog.setIgnoreClasspathPrefix(ignoreClasspathPrefix);
 
                     List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                     ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                             new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
-                            new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
+                            new AlreadyRanChangeSetFilter(ranChangeSetList),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
@@ -1764,14 +1759,6 @@ public class Liquibase implements AutoCloseable {
 
     public void setChangeLogSyncListener(ChangeLogSyncListener changeLogSyncListener) {
         this.changeLogSyncListener = changeLogSyncListener;
-    }
-
-    public boolean isIgnoreClasspathPrefix() {
-        return ignoreClasspathPrefix;
-    }
-
-    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
-        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
     }
 
     @SafeVarargs

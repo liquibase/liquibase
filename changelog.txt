@@ -1,6 +1,58 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.0.0 Beta1 (2020.4.20)
+- MAJOR CHANGE: Replaced old custom classpath scanner with java.util.ServiceLoader for finding extensions
+- MAJOR CHANGE: Refactored logging system to clean up API and use java.util.Logging
+- Fixes to ConstraintsConfig https://github.com/liquibase/liquibase/pull/954
+- ignoreLines command in formatted sql log https://github.com/liquibase/liquibase/pull/877
+- postgresql >= 10: use identity columns for autoincrement https://github.com/liquibase/liquibase/pull/874
+- Using proxy user for Oracle Connections https://github.com/liquibase/liquibase/pull/894
+- Capture table remarks on mysql https://github.com/liquibase/liquibase/pull/895
+- Add PERIOD to reserved words for MariaDB https://github.com/liquibase/liquibase/pull/896
+- Don't require columnDataType on H2 for addNotNullConstraint https://github.com/liquibase/liquibase/pull/851
+- Do not remove trailing /'s of comments like /* dsds */ https://github.com/liquibase/liquibase/pull/853
+- Require type xsd:string to where element of update element https://github.com/liquibase/liquibase/pull/875/files
+- runOnChange change set runs every time even if there wasn't changed https://github.com/liquibase/liquibase/pull/891
+- Indexes with DESC sorting are not created for PostgreSQL https://github.com/liquibase/liquibase/pull/880
+- Added Ingress support https://github.com/liquibase/liquibase/pull/683
+- Support boolean in firebird 3.0 https://github.com/liquibase/liquibase/pull/757
+- Change Log Parameters from Environment Variable https://github.com/liquibase/liquibase/pull/758
+- Adds clearCheckSums property in spring integration https://github.com/liquibase/liquibase/pull/792
+- Oracle datatype translation changes https://github.com/liquibase/liquibase/pull/797
+- Implement Sequence Support for MariaDB https://github.com/liquibase/liquibase/pull/852
+- Cleanup checksum classes https://github.com/liquibase/liquibase/pull/869
+- Fix Turkish uppercase column keys bug https://github.com/liquibase/liquibase/pull/857
+- Generate diff with onDelete and onUpdate https://github.com/liquibase/liquibase/pull/858
+- PrimaryKeySnapshotGenerator throws NPE for SQLite https://github.com/liquibase/liquibase/pull/856
+- Handle java.sql.Time when setting prepared statement parameter values in CSV filese https://github.com/liquibase/liquibase/pull/859
+- DB2 LUW supports boolean data type column from version 11.1.1.1 https://github.com/liquibase/liquibase/pull/865
+- Offline history support not correctly closing files https://github.com/liquibase/liquibase/pull/863
+- Use computeIfAbsent to avoid Liquibase concurrency issues https://github.com/liquibase/liquibase/pull/866
+- Firebird does not support RESTRICT option on Foreign Keys https://github.com/liquibase/liquibase/pull/761
+- Liquibase was ignoring DatabaseFunction value and processing only SequenceNextValueFunction when creating tables and generating column default value. https://github.com/liquibase/liquibase/pull/785
+- Restore usage of `DatabaseList.definitionMatches` to match the `dbms` tag against the database type https://github.com/liquibase/liquibase/pull/811
+- DEPLOYMENT_ID column header not included in offline updateSql CSV https://github.com/liquibase/liquibase/pull/813
+- Can't set some parameters for snapshot & generate changelog https://github.com/liquibase/liquibase/pull/822
+- UUID type handling improvements https://github.com/liquibase/liquibase/pull/838
+- Correctly close yaml file in generateChagneLog https://github.com/liquibase/liquibase/pull/844
+- Adding restricted words for MSSQL Server Database https://github.com/liquibase/liquibase/pull/825
+- Getting a java.io.FileNotFoundException using Liquibase with Spring reactive web https://github.com/liquibase/liquibase/pull/814
+- FileSystemResourceAccessor fails with non-hierarchical URLS on classpath https://github.com/liquibase/liquibase/pull/830
+- fix oracle date literal without millis https://github.com/liquibase/liquibase/pull/828
+- fix nullPointerException when migrating RedShift https://github.com/liquibase/liquibase/pull/823
+- Prints the SQL error code on Exception https://github.com/liquibase/liquibase/pull/833
+- Fixed SetColumnRemarks for mysql https://github.com/liquibase/liquibase/pull/835
+- Allow “NOW” and “Today” literal capabilities in CSV filese https://github.com/liquibase/liquibase/pull/808
+- Add ability to disable running of Liquibase via CDILiquibaseConfig https://github.com/liquibase/liquibase/pull/804
+
+Changes in version 3.8.9 (2020.4.06)
+- Fixed an issue with how Liquibase handles SMALLINT columns in PostgreSQL when generating a changelog.
+- Improved `generateChangeLog` command to assume a `diffTypes` that includes "data" when the `dataOutputDirectory` parameter is used. Most users looking to export data as part of `generateChangeLog` can now simply use the `dataOuputDirectory` parameter without needing to specify `diffTypes`.
+- Enabled the use of the `--schemas` parameter to work on either side of the `snapshot` command.
+- Enabled `generatechangelog` in PostgreSQL to correctly order `create`, `function`, and `trigger` statements.
+- Improved the use of dblink objects when using `diff` command.
+
 Changes in version 3.8.8 (2020.3.19)
 - `rollbackOneChangeSetSQL` now works correctly with the Liquibase Maven plugin.
 - Liquibase Pro no longer generates procedural code with incorrect SQL syntax when running `generateChangeLog` against a MySQL database.
