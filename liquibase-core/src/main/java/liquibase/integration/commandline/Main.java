@@ -1772,7 +1772,8 @@ public class Main {
     }
 
     private boolean isFormattedDiff() throws CommandLineParsingException {
-        return ! getCommandParam(OPTIONS.FORMAT, "txt").equalsIgnoreCase("txt");
+        String formatValue = getCommandParam(OPTIONS.FORMAT, "txt");
+        return ! formatValue.equalsIgnoreCase("txt") && ! formatValue.isEmpty();
     }
 
     private String getSchemaParams(Database database) throws CommandLineParsingException {
