@@ -1307,7 +1307,7 @@ public class Main {
             COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command) ||
-            (COMMANDS.DIFF.equals(command) && formatValue != null && ! formatValue.isEmpty())) {
+            (COMMANDS.DIFF.equals(command) && formatValue != null && ! formatValue.toLowerCase().equals("txt"))) {
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
                 String warningAboutCommand = command;
                 if (formatValue != null && ! formatValue.isEmpty()) {
@@ -1403,6 +1403,7 @@ public class Main {
                     argsMap.put("format", getCommandParam(OPTIONS.FORMAT, "JSON"));
                     argsMap.put("diffCommand", diffCommand);
                     ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
+                    liquibaseCommand.execute();
                 }
                 else {
                     CommandLineUtils.doDiff(
