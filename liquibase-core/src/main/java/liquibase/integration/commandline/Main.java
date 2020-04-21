@@ -212,7 +212,7 @@ public class Main {
                     if (main.liquibaseProLicenseKey == null) {
                         log.info(LogType.LOG,
                            "The command '" + main.command +
-                                   "' requires a Liquibase Pro license, available at https://www.liquibase.org or sales@liquibase.com");
+                                   "' requires a Liquibase Pro license, available at https://www.liquibase.org/download or sales@liquibase.com");
                     } else {
                         Location licenseKeyLocation =
                                 new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
@@ -846,7 +846,7 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
-                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) &&  cmdParm.startsWith("--" + OPTIONS.FORMAT)) {
+                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.startsWith("--" + OPTIONS.FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -1302,15 +1302,16 @@ public class Main {
         //
         // Check for a valid license to run PRO commands
         //
+        String formatValue = getCommandParam(OPTIONS.FORMAT, "txt");
         if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command) ||
             COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command) ||
-            (COMMANDS.DIFF.equals(command) && isFormattedDiff())){
+            (COMMANDS.DIFF.equals(command) && formatValue != null && ! formatValue.isEmpty())) {
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
                 String warningAboutCommand = command;
-                if (isFormattedDiff()) {
-                    warningAboutCommand = "diff --format=JSON";
+                if (formatValue != null && ! formatValue.isEmpty()) {
+                    warningAboutCommand = "diff --format=" + formatValue;
                 }
                 String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
                 throw new LiquibaseException(messageString);
@@ -1402,7 +1403,6 @@ public class Main {
                     argsMap.put("format", getCommandParam(OPTIONS.FORMAT, "JSON"));
                     argsMap.put("diffCommand", diffCommand);
                     ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
-                    liquibaseCommand.execute();
                 }
                 else {
                     CommandLineUtils.doDiff(
