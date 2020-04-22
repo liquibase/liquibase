@@ -1302,7 +1302,7 @@ public class Main {
         //
         // Check for a valid license to run PRO commands
         //
-        String formatValue = getCommandParam(OPTIONS.FORMAT, "txt");
+        String formatValue = getCommandParam(OPTIONS.FORMAT, null);
         if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command) ||
             COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command) ||
             COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
@@ -1310,7 +1310,7 @@ public class Main {
             (COMMANDS.DIFF.equals(command) && formatValue != null && ! formatValue.toLowerCase().equals("txt"))) {
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
                 String warningAboutCommand = command;
-                if (formatValue != null && ! formatValue.isEmpty()) {
+                if (command.equals(COMMANDS.DIFF) && formatValue != null && ! formatValue.isEmpty()) {
                     warningAboutCommand = "diff --format=" + formatValue;
                 }
                 String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
