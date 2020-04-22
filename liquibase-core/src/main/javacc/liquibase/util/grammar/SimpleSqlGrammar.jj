@@ -80,6 +80,7 @@ TOKEN:
 Built list from http://stackoverflow.com/a/37668315/45756
 */
 | < #UNICODE_LETTERS: ["\u00AA",
+    "\u00B0",
     "\u00B5",
     "\u00BA",
     "\u00C0"-"\u00D6",
