@@ -32,9 +32,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -185,6 +183,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * ChangeSet level precondtions defined for this changeSet
      */
     private PreconditionContainer preconditions;
+
+    /**
+     * ChangeSet level attribute to specify an Executor
+     */
+    private String runWith;
 
     /**
      * SqlVisitors defined for this changeset.
