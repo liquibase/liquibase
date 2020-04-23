@@ -184,7 +184,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private PreconditionContainer preconditions;
 
-    /**
+   /**
      * ChangeSet level attribute to specify an Executor
      */
     private String runWith;
@@ -254,6 +254,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public String getFilePath() {
         return filePath;
+    }
+    
+    public String getRunWith() {
+        return runWith;
     }
 
     public void clearCheckSum() {
