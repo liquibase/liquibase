@@ -1,6 +1,7 @@
 package liquibase.executor;
 
 import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.Sql;
@@ -16,6 +17,37 @@ import java.util.List;
  */
 public abstract class AbstractExecutor implements Executor {
     protected Database database;
+
+    /**
+     *
+     * Return the name of the Executor
+     *
+     * @return String   The Executor name
+     *
+     */
+    @Override
+    public abstract String getName();
+
+    /**
+     *
+     * Return the Executor priority
+     *
+     * @return int      The Executor priority
+     *
+     */
+    @Override
+    public abstract int getPriority();
+
+    /**
+     *
+     * Validate if the change set can be executed by this Executor
+     *
+     * @param   changeSet The change set to validate
+     * @return  boolean   Always true for abstract class
+     *
+     */
+    @Override
+    public abstract boolean validate(ChangeSet changeSet);
 
     public void setDatabase(Database database) {
         this.database = database;

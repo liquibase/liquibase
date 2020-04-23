@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -7,6 +8,7 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.ExecutablePreparedStatement;
@@ -39,6 +41,43 @@ public class LoggingExecutor extends AbstractExecutor {
         }
         this.delegatedReadExecutor = delegatedExecutor;
         setDatabase(database);
+    }
+
+    /**
+     *
+     * Return the name of the Executor
+     *
+     * @return String   The Executor name
+     *
+     */
+    @Override
+    public String getName() {
+        return "logging";
+    }
+
+    /**
+     *
+     * Return the Executor priority
+     *
+     * @return int      The Executor priority
+     *
+     */
+    @Override
+    public int getPriority() {
+        return PrioritizedService.PRIORITY_DEFAULT;
+    }
+
+    /**
+     *
+     * Validate if the change set can be executed by this Executor
+     *
+     * @param   changeSet The change set to validate
+     * @return  boolean  Always true for LoggingExecutor
+     *
+     */
+    @Override
+    public boolean validate(ChangeSet changeSet) {
+        return true;
     }
 
     protected Writer getOutput() {

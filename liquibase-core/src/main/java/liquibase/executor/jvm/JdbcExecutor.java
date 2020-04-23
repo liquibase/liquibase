@@ -1,5 +1,6 @@
 package liquibase.executor.jvm;
 
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -12,6 +13,7 @@ import liquibase.executor.AbstractExecutor;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
@@ -40,6 +42,43 @@ import java.util.Map;
 public class JdbcExecutor extends AbstractExecutor {
 
     private Logger log = LogService.getLog(getClass());
+
+    /**
+     *
+     * Return the name of the Executor
+     *
+     * @return String   The Executor name
+     *
+     */
+    @Override
+    public String getName() {
+        return "jdbc";
+    }
+
+    /**
+     *
+     * Return the Executor priority
+     *
+     * @return int      The Executor priority
+     *
+     */
+    @Override
+    public int getPriority() {
+        return PrioritizedService.PRIORITY_DEFAULT;
+    }
+
+    /**
+     *
+     * Validate if the change set can be executed by this Executor
+     *
+     * @param   changeSet The change set to validate
+     * @return  boolean   Always true for JdbcExecutor
+     *
+     */
+    @Override
+    public boolean validate(ChangeSet changeSet) {
+        return true;
+    }
 
     @Override
     public boolean updatesDatabase() {

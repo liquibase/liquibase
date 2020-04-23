@@ -1,6 +1,7 @@
 package liquibase.executor;
 
 import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
@@ -13,6 +14,33 @@ import java.util.Map;
  * Interface for a class that is capable of executing statements/queries against a DBMS.
  */
 public interface Executor {
+    /**
+     *
+     * Return the name of the Executor
+     *
+     * @return   String   The Executor name
+     *
+     */
+    String getName();
+
+    /**
+     *
+     * Return the Executor priority
+     *
+     * @return   int      The Executor priority
+     *
+     */
+    int getPriority();
+
+    /**
+     *
+     * Validate if the change set can be executed by this Executor
+     *
+     * @param    changeSet  The change set to validate
+     * @return   boolean
+     *
+     */
+    boolean validate(ChangeSet changeSet);
 
     /**
      * Configures the Executor for the Database to run statements/queries against.
