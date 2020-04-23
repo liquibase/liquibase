@@ -79,7 +79,8 @@ TOKEN:
 /*
 Built list from http://stackoverflow.com/a/37668315/45756
 */
-| < #UNICODE_LETTERS: ["\u00AA",
+| < #UNICODE_LETTERS: [
+    "\u00A2"-"\u00A6",
     "\u00B0",
     "\u00B5",
     "\u00BA",

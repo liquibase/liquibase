@@ -61,6 +61,7 @@ class SqlParserTest extends Specification {
         "x \u2013 abc"                                      | ["x", "\u2013", "abc"] //ndash synmbol
         "x 'quote with unicode punctuation \u2013 in it' y" | ["x", "'quote with unicode punctuation \u2013 in it'", "y"]
         "string with degree sign sample 32\u00b0C"          | ["string", "with", "degree", "sign", "sample", "32", "\u00b0C"]
+        "><#|\\!?£\$@°§%&()[]{}^àìùòèéç"                    | [">","<", "#","|", "\\", "!", "?", "£\$@°", "§", "%", "&", "(",")","[","]","{","}","^","àìùòèéç"]
     }
 
     @Unroll("#featureName `#input`")
