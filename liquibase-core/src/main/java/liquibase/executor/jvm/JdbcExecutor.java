@@ -77,7 +77,7 @@ public class JdbcExecutor extends AbstractExecutor {
      */
     @Override
     public boolean validate(ChangeSet changeSet) {
-        return false;
+        return true;
     }
 
     @Override
