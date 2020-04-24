@@ -92,7 +92,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return filePath.replaceFirst("^classpath:", "");
     }
 
-        @Override
+    @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;

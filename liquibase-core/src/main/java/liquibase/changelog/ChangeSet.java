@@ -223,19 +223,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, boolean runInTransaction, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, quotingStrategy, databaseChangeLog);
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, true, quotingStrategy, databaseChangeLog);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
                      boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, null, runInTransaction, quotingStrategy, databaseChangeLog);
+    }
+
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
+                     String runWith, boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
         this(databaseChangeLog);
         this.id = id;
         this.author = author;
@@ -246,6 +251,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.objectQuotingStrategy = quotingStrategy;
         this.contexts = new ContextExpression(contextList);
         setDbms(dbmsList);
+        this.runWith = runWith;
     }
 
     protected void setDbms(String dbmsList) {
@@ -288,6 +294,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.author = node.getChildValue(null, "author", String.class);
         this.alwaysRun  = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
         this.runOnChange  = node.getChildValue(null, "runOnChange", false);
+        this.runWith = node.getChildValue(null, "runWith", String.class);
         this.contexts = new ContextExpression(node.getChildValue(null, "context", String.class));
         this.labels = new Labels(StringUtils.trimToNull(node.getChildValue(null, "labels", String.class)));
         setDbms(node.getChildValue(null, "dbms", String.class));
