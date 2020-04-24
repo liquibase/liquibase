@@ -38,7 +38,7 @@ public class ExecutorService {
         return instance;
     }
 
-    public Executor getExecutor(String executorName) {
+    public Executor getExecutor(String executorName) throws UnexpectedLiquibaseException {
         if (executorsByName.containsKey(executorName)) {
             return executorsByName.get(executorName);
         }
