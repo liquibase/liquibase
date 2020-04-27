@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 
@@ -13,7 +14,7 @@ import java.util.Map;
 /**
  * Interface for a class that is capable of executing statements/queries against a DBMS.
  */
-public interface Executor {
+public interface Executor extends PrioritizedService {
     /**
      *
      * Return the name of the Executor
