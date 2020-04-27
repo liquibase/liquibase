@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Interface for a class that is capable of executing statements/queries against a DBMS.
  */
-public interface Executor extends PrioritizedService {
+public interface Executor {
     /**
      *
      * Return the name of the Executor
