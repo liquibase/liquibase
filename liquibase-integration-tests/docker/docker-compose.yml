@@ -1,0 +1,15 @@
+version: '3.3'
+
+services:
+  mysql:
+    image: mysql:5
+    ports:
+      - "33061:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: LbRootPass1
+      MYSQL_DATABASE: lbcat
+      MYSQL_USER: lbuser
+      MYSQL_PASSWORD: LiquibasePass1
+    volumes:
+    - "./mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql"

@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -9,15 +10,11 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.logging.Logger;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.executor.ExecutorService;
 
@@ -36,7 +33,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
-    private static final Logger LOG = LogService.getLog(PostgresDatabase.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
 
     /**
      * Represents Postgres DB types.
@@ -46,7 +43,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public enum DbTypes {
         EDB, COMMUNITY, RDS, AURORA
     }
-
 
     private Set<String> systemTablesAndViews = new HashSet<>();
 
@@ -181,18 +177,23 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if ((setting != null) && "on".equals(setting)) {
-                        LOG.warning(LogType.LOG, "EnterpriseDB " + conn.getURL() + " does not store DATE columns. Instead, it auto-converts " +
+                        LOG.warning("EnterpriseDB " + conn.getURL() + " does not store DATE columns. Instead, it auto-converts " +
                                 "them " +
                                 "to TIMESTAMPs. (edb_redwood_date=true)");
                     }
                 }
             } catch (SQLException | DatabaseException e) {
-                LOG.info(LogType.LOG, "Cannot check pg_settings", e);
+                LOG.info("Cannot check pg_settings", e);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
         }
 
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName.replace("\"", "");
     }
 
     @Override
@@ -298,7 +299,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (tableName == null) {
             return false;
         }
-        return StringUtils.hasUpperCase(tableName) && StringUtils.hasLowerCase(tableName);
+        return StringUtil.hasUpperCase(tableName) && StringUtil.hasLowerCase(tableName);
     }
 
     @Override
@@ -327,8 +328,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             major = getDatabaseMajorVersion();
             minor = getDatabaseMinorVersion();
         } catch (DatabaseException x) {
-            LogService.getLog(getClass()).warning(
-                    LogType.LOG, "Unable to determine exact database server version"
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                    "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;
@@ -338,7 +339,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         // https://www.postgresql.org/docs/9.2/static/datatype-datetime.html
         String minimumVersion = "7.2";
 
-        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, 0)) {
+        if (StringUtil.isMinimumVersion(minimumVersion, major, minor, 0)) {
             return 6;
         } else {
             return 0;
@@ -377,9 +378,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         try {
             enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
         } catch (DatabaseException e) {
-            LOG.severe("Can't get full version of Postgres DB. Used EDB as default", e);
+            Scope.getCurrentScope().getLog(getClass()).severe("Can't get full version of Postgres DB. Used EDB as default", e);
             return  DbTypes.EDB;
         }
         return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
     }
+
 }

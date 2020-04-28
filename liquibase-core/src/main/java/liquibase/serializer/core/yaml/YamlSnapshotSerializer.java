@@ -12,8 +12,10 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.DatabaseObjectComparator;
+import liquibase.structure.core.Column;
+import liquibase.util.BooleanUtils;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
@@ -53,7 +55,10 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     @Override
     protected Object toMap(final LiquibaseSerializable object) {
         if (object instanceof DatabaseObject) {
-            if (alreadySerializingObject) {
+            if (object instanceof Column && (BooleanUtils.isTrue(((Column) object).getDescending()) || BooleanUtils.isTrue(((Column) object).getComputed()))) {
+                //not really a "real" column that has a snapshot to reference, just serialize it
+                return super.toMap(object);
+            } else if (alreadySerializingObject) {
                 String snapshotId = ((DatabaseObject) object).getSnapshotId();
                 if (snapshotId == null) {
                     String name = ((DatabaseObject) object).getName();
@@ -69,7 +74,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                         name = ((DatabaseObject) object).getSchema().toString() + "." + name;
                     }
 
-                    throw new UnexpectedLiquibaseException("Found a null snapshotId for " + StringUtils.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
+                    throw new UnexpectedLiquibaseException("Found a null snapshotId for " + StringUtil.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
                 }
                 return ((DatabaseObject) object).getClass().getName() + "#" + snapshotId;
             } else {

@@ -15,10 +15,7 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.ISODateFormat;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
-import liquibase.util.NowAndTodayUtil;
+import liquibase.util.*;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -71,8 +68,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setComputed(((columnSnapshot.getComputed() != null) && columnSnapshot.getComputed()) ? Boolean.TRUE : null);
-        setDescending(((columnSnapshot.getDescending() != null) && columnSnapshot.getDescending()) ? Boolean.TRUE : null);
+        setComputed(BooleanUtils.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
+        setDescending(BooleanUtils.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -194,7 +191,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (names == null) {
             return null;
         }
-        List<String> nameArray = StringUtils.splitAndTrim(names, ",");
+        List<String> nameArray = StringUtil.splitAndTrim(names, ",");
         ColumnConfig[] returnArray = new ColumnConfig[nameArray.size()];
         for (int i = 0; i < nameArray.size(); i++) {
             returnArray[i] = fromName(nameArray.get(i));
@@ -319,7 +316,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
     public ColumnConfig setValueBoolean(String valueBoolean) {
-        valueBoolean = StringUtils.trimToNull(valueBoolean);
+        valueBoolean = StringUtil.trimToNull(valueBoolean);
         if ((valueBoolean == null) || "null".equalsIgnoreCase(valueBoolean)) {
             this.valueBoolean = null;
         } else {
@@ -562,7 +559,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If the string "null" or an empty string is passed, it will set a null value.
      */
     public ColumnConfig setDefaultValueDate(String defaultValueDate) {
-        defaultValueDate = StringUtils.trimToNull(defaultValueDate);
+        defaultValueDate = StringUtil.trimToNull(defaultValueDate);
         if ((defaultValueDate == null) || "null".equalsIgnoreCase(defaultValueDate)) {
             this.defaultValueDate = null;
         } else {
@@ -592,7 +589,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
      */
     public ColumnConfig setDefaultValueBoolean(String defaultValueBoolean) {
-        defaultValueBoolean = StringUtils.trimToNull(defaultValueBoolean);
+        defaultValueBoolean = StringUtil.trimToNull(defaultValueBoolean);
         if ((defaultValueBoolean == null) || "null".equalsIgnoreCase(defaultValueBoolean)) {
             this.defaultValueBoolean = null;
         } else {
@@ -805,7 +802,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         value = parsedNode.getChildValue(null, "value", String.class);
         if (value == null) {
-            value = StringUtils.trimToNull((String) parsedNode.getValue());
+            value = StringUtil.trimToNull((String) parsedNode.getValue());
         }
 
         setValueNumeric(parsedNode.getChildValue(null, "valueNumeric", String.class));
@@ -877,7 +874,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setReferencedColumnNames(constraintsNode.getChildValue(null, "referencedColumnNames", String.class));
         constraints.setUnique(constraintsNode.getChildValue(null, "unique", Boolean.class));
         constraints.setUniqueConstraintName(constraintsNode.getChildValue(null, "uniqueConstraintName", String.class));
-        constraints.setNotNullConstraintName(constraintsNode.getChildValue(null, "notNullConstraintName", String.class));
         constraints.setCheckConstraint(constraintsNode.getChildValue(null, "checkConstraint", String.class));
         constraints.setDeleteCascade(constraintsNode.getChildValue(null, "deleteCascade", Boolean.class));
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));

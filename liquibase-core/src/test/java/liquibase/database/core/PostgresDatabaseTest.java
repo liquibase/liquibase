@@ -4,6 +4,7 @@ import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.structure.core.Table;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -101,6 +102,25 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
 
         String result = database.escapeObjectName(COLUMN_AUTHOR, LiquibaseColumn.class);
         assertEquals(COLUMN_AUTHOR, result);
+    }
+
+    @Test
+    public void test_escapeObjectName() {
+        String tableName = database.escapeObjectName("My Table  ", Table.class);
+        assertTrue(tableName.matches("[\\[\\\"`]?My Table  [\\]\\\"`]?"));
+
+        tableName = database.escapeObjectName("MyTable", Table.class);
+        assertTrue(tableName.equals("\"MyTable\""));
+
+        tableName = database.escapeObjectName("My Table", Table.class);
+        assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
+    }
+    @Test
+    public void test_getConcatSql() {
+        assertEquals("", database.getConcatSql());
+        assertEquals("foo", database.getConcatSql("foo"));
+        assertEquals("foo || bar", database.getConcatSql("foo", "bar"));
+        assertEquals("one || two || | three", database.getConcatSql("one", "two", "| three"));
     }
 
 }

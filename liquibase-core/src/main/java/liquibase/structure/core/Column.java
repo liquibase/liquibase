@@ -8,11 +8,13 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.BooleanUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class Column extends AbstractDatabaseObject {
 
@@ -361,7 +363,7 @@ public class Column extends AbstractDatabaseObject {
             return null;
         }
 
-        List<String> columnNameList = StringUtils.splitAndTrim(columnNames, ",");
+        List<String> columnNameList = StringUtil.splitAndTrim(columnNames, ",");
         Column[] returnArray = new Column[columnNameList.size()];
         for (int i = 0; i < columnNameList.size(); i++) {
             returnArray[i] = fromName(columnNameList.get(i));
@@ -455,6 +457,16 @@ public class Column extends AbstractDatabaseObject {
             this.defaultOnNull = parsedNode.getChildValue(null, "defaultOnNull", Boolean.class);
             this.generationType = parsedNode.getChildValue(null, "generationType", String.class);
         }
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        final Set<String> fields = super.getSerializableFields();
+        //if this is a computed or indexed column, don't have the serializer try to traverse down to the relation since it may not be a "real" object with an objectId
+        if (BooleanUtils.isTrue(getDescending()) || BooleanUtils.isTrue(getComputed())) {
+            fields.remove("relation");
+        }
+        return fields;
     }
 }
 

@@ -1,5 +1,6 @@
 package liquibase.changelog.column;
 
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.structure.core.Column;
 
 /**
@@ -7,6 +8,7 @@ import liquibase.structure.core.Column;
  * used in the DATABASECHANGELOG and DATABASECHANGELOGLOCK tables from other columns 
  * that might be used in Liquibase-managed database schemas. 
  */
+@LiquibaseService(skip = true)
 public final class LiquibaseColumn extends Column {
     // no behavioral changes, just extends Column
 }

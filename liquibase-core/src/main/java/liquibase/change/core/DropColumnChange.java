@@ -16,7 +16,7 @@ import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +25,14 @@ import java.util.List;
 /**
  * Drops an existing column from a table.
  */
-@DatabaseChange(name = "dropColumn", description = "Drop existing column(s)", priority = ChangeMetaData
+@DatabaseChange(name = "dropColumn",
+        description = "Drop existing column(s).\n" +
+        "\n" +
+        "To drop a single column, use the simple form of this element where the tableName and " +
+        "columnName are specified as attributes. To drop several columns, specify the tableName " +
+        "as an attribute, and then specify a set of nested <column> tags. If nested <column> tags " +
+        "are present, the columnName attribute will be ignored.",
+        priority = ChangeMetaData
 .PRIORITY_DEFAULT, appliesTo = "column")
 public class DropColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
     
@@ -60,7 +67,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         return super.validate(database);
     }
     
-    @DatabaseChangeProperty(description = "Name of the column to drop", requiredForDatabase = "none",
+    @DatabaseChangeProperty(description = "Name of the column to drop, if dropping a single column", requiredForDatabase = "none",
         mustEqualExisting = "column")
     public String getColumnName() {
         return columnName;
@@ -103,7 +110,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     public SqlStatement[] generateStatements(Database database) {
         try {
             if (isMultiple()) {
-                return generateMultipeColumns(database);
+                return generateMultipleColumns(database);
             } else {
                 return generateSingleColumn(database);
             }
@@ -112,7 +119,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         }
     }
     
-    private SqlStatement[] generateMultipeColumns(Database database) throws DatabaseException {
+    private SqlStatement[] generateMultipleColumns(Database database) throws DatabaseException {
         List<SqlStatement> statements = new ArrayList<>();
         List<DropColumnStatement> dropStatements = new ArrayList<>();
         
@@ -220,7 +227,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             for (ColumnConfig column : columns) {
                 names.add(column.getName());
             }
-            return "Columns " + StringUtils.join(names, ",") + " dropped from " + getTableName();
+            return "Columns " + StringUtil.join(names, ",") + " dropped from " + getTableName();
         } else {
             return "Column " + getTableName() + "." + getColumnName() + " dropped";
         }
@@ -246,7 +253,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
     
     @Override
-    @DatabaseChangeProperty(description = "Columns to be dropped.", requiredForDatabase = "none")
+    @DatabaseChangeProperty(description = "Columns to be dropped if dropping multiple columns. If this is populated, the columnName attribute is ignored.", requiredForDatabase = "none")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

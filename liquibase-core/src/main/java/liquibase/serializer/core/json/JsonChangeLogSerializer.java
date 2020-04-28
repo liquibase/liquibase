@@ -4,7 +4,7 @@ import liquibase.changelog.ChangeLogChild;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
             if (++i < children.size()) {
                 serialized = serialized.replaceFirst("}\\s*$", "},\n");
             }
-            writer.write(StringUtils.indent(serialized, 2));
+            writer.write(StringUtil.indent(serialized, 2));
             writer.write("\n");
         }
         writer.write("]}");

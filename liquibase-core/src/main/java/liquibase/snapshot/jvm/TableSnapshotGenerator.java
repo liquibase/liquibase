@@ -11,7 +11,7 @@ import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -75,10 +75,10 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
         String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
-        String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
-        String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
-        String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));
-        String tablespace = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLESPACE_NAME"));
+        String rawSchemaName = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
+        String rawCatalogName = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
+        String remarks = StringUtil.trimToNull(tableMetadataResultSet.getString("REMARKS"));
+        String tablespace = StringUtil.trimToNull(tableMetadataResultSet.getString("TABLESPACE_NAME"));
         
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes

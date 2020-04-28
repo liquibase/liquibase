@@ -2,7 +2,7 @@ package liquibase.change;
 
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.core.DB2Database;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;

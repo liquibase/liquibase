@@ -10,7 +10,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -33,7 +33,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public String getObjectTypeName() {
-        return StringUtils.lowerCaseFirst(getClass().getSimpleName());
+        return StringUtil.lowerCaseFirst(getClass().getSimpleName());
     }
 
     @Override
@@ -74,7 +74,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
                 } // if they are both null, it will continue with rest
             }
             // now compare schema name
-            int compare = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            int compare = StringUtil.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtil.trimToEmpty(that.getSchema().getName()));
             if (compare != 0) {
                 return compare;
             }

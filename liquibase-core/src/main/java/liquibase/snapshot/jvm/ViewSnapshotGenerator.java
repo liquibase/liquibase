@@ -14,7 +14,7 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -62,8 +62,8 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             if (!viewsMetadataRs.isEmpty()) {
                 CachedRow row = viewsMetadataRs.get(0);
                 String rawViewName = row.getString("TABLE_NAME");
-                String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));
-                String rawCatalogName = StringUtils.trimToNull(row.getString("TABLE_CAT"));
+                String rawSchemaName = StringUtil.trimToNull(row.getString("TABLE_SCHEM"));
+                String rawCatalogName = StringUtil.trimToNull(row.getString("TABLE_CAT"));
                 String remarks = row.getString("REMARKS");
                 if (remarks != null) {
                     remarks = remarks.replace("''", "'"); //come back escaped sometimes
@@ -170,7 +170,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //                if ("TABLE".equals(type)) {
 //                    Table table = new Table(name);
-//                    table.setRemarks(StringUtils.trimToNull(remarks));
+//                    table.setRemarks(StringUtil.trimToNull(remarks));
 //                    table.setDatabase(database);
 //                    table.setSchema(schemaName);
 //                    snapshot.getTables().add(table);

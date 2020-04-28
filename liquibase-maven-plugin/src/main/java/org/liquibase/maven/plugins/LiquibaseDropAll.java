@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Drops all database objects in the configured schema(s). Note that functions, procedures and packages are not dropped.
+ * <p>Drops all database objects in the configured schema(s). Note that functions, procedures and packages are not dropped.</p>
  * 
  * @author Ferenc Gratzer
  * @description Liquibase DropAll Maven plugin
@@ -20,7 +20,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseMojo {
 	/**
 	 * The schemas to be dropped. Comma separated list.
 	 * 
-	 * @parameter expression="${liquibase.schemas}"
+	 * @parameter property="liquibase.schemas"
 	 */
 	protected String schemas;
     

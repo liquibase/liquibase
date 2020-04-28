@@ -9,7 +9,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -198,7 +198,7 @@ class ResultSetCache {
         }
 
         public String createKey(Database database, String... params) {
-            String key = StringUtils.join(params, ":");
+            String key = StringUtil.join(params, ":");
             if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.
                     equals(database.getSchemaAndCatalogCase())) {
                 return key;

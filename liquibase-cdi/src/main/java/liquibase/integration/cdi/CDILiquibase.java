@@ -3,6 +3,7 @@ package liquibase.integration.cdi;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -12,8 +13,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.cdi.annotations.LiquibaseType;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
@@ -78,7 +77,7 @@ public class CDILiquibase implements Extension {
     @Inject
     @LiquibaseType
     ResourceAccessor resourceAccessor;
-    private Logger log = LogService.getLog(CDILiquibase.class);
+
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
     @Inject @LiquibaseType
@@ -96,19 +95,21 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
-        log.info(LogType.LOG, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
+        log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();
         } catch (Exception e) {
-            log.warning(LogType.LOG, "Cannot find hostname: " + e.getMessage());
-            log.debug(LogType.LOG, "", e);
+            log.warning("Cannot find hostname: " + e.getMessage());
+            log.fine("", e);
             return;
         }
 
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            log.info(LogType.LOG, String.format("Liquibase did not run on %s because %s was set to false.",
+            log.info(String.format("Liquibase did not run on %s because %s was set to false.",
                     hostName,
                 liquibaseConfiguration.describeValueLookupLogic(
                     GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
@@ -116,7 +117,7 @@ public class CDILiquibase implements Extension {
             return;
         }
         if (!config.getShouldRun()) {
-            log.info(LogType.LOG, String.format("Liquibase did not run on %s because CDILiquibaseConfig.shouldRun was set to false.", hostName));
+            log.info(String.format("Liquibase did not run on %s because CDILiquibaseConfig.shouldRun was set to false.", hostName));
             return;
         }
         initialized = true;

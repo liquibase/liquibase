@@ -1,6 +1,6 @@
 package liquibase.io;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class EmptyLineAndCommentSkippingInputStream extends BufferedInputStream 
         super(in);
 
         this.commentLineStartsWith = commentLineStartsWith;
-        this.commentSkipEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
+        this.commentSkipEnabled = StringUtil.isNotEmpty(commentLineStartsWith);
     }
 
     @Override

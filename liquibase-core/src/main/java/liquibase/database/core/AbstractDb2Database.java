@@ -1,11 +1,5 @@
 package liquibase.database.core;
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.OfflineConnection;
@@ -19,12 +13,13 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
 
@@ -95,9 +90,9 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
             if (rs.next()) {
                 String result = rs.getString(1);
                 if (result != null) {
-                    this.defaultSchemaName = StringUtils.trimToNull(result);
+                    this.defaultSchemaName = StringUtil.trimToNull(result);
                 } else {
-                    this.defaultSchemaName = StringUtils.trimToNull(super.getDefaultSchemaName());
+                    this.defaultSchemaName = StringUtil.trimToNull(super.getDefaultSchemaName());
                 }
             }
         } catch (Exception e) {
@@ -132,23 +127,11 @@ public abstract class AbstractDb2Database extends AbstractJdbcDatabase {
         String normalLiteral = super.getDateLiteral(isoDate);
 
         if (isDateOnly(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            val.append("DATE(");
-            val.append(normalLiteral);
-            val.append(')');
-            return val.toString();
+            return "DATE(" + normalLiteral + ')';
         } else if (isTimeOnly(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            val.append("TIME(");
-            val.append(normalLiteral);
-            val.append(')');
-            return val.toString();
+            return "TIME(" + normalLiteral + ')';
         } else if (isDateTime(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            val.append("TIMESTAMP(");
-            val.append(normalLiteral);
-            val.append(')');
-            return val.toString();
+            return "TIMESTAMP(" + normalLiteral + ')';
         } else {
             return "UNSUPPORTED:" + isoDate;
         }

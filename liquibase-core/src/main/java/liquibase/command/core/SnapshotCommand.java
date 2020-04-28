@@ -1,21 +1,25 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.*;
 import liquibase.exception.LiquibaseException;
+import liquibase.license.LicenseServiceUtils;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotListener;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
@@ -51,7 +55,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
             return this;
         }
 
-        schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
+        schemas = StringUtil.join(schemas, ",").split("\\s*,\\s*");
         List<CatalogAndSchema> finalList = new ArrayList<>();
         for (String schema : schemas) {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
@@ -91,6 +95,8 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
 
     @Override
     protected SnapshotCommandResult run() throws Exception {
+        SnapshotCommand.logUnsupportedDatabase(database, this.getClass());
+
         SnapshotControl snapshotControl = new SnapshotControl(database);
         snapshotControl.setSnapshotListener(snapshotListener);
 
@@ -138,11 +144,23 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
                 format = "txt";
             }
 
-            return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
+            return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize(snapshot, true);
         }
 
         public void merge(SnapshotCommandResult resultToMerge) {
             this.snapshot.merge(resultToMerge.snapshot);
         }
     }
+
+    public static void logUnsupportedDatabase(Database database, Class callingClass) {
+        if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
+            if (!(database instanceof MSSQLDatabase
+               || database instanceof OracleDatabase
+               || database instanceof DB2Database
+               || database instanceof PostgresDatabase)) {
+                Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
+            }
+        }
+    }
+
 }

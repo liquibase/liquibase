@@ -1,8 +1,10 @@
 package liquibase.license; 
 
+import liquibase.plugin.Plugin;
+
 import java.util.List;
 
-public interface LicenseService {
+public interface LicenseService extends Plugin {
 
   /**
    *
@@ -48,6 +50,16 @@ public interface LicenseService {
    * that detail the locations checked and the result of checking each location.
    */
   LicenseInstallResult installLicense(Location... locations);
+
+  /**
+   *
+   * Disable this LicenseService
+   * This can be used to turn off license checking
+   * after it has been determined that a license
+   * key is not valid
+   *
+   */
+  void disable();
 
   /**
    * @return true if any installed license is valid but will expire within the next 30 days.

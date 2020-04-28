@@ -1,5 +1,6 @@
 package liquibase.serializer;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.servicelocator.ServiceLocator;
@@ -24,12 +25,9 @@ public class ChangeLogSerializerFactory {
     }
 
     private ChangeLogSerializerFactory() {
-        Class<? extends ChangeLogSerializer>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogSerializer.class);
-
-            for (Class<? extends ChangeLogSerializer> clazz : classes) {
-                register((ChangeLogSerializer) clazz.getConstructor().newInstance());
+            for (ChangeLogSerializer serializer : Scope.getCurrentScope().getServiceLocator().findInstances(ChangeLogSerializer.class)) {
+                register(serializer);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

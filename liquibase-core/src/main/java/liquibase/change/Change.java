@@ -1,11 +1,14 @@
 package liquibase.change;
 
+import liquibase.ExtensibleObject;
+import liquibase.Scope;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.plugin.Plugin;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
@@ -21,7 +24,7 @@ import java.util.Set;
  * @see ChangeFactory
  * @see Database
  */
-public interface Change extends LiquibaseSerializable {
+public interface Change extends LiquibaseSerializable, Plugin, ExtensibleObject {
 
     /**
      * This method will be called by the changlelog parsing process after all of the
@@ -44,6 +47,7 @@ public interface Change extends LiquibaseSerializable {
     /**
     * Sets the {@link ResourceAccessor} that should be used for any file and/or resource loading needed by this Change.
     * Called automatically by Liquibase during the changelog parsing process.
+     * @deprecated this is now set via {@link Scope}
     */
     public void setResourceAccessor(ResourceAccessor resourceAccessor);
 
@@ -100,7 +104,7 @@ public interface Change extends LiquibaseSerializable {
 
 
     /**
-     * Returns true if this change be rolled back for the given database.
+     * Returns true if this can change be rolled back for the given database.
      */
     public boolean supportsRollback(Database database);
 
