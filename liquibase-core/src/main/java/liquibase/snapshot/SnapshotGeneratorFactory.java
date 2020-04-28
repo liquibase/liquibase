@@ -111,7 +111,7 @@ public class SnapshotGeneratorFactory {
         if ((example instanceof Table) && (example.getName().equals(database.getDatabaseChangeLogTableName()) ||
             example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
             try {
-                ExecutorService.getInstance().getExecutor(database).queryForInt(
+                ExecutorService.getInstance().getExecutor("jdbc", database).queryForInt(
                         new RawSqlStatement("SELECT COUNT(*) FROM " +
                                 database.escapeObjectName(database.getLiquibaseCatalogName(),
                                         database.getLiquibaseSchemaName(), example.getName(), Table.class)));

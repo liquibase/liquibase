@@ -243,7 +243,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);
         GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
-        Executor executor = ExecutorService.getInstance().getExecutor(this);
+        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", this);
         @SuppressWarnings("unchecked")
         List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
         StringBuilder definition = new StringBuilder();

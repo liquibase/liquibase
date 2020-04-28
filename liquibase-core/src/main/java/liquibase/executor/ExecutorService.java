@@ -5,16 +5,14 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ExecutorService {
 
     private static ExecutorService instance = new ExecutorService();
 
     private List<Executor> registry = new ArrayList<>();
-    private Map<String, Executor> executorsByName = new ConcurrentHashMap<>();
 
-    private Map<Database, Executor> executors = new ConcurrentHashMap<>();
+    private Map<String, Executor> executors = new HashMap<>();
 
     private ExecutorService() {
         Class<? extends Executor>[] classes;
@@ -30,17 +28,14 @@ public class ExecutorService {
         }
     }
 
-    public void register(Executor executor) {
-        registry.add(0, executor);
+    private String createKey(String executorName, Database database) {
+        String key = executorName + "#" + System.identityHashCode(database);
+        return key;
     }
 
-    public static ExecutorService getInstance() {
-        return instance;
-    }
-
-    public Executor getExecutor(String executorName) throws UnexpectedLiquibaseException {
-        if (executorsByName.containsKey(executorName)) {
-            return executorsByName.get(executorName);
+    private Executor getExecutorValue(String executorName, Database database) throws UnexpectedLiquibaseException {
+        if (executors.containsKey(executorName)) {
+            return executors.get(executorName);
         }
         SortedSet<Executor> foundExecutors = new TreeSet<>(new Comparator<Executor>() {
             @Override
@@ -51,7 +46,7 @@ public class ExecutorService {
 
         for (Executor executor : registry) {
             if (executor.getName().equals(executorName)) {
-                foundExecutors .add(executor);
+                foundExecutors.add(executor);
             }
         }
         if (foundExecutors .isEmpty()) {
@@ -70,31 +65,88 @@ public class ExecutorService {
                 executor = exampleService;
             }
 
-            executorsByName.put(executorName, executor);
             return executor;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
 
-    public Executor getExecutor(Database database) {
-        return executors.computeIfAbsent(database, db -> {
+    private void register(Executor executor) {
+        registry.add(0, executor);
+    }
+
+    public static ExecutorService getInstance() {
+        return instance;
+    }
+
+    /**
+     *
+     * Retrieve a named executor for the specified database
+     *
+     * @param   name
+     * @param   database
+     * @return  Executor
+     *
+     */
+    public Executor getExecutor(final String name, final Database database) {
+        Executor returnExecutor = executors.computeIfAbsent(createKey(name, database), db -> {
             try {
-                Executor executor = (Executor) ServiceLocator.getInstance().newInstance(Executor.class);
-                executor.setDatabase(db);
+                Executor executor = getExecutorValue(name, database); //(Executor) ServiceLocator.getInstance().newInstance(Executor.class);
+                executor.setDatabase(database);
                 return executor;
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         });
+        return returnExecutor;
     }
 
+    /**
+     *
+     * Return true if there is an existing Executor for this name/database
+     *
+     */
+    public boolean executorExists(final String name, final Database database) {
+        return executors.containsKey(createKey(name, database));
+    }
+
+    /**
+     *
+     * @deprecated  Please use getExecutor(name, database) instead
+     * @param       database
+     * @return      Executor
+     *
+     */
+    public Executor getExecutor(Database database) {
+        return getExecutor("jdbc", database);
+    }
+
+    /**
+     *
+     * @deprecated      Please use setExecutor(name, database, executor)
+     * @param           database
+     * @param           executor
+     */
     public void setExecutor(Database database, Executor executor) {
-        executors.put(database, executor);
+        setExecutor("jdbc", database, executor);
     }
 
+    public void setExecutor(String name, Database database, Executor executor) {
+        executors.put(createKey(name, database), executor);
+    }
+
+    /**
+     *
+     * @deprecated   Please use clearExecutor(name, database)
+     * @param        database
+     *
+     */
     public void clearExecutor(Database database) {
-        executors.remove(database);
+        clearExecutor("jdbc", database);
+    }
+
+    public void clearExecutor(String name, Database database) {
+        executors.remove(createKey(name, database));
     }
 
     public void reset() {

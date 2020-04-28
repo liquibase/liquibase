@@ -198,7 +198,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        String definition = ExecutorService.getInstance().getExecutor(this).queryForObject(
+        String definition = ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(
                 new RawSqlStatement("SELECT sql FROM sqlite_master WHERE name=" + this.quoteObject(viewName, View.class)),
                 String.class);
         // SQLite is friendly and already returns the form CREATE VIEW ... AS. However, we cannot use this, so we have
