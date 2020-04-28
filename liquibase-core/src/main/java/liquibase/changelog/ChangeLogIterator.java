@@ -7,6 +7,7 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
@@ -93,6 +94,9 @@ public class ChangeLogIterator {
 
                 try (LoggerContext ignored2 = LogService.pushContext("changeSet", changeSet)) {
                     if (shouldVisit && !alreadySaw(changeSet)) {
+                        //
+                        // Switch Executor if necessary
+                        //
                         visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                         markSeen(changeSet);
                     } else {
@@ -106,6 +110,7 @@ public class ChangeLogIterator {
             databaseChangeLog.setRuntimeEnvironment(null);
         }
     }
+
 
     //
     // Make sure that any change set which has a runWith=<executor> setting

@@ -442,6 +442,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             for (Change change : changeSet.getChanges()) {
                 rollback.getChanges().add(change);
             }
+            String runWith = rollbackNode.getChildValue(null, "runWith", String.class);
+            rollback.setRunWith(runWith);
             return;
         }
 
@@ -513,8 +515,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         boolean skipChange = false;
 
-        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor originalExecutor = switchExecutorIfNecessary(database);
         try {
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             // set object quoting strategy
             database.setObjectQuotingStrategy(objectQuotingStrategy);
 
@@ -671,7 +674,20 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
             }
         }
+        ExecutorService.getInstance().setExecutor(getRunWith(), database, originalExecutor);
         return execType;
+    }
+
+    //
+    // Switch the Executor for a custom one if specified
+    //
+    private Executor switchExecutorIfNecessary(Database database) {
+        Executor originalExecutor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        if (getRunWith() != null) {
+            Executor customExecutor = ExecutorService.getInstance().getExecutor(getRunWith(), database);
+            ExecutorService.getInstance().setExecutor("jdbc", database, customExecutor);
+        }
+        return originalExecutor;
     }
 
     public void rollback(Database database) throws RollbackFailedException {
@@ -679,8 +695,24 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
+        Executor originalExecutor = ExecutorService.getInstance().getExecutor("jdbc", database);
         try {
-            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+            //
+            // Check for a custom runWith value and reset the Executor if there is one
+            //
+            Executor executor;
+            if (getRollback().getRunWith() != null) {
+                try {
+                    executor = ExecutorService.getInstance().getExecutor(getRollback().getRunWith(), database);
+                    ExecutorService.getInstance().setExecutor("jdbc", database, executor);
+                }
+                catch (UnexpectedLiquibaseException ulbe) {
+                     throw new RollbackFailedException(ulbe);
+                }
+            }
+            else {
+                executor = originalExecutor;
+            }
             executor.comment("Rolling Back ChangeSet: " + toString());
 
             database.setObjectQuotingStrategy(objectQuotingStrategy);
@@ -690,9 +722,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 database.setAutoCommit(!runInTransaction);
             }
 
-            RanChangeSet ranChangeSet = database.getRanChangeSet(this);
             if (hasCustomRollbackChanges()) {
-                
                 final List<SqlStatement> statements = new LinkedList<>();
                 for (Change change : rollback.getChanges()) {
                     if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
@@ -738,6 +768,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
             throw new RollbackFailedException(e);
         } finally {
+            //
+            // Restore the original Executor
+            //
+            ExecutorService.getInstance().setExecutor("jdbc", database, originalExecutor);
+
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
             if (!runInTransaction && database.supportsDDLInTransaction()) {

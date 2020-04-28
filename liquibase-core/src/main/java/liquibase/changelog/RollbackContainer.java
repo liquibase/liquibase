@@ -8,6 +8,7 @@ import java.util.List;
 
 public class RollbackContainer extends AbstractLiquibaseSerializable {
     private List<Change> changes = new ArrayList<>();
+    private String runWith;
 
     @Override
     public String getSerializedObjectName() {
@@ -25,5 +26,13 @@ public class RollbackContainer extends AbstractLiquibaseSerializable {
 
     public void setChanges(List<Change> changes) {
         this.changes = changes;
+    }
+
+    public String getRunWith() {
+        return runWith;
+    }
+
+    public void setRunWith(String runWith) {
+        this.runWith = runWith;
     }
 }
