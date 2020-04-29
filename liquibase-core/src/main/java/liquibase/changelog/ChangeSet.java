@@ -16,6 +16,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
@@ -681,7 +682,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     //
     private Executor switchExecutorIfNecessary(Database database) {
         Executor originalExecutor = ExecutorService.getInstance().getExecutor("jdbc", database);
-        if (getRunWith() != null) {
+        if (getRunWith() != null && !(originalExecutor instanceof LoggingExecutor)) {
             Executor customExecutor = ExecutorService.getInstance().getExecutor(getRunWith(), database);
             ExecutorService.getInstance().setExecutor("jdbc", database, customExecutor);
         }
