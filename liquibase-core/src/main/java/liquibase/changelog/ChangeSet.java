@@ -678,7 +678,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     //
-    // Switch the Executor for a custom one if specified
+    // Switch the Executor for a custom one if specified and we do not
+    // have a LoggingExecutor
     //
     private Executor switchExecutorIfNecessary(Database database) {
         Executor originalExecutor = ExecutorService.getInstance().getExecutor("jdbc", database);
