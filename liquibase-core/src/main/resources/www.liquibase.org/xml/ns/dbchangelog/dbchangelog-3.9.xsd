@@ -1059,7 +1059,6 @@
             <xsd:attribute name="changeSetPath" type="xsd:string"/>
             <xsd:attribute name="changeSetAuthor" type="xsd:string"/>
             <xsd:attribute name="changeSetId" type="xsd:string"/>
-            <xsd:attribute name="runWith" type="xsd:string" />
         </xsd:complexType>
     </xsd:element>
 

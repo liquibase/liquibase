@@ -442,8 +442,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             for (Change change : changeSet.getChanges()) {
                 rollback.getChanges().add(change);
             }
-            String runWith = rollbackNode.getChildValue(null, "runWith", String.class);
-            rollback.setRunWith(runWith);
             return;
         }
 
@@ -695,24 +693,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
-        Executor originalExecutor = ExecutorService.getInstance().getExecutor("jdbc", database);
         try {
-            //
-            // Check for a custom runWith value and reset the Executor if there is one
-            //
-            Executor executor;
-            if (getRollback().getRunWith() != null) {
-                try {
-                    executor = ExecutorService.getInstance().getExecutor(getRollback().getRunWith(), database);
-                    ExecutorService.getInstance().setExecutor("jdbc", database, executor);
-                }
-                catch (UnexpectedLiquibaseException ulbe) {
-                     throw new RollbackFailedException(ulbe);
-                }
-            }
-            else {
-                executor = originalExecutor;
-            }
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             executor.comment("Rolling Back ChangeSet: " + toString());
 
             database.setObjectQuotingStrategy(objectQuotingStrategy);
@@ -768,11 +750,6 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
             throw new RollbackFailedException(e);
         } finally {
-            //
-            // Restore the original Executor
-            //
-            ExecutorService.getInstance().setExecutor("jdbc", database, originalExecutor);
-
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
             if (!runInTransaction && database.supportsDDLInTransaction()) {
