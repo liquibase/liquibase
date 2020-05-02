@@ -12,6 +12,7 @@ import liquibase.util.ObjectUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     private ClassLoader classLoader;
 
     private SortedSet<String> params = new TreeSet<>();
-    private Map<String, String> paramValues = new HashMap<>();
+    private Map<String, String> paramValues = new LinkedHashMap<>();
 
     public String getClassName() {
         return className;

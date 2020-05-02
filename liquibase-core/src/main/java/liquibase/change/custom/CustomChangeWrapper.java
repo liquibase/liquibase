@@ -42,7 +42,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     private SortedSet<String> params = new TreeSet<>();
 
-    private Map<String, String> paramValues = new HashMap<>();
+    private Map<String, String> paramValues = new LinkedHashMap<>();
 
     private ClassLoader classLoader;
 
