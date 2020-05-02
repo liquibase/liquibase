@@ -25,6 +25,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     protected int driverVersionMajor;
     protected int driverVersionMinor;
     private Logger log = LogService.getLog(getClass());
+    private boolean shutdownEmbeddedDerby = true;
 
     public DerbyDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
@@ -89,6 +90,14 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return "derby";
     }
 
+    public boolean getShutdownEmbeddedDerby() {
+        return shutdownEmbeddedDerby;
+    }
+
+    public void setShutdownEmbeddedDerby(boolean shutdown) {
+        this.shutdownEmbeddedDerby = shutdown;
+    }
+
     @Override
     public boolean supportsSequences() {
         return ((driverVersionMajor == 10) && (driverVersionMinor >= 6)) || (driverVersionMajor >= 11);
@@ -131,7 +140,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if ((driverName != null) && driverName.toLowerCase().contains("embedded")) {
+        if (getShutdownEmbeddedDerby() && (driverName != null) && driverName.toLowerCase().contains("embedded")) {
             try {
                 if (url.contains(";")) {
                     url = url.substring(0, url.indexOf(";")) + ";shutdown=true";

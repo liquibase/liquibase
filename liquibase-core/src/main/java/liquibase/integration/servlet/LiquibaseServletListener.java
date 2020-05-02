@@ -9,6 +9,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogService;
@@ -239,6 +240,9 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
 
             liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+            if (database instanceof DerbyDatabase) {
+                ((DerbyDatabase) database).setShutdownEmbeddedDerby(false);
+            }
         }
         finally {
             if (database != null) {
