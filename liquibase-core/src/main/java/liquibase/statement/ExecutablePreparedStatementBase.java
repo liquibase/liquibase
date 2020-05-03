@@ -73,7 +73,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
 
         String sql = generateSql(cols);
-        LOG.info(LogType.WRITE_SQL, sql);
+        LOG.debug(LogType.WRITE_SQL, sql);
         LOG.debug(LogType.LOG, "Number of columns = " + cols.size());
 
         // create prepared statement
