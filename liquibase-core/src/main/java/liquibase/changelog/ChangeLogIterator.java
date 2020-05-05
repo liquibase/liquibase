@@ -10,6 +10,7 @@ import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogService;
@@ -132,10 +133,10 @@ public class ChangeLogIterator {
                 LOG.severe(LogType.LOG, MSG_COULD_NOT_FIND_EXECUTOR);
                 throw new LiquibaseException(message);
             }
-            boolean validated = executor.validate(changeSet);
-            if (! validated) {
-                String message = String.format(MSG_UNABLE_TO_VALIDATE_CHANGE_SET, changeSet.toString(), executorName);
-                LOG.severe(LogType.LOG, MSG_UNABLE_TO_VALIDATE_CHANGE_SET);
+            ValidationErrors errors = executor.validate(changeSet);
+            if (errors.hasErrors()) {
+                String message = errors.toString();
+                LOG.severe(LogType.LOG, message);
                 throw new LiquibaseException(message);
             }
         }

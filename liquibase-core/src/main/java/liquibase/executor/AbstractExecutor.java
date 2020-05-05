@@ -4,6 +4,8 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -17,6 +19,7 @@ import java.util.List;
  */
 public abstract class AbstractExecutor implements Executor {
     protected Database database;
+    protected ResourceAccessor resourceAccessor;
 
     /**
      *
@@ -47,7 +50,21 @@ public abstract class AbstractExecutor implements Executor {
      *
      */
     @Override
-    public abstract boolean validate(ChangeSet changeSet);
+    public ValidationErrors validate(ChangeSet changeSet) {
+        return new ValidationErrors();
+    }
+
+    /**
+     *
+     * Set a ResourceAccessor on this Executor to be used in file access
+     *
+     * @param resourceAccessor
+     *
+     */
+    @Override
+    public void setResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
+    }
 
     public void setDatabase(Database database) {
         this.database = database;
