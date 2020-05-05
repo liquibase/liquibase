@@ -91,6 +91,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern ignoreLinesPattern = Pattern.compile("\\-\\-[\\s]*ignoreLines:(\\w+)", Pattern.CASE_INSENSITIVE);
+            Pattern runWithPattern = Pattern.compile(".*runWith:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -165,6 +166,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     Matcher stripCommentsPatternMatcher = stripCommentsPattern.matcher(line);
                     Matcher splitStatementsPatternMatcher = splitStatementsPattern.matcher(line);
+                    Matcher runWithMatcher = runWithPattern.matcher(line);
                     Matcher rollbackSplitStatementsPatternMatcher = rollbackSplitStatementsPattern.matcher(line);
                     Matcher endDelimiterPatternMatcher = endDelimiterPattern.matcher(line);
                     Matcher rollbackEndDelimiterPatternMatcher = rollbackEndDelimiterPattern.matcher(line);
@@ -186,6 +188,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true);
                     boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true);
 
+                    String runWith = parseString(runWithMatcher);
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
                     String context = StringUtils.trimToNull(
@@ -199,7 +202,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String dbms = parseString(dbmsPatternMatcher);
 
 
-                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, logicalFilePath, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                    changeSet =
+                       new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);

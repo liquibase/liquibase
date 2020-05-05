@@ -95,9 +95,6 @@ public class ChangeLogIterator {
 
                 try (LoggerContext ignored2 = LogService.pushContext("changeSet", changeSet)) {
                     if (shouldVisit && !alreadySaw(changeSet)) {
-                        //
-                        // Switch Executor if necessary
-                        //
                         visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                         markSeen(changeSet);
                     } else {

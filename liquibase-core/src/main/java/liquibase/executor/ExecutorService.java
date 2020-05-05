@@ -29,13 +29,14 @@ public class ExecutorService {
     }
 
     private String createKey(String executorName, Database database) {
-        String key = executorName + "#" + System.identityHashCode(database);
+        String key = executorName.toLowerCase() + "#" + System.identityHashCode(database);
         return key;
     }
 
     private Executor getExecutorValue(String executorName, Database database) throws UnexpectedLiquibaseException {
-        if (executors.containsKey(executorName)) {
-            return executors.get(executorName);
+        String key = createKey(executorName, database);
+        if (executors.containsKey(key)) {
+            return executors.get(key);
         }
         SortedSet<Executor> foundExecutors = new TreeSet<>(new Comparator<Executor>() {
             @Override
