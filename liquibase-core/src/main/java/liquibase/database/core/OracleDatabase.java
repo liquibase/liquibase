@@ -96,6 +96,88 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
     }
 
+    public final void openProxySession (String targetSchema) {
+        Properties props = new Properties();
+        props.put("PROXY_USER_NAME", targetSchema);
+        DatabaseConnection conn = getConnection();
+
+        if (conn instanceof OfflineConnection) {
+            LogService.getLog(getClass()).info(LogType.LOG, "01 Could not open proxy session on OracleDatabase: " + targetSchema);
+            return;
+        }
+
+        Connection sqlConn = null;
+        try {
+            if (conn instanceof JdbcConnection) {
+                sqlConn = ((JdbcConnection) conn).getWrappedConnection();
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        try {
+            Method method = sqlConn.getClass().getMethod("openProxySession", int.class, Properties.class);
+            method.setAccessible(true);
+            method.invoke(sqlConn, 1, props);
+        } catch (Exception e) {
+            LogService.getLog(getClass()).info(LogType.LOG, "Could not open proxy session on OracleDatabase: " + e.getCause().getMessage());
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    public final boolean isProxySession () {
+        boolean isProxy = false;
+        DatabaseConnection conn = getConnection();
+        Connection sqlConn = null;
+
+        try {
+            if (conn instanceof JdbcConnection) {
+                sqlConn = ((JdbcConnection) conn).getWrappedConnection();
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        if (sqlConn == null)
+            return false;
+
+        try {
+            Method method = sqlConn.getClass().getMethod("isProxySession");
+            method.setAccessible(true);
+            isProxy = (boolean) method.invoke(sqlConn);
+        } catch (Exception e) {
+            LogService.getLog(getClass()).info(LogType.LOG, "Could not check if a session is a proxy session on OracleDatabase: " + e.getCause().getMessage());
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        return isProxy;
+    }
+
+    public final void closeProxySession () {
+        DatabaseConnection conn = getConnection();
+        Connection sqlConn = null;
+
+        try {
+            if (conn instanceof JdbcConnection) {
+                sqlConn = ((JdbcConnection) conn).getWrappedConnection();
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        if (sqlConn == null)
+            return;
+
+        try {
+            Method method = sqlConn.getClass().getMethod("close", int.class);
+            method.setAccessible(true);
+            method.invoke(sqlConn, 1);
+        } catch (Exception e) {
+            LogService.getLog(getClass()).info(LogType.LOG, "Could not close proxy session on OracleDatabase: " + e.getCause().getMessage());
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     @Override
     public void setConnection(DatabaseConnection conn) {
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,

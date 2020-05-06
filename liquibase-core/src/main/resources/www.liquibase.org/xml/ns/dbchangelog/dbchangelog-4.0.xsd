@@ -192,6 +192,7 @@
                             <xsd:attribute name="labels" type="xsd:string"/>
                             <xsd:attribute name="ignore" type="xsd:string"/>
                             <xsd:attribute name="created" type="xsd:string"/>
+                            <xsd:attribute name="schema" type="xsd:string" />
                             <xsd:anyAttribute namespace="##other" processContents="lax"/>
                         </xsd:complexType>
                     </xsd:element>
@@ -203,6 +204,7 @@
                             <xsd:attribute name="resourceComparator" type="xsd:string"/>
                             <xsd:attribute name="filter" type="xsd:string"/>
                             <xsd:attribute name="context" type="xsd:string"/>
+                            <xsd:attribute name="schema" type="xsd:string" />
                             <xsd:anyAttribute namespace="##other" processContents="lax"/>
                         </xsd:complexType>
                     </xsd:element>
