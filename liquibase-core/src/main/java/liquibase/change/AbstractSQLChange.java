@@ -127,6 +127,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
     }
 
+    public boolean isSplitStatementsSet() {
+        return isSplitStatementsSet;
+    }
+
     /**
      * Return the raw SQL managed by this Change
      */
