@@ -1312,7 +1312,7 @@ public class Main {
             }
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
                 String warningAboutCommand = command;
-                if (command.equals(COMMANDS.DIFF) && formatValue != null && !formatValue.isEmpty()) {
+                if (command.equalsIgnoreCase(COMMANDS.DIFF) && formatValue != null && !formatValue.isEmpty()) {
                     warningAboutCommand = "diff --format=" + formatValue;
                 }
                 String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
@@ -1388,7 +1388,7 @@ public class Main {
                 diffOutputControl.addIncludedSchema(schema.getComparisonSchema());
             }
 
-            if (COMMANDS.DIFF.equals(command)) {
+            if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
                 if (commandParams.contains("--help")) {
                     System.out.println("liquibase diff" +
                             "\n" +
@@ -1767,11 +1767,11 @@ public class Main {
     }
 
     private boolean isLicenseableCommand(String formatValue) {
-        return COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command) ||
-               COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command) ||
-               COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
-               COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command) ||
-               (COMMANDS.DIFF.equals(command) && formatValue != null && ! formatValue.toLowerCase().equals("txt"));
+        return COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command) ||
+               (COMMANDS.DIFF.equalsIgnoreCase(command) && formatValue != null && ! formatValue.toLowerCase().equals("txt"));
     }
 
     private void loadChangeSetInfoToMap(Map<String, Object> argsMap) throws CommandLineParsingException {
