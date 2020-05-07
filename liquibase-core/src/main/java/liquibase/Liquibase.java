@@ -53,6 +53,7 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -244,6 +245,28 @@ public class Liquibase implements AutoCloseable {
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database),
                 new IgnoreChangeSetFilter());
+    }
+
+    protected ChangeLogIterator buildChangeLogIterator(String tag, DatabaseChangeLog changeLog, Contexts contexts,
+                                                       LabelExpression labelExpression) throws DatabaseException {
+
+        if (tag == null) {
+            return new ChangeLogIterator(changeLog,
+                new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new IgnoreChangeSetFilter(),
+                new DbmsChangeSetFilter(database));
+        } else {
+            List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
+            return new ChangeLogIterator(changeLog,
+                new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new IgnoreChangeSetFilter(),
+                new DbmsChangeSetFilter(database),
+                new UpToTagChangeSetFilter(tag, ranChangeSetList));
+        }
     }
 
     public void update(String contexts, Writer output) throws LiquibaseException {
@@ -893,37 +916,10 @@ public class Liquibase implements AutoCloseable {
     }
 
     public void changeLogSync(Contexts contexts, LabelExpression labelExpression, Writer output)
-            throws LiquibaseException {
-        changeLogParameters.setContexts(contexts);
-        changeLogParameters.setLabels(labelExpression);
+        throws LiquibaseException {
 
-        runInScope(new Scope.ScopedRunner() {
-            @Override
-            public void run() throws Exception {
-
-                LoggingExecutor outputTemplate = new LoggingExecutor(
-                        ExecutorService.getInstance().getExecutor(database), output, database
-                );
-
-                /* We have no other choice than to save the current Executer here. */
-                @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-                ExecutorService.getInstance().setExecutor(database, outputTemplate);
-
-                outputHeader("SQL to add all changesets to database history table");
-
-                changeLogSync(contexts, labelExpression);
-
-                try {
-                    output.flush();
-                } catch (IOException e) {
-                    throw new LiquibaseException(e);
-                }
-
-                ExecutorService.getInstance().setExecutor(database, oldTemplate);
-                resetServices();
-            }
-        });
+        doChangeLogSyncSql(null, contexts, labelExpression, output,
+            () -> "SQL to add all changesets to database history table");
     }
 
     public void changeLogSync(String contexts) throws LiquibaseException {
@@ -939,6 +935,14 @@ public class Liquibase implements AutoCloseable {
     }
 
     public void changeLogSync(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        changeLogSync(null, contexts, labelExpression);
+    }
+
+    public void changeLogSync(String tag, String contexts) throws LiquibaseException {
+        changeLogSync(tag, new Contexts(contexts), new LabelExpression());
+    }
+
+    public void changeLogSync(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -956,12 +960,7 @@ public class Liquibase implements AutoCloseable {
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                            new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
+                    ChangeLogIterator logIterator = buildChangeLogIterator(tag, changeLog, contexts, labelExpression);
 
                     logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
                             new RuntimeEnvironment(database, contexts, labelExpression)
@@ -975,6 +974,50 @@ public class Liquibase implements AutoCloseable {
                     resetServices();
                 }
             }
+        });
+
+    }
+
+    public void changeLogSync(String tag, String contexts, Writer output) throws LiquibaseException {
+        changeLogSync(tag, new Contexts(contexts), new LabelExpression(), output);
+    }
+
+    public void changeLogSync(String tag, Contexts contexts, LabelExpression labelExpression, Writer output)
+        throws LiquibaseException {
+
+        doChangeLogSyncSql(tag, contexts, labelExpression, output,
+            () -> "SQL to add changesets upto '" + tag + "' to database history table");
+    }
+
+    private void doChangeLogSyncSql(String tag, Contexts contexts, LabelExpression labelExpression, Writer output,
+                                    Supplier<String> header) throws LiquibaseException {
+
+        changeLogParameters.setContexts(contexts);
+        changeLogParameters.setLabels(labelExpression);
+
+        runInScope(() -> {
+
+            LoggingExecutor outputTemplate = new LoggingExecutor(
+                ExecutorService.getInstance().getExecutor(database), output, database
+            );
+
+            /* We have no other choice than to save the current Executor here. */
+            @SuppressWarnings("squid:S1941")
+            Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+            ExecutorService.getInstance().setExecutor(database, outputTemplate);
+
+            outputHeader(header.get());
+
+            changeLogSync(tag, contexts, labelExpression);
+
+            try {
+                output.flush();
+            } catch (IOException e) {
+                throw new LiquibaseException(e);
+            }
+
+            ExecutorService.getInstance().setExecutor(database, oldTemplate);
+            resetServices();
         });
 
     }

@@ -1,22 +1,31 @@
 package liquibase;
 
-import liquibase.changelog.ChangeLogIterator;
-import liquibase.changelog.DatabaseChangeLog;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+
+import liquibase.changelog.*;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.database.core.MockDatabase;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.sdk.resource.MockResourceAccessor;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
@@ -240,6 +249,200 @@ public class LiquibaseTest {
 //            }
 //        });
 //    }
+
+    @Test
+    public void syncChangeLogForUnmanagedDatabase() throws Exception {
+        JdbcConnection dbConnection = getInMemoryH2DatabaseConnection();
+
+        try {
+            Liquibase liquibase = createUnmanagedDatabase(dbConnection);
+            assertFalse(hasDatabaseChangeLogTable(liquibase));
+
+            liquibase.changeLogSync("");
+            assertTrue(hasDatabaseChangeLogTable(liquibase));
+            assertTags(liquibase, "1.0", "1.1", "2.0");
+        }
+        finally {
+            dbConnection.close();
+        }
+    }
+
+    @Test
+    public void syncChangeLogToTagForUnmanagedDatabase() throws Exception {
+        JdbcConnection dbConnection = getInMemoryH2DatabaseConnection();
+
+        try {
+            Liquibase liquibase = createUnmanagedDatabase(dbConnection);
+            assertFalse(hasDatabaseChangeLogTable(liquibase));
+
+            liquibase.changeLogSync("1.1", "");
+            assertTrue(hasDatabaseChangeLogTable(liquibase));
+            assertTags(liquibase, "1.0", "1.1");
+        }
+        finally {
+            dbConnection.close();
+        }
+    }
+
+    @Test
+    public void syncChangeLogForManagedDatabase() throws Exception {
+        JdbcConnection dbConnection = getInMemoryH2DatabaseConnection();
+
+        try {
+            Liquibase liquibase = createDatabaseAtTag(dbConnection, "1.0");
+            assertTrue(hasDatabaseChangeLogTable(liquibase));
+
+            liquibase.changeLogSync("");
+            assertTags(liquibase, "1.0", "1.1", "2.0");
+        }
+        finally {
+            dbConnection.close();
+        }
+    }
+
+    @Test
+    public void syncChangeLogToTagForManagedDatabase() throws Exception {
+        JdbcConnection dbConnection = getInMemoryH2DatabaseConnection();
+
+        try {
+            Liquibase liquibase = createDatabaseAtTag(dbConnection, "1.0");
+            assertTrue(hasDatabaseChangeLogTable(liquibase));
+
+            liquibase.changeLogSync("1.1", "");
+            assertTags(liquibase, "1.0", "1.1");
+        }
+        finally {
+            dbConnection.close();
+        }
+    }
+
+    @Test
+    public void syncChangeLogSqlForUnmanagedDatabase() throws Exception {
+        JdbcConnection dbConnection = getInMemoryH2DatabaseConnection();
+        StringWriter writer = new StringWriter();
+
+        try {
+            Liquibase liquibase = createUnmanagedDatabase(dbConnection);
+            assertFalse(hasDatabaseChangeLogTable(liquibase));
+
+            liquibase.changeLogSync("", writer);
+            assertFalse(hasDatabaseChangeLogTable(liquibase));
+            assertSqlOutputAppliesTags(writer.toString(), "1.0", "1.1", "2.0");
+        }
+        finally {
+            dbConnection.close();
+        }
+    }
+
+    @Test
+    public void syncChangeLogToTagSqlForUnmanagedDatabase() throws Exception {
+        JdbcConnection dbConnection = getInMemoryH2DatabaseConnection();
+        StringWriter writer = new StringWriter();
+
+        try {
+            Liquibase liquibase = createUnmanagedDatabase(dbConnection);
+            assertFalse(hasDatabaseChangeLogTable(liquibase));
+
+            liquibase.changeLogSync("1.1", "", writer);
+            assertFalse(hasDatabaseChangeLogTable(liquibase));
+            assertSqlOutputAppliesTags(writer.toString(), "1.0", "1.1");
+        }
+        finally {
+            dbConnection.close();
+        }
+    }
+
+    @Test
+    public void syncChangeLogSqlForManagedDatabase() throws Exception {
+        JdbcConnection dbConnection = getInMemoryH2DatabaseConnection();
+        StringWriter writer = new StringWriter();
+
+        try {
+            Liquibase liquibase = createDatabaseAtTag(dbConnection, "1.0");
+            assertTrue(hasDatabaseChangeLogTable(liquibase));
+
+            liquibase.changeLogSync("", writer);
+            assertSqlOutputAppliesTags(writer.toString(), "1.1", "2.0");
+        }
+        finally {
+            dbConnection.close();
+        }
+    }
+
+    @Test
+    public void syncChangeLogToTagSqlForManagedDatabase() throws Exception {
+        JdbcConnection dbConnection = getInMemoryH2DatabaseConnection();
+        StringWriter writer = new StringWriter();
+
+        try {
+            Liquibase liquibase = createDatabaseAtTag(dbConnection, "1.0");
+            assertTrue(hasDatabaseChangeLogTable(liquibase));
+
+            liquibase.changeLogSync("1.1", "", writer);
+            assertSqlOutputAppliesTags(writer.toString(), "1.1");
+        }
+        finally {
+            dbConnection.close();
+        }
+    }
+
+    private JdbcConnection getInMemoryH2DatabaseConnection() throws SQLException {
+        String urlFormat = "jdbc:h2:mem:%s";
+        return new JdbcConnection(DriverManager.getConnection(format(urlFormat, UUID.randomUUID().toString())));
+    }
+
+    private Liquibase createUnmanagedDatabase(JdbcConnection connection) throws SQLException, LiquibaseException {
+        String createTableSql = "CREATE TABLE PUBLIC.TABLE_A (ID INTEGER);";
+
+        try(PreparedStatement stmt = connection.getUnderlyingConnection().prepareStatement(createTableSql)) {
+            stmt.execute();
+        }
+
+        return new Liquibase("liquibase/tagged-changelog.xml", new ClassLoaderResourceAccessor(), connection);
+    }
+
+    private Liquibase createDatabaseAtTag(JdbcConnection connection, String tag) throws LiquibaseException {
+        Liquibase liquibase = new Liquibase("liquibase/tagged-changelog.xml", new ClassLoaderResourceAccessor(),
+            connection);
+        liquibase.update(tag, "");
+        return liquibase;
+    }
+
+    private boolean hasDatabaseChangeLogTable(Liquibase liquibase) throws DatabaseException {
+        return SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(liquibase.database);
+    }
+
+    private void assertTags(Liquibase liquibase, String... expectedTags) throws DatabaseException {
+        List<String> actualTags = liquibase.database.getRanChangeSetList().stream()
+            .map(RanChangeSet::getTag)
+            .filter(Objects::nonNull)
+            .collect(toList());
+
+        assertEquals(Arrays.asList(expectedTags), actualTags);
+    }
+
+    private void assertSqlOutputAppliesTags(String output, String... expectedTags) throws IOException {
+        String insertTagH2SqlTemplate =
+            "INSERT INTO PUBLIC\\.DATABASECHANGELOG \\(.*, DESCRIPTION,.*, TAG\\) VALUES \\(.*, 'tagDatabase',.*, '%s'\\);";
+
+        List<Pattern> patterns = Stream.of(expectedTags)
+            .map(tag -> String.format(insertTagH2SqlTemplate, tag))
+            .map(Pattern::compile)
+            .collect(toList());
+
+        try(BufferedReader reader = new BufferedReader(new StringReader(output))) {
+            String line;
+            int index = 0;
+
+            while ((line = reader.readLine()) != null && index < patterns.size()) {
+                Matcher matcher = patterns.get(index).matcher(line);
+                if (matcher.matches()) {
+                    index++;
+                }
+            }
+            assertTrue(index > 0 && index == patterns.size());
+        }
+    }
 
     /**
      * Convenience helper class for testing Liquibase methods that simply delegate to another.
