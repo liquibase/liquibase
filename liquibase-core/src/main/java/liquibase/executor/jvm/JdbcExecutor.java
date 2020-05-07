@@ -13,6 +13,7 @@ import liquibase.executor.AbstractExecutor;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
@@ -65,19 +66,6 @@ public class JdbcExecutor extends AbstractExecutor {
     @Override
     public int getPriority() {
         return PrioritizedService.PRIORITY_DEFAULT;
-    }
-
-    /**
-     *
-     * Validate if the change set can be executed by this Executor
-     *
-     * @param   changeSet The change set to validate
-     * @return  boolean   Always true for JdbcExecutor
-     *
-     */
-    @Override
-    public boolean validate(ChangeSet changeSet) {
-        return true;
     }
 
     @Override

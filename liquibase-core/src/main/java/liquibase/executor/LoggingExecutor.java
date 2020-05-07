@@ -67,19 +67,6 @@ public class LoggingExecutor extends AbstractExecutor {
         return PrioritizedService.PRIORITY_DEFAULT;
     }
 
-    /**
-     *
-     * Validate if the change set can be executed by this Executor
-     *
-     * @param   changeSet The change set to validate
-     * @return  boolean  Always true for LoggingExecutor
-     *
-     */
-    @Override
-    public boolean validate(ChangeSet changeSet) {
-        return true;
-    }
-
     protected Writer getOutput() {
         return output;
     }

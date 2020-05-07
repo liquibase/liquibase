@@ -4,7 +4,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.PrioritizedService;
 
 import java.sql.Driver;
-import java.sql.SQLException;
 import java.util.Properties;
 
 /**

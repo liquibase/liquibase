@@ -3,10 +3,7 @@ package liquibase.changelog;
 import liquibase.ContextExpression;
 import liquibase.LabelExpression;
 import liquibase.Labels;
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import liquibase.change.CheckSum;
-import liquibase.change.DbmsTargetedChange;
+import liquibase.change.*;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.visitor.ChangeExecListener;
@@ -514,7 +511,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         boolean skipChange = false;
 
-        Executor originalExecutor = switchExecutorIfNecessary(database);
+        Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
             Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             // set object quoting strategy
@@ -678,13 +675,26 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     //
-    // Switch the Executor for a custom one if specified
+    // Get the custom Executor ready if necessary
+    // We do not do anything if we have a LoggingExecutor.
     //
-    private Executor switchExecutorIfNecessary(Database database) {
+    private Executor setupCustomExecutorIfNecessary(Database database) {
         Executor originalExecutor = ExecutorService.getInstance().getExecutor("jdbc", database);
-        if (getRunWith() != null && !(originalExecutor instanceof LoggingExecutor)) {
-            Executor customExecutor = ExecutorService.getInstance().getExecutor(getRunWith(), database);
-            ExecutorService.getInstance().setExecutor("jdbc", database, customExecutor);
+        if (getRunWith() == null || originalExecutor instanceof LoggingExecutor) {
+            return originalExecutor;
+        }
+        Executor customExecutor = ExecutorService.getInstance().getExecutor(getRunWith(), database);
+        ExecutorService.getInstance().setExecutor("jdbc", database, customExecutor);
+        List<Change> changes = getChanges();
+        for (Change change : changes) {
+            if (! (change instanceof AbstractChange)) {
+                continue;
+            }
+            final ResourceAccessor resourceAccessor = ((AbstractChange) change).getResourceAccessor();
+            if (resourceAccessor != null) {
+                customExecutor.setResourceAccessor(resourceAccessor);
+                break;
+            }
         }
         return originalExecutor;
     }

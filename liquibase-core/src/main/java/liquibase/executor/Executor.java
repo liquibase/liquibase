@@ -4,6 +4,8 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
@@ -36,12 +38,23 @@ public interface Executor {
     /**
      *
      * Validate if the change set can be executed by this Executor
+     * If the ChangeSet can be executed return an empty ValidationErrors object
+     * otherwise return the errors
      *
-     * @param    changeSet  The change set to validate
-     * @return   boolean
+     * @param    changeSet         The change set to validate
+     * @return   ValidationErrors  Any errors which occur during validation
      *
      */
-    boolean validate(ChangeSet changeSet);
+    ValidationErrors validate(ChangeSet changeSet);
+
+    /**
+     *
+     * Set a ResourceAccessor on this Executor to be used in file access
+     *
+     * @param resourceAccessor
+     *
+     */
+    void setResourceAccessor(ResourceAccessor resourceAccessor);
 
     /**
      * Configures the Executor for the Database to run statements/queries against.
