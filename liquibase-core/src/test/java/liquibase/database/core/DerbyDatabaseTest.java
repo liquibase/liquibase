@@ -1,12 +1,22 @@
 package liquibase.database.core;
 
+import static org.mockito.Mockito.RETURNS_SMART_NULLS;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.sql.Connection;
-import javax.sql.DataSource;
-import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 import junit.framework.TestCase;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 
 public class DerbyDatabaseTest extends TestCase {
     public void testGetDefaultDriver() {
@@ -25,35 +35,40 @@ public class DerbyDatabaseTest extends TestCase {
     }
 
     public void testCloseShutsEmbeddedDerbyDown() throws Exception {
-        DataSource ds = newDataSource();
-        try (Connection pooled = ds.getConnection()) {
+        Connection con = mockConnection();
+        DerbyDatabase database = spyDatabase(con);
 
-            Database database = new DerbyDatabase();
-            database.setConnection(new JdbcConnection(ds.getConnection()));
-            database.close();
+        database.close();
 
-            assertEquals("connection.closed", true, pooled.isClosed());
-        }
+        verify(database).shutdownDerby(anyString(), anyString());
+        verify(con).close();
     }
 
     public void testCloseDoesNotShutEmbeddedDerbyDown() throws Exception {
-        DataSource ds = newDataSource();
-        try (Connection connection = ds.getConnection()) {
+        Connection con = mockConnection();
+        DerbyDatabase database = spyDatabase(con);
+        database.setShutdownEmbeddedDerby(false);
 
-            DerbyDatabase database = new DerbyDatabase();
-            database.setShutdownEmbeddedDerby(false);
-            database.setConnection(new JdbcConnection(ds.getConnection()));
-            database.close();
+        database.close();
 
-            assertEquals("connection.closed", false, connection.isClosed());
-        }
+        verify(database, never()).shutdownDerby(anyString(), anyString());
+        verify(con).close();
     }
 
-    private BasicEmbeddedDataSource40 newDataSource() {
-        BasicEmbeddedDataSource40 ds = new BasicEmbeddedDataSource40();
-        ds.setDatabaseName("memory:Foo");
-        ds.setCreateDatabase("create");
-        return ds;
+    private static DerbyDatabase spyDatabase(Connection con) throws DatabaseException {
+        DerbyDatabase database = spy(new DerbyDatabase());
+        doNothing().when(database).shutdownDerby(anyString(), anyString());
+        database.setConnection(new JdbcConnection(con));
+        return database;
+    }
+
+    private static Connection mockConnection() throws SQLException {
+        Connection con = mock(Connection.class);
+        DatabaseMetaData metaData = mock(DatabaseMetaData.class, RETURNS_SMART_NULLS);
+        when(metaData.getURL()).thenReturn("jdbc:derby:memory:foo");
+        when(metaData.getDriverName()).thenReturn("org.apache.derby.jdbc.EmbeddedDriver");
+        when(con.getMetaData()).thenReturn(metaData);
+        return con;
     }
 
 }
