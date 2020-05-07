@@ -3,6 +3,7 @@
     <typedef name="tableExists" classname="liquibase.integration.ant.test.TableExistsCondition"/>
     <typedef name="columnExists" classname="liquibase.integration.ant.test.ColumnExistsCondition"/>
     <typedef name="rowCountEquals" classname="liquibase.integration.ant.test.RowCountEqualsCondition"/>
+    <typedef name="tagExists" classname="liquibase.integration.ant.test.LiquibaseTagExistsCondition"/>
 
     <macrodef name="assertTableExists" backtrace="false">
         <attribute name="driver"/>
@@ -74,6 +75,34 @@
             <au:assertTrue message="@{message}">
                 <current:rowCountEquals driver="@{driver}" url="@{url}" user="@{user}" password="@{password}" table="@{table}" count="@{count}"/>
             </au:assertTrue>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="assertTagExists" backtrace="false">
+        <attribute name="driver"/>
+        <attribute name="url"/>
+        <attribute name="user"/>
+        <attribute name="password"/>
+        <attribute name="tag"/>
+        <attribute name="message" default="Assertion failed"/>
+        <sequential>
+            <au:assertTrue message="@{message}">
+                <current:tagExists driver="@{driver}" url="@{url}" user="@{user}" password="@{password}" tag="@{tag}"/>
+            </au:assertTrue>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="assertTagNotExists" backtrace="false">
+        <attribute name="driver"/>
+        <attribute name="url"/>
+        <attribute name="user"/>
+        <attribute name="password"/>
+        <attribute name="tag"/>
+        <attribute name="message" default="Assertion failed"/>
+        <sequential>
+            <au:assertFalse message="@{message}">
+                <current:tagExists driver="@{driver}" url="@{url}" user="@{user}" password="@{password}" tag="@{tag}"/>
+            </au:assertFalse>
         </sequential>
     </macrodef>
 </antlib>
