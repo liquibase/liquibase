@@ -34,6 +34,8 @@ calculateCheckSum
 clearCheckSums
 changelogSync
 changelogSyncSQL
+changeLogSyncToTag
+changeLogSyncToTagSQL
 markNextChangeSetRan
 markNextChangeSetRanSQL
 listLocks
