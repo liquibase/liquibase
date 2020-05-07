@@ -5,7 +5,6 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
@@ -31,13 +30,19 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	 */
 	protected File migrationSqlOutputFile;
 
+	/**
+	 * Update to the changeSet with the given tag command.
+	 * @parameter property="liquibase.toTag"
+	 */
+	protected String toTag;
+
 	/** The writer for writing the migration SQL. */
 	private Writer outputWriter;
 
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-		liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels), outputWriter);
+		liquibase.changeLogSync(toTag, new Contexts(contexts), new LabelExpression(labels), outputWriter);
 	}
 
 	@Override
