@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -1116,6 +1116,29 @@
                     <foreignKeyConstraintExists foreignKeyName="fk_ref1" foreignKeyTableName="child_table"/>
                     <foreignKeyConstraintExists foreignKeyName="fk_ref2" foreignKeyTableName="child_table"/>
                 </or>
+            </not>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="drop_all_indexes" author="wallaby1999">
+        <createTable tableName="dropIndexTest">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(10)"/>
+            <column name="lastname" type="varchar(10)"/>
+        </createTable>
+        <createIndex indexName="idx_dropindextest" tableName="dropIndexTest">
+            <column name="firstname"/>
+            <column name="lastname"/>
+        </createIndex>
+        <dropAllIndexes tableName="dropIndexTest"/>
+    </changeSet>
+
+    <changeSet id="verify_drop_all_indexes" author="wallaby1999">
+        <preConditions>
+            <not>
+                <indexExists indexName="idx_dropindextest"/>
             </not>
         </preConditions>
     </changeSet>
