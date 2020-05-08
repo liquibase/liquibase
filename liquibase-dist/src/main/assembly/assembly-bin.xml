@@ -47,13 +47,6 @@
                 <include>**/*</include>
             </includes>
         </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/../liquibase-core/src/main/resources/liquibase/licenses</directory>
-            <outputDirectory>licenses</outputDirectory>
-            <includes>
-                <include>**/*</include>
-            </includes>
-        </fileSet>
     </fileSets>
     <files>
         <file>

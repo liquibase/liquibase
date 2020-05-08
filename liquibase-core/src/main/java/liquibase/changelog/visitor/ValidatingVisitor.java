@@ -74,8 +74,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             for (RanChangeSet ranChangeSet : ranIndex.values()) {
                 if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())) {
                     if (ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())) {
-                        String changeSetPath = normalizePath(changeSet.getFilePath());
-                        String ranChangeSetPath = normalizePath(ranChangeSet.getChangeLog());
+                        String changeSetPath = DatabaseChangeLog.normalizePath(changeSet.getFilePath());
+                        String ranChangeSetPath = DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog());
                         if (ranChangeSetPath.equalsIgnoreCase(changeSetPath)
                             || ranChangeSetPath.endsWith(changeSetPath) || changeSetPath.endsWith(ranChangeSetPath)) {
                             result = ranChangeSet;
@@ -87,11 +87,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return result;
     }
         
-    private String normalizePath(String filePath) {
-        return filePath.replaceFirst("^classpath:", "");
-    }
-
-        @Override
+    @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;

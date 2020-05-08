@@ -50,7 +50,7 @@
     </scm>
 
     <properties>
-        <liquibase.base.version>4.0.0-beta1</liquibase.base.version>
+        <liquibase.base.version>4.0.0-beta2</liquibase.base.version>
         <liquibase.version.qualifier>-local</liquibase.version.qualifier>
         <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
         <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}</liquibase.version>
@@ -155,8 +155,14 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>6.0.6</version>
             <scope>test</scope>
-        </dependency>
+    	</dependency>
 
+	<dependency>
+    	    <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.12</version>
+	    <scope>test</scope>
+	</dependency>
     </dependencies>
 
     <build>

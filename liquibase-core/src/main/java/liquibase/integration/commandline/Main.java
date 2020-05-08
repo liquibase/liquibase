@@ -1216,9 +1216,11 @@ public class Main {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
 
-        FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile());
-        CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
-        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
+        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(
+                new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
+                new CommandLineResourceAccessor(classLoader),
+                new FileSystemResourceAccessor(Paths.get("/").toAbsolutePath().toFile())
+                );
 
         Database database = null;
         if (this.url != null) {
@@ -1237,6 +1239,12 @@ public class Main {
                         String.format(coreBundle.getString("cannot.specify.both"),
                                 OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
+
+            //
+            // Set the global configuration option based on presence of the dataOutputDirectory
+            //
+            boolean b = dataOutputDirectory != null;
+            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
 
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
@@ -1315,11 +1323,7 @@ public class Main {
                 SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
                         .getCommand(COMMANDS.SNAPSHOT);
                 snapshotCommand.setDatabase(database);
-                snapshotCommand.setSchemas(
-                        getCommandParam(
-                                OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName()
-                        )
-                );
+                snapshotCommand.setSchemas(getSchemaParams(database));
                 snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 String result = snapshotCommand.execute().print();
@@ -1344,11 +1348,7 @@ public class Main {
                         .getCommand(COMMANDS.SNAPSHOT);
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 snapshotCommand.setDatabase(referenceDatabase);
-                snapshotCommand.setSchemas(
-                        getCommandParam(
-                                OPTIONS.SCHEMAS, referenceDatabase.getDefaultSchema().getSchemaName()
-                        )
-                );
+                snapshotCommand.setSchemas(getSchemaParams(database));
                 snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 outputWriter.write(snapshotCommand.execute().print());
@@ -1486,10 +1486,7 @@ public class Main {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
                         (COMMANDS.DROP_ALL);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
-                dropAllCommand.setSchemas(getCommandParam(
-                        OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName())
-                );
-
+                dropAllCommand.setSchemas(getSchemaParams(database));
                 Scope.getCurrentScope().getUI().sendMessage(dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
@@ -1669,6 +1666,14 @@ public class Main {
                         coreBundle.getString("problem.closing.connection"), e);
             }
         }
+    }
+
+    private String getSchemaParams(Database database) throws CommandLineParsingException {
+        String schemaParams = getCommandParam(OPTIONS.SCHEMAS, schemas);
+        if (schemaParams == null || schemaParams.isEmpty()) {
+            return database.getDefaultSchema().getSchemaName();
+        }
+        return schemaParams;
     }
 
     private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, String commandName, Map<String, Object> argsMap)

@@ -1,10 +1,27 @@
 ---
-Liquibase Version: ''
-Liquibase Integration: 'Pick one: CLI, maven, gradle, spring boot, servlet, etc.' 
-Liquibase Extension(s) & Version: ''
-Database Vendor & Version: ''
-Operating System Type & Version: ''
+name: Pull Request
+about: Create a report to help us improve
+title: ''
+labels: Status:Discovery
+assignees: ''
+
 ---
+
+<!--- This environment context section helps us quickly review your PR. 
+      Please take a minute to fill-out this information. -->
+## Environment
+
+**Liquibase Version**:
+
+**Liquibase Integration & Version**: <Pick one: CLI, maven, gradle, spring boot, servlet, etc.>
+
+**Liquibase Extension(s) & Version**: 
+
+**Database Vendor & Version**:
+
+**Operating System Type & Version**:
+
+## Pull Request Type
 
 <!--- What types of changes does your code introduce?
       Put an `x` in all the boxes that apply: 
@@ -26,7 +43,7 @@ List the steps to reproduce the behavior.
 - Please be precise and ensure private information is redacted
 - Include things like
   - Files used - sql scripts, changelog file(s), property file(s), config files, POM Files
-  - Exact commands used - CLI, maven, gradle, spring boot, servlet, etc.)
+  - Exact commands used - CLI, maven, gradle, spring boot, servlet, etc.
 
 ## Actual Behavior
 A clear and concise description of what happens in the software **before** this pull request.
