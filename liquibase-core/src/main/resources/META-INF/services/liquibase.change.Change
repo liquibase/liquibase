@@ -14,6 +14,7 @@ liquibase.change.core.CreateTableChange
 liquibase.change.core.CreateViewChange
 liquibase.change.core.DeleteDataChange
 liquibase.change.core.DropAllForeignKeyConstraintsChange
+liquibase.change.core.DropAllIndexesChange
 liquibase.change.core.DropColumnChange
 liquibase.change.core.DropDefaultValueChange
 liquibase.change.core.DropForeignKeyConstraintChange
