@@ -89,7 +89,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return PRIORITY_DEFAULT;
     }
 
-    private final void tryProxySession(final String url, final Connection con) {
+    private void tryProxySession(final String url, final Connection con) {
         Matcher m = PROXY_USER.matcher(url);
         if (m.matches()) {
             Properties props = new Properties();
@@ -106,8 +106,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(DatabaseConnection conn) {
-        //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
-        // HardCodedStringLiteral
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
         // HardCodedStringLiteral
         reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC", "ORDER")); //more reserved words not returned by driver
@@ -150,7 +148,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 }
 
                 CallableStatement statement = null;
-                ResultSet resultSet = null;
                 try {
                     //noinspection HardCodedStringLiteral
                     statement = sqlConn.prepareCall("{call DBMS_UTILITY.DB_VERSION(?,?)}");
@@ -172,7 +169,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     //noinspection HardCodedStringLiteral
                     Scope.getCurrentScope().getLog(getClass()).info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
-                    JdbcUtils.close(resultSet, statement);
+                    JdbcUtils.closeStatement(statement);
                 }
 
 
