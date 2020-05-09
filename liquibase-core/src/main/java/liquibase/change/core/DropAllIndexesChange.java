@@ -30,7 +30,7 @@ public class DropAllIndexesChange extends AbstractChange {
     private String schemaName;
     private String tableName;
 
-    @DatabaseChangeProperty(mustEqualExisting = "table.catalog", description = "Name of the table containing indexes", since = "3.6")
+    @DatabaseChangeProperty(mustEqualExisting = "table.catalog", description = "Name of the table containing indexes", since = "4.0")
     public String getCatalogName() {
         return catalogName;
     }
@@ -94,22 +94,22 @@ public class DropAllIndexesChange extends AbstractChange {
             Table target = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName(), database.correctObjectName(getTableName(), Table.class)), database);
 
             List<Index> results = ((target == null) ? null : target.getIndexes());
-            Set<String> handledConstraints = new HashSet<>();
+            Set<String> handledIndexes = new HashSet<>();
 
             if ((results != null) && (!results.isEmpty())) {
                 for (Index ind : results) {
-                    Relation baseTable = ind.getTable();
-                    String constraintName = ind.getName();
+                    Relation baseTable = ind.getRelation();
+                    String indexName = ind.getName();
                     if (DatabaseObjectComparatorFactory.getInstance().isSameObject(baseTable, target, null, database)) {
-                        if (!handledConstraints.contains(constraintName)) {
+                        if (!handledIndexes.contains(indexName)) {
                             DropIndexChange dropIndexChange = new DropIndexChange();
 
                             dropIndexChange.setSchemaName(getSchemaName());
                             dropIndexChange.setTableName(tableName);
-                            dropIndexChange.setIndexName(constraintName);
+                            dropIndexChange.setIndexName(indexName);
 
                             childDropChanges.add(dropIndexChange);
-                            handledConstraints.add(constraintName);
+                            handledIndexes.add(indexName);
                         }
                     }
                     else {
