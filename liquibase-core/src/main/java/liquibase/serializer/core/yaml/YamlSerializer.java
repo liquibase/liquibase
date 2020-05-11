@@ -78,12 +78,16 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         }
     }
 
+    protected Set<String> getSerializableObjectFields(LiquibaseSerializable object) {
+        return object.getSerializableFields();
+    }
+
     protected Object toMap(LiquibaseSerializable object) {
         Comparator<String> comparator;
         comparator = getComparator(object);
         Map<String, Object> objectMap = new TreeMap<>(comparator);
 
-        for (String field : object.getSerializableFields()) {
+        for (String field : getSerializableObjectFields(object)) {
             Object value = object.getSerializableFieldValue(field);
             if (value != null) {
                 if (value instanceof DataType) {
