@@ -196,6 +196,12 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         // Check the Pro license if --format=JSON is specified
         //
         if (isFormattedDiff()) {
+            if (format != null && ! format.equalsIgnoreCase("json")) {
+                String messageString =
+                        "\nWARNING: The diff command 'diff --format=" + format  + "' optional Pro parameter '--format' " +
+                                "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
+                throw new LiquibaseException(String.format(messageString));
+            }
             boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
             if (!hasProLicense) {
                 throw new LiquibaseException("The command 'diff --format=" + format +
