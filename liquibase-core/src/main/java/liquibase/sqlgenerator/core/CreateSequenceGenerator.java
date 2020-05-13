@@ -38,43 +38,48 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
 
         validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, HsqlDatabase.class, PostgresDatabase.class);
-
+        validationErrors.checkDisallowedField("dataType", statement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class);
 
         return validationErrors;
     }
 
     @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE SEQUENCE ");
-        buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
+        StringBuilder queryStringBuilder = new StringBuilder();
+        queryStringBuilder.append("CREATE SEQUENCE ");
+        if (database instanceof PostgresDatabase) {
+            queryStringBuilder.append(" IF NOT EXISTS ");
+        }
+        queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
-            buffer.append(" AS BIGINT ");
+            queryStringBuilder.append(" AS BIGINT ");
+        } else if (statement.getDataType() != null) {
+            queryStringBuilder.append(" AS " + statement.getDataType());
         }
         if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
-            buffer.append(" START WITH ").append(statement.getStartValue());
+            queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
         }
         if (statement.getIncrementBy() != null) {
-            buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            queryStringBuilder.append(" INCREMENT BY ").append(statement.getIncrementBy());
         }
         if (statement.getMinValue() != null) {
-            buffer.append(" MINVALUE ").append(statement.getMinValue());
+            queryStringBuilder.append(" MINVALUE ").append(statement.getMinValue());
         }
         if (statement.getMaxValue() != null) {
-            buffer.append(" MAXVALUE ").append(statement.getMaxValue());
+            queryStringBuilder.append(" MAXVALUE ").append(statement.getMaxValue());
         }
         if (database instanceof MariaDBDatabase && statement.getStartValue() != null) {
-            buffer.append(" START WITH ").append(statement.getStartValue());
+            queryStringBuilder.append(" START WITH ").append(statement.getStartValue());
         }
 
         if (statement.getCacheSize() != null) {
-            if (database instanceof OracleDatabase || database instanceof Db2zDatabase) {
+            if (database instanceof OracleDatabase || database instanceof Db2zDatabase || database instanceof PostgresDatabase) {
                 if (BigInteger.ZERO.equals(statement.getCacheSize())) {
                     if (database instanceof OracleDatabase) {
-                        buffer.append(" NOCACHE ");
+                        queryStringBuilder.append(" NOCACHE ");
                     }
                 } else {
-                    buffer.append(" CACHE ").append(statement.getCacheSize());
+                    queryStringBuilder.append(" CACHE ").append(statement.getCacheSize());
                 }
             }
         }
@@ -82,21 +87,21 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (!(database instanceof MariaDBDatabase) && statement.getOrdered() != null) {
             if (!(database instanceof SybaseASADatabase)) {
                 if (statement.getOrdered()) {
-                    buffer.append(" ORDER");
+                    queryStringBuilder.append(" ORDER");
                 } else {
                    if (database instanceof OracleDatabase) {
-                       buffer.append(" NOORDER");
+                       queryStringBuilder.append(" NOORDER");
                    }
                 }
             }
         }
         if (!(database instanceof MariaDBDatabase) && statement.getCycle() != null) {
             if (statement.getCycle()) {
-                buffer.append(" CYCLE");
+                queryStringBuilder.append(" CYCLE");
             }
         }
 
-        return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedSequence(statement))};
+        return new Sql[]{new UnparsedSql(queryStringBuilder.toString(), getAffectedSequence(statement))};
     }
 
     protected Sequence getAffectedSequence(CreateSequenceStatement statement) {

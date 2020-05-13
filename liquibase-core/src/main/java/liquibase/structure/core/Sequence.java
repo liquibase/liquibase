@@ -59,9 +59,11 @@ public class Sequence extends AbstractDatabaseObject {
         Sequence sequence = (Sequence) o;
 
         if ((this.getSchema() != null) && (sequence.getSchema() != null)) {
-            return StringUtil.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtil.trimToEmpty(sequence.getSchema().getName()));
+            boolean schemasEqual = this.getSchema().equals(sequence.getSchema());
+            if (!schemasEqual) {
+                return false;
+            }
         }
-
 
         return !((getName() != null) ? !getName().equalsIgnoreCase(sequence.getName()) : (sequence.getName() != null));
 
@@ -152,7 +154,14 @@ public class Sequence extends AbstractDatabaseObject {
 
     public Sequence setCacheSize(BigInteger cacheSize) {
         this.setAttribute("cacheSize", cacheSize);
+        return this;
+    }
 
+    public String getDataType() {
+        return getAttribute("dataType", String.class);
+    }
+    public Sequence setDataType(String dataType) {
+        this.setAttribute("dataType", dataType);
         return this;
     }
 }

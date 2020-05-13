@@ -9,7 +9,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
-import liquibase.logging.LogType;
+import liquibase.listener.SqlListener;
 import liquibase.logging.Logger;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
@@ -19,6 +19,7 @@ import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.CompoundStatement;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.DropTableStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 
@@ -120,7 +121,12 @@ public class JdbcExecutor extends AbstractExecutor {
             }
         }
 
-        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        if (sql instanceof DropTableStatement && database instanceof Db2zDatabase) {
+            execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        }
+        else {
+            execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+        }
     }
 
 
@@ -231,7 +237,9 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                Scope.getCurrentScope().getLog(getClass()).fine(LogType.WRITE_SQL, sqlToExecute[0]);
+                for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                    listener.writeSqlWillRun(sqlToExecute[0]);
+                }
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -267,7 +275,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, message);
+        Scope.getCurrentScope().getLog(getClass()).fine(message);
     }
 
     private void executeDb2ZosComplexStatement(SqlStatement sqlStatement) throws DatabaseException {
@@ -342,12 +350,15 @@ public class JdbcExecutor extends AbstractExecutor {
 
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (database instanceof OracleDatabase) {
-                    while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
-                        statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
+                    while (statement.matches("(?s).*[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$")) { //all trailing /'s
+                        statement = statement.replaceFirst("[\\s\\r\\n]*[^*]/[\\s\\r\\n]*$", "");
                     }
                 }
 
-                log.info(LogType.WRITE_SQL, String.format("%s", statement));
+                for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                    listener.writeSqlWillRun(String.format("%s", statement));
+                }
+
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -419,11 +430,16 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.READ_SQL, sqlToExecute[0]);
 
-                rs = stmt.executeQuery(sqlToExecute[0]);
-                ResultSet rsToUse = rs;
-                return rse.extractData(rsToUse);
+                try {
+                    rs = stmt.executeQuery(sqlToExecute[0]);
+                    ResultSet rsToUse = rs;
+                    return rse.extractData(rsToUse);
+                } finally {
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.readSqlWillRun(sqlToExecute[0]);
+                    }
+                }
             }
             finally {
                 if (rs != null) {

@@ -6,13 +6,11 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.AntClassLoader;
@@ -24,10 +22,12 @@ import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.resources.FileResource;
 
-import java.io.*;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -68,26 +68,32 @@ public abstract class BaseLiquibaseTask extends Task {
         classLoader.setParent(this.getClass().getClassLoader());
         classLoader.setThreadContextLoader();
         validateParameters();
-        Database database = null;
+        final Database[] database = {null};
         try {
             ResourceAccessor resourceAccessor = createResourceAccessor(classLoader);
-            database = createDatabaseFromType(databaseType);
-            liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database);
-            if(changeLogParameters != null) {
-                changeLogParameters.applyParameters(liquibase);
-            }
-            if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunUpdate() &&
-                    UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                log("User chose not to run task against a non-local database.", Project.MSG_INFO);
-                return;
-            }
-            if(shouldRun()) {
-                executeWithLiquibaseClassloader();
-            }
-        } catch (LiquibaseException e) {
+            Map<String, Object> scopeValues = new HashMap<>();
+            scopeValues.put(Scope.Attr.resourceAccessor.name(), resourceAccessor);
+            scopeValues.put(Scope.Attr.classLoader.name(), classLoader);
+
+            Scope.child(scopeValues, () -> {
+                database[0] = createDatabaseFromType(databaseType);
+                liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database[0]);
+                if (changeLogParameters != null) {
+                    changeLogParameters.applyParameters(liquibase);
+                }
+                if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunUpdate() &&
+                        UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                    log("User chose not to run task against a non-local database.", Project.MSG_INFO);
+                    return;
+                }
+                if (shouldRun()) {
+                    executeWithLiquibaseClassloader();
+                }
+            });
+        } catch (Exception e) {
             throw new BuildException("Unable to initialize Liquibase: " + e.getMessage(), e);
         } finally {
-            closeDatabase(database);
+            closeDatabase(database[0]);
             classLoader.resetThreadContextLoader();
             classLoader.cleanup();
             classLoader = null;
@@ -116,7 +122,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * @see AbstractChangeLogBasedTask#getChangeLogDirectory()
      */
     public String getChangeLogDirectory() {
-      return null;
+        return null;
     }
 
     /**
@@ -138,7 +144,7 @@ public abstract class BaseLiquibaseTask extends Task {
         GlobalConfiguration globalConfiguration = configuration.getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
             log("Liquibase did not run because " + configuration.describeValueLookupLogic(globalConfiguration
-                .getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
+                    .getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
             return false;
         }
         return true;
@@ -154,7 +160,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * Subclasses that override this method must always call <code>super.validateParameters()</code> method.
      */
     protected void validateParameters() {
-        if(databaseType == null) {
+        if (databaseType == null) {
             throw new BuildException("A database or databaseref is required.");
         }
     }
@@ -165,16 +171,11 @@ public abstract class BaseLiquibaseTask extends Task {
      * @param classLoader The ClassLoader to use in the ResourceAccessor. It is preferable that it is an AntClassLoader.
      * @return A ResourceAccessor.
      */
-    private ResourceAccessor createResourceAccessor(ClassLoader classLoader) {
-        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
-        resourceAccessors.add(new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().getRoot().toFile()));
-        resourceAccessors.add(new ClassLoaderResourceAccessor(classLoader));
-        String changeLogDirectory = getChangeLogDirectory();
-        if (changeLogDirectory != null) {
-          changeLogDirectory = changeLogDirectory.trim().replace('\\', '/');  //convert to standard / if using absolute path on windows
-          resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
-        }
-        return new CompositeResourceAccessor(resourceAccessors.toArray(new ResourceAccessor[0]));
+    private ResourceAccessor createResourceAccessor(AntClassLoader classLoader) {
+        return new CompositeResourceAccessor(
+                new AntResourceAccessor(classLoader, getChangeLogDirectory()),
+                new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader())
+        );
     }
 
     /*
@@ -188,7 +189,7 @@ public abstract class BaseLiquibaseTask extends Task {
      */
     protected void closeDatabase(Database database) {
         try {
-            if(database != null) {
+            if (database != null) {
                 database.close();
             }
         } catch (DatabaseException e) {
@@ -208,7 +209,7 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     public void addDatabase(DatabaseType databaseType) {
-        if(this.databaseType != null) {
+        if (this.databaseType != null) {
             throw new BuildException("Only one <database> element is allowed.");
         }
         this.databaseType = databaseType;
@@ -220,7 +221,7 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     public void addChangeLogParameters(ChangeLogParametersType changeLogParameters) {
-        if(this.changeLogParameters != null) {
+        if (this.changeLogParameters != null) {
             throw new BuildException("Only one <changeLogParameters> element is allowed.");
         }
         this.changeLogParameters = changeLogParameters;
@@ -250,7 +251,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return DatabaseType object. Created if doesn't exist.
      */
     private DatabaseType getDatabaseType() {
-        if(databaseType == null) {
+        if (databaseType == null) {
             databaseType = new DatabaseType(getProject());
         }
         return databaseType;
@@ -263,7 +264,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return ChangeLogParametersType
      */
     private ChangeLogParametersType getChangeLogParametersType() {
-        if(changeLogParameters == null) {
+        if (changeLogParameters == null) {
             changeLogParameters = new ChangeLogParametersType(getProject());
         }
         return changeLogParameters;
@@ -492,7 +493,7 @@ public abstract class BaseLiquibaseTask extends Task {
     @Deprecated
     protected void closeDatabase(Liquibase liquibase) {
         if ((liquibase != null) && (liquibase.getDatabase() != null) && (liquibase.getDatabase().getConnection() !=
-            null)) {
+                null)) {
             try {
                 liquibase.getDatabase().close();
             } catch (DatabaseException e) {
@@ -577,8 +578,8 @@ public abstract class BaseLiquibaseTask extends Task {
     /**
      * If not set, defaults to true.
      *
-     * @deprecated Use a nested {@link DatabaseType DatabaseType} instead.
      * @param outputDefaultSchema True to output the default schema.
+     * @deprecated Use a nested {@link DatabaseType DatabaseType} instead.
      */
     @Deprecated
     public void setOutputDefaultSchema(boolean outputDefaultSchema) {
@@ -597,8 +598,8 @@ public abstract class BaseLiquibaseTask extends Task {
     /**
      * If not set, defaults to true
      *
-     * @deprecated Use {@link DatabaseType#setOutputDefaultCatalog(boolean)} instead.
      * @param outputDefaultCatalog True to output the default catalog.
+     * @deprecated Use {@link DatabaseType#setOutputDefaultCatalog(boolean)} instead.
      */
     @Deprecated
     public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {

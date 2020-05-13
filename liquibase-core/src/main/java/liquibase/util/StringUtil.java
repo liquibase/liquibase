@@ -1,11 +1,15 @@
 package liquibase.util;
 
 import liquibase.ExtensibleObject;
-import liquibase.database.Database;
-import liquibase.structure.DatabaseObject;
 
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -140,6 +144,11 @@ public class StringUtil {
                 null) || previousPiece.endsWith("\n")));
         } else {
             if (endDelimiter.length() == 1) {
+                if ("/".equals(endDelimiter)) {
+                    if (previousPiece != null && !previousPiece.endsWith("\n")) {
+                        return false;
+                    }
+                }
                 return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
             } else {
                 return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[\\s\n\r]*"+endDelimiter.toLowerCase());
@@ -191,7 +200,7 @@ public class StringUtil {
             return "";
         }
         
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (Object val : collection) {
             buffer.append(formatter.toString(val)).append(delimiter);
         }
@@ -256,17 +265,15 @@ public class StringUtil {
         }
 
         return returnList;
-
-
     }
 
     public static String repeat(String string, int times) {
-        String returnString = "";
-        for (int i=0; i<times; i++) {
-            returnString += string;
+        StringBuilder result = new StringBuilder(string.length() * times);
+        for (int i = 0; i < times; i++) {
+            result.append(string);
         }
 
-        return returnString;
+        return result.toString();
     }
 
     public static String join(Integer[] array, String delimiter) {
@@ -291,7 +298,7 @@ public class StringUtil {
             return "";
         }
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int val : array) {
             buffer.append(val).append(delimiter);
         }
@@ -767,6 +774,46 @@ public class StringUtil {
         return str.substring(start, end);
     }
 
+    //from https://stackoverflow.com/a/48588062/45756
+    public static String escapeXml(CharSequence s) {
+        StringBuilder sb = new StringBuilder();
+        int len = s.length();
+        for (int i=0;i<len;i++) {
+            int c = s.charAt(i);
+            if (c >= 0xd800 && c <= 0xdbff && i + 1 < len) {
+                c = ((c-0xd7c0)<<10) | (s.charAt(++i)&0x3ff);    // UTF16 decode
+            }
+            if (c < 0x80) {      // ASCII range: test most common case first
+                if (c < 0x20 && (c != '\t' && c != '\r' && c != '\n')) {
+                    // Illegal XML character, even encoded. Skip or substitute
+                    sb.append("&#xfffd;");   // Unicode replacement character
+                } else {
+                    switch(c) {
+                        case '&':  sb.append("&amp;"); break;
+                        case '>':  sb.append("&gt;"); break;
+                        case '<':  sb.append("&lt;"); break;
+                        // Uncomment next two if encoding for an XML attribute
+//                  case '\''  sb.append("&apos;"); break;
+//                  case '\"'  sb.append("&quot;"); break;
+                        // Uncomment next three if you prefer, but not required
+//                  case '\n'  sb.append("&#10;"); break;
+//                  case '\r'  sb.append("&#13;"); break;
+//                  case '\t'  sb.append("&#9;"); break;
+
+                        default:   sb.append((char)c);
+                    }
+                }
+            } else if ((c >= 0xd800 && c <= 0xdfff) || c == 0xfffe || c == 0xffff) {
+                // Illegal XML character, even encoded. Skip or substitute
+                sb.append("&#xfffd;");   // Unicode replacement character
+            } else {
+                sb.append("&#x");
+                sb.append(Integer.toHexString(c));
+                sb.append(';');
+            }
+        }
+        return sb.toString();
+    }
     /**
      * Concatenates the addition string to the baseString string, adjusting the case of "addition" to match the base string.
      * If the string is all caps, append addition in all caps. If all lower case, append in all lower case. If baseString is mixed case, make no changes to addition.

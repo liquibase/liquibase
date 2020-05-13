@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -14,6 +15,7 @@ public class DropProcedureGenerator extends AbstractSqlGenerator<DropProcedureSt
     public ValidationErrors validate(DropProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureName", statement.getProcedureName());
+        validationErrors.checkDisallowedField("catalogName", statement.getCatalogName(), database, MSSQLDatabase.class);
         return validationErrors;
     }
 

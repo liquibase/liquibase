@@ -4,14 +4,12 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.ErrorPrecondition;
@@ -215,7 +213,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 super.check(database, changeLog, changeSet, changeExecListener);
             }
         } catch (PreconditionFailedException e) {
-            StringBuffer message = new StringBuffer();
+            StringBuilder message = new StringBuilder();
             message.append("     ").append(e.getFailedPreconditions().size()).append(" preconditions failed").append(StreamUtil.getLineSeparator());
             for (FailedPrecondition invalid : e.getFailedPreconditions()) {
                 message.append("     ").append(invalid.toString());
@@ -223,10 +221,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
 
             if (getOnFailMessage() != null) {
-                message = new StringBuffer(getOnFailMessage());
+                message = new StringBuilder(getOnFailMessage());
             }
             if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
+                Scope.getCurrentScope().getLog(getClass()).info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
                 if (changeExecListener != null) {
                     changeExecListener.preconditionFailed(e, FailOption.WARN);
                 }
@@ -238,7 +236,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 }
             }
         } catch (PreconditionErrorException e) {
-            StringBuffer message = new StringBuffer();
+            StringBuilder message = new StringBuilder();
             message.append("     ").append(e.getErrorPreconditions().size()).append(" preconditions failed").append(StreamUtil.getLineSeparator());
             for (ErrorPrecondition invalid : e.getErrorPreconditions()) {
                 message.append("     ").append(invalid.toString());
@@ -246,10 +244,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
 
             if (this.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition error:\n " + message);
+                Scope.getCurrentScope().getLog(getClass()).info("Continuing past: " + toString() + " despite precondition error:\n " + message);
                 throw e;
             } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Continuing past: " + toString() + " despite precondition error:\n " + message);
+                Scope.getCurrentScope().getLog(getClass()).warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
                 if (changeExecListener != null) {
                     changeExecListener.preconditionErrored(e, ErrorOption.WARN);
                 }

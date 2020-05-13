@@ -72,6 +72,13 @@ public class MissingColumnChangeGenerator extends AbstractChangeGenerator implem
 
         MissingTableChangeGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
 
+        Column.AutoIncrementInformation autoIncrementInfo = column.getAutoIncrementInformation();
+        if (autoIncrementInfo != null) {
+            columnConfig.setAutoIncrement(true);
+            columnConfig.setGenerationType(autoIncrementInfo.getGenerationType());
+            columnConfig.setDefaultOnNull(autoIncrementInfo.getDefaultOnNull());
+        }
+
         if (column.getRemarks() != null) {
             columnConfig.setRemarks(column.getRemarks());
         }
@@ -81,6 +88,10 @@ public class MissingColumnChangeGenerator extends AbstractChangeGenerator implem
                 constraintsConfig = new ConstraintsConfig();
             }
             constraintsConfig.setNullable(false);
+            constraintsConfig.setNotNullConstraintName(column.getAttribute("notNullConstraintName", String.class));
+            if (!column.shouldValidateNullable()) {
+                constraintsConfig.setShouldValidateNullable(false);
+            }
         }
         if (constraintsConfig != null) {
             columnConfig.setConstraints(constraintsConfig);

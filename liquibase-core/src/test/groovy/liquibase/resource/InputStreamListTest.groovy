@@ -54,4 +54,20 @@ class InputStreamListTest extends Specification {
         list.size() == 2
 
     }
+
+    def "alreadySaw"() {
+        when:
+        def list = new InputStreamList()
+        list.add(new URI("file:///C:/test/path/liquibase-4.0.0-beta1-local-SNAPSHOT.jar!www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"), new ByteArrayInputStream())
+        list.add(new URI("jar:file:/C:/test/path/liquibase-4.0.0-beta1-local-SNAPSHOT.jar!/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"), new ByteArrayInputStream())
+
+        then:
+        assert list.alreadySaw(new URI("file:///C:/test/path/liquibase-4.0.0-beta1-local-SNAPSHOT.jar!www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"))
+        assert list.alreadySaw(new URI("jar:file:/C:/test/path/liquibase-4.0.0-beta1-local-SNAPSHOT.jar!/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"))
+        assert list.alreadySaw(new URI("file:///C:/test/path/liquibase-4.0.0-beta1-local-SNAPSHOT.jar!www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"))
+        assert list.alreadySaw(new URI("jar:file:/C:/test/path/liquibase-4.0.0-beta1-local-SNAPSHOT.jar!/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd"))
+
+        assert !list.alreadySaw(new URI("file:///C:/test/path/liquibase-4.0.0-beta1-local-SNAPSHOT.jar!www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd"))
+        assert !list.alreadySaw(new URI("jar:file:/C:/test/path/liquibase-4.0.0-beta1-local-SNAPSHOT.jar!/www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd"))
+    }
 }

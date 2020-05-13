@@ -10,13 +10,13 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.logging.Logger;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.executor.ExecutorService;
 
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -28,11 +28,21 @@ import java.util.*;
  * Encapsulates PostgreSQL database support.
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
+    private String dbFullVersion=null;
     public static final String PRODUCT_NAME = "PostgreSQL";
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
+
+    /**
+     * Represents Postgres DB types.
+     * Note: As we know COMMUNITY, RDS and AWS AURORA have the same Postgres engine. We use just COMMUNITY for those 3
+     *       If we need we can extend this ENUM in future
+     */
+    public enum DbTypes {
+        EDB, COMMUNITY, RDS, AURORA
+    }
 
     private Set<String> systemTablesAndViews = new HashSet<>();
 
@@ -108,7 +118,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
 
         int majorVersion = conn.getDatabaseMajorVersion();
-        int minorVersion =conn.getDatabaseMinorVersion();
+        int minorVersion = conn.getDatabaseMinorVersion();
 
         if ((majorVersion < MINIMUM_DBMS_MAJOR_VERSION) || ((majorVersion == MINIMUM_DBMS_MAJOR_VERSION) &&
             (minorVersion < MINIMUM_DBMS_MINOR_VERSION))) {
@@ -167,18 +177,23 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if ((setting != null) && "on".equals(setting)) {
-                        LOG.warning(LogType.LOG, "EnterpriseDB " + conn.getURL() + " does not store DATE columns. Instead, it auto-converts " +
+                        LOG.warning("EnterpriseDB " + conn.getURL() + " does not store DATE columns. Instead, it auto-converts " +
                                 "them " +
                                 "to TIMESTAMPs. (edb_redwood_date=true)");
                     }
                 }
             } catch (SQLException | DatabaseException e) {
-                LOG.info(LogType.LOG, "Cannot check pg_settings", e);
+                LOG.info("Cannot check pg_settings", e);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
         }
 
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName.replace("\"", "");
     }
 
     @Override
@@ -206,17 +221,38 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getAutoIncrementClause() {
-        return "";
+        try {
+            if (getDatabaseMajorVersion() < 10) {
+                return "";
+            }
+        } catch (DatabaseException e) {
+            return "";
+        }
+        return super.getAutoIncrementClause();
     }
 
     @Override
     public boolean generateAutoIncrementStartWith(BigInteger startWith) {
-        return false;
+        try {
+            if (getDatabaseMajorVersion() < 10) {
+                return false;
+            }
+        } catch (DatabaseException e) {
+            return false;
+        }
+        return super.generateAutoIncrementStartWith(startWith);
     }
 
     @Override
     public boolean generateAutoIncrementBy(BigInteger incrementBy) {
-        return false;
+        try {
+            if (getDatabaseMajorVersion() < 10) {
+                return false;
+            }
+        } catch (DatabaseException e) {
+            return false;
+        }
+        return super.generateAutoIncrementBy(incrementBy);
     }
 
     /**
@@ -293,7 +329,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             minor = getDatabaseMinorVersion();
         } catch (DatabaseException x) {
             Scope.getCurrentScope().getLog(getClass()).warning(
-                    LogType.LOG, "Unable to determine exact database server version"
+                    "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;
@@ -314,4 +350,38 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public CatalogAndSchema.CatalogAndSchemaCase getSchemaAndCatalogCase() {
         return CatalogAndSchema.CatalogAndSchemaCase.LOWER_CASE;
     }
+
+    public String getDatabaseFullVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            throw new DatabaseException("Connection not set. Can not get database version. " +
+                    "Postgres Database wasn't initialized in proper way !");
+        }
+        if (dbFullVersion != null){
+            return dbFullVersion;
+        }
+        final String sqlToGetVersion = "SELECT version()";
+        List<?> result = ExecutorService.getInstance().
+                getExecutor(this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
+        if (result != null && !result.isEmpty()){
+            return dbFullVersion = result.get(0).toString();
+        }
+
+        throw new DatabaseException("Connection set to Postgres type we don't support !");
+    }
+
+    /**
+     * Method to get Postgres DB type
+     * @return Db types
+     * */
+    public DbTypes getDbType() {
+        boolean enterpriseDb = false;
+        try {
+            enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
+        } catch (DatabaseException e) {
+            Scope.getCurrentScope().getLog(getClass()).severe("Can't get full version of Postgres DB. Used EDB as default", e);
+            return  DbTypes.EDB;
+        }
+        return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
+    }
+
 }

@@ -14,8 +14,6 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -23,7 +21,6 @@ import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import java.io.*;
@@ -53,6 +50,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private static final Long SECS_IN_MILLIS = 1000L;
     private static final Long MIN_IN_MILLIS = SECS_IN_MILLIS * 60;
     private static final Long HOUR_IN_MILLIS = MIN_IN_MILLIS * 60;
+
+    protected Integer maxStreamGobblerOutput = null;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -127,7 +126,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
+                Scope.getCurrentScope().getLog(getClass()).info("Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
         }
@@ -223,11 +222,19 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 (GlobalConfiguration.class).getOutputEncoding());
 
         if (errorStreamOut != null && !errorStreamOut.isEmpty()) {
-            Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, errorStreamOut);
+            Scope.getCurrentScope().getLog(getClass()).severe(errorStreamOut);
         }
-        Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, infoStreamOut);
+        Scope.getCurrentScope().getLog(getClass()).info(infoStreamOut);
 
         processResult(returnCode, errorStreamOut, infoStreamOut, database);
+    }
+
+    /**
+     * Max bytes to copy from output to {@link #processResult(int, String, String, Database)}. If null, process all output.
+     * @return
+     */
+    protected Integer getMaxStreamGobblerOutput() {
+        return maxStreamGobblerOutput;
     }
 
     /**
@@ -316,7 +323,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
      */
     protected void processResult(int returnCode, String errorStreamOut, String infoStreamOut, Database database) {
         if (returnCode != 0) {
-            throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
+            throw new RuntimeException(getCommandString() + " returned a code of " + returnCode);
         }
     }
 
@@ -368,6 +375,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         private static final int THREAD_SLEEP_MILLIS = 100;
         private final OutputStream outputStream;
         private InputStream processStream;
+        boolean loggedTruncated = false;
+        long copiedSize = 0;
 
         private StreamGobbler(InputStream processStream, ByteArrayOutputStream outputStream) {
             this.processStream = processStream;
@@ -380,7 +389,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 BufferedInputStream bufferedInputStream = new BufferedInputStream(processStream);
                 while (processStream != null) {
                     if (bufferedInputStream.available() > 0) {
-                        StreamUtil.copy(bufferedInputStream, outputStream);
+                        copy(bufferedInputStream, outputStream);
                     }
                     try {
                         Thread.sleep(THREAD_SLEEP_MILLIS);
@@ -399,12 +408,31 @@ public class ExecuteShellCommandChange extends AbstractChange {
             this.processStream = null;
 
             try {
-                StreamUtil.copy(procStream, outputStream);
+                copy(procStream, outputStream);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         }
+
+        public void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+            Integer maxToCopy = getMaxStreamGobblerOutput();
+            byte[] bytes = new byte[1024];
+            int r = inputStream.read(bytes);
+            while (r > 0) {
+                if (maxToCopy != null && copiedSize > maxToCopy) {
+                    if (!loggedTruncated) {
+                        outputStream.write("...[TRUNCATED]...".getBytes());
+                        loggedTruncated = true;
+                    }
+                } else {
+                    outputStream.write(bytes, 0, r);
+                }
+                r = inputStream.read(bytes);
+                copiedSize += r;
+            }
+        }
+
 
     }
 

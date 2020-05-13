@@ -43,6 +43,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     protected void addRootPath(Path path) {
+        Scope.getCurrentScope().getLog(getClass()).fine("Adding path "+path+" to resourceAccessor "+getClass().getName());
         rootPaths.add(path);
     }
 
@@ -84,34 +85,36 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             if (isCompressedFile(rootPath)) {
                 String finalPath = streamPath;
 
-                try (ZipFile zipFile = new ZipFile(rootPath.toFile())) {
-                    if (relativeTo != null) {
-                        ZipEntry relativeEntry = zipFile.getEntry(relativeTo);
-                        if (relativeEntry == null || relativeEntry.isDirectory()) {
-                            //not a file, maybe a directory
-                            finalPath = relativeTo + "/" + streamPath;
+                // Can't close zipFile here, as we are (possibly) returning its child stream
+                ZipFile zipFile = new ZipFile(rootPath.toFile());
+                if (relativeTo != null) {
+                    ZipEntry relativeEntry = zipFile.getEntry(relativeTo);
+                    if (relativeEntry == null || relativeEntry.isDirectory()) {
+                        //not a file, maybe a directory
+                        finalPath = relativeTo + "/" + streamPath;
+                    } else {
+                        //is a file, find path relative to parent
+                        String actualRelativeTo = relativeTo;
+                        if (actualRelativeTo.contains("/")) {
+                            actualRelativeTo = relativeTo.replaceFirst("/[^/]+?$", "");
                         } else {
-                            //is a file, find path relative to parent
-                            String actualRelativeTo = relativeTo;
-                            if (actualRelativeTo.contains("/")) {
-                                actualRelativeTo = relativeTo.replaceFirst("/[^/]+?$", "");
-                            } else {
-                                actualRelativeTo = "";
-                            }
-                            finalPath = actualRelativeTo + "/" + streamPath;
+                            actualRelativeTo = "";
                         }
-
+                        finalPath = actualRelativeTo + "/" + streamPath;
                     }
 
+                }
 
-                    //resolve any ..'s and duplicated /'s and convert back to standard '/' separator format
-                    finalPath = Paths.get(finalPath.replaceFirst("^/", "")).normalize().toString().replace("\\", "/");
+                //resolve any ..'s and duplicated /'s and convert back to standard '/' separator format
+                finalPath = Paths.get(finalPath.replaceFirst("^/", "")).normalize().toString().replace("\\", "/");
 
-                    ZipEntry entry = zipFile.getEntry(finalPath);
-                    if (entry != null) {
-                        stream = zipFile.getInputStream(entry);
-                        streamURI = URI.create(rootPath.normalize().toUri() + "!" + entry.toString());
-                    }
+                ZipEntry entry = zipFile.getEntry(finalPath);
+                if (entry != null) {
+                    // closing this stream will close zipFile
+                    stream = new CloseChildWillCloseParentStream(zipFile.getInputStream(entry), zipFile);
+                    streamURI = URI.create(rootPath.normalize().toUri() + "!" + entry.toString());
+                } else {
+                    zipFile.close();
                 }
             } else {
                 Path finalRootPath = rootPath;
@@ -263,7 +266,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
      * Returns true if the given path is a compressed file.
      */
     protected boolean isCompressedFile(Path path) {
-        return path != null && (path.toString().startsWith("jar:") || path.toString().toLowerCase().endsWith(".jar") || path.toString().toLowerCase().endsWith(".zip"));
+        return path != null && path.toFile().exists() && (path.toString().startsWith("jar:") || path.toString().toLowerCase().endsWith(".jar") || path.toString().toLowerCase().endsWith(".zip"));
     }
 
     @Override
@@ -271,5 +274,19 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         return getClass().getName() + " (" + StringUtil.join(getRootPaths(), ", ", new StringUtil.ToStringFormatter()) + ")";
     }
 
+    private static class CloseChildWillCloseParentStream extends FilterInputStream {
 
+        private final Closeable parent;
+
+        protected CloseChildWillCloseParentStream(InputStream in, Closeable parent) {
+            super(in);
+            this.parent = parent;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            parent.close();
+        }
+    }
 }

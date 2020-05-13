@@ -6,7 +6,7 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * Marks all unapplied changes to the database as applied in the change log.
+ * <p>Marks all unapplied changes to the database as applied in the change log.</p>
  * 
  * @author JAmes Atwill
  * @goal changelogSync

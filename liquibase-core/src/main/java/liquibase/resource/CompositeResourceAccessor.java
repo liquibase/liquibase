@@ -20,11 +20,17 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         this.resourceAccessors = new ArrayList<>(resourceAccessors);
     }
 
+    public CompositeResourceAccessor addResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessors.add(resourceAccessor);
+
+        return this;
+    }
+
     @Override
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList returnList = new InputStreamList();
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnList.addAll(accessor.openStreams(null, streamPath));
+            returnList.addAll(accessor.openStreams(relativeTo, streamPath));
         }
         return returnList;
     }
@@ -33,7 +39,10 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
         SortedSet<String> returnSet = new TreeSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            returnSet.addAll(accessor.list(relativeTo, path, recursive, includeFiles, includeDirectories));
+            final SortedSet<String> list = accessor.list(relativeTo, path, recursive, includeFiles, includeDirectories);
+            if (list != null) {
+                returnSet.addAll(list);
+            }
         }
 
         return returnSet;

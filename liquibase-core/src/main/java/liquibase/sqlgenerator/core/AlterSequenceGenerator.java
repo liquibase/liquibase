@@ -34,7 +34,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         }
 
         validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, HsqlDatabase.class, DB2Database.class);
-
+        validationErrors.checkDisallowedField("dataType", alterSequenceStatement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class);
         validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
 
         return validationErrors;
@@ -42,12 +42,16 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
 
     @Override
     public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
 
+        if (statement.getDataType() != null) {
+            buffer.append(" AS ").append(statement.getDataType());
+        }
+
         if (statement.getIncrementBy() != null) {
-                buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
         }
 
         if (statement.getMinValue() != null) {
@@ -68,7 +72,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase)) {
+        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
             if (statement.getCacheSize().equals(BigInteger.ZERO)) {
                 buffer.append(" NOCACHE ");
             } else {
@@ -76,7 +80,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if ((statement.getCycle() != null) && (database instanceof OracleDatabase)) {
+        if ((statement.getCycle() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
             if (statement.getCycle()) {
                 buffer.append(" CYCLE ");
             } else {

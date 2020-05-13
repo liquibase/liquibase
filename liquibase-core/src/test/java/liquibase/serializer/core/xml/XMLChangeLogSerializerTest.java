@@ -65,7 +65,6 @@ public class XMLChangeLogSerializerTest {
         assertEquals("column", ((Element) columns.item(0)).getTagName());
         assertEquals("NEWCOL", ((Element) columns.item(0)).getAttribute("name"));
         assertEquals("TYP", ((Element) columns.item(0)).getAttribute("type"));
-
     }
 
     @Test
@@ -150,6 +149,7 @@ public class XMLChangeLogSerializerTest {
         change.setColumnNames("COL_HERE");
         change.setConstraintName("PK_NAME");
         change.setTablespace("TABLESPACE_NAME");
+        change.setValidate(true);
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addPrimaryKey", node.getTagName());
@@ -158,6 +158,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("COL_HERE", node.getAttribute("columnNames"));
         assertEquals("PK_NAME", node.getAttribute("constraintName"));
         assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
+        assertEquals("true", node.getAttribute("validate"));
     }
 
     @Test
@@ -180,7 +181,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("COL_HERE", node.getAttribute("columnNames"));
         assertEquals("PK_NAME", node.getAttribute("constraintName"));
         assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
-        assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
+        assertEquals("true", node.getAttribute("disabled"));
         assertEquals("true", node.getAttribute("deferrable"));
         assertEquals("true", node.getAttribute("initiallyDeferred"));
         assertEquals("true", node.getAttribute("validate"));
@@ -232,7 +233,10 @@ public class XMLChangeLogSerializerTest {
 
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setDeferrable(Boolean.TRUE);
-        constraints.setShouldValidate(Boolean.TRUE);
+        constraints.setShouldValidateNullable(Boolean.TRUE);
+        constraints.setShouldValidateUnique(Boolean.TRUE);
+        constraints.setShouldValidatePrimaryKey(Boolean.TRUE);
+        constraints.setShouldValidateForeignKey(Boolean.TRUE);
         constraints.setDeleteCascade(true);
         constraints.setForeignKeyName("FK_NAME");
         constraints.setInitiallyDeferred(true);
@@ -250,9 +254,12 @@ public class XMLChangeLogSerializerTest {
         assertEquals("some value here", element.getAttribute("value"));
 
         Element constraintsElement = (Element) element.getChildNodes().item(0);
-        assertEquals(9, constraintsElement.getAttributes().getLength());
+        assertEquals(12, constraintsElement.getAttributes().getLength());
         assertEquals("true", constraintsElement.getAttribute("deferrable"));
-        assertEquals("true", constraintsElement.getAttribute("validate"));
+        assertEquals("true", constraintsElement.getAttribute("validateNullable"));
+        assertEquals("true", constraintsElement.getAttribute("validateUnique"));
+        assertEquals("true", constraintsElement.getAttribute("validatePrimaryKey"));
+        assertEquals("true", constraintsElement.getAttribute("validateForeignKey"));
         assertEquals("true", constraintsElement.getAttribute("deleteCascade"));
         assertEquals("FK_NAME", constraintsElement.getAttribute("foreignKeyName"));
         assertEquals("true", constraintsElement.getAttribute("initiallyDeferred"));
@@ -260,7 +267,6 @@ public class XMLChangeLogSerializerTest {
         assertEquals("true", constraintsElement.getAttribute("primaryKey"));
         assertEquals("state(id)", constraintsElement.getAttribute("references"));
         assertEquals("true", constraintsElement.getAttribute("unique"));
-
     }
 
     @Test
@@ -738,7 +744,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("OLD_NAME", node.getAttribute("oldTableName"));
         assertEquals("NEW_NAME", node.getAttribute("newTableName"));
     }
-    
+
     @Test
     public void createNode_RenameSequenceChange() throws Exception {
         RenameSequenceChange refactoring = new RenameSequenceChange();
@@ -774,7 +780,6 @@ public class XMLChangeLogSerializerTest {
         String fileName = "liquibase/change/core/SQLFileTestData.sql";
         SQLFileChange change = new SQLFileChange();
         ClassLoaderResourceAccessor opener = new ClassLoaderResourceAccessor();
-        change.setResourceAccessor(opener);
         change.setPath(fileName);
 
         Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);

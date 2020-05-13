@@ -12,9 +12,8 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.database.core.MockDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -125,7 +124,9 @@ public abstract class AbstractExecuteTest {
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
                 String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
                 try {
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.WRITE_SQL, sqlToRun);
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.writeSqlWillRun(sqlToRun);
+                    }
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
                     System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
@@ -154,7 +155,7 @@ public abstract class AbstractExecuteTest {
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {
-        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null));
+        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null, null, null));
     }
 
     private boolean shouldTestDatabase(Database database, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) {

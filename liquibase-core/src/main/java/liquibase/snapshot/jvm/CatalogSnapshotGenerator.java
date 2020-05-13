@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
@@ -53,6 +54,9 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected boolean isDefaultCatalog(Catalog match, Database database) {
+        if (CatalogAndSchema.CatalogAndSchemaCase.ORIGINAL_CASE.equals(database.getSchemaAndCatalogCase())) {
+            return (match.getName() == null || match.getName().equals(database.getDefaultCatalogName()));
+        }
         return ((match.getName() == null) || match.getName().equalsIgnoreCase(database.getDefaultCatalogName()));
     }
 
@@ -60,5 +64,5 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         //nothing to add to
     }
-    
+
 }

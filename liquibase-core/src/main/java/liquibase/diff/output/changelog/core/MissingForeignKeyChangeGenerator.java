@@ -54,7 +54,7 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
 
         String missingPrimaryKeyCatalogName = StringUtil.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         if (referenceDatabase.supportsCatalogs()) {
-            if (control.getIncludeCatalog()) {
+            if (control.getIncludeCatalog() || control.considerCatalogsAsSchemas()) {
                 change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
                 includedCatalog = true;
             } else if (!defaultCatalogName.equalsIgnoreCase(missingPrimaryKeyCatalogName)) {
@@ -104,15 +104,9 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
         change.setOnDelete(fk.getDeleteRule());
 
         Index backingIndex = fk.getBackingIndex();
-//        if (backingIndex == null) {
-//            Index exampleIndex = new Index().setTable(fk.getForeignKeyTable());
-//            for (String col : fk.getForeignKeyColumns().split("\\s*,\\s*")) {
-//                exampleIndex.getColumns().add(col);
-//            }
-//            control.setAlreadyHandledMissing(exampleIndex);
-//        } else {
+        if (referenceDatabase.createsIndexesForForeignKeys()) {
             control.setAlreadyHandledMissing(backingIndex);
-//        }
+        }
 
         return new Change[] { change };
     }

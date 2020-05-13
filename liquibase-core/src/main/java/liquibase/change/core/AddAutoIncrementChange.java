@@ -39,6 +39,8 @@ public class AddAutoIncrementChange extends AbstractChange {
     private String columnDataType;
     private BigInteger startWith;
     private BigInteger incrementBy;
+    private Boolean defaultOnNull;
+    private String generationType;
 
     @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.catalog")
     public String getCatalogName() {
@@ -103,7 +105,23 @@ public class AddAutoIncrementChange extends AbstractChange {
     public void setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
     }
+@DatabaseChangeProperty(exampleValue = "true", since = "3.6")
+    public Boolean getDefaultOnNull() {
+        return defaultOnNull;
+    }
 
+    public void setDefaultOnNull(Boolean defaultOnNull) {
+        this.defaultOnNull = defaultOnNull;
+    }
+
+    @DatabaseChangeProperty(exampleValue = "ALWAYS", since = "3.6")
+    public String getGenerationType() {
+        return generationType;
+    }
+
+    public void setGenerationType(String generationType) {
+        this.generationType = generationType;
+    }
     @Override
     public SqlStatement[] generateStatements(Database database) {
         if (database instanceof PostgresDatabase) {
@@ -135,7 +153,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         }
 
         return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(),
-            getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
+            getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy(), getDefaultOnNull(), getGenerationType())};
     }
 
     @Override
@@ -162,6 +180,14 @@ public class AddAutoIncrementChange extends AbstractChange {
             if ((getIncrementBy() != null) && (column.getAutoIncrementInformation().getIncrementBy() != null)) {
                 result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()),
                      "Increment by incorrect");
+            }
+
+            if (getGenerationType() != null && column.getAutoIncrementInformation().getGenerationType() != null) {
+                result.assertCorrect(getGenerationType().equals(column.getAutoIncrementInformation().getGenerationType()), "Generation type is incorrect");
+            }
+
+            if (getDefaultOnNull() != null && column.getAutoIncrementInformation().getDefaultOnNull() != null) {
+                result.assertCorrect(getDefaultOnNull().equals(column.getAutoIncrementInformation().getDefaultOnNull()), "Default on null is incorrect");
             }
 
             return result;

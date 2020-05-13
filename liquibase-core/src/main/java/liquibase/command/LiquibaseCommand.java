@@ -17,5 +17,4 @@ public interface LiquibaseCommand<T extends CommandResult> {
     T execute() throws CommandExecutionException;
 
     int getPriority(String commandName);
-
 }

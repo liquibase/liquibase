@@ -268,7 +268,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
-        
+
         oldFile.delete();
         newFile.renameTo(oldFile);
     }

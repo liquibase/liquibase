@@ -1,6 +1,7 @@
 package liquibase.changelog.filter;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
@@ -29,7 +30,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
                 Date thisDate = ranChangeSet.getDateExecuted();
                 if ((existingDate != null) && (thisDate != null)) {
                     int comparedDates = thisDate.compareTo(existingDate);
-                    if (comparedDates < 0) {
+                    if (comparedDates > 0) {
                         addToSet = true;
                     } else if (comparedDates == 0) {
                         Integer existingOrder = existingChangeSet.getOrderExecuted();
@@ -98,20 +99,11 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
 
     private String getPath(RanChangeSet ranChangeSet) {
-        return normalizePath(ranChangeSet.getChangeLog());
+        return DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog());
     }
 
     private String getPath(ChangeSet changeSet) {
-        return normalizePath(changeSet.getFilePath());
+        return DatabaseChangeLog.normalizePath(changeSet.getFilePath());
     }
 
-    protected String normalizePath(String filePath) {
-        if (filePath == null) {
-            return null;
-        }
-        if (ignoreClasspathPrefix) {
-            return filePath.replaceFirst("^classpath:", "");
-        }
-        return filePath;
-    }
 }

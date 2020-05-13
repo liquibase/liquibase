@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml
 
+import org.junit.Test;
 
 import spock.lang.Specification
 

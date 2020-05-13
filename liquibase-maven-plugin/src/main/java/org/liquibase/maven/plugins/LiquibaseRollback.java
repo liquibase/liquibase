@@ -14,8 +14,9 @@ import java.text.ParseException;
 import java.util.Date;
 
 /**
- * Invokes Liquibase rollbacks the database to the specified using
- * pointing attributes 'rollbackCount', 'rollbackTag' and/or 'rollbackDate'
+ * <p>Invokes Liquibase to rollback the database (and mark changesets as unapplied). The
+ * change sets to be rolled back are specified using attributes 'rollbackCount',
+ * 'rollbackTag' and/or 'rollbackDate'</p>
  * @author Peter Murray
  * @goal rollback
  */
@@ -28,13 +29,13 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
 
   /**
    * The tag to roll the database back to. 
-   * @parameter expression="${liquibase.rollbackTag}"
+   * @parameter property="liquibase.rollbackTag"
    */
   protected String rollbackTag;
 
   /**
    * The number of change sets to rollback.
-   * @parameter expression="${liquibase.rollbackCount}" default-value="-1"
+   * @parameter property="liquibase.rollbackCount" default-value="-1"
    */
   protected int rollbackCount;
 
@@ -42,7 +43,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
    * The date to rollback the database to. The format of the date must match either an ISO date format, or that of the
    * <code>DateFormat.getDateInstance()</code> for the platform the plugin is executing
    * on.
-   * @parameter expression="${liquibase.rollbackDate}"
+   * @parameter property="liquibase.rollbackDate"
    */
   protected String rollbackDate;
 

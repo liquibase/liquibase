@@ -16,8 +16,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
@@ -83,7 +81,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             lockService.waitForLock();
 
             for (CatalogAndSchema schema : schemas) {
-                log.info(LogType.LOG, "Dropping Database Objects in schema: " + schema);
+                log.info("Dropping Database Objects in schema: " + schema);
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }
