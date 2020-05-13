@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.Scope;
 import liquibase.change.core.LoadDataChange;
-import liquibase.change.core.VariableConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;

@@ -8,13 +8,11 @@ import liquibase.change.custom.CustomSqlChange
 import liquibase.change.custom.ExampleCustomSqlChange
 import liquibase.changelog.ChangeLogParameters
 import liquibase.logging.Logger
-import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.SequenceCurrentValueFunction
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.changelog.ChangeSet
-import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 import spock.lang.Unroll
 

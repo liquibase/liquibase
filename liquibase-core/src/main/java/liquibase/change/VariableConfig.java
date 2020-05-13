@@ -1,4 +1,4 @@
-package liquibase.change.core;
+package liquibase.change;
 
 
 import liquibase.parser.core.ParsedNode;

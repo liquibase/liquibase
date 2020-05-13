@@ -2,19 +2,18 @@ package liquibase.change.core
 
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
+import liquibase.change.VariableConfig
 import liquibase.changelog.ChangeSet
 import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
-import liquibase.parser.core.ParsedNodeException
-import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.ResourceAccessor
 import liquibase.database.core.MockDatabase
+import liquibase.parser.core.ParsedNodeException
+import liquibase.resource.ResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
-import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
 import spock.lang.Unroll
 
@@ -230,8 +229,8 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "21" == ((InsertStatement) sqlStatements[1]).getColumnValue("age").toString()
         Boolean.FALSE == ((InsertStatement) sqlStatements[1]).getColumnValue("active")
     }
-    
-        def "generateStatement_uuid not using InsertStatement"() throws Exception {
+
+    def "generateStatement_uuid not using InsertStatement"() throws Exception {
         when:
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -256,12 +255,12 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assert sqlStatements[1] instanceof InsertStatement
         println sqlStatements[0]
         println sqlStatements[1]
-        
+
         "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
         "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
         "c7ac2480-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[0]).getColumnValue("id")
         "NULL" == ((InsertStatement) sqlStatements[0]).getColumnValue("parent_id")
-        
+
         "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
         "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
         "c801be90-bc96-11e2-a300-64315073a768" == ((InsertStatement) sqlStatements[1]).getColumnValue("id")
@@ -414,5 +413,23 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         then:
         assert md5sum1.equals(md5sum2)
+    }
+
+    def "test variables setting and getting"() {
+        when:
+        LoadDataChange refactoring = new LoadDataChange()
+        VariableConfig var1 = new VariableConfig()
+        var1.setName("var1")
+        VariableConfig var2 = new VariableConfig()
+        var2.setName("var2")
+        refactoring.addVariable(var1)
+        refactoring.addVariable(var2)
+
+        then:
+        assert refactoring.getVariables().size() == 2
+        assert refactoring.getVariables().contains(var1)
+        assert refactoring.getVariables().contains(var2)
+        assert refactoring.isVariable("var1")
+        assert !refactoring.isVariable("var3")
     }
 }
