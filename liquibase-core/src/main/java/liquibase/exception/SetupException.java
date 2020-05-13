@@ -6,8 +6,6 @@ package liquibase.exception;
  * 
  * A message must always be provided, if none is then the message
  * from the cause exception will be used.
- * 
- * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  *
  */
 public class SetupException extends LiquibaseException {

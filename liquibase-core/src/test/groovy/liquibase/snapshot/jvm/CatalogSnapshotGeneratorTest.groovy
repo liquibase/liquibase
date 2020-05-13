@@ -2,7 +2,7 @@ package liquibase.snapshot.jvm
 
 import liquibase.database.Database
 import liquibase.exception.DatabaseException
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockDatabaseSnapshot
 import liquibase.structure.core.Catalog
 import spock.lang.Specification

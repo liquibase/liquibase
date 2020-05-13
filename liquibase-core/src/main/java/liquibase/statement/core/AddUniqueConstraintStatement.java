@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
@@ -12,6 +12,9 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private ColumnConfig[] columns;
     private String constraintName;
     private String tablespace;
+
+    private boolean clustered;
+    private boolean shouldValidate = true; //only Oracle PL/SQL feature
 
     private boolean deferrable;
     private boolean initiallyDeferred;
@@ -46,7 +49,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     }
 
     public String getColumnNames() {
-        return StringUtils.join(columns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+        return StringUtil.join(columns, ", ", new StringUtil.StringUtilFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig obj) {
                 return obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : "");
@@ -66,6 +69,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         this.tablespace = tablespace;
         return this;
     }
+
     public boolean isDeferrable() {
         return deferrable;
     }
@@ -84,13 +88,22 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         return this;
     }
 
+    public boolean isDisabled() {
+        return disabled;
+    }
+
     public AddUniqueConstraintStatement setDisabled(boolean disabled) {
-        this.disabled= disabled;
+        this.disabled = disabled;
         return this;
     }
 
-    public boolean isDisabled() {
-        return disabled;
+    public AddUniqueConstraintStatement setClustered(boolean clustered) {
+        this.clustered= clustered;
+        return this;
+    }
+
+    public boolean isClustered() {
+        return clustered;
     }
 
     public String getForIndexName() {
@@ -115,5 +128,27 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
     public void setForIndexCatalogName(String forIndexCatalogName) {
         this.forIndexCatalogName = forIndexCatalogName;
+    }
+
+    /**
+     * In Oracle PL/SQL, the VALIDATE keyword defines whether a newly added unique constraint on a 
+     * column in a table should cause existing rows to be checked to see if they satisfy the 
+     * uniqueness constraint or not. 
+     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
+     */
+    public boolean shouldValidate() {
+        return shouldValidate;
+    }
+
+    /**
+     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+     * check will be done to ensure old data has valid constraints - only new data would be checked
+     * to see if it complies with the constraint logic. The default state for unique constraints is to
+     * have 'ENABLE VALIDATE' set.
+     */
+    public AddUniqueConstraintStatement setShouldValidate(boolean shouldValidate) {
+        this.shouldValidate = shouldValidate;
+        return this;
     }
 }

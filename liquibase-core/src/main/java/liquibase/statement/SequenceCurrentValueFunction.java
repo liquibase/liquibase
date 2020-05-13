@@ -5,7 +5,17 @@ package liquibase.statement;
  */
 public class SequenceCurrentValueFunction extends DatabaseFunction {
 
+    private String sequenceSchemaName;
+
     public SequenceCurrentValueFunction(String sequenceName) {
         super(sequenceName);
+    }
+
+    public String getSequenceSchemaName() {
+        return sequenceSchemaName;
+    }
+
+    public void setSequenceSchemaName(String sequenceSchemaName) {
+        this.sequenceSchemaName = sequenceSchemaName;
     }
 }

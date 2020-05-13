@@ -4,9 +4,9 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
@@ -37,6 +37,8 @@ public class AddDefaultValueChange extends AbstractChange {
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
     private SequenceNextValueFunction defaultValueSequenceNext;
+
+    private String defaultValueConstraintName;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -172,6 +174,14 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueSequenceNext = defaultValueSequenceNext;
     }
 
+    public String getDefaultValueConstraintName() {
+        return defaultValueConstraintName;
+    }
+
+    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
+        this.defaultValueConstraintName = defaultValueConstraintName;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         Object defaultValue = null;
@@ -196,10 +206,14 @@ public class AddDefaultValueChange extends AbstractChange {
             defaultValue = getDefaultValueComputed();
         } else if (getDefaultValueSequenceNext() != null) {
             defaultValue = getDefaultValueSequenceNext();
+            ((SequenceNextValueFunction) defaultValue).setSequenceSchemaName(this.getSchemaName());
         }
 
+        AddDefaultValueStatement statement = new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue);
+        statement.setDefaultValueConstraintName(this.getDefaultValueConstraintName());
+
         return new SqlStatement[]{
-                new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
+                statement
         };
     }
 

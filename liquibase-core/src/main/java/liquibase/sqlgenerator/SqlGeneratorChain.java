@@ -9,16 +9,16 @@ import liquibase.statement.SqlStatement;
 import java.util.Iterator;
 import java.util.SortedSet;
 
-public class SqlGeneratorChain {
-    private Iterator<SqlGenerator> sqlGenerators;
+public class SqlGeneratorChain<T extends SqlStatement> {
+    private Iterator<SqlGenerator<T>> sqlGenerators;
 
-    public SqlGeneratorChain(SortedSet<SqlGenerator> sqlGenerators) {
+    public SqlGeneratorChain(SortedSet<SqlGenerator<T>> sqlGenerators) {
         if (sqlGenerators != null) {
             this.sqlGenerators = sqlGenerators.iterator();
         }
     }
 
-    public Sql[] generateSql(SqlStatement statement, Database database) {
+    public Sql[] generateSql(T statement, Database database) {
         if (sqlGenerators == null) {
             return null;
         }
@@ -30,16 +30,16 @@ public class SqlGeneratorChain {
         return sqlGenerators.next().generateSql(statement, database, this);
     }
 
-    public Warnings warn(SqlStatement statement, Database database) {
-        if (sqlGenerators == null || !sqlGenerators.hasNext()) {
+    public Warnings warn(T statement, Database database) {
+        if ((sqlGenerators == null) || !sqlGenerators.hasNext()) {
             return new Warnings();
         }
 
         return sqlGenerators.next().warn(statement, database, this);
     }
 
-    public ValidationErrors validate(SqlStatement statement, Database database) {
-        if (sqlGenerators == null || !sqlGenerators.hasNext()) {
+    public ValidationErrors validate(T statement, Database database) {
+        if ((sqlGenerators == null) || !sqlGenerators.hasNext()) {
             return new ValidationErrors();
         }
 

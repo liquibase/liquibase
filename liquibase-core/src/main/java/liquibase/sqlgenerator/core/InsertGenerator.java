@@ -15,7 +15,7 @@ import java.util.Date;
 
 public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
-	private boolean previousInsertHasHeader = false;
+	private boolean previousInsertHasHeader;
     @Override
     public ValidationErrors validate(InsertStatement insertStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -32,7 +32,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     @Override
     public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
        
-        StringBuffer sql = new StringBuffer();
+        StringBuilder sql = new StringBuilder();
         
         if(!previousInsertHasHeader) {
         	generateHeader(sql,statement,database);
@@ -50,8 +50,10 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     	this.previousInsertHasHeader = previousInsertHasHeader;
     }
     
-    public void generateHeader(StringBuffer sql,InsertStatement statement, Database database) {
-        sql.append("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");
+    public void generateHeader(StringBuilder sql,InsertStatement statement, Database database) {
+        sql.append("INSERT INTO ")
+            .append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
+            .append(" (");
         for (String column : statement.getColumnValues().keySet()) {
             sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(", ");
         }
@@ -63,14 +65,15 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
         sql.append(") VALUES ");
     }
-    public void generateValues(StringBuffer sql,InsertStatement statement, Database database) {
+
+    public void generateValues(StringBuilder sql,InsertStatement statement, Database database) {
         sql.append("(");
 
         for (String column : statement.getColumnValues().keySet()) {
             Object newValue = statement.getColumnValues().get(column);
-            if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
+            if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
                 sql.append("NULL");
-            } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
+            } else if ((newValue instanceof String) && !looksLikeFunctionCall(((String) newValue), database)) {
                 sql.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
             } else if (newValue instanceof Date) {
                 sql.append(database.getDateLiteral(((Date) newValue)));

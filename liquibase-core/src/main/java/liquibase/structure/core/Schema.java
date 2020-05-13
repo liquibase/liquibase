@@ -3,16 +3,11 @@ package liquibase.structure.core;
 import liquibase.CatalogAndSchema;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
 public class Schema extends AbstractDatabaseObject {
-
-    @Override
-    public DatabaseObject[] getContainingObjects() {
-        return null;
-    }
 
     public Schema() {
         setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
@@ -21,9 +16,9 @@ public class Schema extends AbstractDatabaseObject {
     public Schema(String catalog, String schemaName) {
         this(new Catalog(catalog), schemaName);
     }
-    
+
     public Schema(Catalog catalog, String schemaName) {
-        schemaName = StringUtils.trimToNull(schemaName);
+        schemaName = StringUtil.trimToNull(schemaName);
 
         setAttribute("name", schemaName);
         setAttribute("catalog", catalog);
@@ -31,10 +26,14 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     @Override
+    public DatabaseObject[] getContainingObjects() {
+        return null;
+    }
+
+    @Override
     public String getName() {
         return getAttribute("name", String.class);
     }
-
 
     @Override
     public Schema setName(String name) {
@@ -43,7 +42,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public boolean isDefault() {
-        return getAttribute("default", false);
+        return getAttribute("default", false) || (getName() == null);
     }
 
     public Schema setDefault(Boolean isDefault) {
@@ -68,7 +67,10 @@ public class Schema extends AbstractDatabaseObject {
 
         Schema schema = (Schema) o;
 
-        if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null) return false;
+        if (shouldIncludeCatalogInSpecification()) {
+            if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null)
+                return false;
+        }
         if (getName() != null ? !getName().equalsIgnoreCase(schema.getName()) : schema.getName() != null) return false;
 
         return true;
@@ -76,7 +78,7 @@ public class Schema extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        int result = getCatalog() != null ? getCatalog().hashCode() : 0;
+        int result = (shouldIncludeCatalogInSpecification() && getCatalog() != null) ? getCatalog().hashCode() : 0;
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
         return result;
     }
@@ -97,7 +99,7 @@ public class Schema extends AbstractDatabaseObject {
             schemaName = "DEFAULT";
         }
 
-        if (catalogName == null || catalogName.equals(schemaName)) {
+        if ((catalogName == null) || catalogName.equals(schemaName)) {
             return schemaName;
         } else {
             return catalogName +"."+ schemaName;
@@ -106,7 +108,7 @@ public class Schema extends AbstractDatabaseObject {
 
     public CatalogAndSchema toCatalogAndSchema() {
         String catalogName;
-        if (getCatalog() != null && getCatalog().isDefault()) {
+        if ((getCatalog() != null) && getCatalog().isDefault()) {
             catalogName = null;
         } else {
             catalogName = getCatalogName();
@@ -125,12 +127,13 @@ public class Schema extends AbstractDatabaseObject {
         return getAttribute("objects", Map.class);
     }
 
-    public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {
-        Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) getObjects().get(type);
+    public <T extends DatabaseObject> List<T> getDatabaseObjects(Class<T> type) {
+        Set<T> databaseObjects =
+            (Set<T>) getObjects().get(type);
         if (databaseObjects == null) {
-            return new ArrayList<DatabaseObjectType>();
+            return new ArrayList<>();
         }
-        return new ArrayList<DatabaseObjectType>(databaseObjects);
+        return new ArrayList<>(databaseObjects);
     }
 
     public void addDatabaseObject(DatabaseObject databaseObject) {
@@ -139,7 +142,7 @@ public class Schema extends AbstractDatabaseObject {
         }
         Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
         if (objects == null) {
-            objects = new HashSet<DatabaseObject>();
+            objects = new HashSet<>();
             this.getObjects().put(databaseObject.getClass(), objects);
         }
         objects.add(databaseObject);

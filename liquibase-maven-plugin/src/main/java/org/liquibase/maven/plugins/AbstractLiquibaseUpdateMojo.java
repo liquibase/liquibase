@@ -1,7 +1,7 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 
 /**
  * Liquibase Update Maven plugin. This plugin allows for DatabaseChangeLogs to be
@@ -14,13 +14,13 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
   /**
    * The number of changes to apply to the database. By default this value is 0, which
    * will result in all changes (not already applied to the database) being applied.
-   * @parameter expression="${liquibase.changesToApply}" default-value=0
+   * @parameter property="liquibase.changesToApply" default-value=0
    */
   protected int changesToApply;
 
   /**
    * Update to the changeSet with the given tag command.
-   * @parameter expression="${liquibase.toTag}"
+   * @parameter property="liquibase.toTag"
    */
   protected String toTag;
 

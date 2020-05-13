@@ -1,23 +1,18 @@
 package liquibase.changelog.visitor;
 
-import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.dbdoc.*;
-import liquibase.diff.compare.CompareControl;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
 
@@ -29,33 +24,29 @@ import java.util.*;
 
 public class DBDocVisitor implements ChangeSetVisitor {
 
+    private static final int MAX_RECENT_CHANGE = 50;
     private Database database;
-
     private SortedSet<ChangeLogInfo> changeLogs;
     private Map<DatabaseObject, List<Change>> changesByObject;
     private Map<String, List<Change>> changesByAuthor;
-
     private Map<DatabaseObject, List<Change>> changesToRunByObject;
     private Map<String, List<Change>> changesToRunByAuthor;
     private List<Change> changesToRun;
     private List<Change> recentChanges;
-
     private String rootChangeLogName;
     private DatabaseChangeLog rootChangeLog;
-
-    private static final int MAX_RECENT_CHANGE = 50;
 
     public DBDocVisitor(Database database) {
         this.database = database;
 
-        changesByObject = new HashMap<DatabaseObject, List<Change>>();
-        changesByAuthor = new HashMap<String, List<Change>>();
-        changeLogs = new TreeSet<ChangeLogInfo>();
+        changesByObject = new HashMap<>();
+        changesByAuthor = new HashMap<>();
+        changeLogs = new TreeSet<>();
 
-        changesToRunByObject = new HashMap<DatabaseObject, List<Change>>();
-        changesToRunByAuthor = new HashMap<String, List<Change>>();
-        changesToRun = new ArrayList<Change>();
-        recentChanges = new ArrayList<Change>();
+        changesToRunByObject = new HashMap<>();
+        changesToRunByAuthor = new HashMap<>();
+        changesToRun = new ArrayList<>();
+        recentChanges = new ArrayList<>();
     }
 
     @Override
@@ -118,7 +109,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, LiquibaseException, DatabaseHistoryException {
+    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException,
+        LiquibaseException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
@@ -135,7 +127,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
-        SortedSet<Table> tables = new TreeSet<Table>(snapshot.get(Table.class));
+        SortedSet<Table> tables = new TreeSet<>(snapshot.get(Table.class));
         Iterator<Table> tableIterator = tables.iterator();
         while (tableIterator.hasNext()) {
             if (database.isLiquibaseObject(tableIterator.next())) {
@@ -208,7 +200,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if ((o == null) || (getClass() != o.getClass())) return false;
 
             ChangeLogInfo that = (ChangeLogInfo) o;
 

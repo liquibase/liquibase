@@ -1,13 +1,11 @@
 package liquibase.database.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link MariaDBDatabase}

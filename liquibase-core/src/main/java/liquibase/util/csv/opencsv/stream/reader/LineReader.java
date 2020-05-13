@@ -40,10 +40,10 @@ public class LineReader {
 
     private String readUntilNewline() throws IOException {
         StringBuilder sb = new StringBuilder(CSVParser.INITIAL_READ_SIZE);
-        for (int c = reader.read(); c > -1 && c != '\n'; c = reader.read()) {
+        for (int c = reader.read(); (c > -1) && (c != '\n'); c = reader.read()) {
             sb.append((char) c);
         }
 
-        return sb.length() > 0 ? sb.toString() : null;
+        return (sb.length() > 0) ? sb.toString() : null;
     }
 }

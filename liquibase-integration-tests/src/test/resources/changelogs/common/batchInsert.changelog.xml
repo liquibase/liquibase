@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd"
+    logicalFilePath="changelogs/common/batchInsert.changeLog.xml">
+
+    <changeSet id="1" author="jesser">
+        <createTable tableName="products">
+            <column name="id" type="int" />
+            <column name="name" type="varchar(250)" />
+            <column name="price" type="number(8,2)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="jesser">
+        <loadData tableName="products" file="changelogs/common/batchInsert.csv">
+            <column name="id" />
+            <column name="name" />
+            <column name="price" />
+        </loadData>
+    </changeSet>
+
+    <changeSet id="verify_rownum" author="abuschka">
+        <preConditions>
+            <sqlCheck expectedResult="1000">SELECT COUNT(*) FROM products</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="verify_ids" author="abuschka">
+        <preConditions>
+            <!-- IDs are 1..1000, so the SUM of all IDs is SUM(i over 1..1000 ) = 500500 -->
+            <sqlCheck expectedResult="500500">SELECT SUM(id) FROM products</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="verify_strings_variant1" author="abuschka"
+               dbms="db2,derby,h2,hsqldb,informix,mariadb,mysql,oracle,postgres,sqlite,asany,sybase">
+        <preConditions>
+            <!-- After a successful import of the sample CSV file, the number of all characters in all strings of
+                 the name column should match our expectation -->
+            <sqlCheck expectedResult="94763">SELECT SUM(LENGTH(name)) FROM products</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="verify_strings_variant2" author="abuschka" dbms="mssql">
+        <preConditions>
+            <!-- After a successful import of the sample CSV file, the number of all characters in all strings of
+                 the name column should match our expectation -->
+            <sqlCheck expectedResult="94763">SELECT SUM(LEN(name)) FROM products</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="verify_strings_variant3" author="abuschka" dbms="firebird">
+        <preConditions>
+            <!-- After a successful import of the sample CSV file, the number of all characters in all strings of
+                 the name column should match our expectation -->
+            <sqlCheck expectedResult="94763">SELECT SUM(CHAR_LENGTH(TRIM(name))) FROM products</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="verify_decimals" author="abuschka">
+        <preConditions>
+            <!-- After a successful import of the sample CSV file, the number of all characters in all strings of
+                 the name column should match our expectation -->
+            <sqlCheck expectedResult="52012.11">SELECT SUM(price) FROM products</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+</databaseChangeLog>

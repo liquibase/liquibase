@@ -1,13 +1,12 @@
 package liquibase.statementexecute;
 
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
+import org.junit.Test;
 
 import java.util.List;
-
-import org.junit.Test;
 
 public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecuteTest {
     @Override
@@ -46,12 +45,12 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockgranted] datetime, " +
                 "[lockedby] varchar(255), " +
                 "primary key (id))"}, InformixDatabase.class);
-
+    
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
-                "[id] int not null, " +
-                "[locked] bit not null, " +
-                "[lockgranted] datetime, " +
-                "[lockedby] varchar(255), " +
+                "[id] [int] not null, " +
+                "[locked] [bit] not null, " +
+                "[lockgranted] [datetime2](3), " +
+                "[lockedby] [nvarchar](255), " +
                 "constraint [pk_databasechangeloglock] primary key ([id]))"}, MSSQLDatabase.class);
 
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
@@ -60,13 +59,13 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockgranted] timestamp, " +
                 "[lockedby] varchar(255), " +
                 "constraint [pk_dbchgloglock] primary key ([id]))"}, DB2Database.class);
-
-        assertCorrect(new String[]{"create table [databasechangeloglock] (" +
-                "[id] number(10) not null, " +
-                "[locked] number(1) not null, " +
-                "[lockgranted] timestamp, " +
-                "[lockedby] varchar2(255), " +
-                "constraint [pk_databasechangeloglock] primary key ([id]))"}, OracleDatabase.class);
+    
+        assertCorrect(new String[]{"create table databasechangeloglock (" +
+                "id integer not null, " +
+                "locked number(1) not null, " +
+                "lockgranted timestamp, " +
+                "lockedby varchar2(255), " +
+                "constraint pk_databasechangeloglock primary key (id))"}, OracleDatabase.class);
 
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
                 "[id] int not null, " +
@@ -74,7 +73,29 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockgranted] datetime null, " +
                 "[lockedby] varchar(255) null, " +
                 "constraint [pk_databasechangeloglock] primary key ([id]))"}, MySQLDatabase.class);
+    
+        assertCorrect(new String[]{"create table [databasechangeloglock] (" +
+                "[id] int not null, " +
+                "[locked] boolean not null, " +
+                "[lockgranted] datetime null, " +
+                "[lockedby] varchar(255) null, " +
+                "constraint [pk_databasechangeloglock] primary key ([id]))"}, MariaDBDatabase.class);
 
+        assertCorrect(new String[]{"create table [databasechangeloglock] (" +
+                "[id] int not null, " +
+                "[locked] boolean not null, " +
+                "[lockgranted] datetime, " +
+                "[lockedby] varchar(255), " +
+                "constraint [databasechangeloglock_pkey] primary key ([id]))"}, PostgresDatabase.class);
+
+        assertCorrect(new String[]{"create table [databasechangeloglock] (" +
+                "[id] int not null, " +
+                "[locked] boolean not null, " +
+                "[lockgranted] datetime, " +
+                "[lockedby] varchar(255), " +
+                "constraint [pk_dbchgloglock] primary key ([id]))"}, Db2zDatabase.class);
+
+        // all other RDBMS
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
                 "[id] int not null, " +
                 "[locked] boolean not null, " +

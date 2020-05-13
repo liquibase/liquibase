@@ -5,7 +5,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.
@@ -13,6 +13,7 @@ import liquibase.util.StringUtils;
 public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     private Boolean nullable;
+    private String notNullConstraintName;
     private Boolean primaryKey;
     private String primaryKeyName;
     private String primaryKeyTablespace;
@@ -28,6 +29,10 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     private String foreignKeyName;
     private Boolean initiallyDeferred;
     private Boolean deferrable;
+    private Boolean validateNullable;
+    private Boolean validateUnique;
+    private Boolean validatePrimaryKey;
+    private Boolean validateForeignKey ;
 
     /**
      * Returns if the column should be nullable. Returns null if unspecified.
@@ -54,6 +59,19 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * If {@link #isNullable()} is 'false' and database supports named not null constraints
+     * @return not null constraint name
+     * @see #getUniqueConstraintName()
+     */
+    public String getNotNullConstraintName() {
+        return notNullConstraintName;
+    }
+
+    public ConstraintsConfig setNotNullConstraintName(String notNullConstraintName) {
+        this.notNullConstraintName = notNullConstraintName;
+        return this;
+    }
 
     /**
      * Returns true if the column should be part of the primary key. Returns null if unspecified
@@ -182,7 +200,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-
     /**
      * Returns the name to use for the columns foreign key constraint. Returns null if not specified.
      */
@@ -196,7 +213,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
     /**
-     * Returns if a foreign key defined for this column should be "initially deferred"c. Returns null if not specified.
+     * Returns if a foreign key defined for this column should be "initially deferred". Returns null if not specified.
      */
     public Boolean isInitiallyDeferred() {
         return initiallyDeferred;
@@ -220,7 +237,6 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-
     /**
      * Returns if a foreign key defined for this column should deferrable. Returns null if not specified.
      */
@@ -230,6 +246,106 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     public ConstraintsConfig setDeferrable(Boolean deferrable) {
         this.deferrable = deferrable;
+        return this;
+    }
+
+    /**
+     * Set the shouldValidate field based on the passed string.
+     * Sets true if the passed string is 1 or true or TRUE.
+     * Sets false if the passed string is 0 or false or FALSE.
+     * Sets null if the passed string is null or "null" or "NULL".
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
+     */
+    public ConstraintsConfig setShouldValidateNullable(String validateNullable) {
+        this.validateNullable = parseBoolean(validateNullable);
+        return this;
+    }
+
+    /**
+     * Returns whether a NotNullConst defined for this column should validate.
+     * Returns null if not setShouldValidate has not been called.
+     */
+    public Boolean shouldValidateNullable() {
+        return validateNullable;
+    }
+
+    public ConstraintsConfig setShouldValidateNullable(Boolean validateNullable) {
+        this.validateNullable = validateNullable;
+        return this;
+    }
+
+    /**
+     * Set the shouldValidate field based on the passed string.
+     * Sets true if the passed string is 1 or true or TRUE.
+     * Sets false if the passed string is 0 or false or FALSE.
+     * Sets null if the passed string is null or "null" or "NULL".
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
+     */
+    public ConstraintsConfig setShouldValidateUnique(String validateUnique) {
+        this.validateUnique = parseBoolean(validateUnique);
+        return this;
+    }
+
+    /**
+     * Returns whether a UniqueConst defined for this column should validate.
+     * Returns null if not setShouldValidate has not been called.
+     */
+    public Boolean shouldValidateUnique() {
+        return validateUnique;
+    }
+
+    public ConstraintsConfig setShouldValidateUnique(Boolean validateUnique) {
+        this.validateUnique = validateUnique;
+        return this;
+    }
+
+    /**
+     * Set the shouldValidate field based on the passed string.
+     * Sets true if the passed string is 1 or true or TRUE.
+     * Sets false if the passed string is 0 or false or FALSE.
+     * Sets null if the passed string is null or "null" or "NULL".
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
+     */
+    public ConstraintsConfig setShouldValidatePrimaryKey(String validatePrimaryKey) {
+        this.validatePrimaryKey = parseBoolean(validatePrimaryKey);
+        return this;
+    }
+
+    /**
+     * Returns whether a PrimaryKeyConst defined for this column should validate.
+     * Returns null if not setShouldValidate has not been called.
+     */
+    public Boolean shouldValidatePrimaryKey() {
+        return validatePrimaryKey;
+    }
+
+    public ConstraintsConfig setShouldValidatePrimaryKey(Boolean validatePrimaryKey) {
+        this.validatePrimaryKey = validatePrimaryKey;
+        return this;
+    }
+
+    /**
+     * Set the shouldValidate field based on the passed string.
+     * Sets true if the passed string is 1 or true or TRUE.
+     * Sets false if the passed string is 0 or false or FALSE.
+     * Sets null if the passed string is null or "null" or "NULL".
+     * Throws an {@link UnexpectedLiquibaseException} if an invalid value is passed
+     */
+    public ConstraintsConfig setShouldValidateForeignKey(String validateForeignKey) {
+        this.validateForeignKey= parseBoolean(validateForeignKey);
+        return this;
+    }
+
+    /**
+     * Returns whether a ForeignKeyConst defined for this column should validate.
+     * Returns null if not setShouldValidate has not been called.
+     */
+    public Boolean shouldValidateForeignKey() {
+        return validateForeignKey;
+    }
+
+    public ConstraintsConfig setShouldValidateForeignKey(Boolean validateForeignKey) {
+        this.validateForeignKey = validateForeignKey;
         return this;
     }
 
@@ -250,13 +366,13 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
      * Returns the tablespace to use for the defined primary key. Returns null if not specified.
      */
     public String getPrimaryKeyTablespace() {
-		return primaryKeyTablespace;
-	}
+        return primaryKeyTablespace;
+    }
 
-	public ConstraintsConfig setPrimaryKeyTablespace(String primaryKeyTablespace) {
-		this.primaryKeyTablespace = primaryKeyTablespace;
+    public ConstraintsConfig setPrimaryKeyTablespace(String primaryKeyTablespace) {
+        this.primaryKeyTablespace = primaryKeyTablespace;
         return this;
-	}
+    }
 
     public String getReferencedTableCatalogName() {
         return referencedTableCatalogName;
@@ -291,13 +407,13 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     }
 
     private Boolean parseBoolean(String value) {
-        value = StringUtils.trimToNull(value);
-        if (value == null || value.equalsIgnoreCase("null")) {
+        value = StringUtil.trimToNull(value);
+        if ((value == null) || "null".equalsIgnoreCase(value)) {
             return null;
         } else {
-            if (value.equalsIgnoreCase("true") || value.equals("1")) {
+            if ("true".equalsIgnoreCase(value) || "1".equals(value)) {
                 return true;
-            } else if (value.equalsIgnoreCase("false") || value.equals("0")) {
+            } else if ("false".equalsIgnoreCase(value) || "0".equals(value)) {
                 return false;
             } else {
                 throw new UnexpectedLiquibaseException("Unparsable boolean value: "+value);

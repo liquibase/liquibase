@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<install4j version="8.0.3" transformSequenceNumber="8">
+  <directoryPresets config="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" />
+  <application name="Liquibase" applicationId="3799-9228-0984-2853" mediaDir="../../../target" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-installer-${compiler:sys.version}" shortName="liquibase" publisher="Datical" publisherWeb="http://liquibase.org" version="${liquibase.version}" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="3059500009ae915e" javaMinVersion="1.8">
+    <languages>
+      <principalLanguage id="en" customLocalizationFile="./messages.properties" />
+    </languages>
+    <variables>
+      <variable name="liquibaseVersion" value="3.8.6-local-SNAPSHOT" />
+    </variables>
+    <codeSigning macEnabled="true" macPkcs12File="../../../../../build-logic/certs/code-signing/datical_apple.p12" windowsEnabled="true" windowsPkcs12File="../../../../../build-logic/certs/code-signing/datical_windows.pfx" />
+  </application>
+  <files>
+    <mountPoints>
+      <mountPoint id="411" location="examples" />
+      <mountPoint id="58" />
+    </mountPoints>
+    <entries>
+      <fileEntry mountPoint="411" file="../../../target/liquibase-${compiler:liquibaseVersion}/examples/start-h2" fileMode="755" overrideFileMode="true" />
+      <dirEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}" subDirectory="liquibase-${compiler:liquibaseVersion}">
+        <exclude>
+          <entry location="examples/start-h2" />
+          <entry location="liquibase" />
+        </exclude>
+      </dirEntry>
+      <fileEntry mountPoint="58" file="../../../target/liquibase-${compiler:liquibaseVersion}/liquibase" fileMode="755" overrideFileMode="true" />
+    </entries>
+  </files>
+  <launchers>
+    <launcher name="Open Install Dir" id="156" external="true" menuName="Liquibase Home Directory" externalFile="${installer:sys.installationDir}" />
+    <launcher name="GETTING_STARTED.txt" id="158" external="true" menuName="Liquibase Getting Started" externalFile="GETTING_STARTED.txt" />
+  </launchers>
+  <installerGui>
+    <applications>
+      <application id="installer" beanClass="com.install4j.runtime.beans.applications.InstallerApplication">
+        <startup>
+          <screen id="1" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
+            <actions>
+              <action id="22" beanClass="com.install4j.runtime.beans.actions.misc.RequestPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="obtainIfAdminMac" type="boolean" value="true" />
+                  <property name="obtainIfNormalMac" type="boolean" value="true" />
+                  <property name="obtainIfNormalWin" type="boolean" value="true" />
+                </serializedBean>
+              </action>
+            </actions>
+          </screen>
+        </startup>
+        <screens>
+          <screen id="2" beanClass="com.install4j.runtime.beans.screens.WelcomeScreen" styleId="41" rollbackBarrierExitCode="0">
+            <actions>
+              <action id="7" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" rollbackBarrierExitCode="0" multiExec="true">
+                <serializedBean>
+                  <property name="excludedVariables" type="array" elementType="string" length="1">
+                    <element index="0">sys.installationDir</element>
+                  </property>
+                </serializedBean>
+                <condition>context.getBooleanVariable("sys.confirmedUpdateInstallation")</condition>
+              </action>
+            </actions>
+            <formComponents>
+              <formComponent id="3" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent">
+                <serializedBean>
+                  <property name="labelText" type="string">${form:welcomeMessage}</property>
+                </serializedBean>
+                <visibilityScript>!context.isConsole()</visibilityScript>
+              </formComponent>
+              <formComponent id="4" beanClass="com.install4j.runtime.beans.formcomponents.ConsoleHandlerFormComponent">
+                <serializedBean>
+                  <property name="consoleScript">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">String message = context.getMessage("ConsoleWelcomeLabel", context.getApplicationName());
+return console.askOkCancel(message, true);
+</property>
+                    </object>
+                  </property>
+                </serializedBean>
+              </formComponent>
+              <formComponent id="5" beanClass="com.install4j.runtime.beans.formcomponents.UpdateAlertComponent" useExternalParametrization="true" externalParametrizationName="Update Alert" externalParametrizationMode="include">
+                <externalParametrizationPropertyNames>
+                  <propertyName>updateCheck</propertyName>
+                </externalParametrizationPropertyNames>
+              </formComponent>
+              <formComponent id="6" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetTop="20">
+                <serializedBean>
+                  <property name="labelText" type="string">${i18n:ClickNext}</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
+          <screen id="8" beanClass="com.install4j.runtime.beans.screens.InstallationDirectoryScreen" rollbackBarrierExitCode="0">
+            <condition>!context.getBooleanVariable("sys.confirmedUpdateInstallation")</condition>
+            <actions>
+              <action id="11" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" rollbackBarrierExitCode="0" multiExec="true">
+                <serializedBean>
+                  <property name="excludedVariables" type="array" elementType="string" length="1">
+                    <element index="0">sys.installationDir</element>
+                  </property>
+                </serializedBean>
+                <condition>context.getVariable("sys.responseFile") == null</condition>
+              </action>
+            </actions>
+            <formComponents>
+              <formComponent id="9" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetBottom="25">
+                <serializedBean>
+                  <property name="labelText" type="string">${i18n:SelectDirLabel(${compiler:sys.fullName})}</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent id="10" beanClass="com.install4j.runtime.beans.formcomponents.InstallationDirectoryChooserComponent" useExternalParametrization="true" externalParametrizationName="Installation Directory Chooser" externalParametrizationMode="include">
+                <serializedBean>
+                  <property name="requestFocus" type="boolean" value="true" />
+                </serializedBean>
+                <externalParametrizationPropertyNames>
+                  <propertyName>suggestAppDir</propertyName>
+                  <propertyName>validateApplicationId</propertyName>
+                  <propertyName>existingDirWarning</propertyName>
+                  <propertyName>checkWritable</propertyName>
+                  <propertyName>manualEntryAllowed</propertyName>
+                  <propertyName>checkFreeSpace</propertyName>
+                  <propertyName>showRequiredDiskSpace</propertyName>
+                  <propertyName>showFreeDiskSpace</propertyName>
+                  <propertyName>allowSpacesOnUnix</propertyName>
+                  <propertyName>validationScript</propertyName>
+                  <propertyName>standardValidation</propertyName>
+                </externalParametrizationPropertyNames>
+              </formComponent>
+            </formComponents>
+          </screen>
+          <screen name="Install Options" id="67" beanClass="com.install4j.runtime.beans.screens.FormScreen" styleId="41" rollbackBarrierExitCode="0">
+            <serializedBean>
+              <property name="title" type="string">Installation Options</property>
+            </serializedBean>
+            <condition>return 
+(Util.isWindows() &amp;&amp; !System.getenv("path").contains(context.getVariable("sys.installationDir").toString()))
+    ||
+(Util.isMacOS() &amp;&amp; !(new File("/etc/paths.d/liquibase")).exists())
+;</condition>
+            <formComponents>
+              <formComponent name="Add to path" id="71" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                <serializedBean>
+                  <property name="checkboxText" type="string">Add Liquibase to PATH</property>
+                  <property name="initiallySelected" type="boolean" value="true" />
+                  <property name="variableName" type="string">liquibase.addToPath</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
+          <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true" rollbackBarrierExitCode="0">
+            <actions>
+              <action id="17" beanClass="com.install4j.runtime.beans.actions.InstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="quit" errorMessage="${i18n:FileCorrupted}" />
+              <action id="18" beanClass="com.install4j.runtime.beans.actions.desktop.CreateProgramGroupAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="uninstallerMenuName" type="string">${i18n:UninstallerMenuEntry(${compiler:sys.fullName})}</property>
+                </serializedBean>
+                <condition>!context.getBooleanVariable("sys.programGroupDisabled")</condition>
+              </action>
+              <action id="19" beanClass="com.install4j.runtime.beans.actions.desktop.RegisterAddRemoveAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="itemName" type="string">${compiler:sys.fullName} ${compiler:sys.version}</property>
+                </serializedBean>
+              </action>
+              <action id="61" beanClass="com.install4j.runtime.beans.actions.misc.ModifyEnvironmentVariableAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="revertOnUninstallation" type="boolean" value="false" />
+                  <property name="type" type="enum" class="com.install4j.runtime.beans.actions.misc.ModifyStringType" value="APPEND" />
+                  <property name="value" type="string">${installer:sys.installationDir}</property>
+                  <property name="variableName" type="string">PATH</property>
+                </serializedBean>
+                <condition>Util.isWindows() &amp;&amp;
+context.getBooleanVariable("liquibase.addToPath") &amp;&amp;
+!WinEnvVars.getenv("PATH").contains(context.getInstallationDirectory().getAbsolutePath())</condition>
+              </action>
+              <action name="Create Mac Path" id="259" beanClass="com.install4j.runtime.beans.actions.text.WriteTextFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="file">
+                    <object class="java.io.File">
+                      <string>/etc/paths.d/liquibase</string>
+                    </object>
+                  </property>
+                  <property name="text" type="string">${installer:sys.installationDir}
+</property>
+                </serializedBean>
+                <condition>com.install4j.api.Util.isMacOS() &amp;&amp;
+context.getBooleanVariable("liquibase.addToPath")</condition>
+              </action>
+            </actions>
+            <formComponents>
+              <formComponent id="16" beanClass="com.install4j.runtime.beans.formcomponents.ProgressComponent">
+                <serializedBean>
+                  <property name="initialStatusMessage" type="string">${i18n:WizardPreparing}</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
+          <screen id="20" beanClass="com.install4j.runtime.beans.screens.FinishedScreen" styleId="41" rollbackBarrierExitCode="0" finishScreen="true">
+            <actions>
+              <action name="Open Install Directory" id="336" beanClass="com.install4j.runtime.beans.actions.control.RunScriptAction" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="script">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">Util.showPath((String) context.getVariable("sys.installationDir"));
+return true;</property>
+                    </object>
+                  </property>
+                </serializedBean>
+                <condition>return Boolean.TRUE.equals(context.getVariable("liquibase.openInstallDirectory"));</condition>
+              </action>
+            </actions>
+            <formComponents>
+              <formComponent id="21" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetBottom="10">
+                <serializedBean>
+                  <property name="labelText" type="string">${form:finishedMessage}</property>
+                </serializedBean>
+              </formComponent>
+              <formComponent name="Show Installed Dir" id="335" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                <serializedBean>
+                  <property name="checkboxText" type="string">Open Installed Location</property>
+                  <property name="initiallySelected" type="boolean" value="true" />
+                  <property name="variableName" type="string">liquibase.openInstallDirectory</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
+        </screens>
+      </application>
+      <application id="uninstaller" beanClass="com.install4j.runtime.beans.applications.UninstallerApplication">
+        <serializedBean>
+          <property name="customMacosExecutableName" type="string">${i18n:UninstallerMenuEntry(${compiler:sys.fullName})}</property>
+          <property name="useCustomMacosExecutableName" type="boolean" value="true" />
+        </serializedBean>
+        <startup>
+          <screen id="23" beanClass="com.install4j.runtime.beans.screens.StartupScreen" rollbackBarrierExitCode="0">
+            <actions>
+              <action id="33" beanClass="com.install4j.runtime.beans.actions.misc.LoadResponseFileAction" rollbackBarrierExitCode="0" />
+              <action id="34" beanClass="com.install4j.runtime.beans.actions.misc.RequireInstallerPrivilegesAction" actionElevationType="none" rollbackBarrierExitCode="0" />
+            </actions>
+          </screen>
+        </startup>
+        <screens>
+          <screen id="24" beanClass="com.install4j.runtime.beans.screens.UninstallWelcomeScreen" styleId="41" rollbackBarrierExitCode="0">
+            <formComponents>
+              <formComponent id="25" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetBottom="10">
+                <serializedBean>
+                  <property name="labelText" type="string">${form:welcomeMessage}</property>
+                </serializedBean>
+                <visibilityScript>!context.isConsole()</visibilityScript>
+              </formComponent>
+              <formComponent id="26" beanClass="com.install4j.runtime.beans.formcomponents.ConsoleHandlerFormComponent">
+                <serializedBean>
+                  <property name="consoleScript">
+                    <object class="com.install4j.api.beans.ScriptProperty">
+                      <property name="value" type="string">String message = context.getMessage("ConfirmUninstall", context.getApplicationName());
+return console.askYesNo(message, true);
+</property>
+                    </object>
+                  </property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
+          <screen id="27" beanClass="com.install4j.runtime.beans.screens.UninstallationScreen" rollbackBarrierExitCode="0">
+            <actions>
+              <action id="29" beanClass="com.install4j.runtime.beans.actions.UninstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" />
+            </actions>
+            <formComponents>
+              <formComponent id="28" beanClass="com.install4j.runtime.beans.formcomponents.ProgressComponent">
+                <serializedBean>
+                  <property name="initialStatusMessage" type="string">${i18n:UninstallerPreparing}</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
+          <screen id="32" beanClass="com.install4j.runtime.beans.screens.UninstallFailureScreen" rollbackBarrierExitCode="0" finishScreen="true" />
+          <screen id="30" beanClass="com.install4j.runtime.beans.screens.UninstallSuccessScreen" styleId="41" rollbackBarrierExitCode="0" finishScreen="true">
+            <formComponents>
+              <formComponent id="31" beanClass="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent" insetBottom="10">
+                <serializedBean>
+                  <property name="labelText" type="string">${form:successMessage}</property>
+                </serializedBean>
+              </formComponent>
+            </formComponents>
+          </screen>
+        </screens>
+      </application>
+    </applications>
+    <styles defaultStyleId="35">
+      <style name="Standard" id="35" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+        <formComponents>
+          <formComponent name="Header" id="36" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetTop="0" insetBottom="0">
+            <serializedBean>
+              <property name="styleId" type="string">48</property>
+            </serializedBean>
+          </formComponent>
+          <group name="Main" id="37" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup">
+            <beans>
+              <formComponent id="38" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetLeft="20" insetBottom="10" insetRight="20" />
+              <formComponent name="Watermark" id="39" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" insetTop="0" insetLeft="5" insetBottom="0" useExternalParametrization="true" externalParametrizationName="Custom watermark" externalParametrizationMode="include">
+                <serializedBean>
+                  <property name="enabledTitleText" type="boolean" value="false" />
+                  <property name="labelText" type="string">install4j</property>
+                </serializedBean>
+                <externalParametrizationPropertyNames>
+                  <propertyName>labelText</propertyName>
+                </externalParametrizationPropertyNames>
+              </formComponent>
+              <formComponent name="Footer" id="40" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetTop="0" insetBottom="0">
+                <serializedBean>
+                  <property name="styleId" type="string">52</property>
+                </serializedBean>
+              </formComponent>
+            </beans>
+          </group>
+        </formComponents>
+      </style>
+      <style name="Banner" id="41" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+        <formComponents>
+          <group id="42" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
+            <serializedBean>
+              <property name="backgroundColor">
+                <object class="java.awt.Color">
+                  <int>255</int>
+                  <int>255</int>
+                  <int>255</int>
+                  <int>255</int>
+                </object>
+              </property>
+              <property name="borderSides">
+                <object class="com.install4j.runtime.beans.formcomponents.BorderSides">
+                  <property name="bottom" type="boolean" value="true" />
+                </object>
+              </property>
+              <property name="imageEdgeBackgroundColor">
+                <object class="java.awt.Color">
+                  <int>25</int>
+                  <int>143</int>
+                  <int>220</int>
+                  <int>255</int>
+                </object>
+              </property>
+              <property name="imageEdgeBorder" type="boolean" value="true" />
+              <property name="imageFile">
+                <object class="com.install4j.api.beans.ExternalFile">
+                  <string>${compiler:sys.install4jHome}/resource/styles/wizard.png</string>
+                </object>
+              </property>
+              <property name="insets">
+                <object class="java.awt.Insets">
+                  <int>5</int>
+                  <int>10</int>
+                  <int>10</int>
+                  <int>10</int>
+                </object>
+              </property>
+            </serializedBean>
+            <beans>
+              <formComponent id="43" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent" insetTop="0">
+                <serializedBean>
+                  <property name="labelFontSizePercent" type="int" value="130" />
+                  <property name="labelFontStyle" type="enum" class="com.install4j.runtime.beans.formcomponents.FontStyle" value="BOLD" />
+                  <property name="labelFontType" type="enum" class="com.install4j.runtime.beans.formcomponents.FontType" value="DERIVED" />
+                </serializedBean>
+              </formComponent>
+              <formComponent id="44" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" />
+              <formComponent id="45" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetBottom="0" />
+            </beans>
+            <externalParametrizationPropertyNames>
+              <propertyName>imageAnchor</propertyName>
+              <propertyName>imageEdgeBackgroundColor</propertyName>
+              <propertyName>imageFile</propertyName>
+            </externalParametrizationPropertyNames>
+          </group>
+          <formComponent id="46" beanClass="com.install4j.runtime.beans.styles.NestedStyleComponent" insetBottom="0">
+            <serializedBean>
+              <property name="styleId" type="string">52</property>
+            </serializedBean>
+          </formComponent>
+        </formComponents>
+      </style>
+      <group name="Style components" id="47" beanClass="com.install4j.runtime.beans.groups.StyleGroup">
+        <beans>
+          <style name="Standard header" id="48" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+            <serializedBean>
+              <property name="fillVertical" type="boolean" value="false" />
+              <property name="standalone" type="boolean" value="false" />
+              <property name="verticalAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="NORTH" />
+            </serializedBean>
+            <formComponents>
+              <group id="49" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title bar" externalParametrizationMode="include">
+                <serializedBean>
+                  <property name="backgroundColor">
+                    <object class="java.awt.Color">
+                      <int>255</int>
+                      <int>255</int>
+                      <int>255</int>
+                      <int>255</int>
+                    </object>
+                  </property>
+                  <property name="borderSides">
+                    <object class="com.install4j.runtime.beans.formcomponents.BorderSides">
+                      <property name="bottom" type="boolean" value="true" />
+                    </object>
+                  </property>
+                  <property name="imageAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="NORTHEAST" />
+                  <property name="imageEdgeBorderWidth" type="int" value="2" />
+                  <property name="imageFile">
+                    <object class="com.install4j.api.beans.ExternalFile">
+                      <string>icon:${installer:sys.installerApplicationMode}_header.png</string>
+                    </object>
+                  </property>
+                  <property name="imageInsets">
+                    <object class="java.awt.Insets">
+                      <int>0</int>
+                      <int>5</int>
+                      <int>1</int>
+                      <int>1</int>
+                    </object>
+                  </property>
+                  <property name="insets">
+                    <object class="java.awt.Insets">
+                      <int>0</int>
+                      <int>20</int>
+                      <int>0</int>
+                      <int>10</int>
+                    </object>
+                  </property>
+                </serializedBean>
+                <beans>
+                  <formComponent name="Title" id="50" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent">
+                    <serializedBean>
+                      <property name="labelFontStyle" type="enum" class="com.install4j.runtime.beans.formcomponents.FontStyle" value="BOLD" />
+                      <property name="labelFontType" type="enum" class="com.install4j.runtime.beans.formcomponents.FontType" value="DERIVED" />
+                    </serializedBean>
+                  </formComponent>
+                  <formComponent name="Subtitle" id="51" beanClass="com.install4j.runtime.beans.styles.ScreenTitleComponent" insetLeft="8">
+                    <serializedBean>
+                      <property name="titleType" type="enum" class="com.install4j.runtime.beans.styles.TitleType" value="SUB_TITLE" />
+                    </serializedBean>
+                  </formComponent>
+                </beans>
+                <externalParametrizationPropertyNames>
+                  <propertyName>backgroundColor</propertyName>
+                  <propertyName>foregroundColor</propertyName>
+                  <propertyName>imageAnchor</propertyName>
+                  <propertyName>imageFile</propertyName>
+                  <propertyName>imageOverlap</propertyName>
+                </externalParametrizationPropertyNames>
+              </group>
+            </formComponents>
+          </style>
+          <style name="Standard footer" id="52" beanClass="com.install4j.runtime.beans.styles.FormStyle">
+            <serializedBean>
+              <property name="fillVertical" type="boolean" value="false" />
+              <property name="standalone" type="boolean" value="false" />
+              <property name="verticalAnchor" type="enum" class="com.install4j.api.beans.Anchor" value="SOUTH" />
+            </serializedBean>
+            <formComponents>
+              <group id="53" beanClass="com.install4j.runtime.beans.groups.HorizontalFormComponentGroup">
+                <serializedBean>
+                  <property name="alignFirstLabel" type="boolean" value="false" />
+                  <property name="insets">
+                    <object class="java.awt.Insets">
+                      <int>3</int>
+                      <int>5</int>
+                      <int>8</int>
+                      <int>5</int>
+                    </object>
+                  </property>
+                </serializedBean>
+                <beans>
+                  <formComponent id="54" beanClass="com.install4j.runtime.beans.formcomponents.SpringComponent" />
+                  <formComponent name="Back button" id="55" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent">
+                    <serializedBean>
+                      <property name="buttonText" type="string">&lt; ${i18n:ButtonBack}</property>
+                      <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="PREVIOUS" />
+                    </serializedBean>
+                  </formComponent>
+                  <formComponent name="Next button" id="56" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent">
+                    <serializedBean>
+                      <property name="buttonText" type="string">${i18n:ButtonNext} &gt;</property>
+                      <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="NEXT" />
+                    </serializedBean>
+                  </formComponent>
+                  <formComponent name="Cancel button" id="57" beanClass="com.install4j.runtime.beans.styles.StandardControlButtonComponent" insetLeft="5">
+                    <serializedBean>
+                      <property name="buttonText" type="string">${i18n:ButtonCancel}</property>
+                      <property name="controlButtonType" type="enum" class="com.install4j.api.context.ControlButtonType" value="CANCEL" />
+                    </serializedBean>
+                  </formComponent>
+                </beans>
+              </group>
+            </formComponents>
+          </style>
+        </beans>
+      </group>
+    </styles>
+  </installerGui>
+  <mediaSets>
+    <windows name="Windows" id="153">
+      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/adopt-openjdk-windows-amd64-13.0.1.tar.gz" manualJreEntry="true">
+        <modules>
+          <defaultModules set="jre" />
+        </modules>
+      </jreBundle>
+    </windows>
+    <macosFolder name="macOS Folder" id="154" installDir="liquibase" customInstallBaseDir="/usr/local/opt">
+      <excludedLaunchers>
+        <launcher id="156" />
+        <launcher id="158" />
+      </excludedLaunchers>
+      <jreBundle jreBundleSource="preCreated" includedJre="../../../target/downloaded/adopt-openjdk-macos-amd64-13.0.1.tar.gz" manualJreEntry="true">
+        <modules>
+          <defaultModules set="jre" />
+        </modules>
+      </jreBundle>
+    </macosFolder>
+  </mediaSets>
+</install4j>

@@ -1,17 +1,11 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Data;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-
-import java.util.List;
 
 public class DataSnapshotGenerator extends JdbcSnapshotGenerator {
 

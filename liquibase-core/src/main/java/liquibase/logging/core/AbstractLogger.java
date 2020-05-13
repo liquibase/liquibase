@@ -1,67 +1,62 @@
 package liquibase.logging.core;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogLevel;
+import liquibase.AbstractExtensibleObject;
 import liquibase.logging.Logger;
 
-public abstract class AbstractLogger implements Logger {
-    private LogLevel logLevel;
-    private DatabaseChangeLog databaseChangeLog;
-    private ChangeSet changeSet;
+import java.util.logging.Level;
+
+/**
+ * Convenience base implementation of a Logger.
+ */
+public abstract class AbstractLogger extends AbstractExtensibleObject implements Logger {
 
     @Override
-    public LogLevel getLogLevel() {
-        return logLevel;
-    }
-
-    @Override
-    public void setLogLevel(String logLevel) {
-        setLogLevel(toLogLevel(logLevel));
-    }
-
-    protected LogLevel toLogLevel(String logLevel) {
-        if ("debug".equalsIgnoreCase(logLevel)) {
-            return LogLevel.DEBUG;
-        } else if ("info".equalsIgnoreCase(logLevel)) {
-            return LogLevel.INFO;
-        } else if ("warning".equalsIgnoreCase(logLevel)) {
-            return LogLevel.WARNING;
-        } else if ("severe".equalsIgnoreCase(logLevel)) {
-            return LogLevel.SEVERE;
-        } else if ("off".equalsIgnoreCase(logLevel)) {
-            return LogLevel.OFF;
-        } else {
-            throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel+".  Valid levels are: debug, info, warning, severe, off");
-        }
-    }
-
-    protected String buildMessage(String message) {
-        StringBuilder msg = new StringBuilder();
-        if(databaseChangeLog != null) {
-            msg.append(databaseChangeLog.getFilePath()).append(": ");
-        }
-        if(changeSet != null) {
-            String changeSetName = changeSet.toString(false);
-            msg.append(changeSetName.replace(changeSetName + "::", "")).append(": ");
-        }
-        msg.append(message);
-        return msg.toString();
+    public void severe(String message) {
+        this.severe(message, null);
     }
 
     @Override
-    public void setLogLevel(LogLevel level) {
-        this.logLevel = level;
+    public void severe(String message, Throwable e) {
+        this.log(Level.SEVERE, message, e);
     }
 
     @Override
-    public void setChangeLog(DatabaseChangeLog databaseChangeLog) {
-        this.databaseChangeLog = databaseChangeLog;
+    public void warning(String message) {
+        this.warning(message, null);
     }
 
     @Override
-    public void setChangeSet(ChangeSet changeSet) {
-        this.changeSet = changeSet;
+    public void warning(String message, Throwable e) {
+        this.log(Level.WARNING, message, e);
+    }
+
+    @Override
+    public void info(String message) {
+        this.info(message, null);
+    }
+
+    @Override
+    public void info(String message, Throwable e) {
+        this.log(Level.INFO, message, e);
+    }
+
+    @Override
+    public void config(String message) {
+        this.config(message, null);
+    }
+
+    @Override
+    public void config(String message, Throwable e) {
+        this.log(Level.CONFIG, message, e);
+    }
+
+    @Override
+    public void fine(String message) {
+        this.fine(message, null);
+    }
+
+    @Override
+    public void fine(String message, Throwable e) {
+        this.log(Level.FINE, message, e);
     }
 }

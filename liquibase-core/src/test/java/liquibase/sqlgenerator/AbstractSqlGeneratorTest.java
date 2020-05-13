@@ -6,10 +6,11 @@ import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.sql.SQLException;
+
+import static org.junit.Assert.*;
 
 public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 

@@ -2,7 +2,10 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.core.AddUniqueConstraintStatement;
@@ -30,7 +33,6 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest<A
     @Override
     protected boolean shouldBeImplementation(Database database) {
         return !(database instanceof SQLiteDatabase)
-                && !(database instanceof MSSQLDatabase)
                 && !(database instanceof SybaseDatabase)
                 && !(database instanceof SybaseASADatabase)
                 && !(database instanceof InformixDatabase)

@@ -1,9 +1,10 @@
 package liquibase.change;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
+
+import static org.junit.Assert.*;
 
 public class CheckSumTest {
 
@@ -30,7 +31,7 @@ public class CheckSumTest {
 
     @Test
     public void getCurrentVersion() {
-        assertEquals(7, CheckSum.getCurrentVersion());
+        assertEquals(8, CheckSum.getCurrentVersion());
     }
 
     @Test
@@ -38,7 +39,15 @@ public class CheckSumTest {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(valueToHash);
         assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
-        assertFalse(checkSum.toString().equals(valueToHash));
+        assertNotEquals(checkSum.toString(), valueToHash);
+    }
+
+    @Test
+    public void compute_String_shouldIgnoreUnknownUnicodeChar() {
+        CheckSum checkSum1 = CheckSum.compute("asdfa");
+        CheckSum checkSum2 = CheckSum.compute("as\uFFFDdf\uFFFDa");
+
+        assertEquals(checkSum2, checkSum1);
     }
 
     @Test
@@ -46,7 +55,7 @@ public class CheckSumTest {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false);
         assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
-        assertFalse(checkSum.toString().equals(valueToHash));
+        assertNotEquals(checkSum.toString(), valueToHash);
         assertEquals(CheckSum.compute(valueToHash).toString(), checkSum.toString());
     }
 
@@ -56,18 +65,13 @@ public class CheckSumTest {
     }
 
     @Test
-    public void hashCode_test() {
-        assertNotNull(CheckSum.parse("5:asdf").hashCode());
-    }
-
-    @Test
     public void equals() {
-        assertTrue(CheckSum.parse("9:asdf").equals(CheckSum.parse("9:asdf")));
-        assertFalse(CheckSum.parse("9:asdf").equals(CheckSum.parse("8:asdf")));
-        assertFalse(CheckSum.parse("9:asdf").equals(CheckSum.parse("9:qwert")));
+        assertEquals(CheckSum.parse("9:asdf"), CheckSum.parse("9:asdf"));
+        assertNotEquals(CheckSum.parse("9:asdf"), CheckSum.parse("8:asdf"));
+        assertNotEquals(CheckSum.parse("9:asdf"), CheckSum.parse("9:qwert"));
 
-        assertFalse(CheckSum.parse("9:asdf").equals(12));
-        assertFalse(CheckSum.parse("9:asdf").equals(null));
+        assertNotEquals(12, CheckSum.parse("9:asdf"));
+        assertNotEquals(null, CheckSum.parse("9:asdf"));
     }
 
     @Test
@@ -77,11 +81,22 @@ public class CheckSumTest {
         assertEquals(checkSum, CheckSum.compute("a string\r\nwith\r\nlines").toString());
         assertEquals(checkSum, CheckSum.compute("a string\rwith\nlines").toString());
 
-        assertFalse(checkSum.equals(CheckSum.compute("a string\n\nwith\n\nlines").toString()));
+        assertNotEquals(checkSum, CheckSum.compute("a string\n\nwith\n\nlines").toString());
 
         assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\nwith\nlines".getBytes()), true).toString());
         assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\rlines".getBytes()), true).toString());
         assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\nwith\r\nlines".getBytes()), true).toString());
         assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\r\nlines".getBytes()), true).toString());
+    }
+
+    @Test
+    public void compute_lineEndingsDontMatter_multiline() {
+        String checkSum = CheckSum.compute("a string\n\nwith\n\nlines").toString();
+        assertEquals(checkSum, CheckSum.compute("a string\r\rwith\r\rlines").toString());
+        assertEquals(checkSum, CheckSum.compute("a string\r\n\r\nwith\r\n\r\nlines").toString());
+
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\n\nwith\n\nlines".getBytes()), true).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\rwith\r\rlines".getBytes()), true).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\n\r\nwith\r\n\r\nlines".getBytes()), true).toString());
     }
 }

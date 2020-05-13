@@ -1,6 +1,6 @@
 package liquibase.dbdoc;
 
-import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
@@ -14,8 +14,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 public class PendingSQLWriter extends HTMLWriter {
@@ -33,14 +33,14 @@ public class PendingSQLWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
+    protected void writeBody(Writer fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
 
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), fileWriter, database);
         ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
         try {
-            if (changesToRun.size() == 0) {
+            if (changesToRun.isEmpty()) {
                 fileWriter.append("<b>NONE</b>");
             }
 
@@ -59,7 +59,7 @@ public class PendingSQLWriter extends HTMLWriter {
                 try {
                     thisChangeSet.execute(databaseChangeLog, null, this.database);
                 } catch (MigrationFailedException e) {
-                    fileWriter.append("EXECUTION ERROR: ").append(ChangeFactory.getInstance().getChangeMetaData(change).getDescription()).append(": ").append(e.getMessage()).append("\n\n");
+                    fileWriter.append("EXECUTION ERROR: ").append(Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getDescription()).append(": ").append(e.getMessage()).append("\n\n");
                 }
             }
             fileWriter.append("</pre></code>");
@@ -69,6 +69,6 @@ public class PendingSQLWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+    protected void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }

@@ -23,10 +23,18 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database, HsqlDatabase.class, H2Database.class);
-        validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database, HsqlDatabase.class, H2Database.class);
-        validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2Database.class);
-        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, HsqlDatabase.class, DB2Database.class);
 
+        if (isH2WithMinMaxSupport(database)) {
+
+            validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database, HsqlDatabase.class);
+        } else {
+
+            validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database, H2Database.class, HsqlDatabase.class);
+            validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2Database.class);
+        }
+
+        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, HsqlDatabase.class, DB2Database.class);
+        validationErrors.checkDisallowedField("dataType", alterSequenceStatement.getDataType(), database, DB2Database.class, HsqlDatabase.class, OracleDatabase.class, MySQLDatabase.class, MSSQLDatabase.class);
         validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
 
         return validationErrors;
@@ -34,16 +42,20 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
 
     @Override
     public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("ALTER SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
 
+        if (statement.getDataType() != null) {
+            buffer.append(" AS ").append(statement.getDataType());
+        }
+
         if (statement.getIncrementBy() != null) {
-                buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
+            buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
         }
 
         if (statement.getMinValue() != null) {
-            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database instanceof H2Database) {
+            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
                 buffer.append(" RESTART WITH ").append(statement.getMinValue());
             } else {
                 buffer.append(" MINVALUE ").append(statement.getMinValue());
@@ -60,7 +72,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if (statement.getCacheSize() != null && database instanceof OracleDatabase) {
+        if ((statement.getCacheSize() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
             if (statement.getCacheSize().equals(BigInteger.ZERO)) {
                 buffer.append(" NOCACHE ");
             } else {
@@ -68,7 +80,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if (statement.getCycle() != null && database instanceof OracleDatabase) {
+        if ((statement.getCycle() != null) && (database instanceof OracleDatabase || database instanceof PostgresDatabase)) {
             if (statement.getCycle()) {
                 buffer.append(" CYCLE ");
             } else {
@@ -83,5 +95,10 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
 
     protected Sequence getAffectedSequence(AlterSequenceStatement statement) {
         return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+    }
+
+    private boolean isH2WithMinMaxSupport(Database database) {
+        return H2Database.class.isAssignableFrom(database.getClass())
+                && ((H2Database) database).supportsMinMaxForSequences();
     }
 }

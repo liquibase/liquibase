@@ -1,10 +1,5 @@
 package liquibase.changelog.visitor;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.database.Database;
-import org.junit.Test;
-
 public class RollbackVisitorTest {
 //    @Test
 //    public void visit() throws Exception {

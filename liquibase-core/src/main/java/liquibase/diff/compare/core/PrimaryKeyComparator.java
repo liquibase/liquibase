@@ -9,7 +9,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.List;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
         if (databaseObject.getName() == null) {
             return DatabaseObjectComparatorFactory.getInstance().hash(pk.getTable(),chain.getSchemaComparisons(), accordingTo);
         } else {
-            if (pk.getTable() == null || pk.getTable().getName() == null) {
+            if ((pk.getTable() == null) || (pk.getTable().getName() == null)) {
                 return new String[] {pk.getName().toLowerCase() };
             } else {
                 return new String[] {pk.getName().toLowerCase(), pk.getTable().getName().toLowerCase()};
@@ -40,17 +40,18 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof PrimaryKey && databaseObject2 instanceof PrimaryKey)) {
+        if (!((databaseObject1 instanceof PrimaryKey) && (databaseObject2 instanceof PrimaryKey))) {
             return false;
         }
 
         PrimaryKey thisPrimaryKey = (PrimaryKey) databaseObject1;
         PrimaryKey otherPrimaryKey = (PrimaryKey) databaseObject2;
 
-        if (thisPrimaryKey.getTable() != null && thisPrimaryKey.getTable().getName() != null && otherPrimaryKey.getTable() != null && otherPrimaryKey.getTable().getName() != null) {
+        if ((thisPrimaryKey.getTable() != null) && (thisPrimaryKey.getTable().getName() != null) && (otherPrimaryKey
+            .getTable() != null) && (otherPrimaryKey.getTable().getName() != null)) {
             return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), chain.getSchemaComparisons(), accordingTo);
         } else {
-            return StringUtils.trimToEmpty(thisPrimaryKey.getName()).equalsIgnoreCase(otherPrimaryKey.getName());
+            return StringUtil.trimToEmpty(thisPrimaryKey.getName()).equalsIgnoreCase(otherPrimaryKey.getName());
         }
     }
 
@@ -72,7 +73,7 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
                     return false;
                 }
                 for (int i=0; i<referenceList.size(); i++) {
-                    if (!StringUtils.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtils.trimToEmpty(compareList.get(i).getName()))) {
+                    if (!StringUtil.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtil.trimToEmpty(compareList.get(i).getName()))) {
                         return false;
                     }
                 }

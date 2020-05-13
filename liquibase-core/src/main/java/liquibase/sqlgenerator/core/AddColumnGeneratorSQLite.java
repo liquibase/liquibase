@@ -1,25 +1,35 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.structure.core.Index;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
+/**
+ * Workaround for adding column on existing table for SQLite.
+ *
+ */
 public class AddColumnGeneratorSQLite extends AddColumnGenerator {
-     @Override
-     public int getPriority() {
-        return PRIORITY_DATABASE;
+
+    @Override
+    public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        ValidationErrors validationErrors = super.validate(statement, database, sqlGeneratorChain);
+        validationErrors.checkRequiredField("tableName", statement);
+        validationErrors.checkRequiredField("columnName", statement);
+        return validationErrors;
+    }
+
+    @Override
+    public boolean generateStatementsIsVolatile(Database database) {
+        // need metadata for copying the table
+        return true;
     }
 
     @Override
@@ -28,49 +38,56 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(Database database) {
-        return true;
-    }
-
-    @Override
     public Sql[] generateSql(final AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        // SQLite does not support this ALTER TABLE operation until now.
-        // For more information see: http://www.sqlite.org/omitted.html.
-        // This is a small work around...
-
-        List<Sql> sql = new ArrayList<Sql>();
-
-        // define alter table logic
-        SQLiteDatabase.AlterTableVisitor rename_alter_visitor =
-        new SQLiteDatabase.AlterTableVisitor() {
+        // Workaround implemented by replacing a table with a new one (duplicate)
+        // with a new column added
+        Sql[] generatedSqls;
+        SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
+            @Override
             public ColumnConfig[] getColumnsToAdd() {
-                return new ColumnConfig[] {
-                    new ColumnConfig()
-                            .setName(statement.getColumnName())
-                        .setType(statement.getColumnType())
-                        .setAutoIncrement(statement.isAutoIncrement())
-                };
+                ColumnConfig[] columnConfigs = new ColumnConfig[1];
+                ColumnConfig newColumn = new ColumnConfig();
+                newColumn.setName(statement.getColumnName());
+                newColumn.setType(statement.getColumnType());
+                newColumn.setAutoIncrement(statement.isAutoIncrement());
+                ConstraintsConfig constraintsConfig = new ConstraintsConfig();
+                if (statement.isPrimaryKey()) {
+                    constraintsConfig.setPrimaryKey(true);
+                }
+                if (statement.isNullable()) {
+                    constraintsConfig.setNullable(true);
+                }
+                if (statement.isUnique()) {
+                    constraintsConfig.setUnique(true);
+                }
+                newColumn.setConstraints(constraintsConfig);
+                columnConfigs[0] = newColumn;
+                return columnConfigs;
             }
+
+            @Override
             public boolean copyThisColumn(ColumnConfig column) {
                 return !column.getName().equals(statement.getColumnName());
             }
+
+            @Override
             public boolean createThisColumn(ColumnConfig column) {
                 return true;
             }
+
+            @Override
             public boolean createThisIndex(Index index) {
                 return true;
             }
         };
+        generatedSqls = SQLiteDatabase.getAlterTableSqls(database, alterTableVisitor, statement.getCatalogName(),
+                statement.getSchemaName(), statement.getTableName());
 
-        try {
-            // alter table
-            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), database)));
-        } catch (DatabaseException e) {
-            System.err.println(e);
-            e.printStackTrace();
-        }
+        return generatedSqls;
+    }
 
-        return sql.toArray(new Sql[sql.size()]);
+    @Override
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 }

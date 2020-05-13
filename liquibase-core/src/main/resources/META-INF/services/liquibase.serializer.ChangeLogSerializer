@@ -1,0 +1,5 @@
+liquibase.serializer.core.formattedsql.FormattedSqlChangeLogSerializer
+liquibase.serializer.core.json.JsonChangeLogSerializer
+liquibase.serializer.core.string.StringChangeLogSerializer
+liquibase.serializer.core.xml.XMLChangeLogSerializer
+liquibase.serializer.core.yaml.YamlChangeLogSerializer

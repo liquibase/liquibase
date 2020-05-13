@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
-<project default="oracle.help" name="liquibase-integration-test-setup-oracle">
+<project default="oracle.help" name="liquibase-integration-test-setup-oracle"
+    xmlns:liquibase="antlib:liquibase.integration.ant">
 
   <taskdef resource="net/sf/antcontrib/antlib.xml" />
 
@@ -16,18 +17,16 @@
   <property name="oracle.jdbc.jar.file.name" value="ojdbc14.jar" />
   <property name="oracle.jdbc.jar.file.dir" value="${installs.dir}" />
   <property name="oracle.jdbc.jar.file.path" value="${oracle.jdbc.jar.file.dir}\${oracle.jdbc.jar.file.name}" />
+  <property name="oracle.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+  <property name="oracle.jdbc.sysuser" value="sys" />
   
   <property name="liquibase.jar.file.dir" value="C:\Tools\liquibase\2.0-123" />
   <property name="liquibase.jar.file.name" value="liquibase.jar" />
-  <property name="liquibase.jar.file.path" value="${liquibase.jar.file.dir}\liquibase.jar" />
-
-  <taskdef resource="liquibasetasks.properties">
-    <classpath location="${liquibase.jar.file.path}" />
+  <property name="liquibase.jar.file.path" value="${liquibase.jar.file.dir}/liquibase.jar" />
+  <taskdef resource="liquibase/integration/ant/antlib.xml" uri="antlib:liquibase.integration.ant">
+    <classpath path="${liquibase.jar.file.path}" />
+    <classpath path="${oracle.jdbc.jar.file.path}" />
   </taskdef>
-
-  <path id="jdbc">
-    <pathelement location="${oracle.jdbc.jar.file.path}" />
-  </path>
 
   <target name="oracle.help">
     <echo>
@@ -76,15 +75,23 @@
     <antcall target='oracle.createUsers' />
   </target>
 
+  <!-- $ ant oracle.createUsers 
+            -Doracle.jdbc.url=jdbc:oracle:thin:@172.17.0.2:1521:XE 
+            -Doracle.jdbc.sysuser=system 
+            -Doracle.jdbc.jar.file.path=/usr/local/lib/java/ojdbc7-12.1.0.2.jar 
+            -Dliquibase.jar.file.path=../../../liquibase-debian/target/liquibase.jar -->
   <target name="oracle.createUsers">
     <echo>Creating users...</echo>
-    <updateDatabase changelogfile="${basedir}\oracle\oracle.install.changelog.xml"
-                    username="sys as sysdba"
-                    password="oracle"
-                    driver="oracle.jdbc.OracleDriver"
-                    url="jdbc:oracle:thin:@localhost:1521:xe"
-                    classpathref="jdbc">
-    </updateDatabase>
+    <liquibase:database id="oracle-database"
+        driver="oracle.jdbc.OracleDriver"
+        user="${oracle.jdbc.sysuser}"
+        password="oracle"
+        url="${oracle.jdbc.url}" />
+    <liquibase:rollbackDatabase databaseref="oracle-database"
+        rollbackDate="2009-01-01"
+        changelogfile="oracle.install.changelog.xml" />
+    <liquibase:updateDatabase databaseref="oracle-database"
+        changelogfile="oracle.install.changelog.xml" />
     <echo>Done creating users.</echo>
   </target>
 

@@ -32,7 +32,7 @@ import java.util.*;
  * @param <T> - class to convert the objects to.
  */
 public class CsvToBean<T> extends AbstractCSVToBean {
-   private Map<Class<?>, PropertyEditor> editorMap = null;
+   private Map<Class<?>, PropertyEditor> editorMap;
 
    /**
     * Default constructor.
@@ -90,7 +90,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
       }
 
       try {
-         List<T> list = new ArrayList<T>();
+         List<T> list = new ArrayList<>();
          while (null != (line = csv.readNext())) {
             lineProcessed++;
             processLine(mapper, filter, line, list);
@@ -101,8 +101,8 @@ public class CsvToBean<T> extends AbstractCSVToBean {
       }
    }
 
-   private void processLine(MappingStrategy<T> mapper, CsvToBeanFilter filter, String[] line, List<T> list) throws IllegalAccessException, InvocationTargetException, InstantiationException, IntrospectionException {
-      if (filter == null || filter.allowLine(line)) {
+   private void processLine(MappingStrategy<T> mapper, CsvToBeanFilter filter, String[] line, List<T> list) throws ReflectiveOperationException, IntrospectionException {
+      if ((filter == null) || filter.allowLine(line)) {
          T obj = processLine(mapper, line);
          list.add(obj);
       }
@@ -113,12 +113,10 @@ public class CsvToBean<T> extends AbstractCSVToBean {
     * @param mapper - MappingStrategy
     * @param line  - array of Strings from the csv file.
     * @return - object containing the values.
-    * @throws IllegalAccessException - thrown on error creating bean.
-    * @throws InvocationTargetException - thrown on error calling the setters.
-    * @throws InstantiationException - thrown on error creating bean.
+    * @throws ReflectiveOperationException - thrown on error accessing bean.
     * @throws IntrospectionException - thrown on error getting the PropertyDescriptor.
     */
-   protected T processLine(MappingStrategy<T> mapper, String[] line) throws IllegalAccessException, InvocationTargetException, InstantiationException, IntrospectionException {
+   protected T processLine(MappingStrategy<T> mapper, String[] line) throws ReflectiveOperationException, IntrospectionException {
       T bean = mapper.createBean();
       for (int col = 0; col < line.length; col++) {
          if (mapper.isAnnotationDriven()) {
@@ -130,7 +128,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
       return bean;
    }
 
-   private void processProperty(MappingStrategy<T> mapper, String[] line, T bean, int col) throws IntrospectionException, InstantiationException, IllegalAccessException, InvocationTargetException {
+   private void processProperty(MappingStrategy<T> mapper, String[] line, T bean, int col) throws IntrospectionException, ReflectiveOperationException {
       PropertyDescriptor prop = mapper.findDescriptor(col);
       if (null != prop) {
          String value = checkForTrim(line[col], prop);
@@ -149,7 +147,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
 
    private PropertyEditor getPropertyEditorValue(Class<?> cls) {
       if (editorMap == null) {
-         editorMap = new HashMap<Class<?>, PropertyEditor>();
+         editorMap = new HashMap<>();
       }
 
       PropertyEditor editor = editorMap.get(cls);
@@ -174,13 +172,12 @@ public class CsvToBean<T> extends AbstractCSVToBean {
     *
     * @param desc - PropertyDescriptor.
     * @return - the PropertyEditor for the given PropertyDescriptor.
-    * @throws InstantiationException - thrown when getting the PropertyEditor for the class.
-    * @throws IllegalAccessException - thrown when getting the PropertyEditor for the class.
+    * @throws ReflectiveOperationException - thrown when getting the PropertyEditor for the class.
     */
-   protected PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws InstantiationException, IllegalAccessException {
+   protected PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws ReflectiveOperationException {
       Class<?> cls = desc.getPropertyEditorClass();
       if (null != cls) {
-         return (PropertyEditor) cls.newInstance();
+         return (PropertyEditor) cls.getConstructor().newInstance();
       }
       return getPropertyEditorValue(desc.getPropertyType());
    }

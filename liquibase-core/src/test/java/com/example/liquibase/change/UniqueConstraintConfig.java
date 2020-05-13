@@ -1,9 +1,9 @@
 package com.example.liquibase.change;
 
+import liquibase.serializer.AbstractLiquibaseSerializable;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import liquibase.serializer.AbstractLiquibaseSerializable;
 
 public class UniqueConstraintConfig extends AbstractLiquibaseSerializable {
     private String name;

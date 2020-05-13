@@ -7,7 +7,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameTableStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -66,7 +65,7 @@ public class RenameTableChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
         statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));
@@ -82,10 +81,10 @@ public class RenameTableChange extends AbstractChange {
             Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
             Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);
 
-            if (newTable == null && oldTable == null) {
+            if ((newTable == null) && (oldTable == null)) {
                 return changeStatus.unknown("Neither table exists");
             }
-            if (newTable != null && oldTable != null) {
+            if ((newTable != null) && (oldTable != null)) {
                 return changeStatus.unknown("Both tables exist");
             }
             changeStatus.assertComplete(newTable != null, "New table does not exist");

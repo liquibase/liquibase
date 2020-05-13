@@ -86,14 +86,14 @@
         <au:assertFileExists file="${temp.dir}/new-change-log.xml"/>
     </target>
 
-    <target name="testGenerateChangeLogBadOutputEncoding">
-        <au:expectfailure>
-            <lb:generateChangeLog>
-                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
-                <lb:txt outputfile="${temp.dir}/new-change-log.txt" encoding="REALLY-BAD-ENCODING"/>
-            </lb:generateChangeLog>
-        </au:expectfailure>
-    </target>
+    <!--<target name="testGenerateChangeLogBadOutputEncoding">-->
+        <!--<au:expectfailure>-->
+            <!--<lb:generateChangeLog>-->
+                <!--<lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>-->
+                <!--<lb:txt outputfile="${temp.dir}/new-change-log.txt" encoding="REALLY-BAD-ENCODING"/>-->
+            <!--</lb:generateChangeLog>-->
+        <!--</au:expectfailure>-->
+    <!--</target>-->
 
     <target name="testGenerateChangeLogMissingOutputElement">
         <au:expectfailure>

@@ -3,7 +3,7 @@ package liquibase.sdk;
 import liquibase.command.LiquibaseCommand;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.convert.ConvertCommand;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -12,13 +12,17 @@ import java.util.*;
 
 public class Main {
 
-    private boolean debug = false;
+    private boolean debug;
 
     private CommandLine globalArguments;
     private String command;
-    private List<String> commandArgs = new ArrayList<String>();
+    private List<String> commandArgs = new ArrayList<>();
 
     private Options globalOptions;
+
+    public Main() {
+        globalOptions = new Options();
+    }
 
     public static void main(String[] args) {
         Main main = new Main();
@@ -32,15 +36,15 @@ public class Main {
                 throw new UserError("No command passed");
             }
 
-            if (main.command.equals("help")) {
+            if ("help".equals(main.command)) {
                 main.printHelp();
                 return;
             }
 
             LiquibaseCommand command;
             CommandLineParser commandParser = new GnuParser();
-            if (main.command.equals("convert")) {
-                command = new ConvertCommand(main);
+            if ("convert".equals(main.command)) {
+                command = new ConvertCommand();
 
                 Options options = new Options();
                 options.addOption(OptionBuilder.hasArg().withDescription("Original changelog").isRequired().create("src"));
@@ -74,15 +78,10 @@ public class Main {
         }
     }
 
-    public Main() {
-        globalOptions = new Options();
-    }
-
     public void init(String[] args) throws UserError {
-        Context.reset();
         CommandLineParser globalParser = new GnuParser();
 
-        List<String> globalArgs = new ArrayList<String>();
+        List<String> globalArgs = new ArrayList<>();
 
         boolean inGlobal = true;
         for (String arg : args) {
@@ -107,15 +106,15 @@ public class Main {
 
 //        Context context = Context.getInstance();
 //        if (context.getSeenExtensionClasses().size() == 0) {
-//            System.out.println("No extension classes found in "+StringUtils.join(context.getPackages(), ","));
+//            System.out.println("No extension classes found in "+StringUtil.join(context.getPackages(), ","));
 //            return;
 //        }
 //
 //        System.out.println("Extension classes found:");
 //        for (Map.Entry<Class, Set<Class>> entry : context.getSeenExtensionClasses().entrySet()) {
-//            System.out.println(StringUtils.indent(entry.getKey().getName()+" extensions:", 4));
+//            System.out.println(StringUtil.indent(entry.getKey().getName()+" extensions:", 4));
 //
-//            System.out.println(StringUtils.indent(StringUtils.join(entry.getValue(), "\n", new StringUtils.StringUtilsFormatter() {
+//            System.out.println(StringUtil.indent(StringUtil.join(entry.getValue(), "\n", new StringUtil.StringUtilFormatter() {
 //                @Override
 //                public String toString(Object obj) {
 //                    return ((Class) obj).getName();
@@ -136,7 +135,7 @@ public class Main {
             if (dir.listFiles(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String name) {
-                    return name.equals("liquibase-sdk.bat");
+                    return "liquibase-sdk.bat".equals(name);
                 }
             }).length > 0) {
                 return dir;
@@ -145,7 +144,8 @@ public class Main {
             dir = dir.getParentFile();
         }
 
-        throw new UnexpectedLiquibaseException("Could not find Liquibase SDK home. Please run liquibase-sdk from the liquibase/sdk directory or one of it's sub directories");
+        throw new UnexpectedLiquibaseException("Could not find Liquibase SDK home. Please run liquibase-sdk from the " +
+            "liquibase/sdk directory or one of it's sub directories");
     }
 
     public String getCommand() {
@@ -198,14 +198,14 @@ public class Main {
             path = environment.get("path");
         }
         if (path == null) {
-            throw new UnexpectedLiquibaseException("Cannot find path variable in environment. Possible variables are " + StringUtils.join(environment.keySet(), ","));
+            throw new UnexpectedLiquibaseException("Cannot find path variable in environment. Possible variables are " + StringUtil.join(environment.keySet(), ","));
         }
 
         return path;
     }
 
     public String getPath(String... possibleFileNames) {
-        Set<String> fileNames = new HashSet<String>();
+        Set<String> fileNames = new HashSet<>();
 
         for (String dir : getPath().split("[:;]")) {
             for (String fileName : possibleFileNames) {
@@ -225,7 +225,9 @@ public class Main {
     }
 
     private static class UserError extends RuntimeException {
-
+    
+        private static final long serialVersionUID = 6926190469964122370L;
+    
         public UserError(String message) {
             super(message);
         }

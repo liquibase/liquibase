@@ -1,14 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -22,7 +15,7 @@ public class RenameSequenceGenerator extends AbstractSqlGenerator<RenameSequence
     public boolean supports(RenameSequenceStatement statement, Database database) {
         return database.supportsSequences() 
             // TODO: following are not implemented/tested currently
-            && !(database instanceof DB2Database)
+            && !(database instanceof AbstractDb2Database)
             && !(database instanceof FirebirdDatabase)
             && !(database instanceof H2Database)
             && !(database instanceof HsqlDatabase)

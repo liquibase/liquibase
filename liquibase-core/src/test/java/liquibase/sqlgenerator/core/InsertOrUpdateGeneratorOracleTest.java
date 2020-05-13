@@ -1,18 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.InsertOrUpdateStatement;
-
 import liquibase.statement.core.InsertStatement;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
 public class InsertOrUpdateGeneratorOracleTest {

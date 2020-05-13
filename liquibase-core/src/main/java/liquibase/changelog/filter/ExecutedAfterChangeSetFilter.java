@@ -3,7 +3,6 @@ package liquibase.changelog.filter;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -13,12 +12,12 @@ import java.util.Set;
 public class ExecutedAfterChangeSetFilter implements ChangeSetFilter {
 
     private final Date date;
-    private Set<String> changeLogsAfterDate = new HashSet<String>();
+    private Set<String> changeLogsAfterDate = new HashSet<>();
 
     public ExecutedAfterChangeSetFilter(Date date, List<RanChangeSet> ranChangeSets) {
         this.date = date;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (ranChangeSet.getDateExecuted() != null && ranChangeSet.getDateExecuted().getTime() > date.getTime()) {
+            if ((ranChangeSet.getDateExecuted() != null) && (ranChangeSet.getDateExecuted().getTime() > date.getTime())) {
                 changeLogsAfterDate.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
             }
         }

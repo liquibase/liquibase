@@ -50,7 +50,7 @@ public class ColumnPositionMappingStrategy<T> extends HeaderColumnNameMappingStr
     */
    @Override
    public String getColumnName(int col) {
-      return col < columnMapping.length ? columnMapping[col] : null;
+      return (col < columnMapping.length) ? columnMapping[col] : null;
    }
 
    /**
@@ -66,7 +66,7 @@ public class ColumnPositionMappingStrategy<T> extends HeaderColumnNameMappingStr
     * @param columnMapping - column names to be mapped.
     */
    public void setColumnMapping(String... columnMapping) {
-      this.columnMapping = columnMapping != null ? columnMapping.clone() : new String[]{};
+       this.columnMapping = (columnMapping != null) ? columnMapping.clone() : new String[]{};
       resetIndexMap();
       createIndexLookup(this.columnMapping);
    }

@@ -2,7 +2,7 @@ package liquibase.diff.compare.core
 
 import liquibase.diff.compare.DatabaseObjectComparator
 import liquibase.diff.compare.DatabaseObjectComparatorFactory
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table

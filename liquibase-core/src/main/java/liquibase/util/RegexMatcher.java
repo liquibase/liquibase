@@ -18,7 +18,7 @@ public class RegexMatcher {
      * @param regexToMatch Regex to match
      */
     public RegexMatcher(String text,String [] regexToMatch) {
-        assert text!=null && regexToMatch!=null;
+        assert (text != null) && (regexToMatch != null);
 
         this.text=text;
         patterns=new Pattern[regexToMatch.length];

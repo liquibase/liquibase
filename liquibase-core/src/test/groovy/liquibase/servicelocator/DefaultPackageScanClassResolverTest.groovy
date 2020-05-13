@@ -5,7 +5,7 @@ import liquibase.database.core.MySQLDatabase
 import liquibase.database.core.OracleDatabase
 import liquibase.logging.Logger
 import liquibase.logging.core.AbstractLogger
-import liquibase.logging.core.DefaultLogger
+import liquibase.logging.core.JavaLogger
 import spock.lang.Specification
 
 class DefaultPackageScanClassResolverTest extends Specification {
@@ -20,7 +20,7 @@ class DefaultPackageScanClassResolverTest extends Specification {
 
         then:
         loggingClasses.size() > 0
-        assert loggingClasses.contains(DefaultLogger.class)
+        assert loggingClasses.contains(JavaLogger.class)
         assert !loggingClasses.contains(AbstractLogger.class)
 
         when:

@@ -7,9 +7,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import liquibase.util.SystemUtils;
 
 /**
  * Class Loader for loading JDBC drivers in unit tests.  It was orginally not a singleton, but
@@ -37,20 +35,13 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
 
             addUrlsFromPath(urls,  "jdbc-drivers/all");
 
-            //Add drivers by Java version. Only jars from the biggest matching version are taken
-            if(SystemUtils.isJavaVersionAtLeast(1.6f)) {
-                addUrlsFromPath(urls,  "jdbc-drivers/byJavaVersion/1.6");
-            } else if(SystemUtils.isJavaVersionAtLeast(1.5f)) {
-                addUrlsFromPath(urls,  "jdbc-drivers/byJavaVersion/1.5");
-            }
-
             return urls.toArray(new URL[urls.size()]);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void addUrlsFromPath(List<URL> addTo,String path) throws Exception{
+    private static void addUrlsFromPath(List<URL> addTo,String path) throws Exception {
             File thisClassFile = new File(new URI(Thread.currentThread().getContextClassLoader().getResource("liquibase/test/JUnitJDBCDriverClassLoader.class")
                     .toExternalForm()));
             File jdbcLib = new File(thisClassFile.getParentFile().getParentFile().getParentFile(),path);
@@ -75,7 +66,7 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
                 });
 
                 for (File jar : driverJars) {
-                    addTo.add(jar.toURL());
+                    addTo.add(jar.toURI().toURL());
                 }
 
             }

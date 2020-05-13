@@ -1,15 +1,15 @@
 package liquibase.changelog.filter;
 
-import java.util.List;
-
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 
+import java.util.List;
+
 public class UpToTagChangeSetFilter implements ChangeSetFilter {
     private final String tag;
-    private boolean seenTag = false;
+    private boolean seenTag;
 
     public UpToTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets) {
         this.tag = tag;

@@ -28,7 +28,7 @@ public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGen
 
         // Using an auto-generated name (a name beginning with space) when creating a new unique constraint is impossible
         String constraintName = statement.getConstraintName();
-        if (constraintName == null || constraintName.startsWith(" ")) { // Names beginning with a space can't be created in informix using SQL
+        if ((constraintName == null) || constraintName.startsWith(" ")) { // Names beginning with a space can't be created in informix using SQL
             return new Sql[] {
                 new UnparsedSql(String.format(sqlNoConstraintNameTemplate
                         , database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())

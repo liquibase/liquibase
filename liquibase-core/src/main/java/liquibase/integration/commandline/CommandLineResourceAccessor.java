@@ -1,12 +1,9 @@
 package liquibase.integration.commandline;
 
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.util.StringUtils;
+import liquibase.resource.InputStreamList;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 
 /**
@@ -20,11 +17,11 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
     }
 
     @Override
-    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
-        Set<InputStream> resourcesAsStream = super.getResourcesAsStream(path);
+    public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
+        InputStreamList resourcesAsStream = super.openStreams(relativeTo, streamPath);
         if (resourcesAsStream == null) {
-            for (String altPath : getAlternatePaths(path)) {
-                resourcesAsStream = super.getResourcesAsStream(altPath);
+            for (String altPath : getAlternatePaths(streamPath)) {
+                resourcesAsStream = super.openStreams(relativeTo, altPath);
                 if (resourcesAsStream != null) {
                     return resourcesAsStream;
                 }
@@ -33,9 +30,10 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
         return resourcesAsStream;
     }
 
+
     @Override
-    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        Set<String> contents = new HashSet<String>();
+    public SortedSet<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        SortedSet<String> contents = new TreeSet<>();
         Set<String> superList = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
         if (superList != null) {
             contents.addAll(superList);
@@ -43,8 +41,8 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
         for (String altPath : getAlternatePaths(path)) {
             contents.addAll(super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive));
         }
-        if (contents.size() == 0) {
-            return null;
+        if (contents.isEmpty()) {
+            return new TreeSet<>();
         }
         return contents;
     }
@@ -53,7 +51,7 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
      * Return alternate options for the given path that the user maybe meant. Return in order of likelihood.
      */
     protected List<String> getAlternatePaths(String path) {
-        List<String> alternatePaths = new ArrayList<String>();
+        List<String> alternatePaths = new ArrayList<>();
 
         if (path.startsWith("/")) { //People are often confused about leading slashes in resource paths...
             alternatePaths.add(path.substring(1));

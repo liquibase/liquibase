@@ -2,14 +2,14 @@ package liquibase.serializer;
 
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class ChangeLogSerializerFactoryTest {
 
@@ -89,7 +89,7 @@ public class ChangeLogSerializerFactoryTest {
         XMLChangeLogSerializer highestPriority = new XMLChangeLogSerializer() {
             @Override
             public int getPriority() {
-            	return super.getPriority() + 4;
+                return super.getPriority() + 4;
             }
         };
         factory.register(highestPriority);
@@ -97,7 +97,7 @@ public class ChangeLogSerializerFactoryTest {
         XMLChangeLogSerializer higherPriority = new XMLChangeLogSerializer() {
             @Override
             public int getPriority() {
-            	return super.getPriority() + 1;
+                return super.getPriority() + 1;
             }
         };
         factory.register(higherPriority);

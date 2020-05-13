@@ -7,7 +7,6 @@ public class DropSequenceStatement extends AbstractSqlStatement {
     private String catalogName;
     private String schemaName;
     private String sequenceName;
-    private Boolean onlyIfExists;
 
     public DropSequenceStatement(String catalogName, String schemaName, String sequenceName) {
         this.catalogName  =catalogName;
@@ -32,11 +31,4 @@ public class DropSequenceStatement extends AbstractSqlStatement {
         return sequenceName;
     }
 
-    public Boolean getOnlyIfExists() {
-        return onlyIfExists;
-    }
-
-    public void setOnlyIfExists(Boolean onlyIfExists) {
-        this.onlyIfExists = onlyIfExists;
-    }
 }

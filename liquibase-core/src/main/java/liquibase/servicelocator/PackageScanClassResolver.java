@@ -1,6 +1,5 @@
 package liquibase.servicelocator;
 
-import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**

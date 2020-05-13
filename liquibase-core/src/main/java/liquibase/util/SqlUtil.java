@@ -1,13 +1,32 @@
 package liquibase.util;
 
+import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.AbstractDb2Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.datatype.core.*;
-import liquibase.logging.LogFactory;
+import liquibase.datatype.core.BigIntType;
+import liquibase.datatype.core.BlobType;
+import liquibase.datatype.core.BooleanType;
+import liquibase.datatype.core.CharType;
+import liquibase.datatype.core.ClobType;
+import liquibase.datatype.core.DateTimeType;
+import liquibase.datatype.core.DateType;
+import liquibase.datatype.core.DecimalType;
+import liquibase.datatype.core.DoubleType;
+import liquibase.datatype.core.FloatType;
+import liquibase.datatype.core.IntType;
+import liquibase.datatype.core.NCharType;
+import liquibase.datatype.core.NVarcharType;
+import liquibase.datatype.core.NumberType;
+import liquibase.datatype.core.SmallIntType;
+import liquibase.datatype.core.TimeType;
+import liquibase.datatype.core.TimestampType;
+import liquibase.datatype.core.TinyIntType;
+import liquibase.datatype.core.VarcharType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
@@ -22,6 +41,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SqlUtil {
+
+    private SqlUtil() {
+        throw new IllegalStateException("This utility class must not be instantiated. Sorry.");
+    }
 
     public static boolean isNumeric(int dataType) {
         List<Integer> numericTypes = Arrays.asList(
@@ -63,7 +86,6 @@ public class SqlUtil {
         if (type.getDataTypeId() != null) {
             typeId = type.getDataTypeId();
         }
-        String typeName = type.getTypeName();
 
         LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().from(type, database);
 
@@ -76,20 +98,23 @@ public class SqlUtil {
             }
         }
 
-
-        if (database instanceof OracleDatabase && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
+        if ((database instanceof OracleDatabase) && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
             //oracle returns functions without quotes
             Object maybeDate = null;
 
-            if (liquibaseDataType instanceof DateType || typeId == Types.DATE) {
+            if ((liquibaseDataType instanceof DateType) || (typeId == Types.DATE)) {
                 if (stringVal.endsWith("'HH24:MI:SS')")) {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
+                    maybeDate = DataTypeFactory.getInstance().fromDescription(
+                            "time", database).sqlToObject(stringVal, database);
                 } else {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
+                    maybeDate = DataTypeFactory.getInstance().fromDescription(
+                            "date", database).sqlToObject(stringVal, database);
                 }
-            } else if (liquibaseDataType instanceof DateTimeType || typeId == Types.TIMESTAMP) {
-                maybeDate = DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
-            } else if (!stringVal.matches("\\d+\\.?\\d*")) { //not just a number
+            } else if ((liquibaseDataType instanceof DateTimeType) || (typeId == Types.TIMESTAMP)) {
+                maybeDate = DataTypeFactory.getInstance().fromDescription(
+                        "datetime", database).sqlToObject(stringVal, database);
+            } else if (!stringVal.matches("\\d+\\.?\\d*")) {
+                //not just a number
                 return new DatabaseFunction(stringVal);
             }
             if (maybeDate != null) {
@@ -113,6 +138,7 @@ public class SqlUtil {
             return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
         }
 
+        String typeName = type.getTypeName();
         Scanner scanner = new Scanner(stringVal.trim());
         if (typeId == Types.ARRAY) {
             return new DatabaseFunction(stringVal);
@@ -128,19 +154,51 @@ public class SqlUtil {
             if (stringVal.startsWith("b'") || stringVal.startsWith("B'")) { //mysql returns boolean values as b'0' and b'1'
                 stringVal = stringVal.replaceFirst("b'", "").replaceFirst("B'", "").replaceFirst("'$", "");
             }
-            stringVal = stringVal.trim();
-            if (scanner.hasNextBoolean()) {
-                return scanner.nextBoolean();
-            } else {
-                return Integer.valueOf(stringVal);
+            //postgres defaults for bit columns look like: B'0'::"bit"
+            if (stringVal.endsWith("'::\"bit\"")) {
+                stringVal = stringVal.replaceFirst("'::\"bit\"", "");
             }
-        } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
+
+            stringVal = stringVal.trim();
+            if (database instanceof MySQLDatabase) {
+                return "1".equals(stringVal) || "true".equalsIgnoreCase(stringVal);
+            }
+
+            Object value = stringVal;
+            if (scanner.hasNextBoolean()) {
+                value = scanner.nextBoolean();
+            } else if (scanner.hasNextInt()) {
+                value = Integer.valueOf(stringVal);
+            }
+
+            // Make sure we handle BooleanType values which are not Boolean
+            if (database instanceof MSSQLDatabase) {
+              if (value instanceof Boolean) {
+                if ((Boolean) value) {
+                    return new DatabaseFunction("'true'");
+                } else {
+                    return new DatabaseFunction("'false'");
+                }
+              } else if (value instanceof Integer) {
+                  if (((Integer) value) != 0) {
+                      return new DatabaseFunction("'true'");
+                  }
+                  else {
+                      return new DatabaseFunction("'false'");
+                  }
+              } else {
+                  // you can declare in MsSQL: `col_name bit default 'nonsense'`
+                  return new DatabaseFunction(String.format("'%s'", value));
+              }
+            }
+            return value;
+        } else if (liquibaseDataType instanceof BlobType || typeId == Types.BLOB) {
             if (strippedSingleQuotes) {
                 return stringVal;
             } else {
                 return new DatabaseFunction(stringVal);
             }
-        } else if ((liquibaseDataType instanceof BooleanType || typeId == Types.BOOLEAN )) {
+        } else if ((liquibaseDataType instanceof BooleanType || typeId == Types.BOOLEAN)) {
             if (scanner.hasNextBoolean()) {
                 return scanner.nextBoolean();
             } else {
@@ -199,14 +257,22 @@ public class SqlUtil {
             return null;
         } else if ((liquibaseDataType instanceof NumberType || typeId == Types.NUMERIC)) {
             if (scanner.hasNextBigDecimal()) {
+                if (database instanceof MSSQLDatabase && stringVal.endsWith(".0") || stringVal.endsWith
+                        (".00") || stringVal.endsWith(".000")) {
+                    // MSSQL can store the value with the decimal digits. return it directly to avoid unexpected differences
+                    return new DatabaseFunction(stringVal);
+                }
                 return scanner.nextBigDecimal();
             } else {
+                if (stringVal.equals("")) {
+                    return new DatabaseFunction("''"); //can have numeric default '' on sql server
+                }
                 return new DatabaseFunction(stringVal);
             }
         } else if (liquibaseDataType instanceof NVarcharType || typeId == Types.NVARCHAR) {
             return stringVal;
         } else if (typeId == Types.OTHER) {
-            if (database instanceof DB2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
+            if (database instanceof AbstractDb2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
                 return new BigDecimal(stringVal);
             }
             return new DatabaseFunction(stringVal);
@@ -227,9 +293,12 @@ public class SqlUtil {
         } else if (typeId == Types.STRUCT) {
             return new DatabaseFunction(stringVal);
         } else if (liquibaseDataType instanceof TimeType || typeId == Types.TIME) {
-            return DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
-        } else if (liquibaseDataType instanceof DateTimeType || liquibaseDataType instanceof TimestampType || typeId == Types.TIMESTAMP) {
-            return DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
+            return DataTypeFactory.getInstance().fromDescription("time", database)
+                    .sqlToObject(stringVal, database);
+        } else if (liquibaseDataType instanceof DateTimeType || liquibaseDataType instanceof TimestampType ||
+                typeId == Types.TIMESTAMP) {
+            return DataTypeFactory.getInstance().fromDescription("datetime", database)
+                    .sqlToObject(stringVal, database);
         } else if ((liquibaseDataType instanceof TinyIntType || typeId == Types.TINYINT)) {
             if (scanner.hasNextInt()) {
                 return scanner.nextInt();
@@ -242,36 +311,45 @@ public class SqlUtil {
             return stringVal;
         } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
             return stringVal;
+        } else if ((database instanceof MSSQLDatabase) && typeName.toLowerCase().startsWith("datetimeoffset")) {
+            return stringVal;
         } else {
             if (stringVal.equals("")) {
                 return stringVal;
             }
-            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
+            Scope.getCurrentScope().getLog(SqlUtil.class).info("Unknown default value: value '" + stringVal +
+                    "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
             if (strippedSingleQuotes) { //put quotes back
-                return new DatabaseFunction("'"+stringVal+"'");
+                return new DatabaseFunction("'" + stringVal + "'");
             }
             return new DatabaseFunction(stringVal);
+
         }
     }
 
-    public static String replacePredicatePlaceholders(Database database, String predicate, List<String> columnNames, List<Object> parameters) {
+    public static String replacePredicatePlaceholders(Database database, String predicate, List<String> columnNames,
+                                                      List<Object> parameters) {
         Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(predicate.trim());
         StringBuffer sb = new StringBuffer();
         Iterator<String> columnNameIter = columnNames.iterator();
         Iterator<Object> paramIter = parameters.iterator();
         while (matcher.find()) {
-            if (matcher.group().equals(":name")) {
+            if (":name".equals(matcher.group())) {
                 while (columnNameIter.hasNext()) {
                     String columnName = columnNameIter.next();
                     if (columnName == null) {
                         continue;
                     }
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement(database.escapeObjectName(columnName, Column.class)));
+                    matcher.appendReplacement(sb, Matcher.quoteReplacement(
+                            database.escapeObjectName(columnName, Column.class))
+                    );
                     break;
                 }
             } else if (paramIter.hasNext()) {
                 Object param = paramIter.next();
-                matcher.appendReplacement(sb, Matcher.quoteReplacement(DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database)));
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(
+                        DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database))
+                );
             }
         }
         matcher.appendTail(sb);

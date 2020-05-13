@@ -2,18 +2,21 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.text.*;
-import java.util.Date;
-
 import liquibase.Contexts;
 import liquibase.LabelExpression;
-import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 import liquibase.util.ISODateFormat;
 import org.apache.maven.plugin.MojoFailureException;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
+
 /**
- * Invokes Liquibase rollbacks on a database.
+ * <p>Invokes Liquibase to rollback the database (and mark changesets as unapplied). The
+ * change sets to be rolled back are specified using attributes 'rollbackCount',
+ * 'rollbackTag' and/or 'rollbackDate'</p>
  * @author Peter Murray
  * @goal rollback
  */
@@ -26,13 +29,13 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
 
   /**
    * The tag to roll the database back to. 
-   * @parameter expression="${liquibase.rollbackTag}"
+   * @parameter property="liquibase.rollbackTag"
    */
   protected String rollbackTag;
 
   /**
    * The number of change sets to rollback.
-   * @parameter expression="${liquibase.rollbackCount}" default-value="-1"
+   * @parameter property="liquibase.rollbackCount" default-value="-1"
    */
   protected int rollbackCount;
 
@@ -40,7 +43,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
    * The date to rollback the database to. The format of the date must match either an ISO date format, or that of the
    * <code>DateFormat.getDateInstance()</code> for the platform the plugin is executing
    * on.
-   * @parameter expression="${liquibase.rollbackDate}"
+   * @parameter property="liquibase.rollbackDate"
    */
   protected String rollbackDate;
 
@@ -58,13 +61,13 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   }
 
   protected void checkRequiredRollbackParameters() throws MojoFailureException {
-    if (rollbackCount == -1 && rollbackDate == null && rollbackTag == null) {
+    if ((rollbackCount == -1) && (rollbackDate == null) && (rollbackTag == null)) {
       throw new MojoFailureException("One of the rollback options must be specified, "
                                      + "please specify one of rollbackTag, rollbackCount "
                                      + "or rollbackDate");
     }
 
-    if (rollbackCount!=-1 && rollbackCount <= 0) {
+    if ((rollbackCount != -1) && (rollbackCount <= 0)) {
       throw new MojoFailureException("A rollback count of " + rollbackCount + " is meaningless, please "
                                      + "select a value greater than 0");
     }
@@ -73,17 +76,17 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
                      + " one of rollbackTag, rollbackCount, rollbackDate.";
 
     if (rollbackCount > 0) {
-      if (rollbackDate != null || rollbackTag != null) {
+      if ((rollbackDate != null) || (rollbackTag != null)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.COUNT;
     } else if (rollbackDate != null) {
-      if (rollbackTag != null || rollbackCount > 0) {
+      if ((rollbackTag != null) || (rollbackCount > 0)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.DATE;
     } else if (rollbackTag != null) {
-      if (rollbackCount > 0 || rollbackDate != null) {
+      if ((rollbackCount > 0) || (rollbackDate != null)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.TAG;
@@ -134,7 +137,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
       try {
         return format.parse(date);
       } catch (ParseException e1) {
-        throw new ParseException("Date must match ISODateFormat or standard platform format.\n"+e.getMessage(), 0);
+        throw new ParseException("Date must match ISODateFormat or STANDARD platform format.\n"+e.getMessage(), 0);
 
       }
     }

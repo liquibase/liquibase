@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <preConditions>
+        <dbms type="mariadb"/>
+        <sqlCheck expectedResult="1">select 1</sqlCheck>
+        <runningAs username="${loginUser}"/>
+    </preConditions>
+
+    <changeSet id="1" author="nvoxland">
+        <comment>
+            You can add comments to changeSets.
+            They can even be multiple lines if you would like.
+            They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing
+            problems.
+        </comment>
+        <createTable tableName="person">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="lastname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="nvoxland">
+        <comment>Add a username column so we can use "person" for authentication</comment>
+        <addColumn tableName="person">
+            <column name="usernae" type="varchar(8)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="3" author="nvoxland">
+        <comment>Fix misspelled "username" column</comment>
+        <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username" columnDataType="varchar(8)"/>
+    </changeSet>
+    <changeSet id="5" author="nvoxland" context="test">
+        <insert tableName="person">
+            <column name="firstname" value="John"/>
+            <column name="lastname" value="Doe"/>
+            <column name="username" value="jdoe"/>
+        </insert>
+        <insert tableName="person">
+            <column name="firstname" value="Jane"/>
+            <column name="lastname" value="Doe"/>
+            <column name="username" value="janedoe"/>
+        </insert>
+        <insert tableName="person">
+            <column name="firstname" value="Bob"/>
+            <column name="lastname" value="Johnson"/>
+            <column name="username" value="bjohnson"/>
+        </insert>
+    </changeSet>
+    <changeSet id="6" author="nvoxland">
+        <comment>Don't keep username in the person table</comment>
+        <dropColumn tableName="person" columnName="username"/>
+    </changeSet>
+    <changeSet id="7" author="nvoxland">
+        <createTable tableName="employee">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="7" author="bjohnson" context="test">
+        <insert tableName="employee">
+            <column name="name" value="ACME Corp"/>
+        </insert>
+        <insert tableName="employee">
+            <column name="name" value="Widgets Inc."/>
+        </insert>
+    </changeSet>
+    <changeSet id="7a" author="nvoxland">
+        <addColumn tableName="employee">
+            <column name="company_id" type="int">
+                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="8" author="bjohnson">
+        <dropNotNullConstraint tableName="employee" columnName="name" columnDataType="varchar(50)"/>
+    </changeSet>
+    <changeSet id="8.1" author="bjohnson">
+        <comment>I guess name needs to be not-null</comment>
+        <addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"
+                              columnDataType="varchar(50)"/>
+    </changeSet>
+    <changeSet id="9" author="nvoxland">
+        <renameTable oldTableName="employee" newTableName="company"/>
+    </changeSet>
+    <changeSet id="10" author="nvoxland">
+        <createTable tableName="testtable">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="value" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="person_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_test_person" references="person(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="11" author="nvoxland">
+        <dropTable tableName="testtable"/>
+    </changeSet>
+
+    <changeSet id="12" author="nvoxland">
+        <createIndex indexName="idx_company_name" tableName="company">
+            <column name="name"/>
+        </createIndex>
+        <createIndex indexName="idx_person_lastname" tableName="person">
+            <column name="lastname"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="13" author="nvoxland">
+        <dropIndex indexName="idx_person_lastname" tableName="person"/>
+    </changeSet>
+
+    <changeSet id="14" author="nvoxland">
+        <createTable tableName="liquibaseRunInfo">
+            <column name="timesRan" type="int"/>
+        </createTable>
+        <insert tableName="liquibaseRunInfo">
+            <column name="timesRan" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="15" author="nvoxland">
+        <sql>update liquibaseRunInfo set timesRan=timesRan+1</sql>
+    </changeSet>
+
+    <changeSet id="16" author="nvoxland">
+        <createView viewName="personView">
+            select * from lbcat.person
+        </createView>
+        <createView viewName="personView" replaceIfExists="true">
+            select * from lbcat.person
+        </createView>
+    </changeSet>
+
+    <changeSet id="18" author="nvoxland">
+        <dropView viewName="personView"/>
+    </changeSet>
+
+    <changeSet id="19" author="nvoxland">
+        <mergeColumns
+                tableName="person"
+                column1Name="firstname"
+                joinString=" "
+                column2Name="lastname"
+                finalColumnName="fullname"
+                finalColumnType="varchar(100)"/>
+    </changeSet>
+
+    <changeSet id="20" author="nvoxland">
+        <createView viewName="personView">
+            select id, fullname from person
+        </createView>
+    </changeSet>
+
+    <changeSet id="21" author="nvoxland">
+        <renameView oldViewName="personView" newViewName="v_person"/>
+    </changeSet>
+
+    <changeSet id="22" author="nvoxland">
+        <addColumn tableName="person">
+            <column name="employer_id" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="23" author="nvoxland">
+        <addForeignKeyConstraint
+                baseTableName="person" baseColumnNames="employer_id"
+                constraintName="fk_person_employer"
+                referencedTableName="company" referencedColumnNames="id"
+                deleteCascade="true"/>
+    </changeSet>
+
+    <changeSet id="24" author="nvoxland">
+        <dropForeignKeyConstraint baseTableName="person" constraintName="fk_person_employer"/>
+    </changeSet>
+
+    <changeSet id="25" author="nvoxland">
+        <createTable tableName="address">
+            <column name="id" type="int"/>
+            <column name="line1" type="varchar(255)"/>
+            <column name="line2" type="varchar(255)"/>
+            <column name="city" type="varchar(255)"/>
+            <column name="state" type="char(2)"/>
+            <column name="postalcode" type="varchar(15)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="25.1" author="nvoxland">
+        <addNotNullConstraint tableName="address" columnName="id" columnDataType="int" defaultNullValue="0"/>
+    </changeSet>
+
+    <changeSet id="25.2" author="nvoxland">
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
+    </changeSet>
+
+    <changeSet id="25.3" author="nvoxland">
+        <addAutoIncrement tableName="address" columnName="id" columnDataType="int"/>
+    </changeSet>
+
+    <changeSet id="26" author="nvoxland">
+        <insert tableName="address">
+            <column name="line1" value="123 4th St"/>
+            <column name="line2" value="Suite 432"/>
+            <column name="city" value="New York"/>
+            <column name="state" value="NY"/>
+            <column name="postalcode" value="01235"/>
+        </insert>
+        <insert tableName="address">
+            <column name="line1" value="6123 64th St"/>
+            <column name="city" value="New York"/>
+            <column name="state" value="NY"/>
+            <column name="postalcode" value="01235"/>
+        </insert>
+        <insert tableName="address">
+            <column name="line1" value="One Liquibase Way"/>
+            <column name="city" value="Fargo"/>
+            <column name="state" value="ND"/>
+            <column name="postalcode" value="58103"/>
+        </insert>
+        <insert tableName="address">
+            <column name="line1" value="123 Main Ave"/>
+            <column name="city" value="City With No State"/>
+            <column name="postalcode" value="00000"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="27" author="nvoxland">
+        <addLookupTable
+                existingTableName="address" existingColumnName="state"
+                newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>
+    </changeSet>
+
+    <changeSet id="28" author="nvoxland">
+        <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
+    </changeSet>
+
+    <changeSet id="29" author="nvoxland">
+        <dropDefaultValue tableName="address" columnName="line2"/>
+    </changeSet>
+
+    <changeSet id="30" author="nvoxland">
+        <createTable tableName="pkTest">
+            <column name="id" type="int"/>
+            <column name="value" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="31" author="nvoxland">
+        <addPrimaryKey tableName="pkTest" columnNames="id" constraintName="pk_pktest"/>
+    </changeSet>
+
+    <changeSet id="32" author="nvoxland">
+        <dropPrimaryKey tableName="pkTest" constraintName="pk_pktest"/>
+    </changeSet>
+
+    <changeSet id="33" author="nvoxland">
+        <addUniqueConstraint tableName="address" columnNames="line1, line2" constraintName="uq_address_line1line2"/>
+    </changeSet>
+
+    <changeSet id="34" author="nvoxland">
+        <dropUniqueConstraint tableName="address" constraintName="uq_address_line1line2"/>
+    </changeSet>
+
+
+    <changeSet id="35" author="nvoxland">
+        <createTable tableName="tableToRollback">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <!--<changeSet id="50" author="nvoxland">-->
+        <!--<modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>-->
+    <!--</changeSet>-->
+
+    <changeSet id="51" author="nvoxland">
+        <createTable tableName="nulldefaulttest">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="test" type="bigint" defaultValue="null"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="51b" author="nvoxland">
+        <addColumn tableName="nulldefaulttest">
+            <column name="foreign_id" type="bigint" defaultValue="null"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="52" author="pkeeble">
+        <sqlFile path="changelogs/mariadb/complete/sample.sql" stripComments="true"/>
+    </changeSet>
+
+    <include file="changelogs/mariadb/complete/included.changelog.xml"/>
+
+    <include file="changelogs/mariadb/complete/renamed.changelog.xml"/>
+
+    <include file="changelogs/common/common.tests.changelog.xml" />
+
+    <include file="changelogs/common/autoincrement.tests.changelog.xml" />
+
+    <include file="changelogs/common/schema.tests.changelog.xml"/>
+
+    <changeSet id="54" author="nvoxland">
+        <addColumn tableName="address">
+            <column name="newcol" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="55" author="nvoxland">
+        <addColumn tableName="address">
+            <column name="newcol2" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="56" author="nvoxland">
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="3"/>
+        </customChange>
+    </changeSet>
+    <changeSet id="57" author="nvoxland">
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+    </changeSet>
+    <changeSet id="58" author="nvoxland">
+        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+    </changeSet>
+
+    <!--<changeSet id="60" author="nvoxland">-->
+        <!--<executeCommand executable="getmac" os="Windows XP">-->
+            <!--<arg value="/FO"/>-->
+            <!--<arg value="CSV"/>-->
+        <!--</executeCommand>-->
+    <!--</changeSet>-->
+
+    <changeSet id="bit-test" author="nvoxland">
+        <createTable tableName="bit_test">
+            <column type="int" name="id"/>
+            <column type="bit" name="bit_with_default" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!--<changeSet id="casetest" author="nvoxland" runAlways="true" >-->
+        <!--<sql>select * from bit_test</sql>-->
+    <!--</changeSet>-->
+
+    <!-- ensure that changes skipped by failed preconditions do not attempt to roll back --> 
+    <changeSet author="GATEKEEPER" id="1.5.0-oracle-1">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="oracle"/>
+        </preConditions>
+        <sql>create sequence gk_action_gk_id_seq</sql>
+        <rollback>
+            <sql>drop sequence gk_action_gk_id_seq</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="failingPrecondition" author="pcleto" onValidationFail="MARK_RAN">
+        <createSequence sequenceName="liquidbase_applicationuserSQ" startValue="1"/>
+    </changeSet>
+
+    <changeSet id="correct-mariadb-timestamp" author="nvoxland">
+        <createTable tableName="timestampusage">
+            <column name="id" type="int"/>
+            <column name="test" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <insert tableName="timestampusage">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+        <rollback>
+            <dropTable tableName="timestampusage"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="correct-mariadb-timestamp-checkConstraint" author="nvoxland">
+        <preConditions>
+            <sqlCheck expectedResult="1">select count(*) from timestampusage where test is not null</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="248fdeca-6cab-4ab9-9d9a-3f97f19c7b1e" author="ma.eberhard">
+		<createTable tableName="RM_Benutzer">
+			<column name="BenutzerId" type="int" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="BenutzerName" type="varchar(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="PasswordDoesNotExpire" type="bit" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+</changeSet>
+
+       <changeSet id="test-mark-run" author="alexis">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="RM_Benutzer" />
+            </not>
+        </preConditions>
+        <createTable tableName="RM_Benutzer">
+            <column name="key" type="number" />
+            <column name="value" type="varchar2(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="department" author="rlamber" runOnChange="true">
+        <loadUpdateData tableName="timestampusage" file="changelogs/pkonly.csv" primaryKey="ID">
+            <column name="ID" type="STRING"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <!--<changeSet id="CORE-1227" author="nvoxland">-->
+        <!--<sql>CREATE TABLE archive (ar_namespace INT(10) DEFAULT 0 NOT NULL, ar_title LONGBLOB NOT NULL, ar_text MEDIUMBLOB NOT NULL, ar_comment TINYBLOB NOT NULL, ar_user INT(10) DEFAULT 0 NOT NULL, ar_user_text LONGBLOB NOT NULL, ar_timestamp BINARY(14) NOT NULL, ar_minor_edit TINYINT(3) DEFAULT 0 NOT NULL, ar_flags TINYBLOB NOT NULL, ar_rev_id INT(10) NULL, ar_text_id INT(10) NULL, ar_deleted TINYINT(3) DEFAULT 0 NOT NULL, ar_len INT(10) NULL, ar_page_id INT(10) NULL, ar_parent_id INT(10) NULL, ar_sha1 LONGBLOB NOT NULL)</sql>-->
+        <!--<sql>CREATE INDEX name_title_timestamp ON archive(ar_namespace, ar_title ( 255 ), ar_timestamp)</sql>-->
+    <!--</changeSet>-->
+
+    <!--<changeSet id="CORE-1226" author="nvoxland">-->
+        <!--<sql>CREATE  TABLE sized_double (-->
+            <!--double_column DOUBLE NOT NULL DEFAULT 100 ,-->
+            <!--PRIMARY KEY (double_column) );</sql>-->
+    <!--</changeSet>-->
+
+    <!--<changeSet id="CORE-1511-setup" author="nvoxland">-->
+        <!--<createTable tableName="core1511">-->
+            <!--<column name="id" type="int"/>-->
+            <!--<column name="ApproveSecurity" type="int"/>-->
+        <!--</createTable>-->
+    <!--</changeSet>-->
+    <!--<changeSet id="CORE-1511" author="nvoxland">-->
+        <!--<modifyDataType tableName="core1511"-->
+                        <!--columnName="ApproveSecurity"-->
+                        <!--newDataType="ENUM('Approving_Boss','Approving_NetworkOwner','Approving_other','Approving_Owner','Approving_RVS','Inv_AccessApproving_NetworkOwner','Approving_Request_Handler') NOT NULL"/>-->
+    <!--</changeSet>-->
+
+</databaseChangeLog>

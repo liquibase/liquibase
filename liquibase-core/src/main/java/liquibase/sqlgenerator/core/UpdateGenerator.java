@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -14,6 +13,8 @@ import liquibase.structure.core.Table;
 
 import java.util.Date;
 
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
+
 public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     @Override
@@ -21,7 +22,8 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
         validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
-        if (updateStatement.getWhereParameters() != null && updateStatement.getWhereParameters().size() > 0 && updateStatement.getWhereClause() == null) {
+        if ((updateStatement.getWhereParameters() != null) && !updateStatement.getWhereParameters().isEmpty() &&
+            (updateStatement.getWhereClause() == null)) {
             validationErrors.addError("whereParams set but no whereClause");
         }
         return validationErrors;
@@ -29,11 +31,15 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     @Override
     public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
+        StringBuilder sql = new StringBuilder("UPDATE ")
+            .append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
+            .append(" SET");
         for (String column : statement.getNewColumnValues().keySet()) {
-            sql.append(" ").append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(" = ");
-            sql.append(convertToString(statement.getNewColumnValues().get(column), database));
-            sql.append(",");
+            sql.append(" ")
+                .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column))
+                .append(" = ")
+                .append(convertToString(statement.getNewColumnValues().get(column), database))
+                .append(",");
         }
 
         int lastComma = sql.lastIndexOf(",");
@@ -55,9 +61,9 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     private String convertToString(Object newValue, Database database) {
         String sqlString;
-        if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
+        if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
             sqlString = "NULL";
-        } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
+        } else if ((newValue instanceof String) && !looksLikeFunctionCall(((String) newValue), database)) {
             sqlString = DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database);
         } else if (newValue instanceof Date) {
             // converting java.util.Date to java.sql.Date

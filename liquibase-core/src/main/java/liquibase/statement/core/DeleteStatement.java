@@ -11,8 +11,8 @@ public class DeleteStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private String where;
-    private List<Object> whereParameters = new ArrayList<Object>();
-    private List<String> whereColumnNames = new ArrayList<String>();
+    private List<Object> whereParameters = new ArrayList<>();
+    private List<String> whereColumnNames = new ArrayList<>();
 
     public DeleteStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName  = catalogName;
@@ -43,7 +43,6 @@ public class DeleteStatement extends AbstractSqlStatement {
 
     /**
      * @deprecated use {@link #getWhere()}
-     * @return
      */
     public String getWhereClause() {
         return getWhere();

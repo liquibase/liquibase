@@ -24,6 +24,7 @@ public class AlterSequenceChange extends AbstractChange {
     private Boolean ordered;
     private BigInteger cacheSize;
     private Boolean cycle;
+    private String dataType;
 
     @DatabaseChangeProperty(mustEqualExisting ="sequence.catalog", since = "3.0")
     public String getCatalogName() {
@@ -106,6 +107,15 @@ public class AlterSequenceChange extends AbstractChange {
         this.cycle = cycle;
     }
 
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
+    @DatabaseChangeProperty(description = "Data type of the sequence")
+    public String getDataType() {
+        return dataType;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
@@ -116,6 +126,7 @@ public class AlterSequenceChange extends AbstractChange {
                 .setCacheSize(getCacheSize())
                 .setCycle(getCycle())
                 .setOrdered(isOrdered())
+                .setDataType(getDataType())
         };
     }
 
@@ -142,6 +153,9 @@ public class AlterSequenceChange extends AbstractChange {
             }
             if (getCacheSize() != null) {
                 result.assertCorrect(getCacheSize().equals(sequence.getCacheSize()), "Cache size is different");
+            }
+            if (getDataType() != null) {
+                result.assertCorrect(getDataType().equals(sequence.getDataType()), "Data type is different");
             }
         } catch (Exception e) {
             return result.unknown(e);

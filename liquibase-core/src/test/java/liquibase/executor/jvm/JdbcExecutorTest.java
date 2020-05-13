@@ -3,10 +3,14 @@ package liquibase.executor.jvm;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import static org.junit.Assert.*;
-
 import liquibase.executor.ExecutorService;
 import org.junit.Test;
+
+import java.sql.SQLException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class JdbcExecutorTest {
 
@@ -43,4 +47,12 @@ public class JdbcExecutorTest {
         assertTrue(ExecutorService.getInstance().getExecutor(oracle1) != ExecutorService.getInstance().getExecutor(oracle2));
         assertTrue(ExecutorService.getInstance().getExecutor(oracle1) != ExecutorService.getInstance().getExecutor(mysql));
     }
+
+    @Test
+    public void testGetErrorCode() {
+        assertEquals("", new JdbcExecutor().getErrorCode(new RuntimeException()));
+        assertEquals("(123) ", new JdbcExecutor().getErrorCode(new SQLException("reason", "sqlState", 123)));
+        assertEquals("(0) ", new JdbcExecutor().getErrorCode(new SQLException()));
+    }
+
 }

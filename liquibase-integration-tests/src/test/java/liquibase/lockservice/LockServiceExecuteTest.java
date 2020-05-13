@@ -1,16 +1,16 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.executor.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
+import liquibase.executor.ExecutorService;
+import liquibase.listener.SqlListener;
 import liquibase.test.TestContext;
 import org.junit.After;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -32,12 +32,30 @@ public class LockServiceExecuteTest {
                 try {
                     statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
                     try {
-                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                        String sql = "DROP TABLE " +
+                                database.escapeTableName(
+                                        database.getLiquibaseCatalogName(),
+                                        database.getLiquibaseSchemaName(),
+                                        database.getDatabaseChangeLogTableName()
+                                );
+                        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                            listener.writeSqlWillRun(sql);
+                        }
+                        statement.execute(sql);
                     } catch (Exception e) {
                         //ok
                     }
                     try {
-                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                        String sql = "DROP TABLE " +
+                                database.escapeTableName(
+                                        database.getLiquibaseCatalogName(),
+                                        database.getLiquibaseSchemaName(),
+                                        database.getDatabaseChangeLogLockTableName()
+                                );
+                        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                            listener.writeSqlWillRun(sql);
+                        }
+                        statement.execute(sql);
                     } catch (Exception e) {
                         //ok
                     }
@@ -187,7 +205,7 @@ public class LockServiceExecuteTest {
 //
 //                        database.commit();
 //
-////                        Database clearDatabase = database.getClass().newInstance();
+////                        Database clearDatabase = database.getClass().getConstructor().newInstance();
 ////                        clearDatabase.setConnection(database.getConnection());
 //
 //                        Executor originalTemplate = ExecutorService.getInstance().getExecutor(database);

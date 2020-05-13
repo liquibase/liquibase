@@ -3,7 +3,6 @@ package liquibase.serializer.core.yaml;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import org.junit.Test;
 
 public class YamlChangeLogSerializerTest {

@@ -10,6 +10,7 @@ import com.example.liquibase.change.PrimaryKeyConfig
 import com.example.liquibase.change.UniqueConstraintConfig
 
 import liquibase.Contexts
+import liquibase.Scope
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.CheckSum
@@ -31,7 +32,7 @@ import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.ObjectQuotingStrategy
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
 import liquibase.precondition.core.AndPrecondition
@@ -131,7 +132,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSet(path, "nvoxland", "1").shouldAlwaysRun()
         assert !changeLog.getChangeSet(path, "nvoxland", "1").shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
         assert changeLog.getChangeSets().get(0).getChanges().get(0) instanceof CreateTableChange
 
         then:
@@ -144,10 +145,10 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[0] instanceof RawSQLChange
         assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[1] instanceof RawSQLChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
         assert changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0) instanceof AddColumnChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(1)).getName() == "addColumn"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(1)).getName() == "addColumn"
         assert changeLog.getChangeSets().get(1).getChanges().get(1) instanceof AddColumnChange
 
         changeLog.getChangeSet(path, "bob", "3").getChanges().size() == 1
@@ -156,7 +157,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert !changeLog.getChangeSet(path, "bob", "3").shouldAlwaysRun()
         assert !changeLog.getChangeSet(path, "bob", "3").shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "bob", "3").getChanges().get(0)).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(changeLog.getChangeSet(path, "bob", "3").getChanges().get(0)).getName() == "createTable"
         assert changeLog.getChangeSet(path, "bob", "3").getChanges().get(0) instanceof CreateTableChange
 
 
@@ -287,7 +288,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        assert e.message.startsWith("Syntax error in yaml")
+        assert e.message.startsWith("Syntax error in file liquibase/parser/core/yaml/malformedChangeLog.yaml")
     }
 
     def "elements that don't correspond to anything in liquibase are ignored"() throws Exception {
@@ -309,7 +310,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeSet.getComments() == "Some comments go here"
 
         Change change = changeSet.getChanges().get(0);
-        ChangeFactory.getInstance().getChangeMetaData(change).getName() == "createTable"
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName() == "createTable"
         assert change instanceof CreateTableChange
     }
 
@@ -541,7 +542,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[3].defaultValueComputed.toString() == "average_size()"
 
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].name == "new_col_datetime"
-        new ISODateFormat().format(new java.sql.Timestamp(((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].defaultValueDate.time)).matches(/2014-12-\d+T\d+:15:33.000/) //timezones shift actual value around
+        new ISODateFormat().format(new java.sql.Timestamp(((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].defaultValueDate.time)).matches(/2014-12-\d+T\d+:15:33/) //timezones shift actual value around
 
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].name == "new_col_seq"
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].defaultValueSequenceNext.toString() == "seq_test"
@@ -583,7 +584,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
     def "nested objects are parsed"() {
         setup:
-        ChangeFactory.getInstance().register(CreateTableExampleChange)
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).register(new CreateTableExampleChange())
 
         when:
         def path = "liquibase/parser/core/yaml/nestedObjectsChangeLog.yaml"
@@ -661,6 +662,6 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getDescending() == true
 
         cleanup:
-        ChangeFactory.getInstance().unregister("createTableExample");
+        Scope.getCurrentScope().getSingleton(ChangeFactory.class).unregister("createTableExample");
     }
 }

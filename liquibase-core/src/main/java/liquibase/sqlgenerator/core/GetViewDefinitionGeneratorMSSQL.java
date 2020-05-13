@@ -23,23 +23,9 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
-        boolean sql2005OrLater = true;
-        try {
-            sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
-        } catch (Exception ignored) {
-            // Assume 2005 or later
-        }
         String viewNameEscaped = database.escapeObjectName(schema.getCatalogName(), schema.getSchemaName(), statement.getViewName(), View.class);
         String sql;
-        if (sql2005OrLater) {
-            sql = "SELECT OBJECT_DEFINITION(OBJECT_ID(N'" + database.escapeStringForDatabase(viewNameEscaped) + "')) AS [ObjectDefinition]";
-        } else {
-            sql =
-                    "SELECT [c].[text] " +
-                    "FROM [dbo].[syscomments] AS [c] " +
-                    "WHERE [c].[id] = OBJECT_ID(N'" + database.escapeStringForDatabase(viewNameEscaped) + "') " +
-                    "ORDER BY [c].[colid]";
-        }
+        sql = "SELECT OBJECT_DEFINITION(OBJECT_ID(N'" + database.escapeStringForDatabase(viewNameEscaped) + "')) AS [ObjectDefinition]";
         return new Sql[] { new UnparsedSql(sql) };
     }
 }

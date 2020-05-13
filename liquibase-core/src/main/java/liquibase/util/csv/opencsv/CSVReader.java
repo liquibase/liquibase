@@ -49,8 +49,8 @@ public class CSVReader implements Closeable, Iterable<String[]> {
     private boolean keepCR;
     private boolean verifyReader;
 
-    private long linesRead = 0;
-    private long recordsRead = 0;
+    private long linesRead;
+    private long recordsRead;
 
     /**
      * Constructs CSVReader using a comma for the separator.
@@ -145,7 +145,7 @@ public class CSVReader implements Closeable, Iterable<String[]> {
      * @param strictQuotes sets if characters outside the quotes are ignored
      */
     public CSVReader(Reader reader, char separator, char quotechar, char escape, int line, boolean strictQuotes) {
-        this(reader, separator, quotechar, escape, line, strictQuotes, CSVParser.DEFAULT_IGNORE_LEADING_WHITESPACE);
+        this(reader, separator, quotechar, escape, line, strictQuotes, false);
     }
 
     /**
@@ -204,10 +204,7 @@ public class CSVReader implements Closeable, Iterable<String[]> {
      * @param verifyReader   true to verify reader before each read, false otherwise
      */
     CSVReader(Reader reader, int line, CSVParser csvParser, boolean keepCR, boolean verifyReader) {
-        this.br =
-                (reader instanceof BufferedReader ?
-                        (BufferedReader) reader :
-                        new BufferedReader(reader));
+        this.br = ((reader instanceof BufferedReader) ? (BufferedReader) reader : new BufferedReader(reader));
         this.lineReader = new LineReader(br, keepCR);
         this.skipLines = line;
         this.parser = csvParser;
@@ -250,7 +247,7 @@ public class CSVReader implements Closeable, Iterable<String[]> {
      */
     public List<String[]> readAll() throws IOException {
 
-        List<String[]> allElements = new ArrayList<String[]>();
+        List<String[]> allElements = new ArrayList<>();
         while (hasNext) {
             String[] nextLineAsTokens = readNext();
             if (nextLineAsTokens != null) {

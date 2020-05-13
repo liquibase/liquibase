@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
@@ -20,7 +21,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     private List<ColumnConfig> columns;
 
     public UpdateDataChange() {
-        columns = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<>();
     }
 
     @Override
@@ -62,13 +63,14 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
                 needsPreparedStatement = true;
             }
 
-            if (database instanceof OracleDatabase &&  column.getType() != null && column.getType().equalsIgnoreCase("CLOB") && column.getValue() != null && column.getValue().length() >= 4000) {
+            if ((database instanceof OracleDatabase) && (column.getType() != null) && "CLOB".equalsIgnoreCase(column
+                .getType()) && (column.getValue() != null) && (column.getValue().length() >= 4000)) {
                 needsPreparedStatement = true;
             }
         }
 
         if (needsPreparedStatement) {
-            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor());
+            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), Scope.getCurrentScope().getResourceAccessor());
             
             statement.setWhereClause(where);
             

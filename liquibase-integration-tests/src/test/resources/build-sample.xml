@@ -25,7 +25,7 @@
         <property name="database.url" value="jdbc:mysql://localhost/liquibase"/>
         <property name="database.username" value="liquibase"/>
         <property name="database.password" value="liquibase"/>
-        <property name="database.driver" value="com.mysql.jdbc.Driver"/>
+        <property name="database.driver" value="com.mysql.cj.jdbc.Driver"/>
         <property name="prompt.user.if.not.local.database" value="true"/>
 
         <fail unless="db.changelog.file">db.changelog.file not set</fail>

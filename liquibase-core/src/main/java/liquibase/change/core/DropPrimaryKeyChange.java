@@ -4,13 +4,14 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String constraintName;
+    private Boolean dropIndex;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -69,6 +71,14 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    public Boolean getDropIndex() {
+        return dropIndex;
+    }
+
+    public void setDropIndex(Boolean dropIndex) {
+        this.dropIndex = dropIndex;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
@@ -76,9 +86,11 @@ public class DropPrimaryKeyChange extends AbstractChange {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase(database);
         }
-    	
+
+        DropPrimaryKeyStatement statement = new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
+        statement.setDropIndex(this.dropIndex);
         return new SqlStatement[]{
-                new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
+                statement,
         };
     }
 
@@ -91,51 +103,53 @@ public class DropPrimaryKeyChange extends AbstractChange {
         }
 
     }
-    
+
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-    	
-    	// Note: The attribute "constraintName" is used to pass the column 
-    	// name instead of the constraint name.
-		
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
-		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			@Override
+        SqlStatement[] sqlStatements = null;
+
+
+        // Since SQLite does not support a drop column statement, use alter table visitor to copy the table
+        // and disabling the primary key constraint from the column
+        SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
+            @Override
             public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			@Override
+                return new ColumnConfig[0];
+            }
+
+            @Override
             public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			@Override
+                // toggle the primary key off
+                if (column.getConstraints().isPrimaryKey()) {
+                    column.getConstraints().setPrimaryKey(false);
+                }
+                return true;
+            }
+
+            @Override
             public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getConstraintName())) {
-					column.getConstraints().setPrimaryKey(false);
-				}
-				return true;
-			}
-			@Override
+                // toggle the primary key off
+                if (column.getConstraints().isPrimaryKey()) {
+                    column.getConstraints().setPrimaryKey(false);
+                }
+                return true;
+            }
+
+            @Override
             public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return statements.toArray(new SqlStatement[statements.size()]);
+                return true;
+            }
+        };
+        List<SqlStatement> statements = null;
+        try {
+            statements = SQLiteDatabase.getAlterTableStatements(alterTableVisitor, database, getCatalogName(), getSchemaName(), getTableName());
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        if (statements.size() > 0) {
+            sqlStatements = new SqlStatement[statements.size()];
+            return statements.toArray(sqlStatements);
+        }
+        return sqlStatements;
     }
 
     @Override

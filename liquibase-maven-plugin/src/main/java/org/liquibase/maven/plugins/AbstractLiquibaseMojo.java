@@ -1,18 +1,17 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
-import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
 import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
@@ -21,11 +20,13 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
+import javax.xml.bind.annotation.XmlSchema;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.text.MessageFormat;
 import java.util.*;
 
 /**
@@ -33,7 +34,7 @@ import java.util.*;
  *
  * @author Peter Murray
  * @author Florent Biville
- *
+ * <p>
  * Test dependency is used because when you run a goal outside the build phases you want to have the same dependencies
  * that it would had if it was ran inside test phase
  * @requiresDependencyResolution test
@@ -46,45 +47,37 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private static final String DEFAULT_FIELD_SUFFIX = "Default";
 
     /**
-     * The fully qualified name of the driver class to use to connect to the database.
+     * Specifies the driver class name to use for the database connection.
      *
-     * @parameter expression="${liquibase.driver}"
+     * @parameter property="liquibase.driver"
      */
     protected String driver;
 
     /**
-     * The Database URL to connect to for executing Liquibase.
+     * Specifies the database URL you want to use to execute Liquibase.
      *
-     * @parameter expression="${liquibase.url}"
+     * @parameter property="liquibase.url"
      */
     protected String url;
 
     /**
-
-     The Maven Wagon manager to use when obtaining server authentication details.
-     @component role="org.apache.maven.artifact.manager.WagonManager"
-     @required
-     @readonly
+     * The Maven Wagon manager to use when obtaining server authentication details.
+     *
+     * @component role="org.apache.maven.artifact.manager.WagonManager"
+     * @required
+     * @readonly
      */
     protected WagonManager wagonManager;
     /**
-     * The server id in settings.xml to use when authenticating with.
+     * Specifies the database username for database connection.
      *
-     * @parameter expression="${liquibase.server}"
-     */
-    private String server;
-
-    /**
-     * The database username to use to connect to the specified database.
-     *
-     * @parameter expression="${liquibase.username}"
+     * @parameter property="liquibase.username"
      */
     protected String username;
-
     /**
-     * The database password to use to connect to the specified database.
+     * Specifies the database password for database connection.
      *
-     * @parameter expression="${liquibase.password}"
+     * @parameter property="liquibase.password"
      */
     protected String password;
 
@@ -92,212 +85,217 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Use an empty string as the password for the database connection. This should not be
      * used along side the {@link #password} setting.
      *
-     * @parameter expression="${liquibase.emptyPassword}" default-value="false"
+     * @parameter property="liquibase.emptyPassword" default-value="false"
      * @deprecated Use an empty or null value for the password instead.
      */
     protected boolean emptyPassword;
-
-	/**
-	 * Whether to ignore the schema name.
-	 *
-	 * @parameter expression="${liquibase.outputDefaultSchema}"
-	 */
-	protected boolean outputDefaultSchema;
-
     /**
-     * Whether to ignore the catalog/database name.
      *
-     * @parameter expression="${liquibase.outputDefaultCatalog}"
+     * Specifies whether to ignore the schema name.
+     *
+     * @parameter property="liquibase.outputDefaultSchema" default-value="false"
+     */
+    protected boolean outputDefaultSchema;
+    /**
+     * Specifies whether to ignore the catalog/database name.
+     *
+     * @parameter property="liquibase.outputDefaultCatalog" default-value="false"
      */
     protected boolean outputDefaultCatalog;
 
     /**
-     * The default catalog name to use the for database connection.
+     * Specifies the default catalog name to use for the database connection.
      *
-     * @parameter expression="${liquibase.defaultCatalogName}"
+     * @parameter property="liquibase.defaultCatalogName"
      */
     protected String defaultCatalogName;
 
     /**
-     * The default schema name to use the for database connection.
+     * Specifies the default schema name to use for the database connection.
      *
-     * @parameter expression="${liquibase.defaultSchemaName}"
+     * @parameter property="liquibase.defaultSchemaName"
      */
     protected String defaultSchemaName;
 
     /**
-     * The class to use as the database object.
+     * Specifies the database object class.
      *
-     * @parameter expression="${liquibase.databaseClass}"
+     * @parameter property="liquibase.databaseClass"
      */
     protected String databaseClass;
-    
-    /**
-     * The class to use as the property provider (must be a java.util.Properties implementation).
-     * 
-     * @parameter expression="${liquibase.propertyProviderClass}"
-     */
-    protected String propertyProviderClass;
 
     /**
-     * Controls the prompting of users as to whether or not they really want to run the
-     * changes on a database that is not local to the machine that the user is current
-     * executing the plugin on.
+     * Specifies the property provider  which must be a java.util.Properties implementation.
      *
-     * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="true"
+     * @parameter property="liquibase.propertyProviderClass"
+     */
+    protected String propertyProviderClass;
+    /**
+     * Controls whether users are prompted before executing changeSet to a non-local database.
+     *
+     * @parameter property="liquibase.promptOnNonLocalDatabase" default-value="true"
      */
     protected boolean promptOnNonLocalDatabase;
 
     /**
-     * Allows for the maven project artifact to be included in the class loader for
-     * obtaining the Liquibase property and DatabaseChangeLog files.
+     * Includes a Maven project artifact in the class loader which obtains the liquibase.properties and changelog files.
      *
-     * @parameter expression="${liquibase.includeArtifact}" default-value="true"
+     * @parameter property="liquibase.includeArtifact" default-value="true"
      */
     protected boolean includeArtifact;
-
     /**
-     * Allows for the maven test output directory to be included in the class loader for
-     * obtaining the Liquibase property and DatabaseChangeLog files.
+     * Includes the Maven test output directory in the class loader which obtains the liquibase.properties and changelog files.
      *
-     * @parameter expression="${liquibase.includeTestOutputDirectory}" default-value="true"
+     * @parameter property="liquibase.includeTestOutputDirectory" default-value="true"
      */
     protected boolean includeTestOutputDirectory;
 
     /**
-     * Controls the verbosity of the output from invoking the plugin.
+     * Controls the amount of output detail when you call the plugin.
      *
-     * @parameter expression="${liquibase.verbose}" default-value="false"
-     * @description Controls the verbosity of the plugin when executing
+     * @parameter property="liquibase.verbose" default-value="false"
      */
     protected boolean verbose;
 
     /**
-     * Controls the level of logging from Liquibase when executing. The value can be
-     * "debug", "info", "warning", "severe", or "off". The value is
-     * case insensitive.
+     * Controls the amount of logging detail Liquibase outputs when executing. The values can be
+     * "DEBUG", "INFO", "WARNING", "SEVERE", or "OFF". The value is not case sensitive.
      *
-     * @parameter expression="${liquibase.logging}" default-value="INFO"
-     * @description Controls the verbosity of the plugin when executing
+     * @parameter property="liquibase.logging" default-value="INFO"
      */
     protected String logging;
-
     /**
-     * The Liquibase properties file used to configure the Liquibase {@link
-     * liquibase.Liquibase}.
+     * Specifies the <i>liquibase.properties</i> you want to use to configure Liquibase.
      *
-     * @parameter expression="${liquibase.propertyFile}"
+     * @parameter property="liquibase.propertyFile"
      */
     protected String propertyFile;
-
     /**
-     * Flag allowing for the Liquibase properties file to override any settings provided in
-     * the Maven plugin configuration. By default if a property is explicity specified it is
+     * A flag which indicates you want the <i>liquibase.properties</i> file to override any settings provided in the Maven plugin configuration.
+     * By default, if a property is explicitly specified it is
      * not overridden if it also appears in the properties file.
      *
-     * @parameter expression="${liquibase.propertyFileWillOverride}" default-value="false"
+     * @parameter property="liquibase.propertyFileWillOverride" default-value="false"
      */
     protected boolean propertyFileWillOverride;
 
     /**
-     * Flag for forcing the checksums to be cleared from teh DatabaseChangeLog table.
+     * A flag that forces checksums to be cleared from the DATABASECHANGELOG table.
      *
-     * @parameter expression="${liquibase.clearCheckSums}" default-value="false"
+     * @parameter property="liquibase.clearCheckSums" default-value="false"
      */
     protected boolean clearCheckSums;
-
     /**
-     * List of system properties to pass to the database.
+     * Specifies a list of system properties you want to to pass to the database.
      *
      * @parameter
      */
     protected Properties systemProperties;
-
     /**
      * The Maven project that plugin is running under.
      *
-     * @parameter expression="${project}"
+     * @parameter property="project"
      * @required
      * @readonly
      */
     protected MavenProject project;
 
     /**
+     * Specifies whether to skip running Liquibase.
+     * The use of this parameter is NOT RECOMMENDED but can be used when needed.
+     *
+     * @parameter property="liquibase.skip" default-value="false"
+     */
+    protected boolean skip;
+
+    /**
+     * A flag which indicates you want to set the character encoding of the output file during the updateSQL phase.
+     *
+     * @parameter property="liquibase.outputFileEncoding"
+     */
+    protected String outputFileEncoding;
+
+    /**
+     * Specifies the schema Liquibase will use to create your <i>changelog</i> tables.
+     *
+     * @parameter property="liquibase.changelogCatalogName"
+     */
+    protected String changelogCatalogName;
+
+    /**
+     * Specifies the schema Liquibase will use to create your changelog table.
+     *
+     * @parameter property="liquibase.changelogSchemaName"
+     */
+    protected String changelogSchemaName;
+    /**
+     * Specifies the table name to use for the DATABASECHANGELOG table.
+     *
+     * @parameter property="liquibase.databaseChangeLogTableName"
+     */
+    protected String databaseChangeLogTableName;
+    /**
+     * Specifies the table name to use for the DATABASECHANGELOGLOCK table.
+     *
+     * @parameter property="liquibase.databaseChangeLogLockTableName"
+     */
+    protected String databaseChangeLogLockTableName;
+
+    /**
+     * Specifies the server ID in the Maven <i>settings.xml</i> to use when authenticating.
+     *
+     * @parameter property="liquibase.server"
+     */
+    private String server;
+    /**
      * The {@link Liquibase} object used modify the database.
      */
     private Liquibase liquibase;
 
     /**
-     * Array to put a expression variable to maven plugin.
+     * A property-based collection of <i>changelog</i> properties to apply.
      *
      * @parameter
      */
     private Properties expressionVars;
 
     /**
-     * Set this to 'false' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
-     * convenient on occasion.
-     *
-     * @parameter expression="${liquibase.skip}"
-     */
-    protected boolean skip = false;
-
-    /**
-     * Array to put a expression variable to maven plugin.
+     * A map-based collection of <i>changelog</i> properties to apply.
      *
      * @parameter
      */
     private Map expressionVariables;
 
     /**
-     * Flag to set the character encoding of the output file produced by Liquibase during the updateSQL phase.
-     *
-     * @parameter expression="${liquibase.outputFileEncoding}"
-     */
-    protected String outputFileEncoding;
-    /**
-     * Schema against which Liquibase changelog tables will be created.
-     *
-     * @parameter expression="${liquibase.changelogCatalogName}"
-     */
-    protected String changelogCatalogName;
-
-    /**
-     * Schema against which Liquibase changelog tables will be created.
-     *
-     * @parameter expression="${liquibase.changelogSchemaName}"
-     */
-    protected String changelogSchemaName;
-
-    /**
-     * Location of a properties file containing JDBC connection properties for use by the driver.
+     * Specifies the location of a JDBC connection-properties file which contains properties the driver will use.
      *
      * @parameter
      */
     private File driverPropertiesFile;
 
-    /**
-     * Table name to use for the databasechangelog.
-     *
-     * @parameter expression="${liquibase.databaseChangeLogTableName}"
-     */
-    protected String databaseChangeLogTableName;
+    private boolean hasProLicense;
 
     /**
-     * Table name to use for the databasechangelog.
      *
-     * @parameter expression="${liquibase.databaseChangeLogLockTableName}"
+     * Specifies your Liquibase Pro license key.
+     *
+     * @parameter property="liquibase.liquibaseProLicenseKey"
+     *
      */
-    protected String databaseChangeLogLockTableName;
+    protected String liquibaseProLicenseKey;
 
+    protected String commandName;
 
+    protected boolean hasProLicense() {
+        return hasProLicense;
+    }
     protected Writer getOutputWriter(final File outputFile) throws IOException {
-        if (outputFileEncoding==null) {
+        if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
-            return new FileWriter(outputFile);
+            return new OutputStreamWriter(new FileOutputStream(outputFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
-        return new BufferedWriter(new OutputStreamWriter( new FileOutputStream(outputFile), outputFileEncoding));
+        return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), outputFileEncoding));
     }
 
     @Override
@@ -317,94 +315,138 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
 
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+            getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic
+                    (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
         if (skip) {
-            getLog().warn("Liquibase skipped due to maven configuration");
+            getLog().warn("Liquibase skipped due to Maven configuration");
             return;
         }
 
-        ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-        ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
-        configureFieldsAndValues(fileOpener);
-
-        LogFactory.getInstance().setDefaultLoggingLevel(logging);
-
-        // Displays the settings for the Mojo depending of verbosity mode.
-        displayMojoSettings();
-
-        // Check that all the parameters that must be specified have been by the user.
-        checkRequiredParametersAreSpecified();
-
-        Database database = null;
+        ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
         try {
-            String dbPassword = emptyPassword || password == null ? "" : password;
-            String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
-            database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
-                    url,
-                    username,
-                    dbPassword,
-                    driver,
-                    defaultCatalogName,
-                    defaultSchemaName,
-                    outputDefaultCatalog,
-                    outputDefaultSchema,
-                    databaseClass,
-                    driverPropsFile,
-                    propertyProviderClass,
-                    changelogCatalogName,
-                    changelogSchemaName,
-                    databaseChangeLogTableName,
-                    databaseChangeLogLockTableName);
-            liquibase = createLiquibase(fileOpener, database);
+            Map<String, Object> scopeValues = new HashMap<>();
+            scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
+            scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
 
-            getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+            Scope.child(scopeValues, () -> {
 
-            if (expressionVars != null) {
-                for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
-                    this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
-                }
-            }
+                configureFieldsAndValues();
 
-            getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
-            if (expressionVariables != null) {
-                for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
-                    if (var.getValue() != null) {
-                        this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+        //
+        // Check for a LiquibasePro license
+        //
+        hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+
+                //        LogService.getInstance().setDefaultLoggingLevel(logging);
+                getLog().info(CommandLineUtils.getBanner());
+
+                // Displays the settings for the Mojo depending of verbosity mode.
+                displayMojoSettings();
+
+                // Check that all the parameters that must be specified have been by the user.
+                checkRequiredParametersAreSpecified();
+
+                Database database = null;
+                try {
+                    String dbPassword = (emptyPassword || (password == null)) ? "" : password;
+                    String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
+                    database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
+                            url,
+                            username,
+                            dbPassword,
+                            driver,
+                            defaultCatalogName,
+                            defaultSchemaName,
+                            outputDefaultCatalog,
+                            outputDefaultSchema,
+                            databaseClass,
+                            driverPropsFile,
+                            propertyProviderClass,
+                            changelogCatalogName,
+                            changelogSchemaName,
+                            databaseChangeLogTableName,
+                            databaseChangeLogLockTableName);
+                    liquibase = createLiquibase(database);
+
+                    configureChangeLogProperties();
+
+                    getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+
+                    if (expressionVars != null) {
+                        for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
+                            this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                        }
                     }
-                }
-            }
 
-            if (clearCheckSums) {
-                getLog().info("Clearing the Liquibase Checksums on the database");
-                liquibase.clearCheckSums();
-            }
-
-            getLog().info("Executing on Database: " + url);
-
-            if (isPromptOnNonLocalDatabase()) {
-                if (!liquibase.isSafeToRunUpdate()) {
-                    if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                        throw new LiquibaseException("User decided not to run against non-local database");
+                    getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                    if (expressionVariables != null) {
+                        for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
+                            if (var.getValue() != null) {
+                                this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                            }
+                        }
                     }
+
+                    if (clearCheckSums) {
+                        getLog().info("Clearing the Liquibase checksums on the database");
+                        liquibase.clearCheckSums();
+                    }
+
+                    getLog().info("Executing on Database: " + url);
+
+                    if (isPromptOnNonLocalDatabase()) {
+                        if (!liquibase.isSafeToRunUpdate()) {
+                            if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                                throw new LiquibaseException("User decided not to run against non-local database");
+                            }
+                        }
+                    }
+                    setupBindInfoPackage();
+                    performLiquibaseTask(liquibase);
+                } catch (LiquibaseException e) {
+                    cleanup(database);
+            throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
                 }
-            }
 
-            performLiquibaseTask(liquibase);
-        }
-        catch (LiquibaseException e) {
-            cleanup(database);
-            throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
+                cleanup(database);
+                getLog().info(MavenUtils.LOG_SEPARATOR);
+                getLog().info("");
+            });
+        } catch (Exception e) {
+            throw new MojoExecutionException(e.getMessage(), e);
         }
 
-        cleanup(database);
-        getLog().info(MavenUtils.LOG_SEPARATOR);
-        getLog().info("");
     }
 
     protected Liquibase getLiquibase() {
         return liquibase;
+    }
+
+    protected void setupBindInfoPackage() {
+        String nsuri = "http://www.hibernate.org/xsd/orm/hbm";
+        String packageInfoClassName = "org.hibernate.boot.jaxb.hbm.spi.package-info";
+        try {
+            final Class<?> packageInfoClass = Class.forName(packageInfoClassName);
+            final XmlSchema xmlSchema = packageInfoClass.getAnnotation(XmlSchema.class);
+            if (xmlSchema == null) {
+                this.getLog().warn(MessageFormat
+                        .format("Class [{0}] is missing the [{1}] annotation. Processing bindings will probably fail.",
+                                packageInfoClassName, XmlSchema.class.getName()));
+            } else {
+                final String namespace = xmlSchema.namespace();
+                if (nsuri.equals(namespace)) {
+                    this.getLog().warn(MessageFormat
+                            .format("Namespace of the [{0}] annotation does not match [{1}]. Processing bindings will probably fail.",
+                                    XmlSchema.class.getName(), nsuri));
+                }
+            }
+        } catch (ClassNotFoundException cnfex) {
+            this.getLog().debug(MessageFormat
+                    .format("Class [{0}] could not be found. Processing hibernate bindings will probably fail if applicable.",
+                            packageInfoClassName), cnfex);
+        }
     }
 
     protected abstract void performLiquibaseTask(Liquibase liquibase)
@@ -422,33 +464,55 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
-        try {
-            return new Liquibase("", fo, db);
-        } catch (LiquibaseException ex) {
-            throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(),ex);
-        }
+    protected Liquibase createLiquibase(Database db) throws MojoExecutionException {
+        return new Liquibase("", Scope.getCurrentScope().getResourceAccessor(), db);
     }
 
-    public void configureFieldsAndValues(ResourceAccessor fo)
-            throws MojoExecutionException, MojoFailureException {
+    public void configureFieldsAndValues() throws MojoExecutionException, MojoFailureException {
         // Load the properties file if there is one, but only for values that the user has not
         // already specified.
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
-            InputStream is;
-            try {
-                is = StreamUtil.singleInputStream(propertyFile, fo);
+            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
+                parsePropertiesFile(is);
+                getLog().info(MavenUtils.LOG_SEPARATOR);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
-            if (is == null) {
-                throw new MojoFailureException("Failed to resolve the properties file.");
-            }
-            parsePropertiesFile(is);
-            getLog().info(MavenUtils.LOG_SEPARATOR);
         }
+    }
+
+    protected void configureChangeLogProperties() throws MojoFailureException, MojoExecutionException {
+        if (propertyFile != null) {
+            getLog().info("Parsing Liquibase Properties File " + propertyFile + " for changeLog parameters");
+            try (InputStream propertiesInputStream = handlePropertyFileInputStream(propertyFile)) {
+                Properties props = loadProperties(propertiesInputStream);
+                for (Map.Entry entry : props.entrySet()) {
+                    String key = (String) entry.getKey();
+                    if (key.startsWith("parameter.")) {
+                        getLog().debug("Setting changeLog parameter " + key);
+                        liquibase.setChangeLogParameter(key.replaceFirst("^parameter.", ""), entry.getValue());
+                    }
+                }
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+    }
+
+    private static InputStream handlePropertyFileInputStream(String propertyFile) throws MojoFailureException {
+        InputStream is;
+        try {
+            is = Scope.getCurrentScope().getResourceAccessor().openStream(null, propertyFile);
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        if (is == null) {
+            throw new MojoFailureException("Failed to resolve the properties file.");
+        }
+
+        return is;
     }
 
     protected ClassLoader getMavenArtifactClassLoader() throws MojoExecutionException {
@@ -459,8 +523,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     getClass(),
                     getLog(),
                     verbose);
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new MojoExecutionException("Failed to create artifact classloader", e);
         }
     }
@@ -477,7 +540,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             classpathElements.add(project.getBuild().getOutputDirectory());
             URL urls[] = new URL[classpathElements.size()];
             for (int i = 0; i < classpathElements.size(); ++i) {
-                urls[i] = new File((String) classpathElements.get(i)).toURL();
+                urls[i] = new File((String) classpathElements.get(i)).toURI().toURL();
             }
             return new URLClassLoader(urls, getMavenArtifactClassLoader());
         } catch (Exception e) {
@@ -485,9 +548,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    protected ResourceAccessor getFileOpener(ClassLoader cl) {
+    protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
         ResourceAccessor mFO = new MavenResourceAccessor(cl);
-        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
+        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
         return new CompositeResourceAccessor(mFO, fsFO);
     }
 
@@ -504,7 +567,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     + "a parameter or in a properties file.");
         }
 
-        if (password != null && emptyPassword) {
+        if ((password != null) && emptyPassword) {
             throw new MojoFailureException("A password cannot be present and the empty "
                     + "password property both be specified.");
         }
@@ -537,36 +600,38 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             try {
                 db.rollback();
                 db.close();
-            }
-            catch (DatabaseException e) {
+            } catch (DatabaseException e) {
                 getLog().error("Failed to close open connection to database.", e);
             }
         }
     }
 
+    private static Properties loadProperties(InputStream propertiesInputStream) throws MojoExecutionException {
+        Properties props = new Properties();
+        try {
+            props.load(propertiesInputStream);
+            return props;
+        } catch (IOException e) {
+            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
+        }
+    }
+
     /**
-     * Parses a properties file and sets the assocaited fields in the plugin.
+     * Parses a properties file and sets the associated fields in the plugin.
      *
      * @param propertiesInputStream The input stream which is the Liquibase properties that
      *                              needs to be parsed.
-     * @throws org.apache.maven.plugin.MojoExecutionException
-     *          If there is a problem parsing
-     *          the file.
+     * @throws org.apache.maven.plugin.MojoExecutionException If there is a problem parsing
+     *                                                        the file.
      */
     protected void parsePropertiesFile(InputStream propertiesInputStream)
             throws MojoExecutionException {
         if (propertiesInputStream == null) {
             throw new MojoExecutionException("Properties file InputStream is null.");
         }
-        Properties props = new Properties();
-        try {
-            props.load(propertiesInputStream);
-        }
-        catch (IOException e) {
-            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
-        }
+        Properties props = loadProperties(propertiesInputStream);
 
-        for (Iterator it = props.keySet().iterator(); it.hasNext();) {
+        for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
             String key = null;
             try {
                 key = (String) it.next();
@@ -581,8 +646,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         setFieldValue(field, props.get(key).toString());
                     }
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 getLog().info("  '" + key + "' in properties file is not being used by this "
                         + "task.");
             }
@@ -614,7 +678,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private Object getDefaultValue(Field field) throws IllegalAccessException {
-        List<Field> allFields = new ArrayList<Field>();
+        List<Field> allFields = new ArrayList<>();
         allFields.addAll(Arrays.asList(getClass().getDeclaredFields()));
         allFields.addAll(Arrays.asList(AbstractLiquibaseMojo.class.getDeclaredFields()));
 
@@ -630,6 +694,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private void setFieldValue(Field field, String value) throws IllegalAccessException {
         if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
             field.set(this, Boolean.valueOf(value));
+        } else if (field.getType().equals(File.class)) {
+            field.set(this, new File(value));
         } else {
             field.set(this, value);
         }
@@ -637,8 +703,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     @SuppressWarnings("unchecked")
     private void processSystemProperties() {
-        if (systemProperties == null)
-        {
+        if (systemProperties == null) {
             systemProperties = new Properties();
         }
         // Add all system properties configured by the user

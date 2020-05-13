@@ -1,15 +1,21 @@
 package liquibase.precondition;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.LiquibaseService;
 
 import java.util.Set;
 
+@LiquibaseService(skip = true)
 public class MockPrecondition implements Precondition {
     @Override
     public String getName() {
@@ -27,7 +33,7 @@ public class MockPrecondition implements Precondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener) throws PreconditionFailedException, PreconditionErrorException {
         
     }
 
