@@ -14,30 +14,20 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
-import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.ResourcePatternUtils;
 
 import javax.sql.DataSource;
 import java.io.*;
-import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * A Spring-ified wrapper for Liquibase.
@@ -89,41 +79,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected boolean shouldRun = true;
 	protected File rollbackFile;
 
-	/**
-     * Ignores classpath prefix during changeset comparison.
-     * This is particularly useful if Liquibase is run in different ways.
-     *
-     * For instance, if Maven plugin is used to run changesets, as in:
-     * <code>
-     *      &lt;configuration&gt;
-     *          ...
-     *          &lt;changeLogFile&gt;path/to/changelog&lt;/changeLogFile&gt;
-     *      &lt;/configuration&gt;
-     * </code>
-     *
-     * And {@link SpringLiquibase} is configured like:
-     * <code>
-     *     SpringLiquibase springLiquibase = new SpringLiquibase();
-     *     springLiquibase.setChangeLog("classpath:path/to/changelog");
-     * </code>
-     *
-     * or, in equivalent XML configuration:
-     * <code>
-     *     &lt;bean id="springLiquibase" class="liquibase.integration.spring.SpringLiquibase"&gt;
-     *         &lt;property name="changeLog" value="path/to/changelog" /&gt;
-     *      &lt;/bean&gt;
-     * </code>
-     *
-     * {@link Liquibase#listUnrunChangeSets(Contexts, )} will
-     * always, by default, return changesets, regardless of their
-     * execution by Maven.
-     * Maven-executed changeset path name are not be prepended by
-     * "classpath:" whereas the ones parsed via SpringLiquibase are.
-     *
-     * To avoid this issue, just set ignoreClasspathPrefix to true.
-     */
-    private boolean ignoreClasspathPrefix = true;
-
 	protected boolean testRollbackOnUpdate = false;
 
 	public SpringLiquibase() {
@@ -170,7 +125,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 					}
 					connection.close();
                 } catch (SQLException e) {
-					log.warning(LogType.LOG, "problem closing connection", e);
+					log.warning("problem closing connection", e);
 				}
 			}
 		}
@@ -296,12 +251,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             .getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Liquibase did not run because " + LiquibaseConfiguration
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " + LiquibaseConfiguration
                 .getInstance().describeValueLookupLogic(shouldRunProperty) + " was set to false");
             return;
 		}
 		if (!shouldRun) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Liquibase did not run because 'shouldRun' " + "property was set " +
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because 'shouldRun' " + "property was set " +
                 "to false on " + getBeanName() + " Liquibase Spring bean.");
             return;
 		}
@@ -372,7 +327,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
 		SpringResourceAccessor resourceAccessor = createResourceOpener();
 		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
-        liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
 		if (parameters != null) {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
 				liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
@@ -398,8 +352,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         DatabaseConnection liquibaseConnection;
         if (c == null) {
-            log.warning(LogType.LOG,
-                "Null connection returned by liquibase datasource. Using offline unknown database");
+            log.warning("Null connection returned by liquibase datasource. Using offline unknown database");
             liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
 
         } else {
@@ -475,11 +428,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     public boolean isIgnoreClasspathPrefix() {
-        return ignoreClasspathPrefix;
+        return true;
     }
 
-    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
-        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
+	/**
+	 * @deprecated Always ignoring classpath prefix
+	 */
+	public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
+
 	}
 
 	@Override
@@ -488,7 +444,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     public class SpringResourceAccessor extends ClassLoaderResourceAccessor {
-
-
-    }
+		public SpringResourceAccessor() {
+			super(Thread.currentThread().getContextClassLoader());
+		}
+	}
 }

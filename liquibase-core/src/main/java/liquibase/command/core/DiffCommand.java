@@ -1,17 +1,23 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
+import liquibase.license.LicenseServiceUtils;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
@@ -132,6 +138,8 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
 
     @Override
     protected CommandResult run() throws Exception {
+        SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
+
         DiffResult diffResult = createDiffResult();
 
         new DiffToReport(diffResult, outputStream).print();

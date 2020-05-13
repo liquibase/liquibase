@@ -249,7 +249,6 @@ class CustomChangeWrapperTest extends Specification {
         }
 
         then:
-        change.resourceAccessor == resourceSupplier.simpleResourceAccessor
         change.getCustomChange() instanceof liquibase.change.custom.ExampleCustomSqlChange
         change.params.size() == 3
         change.getParamValue("param 1") == "param 1 value"
@@ -274,7 +273,6 @@ class CustomChangeWrapperTest extends Specification {
         }
 
         then:
-        change.resourceAccessor == resourceSupplier.simpleResourceAccessor
         change.getCustomChange() instanceof ExampleCustomSqlChange
         change.params.size() == 3
         change.getParamValue("param 1") == "param 1 value"
@@ -293,7 +291,6 @@ class CustomChangeWrapperTest extends Specification {
         }
 
         then:
-        change.resourceAccessor == resourceSupplier.simpleResourceAccessor
         change.getCustomChange() instanceof ExampleCustomSqlChange
         change.params.size() == 2
         change.getParamValue("tableName") == "my_table"

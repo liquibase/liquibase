@@ -27,6 +27,23 @@ Standard Commands:
  rollbackSQL <tag>              Writes SQL to roll back the database to that
                                 state it was in when the tag was applied
                                 to STDOUT
+ rollbackOneChangeSet <args>    Rolls back one specific changeset, without
+                                rolling back changesets deployed before or
+                                afterwards. (Liquibase Pro key required)
+ rollbackOneChangeSetSQL <args> Writes SQL to roll back one specific changeset,
+                                without rolling back changesets deployed before
+                                or afterwards. (Liquibase Pro key required)
+ rollbackOneUpdate              Rolls back all the changesets from one update,
+                                identified by "deploymentId", if all the
+                                changesets can be rolled back.
+                                If not, a WARNING message will provide
+                                details (Liquibase Pro key required).
+                                Note:  A list of deploymentIds may be
+                                viewed by using the "history" command.
+ rollbackOneUpdateSQL           Displays the SQL which will be executed
+                                when the corresponding rollbackOneUpdate
+                                command is executed, and does not perform the
+                                actual rollback (Liquibase Pro key required).
  rollbackToDate <date/time>     Rolls back the database to the the state is was
                                 at the given date/time.
                                 Date Format: yyyy-MM-dd'T'HH:mm:ss
@@ -68,7 +85,10 @@ Diff Commands
 Documentation Commands
  dbDoc <outputDirectory>         Generates Javadoc-like documentation
                                  based on current database and change log
-
+ history                         Displays the changesets already deployed to the
+                                 database in the specified connection url,
+                                 grouped by default according to their update
+                                 command's "deployment_id" value.
 Maintenance Commands
  tag <tag string>          'Tags' the current database state for future rollback
  tagExists <tag string>    Checks whether the given tag is already existing

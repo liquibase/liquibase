@@ -14,9 +14,9 @@ liquibase.sqlgenerator.core.AddDefaultValueGeneratorMSSQL
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorMySQL
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorOracle
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorPostgres
+liquibase.sqlgenerator.core.AddDefaultValueGeneratorSQLite
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorSybase
 liquibase.sqlgenerator.core.AddDefaultValueGeneratorSybaseASA
-liquibase.sqlgenerator.core.AddDefaultValueGeneratorSQLite
 liquibase.sqlgenerator.core.AddForeignKeyConstraintGenerator
 liquibase.sqlgenerator.core.AddPrimaryKeyGenerator
 liquibase.sqlgenerator.core.AddPrimaryKeyGeneratorInformix
@@ -75,6 +75,7 @@ liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL
 liquibase.sqlgenerator.core.InsertOrUpdateGeneratorOracle
 liquibase.sqlgenerator.core.InsertOrUpdateGeneratorPostgres
 liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSQLite
+liquibase.sqlgenerator.core.InsertOrUpdateGeneratorSybaseASA
 liquibase.sqlgenerator.core.InsertSetGenerator
 liquibase.sqlgenerator.core.LockDatabaseChangeLogGenerator
 liquibase.sqlgenerator.core.MarkChangeSetRanGenerator

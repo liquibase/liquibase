@@ -8,7 +8,6 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogType;
 import liquibase.parser.ChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
@@ -42,14 +41,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 return false;
             }
         } catch (IOException e) {
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Exception reading " + changeLogFile, e);
+            Scope.getCurrentScope().getLog(getClass()).fine("Exception reading " + changeLogFile, e);
             return false;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Exception closing " + changeLogFile, e);
+                    Scope.getCurrentScope().getLog(getClass()).fine("Exception closing " + changeLogFile, e);
                 }
             }
         }
@@ -202,7 +201,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     change = new RawSQLChange();
                     change.setSql(finalCurrentSql);
-                    change.setResourceAccessor(resourceAccessor);
                     change.setSplitStatements(splitStatements);
                     change.setStripComments(stripComments);
                     change.setEndDelimiter(endDelimiter);

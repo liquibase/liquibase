@@ -8,8 +8,6 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -249,7 +247,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                 return schemaName.trim();
             }
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting connection schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting connection schema", e);
         }
         return null;
     }

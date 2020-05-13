@@ -20,7 +20,6 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
@@ -508,7 +507,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     ExecutablePreparedStatementBase stmt =
                         this.createPreparedStatement(
                             database, getCatalogName(), getSchemaName(), getTableName(), columnsFromCsv,
-                            getChangeSet(), getResourceAccessor()
+                            getChangeSet(), Scope.getCurrentScope().getResourceAccessor()
                         );
                     batchedStatements.add(stmt);
                 } else {
@@ -540,7 +539,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             new BatchDmlExecutablePreparedStatement(
                                     database, getCatalogName(), getSchemaName(),
                                     getTableName(), columns,
-                                    getChangeSet(), getResourceAccessor(),
+                                    getChangeSet(), Scope.getCurrentScope().getResourceAccessor(),
                                     batchedStatements)
                     };
                 } else {
@@ -579,7 +578,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         } catch (UnexpectedLiquibaseException ule) {
             if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
                 .getFailOnError()) {
-                LOG.info(LogType.LOG, "Change set " + getChangeSet().toString(false) +
+                LOG.info("Change set " + getChangeSet().toString(false) +
                          " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {
@@ -635,7 +634,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new DatabaseException(e);
         }
         if (snapshotOfTable == null) {
-            LOG.warning(LogType.LOG, String.format(
+            LOG.warning(String.format(
                     coreBundle.getString("could.not.snapshot.table.to.get.the.missing.column.type.information"),
                     database.escapeTableName(
                             targetTable.getSchema().getCatalogName(),
@@ -677,7 +676,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             LoadDataColumnConfig columnConfig = entry.getValue();
             DataType dataType = tableColumns.get(entry.getKey()).getType();
             if (dataType == null) {
-                LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.find.load.data.type"),
+                LOG.warning(String.format(coreBundle.getString("unable.to.find.load.data.type"),
                     columnConfig.toString(), snapshotOfTable.toString()));
                 columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
             } else {
@@ -686,7 +685,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 if (liquibaseDataType != null) {
                     columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
                 } else {
-                    LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.convert.load.data.type"),
+                    LOG.warning(String.format(coreBundle.getString("unable.to.convert.load.data.type"),
                         columnConfig.toString(), snapshotOfTable.toString(), dataType.toString()));
                 }
             }
@@ -890,7 +889,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
 
     public CSVReader getCSVReader() throws IOException, LiquibaseException {
-        ResourceAccessor resourceAccessor = getResourceAccessor();
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         if (resourceAccessor == null) {
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for " + getFile());
         }
@@ -969,7 +968,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = getResourceAccessor().openStream(getRelativeTo(), file);
+            stream = Scope.getCurrentScope().getResourceAccessor().openStream(getRelativeTo(), file);
             if (stream == null) {
                 throw new UnexpectedLiquibaseException(getFile() + " could not be found");
             }

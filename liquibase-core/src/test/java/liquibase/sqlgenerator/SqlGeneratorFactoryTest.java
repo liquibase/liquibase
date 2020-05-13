@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.core.H2Database;
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsqlH2;
@@ -184,6 +185,7 @@ public class SqlGeneratorFactoryTest {
         assertEquals(1, allGenerators.size());        
     }
 
+    @LiquibaseService(skip = true)
     private class CustomAddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGeneratorHsqlH2 {
 
         @Override
