@@ -22,11 +22,13 @@ import static org.junit.Assume.assumeNotNull;
 public class OracleIntegrationTest extends AbstractIntegrationTest {
     String indexOnSchemaChangeLog;
     String viewOnSchemaChangeLog;
+    String customExecutorChangeLog;
 
     public OracleIntegrationTest() throws Exception {
         super("oracle", DatabaseFactory.getInstance().getDatabase("oracle"));
          indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
          viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
+         customExecutorChangeLog = "changelogs/oracle/complete/sqlplusExecutor.xml";
         // Respect a user-defined location for sqlnet.ora, tnsnames.ora etc. stored in the environment
         // variable TNS_ADMIN. This allowes the use of TNSNAMES.
         if (System.getenv("TNS_ADMIN") != null)

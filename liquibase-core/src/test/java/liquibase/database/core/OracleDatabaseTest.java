@@ -95,7 +95,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         Database database = new OracleDatabase();
 
         assertEquals("The correct JDBC driver class name is reported if the URL is a Oracle JDBC URL",
-                "oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"));
+                "oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost:1521/BUCKET_O1"));
 
         assertNull("No JDBC driver class is returned if the URL is NOT an Oracle Database JDBC URL.",
                 database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
