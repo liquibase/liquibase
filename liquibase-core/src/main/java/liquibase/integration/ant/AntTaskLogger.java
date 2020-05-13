@@ -1,7 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.logging.LogLevel;
-import liquibase.logging.LogType;
 import liquibase.logging.core.AbstractLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -20,7 +18,7 @@ public final class AntTaskLogger extends AbstractLogger {
     }
 
     @Override
-    public void log(Level level, LogType target, String message, Throwable e) {
+    public void log(Level level, String message, Throwable e) {
         int antLevel;
         if (level.intValue() == Level.SEVERE.intValue()) {
             antLevel = Project.MSG_ERR;

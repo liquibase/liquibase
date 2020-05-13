@@ -4,7 +4,7 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * Generates dbDocs against the database.
+ * <p>Generates dbDocs against the database.</p>
  *
  * @author Ryan Connolly
  * @goal dbDoc
@@ -13,7 +13,7 @@ public class LiquibaseDBDocMojo extends AbstractLiquibaseChangeLogMojo {
 
     /**
      * @parameter
-     *      expression="${liquibase.outputDirectory}"
+     *      property="liquibase.outputDirectory"
      *      default-value="${project.build.directory}/liquibase/dbDoc"
      */
     private String outputDirectory;

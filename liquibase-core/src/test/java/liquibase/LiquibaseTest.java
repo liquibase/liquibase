@@ -2,11 +2,6 @@ package liquibase;
 
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.filter.ContextChangeSetFilter;
-import liquibase.changelog.filter.DbmsChangeSetFilter;
-import liquibase.changelog.filter.IgnoreChangeSetFilter;
-import liquibase.changelog.filter.LabelChangeSetFilter;
-import liquibase.changelog.filter.ShouldRunChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.lockservice.LockService;
@@ -16,7 +11,6 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.database.core.MockDatabase;
 import liquibase.sdk.resource.MockResourceAccessor;
-import liquibase.test.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +18,6 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static liquibase.test.Assert.assertListsEqual;
 import static org.junit.Assert.*;
 
 public class LiquibaseTest {
@@ -52,7 +45,7 @@ public class LiquibaseTest {
 //
 //        mockLogger = mock(Logger.class);
 
-        LockServiceFactory.setInstance(mockLockServiceFactory);
+//        LockServiceFactory.setInstance(mockLockServiceFactory);
 //        when(mockLockServiceFactory.getLockService(any(Database.class))).thenReturn(mockLockService);
 
         ChangeLogParserFactory.setInstance(mockChangeLogParserFactory);
@@ -220,7 +213,7 @@ public class LiquibaseTest {
 //        }
 //
 //    }
-
+//
 //    @Test
 //    /* False positive: We do have an assertion in this test. */
 //    @SuppressWarnings("squid:S2699")

@@ -1,22 +1,18 @@
 package liquibase.integration.commandline;
 
-import liquibase.command.CommandFactory;
-import liquibase.command.core.SnapshotCommand;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.util.StringUtil;
-import org.junit.Rule;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.ExpectedSystemExit;
-import org.junit.runner.RunWith;
 
+import java.util.Properties;
+import java.util.Arrays;
+import java.util.List;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.*;
 
@@ -25,6 +21,50 @@ import static org.junit.Assert.*;
  * Tests for {@link Main}
  */
 public class MainTest {
+
+    @Test
+    public void testCodePointCheck() {
+      char badChar = 8192;
+      char anotherBadChar = 160;
+      Main.CodePointCheck codePointCheck = Main.checkArg("test");
+      Assert.assertTrue("This should be a valid string", codePointCheck == null);
+
+      StringBuilder builder = new StringBuilder();
+      builder.append(badChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The first character should be invalid",codePointCheck.position == 0);
+
+      builder = new StringBuilder();
+      builder.append("A");
+      builder.append(badChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The last character should be invalid",codePointCheck.position == builder.length()-1);
+
+      builder = new StringBuilder();
+      builder.append("ABC");
+      builder.append(anotherBadChar);
+      builder.append("DEF");
+      int pos = builder.toString().indexOf(anotherBadChar);
+      codePointCheck = Main.checkArg(builder.toString());
+      Assert.assertTrue("The character in position " + pos + " should be invalid",codePointCheck.position == pos);
+    }
+
+
+    @Test
+    public void checkSetup2() {
+        Main main = new Main();
+        main.command = "snapshot";
+        main.url = "jdbc:oracle://localhost:1521/ORCL";
+        main.commandParams.add("--outputSchemasAs");
+        List<String> messages = main.checkSetup();
+        Assert.assertTrue("There should be no messages from Main.checkSetup", messages.size() == 0);
+
+        main.command = "update";
+        main.changeLogFile = "changelog.xml";
+        messages = main.checkSetup();
+        Assert.assertTrue("There should be one message from Main.checkSetup", messages.size() == 1);
+    }
+
 //    @Rule
 //    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
@@ -570,32 +610,32 @@ public class MainTest {
             cli.command = noArgCommand[i];
             assertEquals(1, cli.checkSetup().size());
         }
-        
+
         // test update cmd with -D parameter
         cli.command = "update";
         cli.commandParams.clear();
         cli.changeLogParameters.clear();
         cli.changeLogParameters.put("engine", "myisam");
         assertEquals(0, cli.checkSetup().size());
-        
+
         // verify normal case - comand w/o command parameters
         cli.commandParams.clear();
         for(int i=0; i<noArgCommand.length; i++) {
             cli.command = noArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
-        
+
         String[] singleArgCommand = { "updateCount", "updateCountSQL",
                 "tag", "dbDoc"
         };
-        
+
         // verify unexpected parameter for single arg commands
         cli.commandParams.add("--logLevel=debug");
         for(int i=0; i<singleArgCommand.length; i++) {
             cli.command = singleArgCommand[i];
             assertEquals(1, cli.checkSetup().size());
         }
-        
+
         // verify normal case - comand with string command parameter
         cli.commandParams.clear();
         cli.commandParams.add("someCommandValue");
@@ -603,38 +643,38 @@ public class MainTest {
             cli.command = singleArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
-            
+
         // status w/o parameter
         cli.command = "status";
         cli.commandParams.clear();
         assertEquals(0, cli.checkSetup().size());
-        
+
         // status w/--verbose
         cli.commandParams.add("--verbose");
         assertEquals(0, cli.checkSetup().size());
-       
+
         cli.commandParams.clear();
         cli.commandParams.add("--logLevel=debug");
         assertEquals(1, cli.checkSetup().size());
-        
+
         String[] multiArgCommand = { "diff", "diffChangeLog" };
-        
-        //first verify diff cmds w/o args 
+
+        //first verify diff cmds w/o args
         cli.commandParams.clear();
         for(int i=0; i<multiArgCommand.length; i++) {
             cli.command = multiArgCommand[i];
             assertEquals(0, cli.checkSetup().size());
         }
-       
+
         // next verify with all parms
-        String[] cmdParms = { "--referenceUsername=USERNAME", "--referencePassword=PASSWORD", 
+        String[] cmdParms = { "--referenceUsername=USERNAME", "--referencePassword=PASSWORD",
                 "--referenceUrl=URL", "--referenceDriver=DRIVER"};
-        // load all parms 
+        // load all parms
         for (String param : cmdParms) {
             cli.commandParams.add(param);
         }
         assertEquals(0, cli.checkSetup().size());
-        
+
         // now add an unexpected parm
         cli.commandParams.add("--logLevel=debug");
         assertEquals(1, cli.checkSetup().size());
@@ -643,7 +683,7 @@ public class MainTest {
     @Test
     public void printHelp() throws Exception {
         final int MAXIMUM_LENGTH = 80;
-    
+
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Main cli = new Main();
         cli.printHelp(new PrintStream(stream));
@@ -699,7 +739,7 @@ public class MainTest {
 
         assertEquals(url, cli.url);
     }
-    
+
     @Test
     public void fixArgs() {
         Main liquibase = new Main();

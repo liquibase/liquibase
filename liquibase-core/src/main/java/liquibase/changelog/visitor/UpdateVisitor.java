@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
-import liquibase.logging.LogType;
 
 import java.util.Set;
 
@@ -42,7 +41,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database,
                       Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
-        Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Running Changeset:" + changeSet);
+        Scope.getCurrentScope().getLog(getClass()).fine("Running Changeset:" + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
         ExecType execType = null;
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();

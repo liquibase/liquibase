@@ -25,17 +25,6 @@ public final class AntTaskLogService implements LogService {
     }
 
     @Override
-    public Level getLogLevel() {
-        //controlled by ant
-        return null;
-    }
-
-    @Override
-    public void setLogLevel(Level level) {
-        //controlled by ant
-    }
-
-    @Override
     public Logger getLog(Class clazz) {
         return logger;
     }

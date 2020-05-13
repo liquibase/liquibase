@@ -1,4 +1,6 @@
-package liquibase.parser.core.xml
+package liquibase.parser.core.xml;
+
+import org.junit.Test;
 
 public class LiquibaseSchemaResolverTest {
 

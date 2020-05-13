@@ -8,7 +8,6 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogType;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
@@ -61,14 +60,14 @@ public class OutputChange extends AbstractChange {
                 } else if ("STDERR".equalsIgnoreCase(target)) {
                     System.err.println(getMessage());
                 } else if ("DEBUG".equalsIgnoreCase(target)) {
-                    Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).fine(getMessage());
                 } else if ("INFO".equalsIgnoreCase(target)) {
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).info(getMessage());
                 } else if ("WARN".equalsIgnoreCase(target) || "WARNING".equalsIgnoreCase(target)) {
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).warning(getMessage());
                 } else if ("SEVERE".equalsIgnoreCase(target) || "FATAL".equalsIgnoreCase(target) || "ERROR"
                     .equalsIgnoreCase(target)) {
-                    Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).severe(getMessage());
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown target: "+target);
                 }

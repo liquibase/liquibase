@@ -1,7 +1,7 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractJdbcDatabaseTest;
-import liquibase.database.Database;
+import liquibase.database.*;
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -58,6 +58,26 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
             "tableName"));
         assertEquals("[catalogName€].[schemaName€].[tableName€]", database.escapeTableName("catalogName€",
             "schemaName€", "tableName€"));
+    }
+    private Database createOfflineDatabase(String url) throws Exception {
+        return DatabaseFactory.getInstance().openDatabase(url, null, null, null, null);
+    }
+
+    @Test
+    public void setDefaultSchemaName() throws Exception {
+        //
+        // No exception should be thrown by call to setDefaultSchemaName
+        //
+        Database database = createOfflineDatabase("offline:mssql");
+        database.setDefaultSchemaName("MySchema");
+    }
+
+    @Test
+    public void isUnmodifiable() throws Exception {
+        Database database = createOfflineDatabase("offline:mssql");
+        assertTrue(database instanceof MSSQLDatabase);
+        MSSQLDatabase mssqlDatabase = (MSSQLDatabase)database;
+        assertTrue(mssqlDatabase.dataTypeIsNotModifiable("datetime"));
     }
 
 //    @Test

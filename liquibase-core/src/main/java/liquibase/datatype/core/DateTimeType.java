@@ -7,8 +7,6 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtil;
 
@@ -17,8 +15,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @DataTypeInfo(name = "datetime", minParameters = 0, maxParameters = 1,
     aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"},
@@ -138,7 +134,7 @@ public class DateTimeType extends LiquibaseDataType {
             Integer precision = Integer.valueOf(params[0].toString());
             if (precision > 6) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        LogType.LOG, "MySQL does not support a timestamp precision"
+                        "MySQL does not support a timestamp precision"
                                 + " of '" + precision + "' - resetting to"
                                 + " the maximum of '6'");
                 params = new Object[] {6};

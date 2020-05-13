@@ -168,7 +168,7 @@ public class CreateViewChange extends AbstractChange {
             if (ObjectUtil.defaultIfNull(getRelativeToChangelogFile(), false)) {
                 relativeTo = getChangeSet().getFilePath();
             }
-            return getResourceAccessor().openStream(relativeTo, path);
+            return Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {
             throw new IOException("<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
         }

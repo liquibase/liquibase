@@ -17,8 +17,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperNotNullConstraintsResultSetExtractor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -270,7 +268,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         protected void warnAboutDbaRecycleBin() {
             if (!ignoreWarnAboutDbaRecycleBin && !warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
-                Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
+                Scope.getCurrentScope().getLog(getClass()).warning(((OracleDatabase) database).getDbaRecycleBinWarning());
                 warnedAboutDbaRecycleBin = true;
             }
         }
@@ -1530,7 +1528,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
+                        Scope.getCurrentScope().getLog(getClass()).warning("Finding unique constraints not currently supported for Sybase");
                         return null; //TODO: find sybase sql
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +

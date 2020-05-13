@@ -65,7 +65,6 @@ public class XMLChangeLogSerializerTest {
         assertEquals("column", ((Element) columns.item(0)).getTagName());
         assertEquals("NEWCOL", ((Element) columns.item(0)).getAttribute("name"));
         assertEquals("TYP", ((Element) columns.item(0)).getAttribute("type"));
-
     }
 
     @Test
@@ -182,7 +181,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("COL_HERE", node.getAttribute("columnNames"));
         assertEquals("PK_NAME", node.getAttribute("constraintName"));
         assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
-        assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
+        assertEquals("true", node.getAttribute("disabled"));
         assertEquals("true", node.getAttribute("deferrable"));
         assertEquals("true", node.getAttribute("initiallyDeferred"));
         assertEquals("true", node.getAttribute("validate"));
@@ -268,7 +267,6 @@ public class XMLChangeLogSerializerTest {
         assertEquals("true", constraintsElement.getAttribute("primaryKey"));
         assertEquals("state(id)", constraintsElement.getAttribute("references"));
         assertEquals("true", constraintsElement.getAttribute("unique"));
-
     }
 
     @Test
@@ -746,7 +744,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("OLD_NAME", node.getAttribute("oldTableName"));
         assertEquals("NEW_NAME", node.getAttribute("newTableName"));
     }
-    
+
     @Test
     public void createNode_RenameSequenceChange() throws Exception {
         RenameSequenceChange refactoring = new RenameSequenceChange();
@@ -782,7 +780,6 @@ public class XMLChangeLogSerializerTest {
         String fileName = "liquibase/change/core/SQLFileTestData.sql";
         SQLFileChange change = new SQLFileChange();
         ClassLoaderResourceAccessor opener = new ClassLoaderResourceAccessor();
-        change.setResourceAccessor(opener);
         change.setPath(fileName);
 
         Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);

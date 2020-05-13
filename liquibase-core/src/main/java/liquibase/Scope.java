@@ -15,6 +15,8 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.servicelocator.StandardServiceLocator;
+import liquibase.ui.ConsoleUIService;
+import liquibase.ui.UIService;
 import liquibase.util.SmartMap;
 
 import java.lang.reflect.Constructor;
@@ -35,6 +37,7 @@ public class Scope {
      */
     public enum Attr {
         logService,
+        ui,
         resourceAccessor,
         classLoader,
         database,
@@ -98,6 +101,7 @@ public class Scope {
         values.put(Attr.logService.name(), new JavaLogService());
         values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
         values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
+        values.put(Attr.ui.name(), new ConsoleUIService());
     }
 
     protected Scope(Scope parent, Map<String, Object> scopeValues) {
@@ -121,6 +125,13 @@ public class Scope {
      */
     public static void child(Map<String, Object> scopeValues, ScopedRunner runner) throws Exception {
         child((LiquibaseListener) null, scopeValues, runner);
+    }
+
+    /**
+     * Creates a new scope that is a child of this scope.
+     */
+    public static <ReturnType> ReturnType child(Map<String, Object> scopeValues, ScopedRunnerWithReturn<ReturnType> runner) throws Exception {
+        return child(null, scopeValues, runner);
     }
 
     /**
@@ -255,6 +266,10 @@ public class Scope {
 
     public Logger getLog(Class clazz) {
         return get(Attr.logService, LogService.class).getLog(clazz);
+    }
+
+    public UIService getUI() {
+        return get(Attr.ui, UIService.class);
     }
 
     public Database getDatabase() {

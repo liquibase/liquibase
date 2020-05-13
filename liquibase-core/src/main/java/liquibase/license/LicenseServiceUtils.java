@@ -1,13 +1,10 @@
 package liquibase.license;
 
 import liquibase.Scope;
-import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
-import liquibase.plugin.PluginFactory;
+import liquibase.exception.ValidationErrors;
 
 /**
  *
@@ -22,8 +19,8 @@ public class LicenseServiceUtils {
         return new ValidationErrors();
       }
       if (licenseService.licenseIsValid(licenseType)) {
-        String message = String.format("Found valid license with subject '%s'",licenseType);
-        Scope.getCurrentScope().getLog(LicenseService.class).info(message);
+        String message = String.format("Found valid license with subject '%s' for '%s'",licenseType, change.getDescription());
+        Scope.getCurrentScope().getLog(LicenseService.class).fine(message);
         return new ValidationErrors();
       }
 
@@ -37,4 +34,21 @@ public class LicenseServiceUtils {
       validationErrors.addError(message);
       return validationErrors;
     }
+
+  /**
+   * check for a Liquibase Pro License, return true if licensed, false if not
+   * @param licenseType
+   * @return
+   */
+  public static boolean checkForValidLicense(String licenseType) {
+    LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
+    if (licenseService == null) {
+      return false;
+    }
+    if (licenseService.licenseIsValid(licenseType)) {
+      return true;
+    }
+    return false;
+  }
+
 }

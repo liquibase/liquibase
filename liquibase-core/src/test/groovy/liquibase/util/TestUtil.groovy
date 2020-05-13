@@ -38,61 +38,65 @@ public abstract class TestUtil {
     static SortedSet<Class> getClasses(Class baseClass) {
         if (allClasses == null) {
             allClasses = [:]
-            findAllClasses("liquibase")
+            findAllClasses()
         }
 
         return allClasses.get(baseClass)
     }
 
 
-    private static findAllClasses(String dirName) {
-        def resources = TestUtil.getClassLoader().getResources(dirName)
-        while (resources.hasMoreElements()) {
-            def url = resources.nextElement()
-            def relativeName = url.toExternalForm().replaceFirst(".*/$dirName", dirName)
-            def file = new File(url.toURI())
-            if (file.isDirectory()) {
-                for (File sub : file.listFiles()) {
-                    if (sub.isDirectory()) {
-                        findAllClasses(relativeName + "/" + sub.name)
-                    } else if (sub.name.endsWith(".class")) {
-                        if (sub.name.contains('$_$') || sub.name.find(/_closure\d+/)) { // a groovy closure
-                            continue;
-                        }
-                        if (sub.name.contains("Abstract")) {
-                            continue;
-                        }
-                        Class clazz = Class.forName("$relativeName/$sub.name".replace("/", ".").replaceFirst(/\.class$/, ""));
+    private static findAllClasses() {
+        def workingDir = new File(".")
 
-                        if (!isValidClass(clazz)) {
-                            continue;
-                        }
+        def startDir = new File(workingDir, "target/classes")
+        startDir.traverse {
+            if (!it.isFile()) {
+                return
+            }
 
-                        Class superClass = clazz.superclass;
-                        Set<Class> interfaces = createClassSortedSet()
-                        addInterfaces(clazz, interfaces)
+            def file = it
+            if (file.name.endsWith(".class")) {
+                if (file.name.contains('$_$') || file.name.find(/_closure\d+/)) { // a groovy closure
+                    return;
+                }
+                if (file.name.contains("Abstract")) {
+                    return;
+                }
 
-                        while (superClass != null && !superClass.equals(Object.class)) {
-                            def classList = allClasses.get(superClass)
-                            if (classList == null) {
-                                classList = createClassSortedSet();
-                                allClasses.put(superClass, classList)
-                            }
-                            allClasses.get(superClass).add(clazz)
-                            addInterfaces(superClass, interfaces)
+                def className = file.absolutePath.replace(startDir.absolutePath, "")
+                        .replace("\\", ".")
+                        .replace("/", ".")
+                        .replaceFirst(/\.class$/, "")
+                        .replaceFirst(/^\./, "")
+                Class clazz = Class.forName(className);
 
-                            superClass = superClass.superclass
-                        }
+                if (!isValidClass(clazz)) {
+                    return;
+                }
 
-                        for (def iface : interfaces) {
-                            def classList = allClasses.get(iface)
-                            if (classList == null) {
-                                classList = createClassSortedSet();
-                                allClasses.put(iface, classList)
-                            }
-                            classList.add(clazz);
-                        }
+                Class superClass = clazz.superclass;
+                Set<Class> interfaces = createClassSortedSet()
+                addInterfaces(clazz, interfaces)
+
+                while (superClass != null && !superClass.equals(Object.class)) {
+                    def classList = allClasses.get(superClass)
+                    if (classList == null) {
+                        classList = createClassSortedSet();
+                        allClasses.put(superClass, classList)
                     }
+                    allClasses.get(superClass).add(clazz)
+                    addInterfaces(superClass, interfaces)
+
+                    superClass = superClass.superclass
+                }
+
+                for (def iface : interfaces) {
+                    def classList = allClasses.get(iface)
+                    if (classList == null) {
+                        classList = createClassSortedSet();
+                        allClasses.put(iface, classList)
+                    }
+                    classList.add(clazz);
                 }
             }
         }
@@ -119,8 +123,13 @@ public abstract class TestUtil {
     }
 
     private static isValidClass(Class<?> clazz) {
-        if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers()) || clazz.isSynthetic() || clazz.isAnonymousClass()) {
-            return false;
+        try {
+            if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers()) || clazz.isSynthetic() || clazz.isAnonymousClass()) {
+                return false;
+            }
+        } catch (NoClassDefFoundError e) {
+            println "Error with "+clazz.name
+            throw e
         }
 
         return true;
