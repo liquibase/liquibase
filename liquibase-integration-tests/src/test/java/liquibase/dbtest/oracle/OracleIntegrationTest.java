@@ -48,6 +48,21 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void sqlplusChangelog() throws Exception {
+        assumeNotNull(this.getDatabase());
+
+        Liquibase liquibase = createLiquibase(this.customExecutorChangeLog);
+        clearDatabase();
+
+        try {
+            liquibase.update(this.contexts);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
+    }
+
+    @Test
     public void indexCreatedOnCorrectSchema() throws Exception {
         assumeNotNull(this.getDatabase());
 

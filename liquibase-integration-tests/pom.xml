@@ -13,6 +13,11 @@
     <artifactId>liquibase-integration-tests</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>com.datical.db.drivers.oracle</groupId>
+            <artifactId>linux_x86_64</artifactId>
+            <version>1.0.12</version>
+        </dependency>
     </dependencies>
 
     <build>
