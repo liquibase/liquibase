@@ -33,7 +33,7 @@ assignees: ''
 
 ## Description
 
-A clear and concise description of the issue being addressed.
+A clear and concise description of the issue being addressed.  Additional guidance [here](https://liquibase.jira.com/wiki/spaces/LB/pages/1274904896/How+to+Contribute+Code+to+Liquibase+Core).
 - Describe the actual problematic behavior.
 - Ensure private information is redacted.
 
@@ -64,7 +64,7 @@ Add any other context about the problem here.
 <!--- Put an `x` in all the boxes that apply. -->
 <!--- If you're unsure about any of these, just ask us in a comment. We're here to help! -->
 - [ ] Build is successful and all new and existing tests pass
-- [ ] Added Unit Test(s)
-- [ ] Added Integration Test(s)
+- [ ] Added [Unit Test(s)](https://liquibase.jira.com/wiki/spaces/LB/pages/1274937609/How+to+Write+Liquibase+Core+Unit+Tests)
+- [ ] Added [Integration Test(s)](https://liquibase.jira.com/wiki/spaces/LB/pages/1276608569/How+to+Write+Liquibase+Core+Integration+Tests)
 - [ ] Documentation Updated
 
