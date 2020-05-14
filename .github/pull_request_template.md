@@ -68,3 +68,5 @@ Add any other context about the problem here.
 - [ ] Added [Integration Test(s)](https://liquibase.jira.com/wiki/spaces/LB/pages/1276608569/How+to+Write+Liquibase+Core+Integration+Tests)
 - [ ] Documentation Updated
 
+## Need Help?
+Come chat with us on our [discord channel](https://discord.com/channels/700506481111597066/700506481572839505)
