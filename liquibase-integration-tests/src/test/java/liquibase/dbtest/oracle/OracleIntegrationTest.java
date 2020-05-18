@@ -1,5 +1,6 @@
 package liquibase.dbtest.oracle;
 
+import ch.qos.logback.classic.Level;
 import liquibase.Liquibase;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
