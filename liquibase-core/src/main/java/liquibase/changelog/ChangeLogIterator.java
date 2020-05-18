@@ -126,7 +126,7 @@ public class ChangeLogIterator {
             }
             catch (UnexpectedLiquibaseException ule) {
                 String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet.toString());
-                LOG.severe(LogType.LOG, MSG_COULD_NOT_FIND_EXECUTOR);
+                LOG.severe(LogType.LOG, message);
                 throw new LiquibaseException(message);
             }
             ValidationErrors errors = executor.validate(changeSet);

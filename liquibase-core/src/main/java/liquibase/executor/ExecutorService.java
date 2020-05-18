@@ -46,7 +46,7 @@ public class ExecutorService {
         });
 
         for (Executor executor : registry) {
-            if (executor.getName().equals(executorName)) {
+            if (executor.getName().toLowerCase().equals(executorName.toLowerCase())) {
                 foundExecutors.add(executor);
             }
         }
