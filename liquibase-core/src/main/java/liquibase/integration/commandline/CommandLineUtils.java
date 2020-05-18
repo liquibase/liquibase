@@ -191,8 +191,9 @@ public class CommandLineUtils {
                               CompareControl.SchemaComparison[] schemaComparisons, PrintStream output) throws LiquibaseException {
         doDiff(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, null, output);
     }
-    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
-            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
+
+    public static DiffCommand createDiffCommand(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+                              CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) {
         DiffCommand diffCommand = (DiffCommand) CommandFactory.getInstance().getCommand("diff");
 
         diffCommand
@@ -202,6 +203,12 @@ public class CommandLineUtils {
                 .setObjectChangeFilter(objectChangeFilter)
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(output);
+        return diffCommand;
+    }
+
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
+        DiffCommand diffCommand = createDiffCommand(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, objectChangeFilter, output);
 
         System.out.println("");
         System.out.println(coreBundle.getString("diff.results"));

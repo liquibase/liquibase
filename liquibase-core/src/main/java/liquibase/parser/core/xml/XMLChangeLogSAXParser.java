@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     
-    public static final String LIQUIBASE_SCHEMA_VERSION = "3.8";
+    public static final String LIQUIBASE_SCHEMA_VERSION = "3.9";
     private static final boolean PREFER_INTERNAL_XSD = Boolean.getBoolean("liquibase.prefer.internal.xsd");
     private static final String XSD_FILE = "dbchangelog-" + LIQUIBASE_SCHEMA_VERSION + ".xsd";
     private SAXParserFactory saxParserFactory;
