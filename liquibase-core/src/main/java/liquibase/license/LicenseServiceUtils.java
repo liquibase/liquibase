@@ -31,8 +31,8 @@ public class LicenseServiceUtils {
       ValidationErrors validationErrors = new ValidationErrors();
       String message = "Change Set ID: " + changeSet.getId() + " Change Set Author: " + changeSet.getAuthor() + "\n";
       message += "Change Type 'pro:" + changeType + "' is not allowed without a valid Liquibase Pro License.\n";
-      message += "To purchase or renew a Liquibase Pro license key please contact lbprosales@datical.com or\n" +
-                "go to https://download.liquibase.org/liquibase-pro-pricing-details";
+      message += "To purchase or renew a Liquibase Pro license key, please contact sales@liquibase.com or\n" +
+                "go to https://www.liquibase.org/download";
       validationErrors.addError(message);
       return validationErrors;
     }

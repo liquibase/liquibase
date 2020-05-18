@@ -1,6 +1,9 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.9.0 (2020.5.13)
+- [Pro] New ""--format=json" argument for diff command
+
 Changes in version 3.8.9 (2020.4.06)
 - Fixed an issue with how Liquibase handles SMALLINT columns in PostgreSQL when generating a changelog.
 - Improved `generateChangeLog` command to assume a `diffTypes` that includes "data" when the `dataOutputDirectory` parameter is used. Most users looking to export data as part of `generateChangeLog` can now simply use the `dataOuputDirectory` parameter without needing to specify `diffTypes`.
