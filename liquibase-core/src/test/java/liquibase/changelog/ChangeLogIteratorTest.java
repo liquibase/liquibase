@@ -46,7 +46,7 @@ public class ChangeLogIteratorTest {
 
     @Test
     public void runChangeSet_withBogusExecutor() throws Exception {
-        changeLog.addChangeSet(new ChangeSet("7", "nvoxland", false, false,
+        changeLog.addChangeSet(new ChangeSet("8", "nvoxland", false, false,
                 "/path/to/changelog",  "test2", null,
                 "foo", true, ObjectQuotingStrategy.LEGACY, null));
         TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
@@ -60,7 +60,7 @@ public class ChangeLogIteratorTest {
             boolean b = e.getMessage().contains("Unable to locate Executor");
             assertEquals(b, true);
         }
-        assertEquals(0, testChangeLogVisitor.visitedChangeSets.size());
+        assertEquals(7, testChangeLogVisitor.visitedChangeSets.size());
     }
 
     @Test
