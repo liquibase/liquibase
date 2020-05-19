@@ -71,11 +71,6 @@ public class ChangeLogIterator {
                 Collections.reverse(changeSetList);
             }
 
-            //
-            // Go validate any change sets with an Executor
-            //
-            validateChangeSetExecutors(changeSetList, env);
-
             for (ChangeSet changeSet : changeSetList) {
                 boolean shouldVisit = true;
                 Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
@@ -95,6 +90,11 @@ public class ChangeLogIterator {
 
                 try (LoggerContext ignored2 = LogService.pushContext("changeSet", changeSet)) {
                     if (shouldVisit && !alreadySaw(changeSet)) {
+                        //
+                        // Go validate any change sets with an Executor
+                        //
+                        validateChangeSetExecutor(changeSet, env);
+
                         visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                         markSeen(changeSet);
                     } else {
@@ -115,27 +115,25 @@ public class ChangeLogIterator {
     // has a valid Executor, and that the changes in the change set
     // are eligible for execution by this Executor
     //
-    private void validateChangeSetExecutors(List<ChangeSet> changeSetList, RuntimeEnvironment env) throws LiquibaseException {
-        for (ChangeSet changeSet : changeSetList) {
-            if (changeSet.getRunWith() == null) {
-                continue;
-            }
-            String executorName = changeSet.getRunWith();
-            Executor executor;
-            try {
-                executor = ExecutorService.getInstance().getExecutor(executorName, env.getTargetDatabase());
-            }
-            catch (UnexpectedLiquibaseException ule) {
-                String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet.toString());
-                LOG.severe(LogType.LOG, message);
-                throw new LiquibaseException(message);
-            }
-            ValidationErrors errors = executor.validate(changeSet);
-            if (errors.hasErrors()) {
-                String message = errors.toString();
-                LOG.severe(LogType.LOG, message);
-                throw new LiquibaseException(message);
-            }
+    private void validateChangeSetExecutor(ChangeSet changeSet, RuntimeEnvironment env) throws LiquibaseException {
+        if (changeSet.getRunWith() == null) {
+            return;
+        }
+        String executorName = changeSet.getRunWith();
+        Executor executor;
+        try {
+            executor = ExecutorService.getInstance().getExecutor(executorName, env.getTargetDatabase());
+        }
+        catch (UnexpectedLiquibaseException ule) {
+            String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet.toString());
+            LOG.severe(LogType.LOG, message);
+            throw new LiquibaseException(message);
+        }
+        ValidationErrors errors = executor.validate(changeSet);
+        if (errors.hasErrors()) {
+            String message = errors.toString();
+            LOG.severe(LogType.LOG, message);
+            throw new LiquibaseException(message);
         }
     }
 

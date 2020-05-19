@@ -159,6 +159,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             } else {
                                 RawSQLChange rollbackChange = new RawSQLChange();
                                 rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeLog));
+                                rollbackChange.setSplitStatements(rollbackSplitStatements);
+                                if (rollbackEndDelimiter != null) {
+                                    rollbackChange.setEndDelimiter(rollbackEndDelimiter);
+                                }
                                 changeSet.addRollbackChange(rollbackChange);
                             }
                         }
