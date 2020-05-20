@@ -56,6 +56,17 @@ public abstract class AbstractExecutor implements Executor {
 
     /**
      *
+     * Allow this Executor to make any needed changes to the change set. The base class is a no-op.
+     *
+     * @param changeSet The change set to operate on
+     *
+     */
+    @Override
+    public void modifyChangeSet(ChangeSet changeSet) {
+    }
+
+    /**
+     *
      * Set a ResourceAccessor on this Executor to be used in file access
      *
      * @param resourceAccessor

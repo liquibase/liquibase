@@ -704,6 +704,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
+        Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
             Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             executor.comment("Rolling Back ChangeSet: " + toString());
@@ -763,6 +764,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         } finally {
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
+            ExecutorService.getInstance().setExecutor("jdbc", database, originalExecutor);
             if (!runInTransaction && database.supportsDDLInTransaction()) {
                 try {
                     database.setAutoCommit(false);

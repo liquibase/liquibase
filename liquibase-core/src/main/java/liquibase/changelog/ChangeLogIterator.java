@@ -129,6 +129,13 @@ public class ChangeLogIterator {
             LOG.severe(LogType.LOG, message);
             throw new LiquibaseException(message);
         }
+        //
+        // ASSERT: the Executor is valid
+        // allow the Executor to make changes to the object model
+        // if needed
+        //
+        executor.modifyChangeSet(changeSet);
+
         ValidationErrors errors = executor.validate(changeSet);
         if (errors.hasErrors()) {
             String message = errors.toString();

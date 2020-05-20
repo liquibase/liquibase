@@ -49,6 +49,15 @@ public interface Executor {
 
     /**
      *
+     * Allow this Executor to make any needed changes to the change set
+     *
+     * @param   changeSet          The change set to operate on
+     *
+     */
+    void modifyChangeSet(ChangeSet changeSet);
+
+    /**
+     *
      * Set a ResourceAccessor on this Executor to be used in file access
      *
      * @param resourceAccessor
