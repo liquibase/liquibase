@@ -105,6 +105,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
+            Matcher rollbackSplitStatementsPatternMatcher=null;
             boolean rollbackSplitStatements = true;
             String rollbackEndDelimiter = null;
 
@@ -159,7 +160,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             } else {
                                 RawSQLChange rollbackChange = new RawSQLChange();
                                 rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeLog));
-                                rollbackChange.setSplitStatements(rollbackSplitStatements);
+                                if (rollbackSplitStatementsPatternMatcher.matches()) {
+                                    rollbackChange.setSplitStatements(rollbackSplitStatements);
+                                }
                                 if (rollbackEndDelimiter != null) {
                                     rollbackChange.setEndDelimiter(rollbackEndDelimiter);
                                 }
@@ -171,7 +174,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher stripCommentsPatternMatcher = stripCommentsPattern.matcher(line);
                     Matcher splitStatementsPatternMatcher = splitStatementsPattern.matcher(line);
                     Matcher runWithMatcher = runWithPattern.matcher(line);
-                    Matcher rollbackSplitStatementsPatternMatcher = rollbackSplitStatementsPattern.matcher(line);
+                    rollbackSplitStatementsPatternMatcher = rollbackSplitStatementsPattern.matcher(line);
                     Matcher endDelimiterPatternMatcher = endDelimiterPattern.matcher(line);
                     Matcher rollbackEndDelimiterPatternMatcher = rollbackEndDelimiterPattern.matcher(line);
 
@@ -291,7 +294,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     } else {
                         RawSQLChange rollbackChange = new RawSQLChange();
                         rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeSet.getChangeLog()));
-                        rollbackChange.setSplitStatements(rollbackSplitStatements);
+                        if (rollbackSplitStatementsPatternMatcher.matches()) {
+                            rollbackChange.setSplitStatements(rollbackSplitStatements);
+                        }
                         if (rollbackEndDelimiter != null) {
                             rollbackChange.setEndDelimiter(rollbackEndDelimiter);
                         }

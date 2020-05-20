@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -56,13 +57,23 @@ public abstract class AbstractExecutor implements Executor {
 
     /**
      *
-     * Allow this Executor to make any needed changes to the change set. The base class is a no-op.
+     * Allow this Executor to make any needed changes to the change set.
+     * The base class sets splitStatements to 'true' if it is not set
      *
      * @param changeSet The change set to operate on
      *
      */
     @Override
     public void modifyChangeSet(ChangeSet changeSet) {
+        List<Change> changes = changeSet.getChanges();
+        for (Change change : changes) {
+            if (change instanceof AbstractSQLChange) {
+                AbstractSQLChange abstractSQLChange = (AbstractSQLChange)change;
+                if (! abstractSQLChange.isSplitStatementsSet()) {
+                    ((AbstractSQLChange) change).setSplitStatements(true);
+                }
+            }
+        }
     }
 
     /**
