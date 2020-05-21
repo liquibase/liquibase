@@ -66,6 +66,15 @@ public abstract class AbstractExecutor implements Executor {
     @Override
     public void modifyChangeSet(ChangeSet changeSet) {
         List<Change> changes = changeSet.getChanges();
+        modifyChanges(changes);
+
+        if (changeSet.getRollback() != null) {
+            List<Change> rollbackChanges = changeSet.getRollback().getChanges();
+            modifyChanges(rollbackChanges);
+        }
+    }
+
+    private void modifyChanges(List<Change> changes) {
         for (Change change : changes) {
             if (change instanceof AbstractSQLChange) {
                 AbstractSQLChange abstractSQLChange = (AbstractSQLChange)change;
