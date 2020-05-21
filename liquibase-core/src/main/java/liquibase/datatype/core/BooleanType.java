@@ -18,41 +18,49 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
+
         if ((database instanceof Firebird3Database)) {
             return new DatabaseDataType("BOOLEAN");
         }
-
         if ((database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("SMALLINT");
-        } else if (database instanceof MSSQLDatabase) {
+        }
+        if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
-        } else if (database instanceof MySQLDatabase) {
+        }
+        if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
             return new DatabaseDataType("BIT", 1);
-        } else if (database instanceof OracleDatabase) {
+        }
+        if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 1);
-        } else if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
+        }
+        if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("BIT");
-        } else if (database instanceof DerbyDatabase) {
+        }
+        if (database instanceof DerbyDatabase) {
             if (((DerbyDatabase) database).supportsBooleanDataType()) {
                 return new DatabaseDataType("BOOLEAN");
             } else {
                 return new DatabaseDataType("SMALLINT");
             }
-        } else if (database.getClass().isAssignableFrom(DB2Database.class)) {
+        }
+        if (database.getClass().isAssignableFrom(DB2Database.class)) {
 			if (((DB2Database) database).supportsBooleanDataType())
 				return new DatabaseDataType("BOOLEAN");
 			else
 				return new DatabaseDataType("SMALLINT");
-        } else if (database instanceof HsqlDatabase) {
+        }
+        if (database instanceof HsqlDatabase) {
             return new DatabaseDataType("BOOLEAN");
-        } else if (database instanceof PostgresDatabase) {
+        }
+        if (database instanceof PostgresDatabase) {
             if (originalDefinition.toLowerCase(Locale.US).startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-    }
+        }
 
         return super.toDatabaseDataType(database);
     }

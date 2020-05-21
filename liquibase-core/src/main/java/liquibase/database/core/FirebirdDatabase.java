@@ -1,12 +1,12 @@
 package liquibase.database.core;
 
+import java.util.Locale;
+
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
-
-import java.util.Locale;
 
 /**
  * Firebird database implementation.
@@ -16,12 +16,12 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
 
     public FirebirdDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
-        super.sequenceNextValueFunction="NEXT VALUE FOR %s";
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
     }
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return conn.getDatabaseProductName().startsWith("Firebird");
+        return conn.getDatabaseProductName().startsWith("Firebird") && conn.getDatabaseMajorVersion() < 3;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
+
     @Override
     public String getShortName() {
         return "firebird";

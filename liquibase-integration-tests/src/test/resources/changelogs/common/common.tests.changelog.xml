@@ -155,10 +155,10 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="nullable-1" author="nvoxland" dbms="!firebird">
+    <changeSet id="nullable-1" author="nvoxland">
         <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)" defaultNullValue="testValue"/>
     </changeSet>
-    <changeSet id="nullable-2" author="nvoxland" dbms="!firebird">
+    <changeSet id="nullable-2" author="nvoxland">
         <dropNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
     </changeSet>
 
@@ -222,7 +222,7 @@
         </preConditions>
         <sql>More invalid SQL. should not run due to "continue"</sql>
     </changeSet>
-    
+
     <changeSet id="add-column-test1" author="alan">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -338,11 +338,11 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="makeNotnulltest" author="nvoxland" dbms="!firebird">
+    <changeSet id="makeNotnulltest" author="nvoxland">
         <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
     </changeSet>
 
-    <changeSet id="makenulltest" author="nvoxland" dbms="!firebird">
+    <changeSet id="makenulltest" author="nvoxland">
         <dropNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
     </changeSet>
 
@@ -998,7 +998,7 @@
 
 
     <sql>
-      <![CDATA[  
+      <![CDATA[
         insert into testutf8insert (stringvalue) values ('€');
         insert into testutf8insert (stringvalue) values ('£');
         ]]>
