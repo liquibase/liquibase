@@ -1,7 +1,24 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.Db2zDatabase;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.Firebird3Database;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
@@ -14,10 +31,6 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatement> {
 
     @Override
@@ -27,7 +40,8 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
                 //"DB2 versions less than 9 or z/OS do not support modifying null constraints";
                 return false;
             }
-        } catch (DatabaseException ignore) {
+        }
+        catch (DatabaseException ignore) {
             //cannot check
         }
 
@@ -51,35 +65,48 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     public Sql[] generateSql(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 
-        String nullableString = statement.isNullable()?" NULL":" NOT NULL";
+        String nullableString = statement.isNullable() ? " NULL" : " NOT NULL";
 
         if ((database instanceof OracleDatabase) && (statement.getConstraintName() != null)) {
             nullableString += !statement.isValidate() ? " ENABLE NOVALIDATE " : "";
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " CONSTRAINT " + statement.getConstraintName() + nullableString;
-        } else if ((database instanceof OracleDatabase) || (database instanceof SybaseDatabase) || (database
-            instanceof SybaseASADatabase)) {
-            nullableString += (database instanceof OracleDatabase)&&(!statement.isValidate()) ? " ENABLE NOVALIDATE " : "";
+        }
+        else if ((database instanceof OracleDatabase) || (database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase)) {
+            nullableString += (database instanceof OracleDatabase) && (!statement.isValidate()) ? " ENABLE NOVALIDATE " : "";
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + nullableString;
-        } else if (database instanceof MSSQLDatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString;
-        } else if (database instanceof MySQLDatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString;
-        } else if (database instanceof DerbyDatabase) {
+        }
+        else if (database instanceof MSSQLDatabase) {
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(),
+                    database).toDatabaseDataType(database) + nullableString;
+        }
+        else if (database instanceof MySQLDatabase) {
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(),
+                    database).toDatabaseDataType(database) + nullableString;
+        }
+        else if (database instanceof DerbyDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + nullableString;
-        } else if ((database instanceof HsqlDatabase) || (database instanceof H2Database)) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET"+nullableString;
-        } else if (database instanceof InformixDatabase) {
+        }
+        else if ((database instanceof HsqlDatabase) || (database instanceof H2Database)) {
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET" + nullableString;
+        }
+        else if (database instanceof InformixDatabase) {
             // Informix simply omits the null for nullables
             if (statement.isNullable()) {
                 nullableString = "";
             }
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database) + nullableString + ")";
-        } else if (database instanceof FirebirdDatabase && !(database instanceof Firebird3Database)) {
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(),
+                    database).toDatabaseDataType(database) + nullableString + ")";
+        }
+        else if (database instanceof FirebirdDatabase && !(database instanceof Firebird3Database)) {
             // For Firebird database prior to Firebird 3 the ALTER TABLE syntax is not working
             // As a workaround we can modify the system table entry directly (see http://www.firebirdfaq.org/faq103/)
-            sql = "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = " + (statement.isNullable() ? "NULL" : "1") + " WHERE RDB$RELATION_NAME = '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "' AND RDB$FIELD_NAME = '" + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + "'";
-        } else {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
+            sql = "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = " + (statement.isNullable() ? "NULL" : "1") + " WHERE RDB$RELATION_NAME = '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "' AND RDB$FIELD_NAME = '" + database.escapeColumnName(statement.getCatalogName(),
+                    statement.getSchemaName(),
+                    statement.getTableName(),
+                    statement.getColumnName()) + "'";
+        }
+        else {
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
         }
 
         List<Sql> returnList = new ArrayList<>();

@@ -7,7 +7,7 @@
 
         logicalFilePath="changelogs/oracle/complete/oldname.changelog.xml">
     <preConditions>
-            <dbms type="firebird,firebird3"/>
+            <dbms type="firebird"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">

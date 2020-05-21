@@ -177,7 +177,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird,!firebird3">
+    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird">
         <createTable tableName="indexWithAscDescColumns">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -842,7 +842,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="number-type" author="nvoxland" dbms="!firebird,!firebird3">
+    <changeSet id="number-type" author="nvoxland" dbms="!firebird">
         <createTable tableName="numbertest">
             <column name="id" type="numeric"/>
         </createTable>
@@ -1064,7 +1064,7 @@
     </changeSet>
 
     <changeSet id="timestamp_column_precision9" author="abuschka"
-               dbms="db2,derby,firebird,firebird3,h2,hsql,informix,mssql,oracle,postgres,sqlite,asany,sybase">
+               dbms="db2,derby,firebird,h2,hsql,informix,mssql,oracle,postgres,sqlite,asany,sybase">
         <comment>Test if we (and the JDBC driver) correctly support TIMESTAMP columns with a extra-large precision
             of 9 for supported DBMS.
         </comment>

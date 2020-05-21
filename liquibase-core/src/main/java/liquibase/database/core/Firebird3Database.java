@@ -9,9 +9,4 @@ public class Firebird3Database extends FirebirdDatabase {
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("Firebird") && conn.getDatabaseMajorVersion() >= 3;
     }
-
-    @Override
-    public String getShortName() {
-        return "firebird3";
-    }
 }
