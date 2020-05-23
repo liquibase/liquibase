@@ -110,8 +110,8 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
             return null;
         }
         if (ignoreClasspathPrefix) {
-            return filePath.replaceFirst("^classpath:", "");
+            return filePath.replaceFirst("^classpath:", "").replace("\\","/");
         }
-        return filePath;
+        return filePath.replace("\\","/");
     }
 }

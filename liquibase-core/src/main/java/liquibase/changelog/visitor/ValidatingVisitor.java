@@ -88,8 +88,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return result;
     }
         
-    private String normalizePath(String filePath) {
-        return filePath.replaceFirst("^classpath:", "");
+    String normalizePath(String filePath) {
+        return filePath.replaceFirst("^classpath:", "").replace("\\","/");
     }
 
         @Override

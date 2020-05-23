@@ -4,6 +4,7 @@ import liquibase.ContextExpression;
 import liquibase.LabelExpression;
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
+import liquibase.changelog.filter.ShouldRunChangeSetFilter
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
@@ -14,6 +15,9 @@ import liquibase.sdk.supplier.resource.ResourceSupplier
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertEquals
 
 class DatabaseChangeLogTest extends Specification {
 
@@ -341,4 +345,19 @@ create view sql_view as select * from sql_table;'''
 
     }
 
+    def "normalizePath removes 'classpath:' and replaces backslashes with forward slashes"() {
+        when:
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        changeLogFile.setIgnoreClasspathPrefix(true)
+        then:
+        changeLogFile.normalizePath("classpath:alpha\\bravo\\charlie") == "alpha/bravo/charlie"
+    }
+
+    def "normalizePath replaces backslashes with forward slashes"() {
+        when:
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        changeLogFile.setIgnoreClasspathPrefix(false)
+        then:
+        changeLogFile.normalizePath("alpha\\bravo\\charlie") == "alpha/bravo/charlie"
+    }
 }

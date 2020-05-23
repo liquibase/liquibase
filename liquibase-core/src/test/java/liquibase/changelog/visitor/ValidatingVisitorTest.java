@@ -129,4 +129,13 @@ public class ValidatingVisitorTest {
 
         assertTrue(handler.validationPassed());
     }
+
+    @Test
+    public void normalize_path() {
+        ValidatingVisitor visitor = new ValidatingVisitor(new ArrayList<>());
+
+        String actual = visitor.normalizePath("classpath:alpha\\bravo\\charlie");
+        String expected = "alpha/bravo/charlie";
+        assertEquals(expected, actual);
+    }
 }

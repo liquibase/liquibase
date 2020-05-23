@@ -628,9 +628,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     protected String normalizePath(String filePath) {
         if (ignoreClasspathPrefix) {
-            return filePath.replaceFirst("^classpath:", "");
+            return filePath.replaceFirst("^classpath:", "").replace("\\","/");
         }
-        return filePath;
+        return filePath.replace("\\","/");
     }
 
     public void clearCheckSums() {

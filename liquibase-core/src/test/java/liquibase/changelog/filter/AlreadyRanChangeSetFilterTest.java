@@ -1,5 +1,12 @@
 package liquibase.changelog.filter;
 
+import liquibase.changelog.RanChangeSet;
+import org.junit.Test;
+
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+
 public class AlreadyRanChangeSetFilterTest {
 
 //    private Database database = createMock(Database.class);
@@ -67,4 +74,21 @@ public class AlreadyRanChangeSetFilterTest {
 
     }
 
+    @Test
+    public void should_normalize_path_when_ignoring_classpath_prefix() {
+        RanChangeSetFilter filter = new AlreadyRanChangeSetFilter(new ArrayList<RanChangeSet>(), true);
+
+        String actual = filter.normalizePath("classpath:alpha\\bravo\\charlie");
+        String expected = "alpha/bravo/charlie";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void should_normalize_path_when_not_ignoring_classpath_prefix() {
+        RanChangeSetFilter filter = new AlreadyRanChangeSetFilter(new ArrayList<RanChangeSet>(), true);
+
+        String actual = filter.normalizePath("alpha\\bravo\\charlie");
+        String expected = "alpha/bravo/charlie";
+        assertEquals(expected, actual);
+    }
 }

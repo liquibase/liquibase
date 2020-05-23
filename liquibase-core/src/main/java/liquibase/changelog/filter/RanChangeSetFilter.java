@@ -27,8 +27,8 @@ public abstract class RanChangeSetFilter implements ChangeSetFilter {
     }
     protected String normalizePath(String filePath) {
         if (ignoreClasspathPrefix) {
-            return filePath.replaceFirst("^classpath:", "");
+            return filePath.replaceFirst("^classpath:", "").replace("\\","/");
         }
-        return filePath;
+        return filePath.replace("\\","/");
     }
 }

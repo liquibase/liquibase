@@ -10,6 +10,7 @@ import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
 import spock.lang.Specification
 
+import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
 
@@ -89,6 +90,12 @@ public class ShouldRunChangeSetFilterTest extends Specification {
 //    }
 
 
+    private Database given_a_database_with_no_executed_changesets() throws DatabaseException {
+        ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
+
+        return mock_database(ranChanges);
+    }
+
     private Database given_a_database_with_two_executed_changesets() throws DatabaseException {
         ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
         RanChangeSet ranChangeSet1 = new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("12345"), new Date(), null, null, null, null, null, null, null);
@@ -134,5 +141,27 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         then:
         ChangeSet changeSet = new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)
         assertFalse("RunOnChange not changed changeset should NOT be accepted", filter.accepts(changeSet).isAccepted())
+    }
+
+    public void should_normalize_path_when_ignoring_classpath_prefix() {
+        when:
+        given_a_database_with_no_executed_changesets()
+        ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database, true)
+
+        then:
+        String actual = filter.normalizePath("classpath:alpha\\bravo\\charlie")
+        String expected = "alpha/bravo/charlie"
+        assertEquals(expected, actual)
+    }
+
+    public void should_normalize_path_when_not_ignoring_classpath_prefix() {
+        when:
+        given_a_database_with_no_executed_changesets()
+        ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database, false)
+
+        then:
+        String actual = filter.normalizePath("alpha\\bravo\\charlie")
+        String expected = "alpha/bravo/charlie"
+        assertEquals(expected, actual)
     }
 }
