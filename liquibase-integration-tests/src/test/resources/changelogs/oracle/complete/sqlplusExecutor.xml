@@ -8,7 +8,7 @@
             <dbms type="oracle"/>
     </preConditions>
 
-    <changeSet runWith="custom" author="Liquibase Pro User" id="5::createTable"
+    <changeSet runWith="example" author="Liquibase Pro User" id="5::createTable"
                objectQuotingStrategy="QUOTE_ALL_OBJECTS" runAlways="false" runOnChange="true" labels="setup">
         <sqlFile path="sql/oracle_create_table.sql" splitStatements="false" />
         <rollback>

@@ -1,16 +1,18 @@
-
+/**
+ *
+ * This is an example of a custom Executor class.
+ * Specifying the change set attribute "runWith=<executor name>"
+ * instructs Liquibase to execute the changes in the change set
+ * with the Executor.
+ *
+ */
 package liquibase.executor.jvm;
 
-import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
-import liquibase.change.core.RawSQLChange;
-import liquibase.change.core.SQLFileChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RollbackContainer;
-import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.license.LicenseServiceUtils;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.servicelocator.PrioritizedService;
@@ -26,13 +28,9 @@ import static java.util.ResourceBundle.getBundle;
 
 public class CustomExecutor extends JdbcExecutor {
     private Logger log = LogService.getLog(getClass());
-    private int timeout = 1800;
-    private ChangeSet changeSet;
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected static final String MSG_UNABLE_TO_VALIDATE_ROLLBACK_CHANGE = coreBundle.getString("unable.to.validate.rollback.change");
     protected static final String MSG_UNABLE_TO_VALIDATE_CHANGE_SET = coreBundle.getString("unable.to.validate.changeset");
-    protected static final String MSG_UNABLE_TO_VALIDATE_LICENSE = coreBundle.getString("no.executor.pro.license.found");
-    protected static final String MSG_SPLIT_STATEMENTS_NOT_SET = coreBundle.getString("split.statements.not.set");
 
     /**
      *
@@ -52,7 +50,7 @@ public class CustomExecutor extends JdbcExecutor {
      */
     @Override
     public String getName() {
-        return "custom";
+        return "example";
     }
 
     /**
@@ -72,7 +70,8 @@ public class CustomExecutor extends JdbcExecutor {
      * Validate if the change set can be executed by this Executor
      *
      * @param   changeSet The change set to validate
-     * @return  boolean   True if all changes can be executed by sqlplus else false
+     * @return  boolean   True if all changes can be executed by the custom Executor
+     *                    False if any change cannot be executed
      *
      */
     @Override
@@ -104,7 +103,6 @@ public class CustomExecutor extends JdbcExecutor {
                 validateChange(changeSet, validationErrors, change, MSG_UNABLE_TO_VALIDATE_ROLLBACK_CHANGE);
             }
         }
-        this.changeSet = changeSet;
         return validationErrors;
     }
 
@@ -115,29 +113,25 @@ public class CustomExecutor extends JdbcExecutor {
         log.info("Validating change " + change.getDescription());
     }
 
+    /**
+     *
+     * Execute the SQL in the SqlStatement parameter
+     *
+     * @param  action                   This is the SqlStatement object which contains
+     *                                  the SQL to execute
+     * @param  sqlVisitors              List of SqlVisitor to apply to the generated SQL
+     * @throws DatabaseException
+     *
+     */
     @Override
     public void execute(SqlStatement action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         log.info("Executing with the '" + getName() + "' executor");
         Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(action, database);
-        DatabaseConnection con = database.getConnection();
         try {
             for (Sql sql : sqls) {
                 String actualSqlString = sql.toSql();
                 log.info("Generated SQL for change is " + actualSqlString);
             }
-            //
-            // Run -v first
-            //
-            // SqlPlusRunner runner = new SqlPlusRunner(changeSet, null, resourceAccessor);
-            // runner.addArg("-v");
-            // runner.executeCommand(database);
-            // log.info("Successfully validated 'sqlplus'");
-
-            //
-            // Now execute the script
-            //
-            // runner = new SqlPlusRunner(changeSet, sqls, resourceAccessor);
-            // runner.executeCommand(database);
         }
         catch (Exception e) {
             throw new DatabaseException(e);
