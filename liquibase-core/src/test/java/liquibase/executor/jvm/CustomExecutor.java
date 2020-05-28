@@ -13,6 +13,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RollbackContainer;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.Executor;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.servicelocator.PrioritizedService;
@@ -26,6 +27,12 @@ import java.util.ResourceBundle;
 
 import static java.util.ResourceBundle.getBundle;
 
+/**
+ *
+ * This is an example of a custom <a href="#{@link}">{@link Executor}</a> implemention which can be specified
+ * in a changelog with the "runWith" attribute
+ *
+ */
 public class CustomExecutor extends JdbcExecutor {
     private Logger log = LogService.getLog(getClass());
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -67,7 +74,7 @@ public class CustomExecutor extends JdbcExecutor {
 
     /**
      *
-     * Validate if the change set can be executed by this Executor
+     * Validate whether the change set can be executed by this Executor
      *
      * @param   changeSet The change set to validate
      * @return  boolean   True if all changes can be executed by the custom Executor
@@ -88,7 +95,6 @@ public class CustomExecutor extends JdbcExecutor {
         ValidationErrors validationErrors = new ValidationErrors();
 
         //
-        // This Executor only support SQLFileChange and RawSQLChange types
         // Verify for go-forward and rollback changes
         //
         List<Change> changes = changeSet.getChanges();
@@ -115,12 +121,12 @@ public class CustomExecutor extends JdbcExecutor {
 
     /**
      *
-     * Execute the SQL in the SqlStatement parameter
+     * Execute the SQL from the <a href="#{@link}">{@link SqlStatement}</a> parameter
      *
      * @param  action                   This is the SqlStatement object which contains
      *                                  the SQL to execute
-     * @param  sqlVisitors              List of SqlVisitor to apply to the generated SQL
-     * @throws DatabaseException
+     * @param  sqlVisitors              List of <a href="#{@link}">{@link SqlVisitor}</a> to apply to the generated SQL
+     * @throws DatabaseException        Exception type thrown if an error occurs during execution
      *
      */
     @Override
