@@ -136,6 +136,9 @@ public class CustomExecutor extends JdbcExecutor {
         try {
             for (Sql sql : sqls) {
                 String actualSqlString = sql.toSql();
+                for (SqlVisitor visitor : sqlVisitors) {
+                    visitor.modifySql(actualSqlString, database);
+                }
                 log.info("Generated SQL for change is " + actualSqlString);
             }
         }

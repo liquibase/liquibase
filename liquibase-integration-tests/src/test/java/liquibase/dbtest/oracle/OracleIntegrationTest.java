@@ -1,17 +1,28 @@
 package liquibase.dbtest.oracle;
 
-import ch.qos.logback.classic.Level;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.LiquibaseException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogService;
+import liquibase.logging.Logger;
+import liquibase.sql.visitor.AbstractSqlVisitor;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.core.DropTableStatement;
 import org.junit.Test;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,6 +35,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     String indexOnSchemaChangeLog;
     String viewOnSchemaChangeLog;
     String customExecutorChangeLog;
+    Logger logger = LogService.getLog(OracleIntegrationTest.class);
 
     public OracleIntegrationTest() throws Exception {
         super("oracle", DatabaseFactory.getInstance().getDatabase("oracle"));
@@ -50,16 +62,41 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void sqlplusChangelog() throws Exception {
-        assumeNotNull(this.getDatabase());
+        Database database = this.getDatabase();
+        assumeNotNull(database);
 
         Liquibase liquibase = createLiquibase(this.customExecutorChangeLog);
         clearDatabase();
 
+        //
+        // Add a visitor so we can assert
+        //
+        DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog();
+        for (ChangeSet changeSet : changeLog.getChangeSets()) {
+            changeSet.addSqlVisitor(new TestSqlVisitor());
+        }
         try {
             liquibase.update(this.contexts);
         } catch (ValidationFailedException e) {
             e.printDescriptiveError(System.out);
             throw e;
+        }
+        database.commit();
+    }
+
+    private class TestSqlVisitor extends AbstractSqlVisitor {
+        @Override
+        public String modifySql(String sql, Database database) {
+            logger.info("In the TestSqlVisitor.modifySql method");
+            logger.info(sql);
+            assertTrue(sql.startsWith("CREATE TABLE primary_table_numero_uno (name CHAR(20));"));
+            assertTrue(sql.endsWith("CREATE TABLE primary_table_numero_cinco(name CHAR(20));"));
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return null;
         }
     }
 
