@@ -160,7 +160,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         this.endDelimiter = endDelimiter;
     }
 
-    @DatabaseChangeProperty(since = "3.4",
+    @DatabaseChangeProperty(since = "4.0",
             description = "Whether to output a delimiter statement in updateSQL/rollbackSQL",
             supportsDatabase = "mysql")
     public Boolean isOutputDelimiter() {
