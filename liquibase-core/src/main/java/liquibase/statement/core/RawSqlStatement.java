@@ -6,6 +6,7 @@ public class RawSqlStatement extends AbstractSqlStatement {
 
     private String sql;
     private String endDelimiter  = ";";
+    private boolean outputDelimiter;
 
 
     public RawSqlStatement(String sql) {
@@ -25,6 +26,14 @@ public class RawSqlStatement extends AbstractSqlStatement {
 
     public String getEndDelimiter() {
         return endDelimiter.replace("\\r","\r").replace("\\n","\n");
+    }
+
+    public boolean isOutputDelimiter() {
+        return outputDelimiter;
+    }
+
+    public void setOutputDelimiter(boolean outputDelimiter) {
+        this.outputDelimiter = outputDelimiter;
     }
 
     @Override

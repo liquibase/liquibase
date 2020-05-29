@@ -109,8 +109,10 @@ public class LoggingExecutor extends AbstractExecutor {
 
                 String endDelimiter = ";";
                 String potentialDelimiter = null;
+                boolean outputDelimiter = false;
                 if (sql instanceof RawSqlStatement) {
                     potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                    outputDelimiter = ((RawSqlStatement) sql).isOutputDelimiter();
                 } else if (sql instanceof CreateProcedureStatement) {
                     potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
                 }
@@ -129,16 +131,12 @@ public class LoggingExecutor extends AbstractExecutor {
 
 
                 boolean resetMySqlDelimiter = false;
-
-                if (database instanceof MySQLDatabase
-                        && endDelimiter.toLowerCase(Locale.ROOT).startsWith("delimiter")) {
-                    endDelimiter = endDelimiter.substring("delimiter".length());
-
+                if (outputDelimiter == true && database instanceof MySQLDatabase
+                        && !";".equals(endDelimiter)) {
+                    resetMySqlDelimiter = true;
                     output.write("delimiter ");
                     output.write(endDelimiter);
                     output.write(StreamUtil.getLineSeparator());
-
-                    resetMySqlDelimiter = true;
                 }
 
                 //remove trailing "/"
