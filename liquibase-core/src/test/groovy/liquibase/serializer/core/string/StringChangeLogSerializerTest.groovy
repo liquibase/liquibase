@@ -264,6 +264,29 @@ public class StringChangeLogSerializerTest extends Specification {
                 "]"
     }
 
+    def serialized_rawSql_outputDelimiter() {
+        when:
+        RawSQLChange change = new RawSQLChange();
+        change.setOutputDelimiter(true);
+
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
+                "    outputDelimiter=\"true\"\n" +
+                "    splitStatements=\"true\"\n" +
+                "    stripComments=\"false\"\n" +
+                "]"
+
+        when:
+        change.setSql("some SQL Here");
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
+                "    outputDelimiter=\"true\"\n" +
+                "    splitStatements=\"true\"\n" +
+                "    sql=\"some SQL Here\"\n" +
+                "    stripComments=\"false\"\n" +
+                "]"
+    }
+
     @Unroll("#featureName: #change.class.name")
     def "general field serialization check"() throws Exception {
         expect:
