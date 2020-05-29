@@ -160,9 +160,6 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         json = json.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
         json = json.replaceAll("!!float \"([^\"]*)\"", "$1");
         json = json.replaceAll("!!liquibase.[^\\s]+ (\"\\w+\")", "$1");
-        if (json.contains("!!")) {
-            throw new IllegalStateException(String.format("Serialize failed. Illegal char on %s position: %s", json.indexOf("!!"), json));
-        }
         return json;
     }
 

@@ -6,7 +6,6 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogType;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
@@ -101,7 +100,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
         {
             
             if (propertiesStream == null) {
-                log.info(LogType.LOG, "Could not open properties file " + property.get("file"));
+                log.info("Could not open properties file " + property.get("file"));
             } else {
                 props.load(propertiesStream);
 

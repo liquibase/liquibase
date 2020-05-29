@@ -12,7 +12,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 /**
- * Prints which changesets need to be applied to the database.
+ * <p>Prints which changesets need to be applied to the database.</p>
  * 
  * @author JAmes Atwill
  * @goal status

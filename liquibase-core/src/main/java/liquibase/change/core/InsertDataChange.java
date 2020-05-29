@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
@@ -110,7 +111,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
         if (needsPreparedStatement) {
             return new SqlStatement[] {
-                    new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor())
+                    new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), Scope.getCurrentScope().getResourceAccessor())
             };
         }
 

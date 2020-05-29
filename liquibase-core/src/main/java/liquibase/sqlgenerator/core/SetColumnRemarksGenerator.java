@@ -11,6 +11,10 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
     @Override
     public int getPriority() {
@@ -29,6 +33,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
+        validationErrors.checkDisallowedField("catalogName", setColumnRemarksStatement.getCatalogName(), database, MSSQLDatabase.class);
         return validationErrors;
     }
 
@@ -49,10 +54,10 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                 schemaName = "dbo";
             }
 
-            return new Sql[]{new UnparsedSql("DECLARE @TableName SYSNAME " +
-                    "set @TableName = N'" + statement.getTableName() + "'; " +
+            Sql[] generatedSql = {new UnparsedSql("DECLARE @TableName SYSNAME " +
+                    "set @TableName = N'" +statement.getTableName() + "'; " +
                     "DECLARE @FullTableName SYSNAME " +
-                    "set @FullTableName = N'" + schemaName+"."+statement.getTableName() + "'; " +
+                    "set @FullTableName = N'" + schemaName + "." + statement.getTableName() + "'; " +
                     "DECLARE @ColumnName SYSNAME " +
                     "set @ColumnName = N'" + statement.getColumnName() + "'; " +
                     "DECLARE @MS_DescriptionValue NVARCHAR(3749); " +
@@ -88,6 +93,8 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                     "@level2type = N'COLUMN', " +
                     "@level2name = @ColumnName; " +
                     "END")};
+
+            return generatedSql;
         } else {
             return new Sql[]{new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
                     + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"

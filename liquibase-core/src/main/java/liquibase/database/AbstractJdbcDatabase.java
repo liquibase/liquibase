@@ -32,7 +32,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -61,7 +60,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.NowAndTodayUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
-import liquibase.util.NowAndTodayUtil;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -128,7 +126,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean defaultCatalogSet;
 
     private Map<String, Object> attributes = new HashMap<>();
-    protected String dbFullVersion;
 
     public String getName() {
         return toString();
@@ -157,24 +154,24 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
-        Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
+        Scope.getCurrentScope().getLog(getClass()).fine("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
         this.connection = conn;
         try {
             boolean autoCommit = conn.getAutoCommit();
             if (autoCommit == getAutoCommitMode()) {
                 // Don't adjust the auto-commit mode if it's already what the database wants it to be.
-                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Not adjusting the auto commit mode; it is already " + autoCommit);
+                Scope.getCurrentScope().getLog(getClass()).fine("Not adjusting the auto commit mode; it is already " + autoCommit);
             } else {
                 // Store the previous auto-commit mode, because the connection needs to be restored to it when this
                 // AbstractDatabase type is closed. This is important for systems which use connection pools.
                 previousAutoCommit = autoCommit;
 
-                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
+                Scope.getCurrentScope().getLog(getClass()).fine("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
 
             }
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Cannot set auto commit to " + getAutoCommitMode() + " on connection");
+            Scope.getCurrentScope().getLog(getClass()).warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection");
         }
 
         this.connection.attached(this);
@@ -255,6 +252,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+
     @Override
     public String getDefaultCatalogName() {
         if (defaultCatalogName == null) {
@@ -266,7 +264,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     defaultCatalogName = getConnectionCatalogName();
                 } catch (DatabaseException e) {
-                    Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting default catalog", e);
+                    Scope.getCurrentScope().getLog(getClass()).info("Error getting default catalog", e);
                 }
             }
         }
@@ -362,7 +360,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return ExecutorService.getInstance().getExecutor(this).
                     queryForObject(currentSchemaStatement, String.class);
         } catch (Exception e) {
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
+            Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
         }
         return null;
     }
@@ -461,6 +459,8 @@ public abstract class AbstractJdbcDatabase implements Database {
             return getTimeLiteral(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
             return getDateTimeLiteral(((java.sql.Timestamp) date));
+        } else if(date instanceof java.util.Date) {
+            return getDateTimeLiteral(new java.sql.Timestamp(date.getTime()));
         } else {
             throw new RuntimeException("Unexpected type: " + date.getClass().getName());
         }
@@ -710,7 +710,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
                 } catch (SQLException e) {
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from JDBC driver", e);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Cannot determine case sensitivity from JDBC driver", e);
                 }
             }
         }
@@ -761,7 +761,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
                 final long createSnapshotStarted = System.currentTimeMillis();
                 snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-                Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+                Scope.getCurrentScope().getLog(getClass()).fine(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -779,7 +779,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     compareControl);
 
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+            Scope.getCurrentScope().getLog(getClass()).fine(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             boolean previousAutoCommit = this.getAutoCommitMode();
             this.commit(); //clear out currently executed statements
@@ -810,7 +810,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             LockServiceFactory.getInstance().getLockService(this).destroy();
 
             this.setAutoCommit(previousAutoCommit);
-            Scope.getCurrentScope().getLog(getClass()).info(LogType.LOG, String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
+            Scope.getCurrentScope().getLog(getClass()).info(String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);
             this.commit();
@@ -984,12 +984,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeObjectName(String objectName, final Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
-            objectName = objectName.trim();
             if (mustQuoteObjectName(objectName, objectType)) {
-                return quoteObject(objectName, objectType);
+                return quoteObject(objectName, objectType).trim();
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-                return quoteObject(objectName, objectType);
+                return quoteObject(objectName, objectType).trim();
             }
+            objectName = objectName.trim();
         }
         return objectName;
     }
@@ -1196,7 +1196,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     connection.setAutoCommit(previousAutoCommit);
                 } catch (DatabaseException e) {
-                    Scope.getCurrentScope().getLog(getClass()).warning(LogType.LOG, "Failed to restore the auto commit to " + previousAutoCommit);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Failed to restore the auto commit to " + previousAutoCommit);
 
                     throw e;
                 }
@@ -1267,12 +1267,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
                 continue;
             }
-            Scope.getCurrentScope().getLog(getClass()).fine(LogType.LOG, "Executing Statement: " + statement);
+            Scope.getCurrentScope().getLog(getClass()).fine("Executing Statement: " + statement);
             try {
                 ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
-                    Scope.getCurrentScope().getLog(getClass()).severe(LogType.LOG, "Error executing statement '"+statement.toString()+"', but continuing", e);
+                    Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '"+statement.toString()+"', but continuing", e);
                 } else {
                     throw e;
                 }
@@ -1588,7 +1588,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (getConnection() == null) {
             // if no connection is there we cannot do anything...
             Scope.getCurrentScope().getLog(getClass()).warning(
-                    LogType.LOG, "No database connection available - specified"
+                    "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
             return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
         }

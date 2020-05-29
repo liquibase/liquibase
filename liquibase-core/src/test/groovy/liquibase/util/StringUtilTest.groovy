@@ -23,7 +23,7 @@ class StringUtilTest extends Specification {
         true          | true            | null         | "/*\nThis is a test comment of SQL script\n*/\n\nSelect * from Test;\nUpdate Test set field = 1"                                                                                                    | ["Select * from Test", "Update Test set field = 1"]
         true          | true            | null         | "select * from simple_select_statement;\ninsert into table ( col ) values (' value with; semicolon ');"                                                                                             | ["select * from simple_select_statement", "insert into table ( col ) values (' value with; semicolon ')"]
         true          | true            | null         | "--\n-- Create the blog table.\n--\nCREATE TABLE blog\n(\n ID NUMBER(15) NOT NULL\n)"                                                                                                               | ["CREATE TABLE blog\n(\n ID NUMBER(15) NOT NULL\n)"]
-        true          | true            | "//"         | "drop procedure if exists my_proc//\n\ncreate procedure my_proc(i_myvar varchar)\nbegin\n  a bunch of code here\nend//"                                                                          | ["drop procedure if exists my_proc", "create procedure my_proc(i_myvar varchar)\nbegin\n  a bunch of code here\nend"]
+        true          | true            | "//"         | "drop procedure if exists my_proc//\n\ncreate procedure my_proc(i_myvar varchar)\nbegin\n  a bunch of code here\nend//"                                                                             | ["drop procedure if exists my_proc", "create procedure my_proc(i_myvar varchar)\nbegin\n  a bunch of code here\nend"]
         true          | true            | "/"          | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;"                                   | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;"]
         true          | true            | "/"          | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;\n/\nanother statement;here\n/\n"   | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;", "another statement;here"]
         true          | true            | "\\n/"       | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;\n/\nanother statement;here\n/\n"   | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;", "another statement;here"]
@@ -200,22 +200,39 @@ class StringUtilTest extends Specification {
         StringUtil.concatConsistentCase(base, addition) == expected
 
         where:
-        base | addition | expected
-        "abc" | "_xyz" | "abc_xyz"
-        "abc" | "_XYZ" | "abc_xyz"
-        "abc" | "_XyZ" | "abc_xyz"
+        base  | addition | expected
+        "abc" | "_xyz"   | "abc_xyz"
+        "abc" | "_XYZ"   | "abc_xyz"
+        "abc" | "_XyZ"   | "abc_xyz"
 
-        "ABC" | "_xyz" | "ABC_XYZ"
-        "ABC" | "_XYZ" | "ABC_XYZ"
-        "ABC" | "_XyZ" | "ABC_XYZ"
+        "ABC" | "_xyz"   | "ABC_XYZ"
+        "ABC" | "_XYZ"   | "ABC_XYZ"
+        "ABC" | "_XyZ"   | "ABC_XYZ"
 
-        "AbC" | "_xyz" | "AbC_xyz"
-        "AbC" | "_XYZ" | "AbC_XYZ"
-        "AbC" | "_XyZ" | "AbC_XyZ"
+        "AbC" | "_xyz"   | "AbC_xyz"
+        "AbC" | "_XYZ"   | "AbC_XYZ"
+        "AbC" | "_XyZ"   | "AbC_XyZ"
 
-        "a1" | "_x" | "a1_x"
-        "A1" | "_x" | "A1_X"
-        "123" | "_x" | "123_x"
-        "123" | "_X" | "123_X"
+        "a1"  | "_x"     | "a1_x"
+        "A1"  | "_x"     | "A1_X"
+        "123" | "_x"     | "123_x"
+        "123" | "_X"     | "123_X"
+    }
+
+    @Unroll("#featureName: '#input'")
+    def "trimToNull"() {
+        expect:
+        StringUtil.trimToNull(input) == expected
+
+        where:
+        input                     | expected
+        "test string"             | "test string"
+        "test string   "          | "test string"
+        "   test string"          | "test string"
+        "   test string     "     | "test string"
+        "test    string"          | "test    string"
+        ""                        | null
+        "    "                    | null
+        "\n\r\ttest string\r\n\t" | "test string"
     }
 }

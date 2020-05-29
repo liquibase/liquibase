@@ -15,11 +15,7 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.ISODateFormat;
-import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtil;
-import liquibase.util.NowAndTodayUtil;
-import liquibase.util.NowAndTodayUtil;
+import liquibase.util.*;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
@@ -72,8 +68,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setComputed(((columnSnapshot.getComputed() != null) && columnSnapshot.getComputed()) ? Boolean.TRUE : null);
-        setDescending(((columnSnapshot.getDescending() != null) && columnSnapshot.getDescending()) ? Boolean.TRUE : null);
+        setComputed(BooleanUtils.isTrue(columnSnapshot.getComputed()) ? Boolean.TRUE : null);
+        setDescending(BooleanUtils.isTrue(columnSnapshot.getDescending()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -878,7 +874,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setReferencedColumnNames(constraintsNode.getChildValue(null, "referencedColumnNames", String.class));
         constraints.setUnique(constraintsNode.getChildValue(null, "unique", Boolean.class));
         constraints.setUniqueConstraintName(constraintsNode.getChildValue(null, "uniqueConstraintName", String.class));
-        constraints.setNotNullConstraintName(constraintsNode.getChildValue(null, "notNullConstraintName", String.class));
         constraints.setCheckConstraint(constraintsNode.getChildValue(null, "checkConstraint", String.class));
         constraints.setDeleteCascade(constraintsNode.getChildValue(null, "deleteCascade", Boolean.class));
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));
