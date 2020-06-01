@@ -42,6 +42,14 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
     }
 
+    /**
+     * @deprecated use {@link FileSystemResourceAccessor#FileSystemResourceAccessor(File...)}
+     */
+    public FileSystemResourceAccessor(String file) {
+        this(new File(file));
+
+    }
+
     protected void addRootPath(Path path) {
         Scope.getCurrentScope().getLog(getClass()).fine("Adding path "+path+" to resourceAccessor "+getClass().getName());
         rootPaths.add(path);
