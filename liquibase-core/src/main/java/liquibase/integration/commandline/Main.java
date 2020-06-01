@@ -1011,6 +1011,37 @@ public class Main {
         // Now apply default values from the default property files. We waited with this until this point
         // since command line parameters might have changed the location where we will look for them.
         parseDefaultPropertyFiles();
+
+        // Load from env variables and override previously defined values
+        parseFromEnv();
+    }
+
+    private void parseFromEnv() {
+        Map<String, String> env = System.getenv();
+
+        env
+                .entrySet()
+                .stream()
+                .filter(it -> it.getKey().toLowerCase().contains("liquibase_"))
+                .forEach(it -> {
+                    String snakeCaseKey = it.getKey().toLowerCase().replace("liquibase_", "");
+                    String key = snakeCaseToCamelCase(snakeCaseKey);
+                    String value = it.getValue();
+
+                    try {
+                        parseOptionArgument(key + "=" + value, false);
+                    } catch (CommandLineParsingException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    public static String snakeCaseToCamelCase(String name) {
+        String phrase = name.toLowerCase();
+        while(phrase.contains("_")) {
+            phrase = phrase.replaceFirst("_[a-z]", String.valueOf(Character.toUpperCase(phrase.charAt(phrase.indexOf("_") + 1))));
+        }
+        return phrase;
     }
 
     /**
