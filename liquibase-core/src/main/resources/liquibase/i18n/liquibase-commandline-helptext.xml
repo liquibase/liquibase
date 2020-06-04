@@ -230,11 +230,9 @@ Optional Diff Parameters:
                                             primarykeys, uniqueconstraints.
 --format=<format type>                      Liquibase Pro option only for diff command.
                                             Output results in the the specified format ("JSON" or "TXT")
---runWith=<executor>                        A changeset level parameter which determines the executor to process the
-                                            SQL or sqlFile change type.  Optional configuration parameters are located
-                                            in a 'liquibase-<executor>.conf' file in the root of one of the
-                                            configured ResourceAccessors.  One example location is in the same directory
-                                            as the liquibase.properties file.
+runWith=<executor>                          A solely changeset level parameter (unavailable in the CLI) 
+                                            which determines which executor processes the SQL or sqlFile 
+                                            change types.  Learn more at http://docs.liquibase.com.
 
 Change Log Properties:
  -D<property.name>=<property.value>         Pass a name/value pair for
