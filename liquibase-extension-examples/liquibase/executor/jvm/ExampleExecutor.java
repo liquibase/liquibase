@@ -33,7 +33,7 @@ import static java.util.ResourceBundle.getBundle;
  * in a changelog with the "runWith" attribute
  *
  */
-public class CustomExecutor extends JdbcExecutor {
+public class ExampleExecutor extends JdbcExecutor {
     private Logger log = LogService.getLog(getClass());
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected static final String MSG_UNABLE_TO_VALIDATE_ROLLBACK_CHANGE = coreBundle.getString("unable.to.validate.rollback.change");
@@ -44,8 +44,8 @@ public class CustomExecutor extends JdbcExecutor {
      * Constructor
      *
      */
-    public CustomExecutor() {
-        log.info("Constructed a CustomExecutor");
+    public ExampleExecutor() {
+        log.info("Constructed an ExampleExecutor");
     }
 
     /**
