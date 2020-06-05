@@ -1,4 +1,4 @@
-/**
+/*
  *
  * This is an example of a custom Executor class.
  * Specifying the change set attribute "runWith=<executor name>"
@@ -23,9 +23,6 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
 import java.util.List;
-import java.util.ResourceBundle;
-
-import static java.util.ResourceBundle.getBundle;
 
 /**
  *
@@ -35,9 +32,6 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class CustomExecutor extends JdbcExecutor {
     private Logger log = LogService.getLog(getClass());
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    protected static final String MSG_UNABLE_TO_VALIDATE_ROLLBACK_CHANGE = coreBundle.getString("unable.to.validate.rollback.change");
-    protected static final String MSG_UNABLE_TO_VALIDATE_CHANGE_SET = coreBundle.getString("unable.to.validate.changeset");
 
     /**
      *
@@ -99,14 +93,14 @@ public class CustomExecutor extends JdbcExecutor {
         //
         List<Change> changes = changeSet.getChanges();
         for (Change change : changes) {
-            validateChange(changeSet, validationErrors, change, MSG_UNABLE_TO_VALIDATE_CHANGE_SET);
+            validateChange(changeSet, validationErrors, change, "");
         }
         if (changeSet.getRollback() != null) {
             RollbackContainer container = changeSet.getRollback();
             List<Change> rollbackChanges = container.getChanges();
             for (Change change : rollbackChanges) {
                 log.info("Validating rollback change " + change.getDescription());
-                validateChange(changeSet, validationErrors, change, MSG_UNABLE_TO_VALIDATE_ROLLBACK_CHANGE);
+                validateChange(changeSet, validationErrors, change, "rollback");
             }
         }
         return validationErrors;
@@ -115,8 +109,8 @@ public class CustomExecutor extends JdbcExecutor {
     private void validateChange(ChangeSet changeSet,
                                 ValidationErrors validationErrors,
                                 Change change,
-                                String msgUnableToValidateChange) {
-        log.info("Validating change " + change.getDescription());
+                                String type) {
+        log.info("Validating " + type + " change " + change.getDescription());
     }
 
     /**
