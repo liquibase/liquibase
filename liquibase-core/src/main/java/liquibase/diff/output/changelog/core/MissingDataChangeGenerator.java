@@ -63,18 +63,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                 return null;
             }
 
-            AbstractJdbcDatabase abstractJdbcDatabase = (AbstractJdbcDatabase)referenceDatabase;
-            String quotedTableName = abstractJdbcDatabase.quoteObject(table.getName(), Table.class);
-            String catalogName = table.getSchema().getCatalogName();
-            String schemaName = table.getSchema().getName();
-            String prefix = schemaName;
-            if (StringUtils.isNotEmpty(catalogName)) {
-                prefix = catalogName + "." + prefix;
-            }
-            String sql =
-                    "SELECT * FROM " + prefix + "." + quotedTableName;
-                    //"SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), quotedTableName);
-
+            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(1000);
             rs = stmt.executeQuery(sql);

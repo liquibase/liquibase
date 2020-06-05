@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.CommandResult;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
@@ -65,14 +66,21 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         changeLogWriter.setChangeSetContext(context);
         changeLogWriter.setChangeSetPath(getChangeLogFile());
 
-        if (StringUtils.trimToNull(getChangeLogFile()) != null) {
-            changeLogWriter.print(getChangeLogFile());
-        } else {
-            PrintStream outputStream = getOutputStream();
-            if (outputStream == null) {
-                outputStream = System.out;
+        ObjectQuotingStrategy originalStrategy = getReferenceDatabase().getObjectQuotingStrategy();
+        try {
+            getReferenceDatabase().setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            if (StringUtils.trimToNull(getChangeLogFile()) != null) {
+                changeLogWriter.print(getChangeLogFile());
+            } else {
+                PrintStream outputStream = getOutputStream();
+                if (outputStream == null) {
+                    outputStream = System.out;
+                }
+                changeLogWriter.print(outputStream);
             }
-            changeLogWriter.print(outputStream);
+        }
+        finally {
+            getReferenceDatabase().setObjectQuotingStrategy(originalStrategy);
         }
 
         return new CommandResult("OK");
