@@ -18,5 +18,4 @@ databaseChangeLog:
                         type: varchar(255)
 
     - include:
-        file: nestedRelativeChangeLog.yaml
-        relativeToChangelogFile: true
+        file: nestedRelDefChangeLog.yaml

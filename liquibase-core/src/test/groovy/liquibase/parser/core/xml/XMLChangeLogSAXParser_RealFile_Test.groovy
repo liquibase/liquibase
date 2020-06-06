@@ -26,6 +26,7 @@ import liquibase.database.core.H2Database
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
 import liquibase.exception.ChangeLogParseException
+import liquibase.parser.ChangeLogParserCofiguration
 import liquibase.precondition.CustomPreconditionWrapper
 import liquibase.precondition.core.*
 import liquibase.sdk.supplier.resource.ResourceSupplier
@@ -240,7 +241,13 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     @Unroll("#featureName #doubleNestedFileName")
     def "changeSets with two levels of includes parse correctly"() throws Exception {
         when:
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
+        ChangeLogParserCofiguration configuration = (ChangeLogParserCofiguration) LiquibaseConfiguration.getInstance().getConfiguration("liquibase.parser.ChangeLogParserCofiguration");
+        try {
+            configuration.setRelativeToChangelogFile(relatedDefault);
+            DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
+        } finally {
+            configuration.setRelativeToChangelogFile(false);
+        }
 
         then:
         changeLog.getLogicalFilePath() == doubleNestedFileName
@@ -265,10 +272,11 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         ((AddColumnChange) changeLog.getChangeSet(nestedFileName, "nvoxland", "2").changes[0]).getTableName() == "employee"
 
         where:
-        doubleNestedFileName | nestedFileName
-        "liquibase/parser/core/xml/doubleNestedChangeLog.xml" | "liquibase/parser/core/xml/nestedChangeLog.xml"
-        "liquibase/parser/core/xml/doubleNestedRelativeChangeLog.xml" | "liquibase/parser/core/xml/nestedRelativeChangeLog.xml"
-
+        doubleNestedFileName | nestedFileName | relatedDefault
+        "liquibase/parser/core/xml/doubleNestedChangeLog.xml" | "liquibase/parser/core/xml/nestedChangeLog.xml" | false
+        "liquibase/parser/core/xml/doubleNestedRelativeChangeLog.xml" | "liquibase/parser/core/xml/nestedRelativeChangeLog.xml" | false
+        "liquibase/parser/core/xml/doubleNestedRelDefChangeLog.xml" | "liquibase/parser/core/xml/nestedRelDefChangeLog.xml" | true
+        
     }
 
     def "ChangeLogParseException thrown if changelog does not exist"() throws Exception {

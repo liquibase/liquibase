@@ -31,9 +31,11 @@ import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.ObjectQuotingStrategy
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException
+import liquibase.parser.ChangeLogParserCofiguration
 import liquibase.precondition.CustomPreconditionWrapper
 import liquibase.precondition.core.AndPrecondition
 import liquibase.precondition.core.DBMSPrecondition
@@ -251,7 +253,13 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
     @Unroll("#featureName #doubleNestedFileName")
     def "changeSets with two levels of includes parse correctly"() throws Exception {
         when:
-        DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
+        ChangeLogParserCofiguration configuration = (ChangeLogParserCofiguration) LiquibaseConfiguration.getInstance().getConfiguration("liquibase.parser.ChangeLogParserCofiguration");
+        try {
+            configuration.setRelativeToChangelogFile(relatedDefault);
+            DatabaseChangeLog changeLog = new YamlChangeLogParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
+        } finally {
+            configuration.setRelativeToChangelogFile(false);
+        }
 
         then:
         changeLog.getLogicalFilePath() == doubleNestedFileName
@@ -276,9 +284,10 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((AddColumnChange) changeLog.getChangeSet(nestedFileName, "nvoxland", "2").changes[0]).getTableName() == "employee"
 
         where:
-        doubleNestedFileName                                            | nestedFileName
-        "liquibase/parser/core/yaml/doubleNestedChangeLog.yaml"         | "liquibase/parser/core/yaml/nestedChangeLog.yaml"
-        "liquibase/parser/core/yaml/doubleNestedRelativeChangeLog.yaml" | "liquibase/parser/core/yaml/nestedRelativeChangeLog.yaml"
+        doubleNestedFileName                                            | nestedFileName                                            | relatedDefault
+        "liquibase/parser/core/yaml/doubleNestedChangeLog.yaml"         | "liquibase/parser/core/yaml/nestedChangeLog.yaml"         | false
+        "liquibase/parser/core/yaml/doubleNestedRelativeChangeLog.yaml" | "liquibase/parser/core/yaml/nestedRelativeChangeLog.yaml" | false
+        "liquibase/parser/core/yaml/doubleNestedRelDefChangeLog.yaml"   | "liquibase/parser/core/yaml/nestedRelDefChangeLog.yaml"   | true
     }
 
     def "ChangeLogParseException thrown if changelog does not exist"() throws Exception {
