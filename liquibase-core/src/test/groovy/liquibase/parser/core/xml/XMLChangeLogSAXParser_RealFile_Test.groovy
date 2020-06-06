@@ -241,10 +241,11 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     @Unroll("#featureName #doubleNestedFileName")
     def "changeSets with two levels of includes parse correctly"() throws Exception {
         when:
+        DatabaseChangeLog changeLog;
         ChangeLogParserCofiguration configuration = (ChangeLogParserCofiguration) LiquibaseConfiguration.getInstance().getConfiguration("liquibase.parser.ChangeLogParserCofiguration");
         try {
             configuration.setRelativeToChangelogFile(relatedDefault);
-            DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
+            changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
         } finally {
             configuration.setRelativeToChangelogFile(false);
         }
