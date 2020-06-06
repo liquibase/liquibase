@@ -11,6 +11,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -53,12 +54,17 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     private LabelExpression includeLabels;
     private boolean includeIgnore;
+    private final boolean relativeToChangelogFile;
 
     public DatabaseChangeLog() {
+        this(null);
     }
 
     public DatabaseChangeLog(String physicalFilePath) {
         this.physicalFilePath = physicalFilePath;
+        relativeToChangelogFile = parentChangeLog == null
+                ? ChangeLogParserConfiguration.RELATIVE_TO_CHANGELOG_FILE.getCurrentValue()
+                : parentChangeLog.relativeToChangelogFile;
     }
 
     public void setRootChangeLog(DatabaseChangeLog rootChangeLog) {
@@ -363,7 +369,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
                 try {
                     include(path,
-                            node.getChildValue(null, "relativeToChangelogFile", false),
+                            node.getChildValue(null, "relativeToChangelogFile", relativeToChangelogFile),
                             resourceAccessor,
                             includeContexts,
                             labelExpression,
@@ -408,7 +414,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 if (ignore == null) {
                     ignore = false;
                 }
-                includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
+                includeAll(path, node.getChildValue(null, "relativeToChangelogFile", relativeToChangelogFile), resourceFilter,
                         node.getChildValue(null, "errorIfMissingOrEmpty", true),
                         resourceComparator,
                         resourceAccessor,

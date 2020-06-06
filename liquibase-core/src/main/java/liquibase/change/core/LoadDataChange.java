@@ -17,6 +17,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.io.EmptyLineAndCommentSkippingInputStream;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
@@ -32,7 +33,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 import liquibase.util.BooleanUtil;
-import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.csv.CSVReader;
@@ -801,7 +801,11 @@ public class LoadDataChange extends AbstractTableChange implements ChangeWithCol
 
     protected String getRelativeTo() {
         String relativeTo = null;
-        if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
+        Boolean isRelative = isRelativeToChangelogFile();
+        if (isRelative == null) {
+            isRelative = ChangeLogParserConfiguration.RELATIVE_TO_CHANGELOG_FILE.getCurrentValue();
+        }
+        if (isRelative != null && isRelative) {
             relativeTo = getChangeSet().getFilePath();
         }
         return relativeTo;

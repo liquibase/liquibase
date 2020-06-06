@@ -10,6 +10,7 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Boolean> SUPPORT_PROPERTY_ESCAPING;
     public static final ConfigurationDefinition<Boolean> USE_PROCEDURE_SCHEMA;
+    public static final ConfigurationDefinition<Boolean> RELATIVE_TO_CHANGELOG_FILE;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase");
@@ -23,6 +24,11 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
         USE_PROCEDURE_SCHEMA = builder.define("useProcedureSchema", Boolean.class)
                 .setDescription("If set to true (default value), createProcedure tags with a set schemaName will modify the procedure body with the given schema name.")
                 .setDefaultValue(true)
+                .build();
+
+        RELATIVE_TO_CHANGELOG_FILE = builder.define("relativeToChangelogFile", Boolean.class)
+                .setDescription("Default value of relativeToChangelogFile for tags: <include>, <includeAll>, <sqlFile> etc.")
+                .setDefaultValue(false)
                 .build();
     }
 }

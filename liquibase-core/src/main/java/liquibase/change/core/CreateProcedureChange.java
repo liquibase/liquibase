@@ -3,12 +3,13 @@ package liquibase.change.core;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.GlobalConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.FileUtil;
@@ -210,7 +211,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         try {
             String path = getPath();
             String relativeTo = null;
-            final Boolean isRelative = isRelativeToChangelogFile();
+            Boolean isRelative = isRelativeToChangelogFile();
+            if (isRelative == null) {
+                isRelative = ChangeLogParserConfiguration.RELATIVE_TO_CHANGELOG_FILE.getCurrentValue();
+            }
             if (isRelative != null && isRelative) {
                 relativeTo = getChangeSet().getFilePath();
             }
