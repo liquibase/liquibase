@@ -3,6 +3,9 @@ package liquibase.executor;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import java.util.Locale;
+import liquibase.change.Change;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
@@ -104,6 +107,38 @@ public class LoggingExecutor extends AbstractExecutor {
                     continue;
                 }
 
+                String endDelimiter = ";";
+                String potentialDelimiter = null;
+                boolean outputDelimiter = false;
+                if (sql instanceof RawSqlStatement) {
+                    potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                    outputDelimiter = ((RawSqlStatement) sql).isOutputDelimiter();
+                } else if (sql instanceof CreateProcedureStatement) {
+                    potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
+                }
+                if (potentialDelimiter != null) {
+                    //ignore trailing $ as a regexp to determine if it should be output
+                    potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", "");
+
+                    if (potentialDelimiter.replaceAll("\\n", "\n")
+                            .replace("\\r", "\r")
+                            .matches("[;/\r\n\\w@\\-]+")) {
+                        endDelimiter = potentialDelimiter;
+                    }
+                }
+                endDelimiter = endDelimiter.replace("\\n", "\n");
+                endDelimiter = endDelimiter.replace("\\r", "\r");
+
+
+                boolean resetMySqlDelimiter = false;
+                if (outputDelimiter == true && database instanceof MySQLDatabase
+                        && !";".equals(endDelimiter)) {
+                    resetMySqlDelimiter = true;
+                    output.write("delimiter ");
+                    output.write(endDelimiter);
+                    output.write(StreamUtil.getLineSeparator());
+                }
+
                 //remove trailing "/"
                 if (database instanceof OracleDatabase) {
                     //all trailing "/"s
@@ -111,7 +146,6 @@ public class LoggingExecutor extends AbstractExecutor {
                         statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
                     }
                 }
-
                 output.write(statement);
 
                 if ((database instanceof MSSQLDatabase) || (database instanceof SybaseDatabase) || (database
@@ -119,33 +153,17 @@ public class LoggingExecutor extends AbstractExecutor {
                     output.write(StreamUtil.getLineSeparator());
                     output.write("GO");
                 } else {
-                    String endDelimiter = ";";
-                    String potentialDelimiter = null;
-                    if (sql instanceof RawSqlStatement) {
-                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
-                    } else if (sql instanceof CreateProcedureStatement) {
-                        potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
-                    }
-
-                    if (potentialDelimiter != null) {
-                        //ignore trailing $ as a regexp to determine if it should be output
-                        potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", "");
-
-                        if (potentialDelimiter.replaceAll("\\n", "\n")
-                                .replace("\\r", "\r")
-                                .matches("[;/\r\n\\w@\\-]+")) {
-                            endDelimiter = potentialDelimiter;
-                        }
-                    }
-
-                    endDelimiter = endDelimiter.replace("\\n", "\n");
-                    endDelimiter = endDelimiter.replace("\\r", "\r");
-
-
                     if (!statement.endsWith(endDelimiter)) {
                         output.write(endDelimiter);
                     }
                 }
+
+                if (resetMySqlDelimiter) {
+                    output.write(StreamUtil.getLineSeparator());
+                    output.write("delimiter ;");
+                    output.write(StreamUtil.getLineSeparator());
+                }
+
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }
