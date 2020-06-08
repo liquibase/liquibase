@@ -69,7 +69,7 @@ public class H2Database extends AbstractJdbcDatabase {
             "TRUE",
             "UNION",
             "UNIQUE",
-	    "UNKNOWN",
+            "UNKNOWN",
             "WHERE");
     private String connectionSchemaName = "PUBLIC";
 
