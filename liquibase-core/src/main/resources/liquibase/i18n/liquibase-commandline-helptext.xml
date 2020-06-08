@@ -184,6 +184,9 @@ Optional Parameters:
                                             If not specified, writes to sysout.
  --help                                     Prints this message
  --version                                  Prints this version information
+ runWith=<executor>                         A solely changeset level parameter (unavailable in the CLI)
+                                            which determines which executor processes the SQL or sqlFile
+                                            change types.  Learn more at http://docs.liquibase.com.
 
 Required Diff Parameters:
  --referenceUsername=<value>                Reference Database username
@@ -230,9 +233,6 @@ Optional Diff Parameters:
                                             primarykeys, uniqueconstraints.
 --format=<format type>                      Liquibase Pro option only for diff command.
                                             Output results in the the specified format ("JSON" or "TXT")
-runWith=<executor>                          A solely changeset level parameter (unavailable in the CLI) 
-                                            which determines which executor processes the SQL or sqlFile 
-                                            change types.  Learn more at http://docs.liquibase.com.
 
 Change Log Properties:
  -D<property.name>=<property.value>         Pass a name/value pair for
