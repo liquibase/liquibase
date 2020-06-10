@@ -1,6 +1,7 @@
 package liquibase.structure.core;
 
 import liquibase.statement.NotNullConstraint;
+import liquibase.util.BooleanUtils;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -90,4 +91,17 @@ public class Table extends Relation {
         return this;
     }
 
+    public Boolean getDefaultTablespace() {
+        return getAttribute("default_tablespace", Boolean.class);
+    }
+
+    public Table setDefaultTablespace(Boolean tablespace) {
+        setAttribute("default_tablespace", tablespace);
+        return this;
+    }
+
+    public boolean isDefaultTablespace() {
+        Boolean b = getAttribute("default_tablespace",Boolean.class);
+        return BooleanUtils.isTrue(b);
+    }
 }
