@@ -134,6 +134,7 @@ public class ExampleExecutor extends JdbcExecutor {
                     visitor.modifySql(actualSqlString, database);
                 }
                 log.info("Generated SQL for change is " + actualSqlString);
+                super.execute(action, sqlVisitors);
             }
         }
         catch (Exception e) {
