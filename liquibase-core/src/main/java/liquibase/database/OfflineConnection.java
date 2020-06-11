@@ -11,6 +11,7 @@ import liquibase.logging.LogType;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -23,14 +24,16 @@ import liquibase.util.StringUtils;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.sql.Driver;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OfflineConnection implements DatabaseConnection {
-    private final String url;
-    private final String databaseShortName;
+    private String url=null;
+    private String databaseShortName=null;
     private final Map<String, String> databaseParams = new HashMap<>();
     private DatabaseSnapshot snapshot;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
@@ -43,6 +46,8 @@ public class OfflineConnection implements DatabaseConnection {
     private String catalog;
     private boolean sendsStringParametersAsUnicode = true;
     private String connectionUserName;
+
+    public OfflineConnection() {}
 
     public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
         this.url = url;
@@ -115,8 +120,20 @@ public class OfflineConnection implements DatabaseConnection {
         }
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     public boolean isCorrectDatabaseImplementation(Database database) {
         return database.getShortName().equalsIgnoreCase(databaseShortName);
+    }
+
+    @Override
+    public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+       //
+       // No-op
+       //
     }
 
     @Override

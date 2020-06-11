@@ -367,7 +367,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
         final String sqlToGetVersion = "SELECT version()";
         List<?> result = ExecutorService.getInstance().
-                getExecutor(this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
+                getExecutor("jdbc", this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
         if (result != null && !result.isEmpty()){
             return dbFullVersion = result.get(0).toString();
         }

@@ -27,7 +27,7 @@ public class DatabaseTestTemplate {
             }
             JdbcExecutor writeExecutor = new JdbcExecutor();
             writeExecutor.setDatabase(database);
-            ExecutorService.getInstance().setExecutor(database, writeExecutor);
+            ExecutorService.getInstance().setExecutor("jdbc", database, writeExecutor);
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.reset();
             if (database.getConnection() != null) {

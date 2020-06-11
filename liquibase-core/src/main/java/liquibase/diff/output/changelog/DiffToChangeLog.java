@@ -481,7 +481,7 @@ public class DiffToChangeLog {
      */
     protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Database database) throws DatabaseException {
         if (database instanceof DB2Database) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
@@ -496,7 +496,7 @@ public class DiffToChangeLog {
                 graph.add(bName, tabName);
             }
         } else if (database instanceof Db2zDatabase) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             String db2ZosSql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
@@ -512,7 +512,7 @@ public class DiffToChangeLog {
                 graph.add(bName, tabName);
             }
         } else if (database instanceof OracleDatabase) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             List<Map<String, ?>> rs = queryForDependenciesOracle(executor, schemas);
             for (Map<String, ?> row : rs) {
                 String tabName = null;
@@ -532,7 +532,7 @@ public class DiffToChangeLog {
                 graph.add(bName, tabName);
             }
         } else if (database instanceof MSSQLDatabase) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             String sql = "select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
@@ -628,7 +628,7 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof PostgresDatabase) {
             final String sql = queryForDependenciesPostgreSql(schemas);
-            final Executor executor = ExecutorService.getInstance().getExecutor(database);
+            final Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {

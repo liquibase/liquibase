@@ -226,7 +226,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     (Map) snapshot.getScratchData("autoIncrementColumns");
             if (autoIncrementColumns == null) {
                 autoIncrementColumns = new HashMap<>();
-                Executor executor = ExecutorService.getInstance().getExecutor(database);
+                Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
                 try {
                     List<Map<String, ?>> rows = executor.queryForList(
                             new RawSqlStatement(
@@ -502,7 +502,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     // SET
                     boilerLength = "6";
                 }
-                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(
+                List<String> enumValues = ExecutorService.getInstance().getExecutor("jdbc", database).queryForList(
                         new RawSqlStatement(
                                 "SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength +
                                         ", LENGTH(COLUMN_TYPE) - " + boilerLength +
