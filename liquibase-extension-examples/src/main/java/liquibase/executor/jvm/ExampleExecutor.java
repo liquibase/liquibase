@@ -1,4 +1,4 @@
-/*
+/**
  *
  * This is an example of a custom Executor class.
  * Specifying the change set attribute "runWith=<executor name>"
@@ -30,7 +30,7 @@ import java.util.List;
  * in a changelog with the "runWith" attribute
  *
  */
-public class CustomExecutor extends JdbcExecutor {
+public class ExampleExecutor extends JdbcExecutor {
     private Logger log = LogService.getLog(getClass());
 
     /**
@@ -38,8 +38,8 @@ public class CustomExecutor extends JdbcExecutor {
      * Constructor
      *
      */
-    public CustomExecutor() {
-        log.info("Constructed a CustomExecutor");
+    public ExampleExecutor() {
+        log.info("Constructed an ExampleExecutor");
     }
 
     /**
@@ -100,7 +100,7 @@ public class CustomExecutor extends JdbcExecutor {
             List<Change> rollbackChanges = container.getChanges();
             for (Change change : rollbackChanges) {
                 log.info("Validating rollback change " + change.getDescription());
-                validateChange(changeSet, validationErrors, change, "rollback");
+                validateChange(changeSet, validationErrors, change, "");
             }
         }
         return validationErrors;
@@ -134,6 +134,7 @@ public class CustomExecutor extends JdbcExecutor {
                     visitor.modifySql(actualSqlString, database);
                 }
                 log.info("Generated SQL for change is " + actualSqlString);
+                super.execute(action, sqlVisitors);
             }
         }
         catch (Exception e) {
