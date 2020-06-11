@@ -361,6 +361,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                     || columnConfig.getType().toLowerCase().contains("time")
                             ) {
                                 if ("NULL".equalsIgnoreCase(value.toString())) {
+                                    valueConfig.setType(columnConfig.getType());
                                     valueConfig.setValue(null);
                                 } else {
                                     try {
