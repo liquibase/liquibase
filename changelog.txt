@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 3.9.0 (2020.6.12)
+Changes in version 3.10.0 (2020.6.12)
 - [Pro] Built-in runWith="sqlplus"
 - New "runWith" changeSet extension point
 - Added liquibase_autocomplete_mac.bash completion script
