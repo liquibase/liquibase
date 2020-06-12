@@ -1,23 +1,17 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Scope;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
-import liquibase.license.LicenseServiceUtils;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
@@ -37,7 +31,6 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
     private SnapshotControl targetSnapshotControl;
     private ObjectChangeFilter objectChangeFilter;
     private CompareControl compareControl;
-
 
     @Override
     public String getName() {
@@ -147,7 +140,7 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         return new CommandResult("OK");
     }
 
-    protected DiffResult createDiffResult() throws DatabaseException, InvalidExampleException {
+    public DiffResult createDiffResult() throws DatabaseException, InvalidExampleException {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
         DatabaseSnapshot targetSnapshot = createTargetSnapshot();
 

@@ -20,6 +20,10 @@
 
     <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
 
+    <lb:changelogparameters id="test-parametchrome-extension://pnhechapfaindjhompbnflcldabbghjo/html/nassh.html#profile-id:61e9ers">
+        <propertyset refid="db-propertyset"/>
+    </lb:changelogparameters>
+
     <lb:changelogparameters id="test-parameters">
         <propertyset refid="db-propertyset"/>
     </lb:changelogparameters>

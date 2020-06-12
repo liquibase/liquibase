@@ -7,10 +7,7 @@ import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
-import liquibase.command.core.DropAllCommand;
-import liquibase.command.core.ExecuteSqlCommand;
-import liquibase.command.core.HistoryCommand;
-import liquibase.command.core.SnapshotCommand;
+import liquibase.command.core.*;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -194,8 +191,13 @@ public class Main {
 
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService != null) {
-                            if (main.liquibaseProLicenseKey != null) {
-                                Location licenseKeyLocation = new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                    if (main.liquibaseProLicenseKey == null) {
+                        log.info(LogType.LOG,
+                                "The command '" + main.command +
+                                        "' requires a Liquibase Pro license, available at https://www.liquibase.org/download or sales@liquibase.com");
+                    } else {
+                        Location licenseKeyLocation =
+                                new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
                                 LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
                                 if (result.code != 0) {
                                     String allMessages = String.join("\n", result.messages);
@@ -296,8 +298,9 @@ public class Main {
                     }
 
             if (main.commandParams.contains("--help") &&
-                (main.command.startsWith("rollbackOneChangeSet") ||
-                 main.command.startsWith("rollbackOneUpdate"))) {
+                    (main.command.startsWith("rollbackOneChangeSet") ||
+                            main.command.startsWith("rollbackOneUpdate") ||
+                            (main.command.startsWith("diff") && main.isFormattedDiff()))) {
                 //don't need to check setup
                     } else {
                     List<String> setupMessages = main.checkSetup();
@@ -445,8 +448,8 @@ public class Main {
     private static boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith(COMMANDS.UPDATE)
                 || (command.toLowerCase().startsWith(COMMANDS.ROLLBACK) &&
-                    (!command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET) &&
-                     !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_UPDATE)))
+                (!command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET) &&
+                        !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_UPDATE)))
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.STATUS.equalsIgnoreCase(command)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
@@ -745,8 +748,12 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
-
+                            && !cmdParm.startsWith("--" + OPTIONS.FORMAT)
+                            && !cmdParm.startsWith("--" + OPTIONS.HELP)
                             && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
+                        messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                    }
+                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.startsWith("--" + OPTIONS.FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
@@ -787,8 +794,7 @@ public class Main {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
-        }
-        else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
+        } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
                         && !cmdParm.startsWith("--" + OPTIONS.HELP)
@@ -796,8 +802,7 @@ public class Main {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
-        }
-        else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
+        } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
                         && !cmdParm.startsWith("--" + OPTIONS.HELP)
@@ -1196,12 +1201,22 @@ public class Main {
         //
         // Check for a valid license to run PRO commands
         //
-        if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command) ||
-            COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command) ||
-            COMMANDS.ROLLBACK_ONE_UPDATE.equals(command) ||
-            COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)){
+        String formatValue = getCommandParam(OPTIONS.FORMAT, null);
+        if (isLicenseableCommand(formatValue)) {
+            if (isFormattedDiff()) {
+                if (formatValue != null && ! formatValue.equalsIgnoreCase("json")) {
+                    String messageString =
+                        "\nWARNING: The diff command optional Pro parameter '--format' " +
+                        "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
+                    throw new LiquibaseException(String.format(messageString));
+                }
+            }
             if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
-                String messageString = String.format(coreBundle.getString("no.pro.license.found"), command);
+                String warningAboutCommand = command;
+                if (command.equalsIgnoreCase(COMMANDS.DIFF) && formatValue != null && !formatValue.isEmpty()) {
+                    warningAboutCommand = "diff --format=" + formatValue;
+                }
+                String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
                 throw new LiquibaseException(messageString);
             }
         }
@@ -1277,9 +1292,29 @@ public class Main {
             }
 
             if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiff(
-                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database, StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                if (commandParams.contains("--help")) {
+                    System.out.println("liquibase diff" +
+                            "\n" +
+                            "          Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option\n");
+                    System.exit(0);
+                }
+                if (isFormattedDiff()) {
+                    LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(COMMANDS.FORMATTED_DIFF);
+                    DiffCommand diffCommand = CommandLineUtils.createDiffCommand(
+                            createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                            database,
+                            StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                    Map<String, Object> argsMap = new HashMap<String, Object>();
+                    argsMap.put("format", getCommandParam(OPTIONS.FORMAT, "JSON"));
+                    argsMap.put("diffCommand", diffCommand);
+                    ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
+                    liquibaseCommand.execute();
+                } else {
+                    CommandLineUtils.doDiff(
+                            createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                            database,
+                            StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                }
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
@@ -1411,35 +1446,15 @@ public class Main {
                 }
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
-                Map<String, Object> argsMap = new HashMap<String, Object>();
-                argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
-                argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
-                argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
-                argsMap.put("rollbackScript", rollbackScript);
-                argsMap.put("changeLogFile", changeLogFile);
-                argsMap.put("database", database);
-                if (!commandParams.contains("--help")) {
-                    argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
-                }
-                argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
-                ChangeLogParameters clp = new ChangeLogParameters(database);
-                for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
-                    clp.set(entry.getKey(), entry.getValue());
-                }
-                argsMap.put("changeLogParameters", clp);
-
-                if (this.commandParams.contains("--force")) {
-                    argsMap.put("force", true);
-                }
-                if (this.commandParams.contains("--help")) {
-                    argsMap.put("help", true);
-                }
+                Map<String, Object> argsMap = new HashMap<>();
+                loadChangeSetInfoToMap(argsMap);
                 LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
                 Writer outputWriter = getOutputWriter();
-                Map<String, Object> argsMap = new HashMap<String, Object>();
+                Map<String, Object> argsMap = new HashMap<>();
+                loadChangeSetInfoToMap(argsMap);
                 argsMap.put("outputWriter", outputWriter);
                 argsMap.put("force", true);
                 LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
@@ -1448,32 +1463,14 @@ public class Main {
                 outputWriter.close();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equals(command)) {
-                Map<String, Object> argsMap = new HashMap<String, Object>();
+                Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
-                argsMap.put("changeLogFile", changeLogFile);
-                argsMap.put("database", database);
-                if (!commandParams.contains("--help")) {
-                    argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
-                }
-                argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
-                ChangeLogParameters clp = new ChangeLogParameters(database);
-                for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
-                    clp.set(entry.getKey(), entry.getValue());
-                }
-                argsMap.put("changeLogParameters", clp);
-
-                if (this.commandParams.contains("--force")) {
-                    argsMap.put("force", true);
-                }
-                if (this.commandParams.contains("--help")) {
-                    argsMap.put("help", true);
-                }
                 LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_UPDATE, argsMap);
                 liquibaseCommand.execute();
                 return;
             } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)) {
                 Writer outputWriter = getOutputWriter();
-                Map<String, Object> argsMap = new HashMap<String, Object>();
+                Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
                 argsMap.put("outputWriter", outputWriter);
                 argsMap.put("force", true);
@@ -1668,6 +1665,25 @@ public class Main {
         }
     }
 
+    private boolean isLicenseableCommand(String formatValue) {
+        return COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command) ||
+               (COMMANDS.DIFF.equalsIgnoreCase(command) && formatValue != null && ! formatValue.toLowerCase().equals("txt"));
+    }
+
+    private void loadChangeSetInfoToMap(Map<String, Object> argsMap) throws CommandLineParsingException {
+        argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
+        argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
+        argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
+    }
+
+    private boolean isFormattedDiff() throws CommandLineParsingException {
+        String formatValue = getCommandParam(OPTIONS.FORMAT, "txt");
+        return ! formatValue.equalsIgnoreCase("txt") && ! formatValue.isEmpty();
+    }
+
     private String getSchemaParams(Database database) throws CommandLineParsingException {
         String schemaParams = getCommandParam(OPTIONS.SCHEMAS, schemas);
         if (schemaParams == null || schemaParams.isEmpty()) {
@@ -1677,12 +1693,7 @@ public class Main {
     }
 
     private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, String commandName, Map<String, Object> argsMap)
-            throws CommandLineParsingException, LiquibaseException {
-        LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(commandName);
-        AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
-        argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
-        argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
-        argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
+            throws LiquibaseException {
         argsMap.put("rollbackScript", rollbackScript);
         argsMap.put("changeLogFile", changeLogFile);
         argsMap.put("database", database);
@@ -1702,6 +1713,8 @@ public class Main {
         if (this.commandParams.contains("--help")) {
             argsMap.put("help", true);
         }
+        LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(commandName);
+        AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
         configuratingCommand.configure(argsMap);
         return liquibaseCommand;
     }
@@ -1862,6 +1875,7 @@ public class Main {
         private static final String ROLLBACK_ONE_CHANGE_SET_SQL = "rollbackOneChangeSetSQL";
         private static final String ROLLBACK_ONE_UPDATE = "rollbackOneUpdate";
         private static final String ROLLBACK_ONE_UPDATE_SQL = "rollbackOneUpdateSQL";
+        private static final String FORMATTED_DIFF = "formattedDiff";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
         private static final String ROLLBACK_COUNT_SQL = "rollbackCountSQL";
@@ -1898,6 +1912,7 @@ public class Main {
         private static final String DEPLOYMENT_ID = "deploymentId";
         private static final String OUTPUT_FILE = "outputFile";
         private static final String FORCE = "force";
+        private static final String FORMAT = "format";
         private static final String ROLLBACK_SCRIPT = "rollbackScript";
         private static final String EXCLUDE_OBJECTS = "excludeObjects";
         private static final String INCLUDE_CATALOG = "includeCatalog";

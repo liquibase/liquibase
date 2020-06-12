@@ -1,5 +1,6 @@
 package liquibase.dbtest;
 
+import ch.qos.logback.classic.Level;
 import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
@@ -40,6 +41,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -58,6 +60,10 @@ import static org.junit.Assume.assumeNotNull;
  */
 public abstract class AbstractIntegrationTest {
 
+    static {
+        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        rootLogger.setLevel(Level.INFO);
+    }
     @Rule
     public TemporaryFolder tempDirectory = new TemporaryFolder();
     protected String completeChangeLog;
@@ -302,7 +308,7 @@ public abstract class AbstractIntegrationTest {
             if (shouldRollBack()) {
                 database.rollback();
             }
-            ExecutorService.getInstance().clearExecutor(database);
+            ExecutorService.getInstance().clearExecutor("jdbc", database);
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
@@ -320,7 +326,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) {
-        ExecutorService.getInstance().clearExecutor(database);
+        ExecutorService.getInstance().clearExecutor("jdbc", database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
     }
@@ -797,7 +803,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         //run again to test changelog testing logic
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
         try {
             executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogTableName(), false));
         } catch (DatabaseException e) {
@@ -913,7 +919,7 @@ public abstract class AbstractIntegrationTest {
 
     private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) {
         try {
-            ExecutorService.getInstance().getExecutor(database).execute(
+            ExecutorService.getInstance().getExecutor("jdbc", database).execute(
                 new DropTableStatement(catalog, schema, database.getDatabaseChangeLogTableName(), false)
             );
         } catch (DatabaseException e) {

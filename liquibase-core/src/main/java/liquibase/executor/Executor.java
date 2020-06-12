@@ -1,8 +1,11 @@
 package liquibase.executor;
 
 import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 
@@ -13,6 +16,53 @@ import java.util.Map;
  * Interface for a class that is capable of executing statements/queries against a DBMS.
  */
 public interface Executor {
+    /**
+     *
+     * Return the name of the Executor
+     *
+     * @return   String   The Executor name
+     *
+     */
+    String getName();
+
+    /**
+     *
+     * Return the Executor priority
+     *
+     * @return   int      The Executor priority
+     *
+     */
+    int getPriority();
+
+    /**
+     *
+     * Validate if the change set can be executed by this Executor
+     * If the ChangeSet can be executed return an empty ValidationErrors object
+     * otherwise return the errors
+     *
+     * @param    changeSet         The change set to validate
+     * @return   ValidationErrors  Any errors which occur during validation
+     *
+     */
+    ValidationErrors validate(ChangeSet changeSet);
+
+    /**
+     *
+     * Allow this Executor to make any needed changes to the change set
+     *
+     * @param   changeSet          The change set to operate on
+     *
+     */
+    void modifyChangeSet(ChangeSet changeSet);
+
+    /**
+     *
+     * Set a ResourceAccessor on this Executor to be used in file access
+     *
+     * @param resourceAccessor
+     *
+     */
+    void setResourceAccessor(ResourceAccessor resourceAccessor);
 
     /**
      * Configures the Executor for the Database to run statements/queries against.

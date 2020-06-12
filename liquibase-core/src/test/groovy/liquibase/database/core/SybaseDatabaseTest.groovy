@@ -31,7 +31,7 @@ public class SybaseDatabaseTest  extends Specification {
         def executor = Mock(Executor)
         executor.queryForList(_ as GetViewDefinitionStatement, String.class) >> viewRows
 		SybaseDatabase database = new SybaseDatabase()
-        ExecutorService.getInstance().setExecutor(database, executor)
+        ExecutorService.getInstance().setExecutor("jdbc", database, executor)
 
         then:
 		database.getViewDefinition(new CatalogAndSchema(null, "dbo"), "view_name") == expected

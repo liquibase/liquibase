@@ -357,7 +357,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         try {
             SqlStatement currentSchemaStatement = getConnectionSchemaNameCallStatement();
-            return ExecutorService.getInstance().getExecutor(this).
+            return ExecutorService.getInstance().getExecutor("jdbc", this).
                     queryForObject(currentSchemaStatement, String.class);
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
@@ -794,7 +794,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         }
                         SqlStatement[] sqlStatements = change.generateStatements(this);
                         for (SqlStatement statement : sqlStatements) {
-                            ExecutorService.getInstance().getExecutor(this).execute(statement);
+                            ExecutorService.getInstance().getExecutor("jdbc", this).execute(statement);
                         }
 
                     }
@@ -887,7 +887,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        String definition = ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         if (definition == null) {
             return null;
         }
@@ -1189,7 +1189,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void close() throws DatabaseException {
-        ExecutorService.getInstance().clearExecutor(this);
+        ExecutorService.getInstance().clearExecutor("jdbc", this);
         DatabaseConnection connection = getConnection();
         if (connection != null) {
             if (previousAutoCommit != null) {
@@ -1269,7 +1269,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
             Scope.getCurrentScope().getLog(getClass()).fine("Executing Statement: " + statement);
             try {
-                ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+                ExecutorService.getInstance().getExecutor("jdbc", this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
                     Scope.getCurrentScope().getLog(getClass()).severe("Error executing statement '"+statement.toString()+"', but continuing", e);

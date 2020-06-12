@@ -13,7 +13,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -269,11 +268,7 @@ public class Liquibase implements AutoCloseable {
 
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-                LoggingExecutor loggingExecutor = new LoggingExecutor(
-                        ExecutorService.getInstance().getExecutor(database), output, database
-                );
-                ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
                 outputHeader("Update Database Script");
 
@@ -289,7 +284,7 @@ public class Liquibase implements AutoCloseable {
                     throw new LiquibaseException(e);
                 }
 
-                ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
             }
         });
     }
@@ -407,24 +402,15 @@ public class Liquibase implements AutoCloseable {
 
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-                LoggingExecutor loggingExecutor = new LoggingExecutor(
-                        ExecutorService.getInstance().getExecutor(database), output, database
-                );
-                ExecutorService.getInstance().setExecutor(database, loggingExecutor);
-
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
                 outputHeader("Update " + changesToApply + " Change Sets Database Script");
 
                 update(changesToApply, contexts, labelExpression);
 
-                try {
-                    output.flush();
-                } catch (IOException e) {
-                    throw new LiquibaseException(e);
-                }
+        flushOutputWriter(output);
 
                 resetServices();
-                ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
             }
         });
 
@@ -453,30 +439,22 @@ public class Liquibase implements AutoCloseable {
 
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-                LoggingExecutor loggingExecutor = new LoggingExecutor(
-                        ExecutorService.getInstance().getExecutor(database), output, database
-                );
-                ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
                 outputHeader("Update to '" + tag + "' Database Script");
 
                 update(tag, contexts, labelExpression);
 
-                try {
-                    output.flush();
-                } catch (IOException e) {
-                    throw new LiquibaseException(e);
-                }
+        flushOutputWriter(output);
 
                 resetServices();
-                ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
             }
         });
     }
 
     public void outputHeader(String message) throws DatabaseException {
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = ExecutorService.getInstance().getExecutor("logging", database);
         executor.comment("*********************************************************************");
         executor.comment(message);
         executor.comment("*********************************************************************");
@@ -534,21 +512,14 @@ public class Liquibase implements AutoCloseable {
 
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-                ExecutorService.getInstance().setExecutor(database,
-                        new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database)
-                );
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
                 outputHeader("Rollback " + changesToRollback + " Change(s) Script");
 
                 rollback(changesToRollback, rollbackScript, contexts, labelExpression);
 
-                try {
-                    output.flush();
-                } catch (IOException e) {
-                    throw new LiquibaseException(e);
-                }
-                ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        flushOutputWriter(output);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
                 resetServices();
             }
         });
@@ -631,7 +602,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     protected void executeRollbackScript(String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        final Executor executor = ExecutorService.getInstance().getExecutor(database);
+        final Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
         String rollbackScriptContents;
         try {
             InputStreamList streams = resourceAccessor.openStreams(null, rollbackScript);
@@ -703,23 +674,16 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        /* We have no other choice than to save the current Executor here. */
+        /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(
-                ExecutorService.getInstance().getExecutor(database), output, database)
-        );
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
         outputHeader("Rollback to '" + tagToRollBackTo + "' Script");
 
         rollback(tagToRollBackTo, contexts, labelExpression);
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        flushOutputWriter(output);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
         resetServices();
     }
 
@@ -810,23 +774,26 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database,
-                new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
         outputHeader("Rollback to " + dateToRollBackTo + " Script");
 
         rollback(dateToRollBackTo, contexts, labelExpression);
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        flushOutputWriter(output);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
         resetServices();
+    }
+
+    private Executor getAndReplaceJdbcExecutor(Writer output) {
+        /* We have no other choice than to save the current Executer here. */
+        @SuppressWarnings("squid:S1941")
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor("jdbc", database);
+        final LoggingExecutor loggingExecutor = new LoggingExecutor(oldTemplate, output, database);
+        ExecutorService.getInstance().setExecutor("logging", database, loggingExecutor);
+        ExecutorService.getInstance().setExecutor("jdbc", database, loggingExecutor);
+        return oldTemplate;
     }
 
     public void rollback(Date dateToRollBackTo, String contexts) throws LiquibaseException {
@@ -907,21 +874,24 @@ public class Liquibase implements AutoCloseable {
 
                 /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-                ExecutorService.getInstance().setExecutor(database, outputTemplate);
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
                 outputHeader("SQL to add all changesets to database history table");
 
                 changeLogSync(contexts, labelExpression);
 
+        flushOutputWriter(output);
+
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
+        resetServices();
+    }
+
+    private void flushOutputWriter(Writer output) throws LiquibaseException {
                 try {
                     output.flush();
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 }
-
-                ExecutorService.getInstance().setExecutor(database, oldTemplate);
-                resetServices();
             }
         });
     }
@@ -992,26 +962,15 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LoggingExecutor outputTemplate = new LoggingExecutor(
-                        ExecutorService.getInstance().getExecutor(database), output, database
-                );
-
-                /* We have no other choice than to save the current Executer here. */
                 @SuppressWarnings("squid:S1941")
-                Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-                ExecutorService.getInstance().setExecutor(database, outputTemplate);
-
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
                 outputHeader("SQL to add all changesets to database history table");
 
                 markNextChangeSetRan(contexts, labelExpression);
 
-                try {
-                    output.flush();
-                } catch (IOException e) {
-                    throw new LiquibaseException(e);
-                }
+        flushOutputWriter(output);
 
-                ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
                 resetServices();
             }
         });
@@ -1121,7 +1080,7 @@ public class Liquibase implements AutoCloseable {
 
                 LoggingExecutor outputTemplate = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database),
                         output, database);
-                Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+                Executor oldTemplate = getAndReplaceJdbcExecutor(output);
                 ExecutorService.getInstance().setExecutor(database, outputTemplate);
 
                 outputHeader("SQL to roll back currently unexecuted changes");
@@ -1208,15 +1167,12 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
-                    ExecutorService.getInstance().setExecutor(database, oldTemplate);
+            ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
                     resetServices();
                 }
 
-                try {
-                    output.flush();
-                } catch (IOException e) {
-                    throw new LiquibaseException(e);
-                }
+                flushOutputWriter(
+                    output);
             }
         });
     }
@@ -1600,7 +1556,7 @@ public class Liquibase implements AutoCloseable {
                             getDatabase().getDatabaseChangeLogTableName()
                     );
                     updateStatement.addNewColumnValue("MD5SUM", null);
-                    ExecutorService.getInstance().getExecutor(database).execute(updateStatement);
+            ExecutorService.getInstance().getExecutor("jdbc", database).execute(updateStatement);
                     getDatabase().commit();
                 } finally {
                     try {

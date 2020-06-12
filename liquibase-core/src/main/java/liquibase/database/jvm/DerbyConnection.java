@@ -11,6 +11,8 @@ import java.sql.Statement;
 
 public class DerbyConnection extends JdbcConnection {
 
+    public DerbyConnection() {}
+
     public DerbyConnection(Connection connection) {
         super(connection);
     }

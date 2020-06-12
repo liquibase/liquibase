@@ -11,6 +11,8 @@ import java.sql.Statement;
 
 public class HsqlConnection extends JdbcConnection {
 
+    public HsqlConnection() {}
+
     public HsqlConnection(Connection connection) {
         super(connection);
     }
