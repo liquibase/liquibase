@@ -4,6 +4,8 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
@@ -19,10 +21,7 @@ import liquibase.util.file.FilenameUtils;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
@@ -201,15 +200,33 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
             LOG.debug(LogType.LOG, "value is explicit null");
-            if (col.getType() != null) {
-                if (col.getType().toLowerCase().contains("date") || col.getType().toLowerCase().contains("time")) {
-                    stmt.setNull(i, java.sql.Types.TIMESTAMP);
-                } else {
-                    // TODO Add support for other types 
+            if (col.getType() == null) {
+                stmt.setNull(i, java.sql.Types.NULL);
+                return;
+            }
+            if (col.getType().toLowerCase().contains("date") || col.getType().toLowerCase().contains("time")) {
+                stmt.setNull(i, java.sql.Types.TIMESTAMP);
+            } else {
+                //
+                // Get the array of aliases and use them to find the
+                // correct java.sql.Types constant for the call to setNull
+                //
+                boolean isSet = false;
+                LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(col.getType(), database);
+                String[] aliases = dataType.getAliases();
+                for (String alias : aliases) {
+                    if (! alias.contains("java.sql.Types")) {
+                        continue;
+                    }
+                    String name = alias.replaceAll("java.sql.Types.","");
+                    JDBCType jdbcType = Enum.valueOf(JDBCType.class, name);
+                    stmt.setNull(i, jdbcType.getVendorTypeNumber());
+                    isSet = true;
+                    break;
+                }
+                if (! isSet) {
                     stmt.setNull(i, java.sql.Types.NULL);
                 }
-            } else {
-                stmt.setNull(i, java.sql.Types.NULL);
             }
         }
     }
