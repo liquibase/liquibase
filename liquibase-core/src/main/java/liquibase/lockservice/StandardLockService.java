@@ -93,7 +93,7 @@ public class StandardLockService implements LockService {
     @Override
     public void init() throws DatabaseException {
         boolean createdTable = false;
-        Executor executor = ExecutorService.getInstance().getExecutor("jdbc",  database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
 
         if (!hasDatabaseChangeLogLockTable()) {
             try {
@@ -161,7 +161,7 @@ public class StandardLockService implements LockService {
 
     public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
         if (!isDatabaseChangeLogLockTableInitialized) {
-            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
 
             try {
                 isDatabaseChangeLogLockTableInitialized = executor.queryForInt(
@@ -244,13 +244,13 @@ public class StandardLockService implements LockService {
 
         quotingStrategy = database.getObjectQuotingStrategy();
 
-        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
 
         try {
             database.rollback();
             this.init();
 
-            Boolean locked = ExecutorService.getInstance().getExecutor("jdbc", database).queryForObject(
+            Boolean locked = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(
                     new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class
             );
 
@@ -310,7 +310,7 @@ public class StandardLockService implements LockService {
             database.setObjectQuotingStrategy(this.quotingStrategy);
         }
 
-        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         try {
             if (this.hasDatabaseChangeLogLockTable()) {
                 executor.comment("Release Database Lock");
@@ -380,7 +380,7 @@ public class StandardLockService implements LockService {
             SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement(
                     "ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY"
             );
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor("jdbc", database).queryForList(sqlStatement);
+            List<Map<String, ?>> rows = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(sqlStatement);
             for (Map columnMap : rows) {
                 Object lockedValue = columnMap.get("LOCKED");
                 Boolean locked;
@@ -446,7 +446,7 @@ public class StandardLockService implements LockService {
                 DiffOutputControl diffOutputControl = new DiffOutputControl(true, true, false, null);
                 Change[] change = ChangeGeneratorFactory.getInstance().fixUnexpected(table, diffOutputControl, database, database);
                 SqlStatement[] sqlStatement = change[0].generateStatements(database);
-                ExecutorService.getInstance().getExecutor("jdbc", database).execute(sqlStatement[0]);
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(sqlStatement[0]);
             }
             reset();
         } catch (InvalidExampleException e) {

@@ -14,6 +14,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -509,7 +510,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
-            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             // set object quoting strategy
             database.setObjectQuotingStrategy(objectQuotingStrategy);
 
@@ -654,7 +655,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 }
             }
         } finally {
-            ExecutorService.getInstance().setExecutor("jdbc", database, originalExecutor);
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, originalExecutor);
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
             if (!runInTransaction && database.supportsDDLInTransaction()) {
@@ -673,12 +674,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     // We do not do anything if we have a LoggingExecutor.
     //
     private Executor setupCustomExecutorIfNecessary(Database database) {
-        Executor originalExecutor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor originalExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (getRunWith() == null || originalExecutor instanceof LoggingExecutor) {
             return originalExecutor;
         }
-        Executor customExecutor = ExecutorService.getInstance().getExecutor(getRunWith(), database);
-        ExecutorService.getInstance().setExecutor("jdbc", database, customExecutor);
+        Executor customExecutor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(getRunWith(), database);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, customExecutor);
         List<Change> changes = getChanges();
         for (Change change : changes) {
             if (! (change instanceof AbstractChange)) {
@@ -700,7 +701,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public void rollback(Database database, ChangeExecListener listener) throws RollbackFailedException {
         Executor originalExecutor = setupCustomExecutorIfNecessary(database);
         try {
-            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
             executor.comment("Rolling Back ChangeSet: " + toString());
 
             database.setObjectQuotingStrategy(objectQuotingStrategy);
@@ -758,7 +759,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         } finally {
             // restore auto-commit to false if this ChangeSet was not run in a transaction,
             // but only if the database supports DDL in transactions
-            ExecutorService.getInstance().setExecutor("jdbc", database, originalExecutor);
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, originalExecutor);
             if (!runInTransaction && database.supportsDDLInTransaction()) {
                 try {
                     database.setAutoCommit(false);

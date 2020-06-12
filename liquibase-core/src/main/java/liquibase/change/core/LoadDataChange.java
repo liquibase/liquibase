@@ -454,8 +454,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 //    "SQL" mode (i.e. we generate an SQL file instead of actually modifying the database).
                 if
                 ((needsPreparedStatement || (databaseSupportsBatchUpdates &&
-                        ExecutorService.getInstance().executorExists("logging", database) &&
-                        !(ExecutorService.getInstance().getExecutor("logging", database) instanceof LoggingExecutor))) &&
+                        Scope.getCurrentScope().getSingleton(ExecutorService.class).executorExists("logging", database) &&
+                        !(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("logging", database) instanceof LoggingExecutor))) &&
                         hasPreparedStatementsImplemented()) {
                     anyPreparedStatements = true;
                     ExecutablePreparedStatementBase stmt =

@@ -215,6 +215,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     if (splitStatementsPatternMatcher.matches()) {
                         change.setSplitStatements(splitStatements);
                     }
+                    change.setStripComments(stripComments);
                     change.setEndDelimiter(endDelimiter);
                     changeSet.addChange(change);
 

@@ -190,7 +190,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             ranOn = String.valueOf(changeSet);
         }
 
-        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         try {
             // Three cases for preConditions onUpdateSQL:
             // 1. TEST: preConditions should be run, as in regular update mode

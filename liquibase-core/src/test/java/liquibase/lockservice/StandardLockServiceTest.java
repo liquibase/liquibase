@@ -63,7 +63,7 @@ public class StandardLockServiceTest {
 //
 //        replay(executor);
 //        replay(database);
-//        ExecutorService.getInstance().setExecutor(database, executor);
+//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
 //
 //        LockServiceImpl service = new LockServiceImpl();
 //        service.setDatabase(database);
@@ -88,7 +88,7 @@ public class StandardLockServiceTest {
 //
 //        replay(database);
 //        replay(executor);
-//        ExecutorService.getInstance().setExecutor(database, executor);
+//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
 //
 //        LockServiceImpl service = new LockServiceImpl();
 //        service.setDatabase(database);
@@ -130,7 +130,7 @@ public class StandardLockServiceTest {
 //
 //        replay(database);
 //        replay(executor);
-//        ExecutorService.getInstance().setExecutor(database, executor);
+//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
 //
 //        LockServiceImpl service = new LockServiceImpl();
 //        service.setDatabase(database);
@@ -169,7 +169,7 @@ public class StandardLockServiceTest {
 //
 //        replay(database);
 //        replay(executor);
-//        ExecutorService.getInstance().setExecutor(database, executor);
+//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
 //
 //        LockServiceImpl service = new LockServiceImpl();
 //        service.setDatabase(database);
@@ -207,7 +207,7 @@ public class StandardLockServiceTest {
 //
 //        replay(database);
 //        replay(executor);
-//        ExecutorService.getInstance().setExecutor(database, executor);
+//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
 //
 //        LockServiceImpl service = new LockServiceImpl();
 //        service.setDatabase(database);
@@ -245,7 +245,7 @@ public class StandardLockServiceTest {
 //
 //        replay(database);
 //        replay(executor);
-//        ExecutorService.getInstance().setExecutor(database, executor);
+//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
 //
 //        LockServiceImpl service = new LockServiceImpl();
 //        service.setDatabase(database);
@@ -278,7 +278,7 @@ public class StandardLockServiceTest {
 //
 //        replay(database);
 //        replay(executor);
-//        ExecutorService.getInstance().setExecutor(database, executor);
+//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
 //
 //        LockServiceImpl service = new LockServiceImpl();
 //        service.setDatabase(database);
@@ -308,7 +308,7 @@ public class StandardLockServiceTest {
 //
 //        replay(database);
 //        replay(executor);
-//        ExecutorService.getInstance().setExecutor(database, executor);
+//        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor(database, executor);
 //
 //        LockServiceImpl service = new LockServiceImpl();
 //        service.setDatabase(database);

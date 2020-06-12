@@ -110,7 +110,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     protected void resetServices() {
         LockServiceFactory.getInstance().resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
-        ExecutorService.getInstance().reset();
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
 
 }

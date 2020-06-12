@@ -1,5 +1,6 @@
 package liquibase.database;
 
+import liquibase.Scope;
 import liquibase.change.core.CreateTableChange;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.executor.MockExecutor;
@@ -108,7 +109,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         final MockExecutor mockExecutor = new MockExecutor();
 
-        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
         final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
@@ -131,7 +132,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         final MockExecutor mockExecutor = new MockExecutor();
 
-        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
         final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
@@ -155,7 +156,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         final MockExecutor mockExecutor = new MockExecutor();
 
-        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
         final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
@@ -179,7 +180,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         final MockExecutor mockExecutor = new MockExecutor();
 
-        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, mockExecutor);
 
         final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 

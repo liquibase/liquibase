@@ -8,14 +8,11 @@ import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
-import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
@@ -24,7 +21,7 @@ import java.util.*;
 import static java.util.ResourceBundle.getBundle;
 
 public class ChangeLogIterator {
-    private static final Logger LOG = LogService.getLog(ChangeLogIterator.class);
+
     private DatabaseChangeLog databaseChangeLog;
     private List<ChangeSetFilter> changeSetFilters;
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
@@ -131,11 +128,11 @@ public class ChangeLogIterator {
         String executorName = changeSet.getRunWith();
         Executor executor;
         try {
-            executor = ExecutorService.getInstance().getExecutor(executorName, env.getTargetDatabase());
+            executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(executorName, env.getTargetDatabase());
         }
         catch (UnexpectedLiquibaseException ule) {
             String message = String.format(MSG_COULD_NOT_FIND_EXECUTOR, executorName, changeSet.toString());
-            LOG.severe(LogType.LOG, message);
+            Scope.getCurrentScope().getLog(getClass()).severe(message);
             throw new LiquibaseException(message);
         }
         //
@@ -148,7 +145,7 @@ public class ChangeLogIterator {
         ValidationErrors errors = executor.validate(changeSet);
         if (errors.hasErrors()) {
             String message = errors.toString();
-            LOG.severe(LogType.LOG, message);
+            Scope.getCurrentScope().getLog(getClass()).severe(message);
             throw new LiquibaseException(message);
         }
     }

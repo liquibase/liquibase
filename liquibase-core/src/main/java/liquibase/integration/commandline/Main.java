@@ -192,8 +192,7 @@ public class Main {
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                         if (licenseService != null) {
                     if (main.liquibaseProLicenseKey == null) {
-                        log.info(LogType.LOG,
-                                "The command '" + main.command +
+                        Scope.getCurrentScope().getLog(getClass()).info("The command '" + main.command +
                                         "' requires a Liquibase Pro license, available at https://www.liquibase.org/download or sales@liquibase.com");
                     } else {
                         Location licenseKeyLocation =
@@ -1303,7 +1302,7 @@ public class Main {
                     DiffCommand diffCommand = CommandLineUtils.createDiffCommand(
                             createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
                             database,
-                            StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                            StringUtil.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
                     Map<String, Object> argsMap = new HashMap<String, Object>();
                     argsMap.put("format", getCommandParam(OPTIONS.FORMAT, "JSON"));
                     argsMap.put("diffCommand", diffCommand);

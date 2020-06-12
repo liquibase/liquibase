@@ -282,7 +282,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
         try {
             //noinspection HardCodedStringLiteral
-            return ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
+            return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
             //noinspection HardCodedStringLiteral
             Scope.getCurrentScope().getLog(getClass()).info("Error getting default schema", e);
@@ -523,10 +523,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 try {
                     try {
                         //noinspection HardCodedStringLiteral
-                        userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor("jdbc", this).queryForList(new RawSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
+                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
                     } catch (DatabaseException e) { //fall back to USER_TYPES if the user cannot see ALL_TYPES
                         //noinspection HardCodedStringLiteral
-                        userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor("jdbc", this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                        userDefinedTypes.addAll(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
                     }
                 } catch (DatabaseException e) {
                     //ignore error

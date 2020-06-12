@@ -254,7 +254,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             if (isFormattedDiff()) {
                 LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand("formattedDiff");
                 DiffCommand diffCommand =
-                        CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtils.trimToNull(diffTypes),
+                        CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
                                 schemaComparisons, objectChangeFilter, printStream);
                 Map<String, Object> argsMap = new HashMap<>();
                 argsMap.put("format", format);
