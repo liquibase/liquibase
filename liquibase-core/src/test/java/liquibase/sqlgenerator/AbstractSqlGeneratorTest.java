@@ -23,7 +23,7 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     protected abstract T createSampleSqlStatement();
 
     protected void dropAndCreateTable(CreateTableStatement statement, Database database) throws SQLException, DatabaseException {
-        ExecutorService.getInstance().getExecutor(database).execute(statement);
+        ExecutorService.getInstance().getExecutor("jdbc", database).execute(statement);
 
         if (!database.getAutoCommitMode()) {
             database.getConnection().commit();
