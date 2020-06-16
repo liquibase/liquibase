@@ -9,6 +9,8 @@ public class LoadDataColumnConfig extends ColumnConfig {
 
     private Integer index;
     private String header;
+    private String select;
+    private String selectNoResults;
 
     public Integer getIndex() {
         return index;
@@ -26,10 +28,29 @@ public class LoadDataColumnConfig extends ColumnConfig {
         this.header = header;
     }
 
+    public String getSelect() {
+        return select;
+    }
+
+    public void setSelect(String select) {
+        this.select = select;
+    }
+
+    public String getSelectNoResults() {
+        return selectNoResults;
+    }
+
+    public void setSelectNoResults(String selectNoResults) {
+        this.selectNoResults = selectNoResults;
+    }
+
+
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         super.load(parsedNode, resourceAccessor);
         this.index = parsedNode.getChildValue(null, "index", Integer.class);
         this.header = parsedNode.getChildValue(null, "header", String.class);
+        this.select = parsedNode.getChildValue(null, "select", String.class);
+        this.selectNoResults = parsedNode.getChildValue(null, "selectNoResults", String.class);
     }
 }

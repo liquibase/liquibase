@@ -1,7 +1,3 @@
-/*
- * Copyright 2018 Sirsi Corporation.  All rights reserved.
- */
-
 package liquibase.util;
 
 import liquibase.exception.DateParseException;

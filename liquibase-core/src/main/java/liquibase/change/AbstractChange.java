@@ -1,9 +1,15 @@
 package liquibase.change;
 
 import liquibase.Scope;
+import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.plugin.AbstractPlugin;
@@ -21,7 +27,16 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is
@@ -34,6 +49,7 @@ import java.util.*;
 public abstract class AbstractChange extends AbstractPlugin implements Change {
 
     protected static final String NODENAME_COLUMN = "column";
+    protected static final String NODENAME_VARIABLE = "variable";
 
     private ChangeSet changeSet;
 
@@ -629,6 +645,17 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                                     }
                                 }
                             }
+                        } else if (VariableConfig.class.isAssignableFrom(collectionType)) {
+                            List<ParsedNode> variableNodes = new ArrayList<>(
+                                    parsedNode.getChildren(null, NODENAME_VARIABLE)
+                            );
+                            for (ParsedNode child : variableNodes) {
+                                VariableConfig variableConfig = createEmptyVariableConfig(collectionType);
+                                variableConfig.load(child, resourceAccessor);
+                                // Currently, variable is applicable only to LoadDataChange.  This may need to be
+                                // generalized some day...
+                                ((LoadDataChange) this).addVariable(variableConfig);
+                            }
                         } else if (
                             (LiquibaseSerializable.class.isAssignableFrom(collectionType))
                             && (!collectionType.isInterface())
@@ -715,6 +742,11 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     protected ColumnConfig createEmptyColumnConfig(Class collectionType)
         throws ReflectiveOperationException {
         return (ColumnConfig) collectionType.getConstructor().newInstance();
+    }
+
+    protected VariableConfig createEmptyVariableConfig(Class collectionType)
+        throws InstantiationException, IllegalAccessException {
+        return (VariableConfig) collectionType.newInstance();
     }
 
     protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor)
