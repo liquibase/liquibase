@@ -5,6 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -19,10 +20,7 @@ import liquibase.util.file.FilenameUtils;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
@@ -31,7 +29,7 @@ import liquibase.change.core.LoadDataChange;
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
     private static final Logger LOG = Scope.getCurrentScope().getLog(ExecutablePreparedStatementBase.class);
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    protected static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
     private String catalogName;
@@ -57,7 +55,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         this.resourceAccessor = resourceAccessor;
     }
 
-    private static InputStream createStream(InputStream in) {
+    protected static InputStream createStream(InputStream in) {
         return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
     }
 
@@ -109,8 +107,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
             LOG.fine("Applying column parameter = " + i + " for column " + col.getName());
-            applyColumnParameter(stmt, i, col);
-            i++;
+            if (col.getValueComputed() != null) {
+                // It's impossible to add a 'db function' to a prepared statement. Adding functions should be handled while building the SQL statement.
+                LOG.fine("Skipping column parameter for " + col.getName() + ", cannot add functions to prepared statements.");
+            } else {
+                LOG.fine("Applying column parameter = " + i + " for column " + col.getName());
+                applyColumnParameter(stmt, i, col);
+                i++;
+            }
         }
     }
 
@@ -124,7 +128,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
      * @throws SQLException if JDBC objects to a setting (non-existent bind number, wrong column type etc.)
      * @throws DatabaseException if an I/O error occurs during the read of LOB values
      */
-    private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
+    protected void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
         if (col.getValue() != null) {
             LOG.fine("value is string = " + col.getValue());
@@ -205,7 +209,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws LiquibaseException, IOException {
+    protected LOBContent<InputStream> toBinaryStream(String valueLobFile) throws LiquibaseException, IOException {
         InputStream in = getResourceAsStream(valueLobFile);
 
         if (in == null) {
@@ -248,7 +252,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    private LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
+    protected LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
             throws IOException, LiquibaseException {
         InputStream in = getResourceAsStream(valueLobFile);
 
@@ -291,7 +295,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
+    protected InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
         String fileName = getFileName(valueLobFile);
         InputStreamList streams = this.resourceAccessor.openStreams(null, fileName);
         if ((streams == null) || streams.isEmpty()) {
@@ -382,13 +386,21 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
         return length;
     }
-    private class LOBContent<T> {
+    protected static class LOBContent<T> {
         private final T content;
         private final long length;
 
-        LOBContent(T content, long length) {
+        public LOBContent(T content, long length) {
             this.content = content;
             this.length = length;
+        }
+
+        public T getContent() {
+            return content;
+        }
+
+        public long getLength() {
+            return length;
         }
     }
 

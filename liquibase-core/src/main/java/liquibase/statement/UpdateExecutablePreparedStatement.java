@@ -18,9 +18,9 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
     private List<String> whereColumnNames = new ArrayList<>();
     private List<Object> whereParameters = new ArrayList<>();
 
-	public UpdateExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
-		super(database, catalogName, schemaName, tableName, columns, changeSet, resourceAccessor);
-	}
+    public UpdateExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
+        super(database, catalogName, schemaName, tableName, columns, changeSet, resourceAccessor);
+    }
 
     @Override
     public boolean continueOnError() {
@@ -28,26 +28,30 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
     }
 
     @Override
-	protected String generateSql(List<ColumnConfig> cols) {
+    protected String generateSql(List<ColumnConfig> cols) {
 
-		StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
+        StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
 
-		StringBuilder params = new StringBuilder(" SET ");
-	    for(ColumnConfig column : getColumns()) {
-	    	params.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
-	    	params.append(" = ");
-	        params.append("?, ");
-	        cols.add(column);
-	    }
-	    params.deleteCharAt(params.lastIndexOf(" "));
-	    params.deleteCharAt(params.lastIndexOf(","));
-	    sql.append(params);
+        StringBuilder params = new StringBuilder(" SET ");
+        for(ColumnConfig column : getColumns()) {
+            params.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
+            params.append(" = ");
+            if (column.getValueComputed() != null) {
+                params.append("(").append(database.generateDatabaseFunctionValue(column.getValueComputed())).append("), ");
+            } else {
+                params.append("?, ");
+            }
+            cols.add(column);
+        }
+        params.deleteCharAt(params.lastIndexOf(" "));
+        params.deleteCharAt(params.lastIndexOf(","));
+        sql.append(params);
         if (getWhereClause() != null) {
             sql.append(" WHERE ").append(replacePredicatePlaceholders(database, getWhereClause(), getWhereColumnNames(), getWhereParameters()));
         }
 
-		return sql.toString();
-	}
+        return sql.toString();
+    }
 
 
     public String getWhereClause() {
