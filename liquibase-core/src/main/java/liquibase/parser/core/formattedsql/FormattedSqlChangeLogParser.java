@@ -4,6 +4,7 @@ import liquibase.Labels;
 import liquibase.Scope;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
+import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -73,6 +74,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
+            TagDatabaseChange tagDatabaseChange = null;
             Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset\\s+([^:]+):(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
@@ -98,6 +100,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern tagDatabasePattern = Pattern.compile(".*tagDatabase:(\".*\"|\\S*).*", Pattern.CASE_INSENSITIVE);
 
             boolean rollbackSplitStatements = true;
             String rollbackEndDelimiter = null;
@@ -172,6 +175,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
                     Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
                     Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
+                    Matcher tagDatabasePatternMatcher = tagDatabasePattern.matcher(line);
 
                     boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
                     boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
@@ -180,7 +184,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false);
                     boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true);
                     boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true);
-
+                    String tagDatabase = StringUtil.trimToNull(
+                            StringUtil.trimToEmpty(parseString(tagDatabasePatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "")
+                    );
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
                     String context = StringUtil.trimToNull(
@@ -206,8 +212,17 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     change.setEndDelimiter(endDelimiter);
                     changeSet.addChange(change);
 
+                    if(tagDatabase != null){
+                        tagDatabaseChange = new TagDatabaseChange();
+                        tagDatabase = tagDatabase.replace("\"", "");
+                        tagDatabaseChange.setTag(tagDatabase);
+                        tagDatabaseChange.setChangeSet(changeSet);
+                        changeSet.addChange(tagDatabaseChange);
+                    }
+
                     currentSql.setLength(0);
                     currentRollbackSql.setLength(0);
+
                 } else {
                     if (changeSet != null) {
                         Matcher commentMatcher = commentPattern.matcher(line);
