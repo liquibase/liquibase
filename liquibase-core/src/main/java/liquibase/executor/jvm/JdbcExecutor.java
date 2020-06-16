@@ -74,7 +74,7 @@ public class JdbcExecutor extends AbstractExecutor {
     }
 
     public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        log.info("Executing with the '" + getName() + "' executor");
+        log.debug("Executing with the '" + getName() + "' executor");
         DatabaseConnection con = database.getConnection();
         Statement stmt = null;
         try {
