@@ -281,7 +281,7 @@
 
     <!-- Attributes for changes -->
     <xsd:attributeGroup name="changeAttributes">
-        <xsd:anyAttribute namespace="##any" processContents="lax"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:attributeGroup>
 
     <!-- Attributes for constraints -->
