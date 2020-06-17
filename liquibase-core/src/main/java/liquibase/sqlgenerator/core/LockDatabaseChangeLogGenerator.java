@@ -19,16 +19,14 @@ import liquibase.util.NetUtil;
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
 
     @Override
-    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, Database database,
-                                     SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
     protected static final String hostname;
     protected static final String hostaddress;
-    protected static final String hostDescription = System.getProperty("liquibase.hostDescription"
-    ) == null ? "" : "#" + System
-        .getProperty("liquibase.hostDescription");
+    protected static final String hostDescription = (System.getProperty("liquibase.hostDescription") == null) ? "" :
+        ("#" + System.getProperty("liquibase.hostDescription"));
 
     static {
         try {

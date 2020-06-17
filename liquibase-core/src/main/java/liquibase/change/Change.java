@@ -1,17 +1,17 @@
 package liquibase.change;
 
-import java.util.Set;
-
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
+
+import java.util.Set;
 
 /**
  * Interface all changes (refactorings) implement.
@@ -100,7 +100,7 @@ public interface Change extends LiquibaseSerializable {
 
 
     /**
-     * Returns true if this change be rolled back for the given database.
+     * Returns true if this can change be rolled back for the given database.
      */
     public boolean supportsRollback(Database database);
 

@@ -6,11 +6,9 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AbstractVerifyTest {
 
@@ -62,11 +60,21 @@ public class AbstractVerifyTest {
 
         public void test() throws Exception {
             String existingContent = readExistingValue();
-            if (existingContent.equals("") && StringUtils.trimToNull(stateContent.toString()) != null) {
+            if ("".equals(existingContent) && (StringUtils.trimToNull(stateContent.toString()) != null)) {
                 save();
             } else {
                 try {
-                    assertEquals("Unexpected difference in "+stateFile.getAbsolutePath(), existingContent, stateContent.toString());
+                    String stateContentString = stateContent.toString();
+                    /* For the purpose of comparison, normalise all line endings to UNIX style (\n)
+                     * instead of Windows (\r\n) */
+                    stateContentString = stateContentString.replaceAll("\r\n", "\n").trim();
+                    existingContent = existingContent.replaceAll("\r\n", "\n").trim();
+                    boolean contentsAreEqual = stateContentString.equals(existingContent);
+                    assertTrue(String.format("Unexpected difference in %s\nOriginal:\n[%s]\nNew state:\n[%s]\n",
+                        stateFile.getAbsolutePath(),
+                        existingContent,
+                        stateContentString),
+                        contentsAreEqual);
                 } catch (ComparisonFailure e) {
                     if ("overwrite".equals(System.getProperty("liquibase.verify.mode"))) {
                         save();

@@ -46,7 +46,7 @@ public class SnapshotParserFactory {
             }
         };
 
-        parsers = new ArrayList<SnapshotParser>();
+        parsers = new ArrayList<>();
         try {
             classes = ServiceLocator.getInstance().findClasses(SnapshotParser.class);
 

@@ -1,11 +1,13 @@
 package liquibase.executor.jvm;
 
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -49,12 +51,12 @@ public class ColumnMapRowMapper implements RowMapper {
     /**
      * Determine the key to use for the given column in the column Map.
      *
-     * @param columnName the column name as returned by the ResultSet
+     * @param columnName the column name (uppercase) as returned by the ResultSet
      * @return the column key to use
      * @see java.sql.ResultSetMetaData#getColumnName
      */
     protected String getColumnKey(String columnName) {
-        return columnName.toUpperCase();
+        return columnName.toUpperCase(Locale.US);
     }
 
     /**

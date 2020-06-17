@@ -21,6 +21,8 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.ObjectQuotingStrategy
+import liquibase.database.core.H2Database
+import liquibase.database.core.MSSQLDatabase
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
@@ -186,7 +188,9 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "changelog with preconditions can be parsed: preconditionsChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/preconditionsChangeLog.xml"
-        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        def params = new ChangeLogParameters()
+        params.set("loginUser", "testUser")
+        def changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor());
 
         then:
         changeLog.getLogicalFilePath() == path
@@ -505,7 +509,9 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "tests for particular features and edge conditions part 3 testCasesChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        def params = new ChangeLogParameters()
+        params.set("loginUser", "sa")
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor());
 
 
         then: "complex preconditions are parsed"
@@ -692,5 +698,51 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
         cleanup:
         ChangeFactory.getInstance().unregister("createTableExample")
+    }
+
+    def "change sets with matching dbms are parsed"() {
+        when:
+        def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
+        def database = new MSSQLDatabase()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 4
+    }
+
+    def "change sets with non-matching dbms are skipped"() {
+        when:
+        def path = "liquibase/parser/core/xml/rollbackWithDbmsChangeLog.xml"
+        def database = new H2Database()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
+    }
+
+    def "change sets exclude matching-excluded dbms"() {
+        when:
+        def path = "liquibase/parser/core/xml/excludeDbmsChangeLog.xml"
+        def database = new MSSQLDatabase()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
+        def change1 = changeLog.getChangeSets().get(0).getChanges().get(0)
+        change1.getTableName() == "a"
+        change1.getColumns().get(0).getType() == "varchar(50)"
+    }
+
+    def "change sets include non-matching-excluded dbms"() {
+        when:
+        def path = "liquibase/parser/core/xml/excludeDbmsChangeLog.xml"
+        def database = new H2Database()
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(database), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 2
+        def change1 = changeLog.getChangeSets().get(0).getChanges().get(0)
+        change1.getTableName() == "a"
+        change1.getColumns().get(0).getType() == "int"
     }
 }

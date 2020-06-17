@@ -14,18 +14,18 @@ class StandardObjectChangeFilterTest extends Specification {
 
     def "null and empty filter does not filter anything"() {
         expect:
-        assert new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, "").include(new Table("cat_name", "schema_name", "test_table"), referenceDatabase, comparisionDatabase)
-        assert new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, null).include(new Table("cat_name", "schema_name", "test_table"), referenceDatabase, comparisionDatabase)
+        assert new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, "").include(new Table("cat_name", "schema_name", "test_table"))
+        assert new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, null).include(new Table("cat_name", "schema_name", "test_table"))
 
-        assert new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, "").include(new Table("cat_name", "schema_name", "test_table"), referenceDatabase, comparisionDatabase)
-        assert new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, null).include(new Table("cat_name", "schema_name", "test_table"), referenceDatabase, comparisionDatabase)
+        assert new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, "").include(new Table("cat_name", "schema_name", "test_table"))
+        assert new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, null).include(new Table("cat_name", "schema_name", "test_table"))
     }
 
     @Unroll("#featureName '#filter' against #object")
     def "filter for all objects by name"() {
         expect:
-        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, filter).include(object, referenceDatabase, comparisionDatabase) == expected
-        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, filter).include(object, referenceDatabase, comparisionDatabase) != expected
+        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, filter).include(object) == expected
+        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, filter).include(object) != expected
 
         where:
         filter           | object                                                   | expected
@@ -44,8 +44,8 @@ class StandardObjectChangeFilterTest extends Specification {
     @Unroll("#featureName '#filter' against #object")
     def "filter for certain object types by name"() {
         expect:
-        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, filter).include(object, referenceDatabase, comparisionDatabase) == expected
-        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, filter).include(object, referenceDatabase, comparisionDatabase) != expected
+        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, filter).include(object) == expected
+        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, filter).include(object) != expected
 
         where:
         filter                                       | object                                                   | expected
@@ -72,8 +72,8 @@ class StandardObjectChangeFilterTest extends Specification {
     @Unroll("#featureName '#filter' against #object")
     def "filter applies to nested objects"() {
         expect:
-        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, filter).include(object, referenceDatabase, comparisionDatabase) == expected
-        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, filter).include(object, referenceDatabase, comparisionDatabase) != expected
+        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, filter).include(object) == expected
+        new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, filter).include(object) != expected
 
         where:
         filter             | object                                                                           | expected

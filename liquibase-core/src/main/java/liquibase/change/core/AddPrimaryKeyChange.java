@@ -13,7 +13,7 @@ import liquibase.structure.core.PrimaryKey;
 /**
  * Creates a primary key out of an existing column or set of columns.
  */
-@DatabaseChange(name="addPrimaryKey", description = "Adds creates a primary key out of an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addPrimaryKey", description = "Adds a primary key out of an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddPrimaryKeyChange extends AbstractChange {
 
     private String catalogName;
@@ -26,6 +26,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String forIndexName;
     private String forIndexSchemaName;
     private String forIndexCatalogName;
+    private Boolean shouldValidate;
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to create the primary key on")
     public String getTableName() {
@@ -112,25 +113,48 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.clustered = clustered;
     }
 
+    /**
+     * the VALIDATE keyword defines whether a primary key constraint on a column in a table
+     * should be checked if it refers to a valid row or not.
+     * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
+     */
+    @DatabaseChangeProperty(description = "This is true if the primary key has 'ENABLE VALIDATE' set, or false if the primary key has 'ENABLE NOVALIDATE' set.")
+    public Boolean getValidate() {
+        return shouldValidate;
+    }
+
+    /**
+     *
+     * @param shouldValidate - if shouldValidate is set to FALSE then the constraint will be created
+     * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
+     * check will be done to ensure old data has valid primary keys - only new data would be checked
+     * to see if it complies with the constraint logic. The default state for primary keys is to
+     * have 'ENABLE VALIDATE' set.
+     */
+    public void setValidate(Boolean shouldValidate) {
+        this.shouldValidate = shouldValidate;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-
+        boolean shouldValidate = true;
+        if (getValidate() != null) {
+            shouldValidate = getValidate();
+        }
         AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
         statement.setClustered(getClustered());
         statement.setForIndexName(getForIndexName());
         statement.setForIndexSchemaName(getForIndexSchemaName());
         statement.setForIndexCatalogName(getForIndexCatalogName());
+        statement.setShouldValidate(shouldValidate);
 
         if (database instanceof DB2Database) {
             return new SqlStatement[]{
                     statement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
             };
-//todo        } else if (database instanceof SQLiteDatabase) {
-//            // return special statements for SQLite databases
-//            return generateStatementsForSQLiteDatabase(database);
         }
 
         return new SqlStatement[]{
@@ -153,50 +177,6 @@ public class AddPrimaryKeyChange extends AbstractChange {
             return result.unknown(e);
         }
     }
-
-    //    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-//        // SQLite does not support this ALTER TABLE operation until now.
-//        // or more information: http://www.sqlite.org/omitted.html
-//        // This is a small work around...
-//
-//        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-//
-//        // define alter table logic
-//        AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-//            public ColumnConfig[] getColumnsToAdd() {
-//                return new ColumnConfig[0];
-//            }
-//
-//            public boolean copyThisColumn(ColumnConfig column) {
-//                return true;
-//            }
-//
-//            public boolean createThisColumn(ColumnConfig column) {
-//                String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
-//                for (String split_column : split_columns) {
-//                    if (column.getName().equals(split_column)) {
-//                        column.getConstraints().setPrimaryKey(true);
-//                    }
-//                }
-//                return true;
-//            }
-//
-//            public boolean createThisIndex(Index index) {
-//                return true;
-//            }
-//        };
-//
-//        try {
-//            // alter table
-//            statements.addAll(SQLiteDatabase.getAlterTableStatements(
-//                    rename_alter_visitor,
-//                    database, getCatalogName(),  getSchemaName(), getTableName()));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        return statements.toArray(new SqlStatement[statements.size()]);
-//    }
 
     @Override
     protected Change[] createInverses() {

@@ -12,7 +12,7 @@ public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
         Schema schema1 = o1.getSchema();
         Schema schema2 = o2.getSchema();
 
-        if (schema1 != null && schema2 != null) {
+        if ((schema1 != null) && (schema2 != null)) {
             int i = schema1.toString().compareTo(schema2.toString());
             if (i != 0) {
                 return i;

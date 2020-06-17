@@ -53,10 +53,9 @@ public interface MappingStrategy<T> {
      * Implementation will return a bean of the type of object you are mapping.
      *
      * @return A new instance of the class being mapped.
-     * @throws InstantiationException - thrown on error creating object.
-     * @throws IllegalAccessException - thrown on error creating object.
+     * @throws ReflectiveOperationException - thrown on error creating object.
      */
-    T createBean() throws InstantiationException, IllegalAccessException;
+    T createBean() throws ReflectiveOperationException;
 
    /**
     * Implementation of this method can grab the header line before parsing begins to use to map columns

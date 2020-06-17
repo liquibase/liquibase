@@ -2,8 +2,10 @@ package liquibase.diff.output.changelog.core;
 
 import liquibase.change.Change;
 import liquibase.change.core.CreateViewChange;
+import liquibase.change.core.SetTableRemarksChange;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
+import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
@@ -14,6 +16,9 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChangedViewChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
@@ -40,7 +45,7 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, final Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) changedObject;
 
-        CreateViewChange change = new CreateViewChange();
+        CreateViewChange change = createViewChange();
         change.setViewName(view.getName());
         change.setReplaceIfExists(true);
         if (control.getIncludeCatalog()) {
@@ -53,9 +58,10 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
         boolean fullDefinitionOverridden = false;
         if (selectQuery == null) {
             selectQuery = "COULD NOT DETERMINE VIEW QUERY";
-        } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && view.getColumns().size() > 0) {
+        } else if ((comparisonDatabase instanceof OracleDatabase) && (view.getColumns() != null) && !view.getColumns
+            ().isEmpty()) {
             String viewName;
-            if (change.getCatalogName() == null && change.getSchemaName() == null) {
+            if ((change.getCatalogName() == null) && (change.getSchemaName() == null)) {
                 viewName = comparisonDatabase.escapeObjectName(change.getViewName(), View.class);
             } else {
                 viewName = comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName());
@@ -64,7 +70,7 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
                     + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
                 @Override
                 public String toString(Object obj) {
-                    if (((Column) obj).getComputed() != null && ((Column) obj).getComputed()) {
+                    if ((((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {
                         return ((Column) obj).getName();
                     } else {
                         return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
@@ -80,6 +86,31 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
             change.setFullDefinition(view.getContainsFullDefinition());
         }
 
-        return new Change[]{change};
+        List<Change> changes = new ArrayList<>();
+        changes.add(change);
+
+        Difference changedRemarks = differences.getDifference("remarks");
+        if (changedRemarks != null) {
+            SetTableRemarksChange setRemarksChange = new SetTableRemarksChange();
+            if (control.getIncludeCatalog()) {
+                setRemarksChange.setCatalogName(view.getSchema().getCatalogName());
+            }
+            if (control.getIncludeSchema()) {
+                setRemarksChange.setSchemaName(view.getSchema().getName());
+            }
+
+            setRemarksChange.setTableName(view.getName());
+            setRemarksChange.setRemarks(view.getRemarks());
+
+            changes.add(setRemarksChange);
+        }
+
+
+        return changes.toArray(new Change[changes.size()]);
     }
+
+    protected CreateViewChange createViewChange() {
+        return new CreateViewChange();
+    }
+
 }

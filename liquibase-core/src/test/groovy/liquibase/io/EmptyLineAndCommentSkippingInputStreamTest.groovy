@@ -1,6 +1,5 @@
 package liquibase.io
 
-import liquibase.util.StreamUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -40,6 +39,9 @@ class EmptyLineAndCommentSkippingInputStreamTest extends Specification {
                 ["just data",
                  "Line1\nLine2", "Line1\nLine2"],
 
+                ["just data but lines contain comment character",
+                 "Li#ne1\nLine2#", "Li#ne1\nLine2#"],
+
                 ["just data in windows format",
                  "Line1\r\nLine2", "Line1\nLine2"],
 
@@ -52,8 +54,12 @@ class EmptyLineAndCommentSkippingInputStreamTest extends Specification {
         expect:
         inputStreamToString(new EmptyLineAndCommentSkippingInputStream(getClass().getResourceAsStream("/liquibase/change/core/sample.data1-withComments.csv"), COMMENT_CHAR)) ==
         inputStreamToString(new EmptyLineAndCommentSkippingInputStream(getClass().getResourceAsStream("/liquibase/change/core/sample.data1-removedComments.csv"), COMMENT_CHAR))
+    }
 
-
+    def "Line endings in csv-files with comments"() {
+        expect:
+        inputStreamToString(new EmptyLineAndCommentSkippingInputStream(new ByteArrayInputStream("a#comment\r\nb\r\n\r\nc".getBytes()), COMMENT_CHAR)) ==
+        inputStreamToString(new EmptyLineAndCommentSkippingInputStream(new ByteArrayInputStream("a#comment\nb\n\nc".getBytes()), COMMENT_CHAR))
     }
 
     private String inputStreamToString(InputStream inputStreamWithComments) {

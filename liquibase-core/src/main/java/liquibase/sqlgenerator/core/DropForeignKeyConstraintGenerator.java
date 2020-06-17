@@ -29,7 +29,7 @@ public class DropForeignKeyConstraintGenerator extends AbstractSqlGenerator<Drop
 
     @Override
     public Sql[] generateSql(DropForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        if (database instanceof MySQLDatabase || database instanceof SybaseASADatabase) {
+        if ((database instanceof MySQLDatabase) || (database instanceof SybaseASADatabase)) {
             return new Sql[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()) + " DROP FOREIGN KEY " + database.escapeConstraintName(statement.getConstraintName()), getAffectedForeignKey(statement)) };
         } else {
             return new Sql[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName()), getAffectedForeignKey(statement)) };

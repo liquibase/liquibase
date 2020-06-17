@@ -14,7 +14,7 @@ public class PreconditionFactory {
 
     @SuppressWarnings("unchecked")
     private PreconditionFactory() {
-        preconditions = new HashMap<String, Class<? extends Precondition>>();
+        preconditions = new HashMap<>();
         Class[] classes;
         try {
             classes = ServiceLocator.getInstance().findClasses(Precondition.class);
@@ -63,7 +63,7 @@ public class PreconditionFactory {
             return null;
         }
         try {
-            return (Precondition) aClass.newInstance();
+            return (Precondition) aClass.getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

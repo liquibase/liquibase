@@ -145,4 +145,50 @@
             </lb:rollbackDatabase>
         </au:expectfailure>
     </target>
+	
+	
+	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
+    
+    <target name="testRollbackDatabaseByCountLegacyChangeLogDirectory">
+    	<!-- Here we check that the rollback has no effect. -->
+    	<!-- By using the changeLogDirectory property, we change all the changelog ids -->
+    	<!-- from ${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml::1::testuser -->
+    	<!--   to changelog-with-rollback.xml::1::testuser -->
+    	<!-- So it's not the same we inserted into databasechangelog during the setUp preStep -->
+        <db:assertRowCountEquals driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                 table="users" count="1"/>
+        <lb:rollbackDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
+                             rollbackCount="1"
+                             changelogdirectory="${liquibase.test.ant.basedir}/changelog"
+                             changelogfile="changelog-with-rollback.xml"/>
+        <db:assertRowCountEquals driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                 table="users" count="1"/>
+    </target>
+
+    <target name="testRollbackDatabaseByCountChangeLogDirectory">
+    	<!-- Here we check that the rollback has no effect. -->
+    	<!-- By using the changeLogDirectory property, we change all the changelog ids -->
+    	<!-- from ${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml::1::testuser -->
+    	<!--   to changelog-with-rollback.xml::1::testuser -->
+    	<!-- So it's not the same we inserted into databasechangelog during the setUp preStep -->
+        <db:assertRowCountEquals driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                 table="users" count="1"/>
+        <lb:rollbackDatabase rollbackCount="1"
+                             changelogdirectory="${liquibase.test.ant.basedir}/changelog"
+                             changelogfile="changelog-with-rollback.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:rollbackDatabase>
+        <db:assertRowCountEquals driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                 table="users" count="1"/>
+    </target>
+
+    <target name="testRollbackDatabaseByCountChangeLogDirectoryDoesNotExist">
+        <au:expectfailure expectedmessage="${liquibase.test.ant.basedir}/bad_changelog must be a directory">
+	        <lb:rollbackDatabase rollbackCount="1"
+                                 changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog"
+                                 changelogfile="changelog-with-rollback.xml">
+	            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+	        </lb:rollbackDatabase>
+        </au:expectfailure>
+    </target>
 </project>

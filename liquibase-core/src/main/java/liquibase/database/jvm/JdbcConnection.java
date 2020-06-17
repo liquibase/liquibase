@@ -4,32 +4,54 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
+import liquibase.servicelocator.PrioritizedService;
 
 import java.sql.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * A ConnectionWrapper implementation which delegates completely to an
  * underlying java.sql.connection.
- *
- * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
+
+    public JdbcConnection() {
+
+    }
 
     public JdbcConnection(java.sql.Connection connection) {
         this.con = connection;
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
+    @Override
+    public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+        try {
+            this.con = driverObject.connect(url, driverProperties);
+            if (this.con == null) {
+                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            }
+        }
+        catch (SQLException sqle) {
+            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+        }
+    }
 
     @Override
     public void attached(Database database) {
         try {
             database.addReservedWords(Arrays.asList(this.getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
         } catch (SQLException e) {
-            LogFactory.getLogger().info("Error fetching reserved words list from JDBC driver", e);
+            LogService.getLog(getClass()).info(LogType.LOG, "Error fetching reserved words list from JDBC driver", e);
         }
 
 
@@ -443,12 +465,20 @@ public class JdbcConnection implements DatabaseConnection {
     public int hashCode() {
         Connection underlyingConnection = this.getUnderlyingConnection();
         try {
-            if (underlyingConnection == null || underlyingConnection.isClosed()) {
+            if ((underlyingConnection == null) || underlyingConnection.isClosed()) {
                 return super.hashCode();
             }
         } catch (SQLException e) {
             return super.hashCode();
         }
         return underlyingConnection.hashCode();
+    }
+
+    public boolean supportsBatchUpdates() throws DatabaseException {
+        try {
+            return getUnderlyingConnection().getMetaData().supportsBatchUpdates();
+        } catch (SQLException e) {
+            throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
+        }
     }
 }

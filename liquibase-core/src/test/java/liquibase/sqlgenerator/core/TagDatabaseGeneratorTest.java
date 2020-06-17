@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertEquals;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.TagDatabaseStatement;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TagDatabaseGeneratorTest {
 ////    @Test
@@ -45,17 +45,17 @@ public class TagDatabaseGeneratorTest {
 
         assertEquals(1, sql.length);
         assertEquals(
-                "UPDATE [changelog] " +
-                "SET [TAG] = 'v1.0' " +
-                "FROM [DATABASECHANGELOG] AS [changelog] " +
+            "UPDATE changelog " +
+                "SET TAG = 'v1.0' " +
+                "FROM DATABASECHANGELOG AS changelog " +
                 "INNER JOIN (" +
-                    "SELECT TOP (1) [ID], [AUTHOR], [FILENAME] " +
-                    "FROM [DATABASECHANGELOG] " +
-                    "ORDER BY [DATEEXECUTED] DESC, [ORDEREXECUTED] DESC" +
-                ") AS [latest] " +
-                "ON [latest].[ID] = [changelog].[ID] " +
-                "AND [latest].[AUTHOR] = [changelog].[AUTHOR] " +
-                "AND [latest].[FILENAME] = [changelog].[FILENAME]",
+                "SELECT TOP (1) ID, AUTHOR, FILENAME " +
+                "FROM DATABASECHANGELOG " +
+                "ORDER BY DATEEXECUTED DESC, ORDEREXECUTED DESC" +
+                ") AS latest " +
+                "ON latest.ID = changelog.ID " +
+                "AND latest.AUTHOR = changelog.AUTHOR " +
+                "AND latest.FILENAME = changelog.FILENAME",
                 sql[0].toSql());
     }
 

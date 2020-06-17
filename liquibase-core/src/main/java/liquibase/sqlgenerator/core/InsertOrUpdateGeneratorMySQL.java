@@ -1,13 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.LiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.structure.core.Column;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  *
@@ -27,7 +29,7 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
         
         StringBuffer updateClause = new StringBuffer("ON DUPLICATE KEY UPDATE ");
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
-        HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
+        HashSet<String> hashPkFields = new HashSet<>(Arrays.asList(pkFields));
         boolean hasFields = false;
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {
@@ -53,8 +55,12 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) {
-        return "";
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    	if (insertOrUpdateStatement.getOnlyUpdate()) {
+    		return super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
+    	} else {
+            return "";
+    	}
     }
 
     @Override

@@ -5,7 +5,9 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
@@ -14,7 +16,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
     public ShouldRunChangeSetFilter(Database database, boolean ignoreClasspathPrefix) throws DatabaseException {
         this.ignoreClasspathPrefix = ignoreClasspathPrefix;
-        this.ranChangeSets = new HashMap<String, RanChangeSet>();
+        this.ranChangeSets = new HashMap<>();
 
         //ensure we have only the latest version of each ranChangeset in case multiple versions ended up in the databasechangelog table
         for (RanChangeSet ranChangeSet : database.getRanChangeSetList()) {
@@ -25,15 +27,15 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
             } else {
                 Date existingDate = existingChangeSet.getDateExecuted();
                 Date thisDate = ranChangeSet.getDateExecuted();
-                if (existingDate != null && thisDate != null) {
+                if ((existingDate != null) && (thisDate != null)) {
                     int comparedDates = thisDate.compareTo(existingDate);
-                    if (comparedDates < 0) {
+                    if (comparedDates > 0) {
                         addToSet = true;
                     } else if (comparedDates == 0) {
                         Integer existingOrder = existingChangeSet.getOrderExecuted();
                         Integer thisOrder = ranChangeSet.getOrderExecuted();
 
-                        if (existingOrder != null && thisOrder != null && thisOrder.compareTo(existingOrder) < 0) {
+                        if ((existingOrder != null) && (thisOrder != null) && (thisOrder.compareTo(existingOrder) < 0)) {
                             addToSet = true;
                         }
                     }

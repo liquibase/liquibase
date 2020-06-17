@@ -6,6 +6,10 @@ import liquibase.configuration.LiquibaseConfiguration;
 import java.io.*;
 
 public class FileUtil {
+    
+    private FileUtil() {
+        throw new IllegalStateException("This utility class must not be instantiated. Sorry.");
+    }
 
     /**
      * Clean a directory without deleting it.
@@ -44,26 +48,25 @@ public class FileUtil {
         if (!file.exists()) {
             return null;
         }
-        Reader reader = null;
-        try {
-            reader = new InputStreamReader(new FileInputStream(file), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+        try (
+            FileInputStream fileInputStream = new FileInputStream(file);
+            Reader reader = new InputStreamReader(fileInputStream, LiquibaseConfiguration.getInstance()
+                .getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+        ) {
+            
             return StreamUtil.getReaderContents(reader);
         } catch (FileNotFoundException e) {
             return null;
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
         }
     }
 
     public static void write(String contents, File file) throws IOException {
         file.getParentFile().mkdirs();
-        FileOutputStream output = new FileOutputStream(file);
-        try {
+        
+        try (
+            FileOutputStream output = new FileOutputStream(file);
+        ){
             StreamUtil.copy(new ByteArrayInputStream(contents.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), output);
-        } finally {
-            output.close();
         }
     }
 }

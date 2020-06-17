@@ -27,7 +27,7 @@ public class DatabaseList {
      * Same logic as {@link #definitionMatches(String, liquibase.database.Database, boolean)} but with a collection of definitions rather than a comma separated list.
      */
     public static boolean definitionMatches(Collection<String> definition, String databaseShortName, boolean returnValueIfEmptyList) {
-        if (definition == null || definition.isEmpty()) {
+        if ((definition == null) || definition.isEmpty()) {
             return returnValueIfEmptyList;
         }
 
@@ -44,7 +44,7 @@ public class DatabaseList {
             return false;
         }
 
-        Set<String> dbmsSupported = new HashSet<String>();
+        Set<String> dbmsSupported = new HashSet<>();
         // add all dbms that do not start with ! to a list
         for (String dbms: definition) {
             if (!dbms.startsWith("!")) {
@@ -69,5 +69,16 @@ public class DatabaseList {
             shortName = database.getShortName();
         }
         return definitionMatches(definition, shortName, returnValueIfEmptyList);
+    }
+
+    public static Set<String> toDbmsSet(String dbmsList) {
+        Set<String> dbmsSet = null;
+        if (StringUtils.trimToNull(dbmsList) != null) {
+            dbmsSet = new HashSet<String>();
+            for (String string : dbmsList.toLowerCase().split(",")) {
+                dbmsSet.add(string.trim());
+            }
+        }
+        return dbmsSet;
     }
 }

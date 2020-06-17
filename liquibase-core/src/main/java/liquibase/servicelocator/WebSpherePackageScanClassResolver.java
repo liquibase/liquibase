@@ -1,5 +1,7 @@
 package liquibase.servicelocator;
 
+import liquibase.logging.LogType;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -46,7 +48,7 @@ public class WebSpherePackageScanClassResolver extends DefaultPackageScanClassRe
         // try super first, just in vase
         Enumeration<URL> enumeration = super.getResources(loader, packageName);
         if (!enumeration.hasMoreElements()) {
-            log.debug("Using WebSphere workaround to load the camel jars with the annotated converters.");
+            log.debug(LogType.LOG, "Using WebSphere workaround to load the camel jars with the annotated converters.");
             // Special WebSphere trick to load a file that exists in the JAR and then let it go from there.
             // The trick is that we just need the URL's for the .jars that contains the type
             // converters that is annotated. So by searching for this resource WebSphere is able to find

@@ -5,14 +5,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.*;
 import javax.enterprise.util.AnnotationLiteral;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -39,7 +32,7 @@ public class CDIBootstrap implements Extension {
 
             @Override
             public Set<Type> getTypes() {
-                Set<Type> types = new HashSet<Type>();
+                Set<Type> types = new HashSet<>();
                 types.add(CDILiquibase.class);
                 types.add(Object.class);
                 return types;
@@ -47,9 +40,13 @@ public class CDIBootstrap implements Extension {
 
             @Override
             public Set<Annotation> getQualifiers() {
-                Set<Annotation> qualifiers = new HashSet<Annotation>();
-                qualifiers.add( new AnnotationLiteral<Default>() {} );
-                qualifiers.add( new AnnotationLiteral<Any>() {} );
+                Set<Annotation> qualifiers = new HashSet<>();
+                qualifiers.add( new AnnotationLiteral<Default>() {
+                    private static final long serialVersionUID = 6919382612875193843L;
+                } );
+                qualifiers.add( new AnnotationLiteral<Any>() {
+                    private static final long serialVersionUID = 972067042069411460L;
+                } );
                 return qualifiers;
             }
 

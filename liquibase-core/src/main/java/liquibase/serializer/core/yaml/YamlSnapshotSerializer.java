@@ -13,20 +13,23 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
+import liquibase.util.BooleanUtils;
 import liquibase.util.ISODateFormat;
-
 import liquibase.util.StringUtils;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.util.*;
 
 public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSerializer {
 
-    private boolean alreadySerializingObject = false;
+    private boolean alreadySerializingObject;
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
@@ -52,7 +55,10 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
     @Override
     protected Object toMap(final LiquibaseSerializable object) {
         if (object instanceof DatabaseObject) {
-            if (alreadySerializingObject) {
+            if (object instanceof Column && (BooleanUtils.isTrue(((Column) object).getDescending()) || BooleanUtils.isTrue(((Column) object).getComputed()))) {
+                //not really a "real" column that has a snapshot to reference, just serialize it
+                return super.toMap(object);
+            } else if (alreadySerializingObject) {
                 String snapshotId = ((DatabaseObject) object).getSnapshotId();
                 if (snapshotId == null) {
                     String name = ((DatabaseObject) object).getName();
@@ -79,7 +85,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
             }
         }
         if (object instanceof DatabaseObjectCollection) {
-            SortedMap<String, Object> returnMap = new TreeMap<String, Object>();
+            SortedMap<String, Object> returnMap = new TreeMap<>();
             for (Map.Entry<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> entry : ((DatabaseObjectCollection) object).toMap().entrySet()) {
                 ArrayList value = new ArrayList(entry.getValue());
                 Collections.sort(value, new DatabaseObjectComparator());

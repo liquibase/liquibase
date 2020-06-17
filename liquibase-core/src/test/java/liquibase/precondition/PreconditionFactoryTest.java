@@ -2,13 +2,13 @@ package liquibase.precondition;
 
 import liquibase.precondition.core.AndPrecondition;
 import liquibase.precondition.core.OrPrecondition;
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class PreconditionFactoryTest {
 

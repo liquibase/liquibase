@@ -1,14 +1,14 @@
 package com.example.liquibase.change;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @DatabaseChange(
     name = "createTableExample",

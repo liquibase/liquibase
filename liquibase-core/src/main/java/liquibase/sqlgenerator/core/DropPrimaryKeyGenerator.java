@@ -2,15 +2,14 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKeyStatement> {
 
@@ -24,7 +23,8 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
 
-        if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        if ((database instanceof FirebirdDatabase) || (database instanceof InformixDatabase) || (database instanceof
+            SybaseDatabase)) {
             validationErrors.checkRequiredField("constraintName", dropPrimaryKeyStatement.getConstraintName());
         }
 
@@ -37,37 +37,20 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         if (database instanceof MSSQLDatabase) {
             String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
             if (statement.getConstraintName() == null) {
-                boolean sql2005OrLater = true;
-                try {
-                    sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
-                } catch (DatabaseException e) {
-                    // Assume SQL Server 2005 or later
-                }
-                if (sql2005OrLater) {
-                    // SQL Server 2005 or later
-                    sql =
-                            "DECLARE @sql [nvarchar](MAX)\r\n" +
-                            "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([kc].[name]) " +
-                            "FROM [sys].[key_constraints] AS [kc] " +
-                            "WHERE [kc].[parent_object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
-                            "AND [kc].[type] = 'PK'\r\n" +
-                            "EXEC sp_executesql @sql";
-                } else {
-                    // SQL Server 2000
-                    sql =
-                            "DECLARE @sql [nvarchar](4000)\r\n" +
-                            "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([kc].[name]) " +
-                            "FROM [dbo].[sysobjects] AS [kc] " +
-                            "WHERE [kc].[parent_obj] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
-                            "AND [kc].[xtype] = 'PK'\r\n" +
-                            "EXEC sp_executesql @sql";
-                }
+                sql =
+                        "DECLARE @sql [nvarchar](MAX)\r\n" +
+                        "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([kc].[name]) " +
+                        "FROM [sys].[key_constraints] AS [kc] " +
+                        "WHERE [kc].[parent_object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
+                        "AND [kc].[type] = 'PK'\r\n" +
+                        "EXEC sp_executesql @sql";
             } else {
                 sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
             }
         } else if (database instanceof PostgresDatabase) {
 			if (statement.getConstraintName() == null) {
-				String schemaName = statement.getSchemaName() != null ? statement.getSchemaName() : database.getDefaultSchemaName();
+				String schemaName = (statement.getSchemaName() != null) ? statement.getSchemaName() : database
+                    .getDefaultSchemaName();
 				schemaName = database.correctObjectName(schemaName, Schema.class);
 				String tableName = database.correctObjectName(statement.getTableName(), Table.class);
 
@@ -78,9 +61,10 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
 						+ "    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc\n"
 						+ "    WHERE CONSTRAINT_TYPE = 'PRIMARY KEY'\n"
 						+ "      AND TABLE_NAME = '%2$s' AND TABLE_SCHEMA = '%1$s';\n"
-						+ "    EXECUTE 'alter table %1$s.%2$s drop constraint ' || constraint_name;\n"
+						+ "    EXECUTE 'alter table %3$s.%4$s drop constraint ' || constraint_name;\n"
 						+ "END $$;"
-						, schemaName, tableName);
+						, schemaName, tableName
+						, database.escapeObjectName(schemaName, Schema.class), database.escapeObjectName(tableName, Table.class));
 			} else {
 				sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
 			}
@@ -88,7 +72,7 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT "+database.escapeConstraintName(statement.getConstraintName());
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP PRIMARY KEY";
-            if (statement.getDropIndex() == null || statement.getDropIndex()) {
+            if ((statement.getDropIndex() == null) || statement.getDropIndex()) {
                 sql += " DROP INDEX";
             } else {
                 sql += " KEEP INDEX";

@@ -1,15 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.DatabaseDataType;
-import liquibase.exception.Warnings;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
@@ -27,7 +27,8 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Warnings warnings = super.warn(modifyDataTypeStatement, database, sqlGeneratorChain);
 
-        if (database instanceof MySQLDatabase && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains("varchar")) {
+        if ((database instanceof MySQLDatabase) && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains
+            ("varchar")) {
             warnings.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
         }
 
@@ -77,11 +78,8 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
      * @return either "MODIFY" or "ALTER COLUMN" depending on the current db
      */
     protected String getModifyString(Database database) {
-        if (database instanceof SybaseASADatabase
-                || database instanceof SybaseDatabase
-                || database instanceof MySQLDatabase
-                || database instanceof OracleDatabase
-                || database instanceof InformixDatabase
+        if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase) || (database instanceof
+            MySQLDatabase) || (database instanceof OracleDatabase) || (database instanceof InformixDatabase)
                 ) {
             return "MODIFY";
         } else {
@@ -94,17 +92,12 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
      *         definition (like 'set data type' for derby or an open parentheses for Oracle)
      */
     protected String getPreDataTypeString(Database database) {
-        if (database instanceof DerbyDatabase
-                || database instanceof DB2Database) {
+        if ((database instanceof DerbyDatabase) || (database instanceof AbstractDb2Database)) {
             return " SET DATA TYPE ";
-        } else if (database instanceof SybaseASADatabase
-                || database instanceof SybaseDatabase
-                || database instanceof MSSQLDatabase
-                || database instanceof MySQLDatabase
-                || database instanceof HsqlDatabase
-                || database instanceof H2Database
-                || database instanceof OracleDatabase
-                || database instanceof InformixDatabase) {
+        } else if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase) || (database
+            instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof HsqlDatabase) ||
+            (database instanceof H2Database) || (database instanceof OracleDatabase) || (database instanceof
+            InformixDatabase)) {
             return " ";
         } else {
             return " TYPE ";

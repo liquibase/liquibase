@@ -37,9 +37,9 @@ import java.util.List;
 @SuppressWarnings({"unchecked"})
 public class RowMapperResultSetExtractor implements ResultSetExtractor {
 
-    private final RowMapper rowMapper;
+    protected final RowMapper rowMapper;
 
-    private final int rowsExpected;
+    protected final int rowsExpected;
 
 
     /**
@@ -66,7 +66,7 @@ public class RowMapperResultSetExtractor implements ResultSetExtractor {
 
     @Override
     public Object extractData(ResultSet rs) throws SQLException {
-        List results = (this.rowsExpected > 0 ? new ArrayList(this.rowsExpected) : new ArrayList());
+        List results = ((this.rowsExpected > 0) ? new ArrayList(this.rowsExpected) : new ArrayList());
         int rowNum = 0;
         while (rs.next()) {
             results.add(this.rowMapper.mapRow(rs, rowNum++));

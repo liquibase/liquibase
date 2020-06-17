@@ -39,10 +39,23 @@ public class CreateViewStatement extends AbstractSqlStatement {
         return replaceIfExists;
     }
 
+    /**
+     * Returns the property "Does the statement contain a full CREATE [OR REPLACE] VIEW ... AS..." command (true),
+     * or just the view definition (SELECT ... FROM data_sources...) (false)?
+     *
+     * @return true if a complete CREATE ... VIEW statement is included, false if not.
+     */
     public boolean isFullDefinition() {
         return fullDefinition;
     }
 
+    /**
+     * Sets the property "Does the statement contain a full CREATE [OR REPLACE] VIEW ... AS..." command (true),
+     * or just the view definition (SELECT ... FROM data_sources...) (false)?
+     *
+     * @param fullDefinition true if a CREATE ... VIEW statement is included, false if not.
+     * @return the same, altered object
+     */
     public CreateViewStatement setFullDefinition(boolean fullDefinition) {
         this.fullDefinition = fullDefinition;
         return this;

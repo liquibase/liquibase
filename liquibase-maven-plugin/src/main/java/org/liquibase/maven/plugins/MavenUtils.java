@@ -2,15 +2,26 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.io.File;
-import java.net.*;
-import java.sql.*;
-import java.util.*;
-import java.lang.reflect.Field;
 import liquibase.exception.LiquibaseException;
+import liquibase.license.Location;
+import liquibase.license.LocationType;
+import liquibase.license.LicenseService;
+import liquibase.license.LicenseServiceFactory;
+import liquibase.license.LicenseInstallResult;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * A Utilities class for Maven plugins.
@@ -38,15 +49,15 @@ public class MavenUtils {
                                                    boolean verbose)
           throws MalformedURLException {
     if (verbose) {
-      log.info("Loading artfacts into URLClassLoader");
+      log.info("Loading artifacts into URLClassLoader");
     }
-    Set<URI> uris = new HashSet<URI>();
+    Set<URI> uris = new HashSet<>();
     // Find project dependencies, including the transitive ones.
     Set dependencies = project.getArtifacts();
-	if (dependencies != null && !dependencies.isEmpty()) {
-		for (Iterator it = dependencies.iterator(); it.hasNext();) {
-			addArtifact(uris, (Artifact) it.next(), log, verbose);
-		}
+    if ((dependencies != null) && !dependencies.isEmpty()) {
+        for (Iterator it = dependencies.iterator(); it.hasNext();) {
+            addArtifact(uris, (Artifact) it.next(), log, verbose);
+        }
     } else {
       log.info("there are no resolved artifacts for the Maven project.");
     }
@@ -55,7 +66,7 @@ public class MavenUtils {
     if (includeArtifact) {
       // If the actual artifact can be resolved, then use that, otherwise use the build
       // directory as that should contain the files for this project that we will need to
-      // run against. It is possible that the build directy could be empty, but we cannot
+      // run against. It is possible that the build directly could be empty, but we cannot
       // directly include the source and resources as the resources may require filtering
       // to replace any placeholders in the resource files.
       Artifact a = project.getArtifact();
@@ -72,7 +83,7 @@ public class MavenUtils {
       log.info(LOG_SEPARATOR);
     }
 
-    List<URI> uriList = new ArrayList<URI>(uris);
+    List<URI> uriList = new ArrayList<>(uris);
     URL[] urlArray = new URL[uris.size()];
     for (int i=0; i<uris.size(); i++ ) {
         urlArray[i] = uriList.get(i).toURL();
@@ -80,10 +91,48 @@ public class MavenUtils {
     return new URLClassLoader(urlArray, clazz.getClassLoader());
   }
 
+  public static boolean checkProLicense(String liquibaseProLicenseKey, String commandName, Log log) {
+      boolean hasProLicense = true;
+      LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+      if (licenseService == null) {
+        return false;
+      }
+      if (liquibaseProLicenseKey == null) {
+          log.info("");
+          if (commandName != null) {
+            log.info("The command '" + commandName + "' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
+          }
+          log.info("");
+          hasProLicense = false;
+      }
+      else {
+          Location licenseKeyLocation = 
+              new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, liquibaseProLicenseKey);
+          LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+          if (result.code != 0) {
+              String allMessages = String.join("\n", result.messages);
+              log.warn(allMessages);
+              hasProLicense = false;
+          }
+          String licenseInfo = licenseService.getLicenseInfo();
+          log.info(licenseInfo);
+
+          //
+          // If the license has expired then just disable the service
+          //
+          if (licenseService.daysTilExpiration() < 0) {
+              licenseService.disable();
+              hasProLicense = false;
+          }
+      }
+      log.info(licenseService.getLicenseInfo());
+      return hasProLicense;
+  }
+
   /**
    * Adds the artifact file into the set of URLs so it can be used in a URLClassLoader.
    * @param urls The set to add the artifact file URL to.
-   * @param artifact The Artifiact to resolve the file for.
+   * @param artifact The Artifact to resolve the file for.
    * @throws MalformedURLException If there is a problem creating the URL for the file.
    */
   private static void addArtifact(Set<URI> urls,
@@ -105,7 +154,7 @@ public class MavenUtils {
 //      }
 //      urls.add(fileURL);
 //    } else {
-//      log.warn("Artifact with no actual file, '" + artifact.getGroupId()
+//      log.warning("Artifact with no actual file, '" + artifact.getGroupId()
 //               + ":" + artifact.getArtifactId() + "'");
 //    }
   }
@@ -131,18 +180,14 @@ public class MavenUtils {
     try {
       dbDriver = (Driver)Class.forName(driver,
                                        true,
-                                       classLoader).newInstance();
-    }
-    catch (InstantiationException e) {
-      throw new LiquibaseException("Failed to load JDBC driver, " + driver, e);
-    }
-    catch (IllegalAccessException e) {
-      throw new LiquibaseException("Failed to load JDBC driver, " + driver, e);
+                                       classLoader).getConstructor().newInstance();
     }
     catch (ClassNotFoundException e) {
       throw new LiquibaseException("Missing Class '" + e.getMessage() + "'. Database "
                                    + "driver may not be included in the project "
                                    + "dependencies or with wrong scope.");
+    } catch (ReflectiveOperationException e) {
+      throw new LiquibaseException("Failed to load JDBC driver, " + driver, e);
     }
 
     Properties info = new Properties();

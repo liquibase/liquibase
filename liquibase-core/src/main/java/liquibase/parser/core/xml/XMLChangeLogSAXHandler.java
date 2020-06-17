@@ -1,10 +1,9 @@
 package liquibase.parser.core.xml;
 
-import liquibase.change.*;
+import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
@@ -12,15 +11,12 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+import java.util.Stack;
 
 class XMLChangeLogSAXHandler extends DefaultHandler {
 
@@ -35,12 +31,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 	private final ResourceAccessor resourceAccessor;
 	private final ChangeLogParameters changeLogParameters;
     private final Stack<ParsedNode> nodeStack = new Stack();
-    private Stack<StringBuffer> textStack = new Stack<StringBuffer>();
+    private Stack<StringBuffer> textStack = new Stack<>();
     private ParsedNode databaseChangeLogTree;
 
 
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, ChangeLogParameters changeLogParameters) {
-		log = LogFactory.getLogger();
+		log = LogService.getLog(getClass());
 		this.resourceAccessor = resourceAccessor;
 
 		databaseChangeLog = new DatabaseChangeLog();
@@ -104,7 +100,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         ParsedNode node = nodeStack.pop();
         try {
             String seenText = this.textStack.pop().toString();
-            if (!StringUtils.trimToEmpty(seenText).equals("")) {
+            if (!"".equals(StringUtils.trimToEmpty(seenText))) {
                 node.setValue(seenText.trim());
             }
         } catch (ParsedNodeException e) {

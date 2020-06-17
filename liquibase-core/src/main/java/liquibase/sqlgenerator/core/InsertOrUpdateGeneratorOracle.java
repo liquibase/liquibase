@@ -43,7 +43,7 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
         endStatements.append("END IF;\n");
         endStatements.append("END;\n");
 
-        if (ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor) {
+        if (ExecutorService.getInstance().getExecutor("jdbc", database) instanceof LoggingExecutor) {
             endStatements.append("/\n");
         }
 

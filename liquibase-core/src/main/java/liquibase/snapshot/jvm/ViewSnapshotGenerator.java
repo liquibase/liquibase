@@ -1,12 +1,10 @@
 package liquibase.snapshot.jvm;
 
-import java.sql.SQLException;
-import java.util.List;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -14,10 +12,12 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
+
+import java.sql.SQLException;
+import java.util.List;
 
 public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -33,7 +33,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 //        String viewName = example.getName();
 //        Schema schema = example.getSchema();
 //        try {
-//            ResultSet rs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(viewName, View.class), new String[]{"VIEW"});
+//            ResultSet rs = getMetaDataFromCache(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(viewName, View.class), new String[]{"VIEW"});
 //            try {
 //                return rs.next();
 //            } finally {
@@ -58,8 +58,8 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<CachedRow> viewsMetadataRs = null;
         try {
-            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName());
-            if (viewsMetadataRs.size() > 0) {
+            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName());
+            if (!viewsMetadataRs.isEmpty()) {
                 CachedRow row = viewsMetadataRs.get(0);
                 String rawViewName = row.getString("TABLE_NAME");
                 String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));
@@ -123,14 +123,17 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             List<CachedRow> viewsMetadataRs = null;
             try {
-                viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
+                viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : viewsMetadataRs) {
+                    CatalogAndSchema catalogAndSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
                     View view = new View();
                     view.setName(row.getString("TABLE_NAME"));
-                    view.setSchema(schema);
+                    view.setSchema(new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName()));
                     view.setRemarks(row.getString("REMARKS"));
                     view.setDefinition(row.getString("OBJECT_BODY"));
-
+                    if(database instanceof OracleDatabase) {
+                        view.setAttribute("editioning", "Y".equals(row.getString("EDITIONING_VIEW")));
+                    }
                     schema.addDatabaseObject(view);
                 }
             } catch (SQLException e) {

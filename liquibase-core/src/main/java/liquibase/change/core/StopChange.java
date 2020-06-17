@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.parser.core.ParsedNode;
@@ -13,7 +13,9 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
 
-@DatabaseChange(name="stop", description = "Stops Liquibase execution with a message. Mainly useful for debugging and stepping through a changelog", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.9")
+@DatabaseChange(name = "stop", description = "Stops Liquibase execution with a message. Mainly useful for debugging " +
+    "and " +
+ "stepping through a changelog", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.9")
 public class StopChange extends AbstractChange {
 
     private String message ="Stop command in changelog file";
@@ -48,12 +50,6 @@ public class StopChange extends AbstractChange {
         return "Changelog Execution Stopped";
     }
 
-    public static class StopChangeException extends RuntimeException {
-        public StopChangeException(String message) {
-            super(message);
-        }
-    }
-
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
@@ -62,8 +58,16 @@ public class StopChange extends AbstractChange {
     @Override
     protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Object value = parsedNode.getValue();
-        if (value != null && value instanceof String) {
+        if ((value != null) && (value instanceof String)) {
             setMessage((String) value);
+        }
+    }
+
+    public static class StopChangeException extends RuntimeException {
+        private static final long serialVersionUID = 6681759443230468424L;
+
+        public StopChangeException(String message) {
+            super(message);
         }
     }
 }

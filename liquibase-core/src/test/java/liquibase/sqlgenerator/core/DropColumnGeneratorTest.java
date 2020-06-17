@@ -1,15 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
-
 import liquibase.database.core.MySQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.DropColumnStatement;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class DropColumnGeneratorTest extends AbstractSqlGeneratorTest<DropColumnStatement> {
 

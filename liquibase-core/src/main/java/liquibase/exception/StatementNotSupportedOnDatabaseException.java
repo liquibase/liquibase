@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 
 public class StatementNotSupportedOnDatabaseException extends DatabaseException {
+    private static final long serialVersionUID = 889271005149363642L;
     private String reason;
 
     public StatementNotSupportedOnDatabaseException(SqlStatement statement, Database database) {

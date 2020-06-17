@@ -10,10 +10,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.ant.type.ChangeLogOutputFile;
 import liquibase.serializer.ChangeLogSerializer;
+import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.json.JsonChangeLogSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.serializer.core.xml.XMLChangeLogSerializer;
-import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.resources.FileResource;
@@ -27,7 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
-    private Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<ChangeLogOutputFile>();
+    private Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<>();
     private boolean includeSchema = true;
     private boolean includeCatalog = true;
     private boolean includeTablespace = true;
@@ -69,7 +68,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     protected void validateParameters() {
         super.validateParameters();
 
-        if(changeLogOutputFiles == null || changeLogOutputFiles.isEmpty()) {
+        if((changeLogOutputFiles == null) || changeLogOutputFiles.isEmpty()) {
             throw new BuildException("Unable to generate a change log. No output file defined. Add at least one <xml>, <json>, <yaml>, or <txt> nested element.");
         }
     }
@@ -86,7 +85,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     private DiffOutputControl getDiffOutputControl() {
         DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace, null);
 
-        if (excludeObjects != null && includeObjects != null) {
+        if ((excludeObjects != null) && (includeObjects != null)) {
             throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
         }
         if (excludeObjects != null) {
@@ -105,12 +104,12 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     }
 
     public void addConfiguredXml(ChangeLogOutputFile changeLogOutputFile) {
-        changeLogOutputFile.setChangeLogSerializer(new XMLChangeLogSerializer());
+        changeLogOutputFile.setChangeLogSerializer(ChangeLogSerializerFactory.getInstance().getSerializer("xml"));
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
     public void addConfiguredYaml(ChangeLogOutputFile changeLogOutputFile) {
-        changeLogOutputFile.setChangeLogSerializer(new YamlChangeLogSerializer());
+        changeLogOutputFile.setChangeLogSerializer(ChangeLogSerializerFactory.getInstance().getSerializer("yaml"));
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 

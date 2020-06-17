@@ -1,7 +1,6 @@
 package liquibase.integration.ant;
 
 import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
@@ -73,7 +72,7 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
     }
 
     public void setRollbackDate(String rollbackDateStr) {
-        if(rollbackTag != null || rollbackCount != null) {
+        if((rollbackTag != null) || (rollbackCount != null)) {
             throw new BuildException("Unable to rollback database. A tag or count has already been set.");
         }
         try {
@@ -88,7 +87,7 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
     }
 
     public void setRollbackTag(String rollbackTag) {
-        if(rollbackDate != null || rollbackCount != null) {
+        if((rollbackDate != null) || (rollbackCount != null)) {
             throw new BuildException("Unable to rollback database. A date or count has already been set.");
         }
         this.rollbackTag = rollbackTag;
@@ -99,7 +98,7 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
     }
 
     public void setRollbackCount(Integer rollbackCount) {
-        if(rollbackDate != null || rollbackTag != null) {
+        if((rollbackDate != null) || (rollbackTag != null)) {
             throw new BuildException("Unable to rollback database. A date or tag has already been set.");
         }
         this.rollbackCount = rollbackCount;

@@ -1,22 +1,33 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://va33-build01/dbchangelog-2.0.xsd"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
 	logicalFilePath="oracle.setup.xml">
 
-  <changeSet author="tbassett" id="12-18-2009-02" runOnChange="true">
-    <sql>CREATE USER liquibase IDENTIFIED BY liquibase</sql>
-    <sql>GRANT "DBA" TO liquibase</sql>
-    <rollback>
-      <sql>DROP USER liquibase CASCADE</sql>
-    </rollback>
-  </changeSet>
-
-  <changeSet author="tbassett" id="12-18-2009-03" runOnChange="true">
-    <sql>CREATE USER liquibaseb IDENTIFIED BY liquibaseb</sql>
-    <sql>GRANT "DBA" TO liquibaseb</sql>
-    <rollback>
-      <sql>DROP USER liquibaseb CASCADE</sql>
-    </rollback>
-  </changeSet>
+	<changeSet author="jesser" id="19-02-2017-04" runOnChange="true">
+		<sql>CREATE USER lbuser IDENTIFIED BY lbuser</sql>
+		<sql>GRANT DBA,
+			CREATE ANY VIEW
+			TO lbuser
+		</sql>
+		<!-- inter-schema-setup -->
+		<sql>CREATE USER lbcat2 IDENTIFIED BY lbcat2 DEFAULT TABLESPACE users
+		</sql>
+		<sql>ALTER USER lbcat2 QUOTA UNLIMITED ON users</sql>
+		<sql>CREATE USER liquibase IDENTIFIED BY liquibase DEFAULT TABLESPACE
+			users</sql>
+		<sql>ALTER USER liquibase QUOTA UNLIMITED ON users</sql>
+		<sql>CREATE USER liquibaseb IDENTIFIED BY liquibaseb DEFAULT
+			TABLESPACE users</sql>
+		<sql>ALTER USER liquibaseb QUOTA UNLIMITED ON users</sql>
+		<!-- tablespace -->
+		<sql>CREATE TABLESPACE liquibase2 DATAFILE 'liquibase2.dbf' SIZE 5M AUTOEXTEND ON NEXT 5M</sql>
+		<rollback>
+			<sql>DROP USER lbuser CASCADE</sql>
+			<sql>DROP USER lbcat2 CASCADE</sql>
+			<sql>DROP USER liquibase CASCADE</sql>
+			<sql>DROP USER liquibaseb CASCADE</sql>
+			<sql>DROP TABLESPACE liquibase2 INCLUDING CONTENTS AND DATAFILES</sql>
+		</rollback>
+	</changeSet>
 </databaseChangeLog>

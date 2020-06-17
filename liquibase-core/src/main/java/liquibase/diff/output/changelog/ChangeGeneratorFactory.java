@@ -6,9 +6,6 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.SnapshotGenerator;
-import liquibase.snapshot.SnapshotGeneratorChain;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 
 import java.util.*;
@@ -16,7 +13,7 @@ import java.util.*;
 public class ChangeGeneratorFactory {
     private static ChangeGeneratorFactory instance;
 
-    private List<ChangeGenerator> generators = new ArrayList<ChangeGenerator>();
+    private List<ChangeGenerator> generators = new ArrayList<>();
 
     private ChangeGeneratorFactory() {
         Class[] classes;
@@ -68,10 +65,11 @@ public class ChangeGeneratorFactory {
     }
 
     protected SortedSet<ChangeGenerator> getGenerators(Class<? extends ChangeGenerator> generatorType, Class<? extends DatabaseObject> objectType, Database database) {
-        SortedSet<ChangeGenerator> validGenerators = new TreeSet<ChangeGenerator>(new ChangeGeneratorComparator(objectType, database));
+        SortedSet<ChangeGenerator> validGenerators = new TreeSet<>(new ChangeGeneratorComparator(objectType, database));
 
         for (ChangeGenerator generator : generators) {
-            if (generatorType.isAssignableFrom(generator.getClass()) && generator.getPriority(objectType, database) > 0) {
+            if (generatorType.isAssignableFrom(generator.getClass()) && (generator.getPriority(objectType, database)
+                > 0)) {
                 validGenerators.add(generator);
             }
         }
@@ -80,7 +78,7 @@ public class ChangeGeneratorFactory {
 
     private ChangeGeneratorChain createGeneratorChain(Class<? extends ChangeGenerator> generatorType, Class<? extends DatabaseObject> objectType, Database database) {
         SortedSet<ChangeGenerator> generators = getGenerators(generatorType, objectType, database);
-        if (generators == null || generators.size() == 0) {
+        if ((generators == null) || generators.isEmpty()) {
             return null;
         }
         //noinspection unchecked
@@ -123,7 +121,7 @@ public class ChangeGeneratorFactory {
     }
 
     public Set<Class<? extends DatabaseObject>> runAfterTypes(Class<? extends DatabaseObject> objectType, Database database, Class<? extends ChangeGenerator> changeGeneratorType) {
-        Set<Class<? extends DatabaseObject>> returnTypes = new HashSet<Class<? extends DatabaseObject>>();
+        Set<Class<? extends DatabaseObject>> returnTypes = new HashSet<>();
 
         SortedSet<ChangeGenerator> generators = getGenerators(changeGeneratorType, objectType, database);
 
@@ -137,7 +135,7 @@ public class ChangeGeneratorFactory {
     }
 
     public Set<Class<? extends DatabaseObject>> runBeforeTypes(Class<? extends DatabaseObject> objectType, Database database, Class<? extends ChangeGenerator> changeGeneratorType) {
-        Set<Class<? extends DatabaseObject>> returnTypes = new HashSet<Class<? extends DatabaseObject>>();
+        Set<Class<? extends DatabaseObject>> returnTypes = new HashSet<>();
 
         SortedSet<ChangeGenerator> generators = getGenerators(changeGeneratorType, objectType, database);
 

@@ -4,27 +4,22 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Index;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import liquibase.structure.core.Index;
 
 /**
- * SQLite does not support this ALTER TABLE operation until now.
- * For more information see: http://www.sqlite.org/omitted.html.
- * This is a small work around...
+ * This class provides a workaround for adding auto increment for SQLite
+ * since SQLite does not support it
  */
 public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
+
+    @Override
+    public ValidationErrors validate(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        return super.validate(statement, database, sqlGeneratorChain);
+    }
 
     @Override
     public int getPriority() {
@@ -37,30 +32,20 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public ValidationErrors validate(
-            AddAutoIncrementStatement statement,
-            Database database,
-            SqlGeneratorChain sqlGeneratorChain) {
-        ValidationErrors validationErrors = new ValidationErrors();
-
-        validationErrors.checkRequiredField("columnName", statement.getColumnName());
-        validationErrors.checkRequiredField("tableName", statement.getTableName());
-
-
-        return validationErrors;
-    }
-
-    @Override
     public boolean generateStatementsIsVolatile(Database database) {
+        // need metadata for copying the table
         return true;
     }
 
     @Override
     public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<Sql> statements = new ArrayList<Sql>();
-
-        // define alter table logic
-        SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
+        // Workaround implemented by replacing a table with a new one (duplicate)
+        // with auto increment set true on the specified column
+        // https://sqlite.org/autoinc.html
+        // For Auto increment to work, the column has to be either primary or have rowid specified on insert statements
+        // Since adding rowid on inserts is out of scope here, we will try to use primary key for the column
+        Sql[] generatedSqls;
+        SQLiteDatabase.AlterTableVisitor alterTableVisitor = new SQLiteDatabase.AlterTableVisitor() {
             @Override
             public ColumnConfig[] getColumnsToAdd() {
                 return new ColumnConfig[0];
@@ -73,11 +58,8 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
             @Override
             public boolean createThisColumn(ColumnConfig column) {
-                if (column.getName().equals(statement.getColumnName())) {
-                    column.setAutoIncrement(true);
-                    column.setConstraints(new ConstraintsConfig().setPrimaryKey(true));
-                    column.setType("INTEGER");
-                }
+                // update the column to set autoincrement while copying
+                setPrimaryKeyAndAutoIncrement(column, statement);
                 return true;
             }
 
@@ -86,15 +68,21 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
                 return true;
             }
         };
+        generatedSqls = SQLiteDatabase.getAlterTableSqls(database, alterTableVisitor, statement.getCatalogName(),
+                statement.getSchemaName(), statement.getTableName());
 
-        try {
-            // alter table
-            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), database)));
-        } catch (DatabaseException e) {
-            e.printStackTrace();
+        return generatedSqls;
+    }
+
+    private void setPrimaryKeyAndAutoIncrement(ColumnConfig column, AddAutoIncrementStatement statement) {
+        if (column.getName().equals(statement.getColumnName())) {
+            column.setAutoIncrement(true);
+            ConstraintsConfig constraints = column.getConstraints();
+            if (constraints == null) {
+                constraints = new ConstraintsConfig();
+                column.setConstraints(constraints);
+            }
+            constraints.setPrimaryKey(true);
         }
-
-        return statements.toArray(new Sql[statements.size()]);
     }
 }

@@ -5,14 +5,13 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.util.JdbcUtils;
 
 import java.sql.ResultSet;
@@ -44,7 +43,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         } else {
             if (database.supportsCatalogs()) {
-                if (catalogName == null && schemaName != null) {
+                if ((catalogName == null) && (schemaName != null)) {
                     catalogName = schemaName;
                     schemaName = null;
                 }
@@ -67,6 +66,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                     Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 
                     Schema schema = new Schema(catalog, tableSchema);
+
                     if (DatabaseObjectComparatorFactory.getInstance().isSameObject(schema, example, snapshot.getSchemaComparisons(), database)) {
                         if (match == null) {
                             match = schema;
@@ -75,18 +75,32 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                         }
                     }
                 }
-            } else {
-                Catalog catalog = new Catalog(catalogName);
-                match = new Schema(catalog, catalogName);
+            } else { // Database does NOT support schemas
+                // If the database supports catalogs, but does not support schema names, then we treat the schema
+                // name as equal to the catalog name.
+                if (((Schema) example).getCatalog().isDefault()) {
+                    match = new Schema(((Schema) example).getCatalog(), catalogName);
+                } else {
+                    /* Before we confirm the schema/catalog existence, we must first check if the catalog exists. */
+                    Catalog catalog = ((Schema) example).getCatalog();
+                    String[] dbCatalogNames = getDatabaseCatalogNames(database);
+                    for (String candidateCatalogName : dbCatalogNames) {
+                        if (catalog.equals(new Catalog(candidateCatalogName))) {
+                            match = new Schema(catalog, catalogName);
+                        }
+                        
+                    }
+    
+                }
             }
-
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
             database.setObjectQuotingStrategy(currentStrategy);
         }
 
-        if (match != null && (match.getName() == null || match.getName().equalsIgnoreCase(database.getDefaultSchemaName()))) {
+        if ((match != null) && ((match.getName() == null) || match.getName().equalsIgnoreCase(database
+            .getDefaultSchemaName()))) {
             match.setDefault(true);
         }
         return match;
@@ -100,9 +114,16 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         //no other types
     }
-
+    
+    /**
+     * Fetches an array of Strings with the schema names in the database.
+     * @param database The database from which to get the schema names
+     * @return An array of schema name Strings (May be an empty array)
+     * @throws SQLException propagated java.sql.SQLException
+     * @throws DatabaseException if a different problem occurs during the DBMS-specific code
+     */
     protected String[] getDatabaseSchemaNames(Database database) throws SQLException, DatabaseException {
-        List<String> returnList = new ArrayList<String>();
+        List<String> returnList = new ArrayList<>();
 
         ResultSet schemas = null;
         try {
@@ -118,5 +139,5 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
 
         return returnList.toArray(new String[returnList.size()]);
     }
-
+    
 }

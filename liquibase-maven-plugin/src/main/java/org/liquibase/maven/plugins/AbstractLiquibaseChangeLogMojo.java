@@ -2,6 +2,10 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -20,24 +24,31 @@ import liquibase.resource.ResourceAccessor;
 public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo {
 
   /**
-   * Specifies the change log file to use for Liquibase.
-   * @parameter expression="${liquibase.changeLogFile}"
+   * Specifies the directory where Liquibase can find your <i>changelog</i> file.
+   *
+   * @parameter property="liquibase.changeLogDirectory"
+   */
+  protected String changeLogDirectory;
+
+  /**
+   * Specifies the <i>changelog</i> file for Liquibase to use.
+   * @parameter property="liquibase.changeLogFile"
    */
   protected String changeLogFile;
 
 
   /**
-   * The Liquibase contexts to execute, which can be "," separated if multiple contexts
-   * are required. If no context is specified then ALL contexts will be executed.
-   * @parameter expression="${liquibase.contexts}" default-value=""
+   * Specifies which contexts Liquibase will execute, which can be separated by a comma if multiple contexts are required.
+   * If a context is not specified, then ALL contexts will be executed.
+   * @parameter property="liquibase.contexts" default-value=""
    */
   protected String contexts;
 
-    /**
-     * The Liquibase labels to execute, which can be "," separated if multiple labels
-     * are required or a more complex expression. If no label is specified then ALL all will be executed.
-     * @parameter expression="${liquibase.labels}" default-value=""
-     */
+  /**
+   * Specifies which Liquibase labels Liquibase will execute, which can be separated by a comma if multiple labels are required or you need to designate a more complex expression.
+   * If a label is not specified, then ALL labels will be executed.
+   * @parameter property="liquibase.labels" default-value=""
+   */
   protected String labels;
 
   @Override
@@ -62,26 +73,44 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
   @Override
   protected void printSettings(String indent) {
     super.printSettings(indent);
+    getLog().info(indent + "changeLogDirectory: " + changeLogDirectory);
     getLog().info(indent + "changeLogFile: " + changeLogFile);
     getLog().info(indent + "context(s): " + contexts);
-      getLog().info(indent + "label(s): " + labels);
+    getLog().info(indent + "label(s): " + labels);
   }
 
   @Override
   protected ResourceAccessor getFileOpener(ClassLoader cl) {
-    ResourceAccessor mFO = new MavenResourceAccessor(cl);
-    ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
-    return new CompositeResourceAccessor(mFO, fsFO);
+    List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+    resourceAccessors.add(new MavenResourceAccessor(cl));
+    resourceAccessors.add(new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath()));
+
+    if (changeLogDirectory != null) {
+      calculateChangeLogDirectoryAbsolutePath();
+      resourceAccessors.add(new FileSystemResourceAccessor(changeLogDirectory));
+    }
+
+    return new CompositeResourceAccessor(resourceAccessors);
   }
 
   @Override
-  protected Liquibase createLiquibase(ResourceAccessor fo, Database database,
-                                      Database lockDatabase) throws MojoExecutionException {
-        try {
-            String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
-            return new Liquibase(changeLog, fo, database, lockDatabase);
-        } catch (LiquibaseException ex) {
-            throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(), ex);
-        }
+  protected Liquibase createLiquibase(ResourceAccessor fo, Database db, Database lockDatabase) throws MojoExecutionException {
+
+    String changeLog = (changeLogFile == null) ? "" : changeLogFile.trim();
+    return new Liquibase(changeLog, fo, db, lockDatabase);
+
+  }
+
+  private void calculateChangeLogDirectoryAbsolutePath() {
+    if (changeLogDirectory != null) {
+      // convert to standard / if using absolute path on windows
+      changeLogDirectory = changeLogDirectory.trim().replace('\\', '/');
+      // try to know if it's an absolute or relative path : the absolute path case is simpler and don't need more actions
+      File changeLogDirectoryFile = new File(changeLogDirectory);
+      if (!changeLogDirectoryFile.isAbsolute()) {
+        // we are in the relative path case
+        changeLogDirectory = project.getBasedir().getAbsolutePath().replace('\\', '/') + "/" + changeLogDirectory;
+      }
+    }
   }
 }

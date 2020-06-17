@@ -1,6 +1,7 @@
 package liquibase.changelog
 
 import liquibase.ContextExpression;
+import liquibase.LabelExpression;
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
@@ -24,7 +25,7 @@ class DatabaseChangeLogTest extends Specification {
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <preConditions>
-        <runningAs username="testUser"/>
+        <runningAs username="${loginUser}"/>
         <or>
             <dbms type="mssql"/>
             <dbms type="mysql"/>
@@ -129,15 +130,19 @@ create view sql_view as select * from sql_table;'''
 
     def "included changelog files have their preconditions and changes included in root changelog"() {
         when:
-        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2")])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
+
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
                 .addChildren([include: [file: "com/example/test1.xml"]])
                 .addChildren([include: [file: "com/example/test2.xml"]])
                 , resourceAccessor)
+
 
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 3
@@ -161,11 +166,13 @@ create view sql_view as select * from sql_table;'''
         when:
         def resourceAccessor = new MockResourceAccessor([
                 "com/example/test1.xml": test1Xml,
-                "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2"),
+                "com/example/test2.xml": test1Xml.replace("\${loginUser}", "otherUser").replace("person", "person2"),
                 "com/example/test.sql" : testSql
         ])
 
         def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.setChangeLogParameters(new ChangeLogParameters())
+        rootChangeLog.getChangeLogParameters().set("loginUser", "testUser")
         rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
@@ -197,6 +204,64 @@ create view sql_view as select * from sql_table;'''
         ((RawSQLChange) rootChangeLog.getChangeSets().get(3).changes[0]).sql == testSql
     }
 
+    def "included changelogs inherit contexts, labels, and ignores via load()"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.xml", context: "context1", labels: "label1"]])
+                .addChildren([include: [file: "com/example/test2.xml", context: "context2", labels: "label2", ignore: true]])
+                , resourceAccessor)
+
+        def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
+        def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
+
+        then:
+        test1ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test1ChangeLog.getIncludeLabels().getLabels()[0] == "label1"
+        test1ChangeLog.getIncludeContexts().getContexts().size() == 1
+        test1ChangeLog.getIncludeContexts().getContexts()[0] == "context1"
+        test1ChangeLog.isIncludeIgnore() == false
+
+        test2ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test2ChangeLog.getIncludeLabels().getLabels()[0] == "label2"
+        test2ChangeLog.getIncludeContexts().getContexts().size() == 1
+        test2ChangeLog.getIncludeContexts().getContexts()[0] == "context2"
+        test2ChangeLog.isIncludeIgnore() == true
+
+    }
+
+    def "included changelogs inherit contexts, labels, and ignores via include()"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/test1.xml": test1Xml,
+                "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")
+        ])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.include("com/example/test1.xml", false, resourceAccessor, new ContextExpression("context1"), new LabelExpression("label1"), false, false)
+        rootChangeLog.include("com/example/test2.xml", false, resourceAccessor, new ContextExpression("context2"), new LabelExpression("label2"), true, false)
+
+        def test1ChangeLog = rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").getChangeLog()
+        def test2ChangeLog = rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").getChangeLog()
+
+        then:
+        test1ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test1ChangeLog.getIncludeLabels().getLabels()[0] == "label1"
+        test1ChangeLog.getIncludeContexts().getContexts().size() == 1
+        test1ChangeLog.getIncludeContexts().getContexts()[0] == "context1"
+        test1ChangeLog.isIncludeIgnore() == false
+
+        test2ChangeLog.getIncludeLabels().getLabels().size() == 1
+        test2ChangeLog.getIncludeLabels().getLabels()[0] == "label2"
+        test2ChangeLog.getIncludeContexts().getContexts().size() == 1
+        test2ChangeLog.getIncludeContexts().getContexts()[0] == "context2"
+        test2ChangeLog.isIncludeIgnore() == true
+    }
+
     def "includeAll executes include in alphabetical order"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
@@ -206,7 +271,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
+        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new LabelExpression(), false)
 
         then:
         changeLogFile.changeSets.collect { it.filePath } == ["com/example/children/file1.sql",
@@ -253,7 +318,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql": "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
+        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new LabelExpression(), false)
 
         then:
         SetupException e = thrown()
@@ -270,7 +335,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql": "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
+        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression(), new LabelExpression(), false)
         then:
         changeLogFile.changeSets.collect {it.filePath } == []
 

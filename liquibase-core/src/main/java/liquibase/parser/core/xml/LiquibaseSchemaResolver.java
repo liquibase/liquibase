@@ -1,20 +1,20 @@
 package liquibase.parser.core.xml;
 
-import java.io.InputStream;
-
-import org.xml.sax.InputSource;
-
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializer;
+import org.xml.sax.InputSource;
+
+import java.io.InputStream;
 
 class LiquibaseSchemaResolver {
 
-	private static final Logger LOGGER = new LogFactory().getLog("LiquibaseSchemaResolver");
+	private static final Logger LOGGER = LogService.getLog(LiquibaseSchemaResolver.class);
 	private String systemId;
 	private String publicId;
 	private ResourceAccessorXsdStreamResolver resourceAccessorXsdStreamResolver;
@@ -54,9 +54,9 @@ class LiquibaseSchemaResolver {
 			return null;
 		}
 
-		LOGGER.debug("Found namespace details class "+namespaceDetails.getClass().getName()+" for "+ systemId);
+		LOGGER.debug(LogType.LOG, "Found namespace details class "+namespaceDetails.getClass().getName()+" for "+ systemId);
 		String xsdFile = namespaceDetails.getLocalPath(systemId);
-		LOGGER.debug("Local path for "+ systemId +" is "+xsdFile);
+		LOGGER.debug(LogType.LOG, "Local path for "+ systemId +" is "+xsdFile);
 
 		if (xsdFile == null) {
 			return null;
@@ -66,17 +66,17 @@ class LiquibaseSchemaResolver {
 			InputStream resourceAsStream = resourceAccessorXsdStreamResolver.getResourceAsStream(xsdFile);
 
 			if (resourceAsStream == null) {
-				LOGGER.debug("Could not find "+xsdFile+" locally");
+				LOGGER.debug(LogType.LOG, "Could not find "+xsdFile+" locally");
 				return null;
 			}
 
-			LOGGER.debug("Successfully loaded XSD from "+xsdFile);
+			LOGGER.debug(LogType.LOG, "Successfully loaded XSD from "+xsdFile);
 			org.xml.sax.InputSource source = new org.xml.sax.InputSource(resourceAsStream);
 			source.setPublicId(publicId);
 			source.setSystemId(systemId);
 			return source;
 		} catch (Exception ex) {
-			LOGGER.debug("Error loading XSD", ex);
+			LOGGER.debug(LogType.LOG, "Error loading XSD", ex);
 			return null; // We don't have the schema, try the network
 		}
 	}

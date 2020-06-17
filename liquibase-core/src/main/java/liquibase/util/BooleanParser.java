@@ -1,65 +1,33 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package liquibase.util;
 
-/**
- *
- * @author asales
- */
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class BooleanParser {
-    public static boolean parseBoolean(String s){
-        // test if we have a integer : if it's = 0 then return true, else return false
-        if(s == null){
+
+    private final static Set<String> trueValues = new HashSet<>(Arrays.asList("true", "t", "yes", "y", "1"));
+    private final static Set<String> falseValues = new HashSet<>(Arrays.asList("false", "f", "no", "n", "0"));
+
+    /**
+     * @param booleanStr not trimmed string
+     * @return true, if represents values "true", "t", "yes", "y", or integer >= 1, false otherwise
+     */
+    public static boolean parseBoolean(String booleanStr) {
+        if (booleanStr == null) {
             return false;
         }
-        try{
-            int tmp = Integer.parseInt(s.trim());
-            // it's an int !
-            if(tmp <= 0){
-                return false;
-            }
-            else{
-                return true;
-            }
-        }
-        catch(NumberFormatException ex){
-            // it's not a number
-            // cast it as a String
-            String test = s.trim().toLowerCase();
-            if(test.equalsIgnoreCase("true")){
-                return true;
-            }
-            else if(test.equalsIgnoreCase("t")){
-                return true;
-            }
-            else if(test.equalsIgnoreCase("yes")){
-                return true;
-            }
-            else if(test.equalsIgnoreCase("y")){
-                return true;
-            }
-            else if(test.equalsIgnoreCase("false")){
-                return false;
-            }
-            else if(test.equalsIgnoreCase("f")){
-                return false;
-            }
-            else if(test.equalsIgnoreCase("no")){
-                return false;
-            }
-            else if(test.equalsIgnoreCase("n")){
-                return false;
-            }
-            else{
-                return false;
-            }
-            
+        String value = booleanStr.trim().toLowerCase();
+
+        // Check is made to parse int as later as possible
+        return trueValues.contains(value) || (!falseValues.contains(value) && isTrue(value));
+    }
+
+    private static boolean isTrue(String str) {
+        try {
+            return Integer.parseInt(str) > 0;
+        } catch (NumberFormatException ex) {
+            return false;
         }
     }
-    
 }
-

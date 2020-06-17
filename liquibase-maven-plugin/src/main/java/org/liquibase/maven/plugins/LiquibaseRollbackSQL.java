@@ -5,20 +5,18 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.ParseException;
 
+import org.apache.maven.plugin.MojoExecutionException;
+
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
-
-import org.apache.maven.plugin.MojoExecutionException;
-
 /**
- * Generates the SQL that is required to rollback the database to the specified
- * pointing attributes 'rollbackCount', 'rollbackTag'
- * 
- * @author Oleg Taranenko
+ * <p>Generates the SQL that is required to rollback the database using one or more of the specified
+ * attributes 'rollbackCount', 'rollbackTag' and/or 'rollbackDate'</p>
+ *
  * @description Liquibase RollbackSQL Maven plugin
  * @goal rollbackSQL
  */
@@ -27,8 +25,8 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 	/**
 	 * The file to output the Rollback SQL script to, if it exists it will be
 	 * overwritten.
-	 * 
-	 * @parameter expression="${liquibase.migrationSqlOutputFile}"
+	 *
+	 * @parameter property="liquibase.migrationSqlOutputFile"
 	 *            default-value=
 	 *            "${project.build.directory}/liquibase/migrate.sql"
 	 */
@@ -45,10 +43,9 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 	}
 
 	@Override
-	protected Liquibase createLiquibase(ResourceAccessor fo, Database database,
-                                        Database db)
-			throws MojoExecutionException {
-		Liquibase liquibase = super.createLiquibase(fo, database, db);
+	protected Liquibase createLiquibase(ResourceAccessor fo, Database db, Database lockDatabase)
+		throws MojoExecutionException {
+		Liquibase liquibase = super.createLiquibase(fo, db, lockDatabase);
 
 		// Setup the output file writer
 		try {
@@ -58,19 +55,19 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 				// Create the actual file
 				if (!migrationSqlOutputFile.createNewFile()) {
 					throw new MojoExecutionException(
-							"Cannot create the migration SQL file; "
-									+ migrationSqlOutputFile.getAbsolutePath());
+						"Cannot create the migration SQL file; "
+							+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
 			outputWriter = getOutputWriter(migrationSqlOutputFile);
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(
-					"Failed to create SQL output writer", e);
+				"Failed to create SQL output writer", e);
 		}
 		getLog().info(
-				"Output SQL Migration File: "
-						+ migrationSqlOutputFile.getAbsolutePath());
+			"Output SQL Migration File: "
+				+ migrationSqlOutputFile.getAbsolutePath());
 		return liquibase;
 	}
 
@@ -78,7 +75,7 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 	protected void printSettings(String indent) {
 		super.printSettings(indent);
 		getLog().info(
-				indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
+			indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
 	}
 
 	@Override
@@ -95,30 +92,30 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)
-			throws LiquibaseException {
+		throws LiquibaseException {
 		switch (type) {
-		case COUNT: {
-			liquibase.rollback(rollbackCount, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
-			break;
-		}
-		case DATE: {
-			try {
-				liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels),
-						outputWriter);
-			} catch (ParseException e) {
-				String message = "Error parsing rollbackDate: "
-						+ e.getMessage();
-				throw new LiquibaseException(message, e);
+			case COUNT: {
+				liquibase.rollback(rollbackCount, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
+				break;
 			}
-			break;
-		}
-		case TAG: {
-			liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
-			break;
-		}
-		default: {
-			throw new IllegalStateException("Unexpected rollback type, " + type);
-		}
+			case DATE: {
+				try {
+					liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels),
+						outputWriter);
+				} catch (ParseException e) {
+					String message = "Error parsing rollbackDate: "
+						+ e.getMessage();
+					throw new LiquibaseException(message, e);
+				}
+				break;
+			}
+			case TAG: {
+				liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
+				break;
+			}
+			default: {
+				throw new IllegalStateException("Unexpected rollback type, " + type);
+			}
 		}
 	}
 }

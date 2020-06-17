@@ -1,9 +1,5 @@
 package liquibase.database.core;
 
-import liquibase.test.JUnitResourceAccessor;
-import org.junit.Assert;
-import org.junit.Test;
-
 import liquibase.change.AddColumnConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.Database;
@@ -13,6 +9,9 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
+import liquibase.test.JUnitResourceAccessor;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class OfflineDatabaseTest {
 

@@ -6,10 +6,11 @@ import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.sql.SQLException;
+
+import static org.junit.Assert.*;
 
 public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 
@@ -22,7 +23,7 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     protected abstract T createSampleSqlStatement();
 
     protected void dropAndCreateTable(CreateTableStatement statement, Database database) throws SQLException, DatabaseException {
-        ExecutorService.getInstance().getExecutor(database).execute(statement);
+        ExecutorService.getInstance().getExecutor("jdbc", database).execute(statement);
 
         if (!database.getAutoCommitMode()) {
             database.getConnection().commit();

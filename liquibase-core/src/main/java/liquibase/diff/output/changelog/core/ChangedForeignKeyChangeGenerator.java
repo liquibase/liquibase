@@ -11,8 +11,8 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
@@ -56,6 +56,8 @@ public class ChangedForeignKeyChangeGenerator extends AbstractChangeGenerator im
         addFkChange.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", formatter));
         addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getName());
         addFkChange.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", formatter));
+        addFkChange.setOnDelete(fk.getDeleteRule());
+        addFkChange.setOnUpdate(fk.getUpdateRule());
 
         if (control.getIncludeCatalog()) {
             dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());

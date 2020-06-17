@@ -3,20 +3,19 @@ package liquibase.changelog.visitor;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.changelog.RanChangeSet;
+import liquibase.database.Database;
 import liquibase.exception.SetupException;
-import static org.junit.Assert.*;
-
+import liquibase.exception.ValidationErrors;
+import liquibase.sdk.database.MockDatabase;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
+import static org.junit.Assert.*;
 
 public class ValidatingVisitorTest {
 

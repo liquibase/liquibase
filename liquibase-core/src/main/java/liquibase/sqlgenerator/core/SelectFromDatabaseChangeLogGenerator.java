@@ -31,7 +31,7 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
         String sql = "SELECT " + (database instanceof MSSQLDatabase && statement.getLimit() != null ? "TOP "+statement.getLimit()+" " : "") + StringUtils.join(columnsToSelect, ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig column) {
-                if (column.getComputed() != null && column.getComputed()) {
+                if ((column.getComputed() != null) && column.getComputed()) {
                     return column.getName();
                 } else {
                     return database.escapeColumnName(null, null, null, column.getName());
@@ -51,7 +51,7 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
             }
         }
 
-        if (statement.getOrderByColumns() != null && statement.getOrderByColumns().length > 0) {
+        if ((statement.getOrderByColumns() != null) && (statement.getOrderByColumns().length > 0)) {
             sql += " ORDER BY ";
             Iterator<String> orderBy = Arrays.asList(statement.getOrderByColumns()).iterator();
 
@@ -76,9 +76,9 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
                 } else {
                     sql += " AND ROWNUM="+statement.getLimit();
                 }
-            } else if (database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
+            } else if ((database instanceof MySQLDatabase) || (database instanceof PostgresDatabase)) {
                 sql += " LIMIT "+statement.getLimit();
-            } else if (database instanceof DB2Database) {
+            } else if (database instanceof AbstractDb2Database) {
                 sql += " FETCH FIRST "+statement.getLimit()+" ROWS ONLY";
             }
         }

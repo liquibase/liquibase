@@ -2,10 +2,10 @@ package liquibase.change;
 
 import liquibase.change.core.*;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.serializer.LiquibaseSerializable;
 import org.junit.Test;
 
@@ -137,13 +137,12 @@ public class ChangeParameterMetaDataTest {
         assertSetsEqual(new String[]{}, catalogName.analyzeRequiredDatabases(new String[] {ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, catalogName.analyzeSupportedDatabases(new String[] {ChangeParameterMetaData.COMPUTE}));
 
-
         ChangeParameterMetaData tableName = ChangeFactory.getInstance().getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("tableName");
         assertSetsEqual(new String[]{"all"}, tableName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, tableName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
         ChangeParameterMetaData columnDataType = ChangeFactory.getInstance().getChangeMetaData(new AddNotNullConstraintChange()).getParameters().get("columnDataType");
-        assertSetsEqual(new String[]{"informix","mssql","h2","mysql","mariadb"}, columnDataType.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
+        assertSetsEqual(new String[]{"informix","mssql","mysql","mariadb"}, columnDataType.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, columnDataType.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
         ChangeParameterMetaData column = ChangeFactory.getInstance().getChangeMetaData(new AddColumnChange()).getParameters().get("columns");
@@ -168,7 +167,7 @@ public class ChangeParameterMetaDataTest {
 
         ChangeParameterMetaData replaceIfExists  = ChangeFactory.getInstance().getChangeMetaData(new CreateViewChange()).getParameters().get("replaceIfExists");
         assertSetsEqual(new String[]{}, replaceIfExists.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
-        assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
+        assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2","hsqldb","db2", "ingres"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
     }
 
 

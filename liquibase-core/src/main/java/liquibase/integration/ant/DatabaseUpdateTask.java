@@ -1,7 +1,6 @@
 package liquibase.integration.ant;
 
 import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
@@ -16,7 +15,7 @@ import java.io.Writer;
  * Ant task for migrating a database forward.
  */
 public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
-    private boolean dropFirst = false;
+    private boolean dropFirst;
     private String toTag;
 
     @Override

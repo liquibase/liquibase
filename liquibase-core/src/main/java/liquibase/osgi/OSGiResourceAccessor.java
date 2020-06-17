@@ -1,9 +1,8 @@
 package liquibase.osgi;
 
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
-
-import liquibase.resource.ClassLoaderResourceAccessor;
 
 public class OSGiResourceAccessor extends ClassLoaderResourceAccessor {
 

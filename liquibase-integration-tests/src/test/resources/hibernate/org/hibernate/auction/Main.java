@@ -1,12 +1,6 @@
 //$Id: Main.java 7369 2005-07-04 03:18:34Z oneovthafew $
 package org.hibernate.auction;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-
 //import org.hibernate.FetchMode;
 //import org.hibernate.FlushMode;
 //import org.hibernate.LockMode;

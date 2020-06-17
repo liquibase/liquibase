@@ -1,14 +1,14 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.precondition.Precondition;
 
 /**
  * Precondition that checks the name of the user executing the change log.
@@ -40,9 +40,10 @@ public class RunningAsPrecondition extends AbstractPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
+            throws PreconditionFailedException, PreconditionErrorException {
         String loggedusername = database.getConnection().getConnectionUserName();
-        if (loggedusername != null && loggedusername.indexOf('@') >= 0) {
+        if ((loggedusername != null) && (loggedusername.indexOf('@') >= 0)) {
             loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
         }
         if (!username.equalsIgnoreCase(loggedusername)) {

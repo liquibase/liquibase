@@ -2,8 +2,10 @@
 // Copyright: Copyright(c) 2008 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.util.*;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Basic tests verifying the configuration of the {@link LiquibaseRollback} plugin.
@@ -28,7 +30,7 @@ public class LiquibaseRollbackMojoTest extends AbstractLiquibaseMojoTest {
   static {
     DEFAULT_PROPERTIES = new HashMap<String, Object>();
     DEFAULT_PROPERTIES.put("changeLogFile", "org/liquibase/changelog.xml");
-    DEFAULT_PROPERTIES.put("driver", "com.mysql.jdbc.Driver");
+    DEFAULT_PROPERTIES.put("driver", "com.mysql.cj.jdbc.Driver");
     DEFAULT_PROPERTIES.put("url", "jdbc:mysql://localhost/eformat");
     DEFAULT_PROPERTIES.put("username", "root");
     DEFAULT_PROPERTIES.put("password", null);

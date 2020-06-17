@@ -9,7 +9,8 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 
 import java.util.Set;
@@ -18,7 +19,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     private Database database;
 
-    private Logger log = LogFactory.getLogger();
+    private Logger log = LogService.getLog(getClass());
     
     private ChangeExecListener execListener;
 
@@ -41,9 +42,10 @@ public class UpdateVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database,
+                      Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
-        log.debug("Running Changeset:" + changeSet);
+        log.debug(LogType.LOG, "Running Changeset:" + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
         ExecType execType = null;
         ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();

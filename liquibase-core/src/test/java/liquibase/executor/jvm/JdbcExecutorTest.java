@@ -3,10 +3,14 @@ package liquibase.executor.jvm;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import static org.junit.Assert.*;
-
 import liquibase.executor.ExecutorService;
 import org.junit.Test;
+
+import java.sql.SQLException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class JdbcExecutorTest {
 
@@ -32,15 +36,23 @@ public class JdbcExecutorTest {
             }
         };
 
-        assertNotNull(ExecutorService.getInstance().getExecutor(oracle1));
-        assertNotNull(ExecutorService.getInstance().getExecutor(oracle2));
-        assertNotNull(ExecutorService.getInstance().getExecutor(mysql));
+        assertNotNull(ExecutorService.getInstance().getExecutor("jdbc", oracle1));
+        assertNotNull(ExecutorService.getInstance().getExecutor("jdbc", oracle2));
+        assertNotNull(ExecutorService.getInstance().getExecutor("jdbc", mysql));
 
-        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) == ExecutorService.getInstance().getExecutor(oracle1));
-        assertTrue(ExecutorService.getInstance().getExecutor(oracle2) == ExecutorService.getInstance().getExecutor(oracle2));
-        assertTrue(ExecutorService.getInstance().getExecutor(mysql) == ExecutorService.getInstance().getExecutor(mysql));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", oracle1) == ExecutorService.getInstance().getExecutor("jdbc", oracle1));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", oracle2) == ExecutorService.getInstance().getExecutor("jdbc", oracle2));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", mysql) == ExecutorService.getInstance().getExecutor("jdbc", mysql));
 
-        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) != ExecutorService.getInstance().getExecutor(oracle2));
-        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) != ExecutorService.getInstance().getExecutor(mysql));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", oracle1) != ExecutorService.getInstance().getExecutor("jdbc", oracle2));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", oracle1) != ExecutorService.getInstance().getExecutor("jdbc", mysql));
     }
+
+    @Test
+    public void testGetErrorCode() {
+        assertEquals("", new JdbcExecutor().getErrorCode(new RuntimeException()));
+        assertEquals("(123) ", new JdbcExecutor().getErrorCode(new SQLException("reason", "sqlState", 123)));
+        assertEquals("(0) ", new JdbcExecutor().getErrorCode(new SQLException()));
+    }
+
 }

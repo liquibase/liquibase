@@ -23,7 +23,7 @@ public class InformixDatabaseTest extends TestCase {
 		assertEquals("'2010-11-12'", d);
 		
 		d = database.getDateLiteral("13:14:15");
-		assertEquals("INTERVAL (13:14:15) HOUR TO FRACTION(5)", d);
+		assertEquals("DATETIME (13:14:15) HOUR TO FRACTION(5)", d);
 	}
 
 

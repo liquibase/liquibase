@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
     <preConditions>
             <dbms type="asany"/>
     </preConditions>
@@ -123,16 +123,24 @@
     <changeSet id="15" author="nvoxland">
         <addPrimaryKey tableName="page" columnNames="id" constraintName="pk_page"/>
     </changeSet>
-<!--
+
     <changeSet id="16" author="nvoxland">
         <addUniqueConstraint tableName="apublication" columnNames="title" constraintName="uq_publication_title"/>
     </changeSet>
--->
-    <changeSet id="20" author="nvoxland">
+
+	<changeSet id="20" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="page" columnName="magazine_id" newValue="4"/>
     </changeSet>
     <changeSet id="21" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
     </changeSet>
-    
+
+	<changeSet id="22" author="abuschka">
+		<createTable tableName="testUniqueIndex">
+			<column name="gets_unique_index" type="int"/>
+		</createTable>
+		<createIndex tableName="testUniqueIndex" indexName="UQ_testUniqueIndex" unique="true">
+			<column name="gets_unique_index"/>
+		</createIndex>
+	</changeSet>
 </databaseChangeLog>

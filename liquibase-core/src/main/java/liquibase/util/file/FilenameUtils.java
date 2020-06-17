@@ -16,7 +16,6 @@
  */
 package liquibase.util.file;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -295,7 +294,7 @@ public class FilenameUtils {
 
         // adjoining slashes
         for (int i = prefix + 1; i < size; i++) {
-            if (array[i] == SYSTEM_SEPARATOR && array[i - 1] == SYSTEM_SEPARATOR) {
+            if ((array[i] == SYSTEM_SEPARATOR) && (array[i - 1] == SYSTEM_SEPARATOR)) {
                 System.arraycopy(array, i, array, i - 1, size - i);
                 size--;
                 i--;
@@ -304,9 +303,9 @@ public class FilenameUtils {
 
         // dot slash
         for (int i = prefix + 1; i < size; i++) {
-            if (array[i] == SYSTEM_SEPARATOR && array[i - 1] == '.' &&
-                    (i == prefix + 1 || array[i - 2] == SYSTEM_SEPARATOR)) {
-                if (i == size - 1) {
+            if ((array[i] == SYSTEM_SEPARATOR) && (array[i - 1] == '.') && ((i == (prefix + 1)) || (array[i - 2] ==
+                SYSTEM_SEPARATOR))) {
+                if (i == (size - 1)) {
                     lastIsDirectory = true;
                 }
                 System.arraycopy(array, i + 1, array, i - 1, size - i);
@@ -318,12 +317,12 @@ public class FilenameUtils {
         // double dot slash
         outer:
         for (int i = prefix + 2; i < size; i++) {
-            if (array[i] == SYSTEM_SEPARATOR && array[i - 1] == '.' && array[i - 2] == '.' &&
-                    (i == prefix + 2 || array[i - 3] == SYSTEM_SEPARATOR)) {
-                if (i == prefix + 2) {
+            if ((array[i] == SYSTEM_SEPARATOR) && (array[i - 1] == '.') && (array[i - 2] == '.') && ((i == (prefix +
+                2)) || (array[i - 3] == SYSTEM_SEPARATOR))) {
+                if (i == (prefix + 2)) {
                     return null;
                 }
-                if (i == size - 1) {
+                if (i == (size - 1)) {
                     lastIsDirectory = true;
                 }
                 int j;
@@ -338,7 +337,7 @@ public class FilenameUtils {
                 }
                 // remove a/../ from a/../c
                 System.arraycopy(array, i + 1, array, prefix, size - i);
-                size -= (i + 1 - prefix);
+                size -= ((i + 1) - prefix);
                 i = prefix + 1;
             }
         }
@@ -427,7 +426,7 @@ public class FilenameUtils {
      * @return the updated path
      */
     public static String separatorsToUnix(String path) {
-        if (path == null || path.indexOf(WINDOWS_SEPARATOR) == -1) {
+        if ((path == null) || (path.indexOf(WINDOWS_SEPARATOR) == -1)) {
             return path;
         }
         return path.replace(WINDOWS_SEPARATOR, UNIX_SEPARATOR);
@@ -440,7 +439,7 @@ public class FilenameUtils {
      * @return the updated path
      */
     public static String separatorsToWindows(String path) {
-        if (path == null || path.indexOf(UNIX_SEPARATOR) == -1) {
+        if ((path == null) || (path.indexOf(UNIX_SEPARATOR) == -1)) {
             return path;
         }
         return path.replace(UNIX_SEPARATOR, WINDOWS_SEPARATOR);
@@ -516,18 +515,18 @@ public class FilenameUtils {
             if (ch0 == '~') {
                 int posUnix = filename.indexOf(UNIX_SEPARATOR, 1);
                 int posWin = filename.indexOf(WINDOWS_SEPARATOR, 1);
-                if (posUnix == -1 && posWin == -1) {
+                if ((posUnix == -1) && (posWin == -1)) {
                     return len + 1;  // return a length greater than the input
                 }
-                posUnix = (posUnix == -1 ? posWin : posUnix);
-                posWin = (posWin == -1 ? posUnix : posWin);
+                posUnix = ((posUnix == -1) ? posWin : posUnix);
+                posWin = ((posWin == -1) ? posUnix : posWin);
                 return Math.min(posUnix, posWin) + 1;
             }
             char ch1 = filename.charAt(1);
             if (ch1 == ':') {
                 ch0 = Character.toUpperCase(ch0);
-                if (ch0 >= 'A' && ch0 <= 'Z') {
-                    if (len == 2 || isSeparator(filename.charAt(2)) == false) {
+                if ((ch0 >= 'A') && (ch0 <= 'Z')) {
+                    if ((len == 2) || (isSeparator(filename.charAt(2)) == false)) {
                         return 2;
                     }
                     return 3;
@@ -537,11 +536,11 @@ public class FilenameUtils {
             } else if (isSeparator(ch0) && isSeparator(ch1)) {
                 int posUnix = filename.indexOf(UNIX_SEPARATOR, 2);
                 int posWin = filename.indexOf(WINDOWS_SEPARATOR, 2);
-                if ((posUnix == -1 && posWin == -1) || posUnix == 2 || posWin == 2) {
+                if (((posUnix == -1) && (posWin == -1)) || (posUnix == 2) || (posWin == 2)) {
                     return -1;
                 }
-                posUnix = (posUnix == -1 ? posWin : posUnix);
-                posWin = (posWin == -1 ? posUnix : posWin);
+                posUnix = ((posUnix == -1) ? posWin : posUnix);
+                posWin = ((posWin == -1) ? posUnix : posWin);
                 return Math.min(posUnix, posWin) + 1;
             } else {
                 return (isSeparator(ch0) ? 1 : 0);
@@ -589,7 +588,7 @@ public class FilenameUtils {
         }
         int extensionPos = filename.lastIndexOf(EXTENSION_SEPARATOR);
         int lastSeparator = indexOfLastSeparator(filename);
-        return (lastSeparator > extensionPos ? -1 : extensionPos);
+        return ((lastSeparator > extensionPos) ? -1 : extensionPos);
     }
 
     //-----------------------------------------------------------------------
@@ -705,7 +704,7 @@ public class FilenameUtils {
             return null;
         }
         int index = indexOfLastSeparator(filename);
-        if (prefix >= filename.length() || index < 0) {
+        if ((prefix >= filename.length()) || (index < 0)) {
             return "";
         }
         return filename.substring(prefix, index + separatorAdd);
@@ -984,16 +983,16 @@ public class FilenameUtils {
             String filename1, String filename2,
             boolean normalized, IOCase caseSensitivity) {
 
-        if (filename1 == null && filename2 == null) {
+        if ((filename1 == null) && (filename2 == null)) {
             return true;
-        } else if (filename1 == null || filename2 == null) {
+        } else if ((filename1 == null) || (filename2 == null)) {
             return false;
         }
 
         if (normalized) {
             filename1 = normalize(filename1);
             filename2 = normalize(filename2);
-            if (filename1 == null || filename2 == null) {
+            if ((filename1 == null) || (filename2 == null)) {
                 throw new NullPointerException(
                     "Error normalizing one or both of the file names");
             }
@@ -1020,7 +1019,7 @@ public class FilenameUtils {
         if (filename == null) {
             return false;
         }
-        if (extension == null || extension.length() == 0) {
+        if ((extension == null) || extension.isEmpty()) {
             return (indexOfExtension(filename) == -1);
         }
         String fileExt = getExtension(filename);
@@ -1042,7 +1041,7 @@ public class FilenameUtils {
         if (filename == null) {
             return false;
         }
-        if (extensions == null || extensions.length == 0) {
+        if ((extensions == null) || (extensions.length == 0)) {
             return (indexOfExtension(filename) == -1);
         }
         String fileExt = getExtension(filename);
@@ -1069,7 +1068,7 @@ public class FilenameUtils {
         if (filename == null) {
             return false;
         }
-        if (extensions == null || extensions.isEmpty()) {
+        if ((extensions == null) || extensions.isEmpty()) {
             return (indexOfExtension(filename) == -1);
         }
         String fileExt = getExtension(filename);
@@ -1146,10 +1145,10 @@ public class FilenameUtils {
      * @since Commons IO 1.3
      */
     public static boolean wildcardMatch(String filename, String wildcardMatcher, IOCase caseSensitivity) {
-        if (filename == null && wildcardMatcher == null) {
+        if ((filename == null) && (wildcardMatcher == null)) {
             return true;
         }
-        if (filename == null || wildcardMatcher == null) {
+        if ((filename == null) || (wildcardMatcher == null)) {
             return false;
         }
         if (caseSensitivity == null) {
@@ -1165,7 +1164,7 @@ public class FilenameUtils {
 
         // loop around a backtrack stack, to handle complex * matching
         do {
-            if (backtrack.size() > 0) {
+            if (!backtrack.isEmpty()) {
                 int[] array = (int[]) backtrack.pop();
                 wcsIdx = array[0];
                 textIdx = array[1];
@@ -1173,55 +1172,60 @@ public class FilenameUtils {
             }
 
             // loop whilst tokens and text left to process
+            label:
             while (wcsIdx < wcs.length) {
-
-                if (wcs[wcsIdx].equals("?")) {
-                    // ? so move to next text char
-                    textIdx++;
-                    anyChars = false;
-
-                } else if (wcs[wcsIdx].equals("*")) {
-                    // set any chars status
-                    anyChars = true;
-                    if (wcsIdx == wcs.length - 1) {
-                        textIdx = filename.length();
-                    }
-
-                } else {
-                    // matching text token
-                    if (anyChars) {
-                        // any chars then try to locate text token
-                        textIdx = filename.indexOf(wcs[wcsIdx], textIdx);
-                        if (textIdx == -1) {
-                            // token not found
-                            break;
+        
+                switch (wcs[wcsIdx]) {
+                    case "?":
+                        // ? so move to next text char
+                        textIdx++;
+                        anyChars = false;
+                
+                        break;
+                    case "*":
+                        // set any chars status
+                        anyChars = true;
+                        if (wcsIdx == (wcs.length - 1)) {
+                            textIdx = filename.length();
                         }
-                        int repeat = filename.indexOf(wcs[wcsIdx], textIdx + 1);
-                        if (repeat >= 0) {
-                            backtrack.push(new int[] {wcsIdx, repeat});
+                
+                        break;
+                    default:
+                        // matching text token
+                        if (anyChars) {
+                            // any chars then try to locate text token
+                            textIdx = filename.indexOf(wcs[wcsIdx], textIdx);
+                            if (textIdx == -1) {
+                                // token not found
+                                break label;
+                            }
+                            int repeat = filename.indexOf(wcs[wcsIdx], textIdx + 1);
+                            if (repeat >= 0) {
+                                backtrack.push(new int[]{wcsIdx, repeat});
+                            }
+                        } else {
+                            // matching from current position
+                            if (!filename.startsWith(wcs[wcsIdx], textIdx)) {
+                                // couldnt match token
+                                break label;
+                            }
                         }
-                    } else {
-                        // matching from current position
-                        if (!filename.startsWith(wcs[wcsIdx], textIdx)) {
-                            // couldnt match token
-                            break;
-                        }
-                    }
-
-                    // matched text token, move text index to end of matched token
-                    textIdx += wcs[wcsIdx].length();
-                    anyChars = false;
+                
+                        // matched text token, move text index to end of matched token
+                        textIdx += wcs[wcsIdx].length();
+                        anyChars = false;
+                        break;
                 }
-
+        
                 wcsIdx++;
             }
 
             // full match
-            if (wcsIdx == wcs.length && textIdx == filename.length()) {
+            if ((wcsIdx == wcs.length) && (textIdx == filename.length())) {
                 return true;
             }
 
-        } while (backtrack.size() > 0);
+        } while (!backtrack.isEmpty());
 
         return false;
     }
@@ -1236,7 +1240,7 @@ public class FilenameUtils {
         // used by wildcardMatch
         // package level so a unit test may run on this
 
-        if (text.indexOf("?") == -1 && text.indexOf("*") == -1) {
+        if ((text.indexOf("?") == -1) && (text.indexOf("*") == -1)) {
             return new String[] { text };
         }
 
@@ -1244,15 +1248,14 @@ public class FilenameUtils {
         ArrayList list = new ArrayList();
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < array.length; i++) {
-            if (array[i] == '?' || array[i] == '*') {
+            if ((array[i] == '?') || (array[i] == '*')) {
                 if (buffer.length() != 0) {
                     list.add(buffer.toString());
                     buffer.setLength(0);
                 }
                 if (array[i] == '?') {
                     list.add("?");
-                } else if (list.size() == 0 ||
-                        (i > 0 && list.get(list.size() - 1).equals("*") == false)) {
+                } else if (list.isEmpty() || ((i > 0) && ("*".equals(list.get(list.size() - 1)) == false))) {
                     list.add("*");
                 }
             } else {

@@ -31,7 +31,7 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
         String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig col) {
-                if (col.getComputed() != null && col.getComputed()) {
+                if ((col.getComputed() != null) && col.getComputed()) {
                     return col.getName();
                 } else {
                     return database.escapeColumnName(null, null, null, col.getName());

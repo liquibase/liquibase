@@ -5,14 +5,15 @@ import liquibase.Labels;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
+import liquibase.logging.LogType;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -20,22 +21,16 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new SafeConstructor());
 
-        try {
-            InputStream changeLogStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
+        try (InputStream changeLogStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor)) {
             if (changeLogStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
+    
+            Map parsedYaml = parseYamlStream(physicalChangeLogLocation, yaml, changeLogStream);
 
-            Map parsedYaml;
-            try {
-                parsedYaml = yaml.loadAs(changeLogStream, Map.class);
-            } catch (Exception e) {
-                throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtensions()[0] + ": " + e.getMessage(), e);
-            }
-
-            if (parsedYaml == null || parsedYaml.size() == 0) {
+            if ((parsedYaml == null) || parsedYaml.isEmpty()) {
                 throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
             }
 
@@ -51,7 +46,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             }
 
             for (Object obj : (List) rootList) {
-                if (obj instanceof Map && ((Map) obj).containsKey("property")) {
+                if ((obj instanceof Map) && ((Map) obj).containsKey("property")) {
                     Map property = (Map) ((Map) obj).get("property");
                     ContextExpression context = new ContextExpression((String) property.get("context"));
                     Labels labels = new Labels((String) property.get("labels"));
@@ -66,17 +61,8 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
                         changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
                     } else if (property.containsKey("file")) {
-                        Properties props = new Properties();
-                        InputStream propertiesStream = StreamUtil.singleInputStream((String) property.get("file"), resourceAccessor);
-                        if (propertiesStream == null) {
-                            log.info("Could not open properties file " + property.get("file"));
-                        } else {
-                            props.load(propertiesStream);
-
-                            for (Map.Entry entry : props.entrySet()) {
-                                changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, (String) property.get("dbms"), global, changeLog);
-                            }
-                        }
+                        loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
+                        context, labels, global);
                     }
                 }
             }
@@ -91,15 +77,43 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             changeLog.load(databaseChangeLogNode, resourceAccessor);
 
             return changeLog;
-        } catch (Throwable e) {
-            if (e instanceof ChangeLogParseException) {
-                throw (ChangeLogParseException) e;
-            }
+        } catch (ChangeLogParseException e) {
+            throw e;
+        } catch (Exception e) {
             throw new ChangeLogParseException("Error parsing "+physicalChangeLogLocation, e);
         }
     }
+    
+    private Map parseYamlStream(String physicalChangeLogLocation, Yaml yaml, InputStream changeLogStream) throws ChangeLogParseException {
+        Map parsedYaml;
+        try {
+            parsedYaml = (Map) yaml.load(changeLogStream);
+        } catch (Exception e) {
+            throw new ChangeLogParseException("Syntax error in file " + physicalChangeLogLocation + ": " + e.getMessage(), e);
+        }
+        return parsedYaml;
+    }
+    
+    private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException {
+        Properties props = new Properties();
+        try (
+            InputStream propertiesStream = StreamUtil.singleInputStream(
+                (String) property.get("file"), resourceAccessor))
+        {
+            
+            if (propertiesStream == null) {
+                log.info(LogType.LOG, "Could not open properties file " + property.get("file"));
+            } else {
+                props.load(propertiesStream);
 
-	/**
+                for (Map.Entry entry : props.entrySet()) {
+                    changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, (String) property.get("dbms"), global, changeLog);
+                }
+            }
+        }
+    }
+    
+    /**
 	 * Extract the global parameter from the properties.
 	 * 
 	 * @param property the map of props
@@ -120,7 +134,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) {
         if (obj instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) obj).entrySet()) {
-                if (entry.getValue() instanceof Map || entry.getValue() instanceof Collection) {
+                if ((entry.getValue() instanceof Map) || (entry.getValue() instanceof Collection)) {
                     replaceParameters(entry.getValue(), changeLogParameters, changeLog);
                 } else if (entry.getValue() instanceof String) {
                     entry.setValue(changeLogParameters.expandExpressions((String) entry.getValue(), changeLog));
@@ -130,7 +144,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             ListIterator iterator = ((List) obj).listIterator();
             while (iterator.hasNext()) {
                 Object child = iterator.next();
-                if (child instanceof Map || child instanceof Collection) {
+                if ((child instanceof Map) || (child instanceof Collection)) {
                     replaceParameters(child, changeLogParameters, changeLog);
                 } else if (child instanceof String) {
                     iterator.set(changeLogParameters.expandExpressions((String) child, changeLog));

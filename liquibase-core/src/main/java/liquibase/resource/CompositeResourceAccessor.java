@@ -4,6 +4,7 @@ import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -26,7 +27,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
     public Set<InputStream> getResourcesAsStream(String path) throws IOException {
         for (ResourceAccessor accessor : resourceAccessors) {
             Set<InputStream> returnSet = accessor.getResourcesAsStream(path);
-            if (returnSet != null && returnSet.size() > 0) {
+            if ((returnSet != null) && !returnSet.isEmpty()) {
                 return returnSet;
             }
         }
@@ -35,7 +36,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
 
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        Set<String> returnSet = new HashSet<String>();
+        Set<String> returnSet = new HashSet<>();
         for (ResourceAccessor accessor : resourceAccessors) {
             Set<String> thisSet = accessor.list(relativeTo, path, includeFiles, includeDirectories, recursive);
             if (thisSet != null) {
@@ -43,7 +44,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
             }
         }
 
-        if (returnSet.size() > 0) {
+        if (!returnSet.isEmpty()) {
             return returnSet;
         }
         return null;
@@ -63,7 +64,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
     //based on code from http://fisheye.codehaus.org/browse/xstream/trunk/xstream/src/java/com/thoughtworks/xstream/core/util/CompositeClassLoader.java?r=root
     private static class CompositeClassLoader extends ClassLoader {
 
-        private final List<ClassLoader> classLoaders = new ArrayList<ClassLoader>();
+        private final List<ClassLoader> classLoaders = new ArrayList<>();
 
         public CompositeClassLoader(ClassLoader... classLoaders) {
             this.classLoaders.addAll(Arrays.asList(classLoaders));
@@ -95,17 +96,44 @@ public class CompositeResourceAccessor implements ResourceAccessor {
             } else {
                 throw new ClassNotFoundException(name);
             }
-
-
         }
 
-        
 
- 	}
+        @Override
+        public URL getResource(String name) {
+            for (ClassLoader cl : classLoaders) {
+                URL url = cl.getResource(name);
+                if (url != null)
+                    return url;
+            }
+
+            // Try with the context class loader associated with the current thread.
+            return Thread.currentThread().getContextClassLoader().getResource(name);
+        }
+
+        @Override
+        public Enumeration<URL> getResources(String name) throws IOException {
+            List<URL> urls = new ArrayList<>();
+
+            for (ClassLoader cl : classLoaders) {
+                Enumeration<URL> resources = cl.getResources(name);
+                while (resources.hasMoreElements()) {
+                    urls.add(resources.nextElement());
+                }
+            }
+
+            if (!urls.isEmpty()) {
+                return Collections.enumeration(urls);
+            }
+
+            // Try with the context class loader associated with the current thread.
+            return Thread.currentThread().getContextClassLoader().getResources(name);
+        }
+    }
 
     @Override
     public String toString() {
-        List<String> openerStrings = new ArrayList<String>();
+        List<String> openerStrings = new ArrayList<>();
         for (ResourceAccessor opener : resourceAccessors) {
             openerStrings.add(opener.toString());
         }

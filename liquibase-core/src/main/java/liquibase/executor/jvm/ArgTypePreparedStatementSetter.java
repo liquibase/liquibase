@@ -27,8 +27,8 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter {
      * @param argTypes the corresponding SQL types of the arguments
      */
     public ArgTypePreparedStatementSetter(Object[] args, int[] argTypes) throws DatabaseException {
-        if ((args != null && argTypes == null) || (args == null && argTypes != null) ||
-                (args != null && args.length != argTypes.length)) {
+        if (((args != null) && (argTypes == null)) || ((args == null) && (argTypes != null)) || ((args != null) &&
+            (args.length != argTypes.length))) {
             throw new DatabaseException("args and argTypes parameters must match");
         }
         this.args = args;
@@ -42,7 +42,7 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter {
         if (this.args != null) {
             for (int i = 0; i < this.args.length; i++) {
                 Object arg = this.args[i];
-                if (arg instanceof Collection && this.argTypes[i] != Types.ARRAY) {
+                if ((arg instanceof Collection) && (this.argTypes[i] != Types.ARRAY)) {
                     Collection entries = (Collection) arg;
                     for (Object entry : entries) {
                         StatementCreatorUtils.setParameterValue(ps, argIndx++, this.argTypes[i], entry);

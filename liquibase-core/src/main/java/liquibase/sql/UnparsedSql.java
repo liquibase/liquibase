@@ -9,7 +9,7 @@ public class UnparsedSql implements Sql {
 
     private String sql;
     private String endDelimiter;
-    private Set<DatabaseObject> affectedDatabaseObjects = new HashSet<DatabaseObject>();
+    private Set<DatabaseObject> affectedDatabaseObjects = new HashSet<>();
 
 
     public UnparsedSql(String sql, DatabaseObject... affectedDatabaseObjects) {
@@ -17,11 +17,11 @@ public class UnparsedSql implements Sql {
     }
 
     public UnparsedSql(String sql, String endDelimiter, DatabaseObject... affectedDatabaseObjects) {
-        this.sql = StringUtils.trimToEmpty(sql.trim());
+        this.sql = StringUtils.trimToEmpty(sql);
         this.endDelimiter = endDelimiter;
 
         this.affectedDatabaseObjects.addAll(Arrays.asList(affectedDatabaseObjects));
-        List<DatabaseObject> moreAffectedDatabaseObjects = new ArrayList<DatabaseObject>();
+        List<DatabaseObject> moreAffectedDatabaseObjects = new ArrayList<>();
 
         boolean foundMore = true;
         while (foundMore) {
@@ -29,13 +29,14 @@ public class UnparsedSql implements Sql {
                 DatabaseObject[] containingObjects = object.getContainingObjects();
                 if (containingObjects != null) {
                     for (DatabaseObject containingObject : containingObjects) {
-                        if (containingObject != null && !this.affectedDatabaseObjects.contains(containingObject) && !moreAffectedDatabaseObjects.contains(containingObject)) {
+                        if ((containingObject != null) && !this.affectedDatabaseObjects.contains(containingObject) &&
+                            !moreAffectedDatabaseObjects.contains(containingObject)) {
                             moreAffectedDatabaseObjects.add(containingObject);
                         }
                     }
                 }
             }
-            foundMore = moreAffectedDatabaseObjects.size() > 0;
+            foundMore = !moreAffectedDatabaseObjects.isEmpty();
             this.affectedDatabaseObjects.addAll(moreAffectedDatabaseObjects);
             moreAffectedDatabaseObjects.clear();
         }

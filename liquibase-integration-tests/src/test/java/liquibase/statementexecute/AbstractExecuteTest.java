@@ -1,5 +1,6 @@
 package liquibase.statementexecute;
 
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -24,6 +25,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -35,8 +38,8 @@ import liquibase.test.TestContext;
 
 public abstract class AbstractExecuteTest {
 
-    private Set<Class<? extends Database>> testedDatabases = new HashSet<Class<? extends Database>>();
     protected SqlStatement statementUnderTest;
+    private Set<Class<? extends Database>> testedDatabases = new HashSet<Class<? extends Database>>();
 
     @After
     public void reset() {
@@ -65,17 +68,21 @@ public abstract class AbstractExecuteTest {
         assertCorrect(expectedSql);
     }
 
-    protected void assertCorrect(String expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
+    @SafeVarargs
+    protected final void assertCorrect(String expectedSql, Class<? extends Database>... includeDatabases) throws
+        Exception {
         assertCorrect(new String[]{expectedSql}, includeDatabases);
     }
 
-    protected void assertCorrect(String[] expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
-        assertNotNull(statementUnderTest);
+    @SafeVarargs
+    protected final void assertCorrect(String[] expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
+        assertNotNull("SqlStatement to test is NOT null.", statementUnderTest);
 
         test(expectedSql, includeDatabases, null);
     }
 
-    public void testOnAllExcept(String expectedSql, Class<? extends Database>... excludedDatabases) throws Exception {
+    @SafeVarargs
+    public final void testOnAllExcept(String expectedSql, Class<? extends Database>... excludedDatabases) throws Exception {
         test(expectedSql, null, excludedDatabases);
     }
 
@@ -120,6 +127,7 @@ public abstract class AbstractExecuteTest {
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
                 String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
                 try {
+                    LogService.getLog(getClass()).info(LogType.WRITE_SQL, sqlToRun);
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
                     System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
@@ -148,11 +156,12 @@ public abstract class AbstractExecuteTest {
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {
-        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null));
+        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null, null, null));
     }
 
     private boolean shouldTestDatabase(Database database, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) {
-        if (database instanceof MockDatabase || database instanceof ExampleCustomDatabase || database instanceof UnsupportedDatabase) {
+        if ((database instanceof MockDatabase) || (database instanceof ExampleCustomDatabase) || (database instanceof
+            UnsupportedDatabase)) {
             return false;
         }
         if (!SqlGeneratorFactory.getInstance().supports(statementUnderTest, database)
@@ -161,12 +170,12 @@ public abstract class AbstractExecuteTest {
         }
 
         boolean shouldInclude = true;
-        if (includeDatabases != null && includeDatabases.length > 0) {
+        if ((includeDatabases != null) && (includeDatabases.length > 0)) {
             shouldInclude = Arrays.asList(includeDatabases).contains(database.getClass());
         }
 
         boolean shouldExclude = false;
-        if (excludeDatabases != null && excludeDatabases.length > 0) {
+        if ((excludeDatabases != null) && (excludeDatabases.length > 0)) {
             shouldExclude = Arrays.asList(excludeDatabases).contains(database.getClass());
         }
 
@@ -199,19 +208,17 @@ public abstract class AbstractExecuteTest {
             try {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
                 LockServiceFactory.getInstance().getLockService(database).destroy();
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }
             try {
                 connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             } catch (SQLException e) {
-                ;
             }
             connection.commit();
             try {
                 connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
             } catch (SQLException e) {
-                ;
             }
             connection.commit();
 
@@ -236,7 +243,7 @@ public abstract class AbstractExecuteTest {
             List<? extends SqlStatement> setupStatements = setupStatements(database);
             if (setupStatements != null) {
                 for (SqlStatement statement : setupStatements) {
-                    ExecutorService.getInstance().getExecutor(database).execute(statement);
+                    ExecutorService.getInstance().getExecutor("jdbc", database).execute(statement);
                 }
             }
             connectionStatement.close();

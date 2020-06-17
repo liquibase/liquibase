@@ -13,9 +13,7 @@ public class PropertyUtils {
         return INSTANCE;
     }
 
-    private final List<BeanIntrospector> introspectors = new ArrayList<BeanIntrospector>(Arrays.asList(
-            new DefaultBeanIntrospector(),
-            new FluentPropertyBeanIntrospector()));
+    private final List<BeanIntrospector> introspectors = new ArrayList<>(Arrays.asList(new DefaultBeanIntrospector(), new FluentPropertyBeanIntrospector()));
 
     public PropertyDescriptor[] getDescriptors(Class<?> targetClass) throws IntrospectionException {
         IntrospectionContext context = new IntrospectionContext(targetClass);

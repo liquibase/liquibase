@@ -1,7 +1,5 @@
 package liquibase.database.core;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import junit.framework.TestCase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -42,19 +40,19 @@ public class HsqlDatabaseTest extends TestCase {
         assertEquals("\"Test\"", databaseWithAllQuoting.escapeObjectName("Test", Table.class));
     }
     
-    public void testUsingOracleSyntax()  {
-        HsqlDatabase database = new HsqlDatabase();
-        DatabaseConnection conn = mock(DatabaseConnection.class);
-        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb;sql.syntax_ora=true;sql.enforce_names=true");
-        database.setConnection(conn );
-        assertTrue("Using oracle syntax", database.isUsingOracleSyntax());
-    }
-
-    public void testNotUsingOracleSyntax()  {
-        HsqlDatabase database = new HsqlDatabase();
-        DatabaseConnection conn = mock(DatabaseConnection.class);
-        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb");
-        database.setConnection(conn );
-        assertFalse("Using oracle syntax", database.isUsingOracleSyntax());
-    }
+//    public void testUsingOracleSyntax()  {
+//        HsqlDatabase database = new HsqlDatabase();
+//        DatabaseConnection conn = mock(DatabaseConnection.class);
+//        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb;sql.syntax_ora=true;sql.enforce_names=true");
+//        database.setConnection(conn );
+//        assertTrue("Using oracle syntax", database.isUsingOracleSyntax());
+//    }
+//
+//    public void testNotUsingOracleSyntax()  {
+//        HsqlDatabase database = new HsqlDatabase();
+//        DatabaseConnection conn = mock(DatabaseConnection.class);
+//        when(conn.getURL()).thenReturn("jdbc:hsqldb:mem:testdb");
+//        database.setConnection(conn );
+//        assertFalse("Using oracle syntax", database.isUsingOracleSyntax());
+//    }
 }

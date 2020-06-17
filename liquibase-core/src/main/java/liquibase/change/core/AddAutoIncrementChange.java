@@ -3,6 +3,8 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.DatabaseException;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -14,15 +16,19 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
+import java.util.Locale;
 
 /**
  * Makes an existing column into an auto-increment column.
  * This change is only valid for databases with auto-increment/identity columns.
  * The current version does not support MS-SQL.
  */
-@DatabaseChange(name = "addAutoIncrement", description = "Converts an existing column to be an auto-increment (a.k.a 'identity') column",
-        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column",
-        databaseNotes = {@DatabaseChangeNote(database = "sqlite", notes = "If the column type is not INTEGER it is converted to INTEGER")}
+@DatabaseChange(name = "addAutoIncrement",
+    description = "Converts an existing column to be an auto-increment (a.k.a 'identity') column",
+    priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column",
+    databaseNotes = {@DatabaseChangeNote(
+        database = "sqlite", notes = "If the column type is not INTEGER it is converted to INTEGER"
+    )}
 )
 public class AddAutoIncrementChange extends AbstractChange {
 
@@ -33,8 +39,10 @@ public class AddAutoIncrementChange extends AbstractChange {
     private String columnDataType;
     private BigInteger startWith;
     private BigInteger incrementBy;
+    private Boolean defaultOnNull;
+    private String generationType;
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting = "column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -70,7 +78,8 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column to make auto-increment", exampleValue = "int")
+    @DatabaseChangeProperty(description = "Current data type of the column to make auto-increment",
+        exampleValue = "int")
     public String getColumnDataType() {
         return columnDataType;
     }
@@ -96,7 +105,23 @@ public class AddAutoIncrementChange extends AbstractChange {
     public void setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
     }
+@DatabaseChangeProperty(exampleValue = "true", since = "3.6")
+    public Boolean getDefaultOnNull() {
+        return defaultOnNull;
+    }
 
+    public void setDefaultOnNull(Boolean defaultOnNull) {
+        this.defaultOnNull = defaultOnNull;
+    }
+
+    @DatabaseChangeProperty(exampleValue = "ALWAYS", since = "3.6")
+    public String getGenerationType() {
+        return generationType;
+    }
+
+    public void setGenerationType(String generationType) {
+        this.generationType = generationType;
+    }
     @Override
     public SqlStatement[] generateStatements(Database database) {
         if (database instanceof PostgresDatabase) {
@@ -104,10 +129,11 @@ public class AddAutoIncrementChange extends AbstractChange {
 
             String escapedTableName = database.escapeObjectName(getTableName(), Table.class);
             String escapedColumnName = database.escapeObjectName(getColumnName(), Table.class);
-            if (escapedTableName != null && escapedColumnName != null && !escapedTableName.startsWith("\"") && !escapedColumnName.startsWith("\"")) {
-                sequenceName = sequenceName.toLowerCase();
+            if ((escapedTableName != null) && (escapedColumnName != null) && !escapedTableName.startsWith("\"") &&
+                !escapedColumnName.startsWith("\"")
+            ) {
+                sequenceName = sequenceName.toLowerCase(Locale.US);
             }
-
 
             String schemaPrefix;
             if (this.schemaName == null) {
@@ -122,12 +148,12 @@ public class AddAutoIncrementChange extends AbstractChange {
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, this.schemaName, sequenceName),
                     new SetNullableStatement(catalogName, this.schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(),
-                            nvf)
+                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(), nvf)
             };
         }
 
-        return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
+        return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(),
+            getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy(), getDefaultOnNull(), getGenerationType())};
     }
 
     @Override
@@ -141,25 +167,33 @@ public class AddAutoIncrementChange extends AbstractChange {
         Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
         try {
             Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            if (column == null) return result.unknown("Column does not exist");
-
-
-            result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
-            if (getStartWith() != null && column.getAutoIncrementInformation().getStartWith() != null) {
-                result.assertCorrect(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()), "startsWith incorrect");
+            if (column == null) {
+                return result.unknown("Column does not exist");
             }
 
-            if (getIncrementBy() != null && column.getAutoIncrementInformation().getIncrementBy() != null) {
-                result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()), "Increment by incorrect");
+            result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
+            if ((getStartWith() != null) && (column.getAutoIncrementInformation().getStartWith() != null)) {
+                result.assertCorrect(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()),
+                     "startsWith incorrect");
+            }
+
+            if ((getIncrementBy() != null) && (column.getAutoIncrementInformation().getIncrementBy() != null)) {
+                result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()),
+                     "Increment by incorrect");
+            }
+
+            if (getGenerationType() != null && column.getAutoIncrementInformation().getGenerationType() != null) {
+                result.assertCorrect(getGenerationType().equals(column.getAutoIncrementInformation().getGenerationType()), "Generation type is incorrect");
+            }
+
+            if (getDefaultOnNull() != null && column.getAutoIncrementInformation().getDefaultOnNull() != null) {
+                result.assertCorrect(getDefaultOnNull().equals(column.getAutoIncrementInformation().getDefaultOnNull()), "Default on null is incorrect");
             }
 
             return result;
-        } catch (Exception e) {
+        } catch (DatabaseException|InvalidExampleException e) {
             return result.unknown(e);
-
         }
-
-
     }
 
     @Override

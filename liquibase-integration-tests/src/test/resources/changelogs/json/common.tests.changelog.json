@@ -189,9 +189,9 @@
                                         "name": "id",
                                         "type": "${real.int.type}",
                                         "constraints": {
-                                            "primaryKey": "${true.boolean}"
-                                        },
-                                        "nullable": false
+                                            "primaryKey": "${true.boolean}",
+                                            "nullable": false
+                                        }
                                     }
                                 },
                                 {

@@ -1,26 +1,25 @@
 package liquibase.parser.core.xml;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.RuntimeEnvironment;
 import liquibase.changelog.ChangeLogIterator;
-import liquibase.changelog.filter.ChangeSetFilterResult;
-import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.database.Database;
-import liquibase.exception.LiquibaseException;
-import liquibase.sdk.database.MockDatabase;
-import org.junit.Assert;
-import org.junit.Test;
-
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.changelog.visitor.ChangeSetVisitor;
+import liquibase.database.Database;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.test.JUnitResourceAccessor;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class XMLChangeLogSAXParserTest {
 

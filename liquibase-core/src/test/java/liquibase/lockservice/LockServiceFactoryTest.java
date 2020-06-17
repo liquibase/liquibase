@@ -1,19 +1,17 @@
 package liquibase.lockservice;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.lockservice.ext.MockLockService;
+import liquibase.sdk.database.MockDatabase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.sdk.database.MockDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.lockservice.ext.MockLockService;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author John Sanda

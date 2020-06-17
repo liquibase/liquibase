@@ -6,8 +6,9 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnGeneratorTest {
     public AddColumnGeneratorDefaultClauseBeforeNotNullTest() throws Exception {
@@ -22,14 +23,9 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnG
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
-        return database instanceof OracleDatabase
-                || database instanceof HsqlDatabase
-                || database instanceof H2Database
-                || database instanceof DerbyDatabase
-                || database instanceof DB2Database
-                || database instanceof FirebirdDatabase
-                || database instanceof SybaseASADatabase
-                || database instanceof SybaseDatabase
-                || database instanceof InformixDatabase;
+        return (database instanceof OracleDatabase) || (database instanceof HsqlDatabase) || (database instanceof
+            H2Database) || (database instanceof DerbyDatabase) || (database instanceof AbstractDb2Database) || (database
+            instanceof FirebirdDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
+            SybaseDatabase) || (database instanceof InformixDatabase);
     }
 }

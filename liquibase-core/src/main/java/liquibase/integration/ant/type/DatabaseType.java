@@ -20,8 +20,11 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class DatabaseType extends DataType {
-    private static final String USER = "user";
-    private static final String PASSWORD = "password";
+    private static final String USER_PROPERTY_NAME = "user";
+    // SONAR thinks this is a hard-coded password, but actually it is only the
+    // property name for the password
+    @SuppressWarnings("squid:S2068")
+    private static final String PASSWORD_PROPERTY_NAME = "password";
 
     private String driver;
     private String url;
@@ -63,27 +66,29 @@ public class DatabaseType extends DataType {
             if (getUrl().startsWith("offline:")) {
                 jdbcConnection = new OfflineConnection(getUrl(), new ClassLoaderResourceAccessor(classLoader));
             } else {
-                Driver driver = (Driver) ClasspathUtils.newInstance(getDriver(), classLoader, Driver.class);
-                if(driver == null) {
-                    throw new BuildException("Unable to create Liquibase Database instance. Could not instantiate the JDBC driver.");
+                Driver jdbcDriver = (Driver) ClasspathUtils.newInstance(getDriver(), classLoader, Driver.class);
+                if(jdbcDriver == null) {
+                    throw new BuildException("Unable to create Liquibase Database instance. Could not instantiate the" +
+                     " JDBC driver.");
                 }
                 Properties connectionProps = new Properties();
-                String user = getUser();
-                if(user != null && !user.isEmpty()) {
-                    connectionProps.setProperty(USER, user);
+                String connectionUserName = getUser();
+                if((connectionUserName != null) && !connectionUserName.isEmpty()) {
+                    connectionProps.setProperty(USER_PROPERTY_NAME, connectionUserName);
                 }
-                String password = getPassword();
-                if(password != null && !password.isEmpty()) {
-                    connectionProps.setProperty(PASSWORD, password);
+                String connectionPassword = getPassword();
+                if((connectionPassword != null) && !connectionPassword.isEmpty()) {
+                    connectionProps.setProperty(PASSWORD_PROPERTY_NAME, connectionPassword);
                 }
-                ConnectionProperties connectionProperties = getConnectionProperties();
-                if(connectionProperties != null) {
-                    connectionProps.putAll(connectionProperties.buildProperties());
+                ConnectionProperties dbConnectionProperties = getConnectionProperties();
+                if(dbConnectionProperties != null) {
+                    connectionProps.putAll(dbConnectionProperties.buildProperties());
                 }
 
-                Connection connection = driver.connect(getUrl(), connectionProps);
+                Connection connection = jdbcDriver.connect(getUrl(), connectionProps);
                 if(connection == null) {
-                    throw new BuildException("Unable to create Liquibase Database instance. Could not connect to the database.");
+                    throw new BuildException("Unable to create Liquibase database instance. Could not connect to the " +
+                     "database.");
                 }
                 jdbcConnection = new JdbcConnection(connection);
             }
@@ -98,39 +103,43 @@ public class DatabaseType extends DataType {
             if (catalogName != null) {
                 database.setDefaultCatalogName(catalogName);
             }
-            String currentDateTimeFunction = getCurrentDateTimeFunction();
-            if(currentDateTimeFunction != null) {
-                database.setCurrentDateTimeFunction(currentDateTimeFunction);
+            String dbmsCurrentDateTimeFunction = getCurrentDateTimeFunction();
+            if(dbmsCurrentDateTimeFunction != null) {
+                database.setCurrentDateTimeFunction(dbmsCurrentDateTimeFunction);
             }
 
             database.setOutputDefaultSchema(isOutputDefaultSchema());
             database.setOutputDefaultCatalog(isOutputDefaultCatalog());
 
-            String liquibaseSchemaName = getLiquibaseSchemaName();
+            String connLiquibaseSchemaName = getLiquibaseSchemaName();
             if (liquibaseSchemaName != null) {
-                database.setLiquibaseSchemaName(liquibaseSchemaName);
+                database.setLiquibaseSchemaName(connLiquibaseSchemaName);
             }
-            String liquibaseCatalogName = getLiquibaseCatalogName();
-            if(liquibaseCatalogName != null) {
-                database.setLiquibaseCatalogName(liquibaseCatalogName);
+            
+            String connLiquibaseCatalogName = getLiquibaseCatalogName();
+            if(connLiquibaseCatalogName != null) {
+                database.setLiquibaseCatalogName(connLiquibaseCatalogName);
             }
 
-            String databaseChangeLogTableName = getDatabaseChangeLogTableName();
-            if(databaseChangeLogTableName != null) {
-                database.setDatabaseChangeLogTableName(databaseChangeLogTableName);
+            String connDatabaseChangeLogTableName = getDatabaseChangeLogTableName();
+            if(connDatabaseChangeLogTableName != null) {
+                database.setDatabaseChangeLogTableName(connDatabaseChangeLogTableName);
             }
-            String databaseChangeLogLockTableName = getDatabaseChangeLogLockTableName();
-            if(databaseChangeLogLockTableName != null) {
-                database.setDatabaseChangeLogLockTableName(databaseChangeLogLockTableName);
+            
+            String connDatabaseChangeLogLockTableName = getDatabaseChangeLogLockTableName();
+            if(connDatabaseChangeLogLockTableName != null) {
+                database.setDatabaseChangeLogLockTableName(connDatabaseChangeLogLockTableName);
             }
-            String liquibaseTablespaceName = getLiquibaseTablespaceName();
-            if(liquibaseTablespaceName != null) {
-                database.setLiquibaseTablespaceName(liquibaseTablespaceName);
+            
+            String connLiquibaseTablespaceName = getLiquibaseTablespaceName();
+            if(connLiquibaseTablespaceName != null) {
+                database.setLiquibaseTablespaceName(connLiquibaseTablespaceName);
             }
 
             return database;
         } catch (SQLException e) {
-            throw new BuildException("Unable to create Liquibase database instance. A JDBC error occurred. " + e.toString(), e);
+            throw new BuildException("Unable to create Liquibase database instance. A JDBC error occurred. " + e
+            .toString(), e);
         } catch (DatabaseException e) {
             throw new BuildException("Unable to create Liquibase database instance. " + e.toString(), e);
         }
@@ -140,7 +149,7 @@ public class DatabaseType extends DataType {
         if(getUrl() == null) {
             throw new BuildException("JDBC URL is required.");
         }
-        if(getDriver() == null && !getUrl().startsWith("offline:")) {
+        if((getDriver() == null) && !getUrl().startsWith("offline:")) {
             throw new BuildException("JDBC driver is required.");
         }
     }
@@ -165,19 +174,10 @@ public class DatabaseType extends DataType {
 
     @Override
     public void setRefid(Reference ref) {
-        if(driver != null
-                || url != null
-                || user != null
-                || password != null
-                || defaultSchemaName != null
-                || defaultCatalogName != null
-                || currentDateTimeFunction != null
-                || databaseClass != null
-                || liquibaseSchemaName != null
-                || liquibaseCatalogName != null
-                || databaseChangeLogTableName != null
-                || databaseChangeLogLockTableName != null
-                || liquibaseTablespaceName != null) {
+        if((driver != null) || (url != null) || (user != null) || (password != null) || (defaultSchemaName != null)
+            || (defaultCatalogName != null) || (currentDateTimeFunction != null) || (databaseClass != null) ||
+            (liquibaseSchemaName != null) || (liquibaseCatalogName != null) || (databaseChangeLogTableName != null)
+            || (databaseChangeLogLockTableName != null) || (liquibaseTablespaceName != null)) {
             throw tooManyAttributes();
         }
         super.setRefid(ref);

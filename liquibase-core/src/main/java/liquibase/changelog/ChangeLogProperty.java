@@ -1,10 +1,10 @@
 package liquibase.changelog;
 
+import liquibase.serializer.AbstractLiquibaseSerializable;
+
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import liquibase.serializer.AbstractLiquibaseSerializable;
 
 public class ChangeLogProperty extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String file;
@@ -17,14 +17,7 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<String>(Arrays.asList(
-                "file",
-                "name",
-                "value",
-                "context",
-                "labels",
-                "dbms",
-                "global"));
+        return new LinkedHashSet<>(Arrays.asList("file", "name", "value", "context", "labels", "dbms", "global"));
     }
 
     @Override
