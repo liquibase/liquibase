@@ -204,7 +204,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 stmt.setNull(i, java.sql.Types.NULL);
                 return;
             }
-            if (col.getType().toLowerCase().contains("date") || col.getType().toLowerCase().contains("time")) {
+            if (col.getType().toLowerCase().contains("datetime")) {
                 stmt.setNull(i, java.sql.Types.TIMESTAMP);
             } else {
                 //
