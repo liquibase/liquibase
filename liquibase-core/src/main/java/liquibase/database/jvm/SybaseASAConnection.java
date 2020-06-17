@@ -13,6 +13,8 @@ import java.sql.Connection;
  */
 public class SybaseASAConnection extends JdbcConnection {
 
+	public SybaseASAConnection() {}
+
 	public SybaseASAConnection(Connection connection) {
 		super(connection);
 	}

@@ -154,24 +154,24 @@ public class CommandLineUtils {
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
-                ExecutorService.getInstance().getExecutor(database).execute(
+                ExecutorService.getInstance().getExecutor("jdbc", database).execute(
                     new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
                         database.escapeObjectName(schema, Schema.class)));
             } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
+                    ExecutorService.getInstance().getExecutor("jdbc", database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
             } else if (database instanceof AbstractDb2Database) {
                 String schema = defaultCatalogName;
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET CURRENT SCHEMA "
+                ExecutorService.getInstance().getExecutor("jdbc", database).execute(new RawSqlStatement("SET CURRENT SCHEMA "
                         + schema));
             } else if (database instanceof MySQLDatabase) {
                 String schema = defaultCatalogName;
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("USE " + schema));
+                ExecutorService.getInstance().getExecutor("jdbc", database).execute(new RawSqlStatement("USE " + schema));
             }
 
         }

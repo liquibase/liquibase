@@ -2,10 +2,25 @@ package liquibase.database;
 
 import liquibase.exception.DatabaseException;
 
+import java.sql.Driver;
+import java.util.Properties;
+
 public class MockDatabaseConnection implements DatabaseConnection {
 
 	private int databaseMajorVersion = 999;
 	private int databaseMinorVersion = 999;
+
+	@Override
+	public int getPriority() {
+		return PRIORITY_DEFAULT;
+	}
+
+	@Override
+	public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+		  //
+		  // No-op
+		  //
+	}
 
 	@Override
 	public void close() throws DatabaseException {

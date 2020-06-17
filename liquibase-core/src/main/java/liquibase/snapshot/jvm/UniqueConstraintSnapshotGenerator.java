@@ -236,7 +236,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         + "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid "
                         + "JOIN sys.systables t ON c.tableid = t.tableid "
                         + "WHERE c.constraintname='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
-                List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+                List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor("jdbc", database).queryForList(new RawSqlStatement(sql));
 
                 List<Map<String, ?>> returnList = new ArrayList<>();
                 if (rows.isEmpty()) {
@@ -248,7 +248,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     String descriptor = rowData.get("DESCRIPTOR").toString();
                     descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
                     for (String columnNumber : StringUtils.splitAndTrim(descriptor, ",")) {
-                        String columnName = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
+                        String columnName = (String) ExecutorService.getInstance().getExecutor("jdbc", database).queryForObject(new RawSqlStatement(
                                 "select c.columnname from sys.syscolumns c "
                                         + "join sys.systables t on t.tableid=c.referenceid "
                                         + "where t.tablename='" + rowData.get("TABLENAME") + "' and c.columnnumber=" + columnNumber), String.class);
@@ -304,7 +304,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     sql += "and constraint_name='" + constraintName + "'";
                 }
             }
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor("jdbc", database).queryForList(new RawSqlStatement(sql));
 
             if (bulkQuery) {
                 columnCache = new HashMap<>();

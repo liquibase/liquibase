@@ -1,8 +1,12 @@
 package liquibase.executor;
 
+import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -16,6 +20,82 @@ import java.util.List;
  */
 public abstract class AbstractExecutor implements Executor {
     protected Database database;
+    protected ResourceAccessor resourceAccessor;
+
+    /**
+     *
+     * Return the name of the Executor
+     *
+     * @return String   The Executor name
+     *
+     */
+    @Override
+    public abstract String getName();
+
+    /**
+     *
+     * Return the Executor priority
+     *
+     * @return int      The Executor priority
+     *
+     */
+    @Override
+    public abstract int getPriority();
+
+    /**
+     *
+     * Validate if the change set can be executed by this Executor
+     *
+     * @param   changeSet The change set to validate
+     * @return  boolean   Always true for abstract class
+     *
+     */
+    @Override
+    public ValidationErrors validate(ChangeSet changeSet) {
+        return new ValidationErrors();
+    }
+
+    /**
+     *
+     * Allow this Executor to make any needed changes to the change set.
+     * The base class sets splitStatements to 'true' if it is not set
+     *
+     * @param changeSet The change set to operate on
+     *
+     */
+    @Override
+    public void modifyChangeSet(ChangeSet changeSet) {
+        List<Change> changes = changeSet.getChanges();
+        modifyChanges(changes);
+
+        if (changeSet.getRollback() != null) {
+            List<Change> rollbackChanges = changeSet.getRollback().getChanges();
+            modifyChanges(rollbackChanges);
+        }
+    }
+
+    private void modifyChanges(List<Change> changes) {
+        for (Change change : changes) {
+            if (change instanceof AbstractSQLChange) {
+                AbstractSQLChange abstractSQLChange = (AbstractSQLChange)change;
+                if (! abstractSQLChange.isSplitStatementsSet()) {
+                    ((AbstractSQLChange) change).setSplitStatements(true);
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * Set a ResourceAccessor on this Executor to be used in file access
+     *
+     * @param resourceAccessor
+     *
+     */
+    @Override
+    public void setResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
+    }
 
     public void setDatabase(Database database) {
         this.database = database;

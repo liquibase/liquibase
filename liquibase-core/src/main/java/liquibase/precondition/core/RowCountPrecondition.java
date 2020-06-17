@@ -72,7 +72,7 @@ public class RowCountPrecondition extends AbstractPrecondition {
         try {
             TableRowCountStatement statement = new TableRowCountStatement(catalogName, schemaName, tableName);
 
-            int result = ExecutorService.getInstance().getExecutor(database).queryForInt(statement);
+            int result = ExecutorService.getInstance().getExecutor("jdbc", database).queryForInt(statement);
             if (result != expectedRows) {
                 throw new PreconditionFailedException(getFailureMessage(result), changeLog, this);
             }

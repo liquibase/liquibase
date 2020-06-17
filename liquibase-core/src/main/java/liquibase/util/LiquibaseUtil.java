@@ -2,7 +2,6 @@ package liquibase.util;
 
 import liquibase.Scope;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 
 import java.io.IOException;
 import java.io.InputStream;

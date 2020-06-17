@@ -206,14 +206,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
-        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+        boolean enabled = ExecutorService.getInstance().getExecutor("jdbc", this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        ExecutorService.getInstance().getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
         return enabled;
     }
 
     @Override
     public void enableForeignKeyChecks() throws DatabaseException {
-        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+        ExecutorService.getInstance().getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
     }
 
     @Override
@@ -284,7 +284,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                     "  self_ref INT NOT NULL,\n" +
                     "  CONSTRAINT c_self_ref FOREIGN KEY(self_ref) REFERENCES " + randomIdentifier + "(id)\n" +
                     ")";
-            ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement(sql));
+            ExecutorService.getInstance().getExecutor("jdbc", this).execute(new RawSqlStatement(sql));
 
             try (
                 ResultSet rs = metaData.getImportedKeys(getDefaultCatalogName(), getDefaultSchemaName(), randomIdentifier)
@@ -309,7 +309,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug.", e);
         } finally {
                 ExecutorService.getInstance().reset();
-                ExecutorService.getInstance().getExecutor(this).execute(
+                ExecutorService.getInstance().getExecutor("jdbc", this).execute(
                         new RawSqlStatement("DROP TABLE " + randomIdentifier));
         }
 

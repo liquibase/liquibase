@@ -173,6 +173,7 @@ public class DatabaseFactory {
             return offlineConnection;
         }
 
+        DatabaseConnection databaseConnection = null;
         driver = StringUtils.trimToNull(driver);
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
@@ -252,16 +253,12 @@ public class DatabaseFactory {
             }
 
             LOG.debug(LogType.LOG, "Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
-            Connection connection = driverObject.connect(url, driverProperties);
+            databaseConnection = ConnectionServiceFactory.getInstance().create(url, driverObject, driverProperties);
             LOG.debug(LogType.LOG, "Connection has been created");
-            if (connection == null) {
-                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-            }
-
-            return new JdbcConnection(connection);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
+        return databaseConnection;
     }
 
     /**
