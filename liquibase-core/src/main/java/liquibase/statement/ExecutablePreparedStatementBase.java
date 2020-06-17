@@ -219,12 +219,21 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                         continue;
                     }
                     String name = alias.replaceAll("java.sql.Types.","");
-                    JDBCType jdbcType = Enum.valueOf(JDBCType.class, name);
-                    stmt.setNull(i, jdbcType.getVendorTypeNumber());
-                    isSet = true;
+                    try {
+                        JDBCType jdbcType = Enum.valueOf(JDBCType.class, name);
+                        stmt.setNull(i, jdbcType.getVendorTypeNumber());
+                        isSet = true;
+                    }
+                    catch (Exception e) {
+                        //
+                        // fall back to using java.sql.Types.NULL by catching any exceptions
+                        //
+                    }
                     break;
                 }
                 if (! isSet) {
+                    LOG.info(LogType.LOG,
+                            String.format("Using java.sql.Types.NULL to set null value for type %s", dataType.getName()));
                     stmt.setNull(i, java.sql.Types.NULL);
                 }
             }
