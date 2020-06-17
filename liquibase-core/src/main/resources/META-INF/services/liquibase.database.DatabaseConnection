@@ -1,6 +1,1 @@
-liquibase.database.OfflineConnection
-liquibase.database.jvm.DerbyConnection
-liquibase.database.jvm.HsqlConnection
 liquibase.database.jvm.JdbcConnection
-liquibase.database.jvm.SybaseASAConnection
-liquibase.database.jvm.SybaseConnection

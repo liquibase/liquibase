@@ -10,6 +10,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
@@ -30,6 +31,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@LiquibaseService(skip=true)
 public class OfflineConnection implements DatabaseConnection {
     private String url=null;
     private String databaseShortName=null;
