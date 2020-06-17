@@ -182,9 +182,11 @@ public abstract class AbstractIntegrationTest {
 
     private void openConnection(String url, String username, String password) throws Exception {
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url, username, password);
+        DatabaseConnection lockConnection = DatabaseTestContext.getInstance().getConnection(url, username, password);
 
         if (connection != null) {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+            lockDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(lockConnection);
         }
     }
 
@@ -258,6 +260,7 @@ public abstract class AbstractIntegrationTest {
 
             SnapshotGeneratorFactory.resetAll();
             LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
+
             emptyTestSchema(CatalogAndSchema.DEFAULT.getCatalogName(), CatalogAndSchema.DEFAULT.getSchemaName(),
                     database);
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
@@ -841,7 +844,10 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(getJdbcUrl(), username, password);
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        DatabaseConnection lockConnection = DatabaseTestContext.getInstance().getConnection(getJdbcUrl(), username, password);
+        lockDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(lockConnection);
         database.setDefaultSchemaName("lbcat2");
+        lockDatabase.setDefaultSchemaName("lbcat2");
         liquibase = createLiquibase(tempFile.getName());
         try {
             liquibase.update(this.contexts);
