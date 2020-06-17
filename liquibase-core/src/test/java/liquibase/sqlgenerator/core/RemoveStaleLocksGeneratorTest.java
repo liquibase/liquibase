@@ -51,7 +51,7 @@ public class RemoveStaleLocksGeneratorTest extends AbstractSqlGeneratorTest<Remo
         assertThat(sql, containsString("ID = 1"));
         assertThat(sql, containsString("LOCKED = 1"));
         assertThat(sql, containsString("LOCKEXPIRES < NOW()"));
-        assertThat(sql, containsString("LOCKEDBYID IS NOT NULL"));
+        assertThat(sql, containsString("LOCKEXPIRES IS NOT NULL"));
 
     }
 }
