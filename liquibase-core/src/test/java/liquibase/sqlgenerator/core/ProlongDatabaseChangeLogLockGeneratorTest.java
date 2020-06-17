@@ -56,7 +56,7 @@ public class ProlongDatabaseChangeLogLockGeneratorTest extends AbstractSqlGenera
         String sql = results[0].toSql();
 
         assertThat(sql, startsWith("UPDATE DATABASECHANGELOGLOCK"));
-        assertThat(sql, containsString("SET LOCKEXPIRES = '2018-10-27 14:38:01.000'"));
+        assertThat(sql, containsString("SET LOCKEXPIRES = '2018-10-27 14:38:01'"));
         assertThat(sql, containsString("ID = 1"));
         assertThat(sql, containsString("`LOCKED` = 1"));
         assertThat(sql, containsString("LOCKEXPIRES IS NOT NULL"));
