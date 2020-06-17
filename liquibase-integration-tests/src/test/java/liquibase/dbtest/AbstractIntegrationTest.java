@@ -110,7 +110,6 @@ public abstract class AbstractIntegrationTest {
     private String invalidReferenceChangeLog;
     private String objectQuotingStrategyChangeLog;
     private Database database;
-    private Database lockDatabase;
     private String jdbcUrl;
     private String defaultSchemaName;
 
@@ -186,7 +185,6 @@ public abstract class AbstractIntegrationTest {
 
         if (connection != null) {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-            lockDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(lockConnection);
         }
     }
 
@@ -227,7 +225,7 @@ public abstract class AbstractIntegrationTest {
             ExecutorService.getInstance().reset();
 
             LockServiceFactory.getInstance().resetAll();
-            LockServiceFactory.getInstance().getLockService(lockDatabase).init();
+            LockServiceFactory.getInstance().getLockService(database).init();
 
             ChangeLogHistoryServiceFactory.getInstance().resetAll();
         }
@@ -259,7 +257,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             SnapshotGeneratorFactory.resetAll();
-            LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
+            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
 
             emptyTestSchema(CatalogAndSchema.DEFAULT.getCatalogName(), CatalogAndSchema.DEFAULT.getSchemaName(),
                     database);
@@ -359,8 +357,8 @@ public abstract class AbstractIntegrationTest {
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) {
         ExecutorService.getInstance().clearExecutor("jdbc", database);
         database.resetInternalState();
-        LockServiceFactory.getInstance().getLockService(lockDatabase).reset();
-        return new Liquibase(changeLogFile, resourceAccessor, database, lockDatabase);
+        LockServiceFactory.getInstance().getLockService(database).reset();
+        return new Liquibase(changeLogFile, resourceAccessor, database, database);
     }
 
     @Test
@@ -797,7 +795,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.forceReleaseLock();
 
         liquibase.update(includedChangeLog);
@@ -844,10 +842,7 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(getJdbcUrl(), username, password);
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        DatabaseConnection lockConnection = DatabaseTestContext.getInstance().getConnection(getJdbcUrl(), username, password);
-        lockDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(lockConnection);
         database.setDefaultSchemaName("lbcat2");
-        lockDatabase.setDefaultSchemaName("lbcat2");
         liquibase = createLiquibase(tempFile.getName());
         try {
             liquibase.update(this.contexts);
@@ -1051,7 +1046,7 @@ public abstract class AbstractIntegrationTest {
             //expected
         }
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         assertFalse(lockService.hasChangeLogLock());
     }
 
