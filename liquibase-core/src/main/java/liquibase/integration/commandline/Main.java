@@ -208,22 +208,16 @@ public class Main {
                 stream.println(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
 
                 LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
-                if (licenseService != null) {
-                    if (main.liquibaseProLicenseKey == null) {
-                        log.info(LogType.LOG,
-                                "The command '" + main.command +
-                                        "' requires a Liquibase Pro license, available at https://www.liquibase.org/download or sales@liquibase.com");
-                    } else {
-                        Location licenseKeyLocation =
+                if (licenseService != null && main.liquibaseProLicenseKey != null) {
+                    Location licenseKeyLocation =
                                 new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
-                        LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
-                        if (result.code != 0) {
-                            String allMessages = String.join("\n", result.messages);
-                            log.warning(LogType.USER_MESSAGE, allMessages);
-                        }
+                    LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                    if (result.code != 0) {
+                        String allMessages = String.join("\n", result.messages);
+                        log.warning(LogType.USER_MESSAGE, allMessages);
                     }
-                    stream.println(licenseService.getLicenseInfo());
                 }
+                stream.println(licenseService.getLicenseInfo());
 
                 stream.println(String.format("Running Java under %s (Version %s)",
                         System.getProperties().getProperty("java.home"),
