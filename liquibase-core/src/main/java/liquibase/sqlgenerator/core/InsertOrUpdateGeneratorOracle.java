@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.executor.ExecutorService;
@@ -37,7 +38,7 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
         endStatements.append("END IF;\n");
         endStatements.append("END;\n");
 
-        if (ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor) {
+        if (Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database) instanceof LoggingExecutor) {
             endStatements.append("/\n");
         }
 

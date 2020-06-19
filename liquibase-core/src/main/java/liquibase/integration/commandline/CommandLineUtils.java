@@ -155,24 +155,24 @@ public class CommandLineUtils {
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
-                ExecutorService.getInstance().getExecutor(database).execute(
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(
                     new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
                         database.escapeObjectName(schema, Schema.class)));
             } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
+                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
             } else if (database instanceof AbstractDb2Database) {
                 String schema = defaultCatalogName;
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET CURRENT SCHEMA "
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(new RawSqlStatement("SET CURRENT SCHEMA "
                         + schema));
             } else if (database instanceof MySQLDatabase) {
                 String schema = defaultCatalogName;
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("USE " + schema));
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(new RawSqlStatement("USE " + schema));
             }
 
         }
@@ -192,8 +192,9 @@ public class CommandLineUtils {
                               CompareControl.SchemaComparison[] schemaComparisons, PrintStream output) throws LiquibaseException {
         doDiff(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, null, output);
     }
-    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
-            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
+
+    public static DiffCommand createDiffCommand(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+                              CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) {
         DiffCommand diffCommand = (DiffCommand) CommandFactory.getInstance().getCommand("diff");
 
         diffCommand
@@ -203,6 +204,12 @@ public class CommandLineUtils {
                 .setObjectChangeFilter(objectChangeFilter)
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(output);
+        return diffCommand;
+    }
+
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
+        DiffCommand diffCommand = createDiffCommand(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, objectChangeFilter, output);
 
         Scope.getCurrentScope().getUI().sendMessage("");
         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));

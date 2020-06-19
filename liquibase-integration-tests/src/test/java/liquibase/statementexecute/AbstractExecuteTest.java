@@ -241,7 +241,7 @@ public abstract class AbstractExecuteTest {
             List<? extends SqlStatement> setupStatements = setupStatements(database);
             if (setupStatements != null) {
                 for (SqlStatement statement : setupStatements) {
-                    ExecutorService.getInstance().getExecutor(database).execute(statement);
+                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(statement);
                 }
             }
             connectionStatement.close();

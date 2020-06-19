@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
@@ -65,7 +66,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
 
     @Override
     protected CommandResult run() throws Exception {
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String sqlText;
         if (sqlFile == null) {
             sqlText = sql;

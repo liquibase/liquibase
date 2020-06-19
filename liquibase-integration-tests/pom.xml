@@ -12,9 +12,6 @@
 
     <artifactId>liquibase-integration-tests</artifactId>
 
-    <dependencies>
-    </dependencies>
-
     <build>
         <testResources>
             <testResource>

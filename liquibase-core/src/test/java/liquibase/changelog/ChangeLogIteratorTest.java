@@ -7,6 +7,7 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.LiquibaseException;
 import org.junit.Before;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static liquibase.util.Validate.fail;
 import static org.junit.Assert.assertEquals;
 
 public class ChangeLogIteratorTest {
@@ -30,6 +32,7 @@ public class ChangeLogIteratorTest {
         changeLog.addChangeSet(new ChangeSet("4", "nvoxland", false, false, "/path/to/changelog",  null, null, null));
         changeLog.addChangeSet(new ChangeSet("5", "nvoxland", false, false, "/path/to/changelog",  null, "mysql", null));
         changeLog.addChangeSet(new ChangeSet("6", "nvoxland", false, false, "/path/to/changelog",  "test2", null, null));
+        changeLog.addChangeSet(new ChangeSet("7", "nvoxland", false, false, "/path/to/changelog",  "test2", null, "jdbc", true, ObjectQuotingStrategy.LEGACY, null));
     }
 
     @Test
@@ -38,7 +41,35 @@ public class ChangeLogIteratorTest {
 
         ChangeLogIterator iterator = new ChangeLogIterator(changeLog);
         iterator.run(testChangeLogVisitor, new RuntimeEnvironment(null, null, null));
-        assertEquals(6, testChangeLogVisitor.visitedChangeSets.size());
+        assertEquals(7, testChangeLogVisitor.visitedChangeSets.size());
+    }
+
+    @Test
+    public void runChangeSet_withBogusExecutor() throws Exception {
+        changeLog.addChangeSet(new ChangeSet("8", "nvoxland", false, false,
+                "/path/to/changelog",  "test2", null,
+                "foo", true, ObjectQuotingStrategy.LEGACY, null));
+        TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
+
+        ChangeLogIterator iterator = new ChangeLogIterator(changeLog);
+        try {
+            iterator.run(testChangeLogVisitor, new RuntimeEnvironment(null, null, null));
+            fail("No exception thrown.  Expected LiquibaseException for invalid Executor");
+        }
+        catch (LiquibaseException e) {
+            boolean b = e.getMessage().contains("Unable to locate Executor");
+            assertEquals(b, true);
+        }
+        assertEquals(7, testChangeLogVisitor.visitedChangeSets.size());
+    }
+
+    @Test
+    public void runChangeSet_withExecutors() throws Exception {
+        TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
+
+        ChangeLogIterator iterator = new ChangeLogIterator(changeLog);
+        iterator.run(testChangeLogVisitor, new RuntimeEnvironment(null, null, null));
+        assertEquals(7, testChangeLogVisitor.visitedChangeSets.size());
     }
 
     @Test

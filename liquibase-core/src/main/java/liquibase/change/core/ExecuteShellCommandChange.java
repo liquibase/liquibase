@@ -133,7 +133,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
         // check if running under not-executed mode (logging output)
         boolean nonExecutedMode = false;
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         if (executor instanceof LoggingExecutor) {
             nonExecutedMode = true;
         }
