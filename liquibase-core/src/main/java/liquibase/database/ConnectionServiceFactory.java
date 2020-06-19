@@ -66,12 +66,12 @@ public class ConnectionServiceFactory {
     }
 
     private ConnectionServiceFactory() {
-        List<Class<? extends DatabaseConnection>> classes;
+        List<DatabaseConnection> connections;
         try {
-            classes = Scope.getCurrentScope().getServiceLocator().findClasses(DatabaseConnection.class);
+            connections = Scope.getCurrentScope().getServiceLocator().findInstances(DatabaseConnection.class);
 
-            for (Class<? extends DatabaseConnection> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (DatabaseConnection connection : connections) {
+                register(connection.getClass().getConstructor().newInstance());
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
