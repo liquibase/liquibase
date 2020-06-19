@@ -165,10 +165,12 @@ public class DiffToChangeLog {
                                     randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
                                 } else {
                                     randomAccessFile.seek(0);
-                                    randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
+                                    long length = randomAccessFile.length();
+                                    randomAccessFile.seek(length);
+                                    randomAccessFile.write(
+                                            xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
                                             (GlobalConfiguration.class).getOutputEncoding()));
                                 }
-                                randomAccessFile.close();
                             }
 
                         }
