@@ -1232,8 +1232,7 @@ public class Main {
 
         CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(
                 new FileSystemResourceAccessor(Paths.get(".").toAbsolutePath().toFile()),
-                new CommandLineResourceAccessor(classLoader),
-                new FileSystemResourceAccessor(Paths.get("/").toAbsolutePath().toFile())
+                new CommandLineResourceAccessor(classLoader)
                 );
 
         Database database = null;
