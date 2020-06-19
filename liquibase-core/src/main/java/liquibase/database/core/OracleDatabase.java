@@ -222,7 +222,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
         if (StringUtils.isEmpty(generationType)) {
-            return "";
+            return super.getAutoIncrementClause();
         }
 
         String autoIncrementClause = "GENERATED %s AS IDENTITY"; // %s -- [ ALWAYS | BY DEFAULT [ ON NULL ] ]
