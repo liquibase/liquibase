@@ -59,4 +59,14 @@ public abstract class AbstractLogger extends AbstractExtensibleObject implements
     public void fine(String message, Throwable e) {
         this.log(Level.FINE, message, e);
     }
+
+    @Override
+    public void debug(String message) {
+        this.fine(message);
+    }
+
+    @Override
+    public void debug(String message, Throwable e) {
+        this.fine(message, e);
+    }
 }

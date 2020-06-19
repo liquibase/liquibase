@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
@@ -104,5 +105,12 @@ public class ChangeFactory extends AbstractPluginFactory<Change>{
         }
 
         return returnMap;
+    }
+
+    /**
+     * @deprecated Use {@link liquibase.Scope#getSingleton(Class)}
+     */
+    public static ChangeFactory getInstance() {
+        return Scope.getCurrentScope().getSingleton(ChangeFactory.class);
     }
 }
