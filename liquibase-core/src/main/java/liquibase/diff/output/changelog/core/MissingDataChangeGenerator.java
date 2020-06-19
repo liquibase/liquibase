@@ -5,6 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -17,6 +18,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,7 +64,6 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
             }
 
             String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
-
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(1000);
             rs = stmt.executeQuery(sql);
