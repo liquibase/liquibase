@@ -747,6 +747,33 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     }
 
     @Test
+    public void testAutoIncrementGenerationTypePostgresDatabase() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof PostgresDatabase) {
+                MockDatabaseConnection conn = new MockDatabaseConnection();
+                conn.setDatabaseMajorVersion(9);
+                database.setConnection(conn);
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                AutoIncrementConstraint constraint = new AutoIncrementConstraint(COLUMN_NAME1);
+                constraint.setGenerationType("ALWAYS");
+                statement.addColumn(
+                    COLUMN_NAME1,
+                    DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
+                    constraint
+                );
+
+                Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+
+                assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGSERIAL)", generatedSql[0].toSql());
+
+                conn.setDatabaseMajorVersion(10);
+                generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+                assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGINT GENERATED ALWAYS AS IDENTITY)", generatedSql[0].toSql());
+            }
+        }
+    }
+
+    @Test
     public void testAutoIncrementStartWithPostgresDatabase() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database instanceof PostgresDatabase) {
