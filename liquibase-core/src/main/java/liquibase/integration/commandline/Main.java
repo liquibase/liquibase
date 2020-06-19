@@ -242,14 +242,12 @@ public class Main {
                     if (main.logLevel == null) {
                         String defaultLogLevel = System.getProperty("liquibase.log.level");
                         if (defaultLogLevel == null) {
-                            rootLogger.setLevel(Level.OFF);
+                            setLogLevel(rootLogger, Level.OFF);
                         } else {
-                            rootLogger.setLevel(parseLogLevel(defaultLogLevel, ui));
+                            setLogLevel(rootLogger, parseLogLevel(defaultLogLevel, ui));
                         }
                     } else {
-                        Level logLevel = parseLogLevel(main.logLevel, ui);
-
-                        rootLogger.setLevel(logLevel);
+                        setLogLevel(rootLogger, parseLogLevel(main.logLevel, ui));
                     }
 
                     if (main.logFile != null) {
@@ -358,6 +356,14 @@ public class Main {
         });
 
 
+    }
+
+    protected static void setLogLevel(java.util.logging.Logger logger, java.util.logging.Level level) {
+        logger.setLevel(level);
+
+        for (Handler handler : logger.getHandlers()) {
+            handler.setLevel(level);
+        }
     }
 
     private static Level parseLogLevel(String logLevelName, ConsoleUIService ui) {
