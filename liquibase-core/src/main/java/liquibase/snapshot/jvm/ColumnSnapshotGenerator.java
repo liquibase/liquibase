@@ -130,7 +130,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         && searchCondition.matches("\"?\\w+\" IS NOT NULL")) {
                     // not validated not null constraint found
                     column.setNullable(false);
-                    column.setShouldValidateNullable(false);
+                    column.setValidateNullable(false);
                 }
                 if (Boolean.FALSE.equals(column.isNullable()) && hasValidObjectName(constraintName)) {
                     column.setAttribute("notNullConstraintName", constraintName);
@@ -481,6 +481,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         } else if (database instanceof PostgresDatabase) {
             columnTypeName = database.unescapeDataTypeName(columnTypeName);
+            // https://www.postgresql.org/message-id/20061016193942.GF23302%40svana.org says that internally array datatypes are defined with an underscore prefix.
+            if (columnTypeName.startsWith("_")) {
+                columnTypeName = columnTypeName.replaceFirst("_", "").concat("[]");
+            }
         }
 
         if (database instanceof FirebirdDatabase) {

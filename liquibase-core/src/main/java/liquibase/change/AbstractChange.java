@@ -699,7 +699,9 @@ public abstract class AbstractChange implements Change {
                     if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
                         childValue = parsedNode.getValue();
                     }
-                    param.setValue(this, childValue);
+                    if(null != childValue) {
+                        param.setValue(this, childValue);
+                    }
                 }
             }
         } catch (ReflectiveOperationException e) {

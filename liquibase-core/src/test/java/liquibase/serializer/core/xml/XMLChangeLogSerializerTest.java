@@ -234,10 +234,10 @@ public class XMLChangeLogSerializerTest {
 
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setDeferrable(Boolean.TRUE);
-        constraints.setShouldValidateNullable(Boolean.TRUE);
-        constraints.setShouldValidateUnique(Boolean.TRUE);
-        constraints.setShouldValidatePrimaryKey(Boolean.TRUE);
-        constraints.setShouldValidateForeignKey(Boolean.TRUE);
+        constraints.setValidateNullable(Boolean.TRUE);
+        constraints.setValidateUnique(Boolean.TRUE);
+        constraints.setValidatePrimaryKey(Boolean.TRUE);
+        constraints.setValidateForeignKey(Boolean.TRUE);
         constraints.setDeleteCascade(true);
         constraints.setForeignKeyName("FK_NAME");
         constraints.setInitiallyDeferred(true);
