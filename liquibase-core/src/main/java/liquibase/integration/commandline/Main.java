@@ -1629,6 +1629,7 @@ public class Main {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
                         (COMMANDS.DROP_ALL);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
+                dropAllCommand.setLockDatabase(liquibase.getLockDatabase());
                 dropAllCommand.setSchemas(getSchemaParams(database));
                 LogService.getLog(getClass()).info(LogType.USER_MESSAGE, dropAllCommand.execute().print());
                 return;

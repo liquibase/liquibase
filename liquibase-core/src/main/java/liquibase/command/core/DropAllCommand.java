@@ -10,6 +10,7 @@ import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -26,6 +27,7 @@ import java.util.List;
 public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     private Database database;
+    private Database lockDatabase;
     private CatalogAndSchema[] schemas;
 
     private Logger log = LogService.getLog(getClass());
@@ -47,6 +49,10 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     public void setDatabase(Database database) {
         this.database = database;
+    }
+
+    public void setLockDatabase(Database lockDatabase) {
+        this.lockDatabase = lockDatabase;
     }
 
     public CatalogAndSchema[] getSchemas() {
@@ -78,7 +84,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     @Override
     protected CommandResult run() throws Exception {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         try {
             lockService.waitForLock();
 
@@ -106,7 +112,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
         }
-        LockServiceFactory.getInstance().getLockService(database).init();
+        LockServiceFactory.getInstance().getLockService(lockDatabase).init();
     }
 
     protected void resetServices() {
