@@ -11,6 +11,7 @@ import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -124,7 +125,7 @@ public class SQLFileChange extends AbstractSQLChange {
             throw new IOException("Unable to read file '" + path + "'", e);
         }
         if (inputStream == null) {
-            throw new IOException("File does not exist: '" + path + "'");
+            throw new IOException(FileUtil.getFileNotFoundMessage(path));
         }
         return inputStream;
     }

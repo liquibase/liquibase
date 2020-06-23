@@ -282,7 +282,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
         then:
         def e = thrown(ChangeLogParseException)
-        e.message == "${path} not found"
+        e.message.startsWith("The file ${path} was not found")
     }
 
     def "ChangeLogParseException thrown if changelog has invalid tags"() throws Exception {
