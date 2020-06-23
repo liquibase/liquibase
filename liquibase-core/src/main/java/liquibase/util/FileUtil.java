@@ -75,7 +75,7 @@ public class FileUtil {
         for (String location : Scope.getCurrentScope().getResourceAccessor().describeLocations()) {
             message += "    - " + location + System.lineSeparator();
         }
-        message += "Specifying files by  absolute path was removed in Liquibase 4.0. Please use a relative path or add '/' to the classpath parameter.";
+        message += "Specifying files by absolute path was removed in Liquibase 4.0. Please use a relative path or add '/' to the classpath parameter.";
 
         return message;
     }
