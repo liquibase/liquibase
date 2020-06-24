@@ -11,10 +11,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
@@ -391,6 +389,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
 
         throw new DatabaseException("Connection set to Postgres type we don't support !");
+    }
+
+    @Override
+    public void rollback() throws DatabaseException {
+        super.rollback();
+        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
     }
 
     /**
