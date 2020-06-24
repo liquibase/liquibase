@@ -291,7 +291,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public ChangeSet getChangeSet(RanChangeSet ranChangeSet) {
-        return getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+        final ChangeSet changeSet = getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+        changeSet.setStoredFilePath(ranChangeSet.getStoredChangeLog());
+        return changeSet;
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor)
