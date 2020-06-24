@@ -4,6 +4,8 @@ import liquibase.change.AddColumnConfig;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
+import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SequenceNextValueFunction;
 import org.junit.Test;
@@ -14,6 +16,8 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.math.BigInteger;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -817,6 +821,69 @@ public class XMLChangeLogSerializerTest {
     }
 
     @Test
+    public void createNode_CustomChange() throws Exception {
+        CustomChangeWrapper change = new CustomChangeWrapper();
+        change.setClassLoader(Thread.currentThread().getContextClassLoader());
+        change.setClass("liquibase.change.custom.ExampleCustomSqlChange");
+        change.setParam("tableName", "tab_name");
+        change.setParam("columnName", "col_name");
+        change.setParam("newValue", "");
+
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+
+        assertEquals("element name", "customChange", node.getTagName());
+        assertEquals("customChange attributes",
+                     attsMap("class", "liquibase.change.custom.ExampleCustomSqlChange"),
+                     attsMap(node));
+
+        NodeList params = node.getChildNodes();
+        assertEquals("params count", 3, params.getLength());
+
+        assertEquals("element name", "param", params.item(0).getNodeName());
+        assertEquals("param[0] attributes",
+                     attsMap("name", "tableName", "value", "tab_name"),
+                     attsMap(params.item(0)));
+
+        assertEquals("element name", "param", params.item(1).getNodeName());
+        assertEquals("param[1] attributes",
+                     attsMap("name", "columnName", "value", "col_name"),
+                     attsMap(params.item(1)));
+
+        assertEquals("element name", "param", params.item(2).getNodeName());
+        assertEquals("param[2] attributes",
+                     attsMap("name", "newValue", "value", ""),
+                     attsMap(params.item(2)));
+    }
+
+    @Test
+    public void createNode_CustomPrecondition() throws Exception {
+        CustomPreconditionWrapper precondition = new CustomPreconditionWrapper();
+        precondition.setClassName("liquibase.precondition.ExampleCustomPrecondition");
+        precondition.setParam("name", "test_1");
+        precondition.setParam("count", "31");
+
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(precondition);
+
+        assertEquals("element name", "customPrecondition", node.getTagName());
+        assertEquals("customPrecondition attributes",
+                     attsMap("className", "liquibase.precondition.ExampleCustomPrecondition"),
+                     attsMap(node));
+
+        NodeList params = node.getChildNodes();
+        assertEquals("params count", 2, params.getLength());
+
+        assertEquals("element name", "param", params.item(0).getNodeName());
+        assertEquals("param[0] attributes",
+                     attsMap("name", "name", "value", "test_1"),
+                     attsMap(params.item(0)));
+
+        assertEquals("element name", "param", params.item(1).getNodeName());
+        assertEquals("param[1] attributes",
+                     attsMap("name", "count", "value", "31"),
+                     attsMap(params.item(1)));
+    }
+
+    @Test
     public void serialize_pretty() {
         UpdateDataChange change = new UpdateDataChange();
         change.setCatalogName("a");
@@ -862,4 +929,23 @@ public class XMLChangeLogSerializerTest {
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\"/>", out);
     }
+
+    private static Map<String, String> attsMap(String... values) {
+        Map<String, String> map = new LinkedHashMap<>();
+        for (int i = 0; i < values.length; i += 2) {
+            map.put(values[i], values[i + 1]);
+        }
+        return map;
+    }
+
+    private static Map<String, String> attsMap(Node elem) {
+        Map<String, String> map = new LinkedHashMap<>();
+        NamedNodeMap attributes = elem.getAttributes();
+        for (int i = 0, len = attributes.getLength(); i < len; i++) {
+            Node item = attributes.item(i);
+            map.put(item.getNodeName(), item.getNodeValue());
+        }
+        return map;
+    }
+
 }
