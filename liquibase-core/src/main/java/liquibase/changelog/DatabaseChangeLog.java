@@ -630,9 +630,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return null;
         }
         return filePath.replaceFirst("^classpath:", "")
-                        .replaceAll("\\\\", "/")
-                        .replaceAll("//+", "/")
-                        .replaceFirst("^/", "");
+                .replaceAll("\\\\", "/")
+                .replaceAll("//+", "/")
+                .replaceFirst("^[a-zA-Z]:", "")
+                .replaceFirst("^/", "")
+                ;
 
     }
 
