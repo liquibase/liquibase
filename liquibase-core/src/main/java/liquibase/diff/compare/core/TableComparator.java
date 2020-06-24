@@ -58,6 +58,12 @@ public class TableComparator  implements DatabaseObjectComparator {
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Table.class, accordingTo));
 
+        Table table1 = (Table)databaseObject1;
+        Table table2 = (Table)databaseObject2;
+        if (table1.isDefaultTablespace() && table2.isDefaultTablespace()) {
+            differences.removeDifference("tablespace");
+        }
+        differences.removeDifference("default_tablespace");
         return differences;
     }
 }
