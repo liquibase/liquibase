@@ -11,6 +11,7 @@ import java.util.Date;
  */
 public class RanChangeSet {
     private final String changeLog;
+    private final String storedChangeLog;
     private final String id;
     private final String author;
     private final CheckSum lastCheckSum;
@@ -41,11 +42,17 @@ public class RanChangeSet {
                 changeSet.getComments(),
                 contexts,
                 labels,
-                null);
+                null,
+                changeSet.getStoredFilePath());
     }
 
     public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description, String comments, ContextExpression contextExpression, Labels labels, String deploymentId) {
+        this(changeLog, id, author, lastCheckSum, dateExecuted, tag, execType, description, comments, contextExpression, labels, deploymentId, null);
+    }
+
+    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description, String comments, ContextExpression contextExpression, Labels labels, String deploymentId, String storedChangeLog) {
         this.changeLog = changeLog;
+        this.storedChangeLog = storedChangeLog;
         this.id = id;
         this.author = author;
         this.lastCheckSum = lastCheckSum;
@@ -65,6 +72,13 @@ public class RanChangeSet {
 
     public String getChangeLog() {
         return changeLog;
+    }
+
+    /**
+     * Get the path stored in the DatabaseChangeLog table
+     */
+    public String getStoredChangeLog() {
+        return storedChangeLog;
     }
 
     public String getId() {
