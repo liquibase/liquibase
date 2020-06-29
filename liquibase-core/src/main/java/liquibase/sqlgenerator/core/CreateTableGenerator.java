@@ -18,8 +18,12 @@ import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
@@ -279,7 +283,38 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             buffer.append(",");
         }
 
+        /*
+         * In the current syntax, UNIQUE constraints can only be set per column on table creation.
+         * To alleviate this problem we combine the columns of unique constraints that have the same name.
+         */
+        HashMap<String, UniqueConstraint> uniqueConstraintMap = new HashMap<>();
+        List<UniqueConstraint> aggregatedUniqueConstraints = new LinkedList<>();
         for (UniqueConstraint uniqueConstraint : statement.getUniqueConstraints()) {
+            if (uniqueConstraint.getConstraintName() == null) {  // Only combine uniqueConstraints that have a name.
+                aggregatedUniqueConstraints.add(uniqueConstraint);}
+            else {
+                String constraintName = uniqueConstraint.getConstraintName();
+                if (uniqueConstraintMap.containsKey(constraintName)) { // if we have seen the uniqueContraint before ..
+                    UniqueConstraint oldUniqueConstraint = uniqueConstraintMap.get(constraintName);
+                    // check if it is really the same constraint
+                    if (oldUniqueConstraint.shouldValidateUnique() != uniqueConstraint.shouldValidateUnique()) {
+                        aggregatedUniqueConstraints.add(uniqueConstraint);  // if not, add it to the aggregated constraints
+                    }
+                    else { // if yes, check which columns are new and add these to the constraint. Put the newly generated constraint back in the map.
+                        Set<String> newColumns = new HashSet<>(uniqueConstraint.getColumns());
+                        newColumns.removeAll(oldUniqueConstraint.getColumns());
+                        for (String column: newColumns) {
+                            oldUniqueConstraint.addColumns(column);
+                        }
+                        uniqueConstraintMap.put(constraintName, oldUniqueConstraint);
+                    }
+                }
+                else uniqueConstraintMap.put(constraintName, uniqueConstraint);  // if we haven't seen the constraint before put it in the map.
+            }
+        }
+        aggregatedUniqueConstraints.addAll(uniqueConstraintMap.values());
+
+        for (UniqueConstraint uniqueConstraint : aggregatedUniqueConstraints) {
             if (uniqueConstraint.getConstraintName() != null) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
