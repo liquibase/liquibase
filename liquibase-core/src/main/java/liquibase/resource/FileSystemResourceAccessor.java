@@ -282,6 +282,17 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         return getClass().getName() + " (" + StringUtil.join(getRootPaths(), ", ", new StringUtil.ToStringFormatter()) + ")";
     }
 
+    @Override
+    public SortedSet<String> describeLocations() {
+        SortedSet<String> returnSet = new TreeSet<>();
+
+        for (Path path : getRootPaths()) {
+            returnSet.add(path.toString());
+        }
+
+        return returnSet;
+    }
+
     private static class CloseChildWillCloseParentStream extends FilterInputStream {
 
         private final Closeable parent;
@@ -297,4 +308,5 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             parent.close();
         }
     }
+
 }

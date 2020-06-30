@@ -107,6 +107,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private String filePath = "UNKNOWN CHANGE LOG";
 
     /**
+     * File path stored in the databasechangelog table. It should be the same as filePath, but not always.
+     */
+    private String storedFilePath;
+
+    /**
      * If set to true, the changeSet will be executed on every update. Defaults to false
      */
     private boolean alwaysRun;
@@ -252,6 +257,17 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public String getFilePath() {
         return filePath;
+    }
+
+    public String getStoredFilePath() {
+        if (storedFilePath == null) {
+            return getFilePath();
+        }
+        return storedFilePath;
+    }
+
+    public void setStoredFilePath(String storedFilePath) {
+        this.storedFilePath = storedFilePath;
     }
 
     public String getRunWith() {

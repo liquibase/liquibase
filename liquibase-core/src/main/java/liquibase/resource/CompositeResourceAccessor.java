@@ -48,4 +48,14 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         return returnSet;
     }
 
+    @Override
+    public SortedSet<String> describeLocations() {
+        SortedSet<String> returnSet = new TreeSet<>();
+
+        for (ResourceAccessor accessor : resourceAccessors) {
+            returnSet.addAll(accessor.describeLocations());
+        }
+
+        return returnSet;
+    }
 }

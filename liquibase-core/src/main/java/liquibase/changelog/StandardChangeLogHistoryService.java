@@ -306,7 +306,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 Scope.getCurrentScope().getLog(getClass()).info("Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
                 for (Map rs : results) {
-                    String fileName = DatabaseChangeLog.normalizePath(rs.get("FILENAME").toString());
+                    String storedFileName = rs.get("FILENAME").toString();
+                    String fileName = DatabaseChangeLog.normalizePath(storedFileName);
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
                     String md5sum = ((rs.get("MD5SUM") == null) || !databaseChecksumsCompatible) ? null : rs.get
@@ -336,7 +337,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     try {
                         RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum),
                             dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts,
-                            labels, deploymentId);
+                            labels, deploymentId, storedFileName);
                         ranChangeSet.setOrderExecuted(orderExecuted);
                         ranChangeSets.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
