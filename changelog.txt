@@ -1,6 +1,11 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.0.0 Beta2 (2020.07.1)
+- Re-introduced deprecated versions of commonly used 3.x methods that had been removed for 4.0
+- Fix to handle --logLevel=debug/fine CLI argument
+- Do not include root filesystem in default CLI search paths
+
 Changes in version 3.10.0 (2020.6.12)
 - [Pro] Built-in runWith="sqlplus"
 - New "runWith" changeSet extension point
