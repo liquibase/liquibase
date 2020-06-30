@@ -196,6 +196,7 @@
                 <configuration>
                     <archive>
                         <manifest>
+                            <addClasspath>true</addClasspath>
                             <Main-Class>liquibase.integration.commandline.Main</Main-Class>
                         </manifest>
                         <manifestEntries>
