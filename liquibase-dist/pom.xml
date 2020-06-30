@@ -149,7 +149,7 @@
                         <descriptor>src/main/assembly/assembly-bin.xml</descriptor>
                     </descriptors>
                     <archive>
-                        <manifestFile>src/main/assembly/MANIFEST.MF</manifestFile>
+                      <manifestFile>/home/wesley/workspace/liquibase/liquibase-core/target/classes/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
                 <executions>
