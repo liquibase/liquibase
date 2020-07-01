@@ -277,6 +277,7 @@
         <xsd:attribute name="created" type="xsd:string"/>
         <xsd:attribute name="runOrder" type="xsd:string"/>
         <xsd:attribute name="ignore" type="booleanExp"/>
+        <xsd:attribute name="runWith" type="xsd:string" />
     </xsd:attributeGroup>
 
     <!-- Attributes for changes -->
