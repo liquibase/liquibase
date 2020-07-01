@@ -725,7 +725,6 @@ public class DiffToChangeLog {
             graph.addType(type);
         }
         List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase, generatorType);
-
         if (!loggedOrderFor.contains(generatorType)) {
             String log = generatorType.getSimpleName() + " type order: ";
             for (Class<? extends DatabaseObject> type : types) {
@@ -871,17 +870,35 @@ public class DiffToChangeLog {
         }
 
         public List<Class<? extends DatabaseObject>> sort(Database database, Class<? extends ChangeGenerator> generatorType) {
+            Map<Class<? extends DatabaseObject>, Node> newNodes = new HashMap<>();
             ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
             for (Class<? extends DatabaseObject> type : allNodes.keySet()) {
+                //
+                // For both run* types
+                // make sure that if the Node does not exist
+                // it gets created and saved in the newNodes map
+                //
                 for (Class<? extends DatabaseObject> afterType : changeGeneratorFactory.runBeforeTypes(type, database, generatorType)) {
-                    getNode(type).addEdge(getNode(afterType));
+                    Node typeNode = retrieveOrCreateNode(newNodes, type);
+                    Node afterTypeNode = retrieveOrCreateNode(newNodes, afterType);
+                    typeNode.addEdge(afterTypeNode);
                 }
 
                 for (Class<? extends DatabaseObject> beforeType : changeGeneratorFactory.runAfterTypes(type, database, generatorType)) {
-                    getNode(beforeType).addEdge(getNode(type));
+                    Node beforeTypeNode = retrieveOrCreateNode(newNodes, beforeType);
+                    Node typeNode = retrieveOrCreateNode(newNodes, type);
+                    beforeTypeNode.addEdge(typeNode);
                 }
             }
 
+            //
+            // Add any newly created Node objects to the allNodes map
+            //
+            for (Node newNode : newNodes.values()) {
+                if (! allNodes.containsKey(newNode.type)) {
+                    allNodes.put(newNode.type, newNode);
+                }
+            }
 
             ArrayList<Node> returnNodes = new ArrayList<>();
 
@@ -924,6 +941,25 @@ public class DiffToChangeLog {
                 returnList.add(node.type);
             }
             return returnList;
+        }
+
+        //
+        // If the Node for this type already exists then return it
+        // else look in the newNodes map for one
+        // else create a new Node and put it in the newNodes map
+        //
+        private Node retrieveOrCreateNode(Map<Class<? extends DatabaseObject>, Node> newNodes, Class<? extends DatabaseObject> type) {
+            Node node;
+            if (allNodes.containsKey(type)) {
+                node = allNodes.get(type);
+            } else if (newNodes.containsKey(type)) {
+                node = newNodes.get(type);
+            }
+            else {
+                node = new Node(type);
+                newNodes.put(type, node);
+            }
+            return node;
         }
 
         private void checkForCycleInDependencies(Class<? extends ChangeGenerator> generatorType) {
