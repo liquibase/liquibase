@@ -1,6 +1,34 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.10.1 (2020.7.2)
+
+ - GH PR#913 ⁃ [CORE-3471] Fixed NPE in LiquibaseUtil when MANIFEST.MF doesn't contain Bundle-Version or Build-Time
+ - GH PR#917 ⁃ [Core 3463] Fix for validateX attributes of constraintsConfig
+ - GH PR#919 ⁃ Fixed issued with bundling in shaded jars
+ - GH PR#941 ⁃ [CORE-3520] Add support for ALWAYS generation type with PostgreSQL auto-increment column.
+ - GH PR#946 ⁃ [CORE-3524] Prevent auto-increment column silently failing on Oracle.
+ - GH PR#949 ⁃ [CORE-3526] TABLE is a reserved keyword in H2database since 1.4.197
+ - GH PR#963 ⁃ [CORE-3556] No default values for changes' properties
+ - GH PR#965 ⁃ [CORE-3558] Unique constraint name is ignored when using the addColumn change
+ - GH PR#970 ⁃ Fix Java 1.9+ versions require jaxb as separate dependency
+ - GH PR#971 ⁃ Add Class-Path entry to the manifest file to simplify command line execution
+ - GH PR#975 ⁃ NULL date value in prepared statement requires type in MSSQL
+ - GH PR#986 ⁃ XMLSerializer: Correct Map value serialization
+ - GH PR#993 ⁃ Improve ChangeFactory initialization time
+ - GH Issue#1035 ⁃ Change how Liquibase produces debug logs
+ - GH Issue#1051 ⁃ Update liquibase-core.jar to exclude ServiceLoader files
+ - GH PR#1053 ⁃ Update liquibase_autocomplete.shape
+ - GH PR#1059 ⁃ Allow multiple column unique constraints on table creation.
+ - GH Issue#1069 ⁃ Patch Liquibase Runner plugin for Jenkins
+ - GH Issue#1070 ⁃ Enable <command>--help without databse connection
+ - GH PR#1082 ⁃ Correct include bash script
+ - GH PR#1096 ⁃ Fix sequence statement generation for PostgreSQL <= 9.4
+ - GH Issue#1104 ⁃ Fix maven-liquibase offline diff to prevent errors
+ - GH Issue#1113 ⁃ Fix schema name using "--defaultSchemaName" on a non-default schema
+ - GH PR#1120 ⁃ LiquibaseServletListener.contextInitialized() improved with Embedded Derby
+ - GH Issue#1220 ⁃ Fix how JAVA_HOME env variable is handled
+
 Changes in version 3.10.0 (2020.6.12)
 - [Pro] Built-in runWith="sqlplus"
 - New "runWith" changeSet extension point
