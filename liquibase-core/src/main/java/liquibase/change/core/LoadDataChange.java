@@ -328,6 +328,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     ColumnConfig valueConfig = new ColumnConfig();
 
                     ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
+
+                    //
+                    // Always set the type for the valueConfig if the value is NULL
+                    //
+                    if ("NULL".equalsIgnoreCase(value.toString())) {
+                        valueConfig.setType(columnConfig.getType());
+                    }
                     if (columnConfig != null) {
                         if ("skip".equalsIgnoreCase(columnConfig.getType())) {
                             continue;
@@ -373,6 +380,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                 }
                             } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.STRING.toString())) {
                                 if ("NULL".equalsIgnoreCase(value.toString())) {
+                                    valueConfig.setType(columnConfig.getType());
                                     valueConfig.setValue(null);
                                 } else {
                                     valueConfig.setValue(value.toString());
