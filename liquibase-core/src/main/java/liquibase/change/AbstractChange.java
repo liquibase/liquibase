@@ -82,7 +82,7 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                 if ((readMethod != null) && (writeMethod != null)) {
                     DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
                     if ((annotation == null) || annotation.isChangeProperty()) {
-                        params.add(createChangeParameterMetadata(property.getDisplayName()));
+                        params.add(createChangeParameterMetadata(property, readMethod));
                     }
                 }
 
@@ -114,9 +114,6 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
     protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) {
 
         try {
-            String displayName = parameterName.replaceAll("([A-Z])", " $1");
-            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
-
             PropertyDescriptor property = null;
             for (PropertyDescriptor prop : PropertyUtils.getInstance().getDescriptors(getClass())) {
                 if (prop.getDisplayName().equals(parameterName)) {
@@ -132,6 +129,18 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             if (readMethod == null) {
                 readMethod = getClass().getMethod("is" + StringUtil.upperCaseFirst(property.getName()));
             }
+            return createChangeParameterMetadata(property, readMethod);
+        } catch (IntrospectionException|NoSuchMethodException|SecurityException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private ChangeParameterMetaData createChangeParameterMetadata(PropertyDescriptor property, Method readMethod) {
+        try {
+            String parameterName = property.getDisplayName();
+            String displayName = parameterName.replaceAll("([A-Z])", " $1");
+            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
+
             Type type = readMethod.getGenericReturnType();
 
             DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
@@ -147,9 +156,9 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
 
             return new ChangeParameterMetaData(this, parameterName, displayName, description, examples, since,
-                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType);
-        } catch (IntrospectionException|UnexpectedLiquibaseException|NoSuchMethodException|SecurityException e) {
-            throw new UnexpectedLiquibaseException(e);
+                type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType).withAccessors(readMethod, property.getWriteMethod());
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
         }
     }
 
@@ -698,7 +707,9 @@ public abstract class AbstractChange extends AbstractPlugin implements Change {
                     if ((childValue == null) && (param.getSerializationType() == SerializationType.DIRECT_VALUE)) {
                         childValue = parsedNode.getValue();
                     }
-                    param.setValue(this, childValue);
+                    if(null != childValue) {
+                        param.setValue(this, childValue);
+                    }
                 }
             }
         } catch (ReflectiveOperationException e) {

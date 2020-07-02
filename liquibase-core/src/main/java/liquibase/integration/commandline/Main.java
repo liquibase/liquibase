@@ -190,21 +190,19 @@ public class Main {
                         Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() ));
 
                         LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
-                        if (licenseService != null) {
-                    if (main.liquibaseProLicenseKey == null) {
-                        Scope.getCurrentScope().getLog(getClass()).info("The command '" + main.command +
-                                        "' requires a Liquibase Pro license, available at https://www.liquibase.org/download or sales@liquibase.com");
-                    } else {
-                        Location licenseKeyLocation =
-                                new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
-                                LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
-                                if (result.code != 0) {
-                                    String allMessages = String.join("\n", result.messages);
-                                    Scope.getCurrentScope().getUI().sendErrorMessage(allMessages);
-                                }
+                        if (licenseService != null && main.liquibaseProLicenseKey != null) {
+                            Location licenseKeyLocation =
+                                    new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                            LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                            if (result.code != 0) {
+                                String allMessages = String.join("\n", result.messages);
+                                Scope.getCurrentScope().getUI().sendErrorMessage(allMessages);
                             }
+                        }
+                        if (licenseService != null) {
                             Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                         }
+
 
                         Scope.getCurrentScope().getUI().sendMessage(String.format("Running Java under %s (Version %s)",
                                 System.getProperties().getProperty("java.home"),
@@ -230,6 +228,10 @@ public class Main {
 
                     try {
                         main.parseOptions(args);
+                if (main.command == null) {
+                    main.printHelp(System.out);
+                    return 0;
+                }
                     } catch (CommandLineParsingException e) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("how.to.display.help"));
@@ -1032,7 +1034,8 @@ public class Main {
     private void parseOptionArgument(String arg, boolean okIfNotAField) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
-        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE)) {
+        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE) ||
+            arg.toLowerCase().startsWith("--" + OPTIONS.HELP)) {
             return;
         }
 
