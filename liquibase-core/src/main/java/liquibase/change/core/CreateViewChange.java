@@ -20,6 +20,7 @@ import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.View;
+import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -243,7 +244,7 @@ public class CreateViewChange extends AbstractChange {
 			try {
 				InputStream stream = openSqlStream();
 				if (stream == null) {
-					throw new IOException("File does not exist: " + path);
+					throw new IOException(FileUtil.getFileNotFoundMessage(path));
 				}
 				selectQuery = StreamUtil.readStreamAsString(stream, encoding);
 			    if (getChangeSet() != null) {

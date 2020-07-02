@@ -42,6 +42,14 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
     }
 
+    /**
+     * @deprecated use {@link FileSystemResourceAccessor#FileSystemResourceAccessor(File...)}
+     */
+    public FileSystemResourceAccessor(String file) {
+        this(new File(file));
+
+    }
+
     protected void addRootPath(Path path) {
         Scope.getCurrentScope().getLog(getClass()).fine("Adding path "+path+" to resourceAccessor "+getClass().getName());
         rootPaths.add(path);
@@ -274,6 +282,17 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         return getClass().getName() + " (" + StringUtil.join(getRootPaths(), ", ", new StringUtil.ToStringFormatter()) + ")";
     }
 
+    @Override
+    public SortedSet<String> describeLocations() {
+        SortedSet<String> returnSet = new TreeSet<>();
+
+        for (Path path : getRootPaths()) {
+            returnSet.add(path.toString());
+        }
+
+        return returnSet;
+    }
+
     private static class CloseChildWillCloseParentStream extends FilterInputStream {
 
         private final Closeable parent;
@@ -289,4 +308,5 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             parent.close();
         }
     }
+
 }

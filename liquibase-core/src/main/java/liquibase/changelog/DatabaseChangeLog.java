@@ -291,7 +291,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public ChangeSet getChangeSet(RanChangeSet ranChangeSet) {
-        return getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+        final ChangeSet changeSet = getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+        if (changeSet != null) {
+            changeSet.setStoredFilePath(ranChangeSet.getStoredChangeLog());
+        }
+        return changeSet;
     }
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor)
@@ -630,9 +634,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             return null;
         }
         return filePath.replaceFirst("^classpath:", "")
-                        .replaceAll("\\\\", "/")
-                        .replaceAll("//+", "/")
-                        .replaceFirst("^/", "");
+                .replaceAll("\\\\", "/")
+                .replaceAll("//+", "/")
+                .replaceFirst("^[a-zA-Z]:", "")
+                .replaceFirst("^/", "")
+                ;
 
     }
 

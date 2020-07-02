@@ -16,6 +16,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
+import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -302,7 +303,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 try {
                     InputStream stream = openSqlStream();
                     if (stream == null) {
-                        throw new IOException("File does not exist: " + path);
+                        throw new IOException(FileUtil.getFileNotFoundMessage(path));
                     }
                     procedureText = StreamUtil.readStreamAsString(stream, encoding);
                     if (getChangeSet() != null) {

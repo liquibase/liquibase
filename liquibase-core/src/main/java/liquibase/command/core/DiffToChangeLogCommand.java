@@ -1,6 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.command.CommandResult;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
@@ -57,10 +58,17 @@ public class DiffToChangeLogCommand extends DiffCommand {
             outputStream = System.out;
         }
 
-        if (StringUtil.trimToNull(changeLogFile) == null) {
-            createDiffToChangeLogObject(diffResult).print(outputStream);
-        } else {
-            createDiffToChangeLogObject(diffResult).print(changeLogFile);
+        ObjectQuotingStrategy originalStrategy = getReferenceDatabase().getObjectQuotingStrategy();
+        try {
+            getReferenceDatabase().setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            if (StringUtil.trimToNull(changeLogFile) == null) {
+                createDiffToChangeLogObject(diffResult).print(outputStream);
+            } else {
+                createDiffToChangeLogObject(diffResult).print(changeLogFile);
+            }
+        }
+        finally {
+            getReferenceDatabase().setObjectQuotingStrategy(originalStrategy);
         }
         return new CommandResult("OK");
     }

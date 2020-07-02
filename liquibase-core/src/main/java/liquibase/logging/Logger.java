@@ -72,4 +72,14 @@ public interface Logger extends ExtensibleObject, AutoCloseable {
      */
     void fine(String message, Throwable e);
 
+    /**
+     * @deprecated use {@link #fine(String)}
+     */
+    void debug(String message);
+
+    /**
+     * @deprecated use {@link #fine(String, Throwable)}
+     */
+    void debug(String message, Throwable e);
+
 }

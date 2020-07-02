@@ -75,11 +75,11 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         if (getDatabase() == null) {
             return;
         }
-        ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RawSqlStatement("DROP TABLE IF " +
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement("DROP TABLE IF " +
                                                                                                      "EXISTS ad"));
         
         try {
-            ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RawSqlStatement("CREATE TABLE ad (\n" +
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement("CREATE TABLE ad (\n" +
                                                                                                          "ad_id int(10) unsigned NOT NULL AUTO_INCREMENT,\n" +
                                                                                                          "advertiser_id int(10) unsigned NOT NULL,\n" +
                                                                                                          "ad_type_id int(10) unsigned NOT NULL,\n" +

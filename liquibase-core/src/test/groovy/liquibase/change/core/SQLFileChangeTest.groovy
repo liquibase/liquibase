@@ -108,7 +108,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
 
         then:
         def e = thrown(IOException)
-        e.message == "File does not exist: 'non-existing.sql'"
+        e.message.startsWith("The file non-existing.sql was not found")
 
     }
 

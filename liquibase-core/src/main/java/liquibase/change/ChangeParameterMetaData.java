@@ -42,6 +42,10 @@ public class ChangeParameterMetaData {
     private Set<String> supportedDatabases;
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
+    private String[] requiredForDatabaseArg;
+    private String[] supportedDatabasesArg;
+    private Optional<Method> readMethodRef;
+    private Optional<Method> writeMethodRef;
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
                                    Map<String, Object> exampleValues, String since, Type dataType,
@@ -84,8 +88,14 @@ public class ChangeParameterMetaData {
         this.serializationType = serializationType;
         this.since = since;
 
-        this.supportedDatabases = Collections.unmodifiableSet(analyzeSupportedDatabases(supportedDatabases));
-        this.requiredForDatabase = Collections.unmodifiableSet(analyzeRequiredDatabases(requiredForDatabase));
+        this.supportedDatabasesArg = supportedDatabases;
+        this.requiredForDatabaseArg = requiredForDatabase;
+    }
+
+    public ChangeParameterMetaData withAccessors(Method readMethod, Method writeMethod) {
+        this.readMethodRef = Optional.ofNullable(readMethod);
+        this.writeMethodRef = Optional.ofNullable(writeMethod);
+        return this;
     }
 
     protected Set<String> analyzeSupportedDatabases(String[] supportedDatabases) {
@@ -234,10 +244,16 @@ public class ChangeParameterMetaData {
      * This method will never return a null value
      */
     public Set<String> getRequiredForDatabase() {
+        if (requiredForDatabase == null) {
+            requiredForDatabase = Collections.unmodifiableSet(analyzeRequiredDatabases(requiredForDatabaseArg));
+        }
         return requiredForDatabase;
     }
 
     public Set<String> getSupportedDatabases() {
+        if (supportedDatabases == null) {
+            supportedDatabases = Collections.unmodifiableSet(analyzeSupportedDatabases(supportedDatabasesArg));
+        }
         return supportedDatabases;
     }
 
@@ -247,11 +263,11 @@ public class ChangeParameterMetaData {
      * required database list contains the string "all"
      */
     public boolean isRequiredFor(Database database) {
-        return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName());
+        return getRequiredForDatabase().contains("all") || getRequiredForDatabase().contains(database.getShortName());
     }
 
     public boolean supports(Database database) {
-        return supportedDatabases.contains("all") || supportedDatabases.contains(database.getShortName());
+        return getSupportedDatabases().contains("all") || getSupportedDatabases().contains(database.getShortName());
     }
 
 
@@ -260,6 +276,21 @@ public class ChangeParameterMetaData {
      */
     public Object getCurrentValue(Change change) {
         try {
+            return getReadMethod(change).invoke(change);
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private Method getReadMethod(Change change) {
+        if (readMethodRef != null) {
+            return readMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No readMethod for " + parameterName));
+        }
+
+        try {
+            readMethodRef = Optional.empty();
             for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method readMethod = descriptor.getReadMethod();
@@ -268,13 +299,14 @@ public class ChangeParameterMetaData {
                             "is" + StringUtil.upperCaseFirst(descriptor.getName())
                         );
                     }
-                    return readMethod.invoke(change);
+                    readMethodRef = Optional.of(readMethod);
+                    return readMethod;
                 }
             }
-            throw new RuntimeException("Could not find readMethod for " + this.parameterName);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
+        throw new UnexpectedLiquibaseException("Could not find readMethod for " + this.parameterName);
     }
 
     /**
@@ -300,30 +332,48 @@ public class ChangeParameterMetaData {
         }
 
         try {
+            Method writeMethod = getWriteMethod(change);
+            Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
+            if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
+                if (expectedWriteType.equals(String.class)) {
+                    value = value.toString();
+                } else {
+                    throw new UnexpectedLiquibaseException(
+                        "Could not convert " + value.getClass().getName() +
+                        " to " +
+                        expectedWriteType.getName()
+                    );
+                }
+            }
+            writeMethod.invoke(change, value);
+        } catch (UnexpectedLiquibaseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
+        }
+    }
+
+    private Method getWriteMethod(Change change) {
+        if (writeMethodRef != null) {
+            return writeMethodRef.orElseThrow(() -> new UnexpectedLiquibaseException("No writeMethod for " + parameterName));
+        }
+
+        try {
+            writeMethodRef = Optional.empty();
             for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method writeMethod = descriptor.getWriteMethod();
                     if (writeMethod == null) {
-                        throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
+                        break;
                     }
-                    Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
-                    if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
-                        if (expectedWriteType.equals(String.class)) {
-                            value = value.toString();
-                        } else {
-                            throw new UnexpectedLiquibaseException(
-                                "Could not convert " + value.getClass().getName() +
-                                " to " +
-                                expectedWriteType.getName()
-                            );
-                        }
-                    }
-                    writeMethod.invoke(change, value);
+                    writeMethodRef = Optional.of(writeMethod);
+                    return writeMethod;
                 }
             }
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
+            throw new UnexpectedLiquibaseException(e);
         }
+        throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
     }
 
     /**

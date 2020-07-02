@@ -28,6 +28,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     private boolean stripComments;
     private boolean splitStatements;
+    /**
+     *
+     * @deprecated  To be removed when splitStatements is changed to be type Boolean
+     *
+     */
+    private boolean splitStatementsSet;
+
     private String endDelimiter;
     private String sql;
     private String dbms;
@@ -123,7 +130,17 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             this.splitStatements = true;
         } else {
             this.splitStatements = splitStatements;
+            splitStatementsSet = true;
         }
+    }
+
+    /**
+     * @deprecated  To be removed when splitStatements is changed to be Boolean type
+     * @return
+     */
+    @Deprecated
+    public boolean isSplitStatementsSet() {
+        return splitStatementsSet;
     }
 
     /**

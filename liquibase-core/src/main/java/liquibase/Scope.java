@@ -70,6 +70,16 @@ public class Scope {
                 throw new UnexpectedLiquibaseException("Cannot find default log service");
             }
             rootScope.values.put(Attr.logService.name(), overrideLogService);
+
+            //check for higher-priority serviceLocator
+            ServiceLocator serviceLocator = rootScope.getServiceLocator();
+            for (ServiceLocator possibleLocator : serviceLocator.findInstances(ServiceLocator.class)) {
+                if (possibleLocator.getPriority() > serviceLocator.getPriority()) {
+                    serviceLocator = possibleLocator;
+                }
+            }
+
+            rootScope.values.put(Attr.serviceLocator.name(), serviceLocator);
         }
         return scopeManager.getCurrentScope();
     }

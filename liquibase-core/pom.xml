@@ -38,6 +38,20 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.14.2.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.3.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant-antunit</artifactId>
             <version>1.3</version>
@@ -92,6 +106,7 @@
             <groupId>com.github.stefanbirkner</groupId>
             <artifactId>system-rules</artifactId>
             <version>1.19.0</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -179,6 +194,22 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <Main-Class>liquibase.integration.commandline.Main</Main-Class>
+                        </manifest>
+                        <manifestEntries>
+                            <Liquibase-Package>liquibase.change,liquibase.command,liquibase.changelog,liquibase.database,liquibase.parser,liquibase.precondition,liquibase.datatype,liquibase.serializer,liquibase.sqlgenerator,liquibase.executor,liquibase.snapshot,liquibase.logging,liquibase.diff,liquibase.structure,liquibase.structurecompare,liquibase.lockservice,liquibase.sdk.database,liquibase.ext,liquibase.pro,com.datical.liquibase</Liquibase-Package>
+                            <Build-Time>${build.timestamp}</Build-Time>
+                            <Build-Number>${build.number}</Build-Number>
+                            <Liquibase-Version>${project.version}</Liquibase-Version>
+                        </manifestEntries>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+
+                    </archive>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

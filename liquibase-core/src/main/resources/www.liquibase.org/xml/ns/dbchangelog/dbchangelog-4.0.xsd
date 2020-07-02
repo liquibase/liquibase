@@ -277,11 +277,12 @@
         <xsd:attribute name="created" type="xsd:string"/>
         <xsd:attribute name="runOrder" type="xsd:string"/>
         <xsd:attribute name="ignore" type="booleanExp"/>
+        <xsd:attribute name="runWith" type="xsd:string" />
     </xsd:attributeGroup>
 
     <!-- Attributes for changes -->
     <xsd:attributeGroup name="changeAttributes">
-        <xsd:anyAttribute namespace="##any" processContents="lax"/>
+        <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:attributeGroup>
 
     <!-- Attributes for constraints -->

@@ -6,6 +6,7 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.BomAwareInputStream;
+import liquibase.util.FileUtil;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
@@ -16,6 +17,8 @@ import java.io.InputStream;
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     public static final String LIQUIBASE_SCHEMA_VERSION = "4.0";
+    private static final boolean PREFER_INTERNAL_XSD = Boolean.getBoolean("liquibase.prefer.internal.xsd");
+    private static final String XSD_FILE = "dbchangelog-" + LIQUIBASE_SCHEMA_VERSION + ".xsd";
     private SAXParserFactory saxParserFactory;
 
     public XMLChangeLogSAXParser() {
@@ -79,7 +82,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                             physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", ""),
                             changeLogParameters, resourceAccessor);
                 } else {
-                    throw new ChangeLogParseException(physicalChangeLogLocation + " not found");
+                    throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
                 }
             }
 

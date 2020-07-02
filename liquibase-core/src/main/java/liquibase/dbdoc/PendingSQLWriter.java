@@ -35,9 +35,10 @@ public class PendingSQLWriter extends HTMLWriter {
     @Override
     protected void writeBody(Writer fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
 
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), fileWriter, database);
-        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+        Executor oldTemplate = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        LoggingExecutor loggingExecutor = new LoggingExecutor(oldTemplate, fileWriter, database);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("logging", database, loggingExecutor);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, loggingExecutor);
 
         try {
             if (changesToRun.isEmpty()) {
@@ -64,7 +65,7 @@ public class PendingSQLWriter extends HTMLWriter {
             }
             fileWriter.append("</pre></code>");
         } finally {
-            ExecutorService.getInstance().setExecutor(database, oldTemplate);
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
         }
     }
 

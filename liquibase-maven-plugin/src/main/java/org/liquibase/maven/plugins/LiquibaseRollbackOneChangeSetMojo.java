@@ -90,7 +90,8 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         //
         boolean hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
         if (! hasProLicense) {
-            throw new LiquibaseException("The command 'rollbackOneChangeSet' requires a Liquibase Pro License, available at http://liquibase.org.");
+            throw new LiquibaseException(
+                    "The command 'rollbackOneChangeSet' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
         }
         Database database = liquibase.getDatabase();
         LiquibaseCommand liquibaseCommand = (CommandFactory.getInstance().getCommand("rollbackOneChangeSet"));

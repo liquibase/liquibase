@@ -39,7 +39,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
 
         //noinspection unchecked
-        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
+        List<Map<String, ?>> sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
 
         if (sequences != null) {
             for (Map<String, ?> sequence : sequences) {
@@ -56,8 +56,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         List<Map<String, ?>> sequences;
         if (database instanceof Db2zDatabase) {
-            sequences = ExecutorService.getInstance()
-                    .getExecutor(database)
+            sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                    .getExecutor("jdbc", database)
                     .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
             return getSequences(example, database, sequences);
         } else {
@@ -71,8 +71,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 return null;
             }
 
-            sequences = ExecutorService.getInstance()
-                    .getExecutor(database)
+            sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                    .getExecutor("jdbc", database)
                     .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
             DatabaseObject sequenceRow = getSequences(example, database, sequences);
             return sequenceRow;
