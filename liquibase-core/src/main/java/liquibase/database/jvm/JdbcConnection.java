@@ -42,7 +42,7 @@ public class JdbcConnection implements DatabaseConnection {
             }
         }
         catch (SQLException sqle) {
-            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  " + sqle.getMessage());
         }
     }
 
