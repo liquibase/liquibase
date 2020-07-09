@@ -196,7 +196,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     /**
-     * @param validateNullable - if shouldValidateNullable is set to FALSE then the constraint will be created
+     * @param validateNullable - if validateNullable is set to FALSE then the constraint will be created
      * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
      * check will be done to ensure old data has valid not null constraint - only new data would be checked
      * to see if it complies with the constraint logic. The default state for not null constraint is to
