@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -27,25 +28,31 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
 		
 		ColumnConfig[] columns = statement.getColumnsToSelect();
 		int numberOfColumns = columns.length;
-
-        String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
-            @Override
-            public String toString(ColumnConfig col) {
-                if ((col.getComputed() != null) && col.getComputed()) {
-                    return col.getName();
-                } else {
-                    return database.escapeColumnName(null, null, null, col.getName());
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        try {
+            String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+                @Override
+                public String toString(ColumnConfig col) {
+                    if ((col.getComputed() != null) && col.getComputed()) {
+                        return col.getName();
+                    } else {
+                        return database.escapeColumnName(null, null, null, col.getName());
+                    }
                 }
-            }
-        }) + " FROM " +
-                database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName()) +
+            }) + " FROM " +
+                    database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName()) +
                 " WHERE " + database.escapeColumnName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
 
-        if (database instanceof OracleDatabase) {
-            sql += " FOR UPDATE";
+            if (database instanceof OracleDatabase) {
+                sql += " FOR UPDATE";
+            }
+            return new Sql[] {
+                    new UnparsedSql(sql)
+            };
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
         }
-        return new Sql[] {
-                new UnparsedSql(sql)
-        };
     }
 }
