@@ -253,7 +253,7 @@
         <xsd:attribute name="driverName" type="xsd:string"/>
     </xsd:attributeGroup>
 
-    <!-- Attributes for changeSet -->
+    <!-- Attributes for databaseChangeLog -->
     <xsd:attributeGroup name="changeLogAttributes">
         <xsd:attribute name="logicalFilePath" type="xsd:string"/>
         <xsd:attribute name="context" type="xsd:string"/>
