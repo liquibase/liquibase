@@ -1,6 +1,9 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.0.0 (2020.07.14)
+- No changes since 4.0.0 beta2
+
 Changes in version 4.0.0 Beta2 (2020.07.1)
 - Re-introduced deprecated versions of commonly used 3.x methods that had been removed for 4.0
 - Fix to handle --logLevel=debug/fine CLI argument
