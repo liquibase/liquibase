@@ -23,6 +23,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
     public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
     public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
+    public static final String LIQUIBASE_HUB_API_KEY="hubApiKey";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -100,6 +101,9 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(SHOULD_SNAPSHOT_DATA, Boolean.class)
                 .setDescription("Should Liquibase snapshot data by default?")
                 .setDefaultValue(false);
+
+        getContainer().addProperty(LIQUIBASE_HUB_API_KEY, String.class)
+                .setDescription("Liquibase Hub API key for operations");
     }
 
     /**
@@ -171,6 +175,15 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setLiquibaseTablespaceName(String name) {
         getContainer().setValue(LIQUIBASE_TABLESPACE_NAME, name);
+        return this;
+    }
+
+    public String getLiquibaseHubApiKey() {
+        return getContainer().getValue(LIQUIBASE_HUB_API_KEY, String.class);
+    }
+
+    public GlobalConfiguration setLiquibaseHubApiKey(String liquibaseHubApiKey) {
+        getContainer().setValue(LIQUIBASE_HUB_API_KEY, liquibaseHubApiKey);
         return this;
     }
 
