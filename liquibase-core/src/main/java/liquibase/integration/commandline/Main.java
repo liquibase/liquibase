@@ -1254,7 +1254,7 @@ public class Main {
         }
 
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        LOG.debug("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKey());
+        LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKey());
 
         //
         // Check for a valid license to run PRO commands
