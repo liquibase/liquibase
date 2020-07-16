@@ -325,7 +325,7 @@ public class Main {
                     //
                     // Store the Hub API key for later use
                     //
-                    if (main.liquibaseHubApiKey != null && main.liquibaseHubApiKey != "") {
+                    if (main.liquibaseHubApiKey != null && ! main.liquibaseHubApiKey.isEmpty()) {
                         hubConfiguration.setLiquibaseHubApiKey(main.liquibaseHubApiKey);
                     }
 
