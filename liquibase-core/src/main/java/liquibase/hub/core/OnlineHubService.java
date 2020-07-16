@@ -1,7 +1,8 @@
 package liquibase.hub.core;
 
-import com.sun.deploy.util.StringUtils;
 import liquibase.Scope;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.HubUser;
@@ -104,10 +105,12 @@ public class OnlineHubService implements HubService {
     }
 
     private URLConnection openConnection(String url) throws LiquibaseHubException {
-        String apiKey = "961e43af-b1db-43ac-a001-e0b1719891a4";
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        String hubUrl = hubConfiguration.getLiquibaseHubUrl();
+        String apiKey = hubConfiguration.getLiquibaseHubApiKey(); //"961e43af-b1db-43ac-a001-e0b1719891a4";
 
         try {
-            final URLConnection connection = new URL("http://localhost:8888" + url).openConnection();
+            final URLConnection connection = new URL(hubUrl + url).openConnection();
             connection.setRequestProperty("User-Agent", "Liquibase " + LiquibaseUtil.getBuildVersion());
             connection.setRequestProperty("Authorization", "Bearer " + apiKey);
             return connection;
@@ -130,7 +133,7 @@ public class OnlineHubService implements HubService {
             throw new RuntimeException(e);
         }
 
-        return StringUtils.join(paramArray, "&");
+        return StringUtil.join(paramArray, "&");
     }
 
     private <T> T doRequest(URLConnection connection, Class<T> returnType) throws LiquibaseHubException {

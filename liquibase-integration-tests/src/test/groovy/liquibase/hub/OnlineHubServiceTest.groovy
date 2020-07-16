@@ -1,5 +1,7 @@
 package liquibase.hub
 
+import liquibase.configuration.HubConfiguration
+import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.core.OnlineHubService
 import liquibase.hub.model.HubUser
 import spock.lang.Specification
@@ -11,17 +13,21 @@ class OnlineHubServiceTest extends Specification {
     private OnlineHubService hubService
 
     private Properties integrationTestProperties
-    private boolean hubAvailable;
+    private boolean hubAvailable
 
     def setup() {
         hubService = new OnlineHubService()
 
         if (integrationTestProperties == null) {
-            integrationTestProperties = new Properties();
-            integrationTestProperties.load((InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-            integrationTestProperties.load((InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties"));
+            integrationTestProperties = new Properties()
+            integrationTestProperties.load((InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"))
+            integrationTestProperties.load((InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties"))
 
+            def hubApiKey = integrationTestProperties.get("integration.test.hub.apikey")
             def hubUrl = integrationTestProperties.get("integration.test.hub.url")
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration("liquibase.hub")
+            hubConfiguration.setLiquibaseHubApiKey(hubApiKey)
+            hubConfiguration.setLiquibaseHubUrl(hubUrl)
 
             try {
                 def me = hubService.getMe()

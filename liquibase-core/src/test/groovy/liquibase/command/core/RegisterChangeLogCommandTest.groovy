@@ -6,7 +6,7 @@ import spock.lang.Specification
 
 class RegisterChangeLogCommandTest extends Specification {
 
-    setup() {
+    def setup() {
         Scope.child()
         Scope.currentScope.getSingleton(HubServiceFactory.class)
     }
