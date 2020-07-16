@@ -9,6 +9,7 @@ import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.*;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
@@ -114,6 +115,8 @@ public class Main {
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
     private boolean liquibaseProLicenseValid = false;
+    protected String liquibaseHubApiKey;
+    protected String liquibaseHubUrl;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
@@ -210,6 +213,7 @@ public class Main {
                         ));
                         return 0;
                     }
+
                     //
                     // Look for characters which cannot be handled
                     //
@@ -226,12 +230,17 @@ public class Main {
                         }
                     }
 
+                    //
+                    // Instantiate the HubConfiguration instance
+                    //
+                    HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+
                     try {
                         main.parseOptions(args);
-                if (main.command == null) {
-                    main.printHelp(System.out);
-                    return 0;
-                }
+                        if (main.command == null) {
+                            main.printHelp(System.out);
+                            return 0;
+                        }
                     } catch (CommandLineParsingException e) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("how.to.display.help"));
@@ -282,32 +291,46 @@ public class Main {
                             if (result.code != 0) {
                                 String allMessages = String.join("\n", result.messages);
                                 Scope.getCurrentScope().getUI().sendMessage( allMessages);
-                    } else {
-                        main.liquibaseProLicenseValid = true;
+                            } else {
+                                main.liquibaseProLicenseValid = true;
                             }
                         }
 
-                //
-                // Check to see if we have an expired license
-                //
-                if (licenseService.daysTilExpiration() < 0) {
-                    main.liquibaseProLicenseValid = false;
-                }
-                        Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                       //
+                       // Check to see if we have an expired license
+                       //
+                       if (licenseService.daysTilExpiration() < 0) {
+                           main.liquibaseProLicenseValid = false;
+                       }
+                       Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                     }
 
-            if (main.commandParams.contains("--help") &&
-                    (main.command.startsWith("rollbackOneChangeSet") ||
-                            main.command.startsWith("rollbackOneUpdate") ||
-                            (main.command.startsWith("diff") && main.isFormattedDiff()))) {
-                //don't need to check setup
+                    if (main.commandParams.contains("--help") &&
+                        (main.command.startsWith("rollbackOneChangeSet") ||
+                         main.command.startsWith("rollbackOneUpdate") ||
+                         (main.command.startsWith("diff") && main.isFormattedDiff()))) {
+                        //don't need to check setup
                     } else {
-                    List<String> setupMessages = main.checkSetup();
-                    if (!setupMessages.isEmpty()) {
-                        main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
-                        return 1;
+                        List<String> setupMessages = main.checkSetup();
+                        if (!setupMessages.isEmpty()) {
+                            main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
+                            return 1;
+                        }
                     }
-            }
+
+                    //
+                    // Store the Hub API key for later use
+                    //
+                    if (StringUtil.isNotEmpty(main.liquibaseHubApiKey)) {
+                        hubConfiguration.setLiquibaseHubApiKey(main.liquibaseHubApiKey);
+                    }
+
+                    //
+                    // Store the Hub URL for later use
+                    //
+                    if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
+                        hubConfiguration.setLiquibaseHubUrl(main.liquibaseHubUrl);
+                    }
 
                     Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
@@ -322,7 +345,6 @@ public class Main {
                         } else {
                             Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("command.successful"), main.command));
                         }
-
                     });
                 } catch (Throwable e) {
                     String message = e.getMessage();
@@ -356,8 +378,6 @@ public class Main {
                 return 0;
             }
         });
-
-
     }
 
     protected static void setLogLevel(java.util.logging.Logger logger, java.util.logging.Level level) {
@@ -892,16 +912,36 @@ public class Main {
             strict = Boolean.valueOf(props.getProperty("strict"));
         }
 
+        //
+        // Load property values into
+        //   changeLogParameters
+        //   ConfigurationContainer
+        //   local member variable
+        //
         for (Map.Entry entry : props.entrySet()) {
             try {
                 if ("promptOnNonLocalDatabase".equals(entry.getKey())) {
                     continue;
                 }
                 if (((String) entry.getKey()).startsWith("parameter.")) {
-                    changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue
-                            ());
+                    changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue());
+                } else if (((String) entry.getKey()).contains(".")) {
+                    //
+                    // Determine the namespace and value keys
+                    // then set the property value
+                    //
+                    final String[] splitKey = ((String) entry.getKey()).split("\\.", 3);
+                    String namespace="";
+                    for (int i=0; i < splitKey.length-1; i++) {
+                        if (! namespace.equals("")) {
+                            namespace += ".";
+                        }
+                        namespace += splitKey[i];
+                    }
+                    String valueKey = splitKey[splitKey.length-1];
+                    LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
                 } else {
-                    Field field = getClass().getDeclaredField((String) entry.getKey());
+                    Field field = getDeclaredField((String)entry.getKey());
                     Object currentValue = field.get(this);
 
                     if (currentValue == null) {
@@ -1066,7 +1106,7 @@ public class Main {
         }
 
         try {
-            Field field = getClass().getDeclaredField(attributeName);
+            Field field = getDeclaredField(attributeName); //getClass().getDeclaredField(attributeName);
             if (field.getType().equals(Boolean.class)) {
                 field.set(this, Boolean.valueOf(value));
             } else {
@@ -1079,6 +1119,16 @@ public class Main {
                 );
             }
         }
+    }
+
+    private Field getDeclaredField(String attributeName) throws NoSuchFieldException {
+        Field[] fields = getClass().getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getName().equalsIgnoreCase(attributeName)) {
+                return field;
+            }
+        }
+        throw new NoSuchFieldException();
     }
 
     @SuppressWarnings("HardCodedStringLiteral")
@@ -1205,6 +1255,15 @@ public class Main {
         if (COMMANDS.HELP.equalsIgnoreCase(command)) {
             printHelp(System.err);
             return;
+        }
+
+        //
+        // Log setting for Hub properties
+        //
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubApiKey())) {
+            LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKey());
+            LOG.fine("Liquibase Hub URL:      " + hubConfiguration.getLiquibaseHubUrl());
         }
 
         //
