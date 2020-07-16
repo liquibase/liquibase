@@ -116,7 +116,6 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
             //
             // Not matching with the actual key then try case insensitive
             //
-            Set<Map.Entry<String, ConfigurationProperty>> s = properties.entrySet();
             for (Map.Entry<String ,ConfigurationProperty> entry : properties.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase(propertyName)) {
                     return entry.getValue();

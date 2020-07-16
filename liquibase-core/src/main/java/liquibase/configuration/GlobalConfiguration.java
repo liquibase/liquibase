@@ -101,9 +101,6 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(SHOULD_SNAPSHOT_DATA, Boolean.class)
                 .setDescription("Should Liquibase snapshot data by default?")
                 .setDefaultValue(false);
-
-        getContainer().addProperty(LIQUIBASE_HUB_API_KEY, String.class)
-                .setDescription("Liquibase Hub API key for operations");
     }
 
     /**

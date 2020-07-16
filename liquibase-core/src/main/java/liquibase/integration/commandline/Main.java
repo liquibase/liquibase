@@ -116,6 +116,7 @@ public class Main {
     protected String liquibaseProLicenseKey;
     private boolean liquibaseProLicenseValid = false;
     protected String liquibaseHubApiKey;
+    protected String liquibaseHubUrl;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
@@ -279,11 +280,6 @@ public class Main {
                         ui.setOutputStream(System.err);
                     }
 
-                    //
-                    // Save the hub.apikey in the configuration object
-                    //
-                    globalConfiguration.setLiquibaseHubApiKey(main.liquibaseHubApiKey);
-
                     LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
                     if (licenseService != null) {
 
@@ -325,8 +321,15 @@ public class Main {
                     //
                     // Store the Hub API key for later use
                     //
-                    if (main.liquibaseHubApiKey != null && ! main.liquibaseHubApiKey.isEmpty()) {
+                    if (StringUtil.isNotEmpty(main.liquibaseHubApiKey)) {
                         hubConfiguration.setLiquibaseHubApiKey(main.liquibaseHubApiKey);
+                    }
+
+                    //
+                    // Store the Hub URL for later use
+                    //
+                    if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
+                        hubConfiguration.setLiquibaseHubUrl(main.liquibaseHubUrl);
                     }
 
                     Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
@@ -1253,8 +1256,14 @@ public class Main {
             return;
         }
 
+        //
+        // Log setting for Hub properties
+        //
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKey());
+        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubApiKey())) {
+            LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKey());
+            LOG.fine("Liquibase Hub URL:      " + hubConfiguration.getLiquibaseHubUrl());
+        }
 
         //
         // Check for a valid license to run PRO commands

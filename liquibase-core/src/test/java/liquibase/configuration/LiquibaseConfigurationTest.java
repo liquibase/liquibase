@@ -26,4 +26,21 @@ public class LiquibaseConfigurationTest {
         String hubApiKey = hubConfiguration.getLiquibaseHubApiKey();
         Assert.assertEquals(hubApiKey,"this_is_a_hub_key");
     }
+
+    @Test
+    public void setGetHubUrl() {
+        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
+        HubConfiguration hubConfiguration = liquibaseConfiguration.getConfiguration(HubConfiguration.class);
+        hubConfiguration.setLiquibaseHubUrl("https://myhub.liquibase.com/api/v1/");
+        String hubUrl = hubConfiguration.getLiquibaseHubUrl();
+        Assert.assertEquals(hubUrl,"https://myhub.liquibase.com/api/v1/");
+    }
+
+    @Test
+    public void setGetHubUrlDefault() {
+        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
+        HubConfiguration hubConfiguration = liquibaseConfiguration.getConfiguration(HubConfiguration.class);
+        String hubUrl = hubConfiguration.getLiquibaseHubUrl();
+        Assert.assertEquals(hubUrl,"https://hub.liquibase.com/api/v1/");
+    }
 }
