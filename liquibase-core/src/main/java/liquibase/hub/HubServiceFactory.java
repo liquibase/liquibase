@@ -4,6 +4,9 @@ import liquibase.plugin.AbstractPluginFactory;
 
 public class HubServiceFactory extends AbstractPluginFactory<HubService> {
 
+    protected HubServiceFactory() {
+    }
+
     @Override
     protected Class<HubService> getPluginClass() {
         return HubService.class;
