@@ -1,14 +1,21 @@
 package liquibase.command.core
 
 import liquibase.Scope
-import liquibase.hub.HubServiceFactory
+import liquibase.hub.HubService
+import liquibase.hub.core.MockHubService
+import liquibase.util.StringUtil
 import spock.lang.Specification
 
 class RegisterChangeLogCommandTest extends Specification {
 
+    private String scopeId
+
     def setup() {
-        Scope.child()
-        Scope.currentScope.getSingleton(HubServiceFactory.class)
+        scopeId = Scope.enter([("liquibase.plugin." + HubService.name): MockHubService])
+    }
+
+    def "cleanup"() {
+        Scope.exit(scopeId)
     }
 
     def run() {
@@ -24,6 +31,9 @@ class RegisterChangeLogCommandTest extends Specification {
 
         then:
         result.succeeded
-        output == "x"
+        StringUtil.standardizeLineEndings(output).trim() == StringUtil.standardizeLineEndings("""
+See project Project 1
+See project Project 2
+""").trim()
     }
 }

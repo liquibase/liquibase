@@ -3,7 +3,10 @@ package liquibase.plugin;
 import liquibase.Scope;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.ServiceLoader;
+import java.util.TreeSet;
 
 /**
  * Convenience base class for all factories that find correct {@link Plugin} implementations.
@@ -29,9 +32,22 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
      * This method is called by a public implementation-specific methods.
      * Normally this does not need to be overridden, instead override {@link #getPriority(Plugin, Object...)} to compute the priority of each object for the scope and arguments passed to this method.
      *
+     * However, if there is a {@link Scope} key of "liquibase.plugin.${plugin.interface.class.Name}", an instance of that class will always be ran first.
+     *
      * @return null if no plugins are found or have a priority greater than zero.
      */
     protected T getPlugin(final Object... args) {
+        final String pluginClassName = getPluginClass().getName();
+        final Class forcedPlugin = Scope.getCurrentScope().get("liquibase.plugin." + pluginClassName, Class.class);
+        if (forcedPlugin != null) {
+            for (T plugin : findAllInstances()) {
+                if (plugin.getClass().equals(forcedPlugin)) {
+                    return plugin;
+                }
+            }
+            throw new RuntimeException("No registered " + pluginClassName + " plugin " + forcedPlugin.getName());
+        }
+
         TreeSet<T> applicable = new TreeSet<>((o1, o2) -> {
             Integer o1Priority = getPriority(o1, args);
             Integer o2Priority = getPriority(o2, args);
@@ -58,7 +74,7 @@ public abstract class AbstractPluginFactory<T extends Plugin> implements PluginF
     }
 
 
-    public void register(T plugin){
+    public void register(T plugin) {
         this.findAllInstances();
         this.allInstances.add(plugin);
     }

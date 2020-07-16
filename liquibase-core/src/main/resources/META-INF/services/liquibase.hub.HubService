@@ -1,1 +1,2 @@
+liquibase.hub.core.MockHubService
 liquibase.hub.core.OnlineHubService
