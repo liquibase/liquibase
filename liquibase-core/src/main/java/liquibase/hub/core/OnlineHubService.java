@@ -39,32 +39,37 @@ public class OnlineHubService implements HubService {
 
         HubUser user = new HubUser();
         user.setId(UUID.fromString((String) response.get("id")));
-        user.setUsername((String) response.get("username"));
+        user.setUsername((String) response.get("userName"));
 
         return user;
     }
 
     @Override
     public Organization getOrganization() throws LiquibaseHubException {
-        final Map response = doGet("/api/v1/organizations", Map.class);
+        final Map<String, List<Map>> response = doGet("/api/v1/organizations", Map.class);
 
         Organization org = new Organization();
-        org.setId(UUID.fromString((String) response.get("id")));
-        org.setName((String) response.get("name"));
+        List<Map> contentList = response.get("content");
+        String id = (String) contentList.get(0).get("id");
+        org.setId(UUID.fromString(id));
+        String name = (String) contentList.get(0).get("name");
+        org.setName(name);
 
         return org;
     }
 
     @Override
     public List<Project> getProjects() throws LiquibaseHubException {
-        Project project = new Project();
-        project.setId(UUID.randomUUID());
-        project.setName("Sample project");
-
         final UUID organizationId = getOrganization().getId();
 
-        final Map response = doGet("/api/v1/organization/" + organizationId.toString() + "/projects", Map.class);
-        System.out.println("Got response " + response.size());
+        final Map<String, List<Map>> response = doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
+        List<Map> contentList = response.get("content");
+        String id = (String) contentList.get(0).get("id");
+        String name = (String) contentList.get(0).get("name");
+
+        Project project = new Project();
+        project.setId(UUID.fromString(id));
+        project.setName(name);
 
         return Collections.singletonList(project);
     }

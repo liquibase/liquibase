@@ -25,7 +25,7 @@ class OnlineHubServiceTest extends Specification {
 
             def hubApiKey = integrationTestProperties.get("integration.test.hub.apikey")
             def hubUrl = integrationTestProperties.get("integration.test.hub.url")
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration("liquibase.hub")
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
             hubConfiguration.setLiquibaseHubApiKey(hubApiKey)
             hubConfiguration.setLiquibaseHubUrl(hubUrl)
 
@@ -48,8 +48,8 @@ class OnlineHubServiceTest extends Specification {
         def me = hubService.getMe()
 
         then:
-        me.id.toString() == "x-y-z"
-        me.name == "x"
+        me.id.toString() == "0c58fc42-7d81-4b92-8a00-0ac4d5784d5e"
+        me.username == "wwillard7800"
 
     }
 
@@ -58,16 +58,16 @@ class OnlineHubServiceTest extends Specification {
         def org = hubService.getOrganization()
 
         then:
-        org.id.toString() == "x-y-z"
-        org.name == "x"
+        org.id.toString() == "bec54f77-c255-4566-aee1-66d80e4a9f41"
+        org.name == "wwillard7800's Personal Organization"
 
     }
 
     def getProjects() {
         when:
-        def projects = hubService.getProjects(UUID.randomUUID())
+        def projects = hubService.getProjects()
 
         then:
-        projects.size() == 2
+        projects.size() >=1
     }
 }
