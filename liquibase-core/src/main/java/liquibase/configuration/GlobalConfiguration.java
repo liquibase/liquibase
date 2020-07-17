@@ -175,15 +175,6 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         return this;
     }
 
-    public String getLiquibaseHubApiKey() {
-        return getContainer().getValue(LIQUIBASE_HUB_API_KEY, String.class);
-    }
-
-    public GlobalConfiguration setLiquibaseHubApiKey(String liquibaseHubApiKey) {
-        getContainer().setValue(LIQUIBASE_HUB_API_KEY, liquibaseHubApiKey);
-        return this;
-    }
-
     /**
      *
      * Should Liquibase snapshot data for table by default
