@@ -46,20 +46,24 @@ class OnlineHubServiceTest extends Specification {
     def getMe() {
         when:
         def me = hubService.getMe()
+        def testUserId = integrationTestProperties.get("integration.test.hub.userId")
+        def testUserName = integrationTestProperties.get("integration.test.hub.userName")
 
         then:
-        me.id.toString() == "0c58fc42-7d81-4b92-8a00-0ac4d5784d5e"
-        me.username == "wwillard7800"
+        me.id.toString() == testUserId
+        me.username == testUserName
 
     }
 
     def getOrganization() {
         when:
         def org = hubService.getOrganization()
+        def orgId= integrationTestProperties.get("integration.test.hub.orgId")
+        def orgName= integrationTestProperties.get("integration.test.hub.orgName")
 
         then:
-        org.id.toString() == "bec54f77-c255-4566-aee1-66d80e4a9f41"
-        org.name == "wwillard7800's Personal Organization"
+        org.id.toString() == orgId
+        org.name == orgName
 
     }
 
