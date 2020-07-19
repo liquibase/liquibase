@@ -166,6 +166,10 @@ public class ChangeParameterMetaDataTest {
         assertSetsEqual(new String[]{}, baseTableCatalogName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"all"}, baseTableCatalogName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
 
+        tableName = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new DropAllIndexesChange()).getParameters().get("tableName");
+        assertSetsEqual(new String[]{}, tableName.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
+        assertSetsEqual(new String[]{"all"}, tableName.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
+
         ChangeParameterMetaData replaceIfExists  = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(new CreateViewChange()).getParameters().get("replaceIfExists");
         assertSetsEqual(new String[]{}, replaceIfExists.analyzeRequiredDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
         assertSetsEqual(new String[]{"sybase","mssql","postgresql","firebird","oracle","sqlite","mysql","mariadb","h2","hsqldb","db2","ingres"}, replaceIfExists.analyzeSupportedDatabases(new String[]{ChangeParameterMetaData.COMPUTE}));
