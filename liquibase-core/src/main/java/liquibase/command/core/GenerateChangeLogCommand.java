@@ -50,6 +50,8 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     @Override
     protected CommandResult run() throws Exception {
+        outputBestPracticeMessage();
+
         String changeLogFile = StringUtils.trimToNull(getChangeLogFile());
         if (changeLogFile.toLowerCase().endsWith(".sql")) {
           System.out.println("\n" + INFO_MESSAGE + "\n");
