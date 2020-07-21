@@ -268,9 +268,10 @@ public class CommandLineUtils {
                 "##              | |                               ##\n" +
                 "##              |_|                               ##\n" +
                 "##                                                ## \n" +
-                "##  Learn Liquibase at http://docs.liquibase.com  ##\n" +
-                "##  Enjoy advanced powers and expert support at   ## \n" +
-                "##  https://www.liquibase.com/protrial            ##\n" +
+                "##  Get documentation at docs.liquibase.com       ##\n" +
+                "##  Get certified courses at learn.liquibase.com  ## \n" +
+                "##  Get advanced features and support at          ##\n" +
+                "##      liquibase.com/protrial                    ##\n" +
                 "##                                                ##\n" +
                 "####################################################\n"
                         .replaceAll("\n", System.lineSeparator()));
