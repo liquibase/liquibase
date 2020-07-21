@@ -96,8 +96,9 @@ public class MariaDBDatabase extends MySQLDatabase {
     @Override
     public boolean supportsSequences() {
         try {
-            return getDatabaseMajorVersion() >= 10 && getDatabaseMinorVersion() >= 3;
-        } catch (DatabaseException e) {
+            // From https://liquibase.jira.com/browse/CORE-3457 (by Lijun Liao) corrected
+            int majorVersion = getDatabaseMajorVersion();
+            return majorVersion > 10 || (majorVersion == 10 && getDatabaseMinorVersion() >= 3);        } catch (DatabaseException e) {
             LogService.getLog(getClass()).debug(LogType.LOG, "Cannot retrieve database version", e);
             return false;
         }
