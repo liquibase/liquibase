@@ -1,20 +1,25 @@
 package liquibase.hub.core;
 
+import liquibase.changelog.RanChangeSet;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.HubUser;
-import liquibase.hub.model.Organization;
-import liquibase.hub.model.Project;
+import liquibase.hub.model.*;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class MockHubService implements HubService {
+
+    public List<Project> projects = new ArrayList<>();
+    public List<Environment> environments = new ArrayList<>();
+    public List<HubChangeLog> changeLogs = new ArrayList<>();
 
     @Override
     public int getPriority() {
         return PRIORITY_NOT_APPLICABLE;
+    }
+
+    public MockHubService() {
     }
 
     @Override
@@ -29,14 +34,27 @@ public class MockHubService implements HubService {
 
     @Override
     public List<Project> getProjects() throws LiquibaseHubException {
-        Project project1 = new Project();
-        project1.setId(UUID.randomUUID());
-        project1.setName("Project 1");
+        return projects;
+    }
 
-        Project project2 = new Project();
-        project2.setId(UUID.randomUUID());
-        project2.setName("Project 2");
+    @Override
+    public void setRanChangeSets(Environment environment, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
 
-        return Arrays.asList(project1, project2);
+    }
+
+    @Override
+    public List<Environment> getEnvironments(Environment exampleEnvironment) {
+        return environments;
+    }
+
+    @Override
+    public HubChangeLog getChangeLog(String changeLogId) {
+        for (HubChangeLog changeLog : changeLogs) {
+            if (changeLog.getId().toString().equals(changeLogId)) {
+                return changeLog;
+            }
+        }
+
+        return null;
     }
 }

@@ -1,13 +1,12 @@
 package liquibase.hub.core;
 
 import liquibase.Scope;
+import liquibase.changelog.RanChangeSet;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.HubUser;
-import liquibase.hub.model.Organization;
-import liquibase.hub.model.Project;
+import liquibase.hub.model.*;
 import liquibase.plugin.Plugin;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
@@ -72,6 +71,21 @@ public class OnlineHubService implements HubService {
         project.setName(name);
 
         return Collections.singletonList(project);
+    }
+
+    @Override
+    public void setRanChangeSets(Environment environment, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+
+    }
+
+    @Override
+    public List<Environment> getEnvironments(Environment exampleEnvironment) {
+        return null;
+    }
+
+    @Override
+    public HubChangeLog getChangeLog(String changeLogId) {
+        return null;
     }
 
     protected <T> T doGet(String url, Class<T> returnType) throws LiquibaseHubException {
