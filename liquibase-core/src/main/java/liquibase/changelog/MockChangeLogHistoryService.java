@@ -8,10 +8,13 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class MockChangeLogHistoryService implements ChangeLogHistoryService {
+
+    public List<RanChangeSet> ranChangeSets = new ArrayList<>();
 
     @Override
     public int getPriority() {
@@ -45,7 +48,7 @@ public class MockChangeLogHistoryService implements ChangeLogHistoryService {
 
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
-        return null;
+        return ranChangeSets;
     }
 
     @Override

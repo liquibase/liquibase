@@ -9,11 +9,13 @@ import liquibase.database.Database;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.model.Environment;
+import liquibase.hub.model.HubChangeLog;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.OutputStream;
 import java.util.List;
+import java.util.UUID;
 
 public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResult> {
 
@@ -66,38 +68,52 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
     @Override
     protected CommandResult run() throws Exception {
-        final Database database = Scope.getCurrentScope().getDatabase();
-        final ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-
-        final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
-
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
-        Environment exampleEnvironment = new Environment();
-        exampleEnvironment.setUrl(url);
-        final List<Environment> environments = hubService.getEnvironments(exampleEnvironment);
-        if (environments.size() == 0) {
-            if (changeLogFile == null) {
-                return new CommandResult("The url " + url + " does not match any defined environments. To auto-create an environment, please specify 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
+        Environment environmentToSync;
+        if (hubEnvironmentId == null) {
+            final List<Environment> environments = hubService.getEnvironments(new Environment().setUrl(url));
+            if (environments.size() == 0) {
+                if (changeLogFile == null) {
+                    return new CommandResult("The url " + url + " does not match any defined environments. To auto-create an environment, please specify 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
+                }
+
+                final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+                final DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, new ChangeLogParameters(), resourceAccessor);
+                final String changeLogId = databaseChangeLog.getChangeLogId();
+                if (changeLogId == null) {
+                    return new CommandResult("Changelog " + changeLogFile + " has not been registered with Liquibase Hub.", false);
+                }
+
+                final HubChangeLog changeLog = hubService.getChangeLog(changeLogId);
+                if (changeLog == null) {
+                    return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
+                }
+
+                Environment inputEnvironment = new Environment();
+                inputEnvironment.setUrl(url);
+
+                environmentToSync = hubService.createEnvironment(changeLog.getProject().getId(), inputEnvironment);
+            } else if (environments.size() == 1) {
+                environmentToSync = environments.get(0);
+            } else {
+                return new CommandResult("The url " + url + " is used by more than one environment. Please specify 'hubEnvironmentId=<hubEnvironmentId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
             }
-
-            final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-            final DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, new ChangeLogParameters(), resourceAccessor);
-            final String changeLogId = databaseChangeLog.getChangeLogId();
-            if (changeLogId == null) {
-                return new CommandResult("Changelog "+changeLogFile+" has not been registered with Liquibase Hub", false);
+        } else {
+            final List<Environment> environments = hubService.getEnvironments(new Environment().setId(UUID.fromString(hubEnvironmentId)));
+            if (environments.size() == 0) {
+                return new CommandResult("Unknown hubEnvironmentId "+hubEnvironmentId, false);
+            } else {
+                environmentToSync = environments.get(0);
             }
-
-            hubService.getChangeLog(changeLogId);
-
-            //todo: create environment
-        } else if (environments.size() > 1) {
-            return new CommandResult("The url " + url + " is used by more than one environment. Please specify 'hubEnvironmentId=<hubEnvironmentId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
         }
 
-        final Environment environment = environments.get(0);
+        final Database database = Scope.getCurrentScope().getDatabase();
+        final ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+        final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
 
-        hubService.setRanChangeSets(environment, ranChangeSets);
+
+        hubService.setRanChangeSets(environmentToSync.getId(), ranChangeSets);
 
 
         return new CommandResult();

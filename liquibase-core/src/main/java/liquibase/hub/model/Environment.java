@@ -11,15 +11,22 @@ public class Environment {
         return id;
     }
 
-    public void setId(UUID id) {
+    public Environment setId(UUID id) {
         this.id = id;
+        return this;
     }
 
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    public Environment setUrl(String url) {
         this.url = url;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Environment " + url + " (" + id + ")";
     }
 }

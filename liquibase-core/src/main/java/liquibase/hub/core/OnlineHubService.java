@@ -111,12 +111,17 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public void setRanChangeSets(Environment environment, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+    public void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
 
     }
 
     @Override
     public List<Environment> getEnvironments(Environment exampleEnvironment) {
+        return null;
+    }
+
+    @Override
+    public Environment createEnvironment(UUID projectId, Environment environment) throws LiquibaseHubException {
         return null;
     }
 
@@ -130,7 +135,7 @@ public class OnlineHubService implements HubService {
 
     }
 
-    protected <T> T  doGet(String url, Map<String, String> parameters, Class<T> returnType) throws LiquibaseHubException {
+    protected <T> T doGet(String url, Map<String, String> parameters, Class<T> returnType) throws LiquibaseHubException {
         if (parameters != null && parameters.size() > 0) {
             url += "?" + toQueryString(parameters);
         }

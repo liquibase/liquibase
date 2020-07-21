@@ -8,6 +8,7 @@ public class HubChangeLog {
     private UUID externalChangeLogId;
     private String fileName;
     private String name;
+    private Project project;
 
     public UUID getId() {
         return id;
@@ -43,5 +44,9 @@ public class HubChangeLog {
     @Override
     public String toString() {
         return "ID " + getId() + " (" + fileName + "::" + name + ")";
+    }
+
+    public Project getProject() {
+        return project;
     }
 }
