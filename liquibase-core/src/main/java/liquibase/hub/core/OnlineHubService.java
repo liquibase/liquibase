@@ -4,9 +4,14 @@ import liquibase.Scope;
 import liquibase.changelog.RanChangeSet;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.*;
+import liquibase.hub.model.HubChangeLog;
+import liquibase.hub.model.HubUser;
+import liquibase.hub.model.Organization;
+import liquibase.hub.model.Project;
 import liquibase.plugin.Plugin;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
@@ -26,6 +31,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class OnlineHubService implements HubService {
+
+    private UUID organizationId;
 
     @Override
     public int getPriority() {
@@ -49,8 +56,13 @@ public class OnlineHubService implements HubService {
 
         Organization org = new Organization();
         List<Map> contentList = response.get("content");
-        String id = (String) contentList.get(0).get("id");
-        org.setId(UUID.fromString(id));
+        if (organizationId == null) {
+            String id = (String) contentList.get(0).get("id");
+            if (id != null) {
+                organizationId = UUID.fromString(id);
+            }
+        }
+        org.setId(organizationId);
         String name = (String) contentList.get(0).get("name");
         org.setName(name);
 
@@ -63,14 +75,39 @@ public class OnlineHubService implements HubService {
 
         final Map<String, List<Map>> response = doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
         List<Map> contentList = response.get("content");
-        String id = (String) contentList.get(0).get("id");
-        String name = (String) contentList.get(0).get("name");
+        List<Project> returnList = new ArrayList<>();
+        for (int i=0; i < contentList.size(); i++) {
+            String id = (String) contentList.get(0).get("id");
+            String name = (String) contentList.get(i).get("name");
 
-        Project project = new Project();
-        project.setId(UUID.fromString(id));
-        project.setName(name);
+            Project project = new Project();
+            project.setId(UUID.fromString(id));
+            project.setName(name);
+            returnList.add(project);
+        }
 
-        return Collections.singletonList(project);
+        return returnList;
+    }
+
+    @Override
+    public HubChangeLog createChangeLogId(Project project) throws LiquibaseException {
+        final UUID organizationId = getOrganization().getId();
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("externalChangelogId", "3fa85f64-5717-4562-b3fc-2c963f66afa6");
+        parameters.put("fileName", "string");
+        parameters.put("name", "string");
+        Map<String, String> response =
+           doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs", parameters, Map.class);
+        String id = response.get("id");
+        String externalChangeLogId = response.get("externalChangelogId");
+        String fileName = response.get("fileName");
+        String name = response.get("name");
+        HubChangeLog hubChangeLog = new HubChangeLog();
+        hubChangeLog.setId(UUID.fromString(id));
+        hubChangeLog.setIdExternalChangeLogId(UUID.fromString(externalChangeLogId));
+        hubChangeLog.setFileName(fileName);
+        hubChangeLog.setName(name);
+        return hubChangeLog;
     }
 
     @Override
@@ -104,23 +141,30 @@ public class OnlineHubService implements HubService {
     }
 
     protected <T> T doPost(String url, Map<String, String> parameters, Class<T> returnType) throws LiquibaseHubException {
-        if (parameters != null && parameters.size() > 0) {
-            url += toQueryString(parameters);
-        }
-
-        URLConnection connection = openConnection(url);
+        HttpURLConnection connection = (HttpURLConnection)openConnection(url);
         connection.setDoOutput(true);
-        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 
+        String requestBody = createPostRequestBody(parameters);
         try {
             try (OutputStream output = connection.getOutputStream()) {
-                output.write(toQueryString(parameters).getBytes(StandardCharsets.UTF_8));
+                output.write(requestBody.getBytes(StandardCharsets.UTF_8));
             }
-
             return doRequest(connection, returnType);
         } catch (IOException e) {
             throw new LiquibaseHubException(e);
         }
+    }
+
+    private String createPostRequestBody(Map<String, String> parameters) {
+        String out = "{";
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            if (! out.equals("{")) {
+                out += ",";
+            }
+            out += '"' + entry.getKey() + '"' + ":" + '"' + entry.getValue() + '"';
+        }
+        out += "}";
+        return out;
     }
 
     private URLConnection openConnection(String url) throws LiquibaseHubException {
@@ -132,6 +176,8 @@ public class OnlineHubService implements HubService {
             final URLConnection connection = new URL(hubUrl + url).openConnection();
             connection.setRequestProperty("User-Agent", "Liquibase " + LiquibaseUtil.getBuildVersion());
             connection.setRequestProperty("Authorization", "Bearer " + apiKey);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
             return connection;
         } catch (IOException e) {
             throw new LiquibaseHubException(e);

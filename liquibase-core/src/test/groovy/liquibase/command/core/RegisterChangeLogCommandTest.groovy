@@ -1,9 +1,10 @@
 package liquibase.command.core
 
 import liquibase.Scope
+import liquibase.configuration.HubConfiguration
+import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
-import liquibase.util.StringUtil
 import spock.lang.Specification
 
 class RegisterChangeLogCommandTest extends Specification {
@@ -22,18 +23,21 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
+        def hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
+        hubConfiguration.setLiquibaseHubProject("PROJECT 1")
         def command = new RegisterChangeLogCommand()
         command.setOutputStream(new PrintStream(outputStream))
 
         def result = command.run()
 
-        def output = outputStream.toString()
+        def hubChangeLog = command.getHubChangeLog()
 
         then:
         result.succeeded
-        StringUtil.standardizeLineEndings(output).trim() == StringUtil.standardizeLineEndings("""
-See project Project 1
-See project Project 2
-""").trim()
+        hubChangeLog.id != null
+        hubChangeLog.id.toString() == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        hubChangeLog.externalChangeLogId.toString() == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        hubChangeLog.fileName == "string"
+        hubChangeLog.name == "changelog"
     }
 }
