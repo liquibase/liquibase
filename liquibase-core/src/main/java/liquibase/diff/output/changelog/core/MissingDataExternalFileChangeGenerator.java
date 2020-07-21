@@ -23,10 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-
-import org.springframework.util.Base64Utils;
 
 @LiquibaseService(skip = true)
 public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGenerator {
@@ -131,7 +130,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                                 } else if (value instanceof byte[]) {
                                     // extract the value as a Base64 string, to safely store the
                                     // binary data
-                                    line[i] = Base64Utils.encodeToString((byte[])value);
+                                    line[i] = Base64.getEncoder().encodeToString((byte[])value);
                                 } else {
                                     line[i] = value.toString();
                                 }

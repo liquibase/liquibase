@@ -24,8 +24,6 @@ import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
 
-import org.springframework.util.Base64Utils;
-
 import static java.util.ResourceBundle.getBundle;
 import liquibase.change.core.LoadDataChange;
 
@@ -132,7 +130,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
                 stmt.setObject(i, UUID.fromString(col.getValue()));
             } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
-                stmt.setBlob(i, new ByteArrayInputStream(Base64Utils.decodeFromString(col.getValue())));
+                stmt.setBlob(i, new ByteArrayInputStream(Base64.getDecoder().decode(col.getValue())));
             } else {
                 stmt.setString(i, col.getValue());
             }
