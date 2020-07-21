@@ -6,6 +6,7 @@ public class HubChangeLog {
 
     private UUID id;
     private String name;
+    private Project project;
 
     public UUID getId() {
         return id;
@@ -26,5 +27,9 @@ public class HubChangeLog {
     @Override
     public String toString() {
         return "Changelog " + getId() + " (" + getName() + ")";
+    }
+
+    public Project getProject() {
+        return project;
     }
 }
