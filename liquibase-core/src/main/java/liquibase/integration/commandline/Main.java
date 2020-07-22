@@ -938,7 +938,14 @@ public class Main {
                         namespace += splitKey[i];
                     }
                     String valueKey = splitKey[splitKey.length-1];
-                    LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
+                    try {
+                        LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
+                    }
+                    catch (Exception e) {
+                        if (strict) {
+                            throw new CommandLineParsingException(e);
+                        }
+                    }
                 } else {
                     Field field = getDeclaredField((String)entry.getKey());
                     Object currentValue = field.get(this);
