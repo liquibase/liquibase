@@ -58,6 +58,9 @@ public class ISODateFormat {
     }
 
     public Date parse(String dateAsString) throws ParseException {
+        if (dateAsString == null) {
+            return null;
+        }
         int length = dateAsString.length();
         switch (length) {
         case 8:

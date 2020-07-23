@@ -16,6 +16,8 @@ class OnlineHubServiceTest extends Specification {
     private Properties integrationTestProperties
     private boolean hubAvailable
 
+    private UUID exampleProjectId = UUID.fromString("ce1a237e-e005-4288-a243-4856823a25a6")
+
     def setup() {
         hubService = new OnlineHubService()
 
@@ -103,5 +105,25 @@ class OnlineHubServiceTest extends Specification {
         search                                                                                            | expectedName
         [name: "dooriblon Environment"]                                                                   | "[dooriblon Environment]"
         [jdbcUrl: "jdbc:postgresql://localhost:5432/liquibase-hub- f448a409-1c73-421a-a03c-fd2a146e4c0d"] | "[dooriblon Environment]"
+    }
+
+    def createEnvironment() {
+        setup:
+        def randomNumber = new Random().nextInt()
+
+
+        when:
+        def newEnv = hubService.createEnvironment(exampleProjectId, new Environment(
+                name: "New Env $randomNumber",
+                jdbcUrl: "jdbc://test-$randomNumber",
+        ))
+
+        then:
+        newEnv.id != null
+        newEnv.name == "New Env $randomNumber"
+        newEnv.jdbcUrl == "jdbc://test-$randomNumber"
+        newEnv.createDate != null
+        newEnv.updateDate == null
+        newEnv.removeDate == null
     }
 }

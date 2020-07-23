@@ -141,7 +141,11 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         //
         // Go create the Hub Changelog
         //
-        hubChangeLog = service.createChangeLogId(project);
+        hubChangeLog = service.createChangeLog(project);
+
+        //
+        // Make changes to the changelog file
+        //
         final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
         InputStreamList list = resourceAccessor.openStreams("", changeLogFile);
         List<URI> uris = list.getURIs();

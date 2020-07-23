@@ -20,4 +20,16 @@ class OnlineHubServiceTest extends Specification {
 
     }
 
+    @Unroll
+    def "parseDate"() {
+        expect:
+        String.valueOf(new OnlineHubService().parseDate(date)) == expected
+
+        where:
+        date | expected
+        null | "null"
+        "2002-03-04" | "2002-03-04"
+        "2002-03-04T05:06:07" | "2002-03-04 05:06:07.0"
+    }
+
 }
