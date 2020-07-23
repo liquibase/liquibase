@@ -10,10 +10,17 @@ import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.LiquibaseHubObjectNotFoundException;
 import liquibase.hub.model.*;
 import liquibase.plugin.Plugin;
+import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.introspector.BeanAccess;
+import org.yaml.snakeyaml.introspector.Property;
+import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,11 +32,27 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.*;
 
 public class OnlineHubService implements HubService {
 
+    private Yaml yaml;
     private UUID organizationId;
+
+    public OnlineHubService() {
+        DumperOptions dumperOptions = new DumperOptions();
+
+        dumperOptions.setPrettyFlow(true);
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+        dumperOptions.setWidth(Integer.MAX_VALUE);
+
+        yaml = new Yaml(new Constructor(), new HubRepresenter(), dumperOptions);
+
+        yaml.setBeanAccess(BeanAccess.FIELD);
+
+    }
 
     @Override
     public int getPriority() {
@@ -87,24 +110,14 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public HubChangeLog createChangeLogId(Project project) throws LiquibaseException {
+    public HubChangeLog createChangeLog(Project project) throws LiquibaseException {
         final UUID organizationId = getOrganization().getId();
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("externalChangelogId", "3fa85f64-5717-4562-b3fc-2c963f66afa6");
-        parameters.put("fileName", "string");
-        parameters.put("name", "string");
-        Map<String, String> response =
-                doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs", parameters, Map.class);
-        String id = response.get("id");
-        String externalChangeLogId = response.get("externalChangelogId");
-        String fileName = response.get("fileName");
-        String name = response.get("name");
-        HubChangeLog hubChangeLog = new HubChangeLog();
-        hubChangeLog.setId(UUID.fromString(id));
-        hubChangeLog.setIdExternalChangeLogId(UUID.fromString(externalChangeLogId));
-        hubChangeLog.setFileName(fileName);
-        hubChangeLog.setName(name);
-        return hubChangeLog;
+
+        HubChangeLog changeLogRequest = new HubChangeLog();
+        changeLogRequest.setExternalChangeLogId(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6"));
+        changeLogRequest.setFileName("string");
+        changeLogRequest.setName("string");
+        return doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs", changeLogRequest, HubChangeLog.class);
     }
 
     @Override
@@ -120,28 +133,32 @@ public class OnlineHubService implements HubService {
 
         List<Environment> returnList = new ArrayList<>();
 
-        for (Map object : (List<Map>) response.get("content")) {
-            returnList.add(new Environment()
-                    .setId(UUID.fromString((String) object.get("id")))
-                    .setJdbcUrl((String) object.get("jdbcUrl"))
-                    .setName((String) object.get("name"))
-                    .setDescription((String) object.get("description"))
-                    .setCreateDate(parseDate((String) object.get("createDate")))
-                    .setUpdateDate(parseDate((String) object.get("updateDate")))
-                    .setRemoveDate(parseDate((String) object.get("removeDate")))
-            );
+        try {
+            for (Map object : (List<Map>) response.get("content")) {
+                returnList.add(new Environment()
+                        .setId(UUID.fromString((String) object.get("id")))
+                        .setJdbcUrl((String) object.get("jdbcUrl"))
+                        .setName((String) object.get("name"))
+                        .setDescription((String) object.get("description"))
+                        .setCreateDate(parseDate((String) object.get("createDate")))
+                        .setUpdateDate(parseDate((String) object.get("updateDate")))
+                        .setRemoveDate(parseDate((String) object.get("removeDate")))
+                );
+            }
+        } catch (ParseException e) {
+            throw new LiquibaseHubException(e);
         }
 
         return returnList;
     }
 
-    private Date parseDate(String stringDate) {
-        return null;
+    protected Date parseDate(String stringDate) throws ParseException {
+        return new ISODateFormat().parse(stringDate);
     }
 
     @Override
     public Environment createEnvironment(UUID projectId, Environment environment) throws LiquibaseHubException {
-        return null;
+        return doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + projectId + "/environments", environment, Environment.class);
     }
 
     @Override
@@ -164,11 +181,11 @@ public class OnlineHubService implements HubService {
         return doRequest(connection, returnType);
     }
 
-    protected <T> T doPost(String url, Map<String, String> parameters, Class<T> returnType) throws LiquibaseHubException {
+    protected <T> T doPost(String url, Object requestBodyObject, Class<T> returnType) throws LiquibaseHubException {
         HttpURLConnection connection = (HttpURLConnection) openConnection(url);
         connection.setDoOutput(true);
 
-        String requestBody = createPostRequestBody(parameters);
+        String requestBody = createPostRequestBody(requestBodyObject);
         try {
             try (OutputStream output = connection.getOutputStream()) {
                 output.write(requestBody.getBytes(StandardCharsets.UTF_8));
@@ -179,16 +196,8 @@ public class OnlineHubService implements HubService {
         }
     }
 
-    private String createPostRequestBody(Map<String, String> parameters) {
-        String out = "{";
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            if (!out.equals("{")) {
-                out += ",";
-            }
-            out += '"' + entry.getKey() + '"' + ":" + '"' + entry.getValue() + '"';
-        }
-        out += "}";
-        return out;
+    private String createPostRequestBody(Object requestObjectBody) {
+        return yaml.dumpAs(requestObjectBody, Tag.MAP, DumperOptions.FlowStyle.FLOW);
     }
 
     private URLConnection openConnection(String url) throws LiquibaseHubException {
@@ -226,9 +235,8 @@ public class OnlineHubService implements HubService {
     }
 
     private <T> T doRequest(URLConnection connection, Class<T> returnType) throws LiquibaseHubException {
-        Yaml yaml = new Yaml(new SafeConstructor());
         try (InputStream response = connection.getInputStream()) {
-            return (T) yaml.load(response);
+            return (T) yaml.loadAs(response, returnType);
         } catch (IOException e) {
             try {
                 try (InputStream error = ((HttpURLConnection) connection).getErrorStream()) {
@@ -241,7 +249,7 @@ public class OnlineHubService implements HubService {
                             returnException = new LiquibaseHubObjectNotFoundException(returnException.getMessage(), returnException.getCause());
                         }
                         returnException.setTimestamp((String) errorDetails.get("timestamp"));
-                        returnException.setDetails((String)errorDetails.get("details"));
+                        returnException.setDetails((String) errorDetails.get("details"));
                         throw returnException;
 
                     }
@@ -270,7 +278,7 @@ public class OnlineHubService implements HubService {
                 Object value = field.get(object);
                 if (value != null) {
                     value = value.toString().replace("\"", "\\\"");
-                    clauses.add(field.getName()+":\""+value+"\"");
+                    clauses.add(field.getName() + ":\"" + value + "\"");
                 }
 
             } catch (IllegalAccessException ignored) {
@@ -280,5 +288,20 @@ public class OnlineHubService implements HubService {
 
         return StringUtil.join(clauses, " AND ");
 
+    }
+
+    private static class HubRepresenter extends Representer {
+
+        public HubRepresenter() {
+            getPropertyUtils().setSkipMissingProperties(true);
+        }
+
+        @Override
+        protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
+            if (propertyValue == null) {
+                return null;
+            }
+            return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
+        }
     }
 }

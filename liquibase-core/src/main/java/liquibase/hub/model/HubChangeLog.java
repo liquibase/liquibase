@@ -21,7 +21,7 @@ public class HubChangeLog {
         return externalChangeLogId;
     }
 
-    public void setIdExternalChangeLogId(UUID externalChangeLogId) {
+    public void setExternalChangeLogId(UUID externalChangeLogId) {
         this.externalChangeLogId = externalChangeLogId;
     }
 

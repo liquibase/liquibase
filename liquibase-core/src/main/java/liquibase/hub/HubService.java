@@ -25,7 +25,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException;
 
-    HubChangeLog createChangeLogId(Project project) throws LiquibaseException;
+    HubChangeLog createChangeLog(Project project) throws LiquibaseException;
     Environment createEnvironment(UUID projectId, Environment environment) throws LiquibaseHubException;
 
     HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException;

@@ -73,7 +73,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         }
         hubChangeLog = null;
         if (project != null) {
-            hubChangeLog = service.createChangeLogId(project);
+            hubChangeLog = service.createChangeLog(project);
         }
 
         return new CommandResult();

@@ -41,14 +41,14 @@ public class MockHubService implements HubService {
         return null;
     }
 
-    public HubChangeLog createChangeLogId(Project project) throws LiquibaseException {
+    public HubChangeLog createChangeLog(Project project) throws LiquibaseException {
         HubChangeLog hubChangeLog = new HubChangeLog();
         String id = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
         String externalChangeLogId = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
         String fileName = "string";
         String testName = "changelog";
         hubChangeLog.setId(UUID.fromString(id));
-        hubChangeLog.setIdExternalChangeLogId(UUID.fromString(externalChangeLogId));
+        hubChangeLog.setExternalChangeLogId(UUID.fromString(externalChangeLogId));
         hubChangeLog.setFileName(fileName);
         hubChangeLog.setName(testName);
         return hubChangeLog;
