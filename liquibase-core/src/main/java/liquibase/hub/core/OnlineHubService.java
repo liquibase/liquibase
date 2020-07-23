@@ -7,14 +7,10 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
+import liquibase.hub.LiquibaseHubObjectNotFoundException;
 import liquibase.hub.model.*;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.HubUser;
-import liquibase.hub.model.Organization;
-import liquibase.hub.model.Project;
 import liquibase.plugin.Plugin;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
@@ -23,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -76,7 +73,7 @@ public class OnlineHubService implements HubService {
         final Map<String, List<Map>> response = doGet("/api/v1/organizations/" + organizationId.toString() + "/projects", Map.class);
         List<Map> contentList = response.get("content");
         List<Project> returnList = new ArrayList<>();
-        for (int i=0; i < contentList.size(); i++) {
+        for (int i = 0; i < contentList.size(); i++) {
             String id = (String) contentList.get(0).get("id");
             String name = (String) contentList.get(i).get("name");
 
@@ -97,7 +94,7 @@ public class OnlineHubService implements HubService {
         parameters.put("fileName", "string");
         parameters.put("name", "string");
         Map<String, String> response =
-           doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs", parameters, Map.class);
+                doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs", parameters, Map.class);
         String id = response.get("id");
         String externalChangeLogId = response.get("externalChangelogId");
         String fileName = response.get("fileName");
@@ -116,7 +113,29 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public List<Environment> getEnvironments(Environment exampleEnvironment) {
+    public List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException {
+        final Organization organization = getOrganization();
+
+        final Map response = doGet("/api/v1/organizations/" + organization.getId() + "/environments", Collections.singletonMap("search", toSearchString(exampleEnvironment)), Map.class);
+
+        List<Environment> returnList = new ArrayList<>();
+
+        for (Map object : (List<Map>) response.get("content")) {
+            returnList.add(new Environment()
+                    .setId(UUID.fromString((String) object.get("id")))
+                    .setJdbcUrl((String) object.get("jdbcUrl"))
+                    .setName((String) object.get("name"))
+                    .setDescription((String) object.get("description"))
+                    .setCreateDate(parseDate((String) object.get("createDate")))
+                    .setUpdateDate(parseDate((String) object.get("updateDate")))
+                    .setRemoveDate(parseDate((String) object.get("removeDate")))
+            );
+        }
+
+        return returnList;
+    }
+
+    private Date parseDate(String stringDate) {
         return null;
     }
 
@@ -146,7 +165,7 @@ public class OnlineHubService implements HubService {
     }
 
     protected <T> T doPost(String url, Map<String, String> parameters, Class<T> returnType) throws LiquibaseHubException {
-        HttpURLConnection connection = (HttpURLConnection)openConnection(url);
+        HttpURLConnection connection = (HttpURLConnection) openConnection(url);
         connection.setDoOutput(true);
 
         String requestBody = createPostRequestBody(parameters);
@@ -163,7 +182,7 @@ public class OnlineHubService implements HubService {
     private String createPostRequestBody(Map<String, String> parameters) {
         String out = "{";
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            if (! out.equals("{")) {
+            if (!out.equals("{")) {
                 out += ",";
             }
             out += '"' + entry.getKey() + '"' + ":" + '"' + entry.getValue() + '"';
@@ -207,16 +226,24 @@ public class OnlineHubService implements HubService {
     }
 
     private <T> T doRequest(URLConnection connection, Class<T> returnType) throws LiquibaseHubException {
+        Yaml yaml = new Yaml(new SafeConstructor());
         try (InputStream response = connection.getInputStream()) {
-            Yaml yaml = new Yaml(new SafeConstructor());
             return (T) yaml.load(response);
         } catch (IOException e) {
             try {
                 try (InputStream error = ((HttpURLConnection) connection).getErrorStream()) {
-                    final String errorStream = StringUtil.trimToNull(StreamUtil.readStreamAsString(error));
+                    if (error != null) {
+                        final Map errorDetails = yaml.load(error);
 
-                    if (errorStream != null) {
-                        throw new LiquibaseHubException(errorStream, e);
+                        LiquibaseHubException returnException = new LiquibaseHubException((String) errorDetails.get("message"), e);
+
+                        if (((HttpURLConnection) connection).getResponseCode() == 404) {
+                            returnException = new LiquibaseHubObjectNotFoundException(returnException.getMessage(), returnException.getCause());
+                        }
+                        returnException.setTimestamp((String) errorDetails.get("timestamp"));
+                        returnException.setDetails((String)errorDetails.get("details"));
+                        throw returnException;
+
                     }
                 }
             } catch (IOException ioException) {
@@ -225,5 +252,33 @@ public class OnlineHubService implements HubService {
 
             throw new LiquibaseHubException(e);
         }
+    }
+
+    /**
+     * Converts an object to a search string. Any properties with non-null values are used as search arguments
+     */
+    protected String toSearchString(Object object) {
+        if (object == null) {
+            return "";
+        }
+
+        SortedSet<String> clauses = new TreeSet<>();
+        final Field[] fields = object.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            try {
+                field.setAccessible(true);
+                Object value = field.get(object);
+                if (value != null) {
+                    value = value.toString().replace("\"", "\\\"");
+                    clauses.add(field.getName()+":\""+value+"\"");
+                }
+
+            } catch (IllegalAccessException ignored) {
+                //don't use it as a param
+            }
+        }
+
+        return StringUtil.join(clauses, " AND ");
+
     }
 }

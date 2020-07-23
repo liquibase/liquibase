@@ -23,7 +23,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException;
 
-    List<Environment> getEnvironments(Environment exampleEnvironment);
+    List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException;
 
     HubChangeLog createChangeLogId(Project project) throws LiquibaseException;
     Environment createEnvironment(UUID projectId, Environment environment) throws LiquibaseHubException;

@@ -5,8 +5,6 @@ import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.*;
 import liquibase.exception.LiquibaseException;
-import liquibase.hub.HubService;
-import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.HubUser;
 import liquibase.hub.model.Organization;
@@ -84,7 +82,7 @@ public class MockHubService implements HubService {
 
         return new Environment()
                 .setId(UUID.randomUUID())
-                .setUrl(environment.getUrl());
+                .setJdbcUrl(environment.getJdbcUrl());
     }
 
     @Override

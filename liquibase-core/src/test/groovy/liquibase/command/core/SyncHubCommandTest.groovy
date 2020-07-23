@@ -57,7 +57,7 @@ class SyncHubCommandTest extends Specification {
         mockHubService.environments = [
                 new Environment(
                         id: randomUUID,
-                        url: "jdbc://test",
+                        jdbcUrl: "jdbc://test",
                 )
         ]
 
@@ -77,11 +77,11 @@ class SyncHubCommandTest extends Specification {
         mockHubService.environments = [
                 new Environment(
                         id: randomUUID,
-                        url: "jdbc://test",
+                        jdbcUrl: "jdbc://test",
                 ),
                 new Environment(
                         id: UUID.randomUUID(),
-                        url: "jdbc://test",
+                        jdbcUrl: "jdbc://test",
                 )
         ]
 
@@ -140,8 +140,8 @@ class SyncHubCommandTest extends Specification {
     def "Fails with multiple matching environments"() {
         setup:
         mockHubService.environments = [
-                new Environment(url: "jdbc://test1"),
-                new Environment(url: "jdbc://test2"),
+                new Environment(jdbcUrl: "jdbc://test1"),
+                new Environment(jdbcUrl: "jdbc://test2"),
         ]
 
         when:

@@ -72,7 +72,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
         Environment environmentToSync;
         if (hubEnvironmentId == null) {
-            final List<Environment> environments = hubService.getEnvironments(new Environment().setUrl(url));
+            final List<Environment> environments = hubService.getEnvironments(new Environment().setJdbcUrl(url));
             if (environments.size() == 0) {
                 if (changeLogFile == null) {
                     return new CommandResult("The url " + url + " does not match any defined environments. To auto-create an environment, please specify 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
@@ -91,7 +91,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                 }
 
                 Environment inputEnvironment = new Environment();
-                inputEnvironment.setUrl(url);
+                inputEnvironment.setJdbcUrl(url);
 
                 environmentToSync = hubService.createEnvironment(changeLog.getProject().getId(), inputEnvironment);
             } else if (environments.size() == 1) {

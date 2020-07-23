@@ -3,8 +3,9 @@ package liquibase.hub
 import liquibase.configuration.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.core.OnlineHubService
-import liquibase.hub.model.HubUser
+import liquibase.hub.model.Environment
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import static org.junit.Assume.assumeTrue
 
@@ -46,24 +47,20 @@ class OnlineHubServiceTest extends Specification {
     def getMe() {
         when:
         def me = hubService.getMe()
-        def testUserId = integrationTestProperties.get("integration.test.hub.userId")
-        def testUserName = integrationTestProperties.get("integration.test.hub.userName")
 
         then:
-        me.id.toString() == testUserId
-        me.username == testUserName
+        me.id != null
+        me.username == "ruslan"
 
     }
 
     def getOrganization() {
         when:
         def org = hubService.getOrganization()
-        def orgId= integrationTestProperties.get("integration.test.hub.orgId")
-        def orgName= integrationTestProperties.get("integration.test.hub.orgName")
 
         then:
-        org.id.toString() == orgId
-        org.name == orgName
+        org.id != null
+        org.name == "ruslan's Personal Organization"
 
     }
 
@@ -72,6 +69,39 @@ class OnlineHubServiceTest extends Specification {
         def projects = hubService.getProjects()
 
         then:
-        projects.size() >=1
+        projects.size() >= 1
+    }
+
+    def "404 errors are thrown as the correct exceptions"() {
+        when:
+        hubService.getEnvironments(new Environment(name: "invalid name"))
+
+        then:
+        def e = thrown(LiquibaseHubObjectNotFoundException)
+        e.message.contains("not found")
+    }
+
+    def "getEnvironments can return all environments"() {
+        when:
+        def environments = hubService.getEnvironments(null)
+
+        then:
+        environments*.id.toString() == "[d92e6505-cd0f-4e91-bb66-b12e6a285184]"
+        environments*.name.toString() == "[dooriblon Environment]"
+        environments*.jdbcUrl.toString() == "[jdbc:postgresql://localhost:5432/liquibase-hub- f448a409-1c73-421a-a03c-fd2a146e4c0d]"
+    }
+
+    @Unroll
+    def "getEnvironments can search"() {
+        when:
+        def environments = hubService.getEnvironments(new Environment(search))
+
+        then:
+        environments*.name.toString() == expectedName
+
+        where:
+        search                                                                                            | expectedName
+        [name: "dooriblon Environment"]                                                                   | "[dooriblon Environment]"
+        [jdbcUrl: "jdbc:postgresql://localhost:5432/liquibase-hub- f448a409-1c73-421a-a03c-fd2a146e4c0d"] | "[dooriblon Environment]"
     }
 }
