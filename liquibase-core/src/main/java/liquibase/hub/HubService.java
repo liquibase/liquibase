@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface HubService extends Plugin, PrioritizedService {
+    boolean hasApiKey();
 
     HubUser getMe() throws LiquibaseHubException;
 
@@ -28,5 +29,5 @@ public interface HubService extends Plugin, PrioritizedService {
     HubChangeLog createChangeLogId(Project project) throws LiquibaseException;
     Environment createEnvironment(UUID projectId, Environment environment) throws LiquibaseHubException;
 
-    HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException;
+    HubChangeLog getChangeLog(String changeLogId, Project project) throws LiquibaseHubException;
 }

@@ -1,6 +1,8 @@
 package liquibase.hub.core;
 
 import liquibase.changelog.RanChangeSet;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.*;
@@ -9,6 +11,8 @@ import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.HubUser;
 import liquibase.hub.model.Organization;
 import liquibase.hub.model.Project;
+import liquibase.plugin.Plugin;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +26,12 @@ public class MockHubService implements HubService {
     public List<Environment> environments = new ArrayList<>();
     public List<HubChangeLog> changeLogs = new ArrayList<>();
     public SortedMap<String, List> sentObjects = new TreeMap<>();
+    private Boolean hasApiKey;
+
+    @Override
+    public boolean hasApiKey() {
+        return true;
+    }
 
     @Override
     public int getPriority() {
@@ -86,7 +96,7 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public HubChangeLog getChangeLog(String changeLogId) {
+    public HubChangeLog getChangeLog(String changeLogId, Project project) {
         for (HubChangeLog changeLog : changeLogs) {
             if (String.valueOf(changeLog.getId()).equals(String.valueOf(changeLogId))) {
                 return changeLog;

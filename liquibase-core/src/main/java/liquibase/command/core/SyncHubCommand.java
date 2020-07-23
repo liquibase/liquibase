@@ -85,7 +85,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                     return new CommandResult("Changelog " + changeLogFile + " has not been registered with Liquibase Hub.", false);
                 }
 
-                final HubChangeLog changeLog = hubService.getChangeLog(changeLogId);
+                final HubChangeLog changeLog = hubService.getChangeLog(changeLogId, null);
                 if (changeLog == null) {
                     return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
                 }

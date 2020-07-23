@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
+import liquibase.command.CommandResult;
 import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.*;
 import liquibase.configuration.GlobalConfiguration;
@@ -1550,8 +1551,13 @@ public class Main {
             } else if (COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
-                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
-                liquibaseCommand.execute();
+                RegisterChangeLogCommand liquibaseCommand =
+                   (RegisterChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
+                liquibaseCommand.setChangeLogFile(changeLogFile);
+                CommandResult result = liquibaseCommand.execute();
+                if (! result.succeeded) {
+                    new PrintStream(getOutputStream()).println(result.message);
+                }
                 return;
             } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();

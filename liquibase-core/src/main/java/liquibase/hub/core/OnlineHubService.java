@@ -28,12 +28,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class OnlineHubService implements HubService {
-
     private UUID organizationId;
+    private Boolean hasApiKey;
 
     @Override
     public int getPriority() {
-        return Plugin.PRIORITY_DEFAULT;
+        return hasApiKey() ? Plugin.PRIORITY_DEFAULT + 100 : Plugin.PRIORITY_NOT_APPLICABLE;
+    }
+
+    @Override
+    public boolean hasApiKey() {
+        if (hasApiKey != null) {
+            return hasApiKey;
+        }
+        hasApiKey = HubServiceUtils.apiKeyExists();
+        return hasApiKey;
     }
 
     @Override
@@ -90,20 +99,12 @@ public class OnlineHubService implements HubService {
     public HubChangeLog createChangeLogId(Project project) throws LiquibaseException {
         final UUID organizationId = getOrganization().getId();
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("externalChangelogId", "3fa85f64-5717-4562-b3fc-2c963f66afa6");
+        parameters.put("externalChangelogId", UUID.randomUUID().toString());
         parameters.put("fileName", "string");
         parameters.put("name", "string");
         Map<String, String> response =
-                doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs", parameters, Map.class);
-        String id = response.get("id");
-        String externalChangeLogId = response.get("externalChangelogId");
-        String fileName = response.get("fileName");
-        String name = response.get("name");
-        HubChangeLog hubChangeLog = new HubChangeLog();
-        hubChangeLog.setId(UUID.fromString(id));
-        hubChangeLog.setIdExternalChangeLogId(UUID.fromString(externalChangeLogId));
-        hubChangeLog.setFileName(fileName);
-        hubChangeLog.setName(name);
+            doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs", parameters, Map.class);
+        HubChangeLog hubChangeLog = createHubChangeLogFromResponse(response);
         return hubChangeLog;
     }
 
@@ -144,9 +145,43 @@ public class OnlineHubService implements HubService {
         return null;
     }
 
+    /**
+     *
+     * Query for a changelog ID.  If no result we return null
+     *
+     * @param   changeLogId                Changelog ID for query
+     * @param   project                    Project for query
+     * @return  HubChangeLog               Object container for result
+     * @throws  LiquibaseHubException
+     *
+     */
     @Override
-    public HubChangeLog getChangeLog(String changeLogId) {
-        return null;
+    public HubChangeLog getChangeLog(String changeLogId, Project project) throws LiquibaseHubException {
+        final UUID organizationId = getOrganization().getId();
+        try {
+            Map<String, String> response =
+                doGet("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs/" + changeLogId, Map.class);
+            HubChangeLog hubChangeLog = createHubChangeLogFromResponse(response);
+            return hubChangeLog;
+        }
+        catch (LiquibaseHubException lbe) {
+            //
+            // Consume and just return null
+            return null;
+        }
+    }
+
+    private HubChangeLog createHubChangeLogFromResponse(Map<String, String> response) {
+        String id = response.get("id");
+        String externalChangeLogId = response.get("externalChangelogId");
+        String fileName = response.get("fileName");
+        String name = response.get("name");
+        HubChangeLog hubChangeLog = new HubChangeLog();
+        hubChangeLog.setId(UUID.fromString(id));
+        hubChangeLog.setIdExternalChangeLogId(UUID.fromString(externalChangeLogId));
+        hubChangeLog.setFileName(fileName);
+        hubChangeLog.setName(name);
+        return hubChangeLog;
     }
 
     protected <T> T doGet(String url, Class<T> returnType) throws LiquibaseHubException {
@@ -194,7 +229,7 @@ public class OnlineHubService implements HubService {
     private URLConnection openConnection(String url) throws LiquibaseHubException {
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         String hubUrl = hubConfiguration.getLiquibaseHubUrl();
-        String apiKey = hubConfiguration.getLiquibaseHubApiKey(); //"961e43af-b1db-43ac-a001-e0b1719891a4";
+        String apiKey = hubConfiguration.getLiquibaseHubApiKey();
 
         try {
             final URLConnection connection = new URL(hubUrl + url).openConnection();
