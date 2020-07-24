@@ -1,11 +1,13 @@
 package liquibase.hub.model;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class Project {
 
     private UUID id;
     private String name;
+    private Date createDate;
 
     public UUID getId() {
         return id;
@@ -21,6 +23,14 @@ public class Project {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
     @Override

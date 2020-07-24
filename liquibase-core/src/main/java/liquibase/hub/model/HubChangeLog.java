@@ -5,7 +5,7 @@ import java.util.UUID;
 public class HubChangeLog {
 
     private UUID id;
-    private UUID externalChangeLogId;
+    private String externalChangelogId;
     private String fileName;
     private String name;
     private Project project;
@@ -17,12 +17,12 @@ public class HubChangeLog {
     public void setId(UUID id) {
         this.id = id;
     }
-    public UUID getExternalChangeLogId() {
-        return externalChangeLogId;
+    public String getExternalChangelogId() {
+        return externalChangelogId;
     }
 
-    public void setExternalChangeLogId(UUID externalChangeLogId) {
-        this.externalChangeLogId = externalChangeLogId;
+    public void setExternalChangelogId(String externalChangelogId) {
+        this.externalChangelogId = externalChangelogId;
     }
 
     public String getFileName() {
@@ -48,5 +48,9 @@ public class HubChangeLog {
 
     public Project getProject() {
         return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 }

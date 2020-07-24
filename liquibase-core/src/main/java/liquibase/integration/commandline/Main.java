@@ -1555,9 +1555,7 @@ public class Main {
                    (RegisterChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
                 CommandResult result = liquibaseCommand.execute();
-                if (! result.succeeded) {
-                    new PrintStream(getOutputStream()).println(result.message);
-                }
+                new PrintStream(getOutputStream()).println(result.message);
                 return;
             } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();

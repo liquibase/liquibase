@@ -1,23 +1,11 @@
 package liquibase.hub.core;
 
 import liquibase.changelog.RanChangeSet;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.*;
-import liquibase.exception.LiquibaseException;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.HubUser;
-import liquibase.hub.model.Organization;
-import liquibase.hub.model.Project;
-import liquibase.plugin.Plugin;
-import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 import java.util.*;
 
 public class MockHubService implements HubService {
@@ -51,6 +39,11 @@ public class MockHubService implements HubService {
         return null;
     }
 
+    @Override
+    public Project createProject(String projectName) {
+        return null;
+    }
+
     public HubChangeLog createChangeLog(Project project) throws LiquibaseException {
         HubChangeLog hubChangeLog = new HubChangeLog();
         String id = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
@@ -58,7 +51,7 @@ public class MockHubService implements HubService {
         String fileName = "string";
         String testName = "changelog";
         hubChangeLog.setId(UUID.fromString(id));
-        hubChangeLog.setExternalChangeLogId(UUID.fromString(externalChangeLogId));
+        hubChangeLog.setExternalChangelogId(externalChangeLogId);
         hubChangeLog.setFileName(fileName);
         hubChangeLog.setName(testName);
         return hubChangeLog;
@@ -96,7 +89,7 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public HubChangeLog getChangeLog(String changeLogId, Project project) {
+    public HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException {
         for (HubChangeLog changeLog : changeLogs) {
             if (String.valueOf(changeLog.getId()).equals(String.valueOf(changeLogId))) {
                 return changeLog;
