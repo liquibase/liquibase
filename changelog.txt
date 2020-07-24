@@ -1,6 +1,21 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.10.2 (2020.7.27)
+
+ - Dependency cycle error during generateChangeLog with --diffTypes=tables,columns,data
+ - liquibase maven:: unable to run tests on java > 8
+ - Add Banner in log out put that directs users to online resources.
+ - GH PR#980 - fixed invalid carriage return coming from oracle ojdbc8 12.2.0.1
+ - GH PR#976 - Changes databasechangelog sql to use legacy mode
+ - [CORE-3525] Add support for java.sql.Types.TIMESTAMP_WITH_TIMEZONE.
+ - GH PR#929 - Fix #CORE-3493 Inconsistent resolution of ChangeLogParameters in liqu…
+ - GH PR#744 - Informix data type generation with Default Value cause
+ - GH PR#1176 - Add MariaDB sequence support to the 3.10.x branch
+ - GH PR#1177 - CORE-3643: fixed the 'shouldValidateX' methods in the Constraints
+ - GH PR#1201 - H2 unknown reserved word
+
+
 Changes in version 3.10.1 (2020.7.2)
 
  - GH PR#913 - [CORE-3471] Fixed NPE in LiquibaseUtil when MANIFEST.MF doesn't contain Bundle-Version or Build-Time
