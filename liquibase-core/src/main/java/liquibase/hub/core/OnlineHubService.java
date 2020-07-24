@@ -113,15 +113,13 @@ public class OnlineHubService implements HubService {
             String id = (String) contentList.get(i).get("id");
             String name = (String) contentList.get(i).get("name");
             String dateString = (String) contentList.get(i).get("createDate");
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
             Date date=null;
             try {
-                date = dateFormat.parse(dateString);
+                date = parseDate(dateString);
             }
             catch (ParseException dpe) {
                 LOG.warning("Project '" + name + "' has an invalid create date of '" + dateString + "'");
             }
-
             Project project = new Project();
             project.setId(UUID.fromString(id));
             project.setName(name);
