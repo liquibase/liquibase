@@ -42,6 +42,8 @@ import static java.util.ResourceBundle.getBundle;
 public abstract class BaseLiquibaseTask extends Task {
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
+    private final Map<String, Object> scopeValues = new HashMap<>();
+
     private AntClassLoader classLoader;
     private Liquibase liquibase;
 
@@ -56,7 +58,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
     @Override
     public void init() throws BuildException {
-//        LogService.setLoggerFactory(new AntTaskLogService(this));
+        scopeValues.put(Scope.Attr.logService.name(), new AntTaskLogService(this));
         classpath = new Path(getProject());
     }
 
@@ -71,7 +73,6 @@ public abstract class BaseLiquibaseTask extends Task {
         final Database[] database = {null};
         try {
             ResourceAccessor resourceAccessor = createResourceAccessor(classLoader);
-            Map<String, Object> scopeValues = new HashMap<>();
             scopeValues.put(Scope.Attr.resourceAccessor.name(), resourceAccessor);
             scopeValues.put(Scope.Attr.classLoader.name(), classLoader);
 
