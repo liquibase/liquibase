@@ -18,12 +18,7 @@ public class MockHubService implements HubService {
     public List<Environment> environments = new ArrayList<>();
     public List<HubChangeLog> changeLogs = new ArrayList<>();
     public SortedMap<String, List> sentObjects = new TreeMap<>();
-    private Boolean hasApiKey;
-
-    @Override
-    public boolean hasApiKey() {
-        return true;
-    }
+    public boolean online = true;
 
     @Override
     public int getPriority() {
@@ -31,6 +26,11 @@ public class MockHubService implements HubService {
     }
 
     public MockHubService() {
+    }
+
+    @Override
+    public boolean isOnline() {
+        return online;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public Project createProject(String projectName) {
+    public Project createProject(Project project) {
         return null;
     }
 

@@ -15,13 +15,16 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface HubService extends Plugin, PrioritizedService {
-    boolean hasApiKey();
+
+    boolean isOnline();
 
     HubUser getMe() throws LiquibaseHubException;
 
     Organization getOrganization() throws LiquibaseHubException;
 
     List<Project> getProjects() throws LiquibaseHubException;
+
+    Project createProject(Project project) throws LiquibaseException;
 
     void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException;
 
@@ -33,9 +36,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     HubChangeLog createChangeLog(Project project) throws LiquibaseException;
 
-    Project createProject(String projectName) throws LiquibaseException;
-
     HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException;
 
-    Operation startOperation(String type, Environment environment, UUID changeLogId, Map<String, String> clientMetadata, Map<String, String> operationParameters);
+    Operation startOperation(String type, Environment environment, UUID changeLogId, Map<String, String> clientMetadata, Map<String, String> operationParameters) throws LiquibaseHubException;
 }

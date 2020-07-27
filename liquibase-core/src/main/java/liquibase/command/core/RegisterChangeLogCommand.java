@@ -26,10 +26,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.ResourceBundle.getBundle;
-
 public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<CommandResult> {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+
     private PrintStream outputStream = System.out;
 
     public HubChangeLog getHubChangeLog() {
@@ -74,16 +72,9 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         // Stop if we do no have a key
         //
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        if (! service.hasApiKey()) {
-            String message = coreBundle.getString("no.hub.api.key");
-            return new CommandResult(message, false);
+        if (! service.isOnline()) {
+            return new CommandResult("You need a free Liquibase Hub account in order to register your changelog for real-time monitoring and reports. Get your Hub API key at https://sales.liquibase.com.", false);
         }
-
-        //
-        // Connect to Hub
-        //
-        service.getMe();
-
 
         //
         // Retrieve the projects
@@ -119,7 +110,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                             outputStream.print("\nThe project name you entered is longer than 255 characters\n\n");
                             continue;
                         }
-                        project = service.createProject(projectName);
+                        project = service.createProject(new Project().setName(projectName));
                         if (project == null) {
                             return new CommandResult("\nUnable to create project '" + projectName + "'.\n\n", false);
                         }

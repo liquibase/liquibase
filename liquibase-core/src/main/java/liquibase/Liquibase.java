@@ -223,18 +223,21 @@ public class Liquibase implements AutoCloseable {
                     ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
                     final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-                    Environment environment;
-                    if (Liquibase.this.hubEnvironmentId == null) {
-                        environment = hubService.getEnvironment(new Environment().setJdbcUrl(Liquibase.this.database.getConnection().getURL()), true);
-                    } else {
-                        environment = hubService.getEnvironment(new Environment().setId(Liquibase.this.hubEnvironmentId), true);
-                    }
-                    Operation operation = hubService.startOperation("UPDATE", environment, UUID.fromString(changeLog.getChangeLogId()), null, null);
+                    if (hubService.isOnline()) {
+                        Environment environment;
+                        if (Liquibase.this.hubEnvironmentId == null) {
+                            environment = hubService.getEnvironment(new Environment().setJdbcUrl(Liquibase.this.database.getConnection().getURL()), true);
+                        } else {
+                            environment = hubService.getEnvironment(new Environment().setId(Liquibase.this.hubEnvironmentId), true);
+                        }
+                        Operation operation = hubService.startOperation("UPDATE", environment, UUID.fromString(changeLog.getChangeLogId()), null, null);
 
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("ChangeExecListener already defined");
+                        if (changeExecListener != null) {
+                            throw new RuntimeException("ChangeExecListener already defined");
+                        }
+                        changeExecListener = new HubChangeExecListener(operation);
                     }
-                    changeExecListener = new HubChangeExecListener(operation);
+
                     changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                 } finally {
                     database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);

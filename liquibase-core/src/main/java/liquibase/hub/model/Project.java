@@ -13,24 +13,28 @@ public class Project {
         return id;
     }
 
-    public void setId(UUID id) {
+    public Project setId(UUID id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Project setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(Date createDate) {
+    public Project setCreateDate(Date createDate) {
         this.createDate = createDate;
+        return this;
+
     }
 
     @Override

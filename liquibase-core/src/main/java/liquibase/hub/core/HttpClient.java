@@ -76,11 +76,10 @@ class HttpClient {
 
     private URLConnection openConnection(String url) throws LiquibaseHubException {
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        String hubUrl = hubConfiguration.getLiquibaseHubUrl();
         String apiKey = hubConfiguration.getLiquibaseHubApiKey();
 
         try {
-            final URLConnection connection = new URL(hubUrl + url).openConnection();
+            final URLConnection connection = new URL(getHubUrl() + url).openConnection();
             connection.setRequestProperty("User-Agent", "Liquibase " + LiquibaseUtil.getBuildVersion());
             connection.setRequestProperty("Authorization", "Bearer " + apiKey);
             connection.setRequestProperty("Accept", "application/json");
@@ -151,6 +150,11 @@ class HttpClient {
         } catch (IOException e) {
             throw new LiquibaseHubException(e);
         }
+    }
+
+    public String getHubUrl() {
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        return hubConfiguration.getLiquibaseHubUrl();
     }
 
 

@@ -2,7 +2,6 @@ package liquibase.hub.core;
 
 import liquibase.Scope;
 import liquibase.changelog.RanChangeSet;
-import liquibase.command.CommandResult;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
@@ -14,40 +13,20 @@ import liquibase.hub.model.*;
 import liquibase.logging.Logger;
 import liquibase.plugin.Plugin;
 import liquibase.util.ISODateFormat;
-import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.introspector.BeanAccess;
-import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Represent;
-import org.yaml.snakeyaml.representer.Representer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class OnlineHubService implements HubService {
 
+    private Boolean available;
     private UUID organizationId;
-    private Boolean hasApiKey;
+    private UUID userId;
 
     private HttpClient http;
-    
+
     public OnlineHubService() {
         this.http = createHttpClient();
     }
@@ -58,16 +37,50 @@ public class OnlineHubService implements HubService {
 
     @Override
     public int getPriority() {
-        return hasApiKey() ? Plugin.PRIORITY_DEFAULT + 100 : Plugin.PRIORITY_NOT_APPLICABLE;
+        if (isHubAvailable()) {
+            return Plugin.PRIORITY_DEFAULT + 100;
+        } else {
+            return PRIORITY_NOT_APPLICABLE;
+        }
     }
 
     @Override
-    public boolean hasApiKey() {
-        if (hasApiKey != null) {
-            return hasApiKey;
+    public boolean isOnline() {
+        return true;
+    }
+
+    public boolean isHubAvailable() {
+        if (this.available == null) {
+            final Logger log = Scope.getCurrentScope().getLog(getClass());
+            if (getApiKey() == null) {
+                log.info("Not connecting to Liquibase Hub: liquibase.hub.apiKey was not specified");
+                this.available = false;
+            }
+
+            try {
+                if (userId == null) {
+                    HubUser me = this.getMe();
+                    this.userId = me.getId();
+                }
+                if (organizationId == null) {
+                    Organization organization = this.getOrganization();
+                    this.organizationId = organization.getId();
+                }
+            } catch (LiquibaseHubException e) {
+                log.info("Not connecting to Liquibase Hub: error interacting with " + http.getHubUrl() + ": " + e.getMessage(), e);
+                this.available = false;
+            }
+
+            log.info("Connected to Liquibase Hub with an API Key beginning with '" + getApiKey().substring(0, 6) + "'");
+            this.available = true;
         }
-        hasApiKey = HubServiceUtils.apiKeyExists();
-        return hasApiKey;
+
+        return this.available;
+    }
+
+    public String getApiKey() {
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        return StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
     }
 
     @Override
@@ -111,11 +124,10 @@ public class OnlineHubService implements HubService {
             String id = (String) contentList.get(i).get("id");
             String name = (String) contentList.get(i).get("name");
             String dateString = (String) contentList.get(i).get("createDate");
-            Date date=null;
+            Date date = null;
             try {
                 date = parseDate(dateString);
-            }
-            catch (ParseException dpe) {
+            } catch (ParseException dpe) {
                 Scope.getCurrentScope().getLog(getClass()).warning("Project '" + name + "' has an invalid create date of '" + dateString + "'");
             }
             Project project = new Project();
@@ -129,10 +141,9 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public Project createProject(String projectName) throws LiquibaseException {
+    public Project createProject(Project project) throws LiquibaseException {
         final UUID organizationId = getOrganization().getId();
-        Project project = new Project();
-        project.setName(projectName);
+
         return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects", project, Project.class);
     }
 
@@ -226,19 +237,17 @@ public class OnlineHubService implements HubService {
     @Override
     public Environment createEnvironment(Environment environment) throws LiquibaseHubException {
         if (environment.getProject() == null || environment.getProject().getId() == null) {
-            throw new LiquibaseHubUserException("projetId is required to create an environment");
+            throw new LiquibaseHubUserException("projectId is required to create an environment");
         }
         return http.doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + environment.getProject().getId() + "/environments", environment, Environment.class);
     }
 
     /**
-     *
      * Query for a changelog ID.  If no result we return null
      *
-     * @param   changeLogId                Changelog ID for query
-     * @return  HubChangeLog               Object container for result
-     * @throws  LiquibaseHubException
-     *
+     * @param changeLogId Changelog ID for query
+     * @return HubChangeLog               Object container for result
+     * @throws LiquibaseHubException
      */
     @Override
     public HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException {
@@ -247,7 +256,7 @@ public class OnlineHubService implements HubService {
         for (Project project : projects) {
             try {
                 Map<String, String> response =
-                    http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs/" + changeLogId, Map.class);
+                        http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs/" + changeLogId, Map.class);
                 HubChangeLog hubChangeLog = createHubChangeLogFromResponse(response);
                 hubChangeLog.setProject(project);
                 return hubChangeLog;

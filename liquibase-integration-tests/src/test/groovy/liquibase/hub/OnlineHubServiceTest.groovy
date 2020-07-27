@@ -38,14 +38,7 @@ class OnlineHubServiceTest extends Specification {
             hubConfiguration.setLiquibaseHubApiKey(hubApiKey)
             hubConfiguration.setLiquibaseHubUrl(hubUrl)
 
-            try {
-                def me = hubService.getMe()
-                hubAvailable = true
-            } catch (LiquibaseHubException e) {
-                println "Hub is not available: $e.message"
-
-                hubAvailable = false
-            }
+            hubAvailable = hubService.isHubAvailable()
         }
 
         assumeTrue("Liquibase Hub is not available for testing", hubAvailable)
