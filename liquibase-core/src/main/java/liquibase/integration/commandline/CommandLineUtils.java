@@ -7,7 +7,6 @@ import liquibase.command.CommandFactory;
 import liquibase.command.core.DiffCommand;
 import liquibase.command.core.DiffToChangeLogCommand;
 import liquibase.command.core.GenerateChangeLogCommand;
-import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
@@ -259,6 +258,24 @@ public class CommandLineUtils {
         buildTimeString = LiquibaseUtil.getBuildTime();
 
         StringBuilder banner = new StringBuilder();
+
+        banner.append("####################################################\n" +
+                "##   _     _             _ _                      ##\n" +
+                "##  | |   (_)           (_) |                     ##\n" +
+                "##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##\n" +
+                "##  | |   | |/ _` | | | | | '_ \\ / _` / __|/ _ \\  ##\n" +
+                "##  | |___| | (_| | |_| | | |_) | (_| \\__ \\  __/  ##\n" +
+                "##  \\_____/_|\\__, |\\__,_|_|_.__/ \\__,_|___/\\___|  ##\n" +
+                "##              | |                               ##\n" +
+                "##              |_|                               ##\n" +
+                "##                                                ## \n" +
+                "##  Get documentation at docs.liquibase.com       ##\n" +
+                "##  Get certified courses at learn.liquibase.com  ## \n" +
+                "##  Get advanced features and support at          ##\n" +
+                "##      liquibase.com/protrial                    ##\n" +
+                "##                                                ##\n" +
+                "####################################################\n"
+                        .replaceAll("\n", System.lineSeparator()));
 
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())

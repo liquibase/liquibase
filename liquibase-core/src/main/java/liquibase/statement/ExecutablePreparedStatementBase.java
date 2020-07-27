@@ -127,9 +127,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
         final Logger LOG = Scope.getCurrentScope().getLog(getClass());
         if (col.getValue() != null) {
-            LOG.fine("value is string = " + col.getValue());
+            LOG.fine("value is string/UUID/blob = " + col.getValue());
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
                 stmt.setObject(i, UUID.fromString(col.getValue()));
+            } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
+                stmt.setBlob(i, new ByteArrayInputStream(Base64.getDecoder().decode(col.getValue())));
             } else {
                 stmt.setString(i, col.getValue());
             }

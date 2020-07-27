@@ -296,6 +296,9 @@ public class Main {
                         Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                     }
 
+            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+
+
             if (main.commandParams.contains("--help") &&
                     (main.command.startsWith("rollbackOneChangeSet") ||
                             main.command.startsWith("rollbackOneUpdate") ||
