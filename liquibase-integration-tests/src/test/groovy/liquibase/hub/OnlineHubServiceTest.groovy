@@ -51,7 +51,6 @@ class OnlineHubServiceTest extends Specification {
         assumeTrue("Liquibase Hub is not available for testing", hubAvailable)
     }
 
-/*
     def getMe() {
         when:
         def me = hubService.getMe()
@@ -61,6 +60,7 @@ class OnlineHubServiceTest extends Specification {
         me.username == "ruslan"
 
     }
+/*
 
     def getOrganization() {
         when:
