@@ -115,6 +115,11 @@ public class MockHubService implements HubService {
         return null;
     }
 
+    @Override
+    public void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException {
+
+    }
+
     public void reset() {
         this.projects = new ArrayList<>();
         this.environments = new ArrayList<>();

@@ -6,6 +6,7 @@ public class Operation {
 
     private UUID id;
     private Environment environment;
+    private Project project;
     private OperationStatus operationStatus;
 
     public UUID getId() {
@@ -22,6 +23,14 @@ public class Operation {
 
     public void setEnvironment(Environment environment) {
         this.environment = environment;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public OperationStatus getOperationStatus() {

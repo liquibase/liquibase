@@ -76,4 +76,9 @@ public class OfflineHubService implements HubService {
     public Operation startOperation(String type, Environment environment, UUID changeLogId, Map<String, String> clientMetadata, Map<String, String> operationParameters) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
+
+    @Override
+    public void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException {
+
+    }
 }

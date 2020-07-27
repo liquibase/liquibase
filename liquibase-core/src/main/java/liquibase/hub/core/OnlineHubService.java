@@ -1,6 +1,7 @@
 package liquibase.hub.core;
 
 import liquibase.Scope;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -273,6 +274,11 @@ public class OnlineHubService implements HubService {
     @Override
     public Operation startOperation(String type, Environment environment, UUID changeLogId, Map<String, String> clientMetadata, Map<String, String> operationParameters) {
         return null;
+    }
+
+    @Override
+    public void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException {
+
     }
 
     private HubChangeLog createHubChangeLogFromResponse(Map<String, String> response) {

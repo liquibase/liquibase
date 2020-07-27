@@ -1,5 +1,6 @@
 package liquibase.hub;
 
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.hub.model.*;
 import liquibase.exception.LiquibaseException;
@@ -39,4 +40,6 @@ public interface HubService extends Plugin, PrioritizedService {
     HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException;
 
     Operation startOperation(String type, Environment environment, UUID changeLogId, Map<String, String> clientMetadata, Map<String, String> operationParameters) throws LiquibaseHubException;
+
+    void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException;
 }
