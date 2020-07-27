@@ -183,6 +183,7 @@ public class Main {
                                                 globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)))));
                         return 0;
                     }
+                    HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
 
                     if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                         main.printHelp(System.out);
@@ -230,11 +231,6 @@ public class Main {
                             System.err.println(message);
                         }
                     }
-
-                    //
-                    // Instantiate the HubConfiguration instance
-                    //
-                    HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
 
                     try {
                         main.parseOptions(args);
