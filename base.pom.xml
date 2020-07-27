@@ -161,7 +161,14 @@
             <scope>test</scope>
     	</dependency>
 
-	<dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>8.2.2.jre8</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
     	    <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.12</version>

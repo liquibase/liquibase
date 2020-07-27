@@ -49,6 +49,8 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     @Override
     protected CommandResult run() throws Exception {
+        outputBestPracticeMessage();
+
         String changeLogFile = StringUtil.trimToNull(getChangeLogFile());
         if (changeLogFile.toLowerCase().endsWith(".sql")) {
             Scope.getCurrentScope().getUI().sendMessage("\n" + INFO_MESSAGE + "\n");
