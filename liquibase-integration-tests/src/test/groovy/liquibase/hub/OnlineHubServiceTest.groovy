@@ -1,16 +1,10 @@
 package liquibase.hub
 
-import liquibase.ContextExpression
-import liquibase.Labels
-import liquibase.change.CheckSum
-import liquibase.changelog.ChangeSet
-import liquibase.changelog.RanChangeSet
+
 import liquibase.configuration.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.core.OnlineHubService
-import liquibase.hub.model.Environment
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import static org.junit.Assume.assumeTrue
 
@@ -19,14 +13,11 @@ class OnlineHubServiceTest extends Specification {
     private OnlineHubService hubService
 
     private Properties integrationTestProperties
-    private boolean hubAvailable
 
     private UUID knownProjectId = UUID.fromString("ce1a237e-e005-4288-a243-4856823a25a6")
     private UUID knownEnvironmentId = UUID.fromString("d92e6505-cd0f-4e91-bb66-b12e6a285184")
 
     def setup() {
-        hubService = new OnlineHubService()
-
         if (integrationTestProperties == null) {
             integrationTestProperties = new Properties()
             integrationTestProperties.load((InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"))
@@ -38,10 +29,10 @@ class OnlineHubServiceTest extends Specification {
             hubConfiguration.setLiquibaseHubApiKey(hubApiKey)
             hubConfiguration.setLiquibaseHubUrl(hubUrl)
 
-            hubAvailable = hubService.isHubAvailable()
         }
 
-        assumeTrue("Liquibase Hub is not available for testing", hubAvailable)
+        hubService = new OnlineHubService()
+        assumeTrue("Liquibase Hub is not available for testing", hubService.isHubAvailable())
     }
 
     def getMe() {

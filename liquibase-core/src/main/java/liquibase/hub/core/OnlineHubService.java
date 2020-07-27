@@ -67,13 +67,13 @@ public class OnlineHubService implements HubService {
                     Organization organization = this.getOrganization();
                     this.organizationId = organization.getId();
                 }
+
+                log.info("Connected to Liquibase Hub with an API Key beginning with '" + getApiKey().substring(0, 6) + "'");
+                this.available = true;
             } catch (LiquibaseHubException e) {
                 log.info("Not connecting to Liquibase Hub: error interacting with " + http.getHubUrl() + ": " + e.getMessage(), e);
                 this.available = false;
             }
-
-            log.info("Connected to Liquibase Hub with an API Key beginning with '" + getApiKey().substring(0, 6) + "'");
-            this.available = true;
         }
 
         return this.available;
