@@ -7,7 +7,9 @@ import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
+import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.DropAllCommand;
+import liquibase.command.core.SyncHubCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -24,6 +26,11 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
+import liquibase.hub.HubService;
+import liquibase.hub.HubServiceFactory;
+import liquibase.hub.listener.HubChangeExecListener;
+import liquibase.hub.model.Environment;
+import liquibase.hub.model.Operation;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -77,6 +84,8 @@ public class Liquibase implements AutoCloseable {
     private ChangeExecListener changeExecListener;
     private ChangeLogSyncListener changeLogSyncListener;
 
+    private UUID hubEnvironmentId;
+
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
      *
@@ -123,6 +132,14 @@ public class Liquibase implements AutoCloseable {
         this.resourceAccessor = resourceAccessor;
         this.database = database;
         this.changeLogParameters = new ChangeLogParameters(database);
+    }
+
+    public UUID getHubEnvironmentId() {
+        return hubEnvironmentId;
+    }
+
+    public void setHubEnvironmentId(UUID hubEnvironmentId) {
+        this.hubEnvironmentId = hubEnvironmentId;
     }
 
     /**
@@ -197,12 +214,27 @@ public class Liquibase implements AutoCloseable {
                         checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                     }
 
+                    syncHub();
+
                     ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
                     changeLog.validate(database, contexts, labelExpression);
 
                     ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
+                    final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+                    Environment environment;
+                    if (Liquibase.this.hubEnvironmentId == null) {
+                        environment = hubService.getEnvironment(new Environment().setJdbcUrl(Liquibase.this.database.getConnection().getURL()), true);
+                    } else {
+                        environment = hubService.getEnvironment(new Environment().setId(Liquibase.this.hubEnvironmentId), true);
+                    }
+                    Operation operation = hubService.startOperation("UPDATE", environment, UUID.fromString(changeLog.getChangeLogId()), null, null);
+
+                    if (changeExecListener != null) {
+                        throw new RuntimeException("ChangeExecListener already defined");
+                    }
+                    changeExecListener = new HubChangeExecListener(operation);
                     changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                 } finally {
                     database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
@@ -215,6 +247,13 @@ public class Liquibase implements AutoCloseable {
                 }
             }
         });
+    }
+
+    public void syncHub() {
+        final SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
+        syncHub.setChangeLogFile(changeLogFile);
+        syncHub.setUrl(database.getConnection().getURL());
+        syncHub.setHubEnvironmentId(Objects.toString(hubEnvironmentId));
     }
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {

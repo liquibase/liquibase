@@ -1,10 +1,14 @@
 package liquibase.hub.core;
 
 import liquibase.changelog.RanChangeSet;
-import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.*;
+import liquibase.exception.LiquibaseException;
+import liquibase.hub.model.HubChangeLog;
+import liquibase.hub.model.HubUser;
+import liquibase.hub.model.Organization;
+import liquibase.hub.model.Project;
 
 import java.util.*;
 
@@ -82,8 +86,13 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public Environment createEnvironment(UUID projectId, Environment environment) throws LiquibaseHubException {
-        sentObjects.computeIfAbsent("createEnvironment/"+projectId, k -> new ArrayList<>()).add(environment);
+    public Environment getEnvironment(Environment exampleEnvironment, boolean createIfNotExists) throws LiquibaseHubException {
+        return environments.get(0);
+    }
+
+    @Override
+    public Environment createEnvironment(Environment environment) throws LiquibaseHubException {
+        sentObjects.computeIfAbsent("createEnvironment/"+environment.getProject().getId(), k -> new ArrayList<>()).add(environment);
 
         return new Environment()
                 .setId(UUID.randomUUID())
@@ -98,6 +107,11 @@ public class MockHubService implements HubService {
             }
         }
 
+        return null;
+    }
+
+    @Override
+    public Operation startOperation(String type, Environment environment, UUID changeLogId, Map<String, String> clientMetadata, Map<String, String> operationParameters) {
         return null;
     }
 

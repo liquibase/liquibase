@@ -13,24 +13,14 @@ import liquibase.hub.model.HubChangeLog;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 
-import java.io.OutputStream;
 import java.util.List;
 import java.util.UUID;
 
 public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResult> {
 
-    private OutputStream outputStream = System.out;
     private String url;
     private String changeLogFile;
     private String hubEnvironmentId;
-
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
-
-    public void setOutputStream(OutputStream outputStream) {
-        this.outputStream = outputStream;
-    }
 
     public String getUrl() {
         return url;
@@ -93,7 +83,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                 Environment inputEnvironment = new Environment();
                 inputEnvironment.setJdbcUrl(url);
 
-                environmentToSync = hubService.createEnvironment(changeLog.getProject().getId(), inputEnvironment);
+                environmentToSync = hubService.createEnvironment(inputEnvironment);
             } else if (environments.size() == 1) {
                 environmentToSync = environments.get(0);
             } else {

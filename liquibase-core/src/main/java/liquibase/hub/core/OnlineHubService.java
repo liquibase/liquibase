@@ -2,12 +2,14 @@ package liquibase.hub.core;
 
 import liquibase.Scope;
 import liquibase.changelog.RanChangeSet;
+import liquibase.command.CommandResult;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubService;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.LiquibaseHubObjectNotFoundException;
+import liquibase.hub.LiquibaseHubUserException;
 import liquibase.hub.model.*;
 import liquibase.logging.Logger;
 import liquibase.plugin.Plugin;
@@ -21,6 +23,7 @@ import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.IOException;
@@ -150,7 +153,45 @@ public class OnlineHubService implements HubService {
 
     @Override
     public void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+//        getEnvironments()
 
+        List<HubChange> hubChangeList = new ArrayList<>();
+        for (RanChangeSet ranChangeSet : ranChangeSets) {
+            hubChangeList.add(new HubChange(ranChangeSet));
+        }
+
+//        doPut("/api/v1/")
+    }
+
+    @Override
+    public Environment getEnvironment(Environment exampleEnvironment, boolean createIfNotExists) throws LiquibaseHubException {
+        if (exampleEnvironment.getId() != null) {
+            //do not auto-create if specifying the exact id
+            return doGet("/api/v1/environments/" + exampleEnvironment.getId().toString(), null, Environment.class);
+        }
+
+        final List<Environment> environments;
+        try {
+            environments = getEnvironments(exampleEnvironment);
+        } catch (LiquibaseHubObjectNotFoundException e) {
+            //the API should not throw this exception, but it does
+            if (createIfNotExists) {
+                return createEnvironment(exampleEnvironment);
+            } else {
+                throw new LiquibaseHubObjectNotFoundException("Environment not found");
+            }
+        }
+        if (environments.size() == 0) {
+            if (createIfNotExists) {
+                return createEnvironment(exampleEnvironment);
+            } else {
+                throw new LiquibaseHubObjectNotFoundException("Environment not found");
+            }
+        } else if (environments.size() == 1) {
+            return environments.get(0);
+        } else {
+            throw new LiquibaseHubException("The url " + exampleEnvironment.getJdbcUrl() + " is used by more than one environment. Please specify 'hubEnvironmentId=<hubEnvironmentId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.");
+        }
     }
 
     @Override
@@ -188,8 +229,11 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public Environment createEnvironment(UUID projectId, Environment environment) throws LiquibaseHubException {
-        return doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + projectId + "/environments", environment, Environment.class);
+    public Environment createEnvironment(Environment environment) throws LiquibaseHubException {
+        if (environment.getProject() == null || environment.getProject().getId() == null) {
+            throw new LiquibaseHubUserException("projetId is required to create an environment");
+        }
+        return doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + environment.getProject().getId() + "/environments", environment, Environment.class);
     }
 
     /**
@@ -219,6 +263,11 @@ public class OnlineHubService implements HubService {
                 continue;
             }
         }
+        return null;
+    }
+
+    @Override
+    public Operation startOperation(String type, Environment environment, UUID changeLogId, Map<String, String> clientMetadata, Map<String, String> operationParameters) {
         return null;
     }
 

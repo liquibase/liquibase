@@ -13,6 +13,8 @@ public class Environment {
     private Date updateDate;
     private Date removeDate;
 
+    private Project project;
+
     public UUID getId() {
         return id;
     }
@@ -76,6 +78,15 @@ public class Environment {
     public Environment setRemoveDate(Date removeDate) {
         this.removeDate = removeDate;
         return this;
+    }
+
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     @Override

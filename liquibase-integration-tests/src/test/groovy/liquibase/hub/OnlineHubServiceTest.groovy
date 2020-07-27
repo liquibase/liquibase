@@ -1,5 +1,10 @@
 package liquibase.hub
 
+import liquibase.ContextExpression
+import liquibase.Labels
+import liquibase.change.CheckSum
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.RanChangeSet
 import liquibase.configuration.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.core.OnlineHubService
@@ -16,7 +21,8 @@ class OnlineHubServiceTest extends Specification {
     private Properties integrationTestProperties
     private boolean hubAvailable
 
-    private UUID exampleProjectId = UUID.fromString("ce1a237e-e005-4288-a243-4856823a25a6")
+    private UUID knownProjectId = UUID.fromString("ce1a237e-e005-4288-a243-4856823a25a6")
+    private UUID knownEnvironmentId = UUID.fromString("d92e6505-cd0f-4e91-bb66-b12e6a285184")
 
     def setup() {
         hubService = new OnlineHubService()
@@ -82,6 +88,27 @@ class OnlineHubServiceTest extends Specification {
         def e = thrown(LiquibaseHubObjectNotFoundException)
         e.message.contains("not found")
     }
+
+    def getEnvironment() {
+        when:
+        def environment = hubService.getEnvironment(knownEnvironmentId)
+
+        then:
+        environment.id == knownEnvironmentId
+        environment.name == "dooriblon Environment"
+
+    }
+
+    def "getEnvironment throws exception if 404"() {
+        when:
+        hubService.getEnvironment(UUID.randomUUID())
+
+        then:
+        def e = thrown(LiquibaseHubObjectNotFoundException)
+        e.message.contains("not found")
+
+    }
+
     def "getEnvironments can return all environments"() {
         when:
         def environments = hubService.getEnvironments(null)
@@ -112,7 +139,7 @@ class OnlineHubServiceTest extends Specification {
 
 
         when:
-        def newEnv = hubService.createEnvironment(exampleProjectId, new Environment(
+        def newEnv = hubService.createEnvironment(new Environment(
                 name: "New Env $randomNumber",
                 jdbcUrl: "jdbc://test-$randomNumber",
         ))
@@ -124,6 +151,15 @@ class OnlineHubServiceTest extends Specification {
         newEnv.createDate != null
         newEnv.updateDate == null
         newEnv.removeDate == null
+    }
+
+    def "setRanChangeSets"() {
+
+        hubService.setRanChangeSets(knownEnvironmentId, [
+                new RanChangeSet("com/example/changelog.xml", "1", "test", CheckSum.parse("1:a"), new Date(), null, ChangeSet.ExecType.EXECUTED, "Test changeset 1", "Comments 1", new ContextExpression(), new Labels(), "123"),
+                new RanChangeSet("com/example/changelog.xml", "2", "other", CheckSum.parse("1:b"), new Date(), null, ChangeSet.ExecType.EXECUTED, "Test changeset 2", "Comments 2", new ContextExpression("a", "b"), new Labels("c", "d"), "123"),
+                new RanChangeSet("com/example/changelog.xml", "3", "test", CheckSum.parse("1:c"), new Date(), null, ChangeSet.ExecType.SKIPPED, "Test changeset 3", "Comments 3", new ContextExpression(), new Labels(), "445"),
+        ])
     }
     */
 }

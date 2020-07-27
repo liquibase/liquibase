@@ -11,6 +11,7 @@ import liquibase.plugin.Plugin;
 import liquibase.servicelocator.PrioritizedService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface HubService extends Plugin, PrioritizedService {
@@ -24,11 +25,17 @@ public interface HubService extends Plugin, PrioritizedService {
 
     void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException;
 
+    Environment getEnvironment(Environment exampleEnvironment, boolean createIfNotExists) throws LiquibaseHubException;
+
     List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException;
 
+    Environment createEnvironment(Environment environment) throws LiquibaseHubException;
+
     HubChangeLog createChangeLog(Project project) throws LiquibaseException;
-    Environment createEnvironment(UUID projectId, Environment environment) throws LiquibaseHubException;
+
     Project createProject(String projectName) throws LiquibaseException;
 
     HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException;
+
+    Operation startOperation(String type, Environment environment, UUID changeLogId, Map<String, String> clientMetadata, Map<String, String> operationParameters);
 }
