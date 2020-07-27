@@ -236,8 +236,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof MariaDBDatabase) {
             StringJoiner j = new StringJoiner(" \n UNION\n");
             try {
-                List<Map<String, ?>> res = ExecutorService.getInstance()
-                        .getExecutor(database)
+                List<Map<String, ?>> res = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                        .getExecutor("jdbc", database)
                         .queryForList(new RawSqlStatement("select table_name AS SEQUENCE_NAME " +
                                                         "from information_schema.TABLES " +
                                                         "where TABLE_SCHEMA = '" + schema.getName() +"' " +

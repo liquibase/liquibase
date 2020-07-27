@@ -296,7 +296,7 @@ public class Main {
                         Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                     }
 
-            log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
+            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
 
             if (main.commandParams.contains("--help") &&

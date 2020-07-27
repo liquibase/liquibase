@@ -130,7 +130,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                     view.setName(row.getString("TABLE_NAME"));
                     view.setSchema(new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName()));
                     view.setRemarks(row.getString("REMARKS"));
-                    String definition = StringUtils.standardizeLineEndings(row.getString("OBJECT_BODY"));
+                    String definition = StringUtil.standardizeLineEndings(row.getString("OBJECT_BODY"));
                     view.setDefinition(definition);
                     if(database instanceof OracleDatabase) {
                         view.setAttribute("editioning", "Y".equals(row.getString("EDITIONING_VIEW")));
