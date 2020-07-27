@@ -6,6 +6,7 @@ import spock.lang.Unroll
 
 class OnlineHubServiceTest extends Specification {
 
+    /*
     @Unroll
     def "toSearchString"() {
         expect:
@@ -19,6 +20,7 @@ class OnlineHubServiceTest extends Specification {
         new Environment(name: "test name", jdbcUrl: "test://jdbc") | 'jdbcUrl:"test://jdbc" AND name:"test name"'
 
     }
+    */
 
     @Unroll
     def "parseDate"() {

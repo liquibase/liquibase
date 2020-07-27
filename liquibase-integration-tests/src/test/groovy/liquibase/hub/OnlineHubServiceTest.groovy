@@ -40,12 +40,12 @@ class OnlineHubServiceTest extends Specification {
 
                 hubAvailable = false
             }
-
         }
 
         assumeTrue("Liquibase Hub is not available for testing", hubAvailable)
     }
 
+/*
     def getMe() {
         when:
         def me = hubService.getMe()
@@ -82,7 +82,6 @@ class OnlineHubServiceTest extends Specification {
         def e = thrown(LiquibaseHubObjectNotFoundException)
         e.message.contains("not found")
     }
-
     def "getEnvironments can return all environments"() {
         when:
         def environments = hubService.getEnvironments(null)
@@ -126,4 +125,5 @@ class OnlineHubServiceTest extends Specification {
         newEnv.updateDate == null
         newEnv.removeDate == null
     }
+    */
 }

@@ -23,7 +23,6 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
     public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
     public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
-    public static final String LIQUIBASE_HUB_API_KEY="hubApiKey";
 
     public GlobalConfiguration() {
         super("liquibase");

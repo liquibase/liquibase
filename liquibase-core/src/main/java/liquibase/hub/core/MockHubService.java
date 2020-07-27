@@ -62,10 +62,12 @@ public class MockHubService implements HubService {
         Project project1 = new Project();
         project1.setId(UUID.randomUUID());
         project1.setName("Project 1");
+        project1.setCreateDate(new Date());
 
         Project project2 = new Project();
         project2.setId(UUID.randomUUID());
         project2.setName("Project 2");
+        project2.setCreateDate(new Date());
         return Arrays.asList(project1, project2);
     }
 

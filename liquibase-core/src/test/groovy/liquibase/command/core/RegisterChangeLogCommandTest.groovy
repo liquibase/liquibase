@@ -4,6 +4,9 @@ import liquibase.Scope
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.configuration.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
+import liquibase.resource.ResourceAccessor
+import liquibase.sdk.resource.MockResourceAccessor
+import liquibase.util.FileUtil
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
 import spock.lang.Specification
@@ -11,9 +14,22 @@ import spock.lang.Specification
 class RegisterChangeLogCommandTest extends Specification {
 
     private String scopeId
+    private File outputFile
 
     def setup() {
-        scopeId = Scope.enter([("liquibase.plugin." + HubService.name): MockHubService])
+        URL url = Thread.currentThread().getContextClassLoader().getResource("liquibase/test-changelog.xml")
+        File changelogFile = new File(url.toURI())
+        String contents = FileUtil.getContents(changelogFile)
+        outputFile = File.createTempFile("registerChangelog-", ".xml")
+        outputFile.deleteOnExit()
+        FileUtil.write(contents, outputFile)
+        Map<String, String> contentsMap = new HashMap<>()
+        contentsMap.put(outputFile.getAbsolutePath(), contents)
+        MockResourceAccessor mockResourceAccessor = new MockResourceAccessor(contentsMap)
+        Map<String, Object> scopeMap = new HashMap<>()
+        scopeMap.put(Scope.Attr.resourceAccessor.name(), mockResourceAccessor)
+        scopeMap.put("liquibase.plugin." + HubService.name, MockHubService)
+        scopeId = Scope.enter(scopeMap)
     }
 
     def "cleanup"() {
@@ -28,6 +44,7 @@ class RegisterChangeLogCommandTest extends Specification {
         hubConfiguration.setLiquibaseHubProject("PROJECT 1")
         def command = new RegisterChangeLogCommand()
         command.setOutputStream(new PrintStream(outputStream))
+        command.setChangeLogFile(outputFile.getCanonicalPath())
 
         def result = command.run()
 
@@ -37,7 +54,7 @@ class RegisterChangeLogCommandTest extends Specification {
         result.succeeded
         hubChangeLog.id != null
         hubChangeLog.id.toString() == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        hubChangeLog.externalChangeLogId.toString() == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        hubChangeLog.externalChangelogId.toString() == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
         hubChangeLog.fileName == "string"
         hubChangeLog.name == "changelog"
     }
@@ -62,6 +79,6 @@ class RegisterChangeLogCommandTest extends Specification {
 
         then:
         ! result.succeeded
-        result.message.contains("is already registered with changeLogId=" + uuid.toString())
+        result.message.contains("is already registered with changeLogId '" + uuid.toString() + "'")
     }
 }

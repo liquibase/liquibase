@@ -941,7 +941,20 @@ public class Main {
                         namespace += splitKey[i];
                     }
                     String valueKey = splitKey[splitKey.length-1];
-                    LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
+                    try {
+                        LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
+                    }
+                    catch (Exception e) {
+                        if (strict) {
+                            throw new CommandLineParsingException(
+                                    String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
+                            );
+                        } else {
+                            Scope.getCurrentScope().getLog(getClass()).warning(
+                                    String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
+                            );
+                        }
+                    }
                 } else {
                     Field field = getDeclaredField((String)entry.getKey());
                     Object currentValue = field.get(this);

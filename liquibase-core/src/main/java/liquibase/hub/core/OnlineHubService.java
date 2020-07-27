@@ -181,6 +181,9 @@ public class OnlineHubService implements HubService {
     }
 
     protected Date parseDate(String stringDate) throws ParseException {
+        if (stringDate == null) {
+            return null;
+        }
         return new ISODateFormat().parse(stringDate);
     }
 
