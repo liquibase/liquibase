@@ -49,12 +49,13 @@ class SyncHubCommandTest extends Specification {
         when:
         def command = new SyncHubCommand()
         command.url = "jdbc://test"
+        command.database = new MockDatabase()
 
         def result = command.run()
 
         then:
         assert result.succeeded: result.message
-        assert mockHubService.sentObjects.toString() == "[setRanChangeSets/$MockHubService.randomUUID:[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
+        assert mockHubService.sentObjects.toString() == "[setRanChangeSets/Environment jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
     }
 
     def "Sync is successful with environmentId passed"() {
@@ -76,12 +77,13 @@ class SyncHubCommandTest extends Specification {
         def command = new SyncHubCommand()
         command.url = "jdbc://test"
         command.hubEnvironmentId = randomUUID
+        command.database = new MockDatabase()
 
         def result = command.run()
 
         then:
         assert result.succeeded: result.message
-        assert mockHubService.sentObjects.toString() == "[setRanChangeSets/$randomUUID:[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
+        assert mockHubService.sentObjects.toString() == "[setRanChangeSets/Environment jdbc://test ($randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
     }
 
     def "Will auto-create environments if changeLogFile is passed"() {
@@ -100,6 +102,7 @@ class SyncHubCommandTest extends Specification {
         ]
         def command = new SyncHubCommand()
         command.url = "jdbc://test2"
+        command.database = new MockDatabase()
         command.changeLogFile = "com/example/registered.mock"
 
         def result = command.run()
@@ -156,7 +159,7 @@ class SyncHubCommandTest extends Specification {
 
         then:
         assert !result.succeeded
-        assert result.message == "The url " + command.url + " does not match any defined environments. To auto-create an environment, please specify 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line."
+        assert result.message == "The url " + command.url + " does not match any defined environments. To auto-create an environment, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId."
 
     }
 
@@ -173,7 +176,7 @@ class SyncHubCommandTest extends Specification {
 
         then:
         assert !result.succeeded
-        assert result.message == "Changelog com/example/unregistered.mock has not been registered with Liquibase Hub."
+        assert result.message == "The url jdbc://test2 does not match any defined environments. To auto-create an environment, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId."
 
     }
 

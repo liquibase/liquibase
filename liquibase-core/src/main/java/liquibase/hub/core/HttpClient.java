@@ -117,6 +117,13 @@ class HttpClient {
 
             if (requestBodyObject != null) {
                 String requestBody = yaml.dumpAs(requestBodyObject, Tag.MAP, DumperOptions.FlowStyle.FLOW);
+
+                //strip out problematic text
+                requestBody = requestBody
+                        .replaceAll("(?m)^(\\s*)!![a-zA-Z0-9.]+", "$1")
+                        .replaceAll("!!int \"(\\d+)\"", "$1")
+                        .replaceAll("!!timestamp '(.+?)'", "\"$1\"")
+                ;
                 try (OutputStream output = connection.getOutputStream()) {
                     output.write(requestBody.getBytes(StandardCharsets.UTF_8));
                 }

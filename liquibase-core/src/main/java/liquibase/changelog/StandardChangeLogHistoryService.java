@@ -333,12 +333,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     ContextExpression contexts = new ContextExpression((String) rs.get("CONTEXTS"));
                     Labels labels = new Labels((String) rs.get("LABELS"));
                     String deploymentId = (String) rs.get("DEPLOYMENT_ID");
+                    String liquibaseVersion =  (rs.get("LIQUIBASE") == null) ? null : rs.get("LIQUIBASE").toString();
 
                     try {
                         RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum),
                             dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts,
                             labels, deploymentId, storedFileName);
                         ranChangeSet.setOrderExecuted(orderExecuted);
+                        ranChangeSet.setLiquibaseVersion(liquibaseVersion);
                         ranChangeSets.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
                         Scope.getCurrentScope().getLog(getClass()).severe("Unknown EXECTYPE from database: " +

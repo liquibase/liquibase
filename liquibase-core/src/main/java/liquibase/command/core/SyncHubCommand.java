@@ -127,7 +127,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
             final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
 
 
-            hubService.setRanChangeSets(environmentToSync.getId(), ranChangeSets);
+            hubService.setRanChangeSets(environmentToSync, ranChangeSets);
 
         });
 

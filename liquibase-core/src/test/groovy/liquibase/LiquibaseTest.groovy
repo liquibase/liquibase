@@ -187,7 +187,7 @@ class LiquibaseTest extends Specification {
         liquibase.update("")
 
         then:
-        mockHubService.sentObjects.toString() == "[startOperation/$MockHubService.randomUUID:[null]]\n"
+        mockHubService.sentObjects.toString() == "[startOperation/$MockHubService.randomUUID:[null]]"
 
     }
 

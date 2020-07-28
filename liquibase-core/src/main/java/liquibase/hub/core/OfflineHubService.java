@@ -9,7 +9,6 @@ import liquibase.plugin.Plugin;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class OfflineHubService implements HubService {
     @Override
@@ -38,7 +37,7 @@ public class OfflineHubService implements HubService {
     }
 
     @Override
-    public void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+    public void setRanChangeSets(Environment environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 

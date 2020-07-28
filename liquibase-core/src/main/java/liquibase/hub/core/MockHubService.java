@@ -75,7 +75,7 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+    public void setRanChangeSets(Environment environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         sentObjects.computeIfAbsent("setRanChangeSets/" + environmentId, k -> new ArrayList<>()).addAll(ranChangeSets);
     }
 

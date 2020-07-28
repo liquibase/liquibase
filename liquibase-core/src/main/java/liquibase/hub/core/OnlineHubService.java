@@ -158,13 +158,13 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+    public void setRanChangeSets(Environment environment, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         List<HubChange> hubChangeList = new ArrayList<>();
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             hubChangeList.add(new HubChange(ranChangeSet));
         }
 
-//        doPut("/api/v1/")
+        http.doPut("/api/v1/organizations/" + getOrganization().getId() + "/environments/" + environment.getId() + "/changes", hubChangeList, ArrayList.class);
     }
 
     @Override

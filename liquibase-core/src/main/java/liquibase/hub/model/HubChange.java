@@ -33,7 +33,7 @@ public class HubChange implements HubModel {
         this.description = ranChangeSet.getDescription();
         this.comments = ranChangeSet.getComments();
         this.tag = ranChangeSet.getTag();
-//        this.liquibase = ranChangeSet.get
+        this.liquibase = ranChangeSet.getLiquibaseVersion();
         this.labels = ranChangeSet.getLabels().toString();
         this.contexts = ranChangeSet.getContextExpression().toString();
         this.orderExecuted = ranChangeSet.getOrderExecuted();
