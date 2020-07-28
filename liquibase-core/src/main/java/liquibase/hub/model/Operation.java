@@ -2,13 +2,14 @@ package liquibase.hub.model;
 
 import java.util.UUID;
 
-public class Operation {
+public class Operation implements HubModel {
 
     private UUID id;
     private Environment environment;
     private Project project;
     private OperationStatus operationStatus;
 
+    @Override
     public UUID getId() {
         return id;
     }

@@ -2,11 +2,12 @@ package liquibase.hub.model;
 
 import java.util.UUID;
 
-public class HubUser {
+public class HubUser implements HubModel {
 
     private UUID id;
     private String username;
 
+    @Override
     public UUID getId() {
         return id;
     }

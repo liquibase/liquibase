@@ -3,12 +3,13 @@ package liquibase.hub.model;
 import java.util.Date;
 import java.util.UUID;
 
-public class Project {
+public class Project implements HubModel {
 
     private UUID id;
     private String name;
     private Date createDate;
 
+    @Override
     public UUID getId() {
         return id;
     }

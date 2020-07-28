@@ -1571,8 +1571,16 @@ public class Main {
                 loadChangeSetInfoToMap(argsMap);
                 SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
                 liquibaseCommand.setUrl(url);
+                liquibaseCommand.setDatabase(database);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
-                liquibaseCommand.execute();
+                final CommandResult commandResult = liquibaseCommand.execute();
+                if (commandResult.succeeded) {
+                    Scope.getCurrentScope().getUI().sendMessage(commandResult.print());
+                } else {
+                    throw new RuntimeException(commandResult.print());
+                }
+
+
                 return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand

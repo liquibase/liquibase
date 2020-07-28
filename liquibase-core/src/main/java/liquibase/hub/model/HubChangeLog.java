@@ -2,7 +2,7 @@ package liquibase.hub.model;
 
 import java.util.UUID;
 
-public class HubChangeLog {
+public class HubChangeLog implements HubModel {
 
     private UUID id;
     private String externalChangelogId;
@@ -10,6 +10,7 @@ public class HubChangeLog {
     private String name;
     private Project project;
 
+    @Override
     public UUID getId() {
         return id;
     }
@@ -17,6 +18,7 @@ public class HubChangeLog {
     public void setId(UUID id) {
         this.id = id;
     }
+
     public String getExternalChangelogId() {
         return externalChangelogId;
     }

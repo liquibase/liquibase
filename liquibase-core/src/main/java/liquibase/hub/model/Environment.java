@@ -3,7 +3,7 @@ package liquibase.hub.model;
 import java.util.Date;
 import java.util.UUID;
 
-public class Environment {
+public class Environment implements HubModel {
 
     private UUID id;
     private String jdbcUrl;
@@ -13,10 +13,7 @@ public class Environment {
     private Date updateDate;
     private Date removeDate;
 
-    private Project project;
-
-    public Environment() {
-    }
+    private Project prj;
 
     public UUID getId() {
         return id;
@@ -84,12 +81,12 @@ public class Environment {
     }
 
 
-    public Project getProject() {
-        return project;
+    public Project getPrj() {
+        return prj;
     }
 
-    public Environment setProject(Project project) {
-        this.project = project;
+    public Environment setPrj(Project prj) {
+        this.prj = prj;
         return this;
     }
 

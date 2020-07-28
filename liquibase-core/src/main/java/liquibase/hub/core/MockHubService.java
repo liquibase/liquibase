@@ -91,7 +91,7 @@ public class MockHubService implements HubService {
 
     @Override
     public Environment createEnvironment(Environment environment) throws LiquibaseHubException {
-        sentObjects.computeIfAbsent("createEnvironment/" + environment.getProject().getId(), k -> new ArrayList<>()).add(environment);
+        sentObjects.computeIfAbsent("createEnvironment/" + environment.getPrj().getId(), k -> new ArrayList<>()).add(environment);
 
         return new Environment()
                 .setId(UUID.randomUUID())
@@ -133,7 +133,7 @@ public class MockHubService implements HubService {
                 new Environment()
                         .setId(randomUUID)
                         .setJdbcUrl("jdbc://test")
-                        .setProject(this.returnProjects.get(0))
+                        .setPrj(this.returnProjects.get(0))
         ));
         this.returnChangeLogs = new ArrayList<>();
         this.sentObjects = new TreeMap<>();

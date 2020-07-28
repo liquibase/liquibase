@@ -55,23 +55,23 @@ public class OnlineHubService implements HubService {
             if (getApiKey() == null) {
                 log.info("Not connecting to Liquibase Hub: liquibase.hub.apiKey was not specified");
                 this.available = false;
-            }
+            } else {
+                try {
+                    if (userId == null) {
+                        HubUser me = this.getMe();
+                        this.userId = me.getId();
+                    }
+                    if (organizationId == null) {
+                        Organization organization = this.getOrganization();
+                        this.organizationId = organization.getId();
+                    }
 
-            try {
-                if (userId == null) {
-                    HubUser me = this.getMe();
-                    this.userId = me.getId();
+                    log.info("Connected to Liquibase Hub with an API Key beginning with '" + getApiKey().substring(0, 6) + "'");
+                    this.available = true;
+                } catch (LiquibaseHubException e) {
+                    log.info("Not connecting to Liquibase Hub: error interacting with " + http.getHubUrl() + ": " + e.getMessage(), e);
+                    this.available = false;
                 }
-                if (organizationId == null) {
-                    Organization organization = this.getOrganization();
-                    this.organizationId = organization.getId();
-                }
-
-                log.info("Connected to Liquibase Hub with an API Key beginning with '" + getApiKey().substring(0, 6) + "'");
-                this.available = true;
-            } catch (LiquibaseHubException e) {
-                log.info("Not connecting to Liquibase Hub: error interacting with " + http.getHubUrl() + ": " + e.getMessage(), e);
-                this.available = false;
             }
         }
 
@@ -159,8 +159,6 @@ public class OnlineHubService implements HubService {
 
     @Override
     public void setRanChangeSets(UUID environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
-//        getEnvironments()
-
         List<HubChange> hubChangeList = new ArrayList<>();
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             hubChangeList.add(new HubChange(ranChangeSet));
@@ -204,7 +202,13 @@ public class OnlineHubService implements HubService {
     public List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException {
         final Organization organization = getOrganization();
 
-        final Map response = http.doGet("/api/v1/organizations/" + organization.getId() + "/environments", Collections.singletonMap("search", toSearchString(exampleEnvironment)), Map.class);
+        final Map response;
+        try {
+            response = http.doGet("/api/v1/organizations/" + organization.getId() + "/environments", Collections.singletonMap("search", toSearchString(exampleEnvironment)), Map.class);
+        } catch (LiquibaseHubObjectNotFoundException e) {
+            //Hub should not be returning this, but does
+            return new ArrayList<>();
+        }
 
         List<Environment> returnList = new ArrayList<>();
 
@@ -236,10 +240,21 @@ public class OnlineHubService implements HubService {
 
     @Override
     public Environment createEnvironment(Environment environment) throws LiquibaseHubException {
-        if (environment.getProject() == null || environment.getProject().getId() == null) {
+        if (environment.getPrj() == null || environment.getPrj().getId() == null) {
             throw new LiquibaseHubUserException("projectId is required to create an environment");
         }
-        return http.doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + environment.getProject().getId() + "/environments", environment, Environment.class);
+
+        //cannot send project information
+        Environment sendEnvironment = new Environment()
+                .setName(environment.getName())
+                .setJdbcUrl(environment.getJdbcUrl())
+                .setDescription(environment.getDescription());
+
+        if (sendEnvironment.getName() == null) {
+            sendEnvironment.setName(sendEnvironment.getJdbcUrl());
+        }
+
+        return http.doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + environment.getPrj().getId() + "/environments", sendEnvironment, Environment.class);
     }
 
     /**
@@ -294,22 +309,40 @@ public class OnlineHubService implements HubService {
     }
 
     /**
-     * Converts an object to a search string. Any properties with non-null values are used as search arguments
+     * Converts an object to a search string.
+     * Any properties with non-null values are used as search arguments.
+     * If a HubModel has an id specified, only that value is used in the search.
      */
-    protected String toSearchString(Object object) {
+    protected String toSearchString(HubModel object) {
         if (object == null) {
             return "";
         }
-
         SortedSet<String> clauses = new TreeSet<>();
+
+        toSearchString(object, "", clauses);
+        return StringUtil.join(clauses, " AND ");
+    }
+
+    private void toSearchString(HubModel object, String clausePrefix, SortedSet<String> clauses) {
         final Field[] fields = object.getClass().getDeclaredFields();
         for (Field field : fields) {
             try {
                 field.setAccessible(true);
                 Object value = field.get(object);
                 if (value != null) {
-                    value = value.toString().replace("\"", "\\\"");
-                    clauses.add(field.getName() + ":\"" + value + "\"");
+                    if (value instanceof HubModel) {
+                        final UUID modelId = ((HubModel) value).getId();
+                        if (modelId == null) {
+                            String newPrefix = clausePrefix + field.getName() + ".";
+                            newPrefix = newPrefix.replaceFirst("^\\.", "");
+                            toSearchString((HubModel) value, newPrefix, clauses);
+                        } else {
+                            clauses.add(clausePrefix + field.getName() + ".id:\"" + modelId + "\"");
+                        }
+                    } else {
+                        value = value.toString().replace("\"", "\\\"");
+                        clauses.add(clausePrefix + field.getName() + ":\"" + value + "\"");
+                    }
                 }
 
             } catch (IllegalAccessException ignored) {
@@ -317,7 +350,6 @@ public class OnlineHubService implements HubService {
             }
         }
 
-        return StringUtil.join(clauses, " AND ");
 
     }
 

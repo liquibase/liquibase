@@ -1,79 +1,91 @@
 package liquibase.hub.model;
 
 import java.util.Date;
+import java.util.UUID;
 
-public class OperationEvent {
-  private String type;
-  private Operation operation;
-  private Date startDate;
-  private Date endDate;
-  private int statusCode;
-  private String statusMessage;
-  private String logs;
+public class OperationEvent implements HubModel {
 
-  public OperationEvent(String type, Operation operation, Date startDate, Date endDate, int statusCode, String statusMessage, String logs) {
-    this.type = type;
-    this.operation = operation;
-    this.startDate = startDate;
-    this.endDate = endDate;
-    this.statusCode = statusCode;
-    this.statusMessage = statusMessage;
-    this.logs = logs;
-  }
+    private UUID id;
+    private String type;
+    private Operation operation;
+    private Date startDate;
+    private Date endDate;
+    private int statusCode;
+    private String statusMessage;
+    private String logs;
 
-  public String getType() {
-    return type;
-  }
+    public OperationEvent(String type, Operation operation, Date startDate, Date endDate, int statusCode, String statusMessage, String logs) {
+        this.type = type;
+        this.operation = operation;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+        this.logs = logs;
+    }
 
-  public void setType(String type) {
-    this.type = type;
-  }
+    @Override
+    public UUID getId() {
+        return id;
+    }
 
-  public Operation getOperation() {
-    return operation;
-  }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-  public void setOperation(Operation operation) {
-    this.operation = operation;
-  }
+    public String getType() {
+        return type;
+    }
 
-  public Date getStartDate() {
-    return startDate;
-  }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-  public void setStartDate(Date startDate) {
-    this.startDate = startDate;
-  }
+    public Operation getOperation() {
+        return operation;
+    }
 
-  public Date getEndDate() {
-    return endDate;
-  }
+    public void setOperation(Operation operation) {
+        this.operation = operation;
+    }
 
-  public void setEndDate(Date endDate) {
-    this.endDate = endDate;
-  }
+    public Date getStartDate() {
+        return startDate;
+    }
 
-  public String getStatusMessage() {
-    return statusMessage;
-  }
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
 
-  public void setStatusMessage(String statusMessage) {
-    this.statusMessage = statusMessage;
-  }
+    public Date getEndDate() {
+        return endDate;
+    }
 
-  public int getStatusCode() {
-    return statusCode;
-  }
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
 
-  public void setStatusCode(int statusCode) {
-    this.statusCode = statusCode;
-  }
+    public String getStatusMessage() {
+        return statusMessage;
+    }
 
-  public String getLogs() {
-    return logs;
-  }
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
 
-  public void setLogs(String logs) {
-    this.logs = logs;
-  }
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getLogs() {
+        return logs;
+    }
+
+    public void setLogs(String logs) {
+        this.logs = logs;
+    }
 }

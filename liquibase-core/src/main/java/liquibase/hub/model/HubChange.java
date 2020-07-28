@@ -3,8 +3,11 @@ package liquibase.hub.model;
 import liquibase.changelog.RanChangeSet;
 
 import java.util.Date;
+import java.util.UUID;
 
-public class HubChange {
+public class HubChange implements HubModel {
+
+    private UUID id;
     private String changesetId;
     private String changesetAuthor;
     private String changesetFilename;
@@ -38,6 +41,11 @@ public class HubChange {
         this.execType = ranChangeSet.getExecType().value;
         this.deploymentId = ranChangeSet.getDeploymentId();
         this.dateExecuted = ranChangeSet.getDateExecuted();
+    }
+
+    @Override
+    public UUID getId() {
+        return id;
     }
 
     public String getChangesetId() {

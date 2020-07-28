@@ -10,6 +10,7 @@ import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.model.Environment;
 import liquibase.hub.model.HubChangeLog;
+import liquibase.hub.model.Project;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 
@@ -21,6 +22,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     private String url;
     private String changeLogFile;
     private String hubEnvironmentId;
+    private Database database;
 
     public String getUrl() {
         return url;
@@ -46,6 +48,15 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         this.hubEnvironmentId = hubEnvironmentId;
     }
 
+
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
     @Override
     public String getName() {
         return "syncHub";
@@ -62,27 +73,39 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
         Environment environmentToSync;
         if (hubEnvironmentId == null) {
-            final List<Environment> environments = hubService.getEnvironments(new Environment().setJdbcUrl(url));
-            if (environments.size() == 0) {
-                if (changeLogFile == null) {
-                    return new CommandResult("The url " + url + " does not match any defined environments. To auto-create an environment, please specify 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
-                }
-
+            Project project = null;
+            if (changeLogFile != null) {
+                Scope.getCurrentScope().getLog(getClass()).info("No changeLogFile specified. Searching for jdbcUrl across the entire organization.");
                 final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
                 final DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, new ChangeLogParameters(), resourceAccessor);
                 final String changeLogId = databaseChangeLog.getChangeLogId();
+
                 if (changeLogId == null) {
-                    return new CommandResult("Changelog " + changeLogFile + " has not been registered with Liquibase Hub.", false);
+                    Scope.getCurrentScope().getLog(getClass()).info("Changelog " + changeLogFile + " has not been registered with Liquibase Hub. Cannot use it to help determine project.");
+                } else {
+                    final HubChangeLog changeLog = hubService.getChangeLog(changeLogId);
+                    if (changeLog == null) {
+                        return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
+                    }
+                    project = changeLog.getProject();
+                }
+            }
+
+            final Environment searchEnvironment = new Environment()
+                    .setJdbcUrl(url)
+                    .setPrj(project);
+
+            final List<Environment> environments = hubService.getEnvironments(searchEnvironment);
+            if (environments.size() == 0) {
+
+                if (project == null) {
+                    return new CommandResult("The url " + url + " does not match any defined environments. To auto-create an environment, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId.", false);
                 }
 
-                final HubChangeLog changeLog = hubService.getChangeLog(changeLogId);
-                if (changeLog == null) {
-                    return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
-                }
 
                 Environment inputEnvironment = new Environment();
                 inputEnvironment.setJdbcUrl(url);
-                inputEnvironment.setProject(changeLog.getProject());
+                inputEnvironment.setPrj(project);
 
                 environmentToSync = hubService.createEnvironment(inputEnvironment);
             } else if (environments.size() == 1) {
@@ -99,15 +122,16 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
             }
         }
 
-        final Database database = Scope.getCurrentScope().getDatabase();
-        final ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
+        Scope.child(Scope.Attr.database, database, () -> {
+            final ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
 
 
-        hubService.setRanChangeSets(environmentToSync.getId(), ranChangeSets);
+            hubService.setRanChangeSets(environmentToSync.getId(), ranChangeSets);
 
+        });
 
         return new CommandResult();
-
     }
+
 }
