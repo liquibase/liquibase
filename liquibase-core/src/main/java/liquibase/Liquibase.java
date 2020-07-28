@@ -7,7 +7,6 @@ import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
-import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.DropAllCommand;
 import liquibase.command.core.SyncHubCommand;
 import liquibase.database.Database;
@@ -207,6 +206,8 @@ public class Liquibase implements AutoCloseable {
                 changeLogParameters.setContexts(contexts);
                 changeLogParameters.setLabels(labelExpression);
 
+                final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+                Operation updateOperation = null;
                 try {
                     DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
@@ -222,7 +223,6 @@ public class Liquibase implements AutoCloseable {
 
                     ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
-                    final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
                     if (hubService.isOnline()) {
                         Environment environment;
                         if (Liquibase.this.hubEnvironmentId == null) {
@@ -230,12 +230,12 @@ public class Liquibase implements AutoCloseable {
                         } else {
                             environment = hubService.getEnvironment(new Environment().setId(Liquibase.this.hubEnvironmentId), true);
                         }
-                        Operation operation = hubService.startOperation("UPDATE", environment, UUID.fromString(changeLog.getChangeLogId()), null, null);
+                        updateOperation = hubService.createOperation(environment, null);
 
                         if (changeExecListener != null) {
                             throw new RuntimeException("ChangeExecListener already defined");
                         }
-                        changeExecListener = new HubChangeExecListener(operation);
+                        changeExecListener = new HubChangeExecListener(updateOperation);
                     }
 
                     changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));

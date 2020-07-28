@@ -82,6 +82,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
                 Environment inputEnvironment = new Environment();
                 inputEnvironment.setJdbcUrl(url);
+                inputEnvironment.setProject(changeLog.getProject());
 
                 environmentToSync = hubService.createEnvironment(inputEnvironment);
             } else if (environments.size() == 1) {

@@ -1,10 +1,10 @@
 package liquibase.command.core
 
-import liquibase.ContextExpression
-import liquibase.Labels
+
 import liquibase.Scope
-import liquibase.change.CheckSum
-import liquibase.changelog.*
+import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.DatabaseChangeLog
+import liquibase.changelog.MockChangeLogHistoryService
 import liquibase.database.core.MockDatabase
 import liquibase.hub.HubService
 import liquibase.hub.HubServiceFactory
@@ -21,7 +21,6 @@ class SyncHubCommandTest extends Specification {
     private String setupScopeId
     private MockHubService mockHubService
 
-    private UUID randomUUID = UUID.randomUUID()
     private MockChangeLogHistoryService changeLogHistoryService
 
     def setup() {
@@ -33,16 +32,10 @@ class SyncHubCommandTest extends Specification {
         mockHubService = (MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()
         ChangeLogParserFactory.getInstance().register(new MockChangeLogParser(changeLogs: [
                 "com/example/unregistered.mock": new DatabaseChangeLog(),
-                "com/example/registered.mock"  : new DatabaseChangeLog(changeLogId: randomUUID.toString())
+                "com/example/registered.mock"  : new DatabaseChangeLog(changeLogId: MockHubService.randomUUID.toString())
         ]))
 
         changeLogHistoryService = (MockChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(Scope.currentScope.getDatabase())
-        (changeLogHistoryService).ranChangeSets = [
-                new RanChangeSet("test/changelog.xml", "1", "mock-author", CheckSum.parse("1:a"), new Date(), null, ChangeSet.ExecType.EXECUTED, "desc here", "comments here", new ContextExpression(), new Labels(), "deployment id"),
-                new RanChangeSet("test/changelog.xml", "2", "mock-author", CheckSum.parse("1:a"), new Date(), null, ChangeSet.ExecType.EXECUTED, "desc here", "comments here", new ContextExpression(), new Labels(), "deployment id"),
-                new RanChangeSet("test/changelog.xml", "3", "mock-author", CheckSum.parse("1:a"), new Date(), null, ChangeSet.ExecType.EXECUTED, "desc here", "comments here", new ContextExpression(), new Labels(), "deployment id"),
-
-        ]
     }
 
     def cleanup() {
@@ -53,14 +46,6 @@ class SyncHubCommandTest extends Specification {
     }
 
     def "Sync is successful with url passed"() {
-        setup:
-        mockHubService.environments = [
-                new Environment(
-                        id: randomUUID,
-                        jdbcUrl: "jdbc://test",
-                )
-        ]
-
         when:
         def command = new SyncHubCommand()
         command.url = "jdbc://test"
@@ -69,18 +54,20 @@ class SyncHubCommandTest extends Specification {
 
         then:
         assert result.succeeded: result.message
-        assert mockHubService.sentObjects.toString() == "[setRanChangeSets/$randomUUID:[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
+        assert mockHubService.sentObjects.toString() == "[setRanChangeSets/$MockHubService.randomUUID:[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
     }
 
     def "Sync is successful with environmentId passed"() {
         setup:
-        mockHubService.environments = [
+        def randomUUID = UUID.randomUUID()
+        def otherUUID = UUID.randomUUID()
+        mockHubService.returnEnvironments = [
                 new Environment(
                         id: randomUUID,
                         jdbcUrl: "jdbc://test",
                 ),
                 new Environment(
-                        id: UUID.randomUUID(),
+                        id: otherUUID,
                         jdbcUrl: "jdbc://test",
                 )
         ]
@@ -88,7 +75,7 @@ class SyncHubCommandTest extends Specification {
         when:
         def command = new SyncHubCommand()
         command.url = "jdbc://test"
-        command.hubEnvironmentId = randomUUID.toString()
+        command.hubEnvironmentId = randomUUID
 
         def result = command.run()
 
@@ -98,13 +85,15 @@ class SyncHubCommandTest extends Specification {
     }
 
     def "Will auto-create environments if changeLogFile is passed"() {
+        mockHubService.returnEnvironments = []
+
         when:
-        mockHubService.changeLogs = [
+        mockHubService.returnChangeLogs = [
                 new HubChangeLog(
-                        id: randomUUID,
+                        id: MockHubService.randomUUID,
                         name: "Mock changelog",
                         project: new Project(
-                                id: randomUUID,
+                                id: MockHubService.randomUUID,
                                 name: "Mock Project",
                         )
                 )
@@ -117,18 +106,18 @@ class SyncHubCommandTest extends Specification {
 
         then:
         assert result.succeeded: result.message
-        assert mockHubService.sentObjects["createEnvironment/$randomUUID" as String].toString() == ("[Environment jdbc://test2 (null)]")
+        assert mockHubService.sentObjects["createEnvironment/$MockHubService.randomUUID" as String].toString() == ("[Environment jdbc://test2 (null)]")
 
     }
 
     def "Fails with invalid hubEnvironmentId"() {
         setup:
-        mockHubService.environments = []
+        mockHubService.returnEnvironments = []
 
         when:
         def command = new SyncHubCommand()
         command.url = "jdbc://test2"
-        command.hubEnvironmentId = randomUUID
+        command.hubEnvironmentId = MockHubService.randomUUID
 
         def result = command.run()
 
@@ -139,7 +128,7 @@ class SyncHubCommandTest extends Specification {
 
     def "Fails with multiple matching environments"() {
         setup:
-        mockHubService.environments = [
+        mockHubService.returnEnvironments = [
                 new Environment(jdbcUrl: "jdbc://test1"),
                 new Environment(jdbcUrl: "jdbc://test2"),
         ]
@@ -156,6 +145,9 @@ class SyncHubCommandTest extends Specification {
     }
 
     def "Fails with no environment and with no changeLogFile passed"() {
+        setup:
+        mockHubService.returnEnvironments = []
+
         when:
         def command = new SyncHubCommand()
         command.url = "jdbc://test2"
@@ -169,6 +161,9 @@ class SyncHubCommandTest extends Specification {
     }
 
     def "Fails with no environment and unregistered changeLogFile passed"() {
+        setup:
+        mockHubService.returnEnvironments = []
+
         when:
         def command = new SyncHubCommand()
         command.url = "jdbc://test2"
@@ -183,6 +178,10 @@ class SyncHubCommandTest extends Specification {
     }
 
     def "Fails with unknown changeLogId"() {
+        setup:
+        mockHubService.returnChangeLogs = []
+        mockHubService.returnEnvironments = []
+
         when:
         def command = new SyncHubCommand()
         command.url = "jdbc://test2"

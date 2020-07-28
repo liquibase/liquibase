@@ -1,7 +1,10 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.Labels;
+import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.DatabaseException;
@@ -9,12 +12,22 @@ import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 public class MockChangeLogHistoryService implements ChangeLogHistoryService {
 
-    public List<RanChangeSet> ranChangeSets = new ArrayList<>();
+    public List<RanChangeSet> ranChangeSets;
+
+    public MockChangeLogHistoryService() {
+        this.ranChangeSets = new ArrayList<>(Arrays.asList(
+                new RanChangeSet("test/changelog.xml", "1", "mock-author", CheckSum.parse("1:a"), new Date(), null, ChangeSet.ExecType.EXECUTED, "desc here", "comments here", new ContextExpression(), new Labels(), "deployment id"),
+                new RanChangeSet("test/changelog.xml", "2", "mock-author", CheckSum.parse("1:a"), new Date(), null, ChangeSet.ExecType.EXECUTED, "desc here", "comments here", new ContextExpression(), new Labels(), "deployment id"),
+                new RanChangeSet("test/changelog.xml", "3", "mock-author", CheckSum.parse("1:a"), new Date(), null, ChangeSet.ExecType.EXECUTED, "desc here", "comments here", new ContextExpression(), new Labels(), "deployment id")
+                ));
+
+    }
 
     @Override
     public int getPriority() {

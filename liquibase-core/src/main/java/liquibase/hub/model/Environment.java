@@ -15,6 +15,9 @@ public class Environment {
 
     private Project project;
 
+    public Environment() {
+    }
+
     public UUID getId() {
         return id;
     }
@@ -85,8 +88,9 @@ public class Environment {
         return project;
     }
 
-    public void setProject(Project project) {
+    public Environment setProject(Project project) {
         this.project = project;
+        return this;
     }
 
     @Override
