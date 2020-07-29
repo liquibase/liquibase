@@ -21,7 +21,11 @@ class OnlineHubServiceTest extends Specification {
         if (integrationTestProperties == null) {
             integrationTestProperties = new Properties()
             integrationTestProperties.load((InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"))
-            integrationTestProperties.load((InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties"))
+
+            def localFileStream = (InputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties")
+            if (localFileStream != null) {
+                integrationTestProperties.load(localFileStream)
+            }
 
             def hubApiKey = integrationTestProperties.get("integration.test.hub.apikey")
             def hubUrl = integrationTestProperties.get("integration.test.hub.url")
