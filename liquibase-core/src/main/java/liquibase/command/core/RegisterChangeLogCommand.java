@@ -116,7 +116,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                         }
                         outputStream.print("\nProject '" + project + "' created with project ID '" + project.getId() + "'.\n\n");
                         projects = getProjectsFromHub();
-                        break;
+                        done = true;
+                        continue;
                     }
                     else if (input.equalsIgnoreCase("N")) {
                         return new CommandResult("", true);
