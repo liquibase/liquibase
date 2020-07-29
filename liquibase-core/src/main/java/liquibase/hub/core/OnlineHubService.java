@@ -12,6 +12,7 @@ import liquibase.hub.LiquibaseHubUserException;
 import liquibase.hub.model.*;
 import liquibase.logging.Logger;
 import liquibase.plugin.Plugin;
+import liquibase.ui.ConsoleUIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 
@@ -69,7 +70,12 @@ public class OnlineHubService implements HubService {
                     log.info("Connected to Liquibase Hub with an API Key beginning with '" + getApiKey().substring(0, 6) + "'");
                     this.available = true;
                 } catch (LiquibaseHubException e) {
-                    log.info("Not connecting to Liquibase Hub: error interacting with " + http.getHubUrl() + ": " + e.getMessage(), e);
+                    String message = "Not connecting to Liquibase Hub: error interacting with " + http.getHubUrl() + ": " + e.getMessage();
+                    log.info(message, e);
+                    if (getApiKey() != null) {
+                        ConsoleUIService consoleUIService = new ConsoleUIService();
+                        consoleUIService.sendErrorMessage(message, e);
+                    }
                     this.available = false;
                 }
             }

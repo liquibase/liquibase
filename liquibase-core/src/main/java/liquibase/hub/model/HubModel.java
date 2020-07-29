@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public interface HubModel {
 
-    public UUID getId();
+    UUID getId();
 }

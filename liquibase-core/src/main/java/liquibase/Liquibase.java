@@ -29,6 +29,7 @@ import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.listener.HubChangeExecListener;
 import liquibase.hub.model.Environment;
+import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Operation;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
@@ -226,7 +227,11 @@ public class Liquibase implements AutoCloseable {
                     if (hubService.isOnline()) {
                         Environment environment;
                         if (Liquibase.this.hubEnvironmentId == null) {
-                            environment = hubService.getEnvironment(new Environment().setJdbcUrl(Liquibase.this.database.getConnection().getURL()), true);
+                            HubChangeLog hubChangeLog = hubService.getChangeLog(changeLog.getChangeLogId());
+                            Environment exampleEnvironment = new Environment();
+                            exampleEnvironment.setPrj(hubChangeLog.getProject());
+                            exampleEnvironment.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
+                            environment = hubService.getEnvironment(exampleEnvironment, true);
                         } else {
                             environment = hubService.getEnvironment(new Environment().setId(Liquibase.this.hubEnvironmentId), true);
                         }

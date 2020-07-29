@@ -39,6 +39,7 @@ class LiquibaseTest extends Specification {
 //        mockLockService = mock(LockService.class);
 //        mockLockServiceFactory = mock(LockServiceFactory.class);
 //        mockChangeLogParserFactory = mock(ChangeLogParserFactory.class);
+
 //        mockChangeLogParser = mock(ChangeLogParser.class);
 //        mockChangeLog = mock(DatabaseChangeLog.class);
 //        mockChangeLogIterator = mock(ChangeLogIterator.class);
