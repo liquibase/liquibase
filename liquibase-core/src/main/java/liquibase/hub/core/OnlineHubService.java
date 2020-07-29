@@ -161,7 +161,7 @@ public class OnlineHubService implements HubService {
     public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
         final UUID organizationId = getOrganization().getId();
 
-        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + hubChangeLog.getProject().getId() + "/changelogs", hubChangeLog, HubChangeLog.class);
+        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + hubChangeLog.getPrj().getId() + "/changelogs", hubChangeLog, HubChangeLog.class);
     }
 
     @Override
@@ -273,14 +273,11 @@ public class OnlineHubService implements HubService {
      */
     @Override
     public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
-        final UUID organizationId = getOrganization().getId();
-
         try {
-            http.doGet("/api/v1/organizations/" + organizationId + "/changelogs/" + changeLogId, HubChangeLog.class);
+            return http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
         } catch (LiquibaseHubObjectNotFoundException lbe) {
             return null;
         }
-        return null;
     }
 
     @Override

@@ -87,7 +87,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                     if (changeLog == null) {
                         return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
                     }
-                    project = changeLog.getProject();
+                    project = changeLog.getPrj();
                 }
             }
 

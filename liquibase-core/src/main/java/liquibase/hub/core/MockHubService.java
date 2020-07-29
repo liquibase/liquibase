@@ -132,7 +132,7 @@ public class MockHubService implements HubService {
                         .setId(randomUUID)
                         .setName("Mock changelog")
                         .setFileName("com/example/test.xml")
-                        .setProject(this.returnProjects.get(0))
+                        .setPrj(this.returnProjects.get(0))
         ));
         this.sentObjects = new TreeMap<>();
     }

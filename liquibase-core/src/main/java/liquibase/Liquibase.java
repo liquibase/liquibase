@@ -227,7 +227,7 @@ public class Liquibase implements AutoCloseable {
                     if (Liquibase.this.hubEnvironmentId == null) {
                             HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
                             Environment exampleEnvironment = new Environment();
-                            exampleEnvironment.setPrj(hubChangeLog.getProject());
+                            exampleEnvironment.setPrj(hubChangeLog.getPrj());
                             exampleEnvironment.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
                             environment = hubService.getEnvironment(exampleEnvironment, true);
                     } else {
