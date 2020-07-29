@@ -9,6 +9,7 @@ import liquibase.plugin.Plugin;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class OfflineHubService implements HubService {
     @Override
@@ -67,7 +68,7 @@ public class OfflineHubService implements HubService {
     }
 
     @Override
-    public HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException {
+    public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 

@@ -83,7 +83,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                 if (changeLogId == null) {
                     Scope.getCurrentScope().getLog(getClass()).info("Changelog " + changeLogFile + " has not been registered with Liquibase Hub. Cannot use it to help determine project.");
                 } else {
-                    final HubChangeLog changeLog = hubService.getChangeLog(changeLogId);
+                    final HubChangeLog changeLog = hubService.getChangeLog(UUID.fromString(changeLogId));
                     if (changeLog == null) {
                         return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
                     }

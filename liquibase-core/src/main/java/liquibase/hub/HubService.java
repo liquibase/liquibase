@@ -12,6 +12,7 @@ import liquibase.servicelocator.PrioritizedService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public interface HubService extends Plugin, PrioritizedService {
 
@@ -35,7 +36,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException;
 
-    HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException;
+    HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException;
 
     Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException;
 

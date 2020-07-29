@@ -225,7 +225,7 @@ public class Liquibase implements AutoCloseable {
                 if (hubService.isOnline() && changeLog.getChangeLogId() != null) {
                     Environment environment;
                     if (Liquibase.this.hubEnvironmentId == null) {
-                            HubChangeLog hubChangeLog = hubService.getChangeLog(changeLog.getChangeLogId());
+                            HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
                             Environment exampleEnvironment = new Environment();
                             exampleEnvironment.setPrj(hubChangeLog.getProject());
                             exampleEnvironment.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
@@ -235,7 +235,7 @@ public class Liquibase implements AutoCloseable {
                     }
 
 
-                    final HubChangeLog hubChangeLog = hubService.getChangeLog(changeLog.getChangeLogId());
+                    final HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
                     updateOperation = hubService.createOperation("UPDATE", hubChangeLog, environment, null);
 
                     if (changeExecListener != null) {

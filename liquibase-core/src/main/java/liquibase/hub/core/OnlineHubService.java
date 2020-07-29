@@ -268,22 +268,13 @@ public class OnlineHubService implements HubService {
      * @throws LiquibaseHubException
      */
     @Override
-    public HubChangeLog getChangeLog(String changeLogId) throws LiquibaseHubException {
-        List<Project> projects = getProjects();
+    public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
         final UUID organizationId = getOrganization().getId();
-        for (Project project : projects) {
-            try {
-                Map<String, String> response =
-                        http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs/" + changeLogId, Map.class);
-                HubChangeLog hubChangeLog = createHubChangeLogFromResponse(response);
-                hubChangeLog.setProject(project);
-                return hubChangeLog;
-            } catch (LiquibaseHubException lbe) {
-                //
-                // Consume and just return null
-                //
-                continue;
-            }
+
+        try {
+            http.doGet("/api/v1/organizations/" + organizationId + "/changelogs/" + changeLogId, HubChangeLog.class);
+        } catch (LiquibaseHubObjectNotFoundException lbe) {
+            return null;
         }
         return null;
     }
@@ -306,19 +297,6 @@ public class OnlineHubService implements HubService {
     @Override
     public void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException {
 
-    }
-
-    private HubChangeLog createHubChangeLogFromResponse(Map<String, String> response) {
-        String id = response.get("id");
-        String externalChangeLogId = response.get("externalChangelogId");
-        String fileName = response.get("fileName");
-        String name = response.get("name");
-        HubChangeLog hubChangeLog = new HubChangeLog();
-        hubChangeLog.setId(UUID.fromString(id));
-        hubChangeLog.setExternalChangelogId(externalChangeLogId);
-        hubChangeLog.setFileName(fileName);
-        hubChangeLog.setName(name);
-        return hubChangeLog;
     }
 
     /**

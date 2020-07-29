@@ -5,7 +5,6 @@ import java.util.UUID;
 public class HubChangeLog implements HubModel {
 
     private UUID id;
-    private String externalChangelogId;
     private String fileName;
     private String name;
     private Project project;
@@ -17,15 +16,6 @@ public class HubChangeLog implements HubModel {
 
     public HubChangeLog setId(UUID id) {
         this.id = id;
-        return this;
-    }
-
-    public String getExternalChangelogId() {
-        return externalChangelogId;
-    }
-
-    public HubChangeLog setExternalChangelogId(String externalChangelogId) {
-        this.externalChangelogId = externalChangelogId;
         return this;
     }
 
