@@ -312,8 +312,6 @@ public class Main {
                     }
             }
 
-                    Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
-
                     main.applyDefaults();
                     Scope.child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {
                         main.doMigration();
