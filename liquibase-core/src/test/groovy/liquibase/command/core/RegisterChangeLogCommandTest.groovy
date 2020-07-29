@@ -6,6 +6,7 @@ import liquibase.configuration.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
+import liquibase.test.JUnitResourceAccessor
 import liquibase.util.FileUtil
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
@@ -20,14 +21,13 @@ class RegisterChangeLogCommandTest extends Specification {
         URL url = Thread.currentThread().getContextClassLoader().getResource("liquibase/test-changelog.xml")
         File changelogFile = new File(url.toURI())
         String contents = FileUtil.getContents(changelogFile)
-        outputFile = File.createTempFile("registerChangelog-", ".xml")
+        outputFile = File.createTempFile("registerChangelog-", ".xml", new File("target/test-classes"))
         outputFile.deleteOnExit()
         FileUtil.write(contents, outputFile)
-        Map<String, String> contentsMap = new HashMap<>()
-        contentsMap.put(outputFile.getAbsolutePath(), contents)
-        MockResourceAccessor mockResourceAccessor = new MockResourceAccessor(contentsMap)
+
+        JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
         Map<String, Object> scopeMap = new HashMap<>()
-        scopeMap.put(Scope.Attr.resourceAccessor.name(), mockResourceAccessor)
+        scopeMap.put(Scope.Attr.resourceAccessor.name(), testResourceAccessor)
         scopeMap.put("liquibase.plugin." + HubService.name, MockHubService)
         scopeId = Scope.enter(scopeMap)
     }
@@ -44,7 +44,7 @@ class RegisterChangeLogCommandTest extends Specification {
         hubConfiguration.setLiquibaseHubProject("PROJECT 1")
         def command = new RegisterChangeLogCommand()
         command.setOutputStream(new PrintStream(outputStream))
-        command.setChangeLogFile(outputFile.getCanonicalPath())
+        command.setChangeLogFile(outputFile.getName())
 
         def result = command.run()
 
