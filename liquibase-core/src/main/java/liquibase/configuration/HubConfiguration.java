@@ -76,7 +76,7 @@ public class HubConfiguration extends AbstractConfigurationContainer {
 
         final List<String> validValues = Arrays.asList("realtime", "off");
         if (!validValues.contains(value.toLowerCase())) {
-            throw new RuntimeException("Unknown liquibase.hub.mode: " + value + ". Possible values: " + StringUtil.join(validValues, ", "));
+            throw new RuntimeException(" An invalid liquibase.hub.mode value of "+value+" detected. Acceptable values are " + StringUtil.join(validValues, ", "));
         }
         return value;
     }
