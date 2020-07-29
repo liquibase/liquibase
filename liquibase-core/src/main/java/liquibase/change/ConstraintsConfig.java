@@ -263,7 +263,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Returns whether a NotNullConst defined for this column should validate.
-     * Returns null if not setShouldValidate has not been called.
+     * Returns null if not setValidateNullable has not been called.
      */
     public Boolean getValidateNullable() {
         return validateNullable;
@@ -288,7 +288,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Returns whether a UniqueConst defined for this column should validate.
-     * Returns null if not setShouldValidate has not been called.
+     * Returns null if not setValidateUnique has not been called.
      */
     public Boolean getValidateUnique() {
         return validateUnique;
@@ -313,7 +313,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Returns whether a PrimaryKeyConst defined for this column should validate.
-     * Returns null if not setShouldValidate has not been called.
+     * Returns null if not setValidatePrimaryKey has not been called.
      */
     public Boolean getValidatePrimaryKey() {
         return validatePrimaryKey;
@@ -338,7 +338,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     /**
      * Returns whether a ForeignKeyConst defined for this column should validate.
-     * Returns null if not setShouldValidate has not been called.
+     * Returns null if not setValidateForeignKey has not been called.
      */
     public Boolean getValidateForeignKey() {
         return validateForeignKey;
