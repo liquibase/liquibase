@@ -341,6 +341,9 @@ public class OnlineHubService implements HubService {
         for (Field field : fields) {
             try {
                 field.setAccessible(true);
+                if (field.isSynthetic()) {
+                    continue;
+                }
                 Object value = field.get(object);
                 if (value != null) {
                     if (value instanceof HubModel) {
