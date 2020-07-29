@@ -77,7 +77,7 @@ class LiquibaseTest extends Specification {
 
         mockHubService = (MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()
         ChangeLogParserFactory.getInstance().register(new MockChangeLogParser(changeLogs: [
-                "com/example/changelog.mock": new DatabaseChangeLog(changeLogId: UUID.randomUUID().toString())
+                "com/example/changelog.mock": new DatabaseChangeLog(changeLogId: MockHubService.randomUUID.toString())
         ]))
     }
 

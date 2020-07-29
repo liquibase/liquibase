@@ -15,32 +15,36 @@ public class HubChangeLog implements HubModel {
         return id;
     }
 
-    public void setId(UUID id) {
+    public HubChangeLog setId(UUID id) {
         this.id = id;
+        return this;
     }
 
     public String getExternalChangelogId() {
         return externalChangelogId;
     }
 
-    public void setExternalChangelogId(String externalChangelogId) {
+    public HubChangeLog setExternalChangelogId(String externalChangelogId) {
         this.externalChangelogId = externalChangelogId;
+        return this;
     }
 
     public String getFileName() {
         return fileName;
     }
 
-    public void setFileName(String fileName) {
+    public HubChangeLog setFileName(String fileName) {
         this.fileName = fileName;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public HubChangeLog setName(String name) {
         this.name = name;
+        return this;
     }
 
     @Override
@@ -52,7 +56,8 @@ public class HubChangeLog implements HubModel {
         return project;
     }
 
-    public void setProject(Project project) {
+    public HubChangeLog setProject(Project project) {
         this.project = project;
+        return this;
     }
 }

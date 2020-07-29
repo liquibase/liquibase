@@ -1,13 +1,18 @@
 package liquibase.hub.model;
 
+import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 public class Operation implements HubModel {
 
     private UUID id;
     private Environment environment;
-    private Project project;
     private OperationStatus operationStatus;
+    private Map<String, String> clientMetadata;
+    private Map<String, String> parameters;
+    private Date createDate;
+    private Date removeDate;
 
     @Override
     public UUID getId() {
@@ -26,14 +31,6 @@ public class Operation implements HubModel {
         this.environment = environment;
     }
 
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
     public OperationStatus getOperationStatus() {
         return operationStatus;
     }
@@ -42,10 +39,42 @@ public class Operation implements HubModel {
         this.operationStatus = operationStatus;
     }
 
+    public Map<String, String> getClientMetadata() {
+        return clientMetadata;
+    }
+
+    public void setClientMetadata(Map<String, String> clientMetadata) {
+        this.clientMetadata = clientMetadata;
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    public Date getRemoveDate() {
+        return removeDate;
+    }
+
+    public void setRemoveDate(Date removeDate) {
+        this.removeDate = removeDate;
+    }
+
     public static class OperationStatus {
         private UUID id;
-        private Integer statusCode;
         private String statusMessage;
+        private String operationStatusTYpe;
 
 
         public UUID getId() {
@@ -54,14 +83,6 @@ public class Operation implements HubModel {
 
         public void setId(UUID id) {
             this.id = id;
-        }
-
-        public Integer getStatusCode() {
-            return statusCode;
-        }
-
-        public void setStatusCode(Integer statusCode) {
-            this.statusCode = statusCode;
         }
 
         public String getStatusMessage() {

@@ -123,6 +123,8 @@ class HttpClient {
                         .replaceAll("(?m)^(\\s*)!![a-zA-Z0-9.]+", "$1")
                         .replaceAll("!!int \"(\\d+)\"", "$1")
                         .replaceAll("!!timestamp '(.+?)'", "\"$1\"")
+                        .replaceAll("!!java.util.UUID ", "")
+                        .replaceAll("!!null \"null\"", "null")
                 ;
                 try (OutputStream output = connection.getOutputStream()) {
                     output.write(requestBody.getBytes(StandardCharsets.UTF_8));

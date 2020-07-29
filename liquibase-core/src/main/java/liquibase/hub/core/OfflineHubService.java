@@ -72,7 +72,7 @@ public class OfflineHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
+    public Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 

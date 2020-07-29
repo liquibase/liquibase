@@ -110,7 +110,7 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
+    public Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
         sentObjects.computeIfAbsent("startOperation/" + environment.getId(), k -> new ArrayList<>()).add(operationParameters);
 
         return null;
@@ -135,7 +135,13 @@ public class MockHubService implements HubService {
                         .setJdbcUrl("jdbc://test")
                         .setPrj(this.returnProjects.get(0))
         ));
-        this.returnChangeLogs = new ArrayList<>();
+        this.returnChangeLogs = new ArrayList<>(Collections.singletonList(
+                new HubChangeLog()
+                        .setId(randomUUID)
+                        .setName("Mock changelog")
+                        .setFileName("com/example/test.xml")
+                        .setProject(this.returnProjects.get(0))
+        ));
         this.sentObjects = new TreeMap<>();
     }
 }

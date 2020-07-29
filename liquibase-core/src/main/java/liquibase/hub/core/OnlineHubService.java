@@ -292,8 +292,18 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
-        return null;
+    public Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("envId", environment.getId());
+        requestBody.put("envJdbcUrl", environment.getJdbcUrl());
+        requestBody.put("envName", environment.getName());
+        requestBody.put("envDescription", environment.getDescription());
+        requestBody.put("changelogId", changeLog.getId());
+        requestBody.put("operationType", operationType);
+        requestBody.put("operationStatusType", "PASS");
+        requestBody.put("statusMessage", operationType);
+
+        return http.doPost("/api/v1/operations", requestBody, Operation.class);
     }
 
     @Override
