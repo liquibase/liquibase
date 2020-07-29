@@ -71,6 +71,10 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     protected CommandResult run() throws Exception {
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
+        if (!hubService.isOnline()) {
+            return new CommandResult("Cannot run syncHub when Liquibase Hub is not available", false);
+        }
+
         Environment environmentToSync;
         if (hubEnvironmentId == null) {
             Project project = null;
