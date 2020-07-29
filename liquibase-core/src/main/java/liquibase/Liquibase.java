@@ -265,7 +265,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {
-        if (databaseChangeLog == null) {
+        if (databaseChangeLog == null && changeLogFile != null) {
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
             databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
         }
