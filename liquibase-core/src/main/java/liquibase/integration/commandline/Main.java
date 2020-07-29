@@ -302,7 +302,7 @@ public class Main {
                        Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                     }
 
-            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                    Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
 
                     if (main.commandParams.contains("--help") &&
@@ -331,8 +331,6 @@ public class Main {
                     if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
                         hubConfiguration.setLiquibaseHubUrl(main.liquibaseHubUrl);
                     }
-
-                    Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
                     main.applyDefaults();
                     Scope.child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {

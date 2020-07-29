@@ -53,7 +53,11 @@ public class OnlineHubService implements HubService {
     public boolean isHubAvailable() {
         if (this.available == null) {
             final Logger log = Scope.getCurrentScope().getLog(getClass());
-            if (getApiKey() == null) {
+            if (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF")) {
+                log.info("Not connecting to Liquibase Hub: liquibase.hub.mode is 'OFF'");
+
+                this.available = false;
+            } else if (getApiKey() == null) {
                 log.info("Not connecting to Liquibase Hub: liquibase.hub.apiKey was not specified");
                 this.available = false;
             } else {
