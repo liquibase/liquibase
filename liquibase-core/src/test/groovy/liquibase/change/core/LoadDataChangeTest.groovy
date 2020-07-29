@@ -18,6 +18,8 @@ import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
 import spock.lang.Unroll
 
+import java.sql.Connection
+
 public class LoadDataChangeTest extends StandardChangeTest {
 
     MSSQLDatabase mssqlDb;
@@ -32,6 +34,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 "superuser", "superpass", null, resourceAccessor));
 
         mockDb = new MockDatabase();
+        mockDb.setConnection((Connection) null)
     }
 
 
