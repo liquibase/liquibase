@@ -1274,7 +1274,9 @@ public class Main {
         //
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubApiKey())) {
-            LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKey());
+            LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKey().substring(0,6) + "************");
+        }
+        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubUrl())) {
             LOG.fine("Liquibase Hub URL:      " + hubConfiguration.getLiquibaseHubUrl());
         }
 
