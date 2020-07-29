@@ -113,6 +113,11 @@ public class MockHubService implements HubService {
 
     }
 
+    @Override
+    public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
+
+    }
+
     public void reset() {
         randomUUID = UUID.randomUUID();
 

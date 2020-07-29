@@ -201,14 +201,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             //
             // Formatted SQL changelog
             //
-            String patternString = "(?ms).*--liquibase.*formatted.*sql";
-            Pattern pattern = Pattern.compile(patternString);
-            Matcher matcher = pattern.matcher(changeLogString);
-            if (matcher.find()) {
-                String header = changeLogString.substring(matcher.start(), matcher.end());
-                String outputHeader = header + " changeLogId:" + hubChangeLog.getId().toString();
-                changeLogString = changeLogString.replaceFirst(patternString, outputHeader);
-            }
+            changeLogString = changeLogString.replaceFirst("--liquibase formatted sql",
+                    "--liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
         }
         else {
             return new CommandResult("Changelog file '" + changeLogFile + "' is not a supported format", false);
@@ -263,9 +257,6 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     }
 
     private String readProjectFromConsole(List<Project> projects) throws CommandLineParsingException {
-        if (true) {
-            return "1";
-        }
         System.out.println("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting. ");
         System.out.println("Register changelog <changelogfilename> to an existing Project, or create a new one.");
 

@@ -81,4 +81,9 @@ public class OfflineHubService implements HubService {
     public void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException {
 
     }
+
+    @Override
+    public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
+
+    }
 }

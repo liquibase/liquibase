@@ -300,6 +300,24 @@ public class OnlineHubService implements HubService {
 
     }
 
+    @Override
+    public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
+        OperationChangeEvent sendOperationChangeEvent =
+           new OperationChangeEvent()
+              .setEventType(operationChangeEvent.getEventType())
+              .setStartDate(operationChangeEvent.getStartDate())
+              .setEndDate(operationChangeEvent.getEndDate())
+              .setChangesetBody(operationChangeEvent.getChangesetBody())
+              .setGeneratedSql(operationChangeEvent.getGeneratedSql())
+              .setLogsTimestamp(new Date());
+        http.doPost("/api/v1" +
+                        "/organizations/" + getOrganization().getId().toString() +
+                        "/projects/" + operationChangeEvent.getProject().getId().toString() +
+                        "/operations/" + operationChangeEvent.getOperation().getId().toString() +
+                        "/change-events",
+                   sendOperationChangeEvent, OperationChangeEvent.class);
+    }
+
     /**
      * Converts an object to a search string.
      * Any properties with non-null values are used as search arguments.
