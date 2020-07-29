@@ -45,6 +45,7 @@ class RegisterChangeLogCommandTest extends Specification {
         def command = new RegisterChangeLogCommand()
         command.setOutputStream(new PrintStream(outputStream))
         command.setChangeLogFile(outputFile.getName())
+        command.configure([changeLog: new DatabaseChangeLog("com/example/test.xml")])
 
         def result = command.run()
 
@@ -53,10 +54,8 @@ class RegisterChangeLogCommandTest extends Specification {
         then:
         result.succeeded
         hubChangeLog.id != null
-        hubChangeLog.id.toString() == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        hubChangeLog.externalChangelogId.toString() == "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        hubChangeLog.fileName == "string"
-        hubChangeLog.name == "changelog"
+        hubChangeLog.fileName == "com/example/test.xml"
+        hubChangeLog.name == "com/example/test.xml"
     }
 
     def "changeLogAlreadyRegistered"() {

@@ -154,13 +154,10 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public HubChangeLog createChangeLog(Project project) throws LiquibaseException {
+    public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
         final UUID organizationId = getOrganization().getId();
-        HubChangeLog changeLogRequest = new HubChangeLog();
-        changeLogRequest.setExternalChangelogId(UUID.randomUUID().toString());
-        changeLogRequest.setFileName("string");
-        changeLogRequest.setName("string");
-        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + project.getId() + "/changelogs", changeLogRequest, HubChangeLog.class);
+
+        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + hubChangeLog.getProject().getId() + "/changelogs", hubChangeLog, HubChangeLog.class);
     }
 
     @Override

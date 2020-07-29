@@ -161,7 +161,13 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         //
         // Go create the Hub Changelog
         //
-        hubChangeLog = service.createChangeLog(project);
+        HubChangeLog newChangeLog = new HubChangeLog();
+        newChangeLog.setProject(project);
+        newChangeLog.setFileName(databaseChangeLog.getFilePath());
+        newChangeLog.setName(databaseChangeLog.getFilePath());
+        newChangeLog.setExternalChangelogId(UUID.randomUUID().toString());
+
+        hubChangeLog = service.createChangeLog(newChangeLog);
 
         //
         // Make changes to the changelog file
@@ -258,6 +264,9 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     }
 
     private String readProjectFromConsole(List<Project> projects) throws CommandLineParsingException {
+        if (true) {
+            return "1";
+        }
         System.out.println("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting. ");
         System.out.println("Register changelog <changelogfilename> to an existing Project, or create a new one.");
 
