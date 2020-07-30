@@ -1,6 +1,7 @@
 package liquibase.hub.core;
 
 import liquibase.Scope;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -305,17 +306,38 @@ public class OnlineHubService implements HubService {
         OperationChangeEvent sendOperationChangeEvent =
            new OperationChangeEvent()
               .setEventType(operationChangeEvent.getEventType())
+              .setChangesetId(operationChangeEvent.getChangesetId())
+              .setChangesetAuthor(operationChangeEvent.getChangesetAuthor())
+              .setChangesetFilename(operationChangeEvent.getChangesetFilename())
               .setStartDate(operationChangeEvent.getStartDate())
               .setEndDate(operationChangeEvent.getEndDate())
+              .setOperationStatusType(operationChangeEvent.getOperationStatusType())
               .setChangesetBody(operationChangeEvent.getChangesetBody())
               .setGeneratedSql(operationChangeEvent.getGeneratedSql())
-              .setLogsTimestamp(new Date());
+              .setLogs(operationChangeEvent.getLogs())
+              .setStatusMessage(operationChangeEvent.getStatusMessage())
+              .setLogsTimestamp(operationChangeEvent.getLogsTimestamp());
         http.doPost("/api/v1" +
                         "/organizations/" + getOrganization().getId().toString() +
                         "/projects/" + operationChangeEvent.getProject().getId().toString() +
                         "/operations/" + operationChangeEvent.getOperation().getId().toString() +
                         "/change-events",
-                   sendOperationChangeEvent, OperationChangeEvent.class);
+                sendOperationChangeEvent, OperationChangeEvent.class);
+    }
+
+    @Override
+    public void sendOperationChanges(OperationChange operationChange) throws LiquibaseHubException {
+        List<HubChange> hubChangeList = new ArrayList<>();
+        for (ChangeSet changeSet : operationChange.getChangeSets()) {
+            hubChangeList.add(new HubChange(changeSet));
+        }
+
+        http.doPost("/api/v1" +
+                        "/organizations/" + getOrganization().getId().toString() +
+                        "/projects/" + operationChange.getProject().getId().toString() +
+                        "/operations/" + operationChange.getOperation().getId().toString() +
+                        "/changes",
+                hubChangeList, ArrayList.class);
     }
 
     /**

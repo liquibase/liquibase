@@ -1,7 +1,10 @@
 package liquibase.hub.model;
 
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
+import liquibase.util.ISODateFormat;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -42,6 +45,33 @@ public class HubChange implements HubModel {
         this.deploymentId = ranChangeSet.getDeploymentId();
         this.dateExecuted = ranChangeSet.getDateExecuted();
     }
+
+    public HubChange(ChangeSet changeSet) {
+        this.changesetId = changeSet.getId();
+        this.changesetAuthor = changeSet.getAuthor();
+        this.changesetFilename = changeSet.getFilePath();
+        this.description = changeSet.getDescription();
+        this.comments = changeSet.getComments();
+        if (this.comments == null) {
+            this.comments="comments text";
+        }
+        this.labels = changeSet.getLabels().toString();
+        this.contexts = changeSet.getContexts().toString();
+        this.orderExecuted = 0;
+        this.md5sum = changeSet.generateCheckSum().toString();
+        this.execType = "EXECUTED";
+        ISODateFormat iso = new ISODateFormat();
+        try {
+            this.dateExecuted = iso.parse(new Date().toString());
+        }
+        catch (ParseException pe) {
+            this.dateExecuted = new Date();
+        }
+        this.tag = "TAG";
+        this.liquibase = "LIQUIBASE";
+        this.deploymentId = "1234567890";
+    }
+
 
     @Override
     public UUID getId() {

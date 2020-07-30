@@ -122,10 +122,12 @@ class HttpClient {
                 requestBody = requestBody
                         .replaceAll("(?m)^(\\s*)!![a-zA-Z0-9.]+", "$1")
                         .replaceAll("!!int \"(\\d+)\"", "$1")
-                        .replaceAll("!!timestamp '(.+?)'", "\"$1\"")
                         .replaceAll("!!java.util.UUID ", "")
                         .replaceAll("!!null \"null\"", "null")
-                ;
+                        .replaceAll("!!liquibase.hub.model.hubChange ", "");
+                requestBody = requestBody.replaceAll("!!timestamp '(.+?)'", "\"$1\"");
+                requestBody = requestBody.replaceAll("\\.[0-9][0-9][0-9]Z", "");
+
                 try (OutputStream output = connection.getOutputStream()) {
                     output.write(requestBody.getBytes(StandardCharsets.UTF_8));
                 }

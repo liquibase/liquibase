@@ -31,6 +31,7 @@ import liquibase.hub.listener.HubChangeExecListener;
 import liquibase.hub.model.Environment;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Operation;
+import liquibase.hub.model.OperationChange;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -234,7 +235,6 @@ public class Liquibase implements AutoCloseable {
                         environment = hubService.getEnvironment(new Environment().setId(Liquibase.this.hubEnvironmentId), true);
                     }
 
-
                     final HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
                     updateOperation = hubService.createOperation("UPDATE", hubChangeLog, environment, null);
 
@@ -242,6 +242,18 @@ public class Liquibase implements AutoCloseable {
                         throw new RuntimeException("ChangeExecListener already defined");
                     }
                     changeExecListener = new HubChangeExecListener(updateOperation);
+
+                    ListVisitor listVisitor = new ListVisitor();
+                    ChangeLogIterator hubChangeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
+                    hubChangeLogIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+                    List<ChangeSet> operationChangeSets = listVisitor.getSeenChangeSets();
+                    OperationChange operationChange = new OperationChange();
+                    for (ChangeSet operationChangeSet : operationChangeSets) {
+                        operationChange.getChangeSets().add(operationChangeSet);
+                    }
+                    operationChange.setProject(hubChangeLog.getPrj());
+                    operationChange.setOperation(updateOperation);
+                    hubService.sendOperationChanges(operationChange);
                 }
 
                 changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));

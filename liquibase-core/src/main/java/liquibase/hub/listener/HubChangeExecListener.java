@@ -77,7 +77,7 @@ public class HubChangeExecListener implements ChangeExecListener {
             }
         }
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
-        operationChangeEvent.setEventType("START");
+        operationChangeEvent.setEventType("UPDATE");
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
         operationChangeEvent.setEndDate(new Date());
         operationChangeEvent.setChangesetId(changeSet.getId());
@@ -86,6 +86,9 @@ public class HubChangeExecListener implements ChangeExecListener {
         operationChangeEvent.setOperationStatusType("PASS");
         operationChangeEvent.setGeneratedSql(builder.toString());
         operationChangeEvent.setOperation(operation);
+        operationChangeEvent.setLogsTimestamp(new Date());
+        operationChangeEvent.setLogs("LOGS");
+        operationChangeEvent.setStatusMessage("STATUS MESSAGE");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(changeSet.getFilePath());

@@ -92,10 +92,10 @@ public class ChangeLogIterator {
                             @Override
                             public void run() throws Exception {
                                 if (finalShouldVisit && !alreadySaw(changeSet)) {
-                        //
-                        // Go validate any change sets with an Executor
-                        //
-                        validateChangeSetExecutor(changeSet, env);
+                                    //
+                                    // Go validate any change sets with an Executor
+                                    //
+                                    validateChangeSetExecutor(changeSet, env);
                                     visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                                     markSeen(changeSet);
                                 } else {
