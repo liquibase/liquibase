@@ -360,8 +360,6 @@ public class OnlineHubService implements HubService {
                         "/operations/" + operationChange.getOperation().getId().toString() +
                         "/changes",
                 hubChangeList, ArrayList.class);
-=======
->>>>>>> origin/DAT-4800
     }
 
     /**

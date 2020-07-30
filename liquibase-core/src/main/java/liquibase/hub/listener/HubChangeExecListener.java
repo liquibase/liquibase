@@ -71,11 +71,16 @@ public class HubChangeExecListener implements ChangeExecListener {
         List<String> sqlList = new ArrayList<>();
         for (Change change : changes) {
             Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
+            /*
             for (Sql sql : sqls) {
                 sqlList.add(sql.toSql());
             }
+            */
+            sqlList.add(sqls[0].toSql().substring(0,60));
         }
-        sqlList.toArray(String[]);
+
+        String[] sqlArray = new String[sqlList.size()];
+        sqlArray = sqlList.toArray(sqlArray);
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType("UPDATE");
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
@@ -84,14 +89,14 @@ public class HubChangeExecListener implements ChangeExecListener {
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
         operationChangeEvent.setOperationStatusType("PASS");
-        operationChangeEvent.setGeneratedSql(new String[] {builder.toString()});
+        operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
         operationChangeEvent.setLogs("LOGS");
         operationChangeEvent.setStatusMessage("STATUS MESSAGE");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(changeSet.getFilePath());
+        ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
         try {
             serializer.write(Collections.singletonList(changeSet), baos);
             operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
