@@ -10,7 +10,10 @@ import java.util.List;
 
 public class CompositeLogService extends AbstractLogService {
 
-    private final List<LogService> services;
+    private List<LogService> services = new ArrayList<>();
+
+    public CompositeLogService() {
+    }
 
     public CompositeLogService(boolean includeCurrentScopeLogService, LogService... logService) {
         this.services = new ArrayList<>(Arrays.asList(logService));
