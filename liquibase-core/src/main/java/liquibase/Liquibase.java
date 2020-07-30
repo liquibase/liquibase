@@ -37,6 +37,8 @@ import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
+import liquibase.logging.core.BufferedLogService;
+import liquibase.logging.core.CompositeLogService;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.InputStreamList;
@@ -61,6 +63,7 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.util.*;
+import java.util.logging.Level;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -210,6 +213,8 @@ public class Liquibase implements AutoCloseable {
 
             final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             Operation updateOperation = null;
+            BufferedLogService bufferLog = new BufferedLogService();
+
             try {
                 DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
@@ -264,7 +269,10 @@ public class Liquibase implements AutoCloseable {
                     changeExecListener = new HubChangeExecListener(updateOperation);
                 }
 
-                changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+                CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+                Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
+                    changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+                });
 
                 try {
                     if (hubService.isOnline()) {
@@ -277,6 +285,11 @@ public class Liquibase implements AutoCloseable {
                                                 .setOperationEventStatusType("PASS")
                                                 .setStatusMessage("Update operation completed successfully")
                                 )
+                                .setOperationEventLog(
+                                        new OperationEvent.OperationEventLog()
+                                        .setLogMessage(bufferLog.getLogAsString(Level.INFO))
+                                        .setTimestampLog(startTime)
+                                )
                         );
                     }
                 } catch (LiquibaseException e) {
@@ -284,7 +297,7 @@ public class Liquibase implements AutoCloseable {
                 }
             } catch (Throwable e) {
                 try {
-                    if (hubService.isOnline()) {
+                    if (updateOperation != null && hubService.isOnline()) {
                         hubService.sendOperationEvent(updateOperation, new OperationEvent()
                                 .setEventType("COMPLETE")
                                 .setStartDate(startTime)
@@ -293,6 +306,10 @@ public class Liquibase implements AutoCloseable {
                                         new OperationEvent.OperationEventStatus()
                                                 .setOperationEventStatusType("FAIL")
                                                 .setStatusMessage("Update operation completed with errors")
+                                )
+                                .setOperationEventLog(
+                                        new OperationEvent.OperationEventLog()
+                                                .setLogMessage(bufferLog.getLogAsString(Level.INFO))
                                 )
                         );
                     }
