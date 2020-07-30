@@ -31,10 +31,6 @@ class SnapshotHelpers {
             super(JSONCompareMode.LENIENT)
         }
 
-        GeneralSnapshotComparator(JSONCompareMode mode) {
-            super(mode)
-        }
-
         @Override
         void compareJSONArray(String prefix, JSONArray exp, JSONArray act, JSONCompareResult result) throws JSONException {
             if (exp.length() != 0) {

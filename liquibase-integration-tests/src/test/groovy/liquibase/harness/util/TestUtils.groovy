@@ -18,27 +18,26 @@ class TestUtils {
         return new Liquibase(changeLogFile, fileOpener, database);
     }
 
-    static List<String> toSql(Change change, Database db) {
-        Sql[] sqls = SqlGeneratorFactory.newInstance().generateSql(change, db)
-        return sqls*.toSql()
-    }
-
-    static List<String> toSql(ChangeSet changeSet, Database db) {
-        return toSql(changeSet.getChanges(), db)
-    }
-
-    static List<String> toSql(List<? extends Change> changes, Database db) {
-        List<String> stringList = new ArrayList<>()
-        changes.each { stringList.addAll(toSql(it, db)) }
-        return stringList
-    }
-
     static List<String> toSqlFromChangeSets(List<ChangeSet> changeSets, Database db) {
         List<String> stringList = new ArrayList<>()
         changeSets.each { stringList.addAll(toSql(it, db)) }
         return stringList
     }
 
+    private static List<String> toSql(ChangeSet changeSet, Database db) {
+        return toSql(changeSet.getChanges(), db)
+    }
+
+    private static List<String> toSql(List<? extends Change> changes, Database db) {
+        List<String> stringList = new ArrayList<>()
+        changes.each { stringList.addAll(toSql(it, db)) }
+        return stringList
+    }
+
+    private static List<String> toSql(Change change, Database db) {
+        Sql[] sqls = SqlGeneratorFactory.newInstance().generateSql(change, db)
+        return sqls*.toSql()
+    }
 
     static ArrayList<CatalogAndSchema> getCatalogAndSchema(List<String> schemaList, Database database) {
         List<CatalogAndSchema> finalList = new ArrayList<>()

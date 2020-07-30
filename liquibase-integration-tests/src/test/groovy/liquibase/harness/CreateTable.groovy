@@ -35,6 +35,7 @@ class CreateTable extends Specification {
 
         when:
 
+        catalogAndSchemaList.each { database.dropDatabaseObjects(it) }
         liquibase.update(context);
         String jsonSnapshot = SnapshotHelpers.getJsonSnapshot(database, catalogAndSchemaList)
         catalogAndSchemaList.each { database.dropDatabaseObjects(it) }
