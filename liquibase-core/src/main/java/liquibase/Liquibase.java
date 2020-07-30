@@ -250,7 +250,7 @@ public class Liquibase implements AutoCloseable {
                                     .setOperationEventStatus(
                                             new OperationEvent.OperationEventStatus()
                                                     .setOperationEventStatusType("PASS")
-                                                    .setStatusMessage("Update started")
+                                                    .setStatusMessage("Update operation started successfully")
                                     )
                             );
                         }
@@ -265,13 +265,6 @@ public class Liquibase implements AutoCloseable {
                 }
 
                 changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-            } finally {
-                database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
-                try {
-                    lockService.releaseLock();
-                } catch (LockException e) {
-                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                }
 
                 try {
                     if (hubService.isOnline()) {
@@ -282,12 +275,39 @@ public class Liquibase implements AutoCloseable {
                                 .setOperationEventStatus(
                                         new OperationEvent.OperationEventStatus()
                                                 .setOperationEventStatusType("PASS")
-                                                .setStatusMessage("Update complete")
+                                                .setStatusMessage("Update operation completed successfully")
                                 )
                         );
                     }
                 } catch (LiquibaseException e) {
                     Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
+                }
+            } catch (Throwable e) {
+                try {
+                    if (hubService.isOnline()) {
+                        hubService.sendOperationEvent(updateOperation, new OperationEvent()
+                                .setEventType("COMPLETE")
+                                .setStartDate(startTime)
+                                .setEndDate(new Date())
+                                .setOperationEventStatus(
+                                        new OperationEvent.OperationEventStatus()
+                                                .setOperationEventStatusType("FAIL")
+                                                .setStatusMessage("Update operation completed with errors")
+                                )
+                        );
+                    }
+                } catch (LiquibaseException serviceException) {
+                    Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), serviceException);
+                }
+
+
+                throw e;
+            } finally {
+                database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+                try {
+                    lockService.releaseLock();
+                } catch (LockException e) {
+                    LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
 
                 resetServices();
