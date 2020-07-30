@@ -6,22 +6,15 @@ import java.util.UUID;
 public class OperationEvent implements HubModel {
 
     private UUID id;
-    private String type;
-    private Operation operation;
+    private String eventType;
     private Date startDate;
     private Date endDate;
-    private int statusCode;
-    private String statusMessage;
-    private String logs;
 
-    public OperationEvent(String type, Operation operation, Date startDate, Date endDate, int statusCode, String statusMessage, String logs) {
-        this.type = type;
-        this.operation = operation;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.logs = logs;
+    private OperationEventLog operationEventLog;
+    private OperationEventStatus operationEventStatus;
+
+    public OperationEvent() {
+
     }
 
     @Override
@@ -29,63 +22,131 @@ public class OperationEvent implements HubModel {
         return id;
     }
 
-    public void setId(UUID id) {
+    public OperationEvent setId(UUID id) {
         this.id = id;
+        return this;
     }
 
-    public String getType() {
-        return type;
+    public String getEventType() {
+        return eventType;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Operation getOperation() {
-        return operation;
-    }
-
-    public void setOperation(Operation operation) {
-        this.operation = operation;
+    public OperationEvent setEventType(String eventType) {
+        this.eventType = eventType;
+        return this;
     }
 
     public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public OperationEvent setStartDate(Date startDate) {
         this.startDate = startDate;
+        return this;
     }
 
     public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public OperationEvent setEndDate(Date endDate) {
         this.endDate = endDate;
+        return this;
     }
 
-    public String getStatusMessage() {
-        return statusMessage;
+    public OperationEventLog getOperationEventLog() {
+        return operationEventLog;
     }
 
-    public void setStatusMessage(String statusMessage) {
-        this.statusMessage = statusMessage;
+    public OperationEvent setOperationEventLog(OperationEventLog operationEventLog) {
+        this.operationEventLog = operationEventLog;
+        return this;
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    public OperationEventStatus getOperationEventStatus() {
+        return operationEventStatus;
     }
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
+    public OperationEvent setOperationEventStatus(OperationEventStatus operationEventStatus) {
+        this.operationEventStatus = operationEventStatus;
+        return this;
     }
 
-    public String getLogs() {
-        return logs;
+    public static class OperationEventLog implements HubModel {
+        private UUID id;
+        private String logMessage;
+        private Date createDate;
+        private Date timestampLog;
+
+        @Override
+        public UUID getId() {
+            return id;
+        }
+
+        public OperationEventLog setId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public String getLogMessage() {
+            return logMessage;
+        }
+
+        public OperationEventLog setLogMessage(String logMessage) {
+            this.logMessage = logMessage;
+            return this;
+        }
+
+        public Date getCreateDate() {
+            return createDate;
+        }
+
+        public OperationEventLog setCreateDate(Date createDate) {
+            this.createDate = createDate;
+            return this;
+        }
+
+        public Date getTimestampLog() {
+            return timestampLog;
+        }
+
+        public OperationEventLog setTimestampLog(Date timestampLog) {
+            this.timestampLog = timestampLog;
+            return this;
+        }
     }
 
-    public void setLogs(String logs) {
-        this.logs = logs;
+    public static class OperationEventStatus implements HubModel {
+        private UUID id;
+        private String operationEventStatusType;
+        private String statusMessage;
+
+        @Override
+        public UUID getId() {
+            return id;
+        }
+
+        public OperationEventStatus setId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public String getOperationEventStatusType() {
+            return operationEventStatusType;
+        }
+
+        public OperationEventStatus setOperationEventStatusType(String operationEventStatusType) {
+            this.operationEventStatusType = operationEventStatusType;
+            return this;
+        }
+
+        public String getStatusMessage() {
+            return statusMessage;
+        }
+
+        public OperationEventStatus setStatusMessage(String statusMessage) {
+            this.statusMessage = statusMessage;
+            return this;
+        }
     }
 }

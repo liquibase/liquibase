@@ -210,9 +210,9 @@ public class OnlineHubService implements HubService {
     public List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException {
         final Organization organization = getOrganization();
 
-        final Map response;
+        final ListResponse response;
         try {
-            response = http.doGet("/api/v1/organizations/" + organization.getId() + "/environments", Collections.singletonMap("search", toSearchString(exampleEnvironment)), Map.class);
+            response = http.doGet("/api/v1/organizations/" + organization.getId() + "/environments", Collections.singletonMap("search", toSearchString(exampleEnvironment)), ListResponse.class, Environment.class);
         } catch (LiquibaseHubObjectNotFoundException e) {
             //Hub should not be returning this, but does
             return new ArrayList<>();
@@ -221,7 +221,7 @@ public class OnlineHubService implements HubService {
         List<Environment> returnList = new ArrayList<>();
 
         try {
-            for (Map object : (List<Map>) response.get("content")) {
+            for (Map object : (List<Map>) response.getContent()) {
                 returnList.add(new Environment()
                         .setId(UUID.fromString((String) object.get("id")))
                         .setJdbcUrl((String) object.get("jdbcUrl"))
@@ -230,6 +230,7 @@ public class OnlineHubService implements HubService {
                         .setCreateDate(parseDate((String) object.get("createDate")))
                         .setUpdateDate(parseDate((String) object.get("updateDate")))
                         .setRemoveDate(parseDate((String) object.get("removeDate")))
+                        .setPrj(exampleEnvironment.getPrj())
                 );
             }
         } catch (ParseException e) {
@@ -293,11 +294,31 @@ public class OnlineHubService implements HubService {
         requestBody.put("operationStatusType", "PASS");
         requestBody.put("statusMessage", operationType);
 
-        return http.doPost("/api/v1/operations", requestBody, Operation.class);
+        final Operation operation = http.doPost("/api/v1/operations", requestBody, Operation.class);
+        operation.setEnvironment(environment);
+        return operation;
     }
 
     @Override
-    public void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException {
+    public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException {
+        final Organization organization = getOrganization();
+
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("eventType", operationEvent.getEventType());
+        requestParams.put("startDate", operationEvent.getStartDate());
+        requestParams.put("endDate", operationEvent.getEndDate());
+
+        if (operationEvent.getOperationEventStatus() != null) {
+            requestParams.put("statusType", operationEvent.getOperationEventStatus().getOperationEventStatusType());
+            requestParams.put("statusMessage", operationEvent.getOperationEventStatus().getStatusMessage());
+        }
+
+        if (operationEvent.getOperationEventLog() != null) {
+            requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
+            requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
+        }
+
+        return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getEnvironment().getPrj().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
 
     }
 
@@ -338,6 +359,8 @@ public class OnlineHubService implements HubService {
                         "/operations/" + operationChange.getOperation().getId().toString() +
                         "/changes",
                 hubChangeList, ArrayList.class);
+=======
+>>>>>>> origin/DAT-4800
     }
 
     /**

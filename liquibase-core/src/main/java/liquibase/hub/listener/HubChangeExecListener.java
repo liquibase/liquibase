@@ -67,15 +67,15 @@ public class HubChangeExecListener implements ChangeExecListener {
         //
         //  POST /organizations/{id}/projects/{id}/operations/{id}/change-events
         //
-        StringBuilder builder = new StringBuilder();
         List<Change> changes = changeSet.getChanges();
+        List<String> sqlList = new ArrayList<>();
         for (Change change : changes) {
             Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
             for (Sql sql : sqls) {
-                builder.append(sql.toSql());
-                builder.append("\n");
+                sqlList.add(sql.toSql());
             }
         }
+        sqlList.toArray(String[]);
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType("UPDATE");
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
@@ -84,7 +84,7 @@ public class HubChangeExecListener implements ChangeExecListener {
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
         operationChangeEvent.setOperationStatusType("PASS");
-        operationChangeEvent.setGeneratedSql(builder.toString());
+        operationChangeEvent.setGeneratedSql(new String[] {builder.toString()});
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
         operationChangeEvent.setLogs("LOGS");

@@ -78,8 +78,8 @@ public class OfflineHubService implements HubService {
     }
 
     @Override
-    public void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException {
-
+    public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException {
+        throw new LiquibaseHubException("Hub is not available");
     }
 
     @Override

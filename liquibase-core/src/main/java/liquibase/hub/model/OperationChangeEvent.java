@@ -11,7 +11,7 @@ public class OperationChangeEvent implements HubModel {
     private String changesetId;
     private String changesetAuthor;
     private String changesetFilename;
-    private String generatedSql;
+    private String[] generatedSql;
     private String changesetBody;
     private String operationStatusType;
     private String statusMessage;
@@ -97,11 +97,11 @@ public class OperationChangeEvent implements HubModel {
       return this;
     }
 
-    public String getGeneratedSql() {
+    public String[] getGeneratedSql() {
       return generatedSql;
     }
 
-    public OperationChangeEvent setGeneratedSql(String generatedSql) {
+    public OperationChangeEvent setGeneratedSql(String[] generatedSql) {
         this.generatedSql = generatedSql;
         return this;
     }

@@ -23,6 +23,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     private String changeLogFile;
     private String hubEnvironmentId;
     private Database database;
+    private boolean failIfOnline = false;
 
     public String getUrl() {
         return url;
@@ -57,6 +58,14 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         return database;
     }
 
+    public boolean isFailIfOnline() {
+        return failIfOnline;
+    }
+
+    public void setFailIfOnline(boolean failIfOnline) {
+        this.failIfOnline = failIfOnline;
+    }
+
     @Override
     public String getName() {
         return "syncHub";
@@ -70,6 +79,14 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     @Override
     protected CommandResult run() throws Exception {
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+
+        if (!hubService.isOnline()) {
+            if (failIfOnline) {
+                return new CommandResult("Cannot run syncHub when Liquibase Hub is not available", false);
+            } else {
+                return new CommandResult("Sync skipped, offline", true);
+            }
+        }
 
         Environment environmentToSync;
         if (hubEnvironmentId == null) {

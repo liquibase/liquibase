@@ -109,8 +109,8 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException {
-
+    public OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException {
+        return null;
     }
 
     @Override
