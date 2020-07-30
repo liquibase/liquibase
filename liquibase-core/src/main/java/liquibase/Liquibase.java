@@ -242,6 +242,22 @@ public class Liquibase implements AutoCloseable {
                     final HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
                     updateOperation = hubService.createOperation("UPDATE", hubChangeLog, environment, null);
 
+                    try {
+                        if (hubService.isOnline()) {
+                            hubService.sendOperationEvent(updateOperation, new OperationEvent()
+                                    .setEventType("START")
+                                    .setStartDate(startTime)
+                                    .setOperationEventStatus(
+                                            new OperationEvent.OperationEventStatus()
+                                                    .setOperationEventStatusType("PASS")
+                                                    .setStatusMessage("Update started")
+                                    )
+                            );
+                        }
+                    } catch (LiquibaseException e) {
+                        Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
+                    }
+
                     if (changeExecListener != null) {
                         throw new RuntimeException("ChangeExecListener already defined");
                     }
@@ -257,16 +273,22 @@ public class Liquibase implements AutoCloseable {
                     LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
 
-                hubService.sendOperationEvent(updateOperation, new OperationEvent()
-                        .setEventType("COMPLETE")
-                        .setStartDate(startTime)
-                        .setEndDate(new Date())
-                        .setOperationEventStatus(
-                                new OperationEvent.OperationEventStatus()
-                                        .setOperationEventStatusType("PASS")
-                                        .setStatusMessage("Update complete")
-                        )
-                );
+                try {
+                    if (hubService.isOnline()) {
+                        hubService.sendOperationEvent(updateOperation, new OperationEvent()
+                                .setEventType("COMPLETE")
+                                .setStartDate(startTime)
+                                .setEndDate(new Date())
+                                .setOperationEventStatus(
+                                        new OperationEvent.OperationEventStatus()
+                                                .setOperationEventStatusType("PASS")
+                                                .setStatusMessage("Update complete")
+                                )
+                        );
+                    }
+                } catch (LiquibaseException e) {
+                    Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
+                }
 
                 resetServices();
             }
