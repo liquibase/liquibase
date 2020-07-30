@@ -5,6 +5,7 @@ import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.LiquibaseHubObjectNotFoundException;
+import liquibase.hub.model.ListResponse;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 import org.yaml.snakeyaml.DumperOptions;
@@ -51,6 +52,15 @@ class HttpClient {
 
     protected <T> T doGet(String url, Class<T> returnType) throws LiquibaseHubException {
         return doGet(url, new HashMap<>(), returnType);
+
+    }
+
+    protected <T> ListResponse doGet(String url, Map<String, String> parameters, Class<ListResponse> listResponseClass, Class<T> contentType) throws LiquibaseHubException {
+        if (parameters != null && parameters.size() > 0) {
+            url += "?" + toQueryString(parameters);
+        }
+
+        return doRequest("GET", url, null, listResponseClass, contentType);
 
     }
 
@@ -108,6 +118,10 @@ class HttpClient {
     }
 
     private <T> T doRequest(String method, String url, Object requestBodyObject, Class<T> returnType) throws LiquibaseHubException {
+        return doRequest(method, url, requestBodyObject, returnType, null);
+    }
+
+    private <T> T doRequest(String method, String url, Object requestBodyObject, Class<T> returnType, Class contentReturnType) throws LiquibaseHubException {
         try {
             HttpURLConnection connection = (HttpURLConnection) openConnection(url);
             if (requestBodyObject != null) {
@@ -132,6 +146,13 @@ class HttpClient {
             }
 
             try (InputStream response = connection.getInputStream()) {
+                //TODO: figure out how to populate ListResponse.content with objects rather than maps
+//                if (contentReturnType != null) {
+//                    final TypeDescription peopleDescription = new TypeDescription(contentReturnType);
+//                    peopleDescription.addPropertyParameters("content", List.class, contentReturnType);
+//                    yaml.addTypeDescription(peopleDescription);
+//                }
+
                 return (T) yaml.loadAs(response, returnType);
             } catch (IOException e) {
                 try {

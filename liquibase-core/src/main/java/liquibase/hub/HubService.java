@@ -40,7 +40,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException;
 
-    void sendOperationEvent(OperationEvent operationEvent) throws LiquibaseException;
+    OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException;
 
     void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException;
 }
