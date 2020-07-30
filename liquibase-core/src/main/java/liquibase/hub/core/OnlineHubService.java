@@ -310,6 +310,7 @@ public class OnlineHubService implements HubService {
         if (operationEvent.getOperationEventStatus() != null) {
             requestParams.put("statusType", operationEvent.getOperationEventStatus().getOperationEventStatusType());
             requestParams.put("statusMessage", operationEvent.getOperationEventStatus().getStatusMessage());
+            requestParams.put("operationEventStatusType", operationEvent.getOperationEventStatus().getOperationEventStatusType());
         }
 
         if (operationEvent.getOperationEventLog() != null) {
