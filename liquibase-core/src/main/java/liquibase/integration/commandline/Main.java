@@ -1035,8 +1035,9 @@ public class Main {
      * Print instructions on how to use this program from the command line.
      *
      * @param stream the output stream to write the help text to
+     * @throws LiquibaseException 
      */
-    protected void printHelp(PrintStream stream) {
+    protected void printHelp(PrintStream stream) throws LiquibaseException {
         Main main = null;
         main = new Main();
         this.logLevel = Level.ERROR.toString();

@@ -20,7 +20,13 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
+
+import ch.qos.logback.core.util.FileUtil;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -247,7 +253,7 @@ public class CommandLineUtils {
 
     }
 
-    public static String getBanner() {
+    public static String getBanner() throws LiquibaseException {
         String myVersion = "";
         String buildTimeString = "";
         Calendar calendar = Calendar.getInstance();
@@ -257,25 +263,16 @@ public class CommandLineUtils {
         buildTimeString = LiquibaseUtil.getBuildTime();
 
         StringBuffer banner = new StringBuffer();
-
-        banner.append("####################################################\n" +
-                "##   _     _             _ _                      ##\n" +
-                "##  | |   (_)           (_) |                     ##\n" +
-                "##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##\n" +
-                "##  | |   | |/ _` | | | | | '_ \\ / _` / __|/ _ \\  ##\n" +
-                "##  | |___| | (_| | |_| | | |_) | (_| \\__ \\  __/  ##\n" +
-                "##  \\_____/_|\\__, |\\__,_|_|_.__/ \\__,_|___/\\___|  ##\n" +
-                "##              | |                               ##\n" +
-                "##              |_|                               ##\n" +
-                "##                                                ## \n" +
-                "##  Get documentation at docs.liquibase.com       ##\n" +
-                "##  Get certified courses at learn.liquibase.com  ## \n" +
-                "##  Get advanced features and support at          ##\n" +
-                "##      liquibase.com/protrial                    ##\n" +
-                "##                                                ##\n" +
-                "####################################################\n"
-                        .replaceAll("\n", System.lineSeparator()));
-
+        
+        // Banner is stored in banner.txt in resources.
+	    Class commandLinUtilsClass = CommandLineUtils.class;
+	    InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/banner.txt");
+	    try {
+			banner.append(readFromInputStream(inputStream));
+		} catch (IOException e) {
+			throw new LiquibaseException(e);
+		}
+    
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
         ));
@@ -287,5 +284,17 @@ public class CommandLineUtils {
 
         return banner.toString();
     }
+    
+	private static String readFromInputStream(InputStream inputStream) throws IOException {
+		StringBuilder resultStringBuilder = new StringBuilder();
+		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				resultStringBuilder.append(line + "\n");
+	
+			}
+		}
+		return resultStringBuilder.toString();
+	}
 
 }
