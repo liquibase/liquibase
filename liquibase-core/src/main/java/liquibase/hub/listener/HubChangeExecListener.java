@@ -70,13 +70,19 @@ public class HubChangeExecListener implements ChangeExecListener {
         List<Change> changes = changeSet.getChanges();
         List<String> sqlList = new ArrayList<>();
         for (Change change : changes) {
+
+            //
+            // Until the generated SQL field is changed to be a CLOB
+            // we are truncating the SQL to fit
+            //
             Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
             /*
             for (Sql sql : sqls) {
                 sqlList.add(sql.toSql());
             }
             */
-            sqlList.add(sqls[0].toSql().substring(0,60));
+            String sqlString = sqls[0].toSql();
+            sqlList.add(sqlString.substring(0,(sqlString.length() <= 60 ? sqlString.length() : 60)));
         }
 
         String[] sqlArray = new String[sqlList.size()];
