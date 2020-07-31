@@ -21,8 +21,6 @@ import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import ch.qos.logback.core.util.FileUtil;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
