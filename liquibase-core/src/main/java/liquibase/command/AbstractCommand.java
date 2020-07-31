@@ -13,6 +13,7 @@ public abstract class AbstractCommand<T extends CommandResult> implements Liquib
         }
     }
 
+    @Override
     public final T execute() throws CommandExecutionException {
         this.validate();
         try {

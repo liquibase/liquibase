@@ -25,6 +25,7 @@ public class CSVIterator implements Iterator<String[]> {
     *
     * @return true if the CSVIterator has more elements.
     */
+   @Override
    public boolean hasNext() {
       return nextLine != null;
    }
@@ -35,6 +36,7 @@ public class CSVIterator implements Iterator<String[]> {
     *
     * @return The next element of the iterator.
     */
+   @Override
    public String[] next() {
       String[] temp = nextLine;
       try {
@@ -48,6 +50,7 @@ public class CSVIterator implements Iterator<String[]> {
    /**
     * This method is not supported by openCSV and will throw a UnsupportedOperationException if called.
     */
+   @Override
    public void remove() {
       throw new UnsupportedOperationException("This is a read only iterator.");
    }

@@ -161,6 +161,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     /**
      * @deprecated Use {@link #addConfiguredXml(ChangeLogOutputFile)} instead.
      */
+    @Override
     @Deprecated
     public void setOutputFile(FileResource outputFile) {
         log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, <yaml>, or <txt> element instead.", Project.MSG_WARN);

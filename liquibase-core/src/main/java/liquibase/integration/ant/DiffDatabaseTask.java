@@ -45,6 +45,7 @@ public class DiffDatabaseTask extends AbstractDatabaseDiffTask {
         }
     }
 
+    @Override
     public void setOutputFile(FileResource outputFile) {
         this.outputFile = outputFile;
     }
@@ -53,6 +54,7 @@ public class DiffDatabaseTask extends AbstractDatabaseDiffTask {
         return outputEncoding;
     }
 
+    @Override
     public void setOutputEncoding(String outputEncoding) {
         this.outputEncoding = outputEncoding;
     }

@@ -26,5 +26,6 @@ public interface Precondition extends LiquibaseSerializable {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet, ChangeExecListener changeExecListener)
             throws PreconditionFailedException, PreconditionErrorException;
 
+    @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException;
 }

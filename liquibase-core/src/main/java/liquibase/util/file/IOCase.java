@@ -231,6 +231,7 @@ final class IOCase implements Serializable {
      *
      * @return a string describing the sensitivity
      */
+    @Override
     public String toString() {
         return name;
     }
