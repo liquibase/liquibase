@@ -14,6 +14,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.logging.LogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
@@ -251,7 +252,7 @@ public class CommandLineUtils {
 
     }
 
-    public static String getBanner() throws LiquibaseException {
+    public static String getBanner() {
         String myVersion = "";
         String buildTimeString = "";
         Calendar calendar = Calendar.getInstance();
@@ -268,7 +269,7 @@ public class CommandLineUtils {
 	    try {
 			banner.append(readFromInputStream(inputStream));
 		} catch (IOException e) {
-			throw new LiquibaseException(e);
+			LogService.getLog(commandLinUtilsClass).debug("Unable to locate banner file.");
 		}
     
         banner.append(String.format(
