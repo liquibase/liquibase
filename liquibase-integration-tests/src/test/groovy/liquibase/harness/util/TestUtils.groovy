@@ -12,7 +12,7 @@ import liquibase.test.JUnitResourceAccessor
 
 class TestUtils {
 
-    static Liquibase createLiquibase(String changeLogFile,  Database database) {
+    static Liquibase createLiquibase(String changeLogFile, Database database) {
         ResourceAccessor fileOpener = new JUnitResourceAccessor();
         database.resetInternalState();
         return new Liquibase(changeLogFile, fileOpener, database);
@@ -39,7 +39,9 @@ class TestUtils {
         return sqls*.toSql()
     }
 
-    static ArrayList<CatalogAndSchema> getCatalogAndSchema(List<String> schemaList, Database database) {
+    static ArrayList<CatalogAndSchema> getCatalogAndSchema(Database database, String dbSchema) {
+        List<String> schemaList = TestUtils.parseValuesToList(dbSchema, ",")
+
         List<CatalogAndSchema> finalList = new ArrayList<>()
         schemaList?.each { sch ->
             String[] catSchema = sch.split("\\.")
@@ -59,16 +61,7 @@ class TestUtils {
         return finalList
     }
 
-    static ArrayList<String> collectValuesForDb(Object value, String dbms, String splitWith = null) {
-        List<String> returnList = new ArrayList<>()
-        if (!value) {
-            return returnList
-        }
-        returnList.addAll(splitAndTrimIfNeeded(value, splitWith))
-        return returnList
-    }
-
-    private static List<String> splitAndTrimIfNeeded(String str, String regex = null) {
+    static List<String> parseValuesToList(String str, String regex = null) {
         List<String> returnList = new ArrayList<>()
         if (str) {
             if (regex == null) {
@@ -80,16 +73,4 @@ class TestUtils {
         return new ArrayList<String>()
     }
 
-    private static Collection<String> splitAndTrimIfNeeded(Collection<String> strs, String regex = null) {
-        if (regex == null) {
-            return strs
-        }
-        List<String> returnList = new ArrayList<>()
-        strs.each { str ->
-            if (str) {
-                returnList.add(str.split(regex)*.trim())
-            }
-        }
-        return returnList
-    }
 }
