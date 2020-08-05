@@ -65,6 +65,7 @@ public class Main {
     protected String username;
     protected String password;
     protected String url;
+    protected String hubEnvironmentId;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -1476,6 +1477,11 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            try {
+                liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+            } catch (IllegalArgumentException  e) {
+                throw new LiquibaseException("Unexpected hubEnvironmentId format: "+hubEnvironmentId, e);
+            }
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);
@@ -1574,6 +1580,7 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
+                liquibaseCommand.setHubEnvironmentId(hubEnvironmentId);
                 liquibaseCommand.setUrl(url);
                 liquibaseCommand.setDatabase(database);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
