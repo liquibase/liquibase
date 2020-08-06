@@ -52,9 +52,6 @@ public class HubChange implements HubModel {
         this.changesetFilename = changeSet.getFilePath();
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
-        if (this.comments == null) {
-            this.comments="comments text goes here";
-        }
         this.labels = changeSet.getLabels().toString();
         this.contexts = changeSet.getContexts().toString();
         this.orderExecuted = 0;
@@ -67,9 +64,6 @@ public class HubChange implements HubModel {
         catch (ParseException pe) {
             this.dateExecuted = new Date();
         }
-        this.tag = "TAG";
-        this.liquibase = "LIQUIBASE";
-        this.deploymentId = "1234567890";
     }
 
 
