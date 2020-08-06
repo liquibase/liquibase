@@ -3,6 +3,8 @@ package liquibase.dbtest;
 import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -96,8 +98,14 @@ public abstract class AbstractIntegrationTest {
         // Get the integration test properties for both global settings and (if applicable) local overrides.
         Properties integrationTestProperties;
         integrationTestProperties = new Properties();
-        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-        InputStream localProperties=Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
+        integrationTestProperties.load(
+           Thread.currentThread()
+                 .getContextClassLoader()
+                 .getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
+        InputStream localProperties=
+           Thread.currentThread()
+                 .getContextClassLoader()
+                 .getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
         if(localProperties!=null)
             integrationTestProperties.load(localProperties);
 
@@ -120,6 +128,14 @@ public abstract class AbstractIntegrationTest {
         }
         this.setJdbcUrl(url);
 
+        String testHubApiKey = integrationTestProperties.getProperty("integration.test.hub.apikey");
+        if (testHubApiKey != null) {
+            HubConfiguration hubConfiguration =
+              LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            hubConfiguration.setLiquibaseHubApiKey(testHubApiKey);
+            String testHubUrl = integrationTestProperties.getProperty("integration.test.hub.url");
+            hubConfiguration.setLiquibaseHubUrl(testHubUrl);
+        }
         Scope.setScopeManager(new TestScopeManager());
     }
 
@@ -127,8 +143,14 @@ public abstract class AbstractIntegrationTest {
         try {
             Properties integrationTestProperties;
             integrationTestProperties = new Properties();
-            integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-            InputStream localProperties = Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
+            integrationTestProperties.load(
+               Thread.currentThread()
+                     .getContextClassLoader()
+                     .getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
+            InputStream localProperties =
+               Thread.currentThread()
+                     .getContextClassLoader()
+                     .getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
             if (localProperties != null)
                 integrationTestProperties.load(localProperties);
 

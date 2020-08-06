@@ -53,7 +53,7 @@ public class HubChange implements HubModel {
         this.description = changeSet.getDescription();
         this.comments = changeSet.getComments();
         if (this.comments == null) {
-            this.comments="comments text";
+            this.comments="comments text goes here";
         }
         this.labels = changeSet.getLabels().toString();
         this.contexts = changeSet.getContexts().toString();
