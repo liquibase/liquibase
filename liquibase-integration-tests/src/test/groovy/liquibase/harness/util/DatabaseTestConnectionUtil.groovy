@@ -15,12 +15,12 @@ import liquibase.test.DatabaseTestContext
 class DatabaseTestConnectionUtil {
     private static Logger logger = Scope.getCurrentScope().getLog(getClass());
 
-    static Database initializeDatabase(String dbName) {
+    static Database initializeDatabase(String dbName, String dbVersion) {
         Database database = DatabaseFactory.getInstance().getDatabase(dbName);
         Properties properties = new Properties();
         File propertiesFile = new File("src/test/resources/harness/harness.db.properties")
         propertiesFile.withInputStream { properties.load(it) }
-        String url = properties.getProperty(database.getShortName() + ".url");
+        String url = properties.getProperty(database.getShortName() + dbVersion + ".url");
         String username = properties.getProperty(database.getShortName() + ".username");
         String password = properties.getProperty(database.getShortName() + ".password");
         try {

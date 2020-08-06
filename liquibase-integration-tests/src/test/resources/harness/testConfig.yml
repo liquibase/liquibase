@@ -1,0 +1,36 @@
+  postgre:
+    username: lbuser
+    password: LiquibasePass1
+    versions:
+      - 9:
+        url: 'jdbc:postgresql://localhost:5433/lbcat'
+#        without specified, run all from directory
+        changeObjects:
+          - createTable
+          - createView
+          - createIndex
+      - 12:
+        url: 'jdbc:postgresql://localhost:5434/lbcat'
+        changeObjects:
+          - createTable
+          - createView
+          - createIndex
+
+  mysql:
+    username: lbuser
+    password: LiquibasePass1
+    versions:
+      - 5.7:
+        url: 'jdbc:mysql://localhost:33062/lbcat'
+        changeObjects:
+          - createTable
+          - createView
+          - createIndex
+      - 8:
+        url: 'jdbc:mysql://localhost:33061/lbcat'
+        changeObjects:
+          - createTable
+          - createView
+          - createIndex
+
+#  oracle:

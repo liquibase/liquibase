@@ -18,7 +18,9 @@ class TestUtils {
         return new Liquibase(changeLogFile, fileOpener, database);
     }
 
-    static List<String> toSqlFromChangeSets(List<ChangeSet> changeSets, Database db) {
+    static List<String> toSqlFromLiquibaseChangeSets(Liquibase liquibase) {
+        Database db = liquibase.getDatabase()
+        List<ChangeSet> changeSets = liquibase.getDatabaseChangeLog().getChangeSets()
         List<String> stringList = new ArrayList<>()
         changeSets.each { stringList.addAll(toSql(it, db)) }
         return stringList
