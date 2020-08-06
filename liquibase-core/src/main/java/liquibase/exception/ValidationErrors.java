@@ -1,18 +1,21 @@
 package liquibase.exception;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.database.Database;
-import liquibase.util.StringUtil;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import liquibase.changelog.ChangeSet;
+import liquibase.database.Database;
+import liquibase.util.StringUtil;
 
 public class ValidationErrors {
 
     protected List<String> errorMessages = new ArrayList<>();
     protected List<String> warningMessages = new ArrayList<>();
+    private Map<ValidationErrors, ChangeSet> error2changeSet = new HashMap<>();
 
     public boolean hasErrors() {
         return !errorMessages.isEmpty();
@@ -89,6 +92,8 @@ public class ValidationErrors {
     }
 
     public void addAll(ValidationErrors validationErrors, ChangeSet changeSet) {
+    	error2changeSet.put(validationErrors, changeSet);
+    	
         for (String message : validationErrors.getErrorMessages()) {
             this.errorMessages.add(message+", "+changeSet);
         }
@@ -137,4 +142,8 @@ public class ValidationErrors {
         }
         return Collections.unmodifiableList(unsupportedErrorMessages);
     }
+
+	public Map<ValidationErrors, ChangeSet> getChangeSetErrors() {
+		return Collections.unmodifiableMap(error2changeSet);
+	}
 }
