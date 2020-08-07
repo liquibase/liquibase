@@ -27,7 +27,10 @@ CREATE TABLE `posts` (
                          `description` varchar(500) COLLATE utf8_unicode_ci NOT NULL,
                          `content` text COLLATE utf8_unicode_ci NOT NULL,
                          `date` date NOT NULL,
-                         PRIMARY KEY (`id`)
+                         PRIMARY KEY (`id`),
+                         FOREIGN KEY (author_id)
+                             REFERENCES authors(id)
+                             ON DELETE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `posts` VALUES ('1','1','sit','in','At corporis est sint beatae beatae.','1996-05-04'),

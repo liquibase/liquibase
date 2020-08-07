@@ -12,10 +12,10 @@ import liquibase.test.JUnitResourceAccessor
 
 class TestUtils {
 
-    static Liquibase createLiquibase(String changeLogFile, Database database) {
+    static Liquibase createLiquibase(String changeObject, Database database) {
         ResourceAccessor fileOpener = new JUnitResourceAccessor();
         database.resetInternalState();
-        return new Liquibase(changeLogFile, fileOpener, database);
+        return new Liquibase(FileUtils.buildPathToChangeLogFile(changeObject), fileOpener, database);
     }
 
     static List<String> toSqlFromLiquibaseChangeSets(Liquibase liquibase) {

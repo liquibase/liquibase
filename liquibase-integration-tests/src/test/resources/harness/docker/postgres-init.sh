@@ -40,7 +40,10 @@ CREATE TABLE posts (
   description VARCHAR (500) NOT NULL,
   content text NOT NULL,
   date date NOT NULL,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  CONSTRAINT fk_authors
+      FOREIGN KEY(author_id)
+	  REFERENCES authors(id)
 );
 
 GRANT ALL PRIVILEGES ON TABLE posts TO lbuser;

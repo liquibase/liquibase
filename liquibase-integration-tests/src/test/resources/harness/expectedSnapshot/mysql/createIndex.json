@@ -1,11 +1,9 @@
 {
   "snapshot": {
     "objects": {
-      "liquibase.structure.core.Table": [
+      "liquibase.structure.core.Index": [
         {
-          "table": {
-            "name": "test_table"
-          }
+          "name": "authors_email_key"
         }
       ],
       "liquibase.structure.core.Column": [

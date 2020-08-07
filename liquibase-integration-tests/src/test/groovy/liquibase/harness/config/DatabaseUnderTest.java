@@ -3,9 +3,20 @@ package liquibase.harness.config;
 import java.util.List;
 
 public class DatabaseUnderTest {
+    private String name;
     private String username;
     private String password;
+    private List<DatabaseVersion> versions;
+    private List<String> changeObjects;
+    private String dbSchema;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     public String getUsername() {
         return username;
     }
@@ -30,5 +41,19 @@ public class DatabaseUnderTest {
         this.versions = versions;
     }
 
-    private List<DatabaseVersion> versions;
+    public List<String> getChangeObjects() {
+        return changeObjects;
+    }
+
+    public void setChangeObjects(List<String> changeObjects) {
+        this.changeObjects = changeObjects;
+    }
+
+    public String getDbSchema() {
+        return dbSchema;
+    }
+
+    public void setDbSchema(String dbSchema) {
+        this.dbSchema = dbSchema;
+    }
 }
