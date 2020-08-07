@@ -285,7 +285,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         }
         System.out.println("[N] to not register this changelog right now.\n" +
             "You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.\n" +
-            " Learn more at https://docs.liquibase.com.");
+            " Learn more at https://hub.liquibase.com.");
         System.out.print("?> ");
         Console c = getConsole();
         String input = c.readLine();
