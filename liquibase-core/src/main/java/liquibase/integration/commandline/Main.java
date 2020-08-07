@@ -1478,7 +1478,9 @@ public class Main {
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             try {
-                liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+                if (hubEnvironmentId != null) {
+                    liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+                }
             } catch (IllegalArgumentException  e) {
                 throw new LiquibaseException("Unexpected hubEnvironmentId format: "+hubEnvironmentId, e);
             }
