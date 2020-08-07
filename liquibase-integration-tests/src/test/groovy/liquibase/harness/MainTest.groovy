@@ -80,7 +80,7 @@ class MainTest extends Specification {
 
     void cleanDatabase(List<CatalogAndSchema> catalogAndSchemaList, Database database){
         try{
-            catalogAndSchemaList.each { database.dropDatabaseObjects(it) }
+           // catalogAndSchemaList.each { database.dropDatabaseObjects(it) }
         }
         catch (Exception e){
             //TODO don't delete objects that i didn't create

@@ -3,16 +3,13 @@
     "objects": {
       "liquibase.structure.core.Index": [
         {
-          "name": "authors_email_key"
-        }
-      ],
-      "liquibase.structure.core.Column": [
+          "index": {
+            "name": "idx_first_name"
+          }
+        },
         {
-          "column": {
-            "name": "test_id"
-          },
-          "column": {
-            "name": "test_column"
+          "index": {
+            "name": "idx_last_name"
           }
         }
       ]

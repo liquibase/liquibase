@@ -1,20 +1,15 @@
 {
   "snapshot": {
     "objects": {
-      "liquibase.structure.core.Table": [
+      "liquibase.structure.core.Index": [
         {
-          "table": {
-            "name": "test_table"
+          "index": {
+            "name": "idx_first_name"
           }
-        }
-      ],
-      "liquibase.structure.core.Column": [
+        },
         {
-          "column": {
-            "name": "test_id"
-          },
-          "column": {
-            "name": "test_column"
+          "index": {
+            "name": "idx_last_name"
           }
         }
       ]

@@ -37,6 +37,7 @@ class DatabaseTestConnectionUtil {
         if (!database.getConnection().getAutoCommit()) {
             database.rollback();
         }
+        database.getConnection().setAutoCommit(true);
 
         SnapshotGeneratorFactory.resetAll();
         LockServiceFactory.getInstance().resetAll();
