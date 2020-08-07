@@ -44,6 +44,9 @@ public class HubConfiguration extends AbstractConfigurationContainer {
     }
 
     public HubConfiguration setLiquibaseHubUrl(String liquibaseHubUrl) {
+        if (liquibaseHubUrl != null) {
+            liquibaseHubUrl = liquibaseHubUrl.replaceFirst("(https?://[^/]+).*", "$1");
+        }
         getContainer().setValue(LIQUIBASE_HUB_URL, liquibaseHubUrl);
         return this;
     }
@@ -51,7 +54,7 @@ public class HubConfiguration extends AbstractConfigurationContainer {
     public String getLiquibaseHubUrl() {
         String hubUrl = getContainer().getValue(LIQUIBASE_HUB_URL, String.class);
         if (hubUrl == null || hubUrl.isEmpty()) {
-            return "https://hub.liquibase.com/api/v1/";
+            return "https://hub.liquibase.com";
         }
         return hubUrl;
     }
