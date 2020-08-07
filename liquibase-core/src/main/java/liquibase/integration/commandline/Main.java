@@ -18,6 +18,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
+import liquibase.hub.HubServiceFactory;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -150,6 +151,7 @@ public class Main {
         } catch (Throwable e) {
             System.exit(-1);
         }
+
         System.exit(errorLevel);
     }
 
@@ -373,6 +375,11 @@ public class Main {
                     }
                     throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
                 }
+
+                if (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKey() != null && !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
+                    ui.sendMessage("The command "+main.command+"'s operations were not synced with your Liquibase Hub account because "+Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason());
+                }
+
                 return 0;
             }
         });
@@ -1275,7 +1282,7 @@ public class Main {
         //
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubApiKey())) {
-            LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKey().substring(0,6) + "************");
+            LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKeySecureDescription());
         }
         if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubUrl())) {
             LOG.fine("Liquibase Hub URL:      " + hubConfiguration.getLiquibaseHubUrl());
@@ -1568,7 +1575,13 @@ public class Main {
                    (RegisterChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
                 CommandResult result = liquibaseCommand.execute();
-                new PrintStream(getOutputStream()).println(result.message);
+
+                if (result.succeeded) {
+                    Scope.getCurrentScope().getUI().sendMessage(result.print());
+                } else {
+                    throw new RuntimeException(result.print());
+                }
+
                 return;
             } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();

@@ -5,6 +5,7 @@ import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.LiquibaseHubObjectNotFoundException;
+import liquibase.hub.LiquibaseHubSecurityException;
 import liquibase.hub.model.ListResponse;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
@@ -156,6 +157,9 @@ class HttpClient {
 
                 return (T) yaml.loadAs(response, returnType);
             } catch (IOException e) {
+                if (connection.getResponseCode() == 401) {
+                    throw new LiquibaseHubSecurityException("Authentication failure for "+connection.getRequestMethod()+" "+connection.getURL().toExternalForm());
+                }
                 try {
                     try (InputStream error = connection.getErrorStream()) {
                         if (error != null) {

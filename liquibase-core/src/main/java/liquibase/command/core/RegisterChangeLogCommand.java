@@ -71,10 +71,12 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         // Access the HubService
         // Stop if we do no have a key
         //
-        final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        if (! service.isOnline()) {
-            return new CommandResult("You need a free Liquibase Hub account in order to register your changelog for real-time monitoring and reports. Get your Hub API key at https://sales.liquibase.com.", false);
+        final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
+        if (! hubServiceFactory.isOnline()) {
+            return new CommandResult("The command registerChangeLog requires access to Liquibase Hub: " + hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com", false);
         }
+
+        final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
         //
         // Retrieve the projects
