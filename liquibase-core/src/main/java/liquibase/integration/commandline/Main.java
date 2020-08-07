@@ -377,7 +377,7 @@ public class Main {
                 }
 
                 if (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKey() != null && !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
-                    ui.sendMessage("The command "+main.command+"'s operations were not synced with your Liquibase Hub account because "+Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason());
+                    ui.sendMessage("The command "+main.command+"'s operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
                 }
 
                 return 0;
