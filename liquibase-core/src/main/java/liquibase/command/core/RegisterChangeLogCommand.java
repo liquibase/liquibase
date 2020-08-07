@@ -259,11 +259,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     }
 
     private String readProjectFromConsole(List<Project> projects) throws CommandLineParsingException {
-        if (true) {
-            return "N";
-        }
         System.out.println("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting. ");
-        System.out.println("Register changelog <changelogfilename> to an existing Project, or create a new one.");
+        System.out.println("Register changelog "+changeLogFile+" to an existing Project, or create a new one.");
 
         System.out.println("Please make a selection:");
 
