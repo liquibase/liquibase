@@ -5,6 +5,10 @@ import liquibase.Liquibase
 import liquibase.change.Change
 import liquibase.changelog.ChangeSet
 import liquibase.database.Database
+import liquibase.harness.config.DatabaseUnderTest
+import liquibase.harness.config.DatabaseVersion
+import liquibase.harness.config.TestConfig
+import liquibase.harness.config.TestInput
 import liquibase.resource.ResourceAccessor
 import liquibase.sql.Sql
 import liquibase.sqlgenerator.SqlGeneratorFactory
@@ -73,6 +77,33 @@ class TestUtils {
             return str?.split(regex)*.trim()
         }
         return new ArrayList<String>()
+    }
+
+    static List<TestInput> buildTestInput(TestConfig config) {
+        List<TestInput> inputList = new ArrayList<>();
+        for (DatabaseUnderTest databaseUnderTest : config.getDatabasesUnderTest()) {
+            for (DatabaseVersion databaseVersion : databaseUnderTest.getVersions()) {
+                if(!databaseUnderTest.getChangeObjects().isEmpty()){
+                    for (String changeObject : databaseUnderTest.getChangeObjects()) {
+                        inputList.add(TestInput.builder()
+                                .databaseName(databaseUnderTest.getName())
+                                .url(databaseVersion.getUrl())
+                                .dbSchema(databaseUnderTest.getDbSchema())
+                                .username(databaseUnderTest.getUsername())
+                                .password(databaseUnderTest.getPassword())
+                                .version(databaseVersion.getVersion())
+                                .context(config.getContext())
+                                .changeObject(changeObject)
+                                .build()
+                        )
+                    }
+                }
+                else {
+                    // TODO version specific changeObjects
+                }
+            }
+        }
+        return inputList;
     }
 
 }

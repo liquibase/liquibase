@@ -1,9 +1,9 @@
+context: testContext
 databasesUnderTest:
   - name: postgresql
     username: lbuser
     password: LiquibasePass1
     changeObjects:
-      #  without specified, run all from directory
       - createTable
       - createView
       - createIndex

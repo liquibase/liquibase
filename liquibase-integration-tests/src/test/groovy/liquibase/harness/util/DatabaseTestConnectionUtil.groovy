@@ -19,7 +19,7 @@ class DatabaseTestConnectionUtil {
     static Database initializeDatabase(TestInput testInput) {
         try {
             Database database = openConnection(testInput.getUrl(), testInput.getUsername(), testInput.getPassword());
-             return init(database);
+            return init(database);
         }
         catch (Exception e) {
             logger.severe("Unable to initialize database connection", e);
@@ -34,11 +34,6 @@ class DatabaseTestConnectionUtil {
     }
 
     private static Database init(Database database) throws DatabaseException {
-        if (!database.getConnection().getAutoCommit()) {
-            database.rollback();
-        }
-        database.getConnection().setAutoCommit(true);
-
         SnapshotGeneratorFactory.resetAll();
         LockServiceFactory.getInstance().resetAll();
         LockServiceFactory.getInstance().getLockService(database).init();

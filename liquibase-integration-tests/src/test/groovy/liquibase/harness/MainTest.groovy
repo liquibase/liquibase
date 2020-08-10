@@ -3,10 +3,7 @@ package liquibase.harness
 import liquibase.CatalogAndSchema
 import liquibase.Liquibase
 import liquibase.database.Database
-import liquibase.harness.config.DatabaseUnderTest
-import liquibase.harness.config.DatabaseVersion
 import liquibase.harness.config.TestConfig
-import liquibase.harness.config.TestInput
 import liquibase.harness.util.DatabaseTestConnectionUtil
 import liquibase.harness.util.FileUtils
 import liquibase.harness.util.SnapshotHelpers
@@ -14,6 +11,7 @@ import liquibase.harness.util.TestUtils
 import org.skyscreamer.jsonassert.JSONAssert
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
 
 class MainTest extends Specification {
@@ -24,7 +22,8 @@ class MainTest extends Specification {
         config = FileUtils.readYamlConfig("testConfig.yml")
     }
 
-    def "test apply changeset and verify SQL and snapshot"() {
+    @Unroll
+    def "apply #testInput.changeObject for #testInput.databaseName DB and verify SQL and snapshot"() {
 
         given:
         Database database = DatabaseTestConnectionUtil.initializeDatabase(testInput)
@@ -42,49 +41,20 @@ class MainTest extends Specification {
         expectedSqlList == generatedSql;
 
         when:
-        cleanDatabase(catalogAndSchemaList, database)
-        //TODO make context configurable
-        liquibase.update("testContext");
+        liquibase.update(testInput.getContext());
+
         String jsonSnapshot = SnapshotHelpers.getJsonSnapshot(database, catalogAndSchemaList)
-        cleanDatabase(catalogAndSchemaList, database)
+        liquibase.rollback(1,testInput.getContext())
+
         then:
         snapshotMatchesSpecifiedStructure(expectedSnapshot, jsonSnapshot)
 
         where:
-        testInput << buildTestInput(config)
-    }
-
-    List<TestInput> buildTestInput(TestConfig config){
-        //TODO refactor this
-        List<TestInput> inputList = new ArrayList<>();
-        for(DatabaseUnderTest databaseUnderTest:config.getDatabasesUnderTest()){
-            for(DatabaseVersion databaseVersion:databaseUnderTest.getVersions()){
-                for(String changeObject: databaseUnderTest.getChangeObjects())
-                    inputList.add(new TestInput(
-                            databaseUnderTest.getName(),
-                            databaseVersion.getUrl(),
-                            databaseUnderTest.getDbSchema(),
-                            databaseUnderTest.getUsername(),
-                            databaseUnderTest.getPassword(),
-                            databaseVersion.getVersion(),
-                            changeObject)
-                    )
-            }
-        }
-        return inputList;
+        testInput << TestUtils.buildTestInput(config)
     }
 
     void snapshotMatchesSpecifiedStructure(String expected, String actual) {
         JSONAssert.assertEquals(expected, actual, new SnapshotHelpers.GeneralSnapshotComparator());
-    }
-
-    void cleanDatabase(List<CatalogAndSchema> catalogAndSchemaList, Database database){
-        try{
-           // catalogAndSchemaList.each { database.dropDatabaseObjects(it) }
-        }
-        catch (Exception e){
-            //TODO don't delete objects that i didn't create
-        }
     }
 
 }
