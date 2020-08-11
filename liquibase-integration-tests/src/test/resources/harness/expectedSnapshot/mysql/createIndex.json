@@ -1,0 +1,18 @@
+{
+  "snapshot": {
+    "objects": {
+      "liquibase.structure.core.Index": [
+        {
+          "index": {
+            "name": "idx_first_name"
+          }
+        },
+        {
+          "index": {
+            "name": "idx_last_name"
+          }
+        }
+      ]
+    }
+  }
+}

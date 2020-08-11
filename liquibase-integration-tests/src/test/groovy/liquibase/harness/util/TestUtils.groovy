@@ -5,6 +5,10 @@ import liquibase.Liquibase
 import liquibase.change.Change
 import liquibase.changelog.ChangeSet
 import liquibase.database.Database
+import liquibase.harness.config.DatabaseUnderTest
+import liquibase.harness.config.DatabaseVersion
+import liquibase.harness.config.TestConfig
+import liquibase.harness.config.TestInput
 import liquibase.resource.ResourceAccessor
 import liquibase.sql.Sql
 import liquibase.sqlgenerator.SqlGeneratorFactory
@@ -12,13 +16,15 @@ import liquibase.test.JUnitResourceAccessor
 
 class TestUtils {
 
-    static Liquibase createLiquibase(String changeLogFile, Database database) {
+    static Liquibase createLiquibase(String changeObject, Database database) {
         ResourceAccessor fileOpener = new JUnitResourceAccessor();
         database.resetInternalState();
-        return new Liquibase(changeLogFile, fileOpener, database);
+        return new Liquibase(FileUtils.buildPathToChangeLogFile(changeObject), fileOpener, database);
     }
 
-    static List<String> toSqlFromChangeSets(List<ChangeSet> changeSets, Database db) {
+    static List<String> toSqlFromLiquibaseChangeSets(Liquibase liquibase) {
+        Database db = liquibase.getDatabase()
+        List<ChangeSet> changeSets = liquibase.getDatabaseChangeLog().getChangeSets()
         List<String> stringList = new ArrayList<>()
         changeSets.each { stringList.addAll(toSql(it, db)) }
         return stringList
@@ -71,6 +77,33 @@ class TestUtils {
             return str?.split(regex)*.trim()
         }
         return new ArrayList<String>()
+    }
+
+    static List<TestInput> buildTestInput(TestConfig config) {
+        List<TestInput> inputList = new ArrayList<>();
+        for (DatabaseUnderTest databaseUnderTest : config.getDatabasesUnderTest()) {
+            for (DatabaseVersion databaseVersion : databaseUnderTest.getVersions()) {
+                if(!databaseUnderTest.getChangeObjects().isEmpty()){
+                    for (String changeObject : databaseUnderTest.getChangeObjects()) {
+                        inputList.add(TestInput.builder()
+                                .databaseName(databaseUnderTest.getName())
+                                .url(databaseVersion.getUrl())
+                                .dbSchema(databaseUnderTest.getDbSchema())
+                                .username(databaseUnderTest.getUsername())
+                                .password(databaseUnderTest.getPassword())
+                                .version(databaseVersion.getVersion())
+                                .context(config.getContext())
+                                .changeObject(changeObject)
+                                .build()
+                        )
+                    }
+                }
+                else {
+                    // TODO version specific changeObjects
+                }
+            }
+        }
+        return inputList;
     }
 
 }

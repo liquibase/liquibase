@@ -1,0 +1,30 @@
+context: testContext
+databasesUnderTest:
+  - name: postgresql
+    username: lbuser
+    password: LiquibasePass1
+    changeObjects:
+      - createTable
+      - createView
+      - createIndex
+    versions:
+#      - version: 9
+#        url: 'jdbc:postgresql://localhost:5433/lbcat'
+      - version: 12
+        url: 'jdbc:postgresql://localhost:5434/lbcat'
+    dbSchema: public
+
+  - name: mysql
+    username: lbuser
+    password: LiquibasePass1
+    changeObjects:
+      - createTable
+      - createView
+      - createIndex
+    versions:
+#      - version: 5.7
+#        url: 'jdbc:mysql://localhost:33062/lbcat'
+      - version: 8
+        url: 'jdbc:mysql://localhost:33061/lbcat'
+    dbSchema:
+#  oracle:
