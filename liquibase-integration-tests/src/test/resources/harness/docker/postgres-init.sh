@@ -17,7 +17,7 @@ CREATE TABLE authors (
   id SERIAL,
   first_name VARCHAR (50) NOT NULL,
   last_name VARCHAR (50) NOT NULL,
-  email VARCHAR (100) NOT NULL UNIQUE,
+  email VARCHAR (100) NOT NULL,
   birthdate date NOT NULL,
   added timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
@@ -41,7 +41,6 @@ CREATE TABLE posts (
   description VARCHAR (500) NOT NULL,
   content text NOT NULL,
   date date NOT NULL,
-  PRIMARY KEY (id),
   CONSTRAINT fk_authors
       FOREIGN KEY(author_id)
 	  REFERENCES authors(id)

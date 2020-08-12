@@ -8,8 +8,7 @@ CREATE TABLE `authors` (
                            `email` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
                            `birthdate` date NOT NULL,
                            `added` timestamp NOT NULL DEFAULT current_timestamp(),
-                           PRIMARY KEY (`id`),
-                           UNIQUE KEY `email` (`email`)
+                           PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `authors` VALUES ('1','Courtney','Hodkiewicz','borer.edison@example.org','1986-01-22','1983-08-23 14:55:09'),
@@ -21,13 +20,12 @@ INSERT INTO `authors` VALUES ('1','Courtney','Hodkiewicz','borer.edison@example.
 
 DROP TABLE IF EXISTS `posts`;
 CREATE TABLE `posts` (
-                         `id` int(11) NOT NULL AUTO_INCREMENT,
+                         `id` int(11) NOT NULL,
                          `author_id` int(11) NOT NULL,
                          `title` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
                          `description` varchar(500) COLLATE utf8_unicode_ci NOT NULL,
                          `content` text COLLATE utf8_unicode_ci NOT NULL,
                          `date` date NOT NULL,
-                         PRIMARY KEY (`id`),
                          FOREIGN KEY (author_id)
                              REFERENCES authors(id)
                              ON DELETE NO ACTION

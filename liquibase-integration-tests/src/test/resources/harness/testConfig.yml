@@ -7,6 +7,8 @@ databasesUnderTest:
       - createTable
       - createView
       - createIndex
+      - addUniqueConstraint
+      - addPrimaryKey
     versions:
 #      - version: 9
 #        url: 'jdbc:postgresql://localhost:5433/lbcat'
@@ -21,6 +23,8 @@ databasesUnderTest:
       - createTable
       - createView
       - createIndex
+      - addUniqueConstraint
+      - addPrimaryKey
     versions:
 #      - version: 5.7
 #        url: 'jdbc:mysql://localhost:33062/lbcat'

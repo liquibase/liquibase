@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet author="oleh" id="1">
+        <addUniqueConstraint columnNames="email"
+                             constraintName="test_unique_constraint"
+                             deferrable="true"
+                             initiallyDeferred="true"
+                             tableName="authors"
+                             validate="true"/>
+    </changeSet>
+</databaseChangeLog>

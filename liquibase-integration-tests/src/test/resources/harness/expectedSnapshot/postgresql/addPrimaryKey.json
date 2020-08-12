@@ -1,0 +1,12 @@
+{
+  "snapshot": {
+    "objects": {
+      "liquibase.structure.core.PrimaryKey": [
+        {
+          "primaryKey": {
+            "name": "pk_posts"
+          }
+        }]
+    }
+  }
+}

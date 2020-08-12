@@ -48,7 +48,10 @@ class SnapshotHelpers {
         @Override
         void compareValues(String prefix, Object expectedValue, Object actualValue, JSONCompareResult result) throws JSONException {
             if (expectedValue instanceof String && actualValue instanceof String) {
-                if (!StringUtil.equalsIgnoreCaseAndEmpty(expectedValue, actualValue)) {
+                if(actualValue.matches(expectedValue)){
+                    result.passed()
+                }
+                else if (!StringUtil.equalsIgnoreCaseAndEmpty(expectedValue, actualValue)) {
                     result.fail(prefix, expectedValue, actualValue);
                 }
             } else {
