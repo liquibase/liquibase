@@ -109,16 +109,11 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
-        if (database instanceof SQLiteDatabase) {
-            return true;
-        }
-        return false;
+        return database instanceof SQLiteDatabase;
     }
 
     @Override
     public SqlStatement[] generateStatements(final Database database) {
-        List<SqlStatement> statements = new ArrayList<>();
-
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
         addNewColumnChange.setTableName(getTableName());
@@ -126,7 +121,7 @@ public class MergeColumnChange extends AbstractChange {
         columnConfig.setName(getFinalColumnName());
         columnConfig.setType(getFinalColumnType());
         addNewColumnChange.addColumn(columnConfig);
-        statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
+        List<SqlStatement> statements = new ArrayList<>(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
         String updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
                 " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)

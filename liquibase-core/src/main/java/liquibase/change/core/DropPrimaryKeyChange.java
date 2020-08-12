@@ -29,10 +29,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
-        if (database instanceof SQLiteDatabase) {
-            return true;
-        }
-        return false;
+        return database instanceof SQLiteDatabase;
     }
 
     @DatabaseChangeProperty(mustEqualExisting ="primaryKey.catalog")
