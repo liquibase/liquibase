@@ -21,9 +21,13 @@ input changelogs from the `resources/harness/changelogs` folder
 
 ## Running the integration test suite is as easy as one-two-three
 1) Make sure you have docker container up and running first
-2) Go to  `liquibase-integration-tests/src/test/resources/harness/docker` and run `docker-compose up`, wait until it starts
+2) Go to  `liquibase-integration-tests/src/test/resources/harness/docker` and run `docker-compose up -d`. 
+Wait until the databases start up.
 3) Open `liquibase-integration-tests/src/test/groovy/liquibase/harness/CreateTable.groovy` in your IDE of choice 
 and run the test class `MainTestIT.groovy`
+
+When you are down with test execution, run `docker-compose down --volumes` to stop the docker containers 
+gracefully and to allow the tests to start from a clean slate the next time.
 PS. - Please note that the Maven surefire plugin isn't configured to run the harness tests yet. This is in the works.
 
 Stay tuned, there is more to come!
