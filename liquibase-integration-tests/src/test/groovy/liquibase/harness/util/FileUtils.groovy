@@ -37,4 +37,18 @@ class FileUtils {
         //TODO search files from directory based on name with any extension
         //TODO discuss to extend and include version to changeLog path
     }
+
+    static List<String> getAllChangeTypes(){
+        //TODO make DB specific implementation
+        List<String> changeTypes = new ArrayList<>()
+        def dir = new File(resourceBaseDir+"/changelogs/")
+        File [] files = dir.listFiles(new FileFilter() {
+            @Override
+            boolean accept(File file) {
+                return !file.isHidden()
+            }
+        } )
+        files.each {changeTypes<<it.getName().substring(0, it.getName().lastIndexOf('.'))}
+        return changeTypes
+    }
 }

@@ -3,12 +3,13 @@ databasesUnderTest:
   - name: postgresql
     username: lbuser
     password: LiquibasePass1
+# Missing or empty changeObjects means run all changeObjects from base dir
     changeObjects:
-      - createTable
-      - createView
-      - createIndex
-      - addUniqueConstraint
-      - addPrimaryKey
+#      - createTable
+#      - createView
+#      - createIndex
+#      - addUniqueConstraint
+#      - addPrimaryKey
     versions:
 #      - version: 9
 #        url: 'jdbc:postgresql://localhost:5433/lbcat'

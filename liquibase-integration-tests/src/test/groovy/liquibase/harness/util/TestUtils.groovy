@@ -83,23 +83,18 @@ class TestUtils {
         List<TestInput> inputList = new ArrayList<>();
         for (DatabaseUnderTest databaseUnderTest : config.getDatabasesUnderTest()) {
             for (DatabaseVersion databaseVersion : databaseUnderTest.getVersions()) {
-                if(!databaseUnderTest.getChangeObjects().isEmpty()){
-                    for (String changeObject : databaseUnderTest.getChangeObjects()) {
-                        inputList.add(TestInput.builder()
-                                .databaseName(databaseUnderTest.getName())
-                                .url(databaseVersion.getUrl())
-                                .dbSchema(databaseUnderTest.getDbSchema())
-                                .username(databaseUnderTest.getUsername())
-                                .password(databaseUnderTest.getPassword())
-                                .version(databaseVersion.getVersion())
-                                .context(config.getContext())
-                                .changeObject(changeObject)
-                                .build()
-                        )
-                    }
-                }
-                else {
-                    // TODO version specific changeObjects
+                for (String changeObject : databaseUnderTest.getChangeObjects() ?: FileUtils.getAllChangeTypes()) {
+                    inputList.add(TestInput.builder()
+                            .databaseName(databaseUnderTest.getName())
+                            .url(databaseVersion.getUrl())
+                            .dbSchema(databaseUnderTest.getDbSchema())
+                            .username(databaseUnderTest.getUsername())
+                            .password(databaseUnderTest.getPassword())
+                            .version(databaseVersion.getVersion())
+                            .context(config.getContext())
+                            .changeObject(changeObject)
+                            .build()
+                    )
                 }
             }
         }
