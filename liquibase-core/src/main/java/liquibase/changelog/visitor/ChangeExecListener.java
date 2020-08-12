@@ -39,6 +39,15 @@ public interface ChangeExecListener {
     void ran(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ExecType execType);
 
     /**
+     * Called before a change is rolled back.
+     *
+     * @param changeSet         changeSet that was rolled back
+     * @param databaseChangeLog parent change log
+     * @param database          the database the rollback was executed on.
+     */
+    void willRollback(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database);
+
+    /**
      * Called after a change is rolled back.
      *
      * @param changeSet         changeSet that was rolled back

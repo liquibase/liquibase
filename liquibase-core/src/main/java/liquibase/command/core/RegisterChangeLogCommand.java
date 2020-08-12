@@ -186,7 +186,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                 // Update the XSD versions to 4.0
                 //
                 String header = changeLogString.substring(matcher.start(), matcher.end() - 1);
-                String xsdPatternString = "([dbchangelog|liquibase-pro])-3.[0-9].xsd";
+                String xsdPatternString = "([dbchangelog|liquibase-pro])-3.[0-9]?[0-9]?.xsd";
                 Pattern xsdPattern = Pattern.compile(xsdPatternString);
                 Matcher xsdMatcher = xsdPattern.matcher(header);
                 String editedString = xsdMatcher.replaceAll("$1-4.0.xsd");

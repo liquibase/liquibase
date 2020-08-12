@@ -47,6 +47,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
         if (! (executor instanceof LoggingExecutor)) {
             Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset:" + changeSet);
         }
+        sendRollbackWillRunEvent(changeSet, databaseChangeLog, database);
         changeSet.rollback(this.database, this.execListener);
         this.database.removeRanStatus(changeSet);
         sendRollbackEvent(changeSet, databaseChangeLog, database);
@@ -72,7 +73,13 @@ public class RollbackVisitor implements ChangeSetVisitor {
         }
     }
 
-    private void sendRollbackEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2) {
+    private void sendRollbackWillRunEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        if (execListener != null) {
+            execListener.willRollback(changeSet, databaseChangeLog, database);
+        }
+    }
+
+    private void sendRollbackEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         if (execListener != null) {
             execListener.rolledBack(changeSet, databaseChangeLog, database);
         }

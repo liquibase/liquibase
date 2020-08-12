@@ -128,7 +128,7 @@ public abstract class AbstractIntegrationTest {
         }
         this.setJdbcUrl(url);
 
-        String testHubApiKey = integrationTestProperties.getProperty("integration.test.hub.apikey");
+        String testHubApiKey = integrationTestProperties.getProperty("integration.test.hub.apiKey");
         if (testHubApiKey != null) {
             HubConfiguration hubConfiguration =
               LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
