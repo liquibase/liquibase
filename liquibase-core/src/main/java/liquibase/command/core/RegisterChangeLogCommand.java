@@ -79,6 +79,26 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
         //
+        // CHeck for existing changeLog file
+        //
+        DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog)argsMap.get("changeLog");
+        final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
+        if (changeLogId != null) {
+            hubChangeLog = service.getChangeLog(UUID.fromString(changeLogId));
+            if (hubChangeLog != null) {
+                return new CommandResult("Changelog '" + changeLogFile +
+                        "' is already registered with changeLogId '" + changeLogId + "' to project '" +
+                        hubChangeLog.getPrj().getName() + "' with project ID '" + hubChangeLog.getPrj().getId().toString() + "'.\n" +
+                        "For more information visit https://docs.liquibase.com.", false);
+            }
+            else {
+                return new CommandResult("Changelog '" + changeLogFile +
+                        "' is already registered with changeLogId '" + changeLogId + "'.\n"  +
+                        "For more information visit https://docs.liquibase.com.", false);
+            }
+        }
+
+        //
         // Retrieve the projects
         //
         List<Project> projects = getProjectsFromHub();
@@ -137,26 +157,6 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                 catch (NumberFormatException nfe) {
                     outputStream.printf("\nInvalid selection '" + input + "'\n\n");
                 }
-            }
-        }
-
-        //
-        // CHeck for existing changeLog file
-        //
-        DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog)argsMap.get("changeLog");
-        final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
-        if (changeLogId != null) {
-            hubChangeLog = service.getChangeLog(UUID.fromString(changeLogId));
-            if (hubChangeLog != null) {
-                return new CommandResult("Changelog '" + changeLogFile +
-                   "' is already registered with changeLogId '" + changeLogId + "' to project '" +
-                   hubChangeLog.getPrj().getName() + "' with project ID '" + hubChangeLog.getPrj().getId().toString() + "'.\n" +
-                   "For more information visit https://docs.liquibase.com.", false);
-            }
-            else {
-                return new CommandResult("Changelog '" + changeLogFile +
-                   "' is already registered with changeLogId '" + changeLogId + "'.\n"  +
-                   "For more information visit https://docs.liquibase.com.", false);
             }
         }
 
