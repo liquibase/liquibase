@@ -1,5 +1,6 @@
 package liquibase.configuration
 
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -27,4 +28,13 @@ class HubConfigurationTest extends Specification {
         "http://localhost"                 | "http://localhost"
         "http://localhost:8080"            | "http://localhost:8080"
     }
+
+    def setGetHubApiKey() {
+        when:
+        def config = new HubConfiguration().setLiquibaseHubApiKey("this_is_a_hub_key")
+
+        then:
+        config.getLiquibaseHubApiKey() == "this_is_a_hub_key"
+    }
+
 }
