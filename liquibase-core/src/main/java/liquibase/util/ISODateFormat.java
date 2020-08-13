@@ -104,9 +104,8 @@ public class ISODateFormat {
                 DateTimeFormatter formatter =
                            new DateTimeFormatterBuilder()
                                 .appendPattern(DATE_TIME_FORMAT_STRING)
-                                .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 9, true) // min 0 max 6
+                                .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 9, true)
                                 .toFormatter();
-                LocalDateTime ldt = LocalDateTime.parse(dateAsString, formatter);
                 nanos = Integer.parseInt(dateAsString.substring(20));
                 for (; length < 29; length++) {
                     nanos *= 10;
