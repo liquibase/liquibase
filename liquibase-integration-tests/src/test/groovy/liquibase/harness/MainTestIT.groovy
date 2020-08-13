@@ -23,7 +23,7 @@ class MainTest extends Specification {
     }
 
     @Unroll
-    def "apply #testInput.changeObject for #testInput.databaseName DB and verify SQL and snapshot"() {
+    def "apply #testInput.changeObject for #testInput.databaseName #testInput.version; verify generated SQL and DB snapshot"() {
 
         given:
         Database database = DatabaseTestConnectionUtil.initializeDatabase(testInput)
