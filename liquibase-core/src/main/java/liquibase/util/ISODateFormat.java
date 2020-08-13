@@ -5,7 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.Date;
 
 public class ISODateFormat {
@@ -16,6 +18,7 @@ public class ISODateFormat {
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE_AND_NANOS = "yyyy-MM-dd HH:mm:ss.SS";
 
 
     public String format(java.sql.Date date) {
@@ -91,23 +94,27 @@ public class ISODateFormat {
             int nanos;
             try {
                 OffsetDateTime odt = OffsetDateTime.parse(dateAsString);
-                //time = odt.toInstant().toEpochMilli();
                 zonedDateTime = odt.toZonedDateTime();
-                // time = zonedDateTime.toInstant().toEpochMilli();
                 nanos = zonedDateTime.getNano();
             }
             catch (DateTimeParseException dtpe) {
-                LocalDateTime ldt = LocalDateTime.parse(dateAsString);
-                //time = ldt.toEpochSecond(ZoneOffset.UTC);
-                nanos = ldt.getNano();
+                if (dateAsString.contains(" ")) {
+                    dateAsString = dateAsString.replaceAll(" ", "T");
+                }
+                DateTimeFormatter formatter =
+                           new DateTimeFormatterBuilder()
+                                .appendPattern(DATE_TIME_FORMAT_STRING)
+                                .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 9, true) // min 0 max 6
+                                .toFormatter();
+                LocalDateTime ldt = LocalDateTime.parse(dateAsString, formatter);
+                nanos = Integer.parseInt(dateAsString.substring(20));
+                for (; length < 29; length++) {
+                    nanos *= 10;
+                }
             }
 
 
             /*
-            int nanos = Integer.parseInt(dateAsString.substring(20).replaceAll("Z",""));
-            for (; length < 29; length++) {
-                nanos *= 10;
-            }
             */
             java.sql.Timestamp timestamp = new java.sql.Timestamp(time);
             timestamp.setNanos(nanos);
