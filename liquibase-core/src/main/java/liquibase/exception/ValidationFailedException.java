@@ -159,4 +159,28 @@ public class ValidationFailedException extends MigrationFailedException {
             }
         }
     }
+
+	public List<FailedPrecondition> getFailedPreconditions() {
+		return failedPreconditions;
+	}
+
+	public List<ErrorPrecondition> getErrorPreconditions() {
+		return errorPreconditions;
+	}
+
+	public Set<ChangeSet> getDuplicateChangeSets() {
+		return duplicateChangeSets;
+	}
+
+	public List<SetupException> getSetupExceptions() {
+		return setupExceptions;
+	}
+
+	public List<Throwable> getChangeValidationExceptions() {
+		return changeValidationExceptions;
+	}
+
+	public ValidationErrors getValidationErrors() {
+		return validationErrors;
+	}
 }

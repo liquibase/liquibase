@@ -9,6 +9,7 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.MigrationFailedException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
@@ -17,6 +18,7 @@ import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -27,10 +29,16 @@ public class ChangeLogIterator {
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
     private Set<String> seenChangeSets = new HashSet<>();
+    private Optional<BiConsumer<MigrationFailedException, ChangeSet>> exceptionListener = Optional.empty();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
         this.changeSetFilters = Arrays.asList(changeSetFilters);
+    }
+
+    public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, BiConsumer<MigrationFailedException, ChangeSet> exceptionListener, ChangeSetFilter... changeSetFilters) {
+        this(databaseChangeLog, changeSetFilters);
+        this.exceptionListener = Optional.ofNullable(exceptionListener);
     }
 
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
@@ -91,17 +99,25 @@ public class ChangeLogIterator {
                         Scope.child(Scope.Attr.changeSet, changeSet, new Scope.ScopedRunner() {
                             @Override
                             public void run() throws Exception {
-                                if (finalShouldVisit && !alreadySaw(changeSet)) {
-                        //
-                        // Go validate any change sets with an Executor
-                        //
-                        validateChangeSetExecutor(changeSet, env);
-                                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
-                                    markSeen(changeSet);
-                                } else {
-                                    if (visitor instanceof SkippedChangeSetVisitor) {
-                                        ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
+                                try {
+                                    if (finalShouldVisit && !alreadySaw(changeSet)) {
+                            //
+                            // Go validate any change sets with an Executor
+                            //
+                            validateChangeSetExecutor(changeSet, env);
+                                        visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                                        markSeen(changeSet);
+                                    } else {
+                                        if (visitor instanceof SkippedChangeSetVisitor) {
+                                            ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
+                                        }
                                     }
+                                } catch (MigrationFailedException exception) {
+                                    if (!exceptionListener.isPresent()) {
+                                        throw exception;
+                                    }
+                                    // handle exception and continue with next changeSet
+                                    exceptionListener.ifPresent(consumer -> consumer.accept(exception, changeSet));
                                 }
                             }
                         });
