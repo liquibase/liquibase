@@ -13,12 +13,12 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.test.DatabaseTestContext
 
 
-class DatabaseTestConnectionUtil {
+class DatabaseConnectionUtil {
     private static Logger logger = Scope.getCurrentScope().getLog(getClass());
 
     static Database initializeDatabase(TestInput testInput) {
         try {
-            Database database = openConnection(testInput.getUrl(), testInput.getUsername(), testInput.getPassword());
+            Database database = openConnection(testInput.url, testInput.username, testInput.password);
             return init(database);
         }
         catch (Exception e) {
