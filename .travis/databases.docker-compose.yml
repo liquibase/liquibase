@@ -25,3 +25,10 @@ services:
       POSTGRES_DB: lbcat
     volumes:
       - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
+
+  cockroachdb:
+    image: cockroachdb/cockroach:v20.1.4
+    command: start-single-node --logtostderr --insecure
+    ports:
+      - "26257:26257"
+      - "8080:8080"
