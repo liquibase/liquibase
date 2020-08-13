@@ -34,6 +34,18 @@ public class HubConfiguration extends AbstractConfigurationContainer {
         super.setValue(propertyName, value);
     }
 
+    /**
+     * Output {@link #getLiquibaseHubApiKey()} but in a way that is secure for message output.
+     *
+     */
+    public String getLiquibaseHubApiKeySecureDescription() {
+        final String key = getContainer().getValue(LIQUIBASE_HUB_API_KEY, String.class);
+        if (key == null) {
+            return null;
+        }
+        return key.substring(0,6) + "************";
+    }
+
     public String getLiquibaseHubApiKey() {
         return getContainer().getValue(LIQUIBASE_HUB_API_KEY, String.class);
     }
@@ -76,7 +88,7 @@ public class HubConfiguration extends AbstractConfigurationContainer {
 
         final List<String> validValues = Arrays.asList("realtime", "off");
         if (!validValues.contains(value.toLowerCase())) {
-            throw new RuntimeException(" An invalid liquibase.hub.mode value of "+value+" detected. Acceptable values are " + StringUtil.join(validValues, ", "));
+            throw new RuntimeException(" An invalid liquibase.hub.mode value of "+value+" detected. Acceptable values are \"realtime\" or \"off\"");
         }
         return value;
     }

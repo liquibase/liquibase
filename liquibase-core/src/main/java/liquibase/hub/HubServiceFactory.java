@@ -4,6 +4,8 @@ import liquibase.plugin.AbstractPluginFactory;
 
 public class HubServiceFactory extends AbstractPluginFactory<HubService> {
 
+    private String offlineReason;
+
     protected HubServiceFactory() {
     }
 
@@ -19,5 +21,17 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
 
     public HubService getService() {
         return getPlugin();
+    }
+
+    public boolean isOnline() {
+        return getService().isOnline();
+    }
+
+    public String getOfflineReason() {
+        return offlineReason;
+    }
+
+    public void setOfflineReason(String offlineReason) {
+        this.offlineReason = offlineReason;
     }
 }
