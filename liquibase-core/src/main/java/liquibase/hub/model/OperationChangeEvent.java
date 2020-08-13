@@ -49,7 +49,7 @@ public class OperationChangeEvent implements HubModel {
 
     public OperationChangeEvent setStartDate(Date startDate) {
         this.startDate = startDate;
-      return this;
+        return this;
     }
 
     public Date getEndDate() {

@@ -1,6 +1,5 @@
 package liquibase.hub.listener;
 
-import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -16,19 +15,19 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.*;
+import liquibase.hub.model.HubChangeLog;
+import liquibase.hub.model.Operation;
+import liquibase.hub.model.OperationChangeEvent;
 import liquibase.logging.Logger;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.sql.Sql;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.*;
 
 public class HubChangeExecListener extends AbstractChangeExecListener
@@ -37,7 +36,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
     private final Operation operation;
 
-    private Map<ChangeSet, Date> startDateMap = new HashMap<>();
+    private final Map<ChangeSet, Date> startDateMap = new HashMap<>();
 
     public HubChangeExecListener(Operation operation) {
         this.operation = operation;
@@ -58,7 +57,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                     DatabaseChangeLog databaseChangeLog,
                     Database database,
                     ChangeSet.ExecType execType) {
-        updateHub(changeSet, databaseChangeLog, database);
+        updateHub(changeSet, databaseChangeLog, database, "PASS", "PASSED");
     }
 
 
@@ -74,18 +73,71 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         startDateMap.put(changeSet, new Date());
     }
 
+    /**
+     *
+     * Called when there is a rollback failure
+     *
+     * @param changeSet         changeSet that was rolled back
+     * @param databaseChangeLog parent change log
+     * @param database          the database the rollback was executed on.
+     * @param e                 original exception
+     *
+     */
+    @Override
+    public void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {
+        updateHubForRollback(changeSet, databaseChangeLog, database, "FAIL", e.getMessage());
+    }
+
+    /**
+     *
+     * Called which a change set is successfully rolled back
+     *
+     * @param changeSet         changeSet that was rolled back
+     * @param databaseChangeLog parent change log
+     * @param database          the database the rollback was executed on.
+     *
+     */
     @Override
     public void rolledBack(ChangeSet changeSet,
                            DatabaseChangeLog databaseChangeLog,
                            Database database) {
+        updateHubForRollback(changeSet, databaseChangeLog, database, "PASS", "PASSED");
+    }
+
+    @Override
+    public void preconditionFailed(PreconditionFailedException error, PreconditionContainer.FailOption onFail) {
+    }
+
+    @Override
+    public void preconditionErrored(PreconditionErrorException error, PreconditionContainer.ErrorOption onError) {
+    }
+
+    @Override
+    public void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
+
+    }
+
+    @Override
+    public void runFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
+        updateHub(changeSet, databaseChangeLog, database, "FAIL", exception.getMessage());
+    }
+
+    //
+    // Send an update message to Hub for this change set rollback
+    //
+    private void updateHubForRollback(ChangeSet changeSet,
+                                      DatabaseChangeLog databaseChangeLog,
+                                      Database database,
+                                      String operationStatusType,
+                                      String statusMessage) {
         if (operation == null) {
             boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
             if (realTime) {
                 logger.info("Hub communication failure.\n" +
-                            "The data for operation on changeset '" +
-                            changeSet.getId() +
-                            "' by author '" + changeSet.getAuthor() + "'\n" +
-                            "was not successfully recorded in your Liquibase Hub project");
+                        "The data for operation on changeset '" +
+                        changeSet.getId() +
+                        "' by author '" + changeSet.getAuthor() + "'\n" +
+                        "was not successfully recorded in your Liquibase Hub project");
             }
             return;
         }
@@ -113,30 +165,42 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
-        List<Change> changes = changeSet.getChanges();
         List<String> sqlList = new ArrayList<>();
-        for (Change change : changes) {
-            try {
-                SqlStatement[] statements = change.generateRollbackStatements(database);
-                for (SqlStatement statement : statements) {
-                    for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, database)) {
-                        sqlList.add(sql.toSql());
+        try {
+           if (changeSet.hasCustomRollbackChanges()) {
+               List<Change> changes = changeSet.getRollback().getChanges();
+               for (Change change : changes) {
+                    SqlStatement[] statements = change.generateStatements(database);
+                    for (SqlStatement statement : statements) {
+                        for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, database)) {
+                            sqlList.add(sql.toSql());
+                        }
                     }
-
+                }
+           }
+           else {
+               List<Change> changes = changeSet.getChanges();
+               for (Change change : changes) {
+                   SqlStatement[] statements = change.generateRollbackStatements(database);
+                   for (SqlStatement statement : statements) {
+                        for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, database)) {
+                            sqlList.add(sql.toSql());
+                        }
+                    }
                 }
             }
-            catch (LiquibaseException lbe) {
-                logger.warning(lbe.getMessage());
-            }
+        }
+        catch (LiquibaseException lbe) {
+            logger.warning(lbe.getMessage());
         }
 
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
         operationChangeEvent.setGeneratedSql(sqlArray);
-        
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ChangeLogSerializer serializer =
-             ChangeLogSerializerFactory.getInstance().getSerializer(".json");
+                ChangeLogSerializerFactory.getInstance().getSerializer(".json");
         try {
             serializer.write(Collections.singletonList(changeSet), baos);
             operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
@@ -146,8 +210,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             // Consume
             //
         }
-        operationChangeEvent.setOperationStatusType("PASS");
-        operationChangeEvent.setStatusMessage("STATUS MESSAGE");
+        operationChangeEvent.setOperationStatusType(operationStatusType);
+        operationChangeEvent.setStatusMessage(statusMessage);
         operationChangeEvent.setLogs("LOGS");
         operationChangeEvent.setLogsTimestamp(new Date());
 
@@ -164,28 +228,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         }
     }
 
-    @Override
-    public void preconditionFailed(PreconditionFailedException error, PreconditionContainer.FailOption onFail) {
-    }
-
-    @Override
-    public void preconditionErrored(PreconditionErrorException error, PreconditionContainer.ErrorOption onError) {
-    }
-
-    @Override
-    public void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
-
-    }
-
-    @Override
-    public void runFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
-        updateHub(changeSet, databaseChangeLog, database);
-    }
-
     //
     // Send an update message to Hub for this change set
     //
-    private void updateHub(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+    private void updateHub(ChangeSet changeSet,
+                           DatabaseChangeLog databaseChangeLog,
+                           Database database,
+                           String operationStatusType,
+                           String statusMessage) {
         //
         // If not connected to Hub but we are supposed to be then show message
         //
@@ -235,12 +285,12 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
-        operationChangeEvent.setOperationStatusType("PASS");
+        operationChangeEvent.setOperationStatusType(operationStatusType);
+        operationChangeEvent.setStatusMessage(statusMessage);
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
         operationChangeEvent.setLogs("LOGS");
-        operationChangeEvent.setStatusMessage("STATUS MESSAGE");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");

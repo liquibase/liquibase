@@ -9,6 +9,7 @@ import liquibase.changelog.RollbackContainer;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.MigrationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -48,11 +49,23 @@ public class RollbackVisitor implements ChangeSetVisitor {
             Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset:" + changeSet);
         }
         sendRollbackWillRunEvent(changeSet, databaseChangeLog, database);
-        changeSet.rollback(this.database, this.execListener);
+        try {
+            changeSet.rollback(this.database, this.execListener);
+        }
+        catch (Exception e) {
+            fireRollbackFailed(changeSet, databaseChangeLog, database, e);
+            throw e;
+        }
         this.database.removeRanStatus(changeSet);
         sendRollbackEvent(changeSet, databaseChangeLog, database);
         this.database.commit();
         checkForEmptyRollbackFile(changeSet);
+    }
+
+    protected void fireRollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {
+        if (execListener != null) {
+            execListener.rollbackFailed(changeSet, databaseChangeLog, database, e);
+        }
     }
 
     private void checkForEmptyRollbackFile(ChangeSet changeSet) {

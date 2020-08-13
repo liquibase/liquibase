@@ -3,17 +3,18 @@ package liquibase.util;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 
 public class ISODateFormat {
 
     private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
-    private SimpleDateFormat dateTimeFormatWithZone = new SimpleDateFormat(DATE_TIME_FORMAT_WITH_ZONE_STRING);
     private SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
-    private static final String DATE_TIME_FORMAT_WITH_ZONE_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
 
 
@@ -85,10 +86,29 @@ public class ISODateFormat {
             } else {
                 time = dateTimeFormat.parse(dateAsString.substring(0,19)).getTime();
             }
+
+            ZonedDateTime zonedDateTime;
+            int nanos;
+            try {
+                OffsetDateTime odt = OffsetDateTime.parse(dateAsString);
+                //time = odt.toInstant().toEpochMilli();
+                zonedDateTime = odt.toZonedDateTime();
+                // time = zonedDateTime.toInstant().toEpochMilli();
+                nanos = zonedDateTime.getNano();
+            }
+            catch (DateTimeParseException dtpe) {
+                LocalDateTime ldt = LocalDateTime.parse(dateAsString);
+                //time = ldt.toEpochSecond(ZoneOffset.UTC);
+                nanos = ldt.getNano();
+            }
+
+
+            /*
             int nanos = Integer.parseInt(dateAsString.substring(20).replaceAll("Z",""));
             for (; length < 29; length++) {
                 nanos *= 10;
             }
+            */
             java.sql.Timestamp timestamp = new java.sql.Timestamp(time);
             timestamp.setNanos(nanos);
             return timestamp;
