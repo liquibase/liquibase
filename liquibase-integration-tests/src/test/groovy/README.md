@@ -20,11 +20,11 @@ input changelogs from the `resources/harness/changelogs` folder
   * Finally, the actual DB snapshot is compared to the expected DB snapshot (provided in `resources/harness/expectedSnapshot`)
 
 #### Adding a change object test
-1) Go to src/test/resources/harness/changelogs and add the xml changeset for the change type you want to test.
-2) Go to src/test/resources/harness/expectedSQL and add the expected generated SQL. 
+1) Go to `src/test/resources/harness/changelogs` and add the xml changeset for the change type you want to test.
+2) Go to `src/test/resources/harness/expectedSQL` and add the expected generated SQL. 
 You will need to add this under the database specific folder. Currently we only have Postgresql & MySQL folders. 
 If you would like to test another DB type, please add the requisite folder.
-3) Go to src/test/resources/harness/expectedSnapshot and add the expected DB Snapshot results. 
+3) Go to `src/test/resources/harness/expectedSnapshot` and add the expected DB Snapshot results. 
 You will need to add this under the database specific folder. Currently we only have Postgresql & MySQL folders. 
 If you would like to test another DB type, please add the requisite folder.
 4) Go to your IDE and run the test class `MainTestIT.groovy`
