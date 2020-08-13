@@ -11,9 +11,9 @@ class FileUtils {
         return new File(new StringBuilder(resourceBaseDir)
                 .append(expectedFolder)
                 .append("/")
-                .append(testInput.getDatabaseName())
+                .append(testInput.databaseName)
                 .append("/")
-                .append(testInput.getChangeObject())
+                .append(testInput.changeObject)
                 .append(fileExtension)
                 .toString()
         ).getText("UTF-8")
@@ -45,7 +45,7 @@ class FileUtils {
         File [] files = dir.listFiles(new FileFilter() {
             @Override
             boolean accept(File file) {
-                return !file.isHidden()
+                return file.isFile()&&!file.isHidden()
             }
         } )
         files.each {changeTypes<<it.getName().substring(0, it.getName().lastIndexOf('.'))}

@@ -23,15 +23,15 @@ class TestUtils {
     }
 
     static List<String> toSqlFromLiquibaseChangeSets(Liquibase liquibase) {
-        Database db = liquibase.getDatabase()
-        List<ChangeSet> changeSets = liquibase.getDatabaseChangeLog().getChangeSets()
+        Database db = liquibase.database
+        List<ChangeSet> changeSets = liquibase.databaseChangeLog.changeSets
         List<String> stringList = new ArrayList<>()
         changeSets.each { stringList.addAll(toSql(it, db)) }
         return stringList
     }
 
     private static List<String> toSql(ChangeSet changeSet, Database db) {
-        return toSql(changeSet.getChanges(), db)
+        return toSql(changeSet.changes, db)
     }
 
     private static List<String> toSql(List<? extends Change> changes, Database db) {
@@ -46,7 +46,7 @@ class TestUtils {
     }
 
     static ArrayList<CatalogAndSchema> getCatalogAndSchema(Database database, String dbSchema) {
-        List<String> schemaList = TestUtils.parseValuesToList(dbSchema, ",")
+        List<String> schemaList = parseValuesToList(dbSchema, ",")
 
         List<CatalogAndSchema> finalList = new ArrayList<>()
         schemaList?.each { sch ->
@@ -81,17 +81,17 @@ class TestUtils {
 
     static List<TestInput> buildTestInput(TestConfig config) {
         List<TestInput> inputList = new ArrayList<>();
-        for (DatabaseUnderTest databaseUnderTest : config.getDatabasesUnderTest()) {
-            for (DatabaseVersion databaseVersion : databaseUnderTest.getVersions()) {
-                for (String changeObject : databaseUnderTest.getChangeObjects() ?: FileUtils.getAllChangeTypes()) {
+        for (DatabaseUnderTest databaseUnderTest : config.databasesUnderTest) {
+            for (DatabaseVersion databaseVersion : databaseUnderTest.versions) {
+                for (String changeObject : databaseUnderTest.changeObjects ?: FileUtils.getAllChangeTypes()) {
                     inputList.add(TestInput.builder()
-                            .databaseName(databaseUnderTest.getName())
-                            .url(databaseVersion.getUrl())
-                            .dbSchema(databaseUnderTest.getDbSchema())
-                            .username(databaseUnderTest.getUsername())
-                            .password(databaseUnderTest.getPassword())
-                            .version(databaseVersion.getVersion())
-                            .context(config.getContext())
+                            .databaseName(databaseUnderTest.name)
+                            .url(databaseVersion.url)
+                            .dbSchema(databaseUnderTest.dbSchema)
+                            .username(databaseUnderTest.username)
+                            .password(databaseUnderTest.password)
+                            .version(databaseVersion.version)
+                            .context(config.context)
                             .changeObject(changeObject)
                             .build()
                     )

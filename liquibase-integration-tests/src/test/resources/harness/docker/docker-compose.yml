@@ -2,7 +2,6 @@ version: '3.3'
 
 services:
 
-
   mysql-5:
     image: library/mysql:5.7.31
     ports:
@@ -34,7 +33,6 @@ services:
     image: postgres:9
     ports:
       - "5433:5432"
-    environment:
     restart: always
     environment:
       POSTGRES_PASSWORD: LbRootPass1
@@ -46,7 +44,6 @@ services:
     image: postgres:12
     ports:
       - "5434:5432"
-    environment:
     restart: always
     environment:
       POSTGRES_PASSWORD: LbRootPass1
