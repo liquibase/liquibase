@@ -233,7 +233,7 @@ public class OnlineHubService implements HubService {
                         .setCreateDate(parseDate((String) object.get("createDate")))
                         .setUpdateDate(parseDate((String) object.get("updateDate")))
                         .setRemoveDate(parseDate((String) object.get("removeDate")))
-                        .setPrj(exampleEnvironment.getPrj())
+                        .setPrj(exampleEnvironment != null ? exampleEnvironment.getPrj() : null)
                 );
             }
         } catch (ParseException e) {
