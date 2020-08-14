@@ -40,10 +40,7 @@ CREATE TABLE posts (
   title VARCHAR (255) NOT NULL,
   description VARCHAR (500) NOT NULL,
   content text NOT NULL,
-  date date NOT NULL,
-  CONSTRAINT fk_authors
-      FOREIGN KEY(author_id)
-	  REFERENCES authors(id)
+  inserted_date date
 );
 
 ALTER TABLE posts OWNER TO lbuser;
