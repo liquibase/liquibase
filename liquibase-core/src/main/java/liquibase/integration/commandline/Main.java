@@ -1479,7 +1479,11 @@ public class Main {
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             try {
                 if (hubEnvironmentId != null) {
-                    liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+                    try {
+                        liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+                    } catch (IllegalArgumentException e) {
+                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubEnvironmentId' has invalid value '"+hubEnvironmentId+"' Learn more at https://hub.liquibase.com");
+                    }
                 }
             } catch (IllegalArgumentException  e) {
                 throw new LiquibaseException("Unexpected hubEnvironmentId format: "+hubEnvironmentId, e);
