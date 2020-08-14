@@ -44,7 +44,7 @@ public class ExecutorService extends AbstractPluginFactory<Executor>  {
             return executors.get(key);
         }
 
-        final Executor plugin = getPlugin(executorName, database);
+        final Executor plugin = getPlugin(executorName.toLowerCase(), database);
         try {
             return plugin.getClass().newInstance();
         } catch (ReflectiveOperationException e) {

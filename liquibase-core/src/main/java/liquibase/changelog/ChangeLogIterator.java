@@ -53,7 +53,7 @@ public class ChangeLogIterator {
                 return "";
             }
         });
-
+        this.databaseChangeLog.setChangeLogId(changeLog.getChangeLogId());
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 

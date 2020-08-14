@@ -41,6 +41,26 @@ public class ISODateFormatTest {
     }
 
     @Test
+    public void isoDateFormatWithNoNanos() throws Exception {
+        Date date = dateFormat.parse("2011-04-21T10:13:40");
+        assertEquals("2011-04-21T10:13:40", dateFormat.format(date));
+    }
+
+    @Test
+    public void isoDateFormatWithUTCTimeZone() throws Exception {
+        Date date = dateFormat.parse("2011-04-21T10:13:40.084004Z");
+        String result = dateFormat.format(date);
+        assertEquals("2011-04-21T10:13:40.084004", result);
+    }
+
+    @Test
+    public void isoDateFormatWithESTTimeZone() throws Exception {
+        Date date = dateFormat.parse("2011-04-21T10:13:40.084004-05:00");
+        String result = dateFormat.format(date);
+        assertEquals("2011-04-21T10:13:40.084004", result);
+    }
+
+    @Test
     public void isoDateFormatWithLeadingNanoFractions() throws Exception {
         Date date = dateFormat.parse("2011-04-21T10:13:40.01234567");
         assertEquals("2011-04-21T10:13:40.01234567", dateFormat.format(date));

@@ -16,10 +16,12 @@ import liquibase.util.StringUtil;
 
 import java.lang.reflect.Field;
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class OnlineHubService implements HubService {
-
+    private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     private Boolean available;
     private UUID organizationId;
     private UUID userId;
@@ -324,6 +326,11 @@ public class OnlineHubService implements HubService {
 
         return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getEnvironment().getPrj().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
 
+    }
+
+    private Date convertDateToUTC(Date dateInString) {
+        //LocalDateTime ldt = LocalDateTime.parse(dateInString, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_STRING));
+        return null;
     }
 
     @Override
