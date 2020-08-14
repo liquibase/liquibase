@@ -3,15 +3,8 @@ package liquibase.logging.core;
 import liquibase.logging.Logger;
 import liquibase.serializer.LiquibaseSerializable;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
 
 public class JavaLogService extends AbstractLogService {
 
@@ -22,6 +15,7 @@ public class JavaLogService extends AbstractLogService {
 
     private Map<Class, JavaLogger> loggers = new HashMap<>();
 
+    private java.util.logging.Logger parent;
 
     @Override
     public Logger getLog(Class clazz) {
@@ -29,7 +23,10 @@ public class JavaLogService extends AbstractLogService {
         if (logger == null) {
             java.util.logging.Logger utilLogger = java.util.logging.Logger.getLogger(getLogName(clazz));
             utilLogger.setUseParentHandlers(true);
-            logger = new JavaLogger(utilLogger);
+            if (parent != null && !parent.getName().equals(utilLogger.getName())) {
+                utilLogger.setParent(parent);
+            }
+            logger = new JavaLogger(utilLogger, this.filter);
 
             this.loggers.put(clazz, logger);
         }
@@ -75,4 +72,14 @@ public class JavaLogService extends AbstractLogService {
         return "liquibase";
     }
 
+    public java.util.logging.Logger getParent() {
+        return parent;
+    }
+
+    /**
+     * Explicitly control the parent logger for all {@link java.util.logging.Logger} instances created.
+     */
+    public void setParent(java.util.logging.Logger parent) {
+        this.parent = parent;
+    }
 }

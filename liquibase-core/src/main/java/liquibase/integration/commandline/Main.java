@@ -22,7 +22,10 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogMessageFilter;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
+import liquibase.logging.core.JavaLogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -249,26 +252,32 @@ public class Main {
                     System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
                     java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+                    java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
+                    liquibaseLogger.setParent(rootLogger);
+
+                    final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+                    logService.setParent(liquibaseLogger);
+
                     if (main.logLevel == null) {
                         String defaultLogLevel = System.getProperty("liquibase.log.level");
                         if (defaultLogLevel == null) {
-                            setLogLevel(rootLogger, Level.OFF);
+                            setLogLevel(logService, rootLogger, liquibaseLogger, Level.OFF);
                         } else {
-                            setLogLevel(rootLogger, parseLogLevel(defaultLogLevel, ui));
+                            setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(defaultLogLevel, ui));
                         }
                     } else {
-                        setLogLevel(rootLogger, parseLogLevel(main.logLevel, ui));
+                        setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(main.logLevel, ui));
                     }
 
                     if (main.logFile != null) {
                         FileHandler fileHandler = new FileHandler(main.logFile, true);
                         fileHandler.setFormatter(new SimpleFormatter());
-                        if (rootLogger.getLevel() == Level.OFF) {
+                        if (liquibaseLogger.getLevel() == Level.OFF) {
                             fileHandler.setLevel(Level.FINE);
                         }
 
-                        rootLogger.addHandler(fileHandler);
-                        for (Handler handler : rootLogger.getHandlers()) {
+                        liquibaseLogger.addHandler(fileHandler);
+                        for (Handler handler : liquibaseLogger.getHandlers()) {
                             if (handler instanceof ConsoleHandler) {
                                 handler.setLevel(Level.OFF);
                             }
@@ -385,11 +394,18 @@ public class Main {
         });
     }
 
-    protected static void setLogLevel(java.util.logging.Logger logger, java.util.logging.Level level) {
-        logger.setLevel(level);
+    protected static void setLogLevel(LogService logService, java.util.logging.Logger rootLogger, java.util.logging.Logger liquibaseLogger, Level level) {
+        if (level.intValue() < Level.INFO.intValue()) {
+            //limit non-liquibase logging to INFO at a minimum to avoid too much logs
+            rootLogger.setLevel(Level.INFO);
+        } else {
+            rootLogger.setLevel(level);
+        }
+        liquibaseLogger.setLevel(level);
 
-        for (Handler handler : logger.getHandlers()) {
+        for (Handler handler : rootLogger.getHandlers()) {
             handler.setLevel(level);
+            handler.setFilter(new SecureLogFilter(logService.getFilter()));
         }
     }
 
@@ -1957,6 +1973,23 @@ public class Main {
      */
     public boolean isWindows() {
         return System.getProperty("os.name").startsWith("Windows ");
+    }
+
+    public static class SecureLogFilter implements Filter {
+
+        private LogMessageFilter filter;
+
+        public SecureLogFilter(LogMessageFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public boolean isLoggable(LogRecord record) {
+            final String filteredMessage = filter.filterMessage(record.getMessage());
+
+            final boolean equals = filteredMessage.equals(record.getMessage());
+            return equals;
+        }
     }
 
     @SuppressWarnings("HardCodedStringLiteral")
