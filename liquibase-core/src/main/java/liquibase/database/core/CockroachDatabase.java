@@ -11,6 +11,10 @@ import java.sql.Statement;
 
 public class CockroachDatabase extends PostgresDatabase {
 
+    public CockroachDatabase() {
+        super.setCurrentDateTimeFunction("NOW()");
+    }
+
     @Override
     public int getPriority() {
         return super.getPriority() + 5;
@@ -41,4 +45,18 @@ public class CockroachDatabase extends PostgresDatabase {
         return false;
     }
 
+    @Override
+    public Integer getDefaultPort() {
+        return 26257;
+    }
+
+    @Override
+    public boolean supportsInitiallyDeferrableColumns() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsTablespaces() {
+        return false;
+    }
 }
