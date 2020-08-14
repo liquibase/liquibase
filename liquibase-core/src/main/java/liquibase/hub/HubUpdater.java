@@ -41,7 +41,7 @@ public class HubUpdater {
    * If there is an error or the Hub is not available it returns null
    *
    * @param  operationType              Operation type (UPDATE or ROLLBACK)
-   * @param  environment                Environment for this operation
+   * @param  connection                Connection for this operation
    * @param  contexts                   Contexts to use for filtering
    * @param  labelExpression            Labels to use for filtering
    * @param  changeLogIterator          Iterator to use for going through change sets
@@ -53,7 +53,7 @@ public class HubUpdater {
    *
    */
   public Operation preUpdateHub(String operationType,
-                                Environment environment,
+                                Connection connection,
                                 Contexts contexts,
                                 LabelExpression labelExpression,
                                 String changeLogFile,
@@ -67,14 +67,14 @@ public class HubUpdater {
     //
     // Perform syncHub
     //
-    syncHub(changeLogFile, database, changeLog, environment.getId());
+    syncHub(changeLogFile, database, changeLog, connection.getId());
 
     //
     // Send the START operation event
     //
     final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
     final HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
-    Operation updateOperation = hubService.createOperation(operationType, hubChangeLog, environment, null);
+    Operation updateOperation = hubService.createOperation(operationType, hubChangeLog, connection, null);
     try {
         hubService.sendOperationEvent(updateOperation, new OperationEvent()
                 .setEventType("START")
@@ -167,7 +167,7 @@ public class HubUpdater {
                                              String originalExceptionMessage) {
     try {
       //
-      // Not a valid Hub environment
+      // Not a valid Hub connection
       // Just go back
       //
       if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
@@ -206,11 +206,11 @@ public class HubUpdater {
     return ! hubService.isOnline() || changeLogId == null;
   }
 
-  private void syncHub(String changeLogFile, Database database, DatabaseChangeLog databaseChangeLog, UUID hubEnvironmentId) {
+  private void syncHub(String changeLogFile, Database database, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) {
     final SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
     syncHub.setChangeLogFile(changeLogFile);
     syncHub.setUrl(database.getConnection().getURL());
-    syncHub.setHubEnvironmentId(Objects.toString(hubEnvironmentId));
+    syncHub.setHubConnectionId(Objects.toString(hubConnectionId));
     syncHub.setDatabase(database);
     syncHub.setFailIfOnline(false);
 

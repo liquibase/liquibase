@@ -66,7 +66,7 @@ public class Main {
     protected String username;
     protected String password;
     protected String url;
-    protected String hubEnvironmentId;
+    protected String hubConnectionId;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -1509,15 +1509,15 @@ public class Main {
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             try {
-                if (hubEnvironmentId != null) {
+                if (hubConnectionId != null) {
                     try {
-                        liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+                        liquibase.setHubConnectionId(UUID.fromString(hubConnectionId));
                     } catch (IllegalArgumentException e) {
-                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubEnvironmentId' has invalid value '"+hubEnvironmentId+"' Learn more at https://hub.liquibase.com");
+                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubConnectionId' has invalid value '"+hubConnectionId+"' Learn more at https://hub.liquibase.com");
                     }
                 }
             } catch (IllegalArgumentException  e) {
-                throw new LiquibaseException("Unexpected hubEnvironmentId format: "+hubEnvironmentId, e);
+                throw new LiquibaseException("Unexpected hubConnectionId format: "+hubConnectionId, e);
             }
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
@@ -1623,7 +1623,7 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
-                liquibaseCommand.setHubEnvironmentId(hubEnvironmentId);
+                liquibaseCommand.setHubConnectionId(hubConnectionId);
                 liquibaseCommand.setUrl(url);
                 liquibaseCommand.setDatabase(database);
                 liquibaseCommand.setChangeLogFile(changeLogFile);

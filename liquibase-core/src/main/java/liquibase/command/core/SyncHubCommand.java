@@ -8,7 +8,7 @@ import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
-import liquibase.hub.model.Environment;
+import liquibase.hub.model.Connection;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
 import liquibase.parser.ChangeLogParserFactory;
@@ -21,7 +21,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
     private String url;
     private String changeLogFile;
-    private String hubEnvironmentId;
+    private String hubConnectionId;
     private Database database;
     private boolean failIfOnline = true;
 
@@ -41,12 +41,12 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         this.changeLogFile = changeLogFile;
     }
 
-    public String getHubEnvironmentId() {
-        return hubEnvironmentId;
+    public String getHubConnectionId() {
+        return hubConnectionId;
     }
 
-    public void setHubEnvironmentId(String hubEnvironmentId) {
-        this.hubEnvironmentId = hubEnvironmentId;
+    public void setHubConnectionId(String hubConnectionId) {
+        this.hubConnectionId = hubConnectionId;
     }
 
 
@@ -90,8 +90,8 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
             }
         }
 
-        Environment environmentToSync;
-        if (hubEnvironmentId == null) {
+        Connection connectionToSync;
+        if (hubConnectionId == null) {
             Project project = null;
             if (changeLogFile != null) {
                 Scope.getCurrentScope().getLog(getClass()).info("No changeLogFile specified. Searching for jdbcUrl across the entire organization.");
@@ -110,34 +110,34 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                 }
             }
 
-            final Environment searchEnvironment = new Environment()
+            final Connection searchConnection = new Connection()
                     .setJdbcUrl(url)
                     .setPrj(project);
 
-            final List<Environment> environments = hubService.getEnvironments(searchEnvironment);
-            if (environments.size() == 0) {
+            final List<Connection> connections = hubService.getConnections(searchConnection);
+            if (connections.size() == 0) {
 
                 if (project == null) {
-                    return new CommandResult("The url " + url + " does not match any defined environments. To auto-create an environment, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId.", false);
+                    return new CommandResult("The url " + url + " does not match any defined connections. To auto-create a connection, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId.", false);
                 }
 
 
-                Environment inputEnvironment = new Environment();
-                inputEnvironment.setJdbcUrl(url);
-                inputEnvironment.setPrj(project);
+                Connection inputConnection = new Connection();
+                inputConnection.setJdbcUrl(url);
+                inputConnection.setPrj(project);
 
-                environmentToSync = hubService.createEnvironment(inputEnvironment);
-            } else if (environments.size() == 1) {
-                environmentToSync = environments.get(0);
+                connectionToSync = hubService.createConnection(inputConnection);
+            } else if (connections.size() == 1) {
+                connectionToSync = connections.get(0);
             } else {
-                return new CommandResult("The url " + url + " is used by more than one environment. Please specify 'hubEnvironmentId=<hubEnvironmentId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
+                return new CommandResult("The url " + url + " is used by more than one connection. Please specify 'hubConnectionId=<hubConnectionId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
             }
         } else {
-            final List<Environment> environments = hubService.getEnvironments(new Environment().setId(UUID.fromString(hubEnvironmentId)));
-            if (environments.size() == 0) {
-                return new CommandResult("Unknown hubEnvironmentId "+hubEnvironmentId, false);
+            final List<Connection> connections = hubService.getConnections(new Connection().setId(UUID.fromString(hubConnectionId)));
+            if (connections.size() == 0) {
+                return new CommandResult("Unknown hubConnectionId "+ hubConnectionId, false);
             } else {
-                environmentToSync = environments.get(0);
+                connectionToSync = connections.get(0);
             }
         }
 
@@ -146,7 +146,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
             final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
 
 
-            hubService.setRanChangeSets(environmentToSync, ranChangeSets);
+            hubService.setRanChangeSets(connectionToSync, ranChangeSets);
 
         });
 
