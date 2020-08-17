@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.AbstractChangeExecListener;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.ChangeLogSyncListener;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -31,7 +32,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class HubChangeExecListener extends AbstractChangeExecListener
-                                   implements ChangeExecListener {
+                                   implements ChangeExecListener, ChangeLogSyncListener {
     private static final Logger logger = Scope.getCurrentScope().getLog(HubChangeExecListener.class);
 
     private final Operation operation;
@@ -57,7 +58,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                     DatabaseChangeLog databaseChangeLog,
                     Database database,
                     ChangeSet.ExecType execType) {
-        updateHub(changeSet, databaseChangeLog, database, "PASS", "PASSED");
+        updateHub(changeSet, databaseChangeLog, database, "UPDATE", "PASS", "PASSED");
     }
 
 
@@ -119,7 +120,13 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
     @Override
     public void runFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
-        updateHub(changeSet, databaseChangeLog, database, "FAIL", exception.getMessage());
+        updateHub(changeSet, databaseChangeLog, database, "UPDATE", "FAIL", exception.getMessage());
+    }
+
+    @Override
+    public void markedRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        startDateMap.put(changeSet, new Date());
+        updateHub(changeSet, databaseChangeLog, database, "SYNC", "PASS", "PASSED");
     }
 
     //
@@ -234,6 +241,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     private void updateHub(ChangeSet changeSet,
                            DatabaseChangeLog databaseChangeLog,
                            Database database,
+                           String eventType,
                            String operationStatusType,
                            String statusMessage) {
         //
@@ -279,7 +287,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
-        operationChangeEvent.setEventType("UPDATE");
+        operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
         operationChangeEvent.setEndDate(new Date());
         operationChangeEvent.setChangesetId(changeSet.getId());

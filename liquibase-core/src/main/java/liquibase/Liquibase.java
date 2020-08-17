@@ -1292,23 +1292,68 @@ public class Liquibase implements AutoCloseable {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
+                Operation changeLogSyncOperation = null;
+                BufferedLogService bufferLog = new BufferedLogService();
+                DatabaseChangeLog changeLog = null;
+                HubUpdater hubUpdater = null;
+
                 try {
-                    DatabaseChangeLog changeLog = getDatabaseChangeLog();
+                    changeLog = getDatabaseChangeLog();
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                     ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    hubUpdater = new HubUpdater(new Date(), changeLog);
+
+                    //
+                    // Create an iterator which will be used with a ListVisitor
+                    // to grab the list of change sets for the update
+                    //
+                    ChangeLogIterator listLogIterator = new ChangeLogIterator(changeLog,
                             new NotRanChangeSetFilter(database.getRanChangeSetList()),
                             new ContextChangeSetFilter(contexts),
                             new LabelChangeSetFilter(labelExpression),
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
 
-                    logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
-                            new RuntimeEnvironment(database, contexts, labelExpression)
-                    );
+                    //
+                    // Create or retrieve the Environment
+                    // Make sure the Hub is available here by checking the return
+                    //
+                    Environment environment = getEnvironment(changeLog);
+                    if (environment != null) {
+                        changeLogSyncOperation =
+                                hubUpdater.preUpdateHub("CHANGELOGSYNC", environment, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                    }
+
+                    //
+                    // Check for an already existing Listener
+                    //
+                    if (changeExecListener != null) {
+                        throw new RuntimeException("HubChangeExecListener already defined");
+                    }
+                    changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation);
+
+                    ChangeLogIterator runChangeLogSyncIterator = new ChangeLogIterator(changeLog,
+                            new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                            new ContextChangeSetFilter(contexts),
+                            new LabelChangeSetFilter(labelExpression),
+                            new IgnoreChangeSetFilter(),
+                            new DbmsChangeSetFilter(database));
+
+                    CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+                    Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
+                        runChangeLogSyncIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
+                                new RuntimeEnvironment(database, contexts, labelExpression));
+                    });
+                    hubUpdater.postUpdateHub(changeLogSyncOperation, bufferLog);
+                }
+                catch (Exception e) {
+                    if (changeLogSyncOperation != null) {
+                        hubUpdater.postUpdateHubExceptionHandling(changeLogSyncOperation, bufferLog, e.getMessage());
+                    }
+                    throw e;
                 } finally {
                     try {
                         lockService.releaseLock();
