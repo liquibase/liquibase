@@ -21,7 +21,13 @@ public class HubConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(LIQUIBASE_HUB_API_KEY, String.class)
                 .setDescription("Liquibase Hub API key for operations");
         getContainer().addProperty(LIQUIBASE_HUB_URL, String.class)
-                .setDescription("Liquibase Hub URL for operations");
+                .setDescription("Liquibase Hub URL for operations")
+                .setValueHandler(value -> {
+                    if (value == null) {
+                        return null;
+                    }
+                    return value.toString().replaceFirst("(https?://[^/]+).*", "$1");
+                });
         getContainer().addProperty(LIQUIBASE_HUB_PROJECT, String.class)
                 .setDescription("Liquibase Hub Project for operations");
         getContainer().addProperty(LIQUIBASE_HUB_MODE, String.class)
@@ -63,7 +69,7 @@ public class HubConfiguration extends AbstractConfigurationContainer {
     public String getLiquibaseHubUrl() {
         String hubUrl = getContainer().getValue(LIQUIBASE_HUB_URL, String.class);
         if (hubUrl == null || hubUrl.isEmpty()) {
-            return "https://hub.liquibase.com/api/v1/";
+            return "https://hub.liquibase.com";
         }
         return hubUrl;
     }

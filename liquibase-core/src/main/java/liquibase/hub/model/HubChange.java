@@ -64,9 +64,6 @@ public class HubChange implements HubModel {
         catch (ParseException pe) {
             this.dateExecuted = new Date();
         }
-        this.tag = "TAG";
-        this.liquibase = "LIQUIBASE";
-        this.deploymentId = "1234567890";
     }
 
 

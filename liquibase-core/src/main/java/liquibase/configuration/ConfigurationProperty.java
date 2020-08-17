@@ -23,6 +23,8 @@ public class ConfigurationProperty {
     private Object defaultValue;
     private boolean wasOverridden;
 
+    private ConfigurationValueHandler valueHandler;
+
     public ConfigurationProperty(String namespace, String propertyName, Class type) {
         this.namespace = namespace;
         this.name = propertyName;
@@ -130,6 +132,9 @@ public class ConfigurationProperty {
      * Overwrites the value currently stored in this property. It he passed type is not compatible with the defined type, an exception is thrown.
      */
     public void setValue(Object value) {
+        if (valueHandler != null) {
+            value = valueHandler.convert(value);
+        }
         if ((value != null) && !type.isAssignableFrom(value.getClass())) {
             throw new UnexpectedLiquibaseException("Property "+name+" on is of type "+type.getSimpleName()+", not "+value.getClass().getSimpleName());
         }
@@ -189,5 +194,11 @@ public class ConfigurationProperty {
      */
     public boolean getWasOverridden() {
         return wasOverridden;
+    }
+
+    public ConfigurationProperty setValueHandler(ConfigurationValueHandler handler) {
+        this.valueHandler = handler;
+
+        return this;
     }
 }
