@@ -8,6 +8,8 @@ import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
+import liquibase.hub.LiquibaseHubException;
+import liquibase.hub.LiquibaseHubObjectNotFoundException;
 import liquibase.hub.model.Environment;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
@@ -114,30 +116,24 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                     .setJdbcUrl(url)
                     .setPrj(project);
 
-            final List<Environment> environments = hubService.getEnvironments(searchEnvironment);
-            if (environments.size() == 0) {
+            boolean createIfNotExists = true;
+            if (project == null) {
+                createIfNotExists = false;
+            }
 
-                if (project == null) {
+            try {
+                environmentToSync = hubService.getEnvironment(searchEnvironment, createIfNotExists);
+            } catch (LiquibaseHubObjectNotFoundException e) {
+                if (!createIfNotExists) {
                     return new CommandResult("The url " + url + " does not match any defined environments. To auto-create an environment, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId.", false);
+                } else {
+                    return new CommandResult(e.getMessage(), false);
                 }
-
-
-                Environment inputEnvironment = new Environment();
-                inputEnvironment.setJdbcUrl(url);
-                inputEnvironment.setPrj(project);
-
-                environmentToSync = hubService.createEnvironment(inputEnvironment);
-            } else if (environments.size() == 1) {
-                environmentToSync = environments.get(0);
-            } else {
-                return new CommandResult("The url " + url + " is used by more than one environment. Please specify 'hubEnvironmentId=<hubEnvironmentId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
             }
         } else {
-            final List<Environment> environments = hubService.getEnvironments(new Environment().setId(UUID.fromString(hubEnvironmentId)));
-            if (environments.size() == 0) {
+            environmentToSync = hubService.getEnvironment(new Environment().setId(UUID.fromString(hubEnvironmentId)), false);
+            if (environmentToSync == null) {
                 return new CommandResult("Unknown hubEnvironmentId "+hubEnvironmentId, false);
-            } else {
-                environmentToSync = environments.get(0);
             }
         }
 

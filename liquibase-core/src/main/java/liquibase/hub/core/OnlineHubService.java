@@ -187,17 +187,8 @@ public class OnlineHubService implements HubService {
             return http.doGet("/api/v1/environments/" + exampleEnvironment.getId().toString(), null, Environment.class);
         }
 
-        final List<Environment> environments;
-        try {
-            environments = getEnvironments(exampleEnvironment);
-        } catch (LiquibaseHubObjectNotFoundException e) {
-            //the API should not throw this exception, but it does
-            if (createIfNotExists) {
-                return createEnvironment(exampleEnvironment);
-            } else {
-                throw new LiquibaseHubObjectNotFoundException("Environment not found");
-            }
-        }
+        final List<Environment> environments = getEnvironments(exampleEnvironment);
+
         if (environments.size() == 0) {
             if (createIfNotExists) {
                 return createEnvironment(exampleEnvironment);
