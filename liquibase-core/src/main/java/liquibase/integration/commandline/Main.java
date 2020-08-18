@@ -388,11 +388,11 @@ public class Main {
             return false;
         }
         if (! main.commandParams.contains("--help")) {
-            return false;
+            return true;
         }
-        return main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_CHANGE_SET.toLowerCase()) ||
-               main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_UPDATE.toLowerCase()) ||
-               (main.command.toLowerCase().startsWith(COMMANDS.DIFF.toLowerCase()) && main.isFormattedDiff());
+        return !main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_CHANGE_SET.toLowerCase()) &&
+                !main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_UPDATE.toLowerCase()) &&
+                (!main.command.toLowerCase().startsWith(COMMANDS.DIFF.toLowerCase()) || !main.isFormattedDiff());
     }
 
     protected static void setLogLevel(java.util.logging.Logger logger, java.util.logging.Level level) {
