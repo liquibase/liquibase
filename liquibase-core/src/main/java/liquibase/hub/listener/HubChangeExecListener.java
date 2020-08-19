@@ -286,7 +286,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
         operationChangeEvent.setOperationStatusType(operationStatusType);
-        operationChangeEvent.setStatusMessage(statusMessage);
+        operationChangeEvent.setStatusMessage(statusMessage.length() <= 255 ? statusMessage : statusMessage.substring(0,255));
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
