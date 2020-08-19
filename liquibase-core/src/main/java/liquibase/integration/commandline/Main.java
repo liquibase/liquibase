@@ -277,8 +277,8 @@ public class Main {
                             fileHandler.setLevel(Level.FINE);
                         }
 
-                        liquibaseLogger.addHandler(fileHandler);
-                        for (Handler handler : liquibaseLogger.getHandlers()) {
+                        rootLogger.addHandler(fileHandler);
+                        for (Handler handler : rootLogger.getHandlers()) {
                             if (handler instanceof ConsoleHandler) {
                                 handler.setLevel(Level.OFF);
                             }
