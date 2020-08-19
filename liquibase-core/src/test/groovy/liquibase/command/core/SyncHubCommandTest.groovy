@@ -94,7 +94,7 @@ class SyncHubCommandTest extends Specification {
                 new HubChangeLog(
                         id: MockHubService.randomUUID,
                         name: "Mock changelog",
-                        prj: new Project(
+                        project: new Project(
                                 id: MockHubService.randomUUID,
                                 name: "Mock Project",
                         )

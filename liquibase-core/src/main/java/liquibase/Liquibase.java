@@ -309,7 +309,7 @@ public class Liquibase implements AutoCloseable {
                 return null;
             }
             Connection exampleConnection = new Connection();
-            exampleConnection.setPrj(hubChangeLog.getPrj());
+            exampleConnection.setProject(hubChangeLog.getProject());
             exampleConnection.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
             connection = hubService.getConnection(exampleConnection, true);
 

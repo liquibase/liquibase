@@ -105,7 +105,7 @@ public class HubUpdater {
     for (ChangeSet operationChangeSet : operationChangeSets) {
         operationChange.getChangeSets().add(operationChangeSet);
     }
-    operationChange.setProject(hubChangeLog.getPrj());
+    operationChange.setProject(hubChangeLog.getProject());
     operationChange.setOperation(updateOperation);
     try {
         hubService.sendOperationChanges(operationChange);

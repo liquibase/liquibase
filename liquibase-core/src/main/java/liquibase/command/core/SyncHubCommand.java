@@ -106,13 +106,13 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                     if (changeLog == null) {
                         return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
                     }
-                    project = changeLog.getPrj();
+                    project = changeLog.getProject();
                 }
             }
 
             final Connection searchConnection = new Connection()
                     .setJdbcUrl(url)
-                    .setPrj(project);
+                    .setProject(project);
 
             final List<Connection> connections = hubService.getConnections(searchConnection);
             if (connections.size() == 0) {
@@ -124,7 +124,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
                 Connection inputConnection = new Connection();
                 inputConnection.setJdbcUrl(url);
-                inputConnection.setPrj(project);
+                inputConnection.setProject(project);
 
                 connectionToSync = hubService.createConnection(inputConnection);
             } else if (connections.size() == 1) {

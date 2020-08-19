@@ -15,8 +15,6 @@ import liquibase.util.StringUtil;
 
 import java.lang.reflect.Field;
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class OnlineHubService implements HubService {
@@ -166,7 +164,7 @@ public class OnlineHubService implements HubService {
     public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
         final UUID organizationId = getOrganization().getId();
 
-        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + hubChangeLog.getPrj().getId() + "/changelogs", hubChangeLog, HubChangeLog.class);
+        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + hubChangeLog.getProject().getId() + "/changelogs", hubChangeLog, HubChangeLog.class);
     }
 
     @Override
@@ -234,7 +232,7 @@ public class OnlineHubService implements HubService {
                         .setCreateDate(parseDate((String) object.get("createDate")))
                         .setUpdateDate(parseDate((String) object.get("updateDate")))
                         .setRemoveDate(parseDate((String) object.get("removeDate")))
-                        .setPrj(exampleConnection != null ? exampleConnection.getPrj() : null)
+                        .setProject(exampleConnection != null ? exampleConnection.getProject() : null)
                 );
             }
         } catch (ParseException e) {
@@ -253,7 +251,7 @@ public class OnlineHubService implements HubService {
 
     @Override
     public Connection createConnection(Connection connection) throws LiquibaseHubException {
-        if (connection.getPrj() == null || connection.getPrj().getId() == null) {
+        if (connection.getProject() == null || connection.getProject().getId() == null) {
             throw new LiquibaseHubUserException("projectId is required to create a connection");
         }
 
@@ -267,7 +265,7 @@ public class OnlineHubService implements HubService {
             sendConnection.setName(sendConnection.getJdbcUrl());
         }
 
-        return http.doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + connection.getPrj().getId() + "/connections", sendConnection, Connection.class);
+        return http.doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + connection.getProject().getId() + "/connections", sendConnection, Connection.class);
     }
 
     /**
@@ -289,10 +287,7 @@ public class OnlineHubService implements HubService {
     @Override
     public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection, Map<String, String> operationParameters) throws LiquibaseHubException {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("connId", connection.getId());
-        requestBody.put("connJdbcUrl", connection.getJdbcUrl());
-        requestBody.put("connName", connection.getName());
-        requestBody.put("connDesc", connection.getDescription());
+        requestBody.put("connectionId", connection.getId());
         requestBody.put("changelogId", changeLog.getId());
         requestBody.put("operationType", operationType);
         requestBody.put("operationStatusType", "PASS");
@@ -323,7 +318,7 @@ public class OnlineHubService implements HubService {
             requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
         }
 
-        return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getConnection().getPrj().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
+        return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getConnection().getProject().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
 
     }
 

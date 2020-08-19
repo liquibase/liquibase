@@ -83,7 +83,7 @@ public class MockHubService implements HubService {
 
     @Override
     public Connection createConnection(Connection connection) throws LiquibaseHubException {
-        sentObjects.computeIfAbsent("createConnection/" + connection.getPrj().getId(), k -> new ArrayList<>()).add(connection);
+        sentObjects.computeIfAbsent("createConnection/" + connection.getProject().getId(), k -> new ArrayList<>()).add(connection);
 
         return new Connection()
                 .setId(UUID.randomUUID())
@@ -135,14 +135,14 @@ public class MockHubService implements HubService {
                 new Connection()
                         .setId(randomUUID)
                         .setJdbcUrl("jdbc://test")
-                        .setPrj(this.returnProjects.get(0))
+                        .setProject(this.returnProjects.get(0))
         ));
         this.returnChangeLogs = new ArrayList<>(Collections.singletonList(
                 new HubChangeLog()
                         .setId(randomUUID)
                         .setName("Mock changelog")
                         .setFileName("com/example/test.xml")
-                        .setPrj(this.returnProjects.get(0))
+                        .setProject(this.returnProjects.get(0))
         ));
         this.sentObjects = new TreeMap<>();
     }

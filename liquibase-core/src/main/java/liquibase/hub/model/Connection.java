@@ -13,7 +13,7 @@ public class Connection implements HubModel {
     private Date updateDate;
     private Date removeDate;
 
-    private Project prj;
+    private Project project;
 
     public UUID getId() {
         return id;
@@ -81,12 +81,12 @@ public class Connection implements HubModel {
     }
 
 
-    public Project getPrj() {
-        return prj;
+    public Project getProject() {
+        return project;
     }
 
-    public Connection setPrj(Project prj) {
-        this.prj = prj;
+    public Connection setProject(Project project) {
+        this.project = project;
         return this;
     }
 
