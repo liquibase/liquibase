@@ -38,7 +38,20 @@ public abstract class AbstractChangeExecListener implements ChangeExecListener {
      */
     @Override
     public void willRollback(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+    }
 
+    /**
+     *
+     * Called when there is a rollback failure
+     *
+     * @param changeSet         changeSet that was rolled back
+     * @param databaseChangeLog parent change log
+     * @param database          the database the rollback was executed on.
+     * @param exception         the original exception which was thrown
+     *
+     */
+    @Override
+    public void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {
     }
 
     @Override

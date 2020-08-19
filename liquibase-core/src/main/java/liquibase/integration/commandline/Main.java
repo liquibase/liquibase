@@ -69,6 +69,7 @@ public class Main {
     protected String username;
     protected String password;
     protected String url;
+    protected String hubEnvironmentId;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -385,7 +386,9 @@ public class Main {
                     throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
                 }
 
-                if (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKey() != null && !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
+                if (isHubEnabled(main.command) &&
+                    LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKey() != null &&
+                    !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
                     ui.sendMessage("The command "+main.command+"'s operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
                 }
 
@@ -466,10 +469,32 @@ public class Main {
     }
 
     /**
+     * Returns true if the given command is Hub-enabled
+     *
+     * @param command the command to check
+     * @return true if this command has Hub integration false if not
+     *
+     */
+    private static boolean isHubEnabled(String command) {
+        return COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
+            || COMMANDS.UPDATE_COUNT.equalsIgnoreCase(command)
+            || COMMANDS.UPDATE_TO_TAG.equalsIgnoreCase(command)
+            || COMMANDS.UPDATE.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK_TO_DATE.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK_COUNT.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)
+            || COMMANDS.DROP_ALL.equalsIgnoreCase(command);
+    }
+
+    /**
+     *
      * Returns true if the given command requires stdout
      *
      * @param command the command to check
      * @return true if stdout needs for a command, false if not
+     *
      */
     private static boolean isStandardOutputRequired(String command) {
         return COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
@@ -1499,6 +1524,17 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            try {
+                if (hubEnvironmentId != null) {
+                    try {
+                        liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+                    } catch (IllegalArgumentException e) {
+                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubEnvironmentId' has invalid value '"+hubEnvironmentId+"' Learn more at https://hub.liquibase.com");
+                    }
+                }
+            } catch (IllegalArgumentException  e) {
+                throw new LiquibaseException("Unexpected hubEnvironmentId format: "+hubEnvironmentId, e);
+            }
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);
@@ -1603,6 +1639,7 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
+                liquibaseCommand.setHubEnvironmentId(hubEnvironmentId);
                 liquibaseCommand.setUrl(url);
                 liquibaseCommand.setDatabase(database);
                 liquibaseCommand.setChangeLogFile(changeLogFile);

@@ -65,4 +65,6 @@ public interface ChangeExecListener {
     void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database);
 
     void runFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception);
+
+    void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception);
 }
