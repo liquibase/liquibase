@@ -899,13 +899,18 @@ public class Liquibase implements AutoCloseable {
 
         RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
 
+        final ChangeSet changeSet = rollbackChange.getChangeSet();
         try {
+            ((HubChangeExecListener)changeExecListener).setRollbackScriptContents(rollbackScriptContents);
+            changeExecListener.willRollback(changeSet, changelog, database);
+            Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset:" + changeSet.toString(false));
             executor.execute(rollbackChange);
+            changeExecListener.rolledBack(changeSet, changelog, database);
         } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage());
             LOG.severe("Error executing rollback script: " + e.getMessage());
             if (changeExecListener != null) {
-                changeExecListener.runFailed(null, databaseChangeLog, database, e);
+                changeExecListener.rollbackFailed(changeSet, databaseChangeLog, database, e);
             }
             throw new DatabaseException("Error executing rollback script", e);
         }
