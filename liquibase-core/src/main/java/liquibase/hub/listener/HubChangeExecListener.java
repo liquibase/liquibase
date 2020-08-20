@@ -58,7 +58,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                     DatabaseChangeLog databaseChangeLog,
                     Database database,
                     ChangeSet.ExecType execType) {
-        updateHub(changeSet, databaseChangeLog, database, "UPDATE", "PASS", "PASSED");
+        String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
+        updateHub(changeSet, databaseChangeLog, database, "UPDATE", "PASS", message);
     }
 
 
@@ -102,7 +103,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     public void rolledBack(ChangeSet changeSet,
                            DatabaseChangeLog databaseChangeLog,
                            Database database) {
-        updateHubForRollback(changeSet, databaseChangeLog, database, "PASS", "PASSED");
+        String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
+        updateHubForRollback(changeSet, databaseChangeLog, database, "PASS", message);
     }
 
     @Override
@@ -126,7 +128,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     @Override
     public void markedRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         startDateMap.put(changeSet, new Date());
-        updateHub(changeSet, databaseChangeLog, database, "SYNC", "PASS", "PASSED");
+        String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
+        updateHub(changeSet, databaseChangeLog, database, "SYNC", "PASS", message);
     }
 
     //
@@ -140,11 +143,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         if (operation == null) {
             boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
             if (realTime) {
-                logger.info("Hub communication failure.\n" +
+                String message =
+                        "Hub communication failure.\n" +
                         "The data for operation on changeset '" +
                         changeSet.getId() +
                         "' by author '" + changeSet.getAuthor() + "'\n" +
-                        "was not successfully recorded in your Liquibase Hub project");
+                        "was not successfully recorded in your Liquibase Hub project";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                logger.info(message);
             }
             return;
         }
@@ -250,11 +256,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         if (operation == null) {
             boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
             if (realTime) {
-                logger.info("Hub communication failure.\n" +
-                        "The data for operation on changeset '" +
-                        changeSet.getId() +
-                        "' by author '" + changeSet.getAuthor() + "'\n" +
-                        "was not successfully recorded in your Liquibase Hub project");
+                String message =
+                    "Hub communication failure.\n" +
+                    "The data for operation on changeset '" +
+                    changeSet.getId() +
+                    "' by author '" + changeSet.getAuthor() + "'\n" +
+                    "was not successfully recorded in your Liquibase Hub project";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                logger.info(message);
             }
             return;
         }
@@ -294,7 +303,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
         operationChangeEvent.setOperationStatusType(operationStatusType);
-        operationChangeEvent.setStatusMessage(statusMessage);
+        operationChangeEvent.setStatusMessage(statusMessage.length() <= 255 ? statusMessage : statusMessage.substring(0,255));
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
