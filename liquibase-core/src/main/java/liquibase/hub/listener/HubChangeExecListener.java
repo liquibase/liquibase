@@ -57,7 +57,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                     DatabaseChangeLog databaseChangeLog,
                     Database database,
                     ChangeSet.ExecType execType) {
-        updateHub(changeSet, databaseChangeLog, database, "PASS", "PASSED");
+        String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
+        updateHub(changeSet, databaseChangeLog, database, "PASS", message);
     }
 
 
@@ -101,7 +102,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     public void rolledBack(ChangeSet changeSet,
                            DatabaseChangeLog databaseChangeLog,
                            Database database) {
-        updateHubForRollback(changeSet, databaseChangeLog, database, "PASS", "PASSED");
+        String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
+        updateHubForRollback(changeSet, databaseChangeLog, database, "PASS", message);
     }
 
     @Override
@@ -133,11 +135,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         if (operation == null) {
             boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
             if (realTime) {
-                logger.info("Hub communication failure.\n" +
+                String message =
+                        "Hub communication failure.\n" +
                         "The data for operation on changeset '" +
                         changeSet.getId() +
                         "' by author '" + changeSet.getAuthor() + "'\n" +
-                        "was not successfully recorded in your Liquibase Hub project");
+                        "was not successfully recorded in your Liquibase Hub project";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                logger.info(message);
             }
             return;
         }
@@ -242,11 +247,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         if (operation == null) {
             boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
             if (realTime) {
-                logger.info("Hub communication failure.\n" +
-                        "The data for operation on changeset '" +
-                        changeSet.getId() +
-                        "' by author '" + changeSet.getAuthor() + "'\n" +
-                        "was not successfully recorded in your Liquibase Hub project");
+                String message =
+                    "Hub communication failure.\n" +
+                    "The data for operation on changeset '" +
+                    changeSet.getId() +
+                    "' by author '" + changeSet.getAuthor() + "'\n" +
+                    "was not successfully recorded in your Liquibase Hub project";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                logger.info(message);
             }
             return;
         }
