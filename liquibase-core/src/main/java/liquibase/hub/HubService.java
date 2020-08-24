@@ -26,19 +26,19 @@ public interface HubService extends Plugin, PrioritizedService {
 
     Project createProject(Project project) throws LiquibaseException;
 
-    void setRanChangeSets(Environment environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException;
+    void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException;
 
-    Environment getEnvironment(Environment exampleEnvironment, boolean createIfNotExists) throws LiquibaseHubException;
+    Connection getConnection(Connection exampleConnection, boolean createIfNotExists) throws LiquibaseHubException;
 
-    List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException;
+    List<Connection> getConnections(Connection exampleConnection) throws LiquibaseHubException;
 
-    Environment createEnvironment(Environment environment) throws LiquibaseHubException;
+    Connection createConnection(Connection connection) throws LiquibaseHubException;
 
     HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException;
 
     HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException;
 
-    Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException;
+    Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection, Map<String, String> operationParameters) throws LiquibaseHubException;
 
     OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException;
 

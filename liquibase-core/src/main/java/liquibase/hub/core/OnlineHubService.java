@@ -10,15 +10,12 @@ import liquibase.hub.*;
 import liquibase.hub.model.*;
 import liquibase.logging.Logger;
 import liquibase.plugin.Plugin;
-import liquibase.ui.ConsoleUIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class OnlineHubService implements HubService {
@@ -172,58 +169,58 @@ public class OnlineHubService implements HubService {
     public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
         final UUID organizationId = getOrganization().getId();
 
-        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + hubChangeLog.getPrj().getId() + "/changelogs", hubChangeLog, HubChangeLog.class);
+        return http.doPost("/api/v1/organizations/" + organizationId.toString() + "/projects/" + hubChangeLog.getProject().getId() + "/changelogs", hubChangeLog, HubChangeLog.class);
     }
 
     @Override
-    public void setRanChangeSets(Environment environment, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+    public void setRanChangeSets(Connection connection, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         List<HubChange> hubChangeList = new ArrayList<>();
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             hubChangeList.add(new HubChange(ranChangeSet));
         }
 
-        http.doPut("/api/v1/organizations/" + getOrganization().getId() + "/environments/" + environment.getId() + "/changes", hubChangeList, ArrayList.class);
+        http.doPut("/api/v1/organizations/" + getOrganization().getId() + "/connections/" + connection.getId() + "/changes", hubChangeList, ArrayList.class);
     }
 
     @Override
-    public Environment getEnvironment(Environment exampleEnvironment, boolean createIfNotExists) throws LiquibaseHubException {
-        if (exampleEnvironment.getId() != null) {
+    public Connection getConnection(Connection exampleConnection, boolean createIfNotExists) throws LiquibaseHubException {
+        if (exampleConnection.getId() != null) {
             //do not auto-create if specifying the exact id
-            return http.doGet("/api/v1/environments/" + exampleEnvironment.getId().toString(), null, Environment.class);
+            return http.doGet("/api/v1/connections/" + exampleConnection.getId().toString(), null, Connection.class);
         }
 
-        final List<Environment> environments = getEnvironments(exampleEnvironment);
+        final List<Connection> connections;
 
-        if (environments.size() == 0) {
+        if (connections.size() == 0) {
             if (createIfNotExists) {
-                return createEnvironment(exampleEnvironment);
+                return createConnection(exampleConnection);
             } else {
-                throw new LiquibaseHubObjectNotFoundException("Environment not found");
+                throw new LiquibaseHubObjectNotFoundException("Connection not found");
             }
-        } else if (environments.size() == 1) {
-            return environments.get(0);
+        } else if (connections.size() == 1) {
+            return connections.get(0);
         } else {
-            throw new LiquibaseHubException("The url " + exampleEnvironment.getJdbcUrl() + " is used by more than one environment. Please specify 'hubEnvironmentId=<hubEnvironmentId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line");
+            throw new LiquibaseHubException("The url " + exampleConnection.getJdbcUrl() + " is used by more than one connection. Please specify 'hubConnectionId=<hubConnectionId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line");
         }
     }
 
     @Override
-    public List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException {
+    public List<Connection> getConnections(Connection exampleConnection) throws LiquibaseHubException {
         final Organization organization = getOrganization();
 
         final ListResponse response;
         try {
-            response = http.doGet("/api/v1/organizations/" + organization.getId() + "/environments", Collections.singletonMap("search", toSearchString(exampleEnvironment)), ListResponse.class, Environment.class);
+            response = http.doGet("/api/v1/organizations/" + organization.getId() + "/connections", Collections.singletonMap("search", toSearchString(exampleConnection)), ListResponse.class, Connection.class);
         } catch (LiquibaseHubObjectNotFoundException e) {
             //Hub should not be returning this, but does
             return new ArrayList<>();
         }
 
-        List<Environment> returnList = new ArrayList<>();
+        List<Connection> returnList = new ArrayList<>();
 
         try {
             for (Map object : (List<Map>) response.getContent()) {
-                returnList.add(new Environment()
+                returnList.add(new Connection()
                         .setId(UUID.fromString((String) object.get("id")))
                         .setJdbcUrl((String) object.get("jdbcUrl"))
                         .setName((String) object.get("name"))
@@ -231,7 +228,7 @@ public class OnlineHubService implements HubService {
                         .setCreateDate(parseDate((String) object.get("createDate")))
                         .setUpdateDate(parseDate((String) object.get("updateDate")))
                         .setRemoveDate(parseDate((String) object.get("removeDate")))
-                        .setPrj(exampleEnvironment != null ? exampleEnvironment.getPrj() : null)
+                        .setProject(exampleConnection != null ? exampleConnection.getProject() : null)
                 );
             }
         } catch (ParseException e) {
@@ -249,22 +246,22 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public Environment createEnvironment(Environment environment) throws LiquibaseHubException {
-        if (environment.getPrj() == null || environment.getPrj().getId() == null) {
-            throw new LiquibaseHubUserException("projectId is required to create an environment");
+    public Connection createConnection(Connection connection) throws LiquibaseHubException {
+        if (connection.getProject() == null || connection.getProject().getId() == null) {
+            throw new LiquibaseHubUserException("projectId is required to create a connection");
         }
 
         //cannot send project information
-        Environment sendEnvironment = new Environment()
-                .setName(environment.getName())
-                .setJdbcUrl(environment.getJdbcUrl())
-                .setDescription(environment.getDescription());
+        Connection sendConnection = new Connection()
+                .setName(connection.getName())
+                .setJdbcUrl(connection.getJdbcUrl())
+                .setDescription(connection.getDescription());
 
-        if (sendEnvironment.getName() == null) {
-            sendEnvironment.setName(sendEnvironment.getJdbcUrl());
+        if (sendConnection.getName() == null) {
+            sendConnection.setName(sendConnection.getJdbcUrl());
         }
 
-        return http.doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + environment.getPrj().getId() + "/environments", sendEnvironment, Environment.class);
+        return http.doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + connection.getProject().getId() + "/connections", sendConnection, Connection.class);
     }
 
     /**
@@ -284,19 +281,16 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
+    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection, Map<String, String> operationParameters) throws LiquibaseHubException {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("envId", environment.getId());
-        requestBody.put("envJdbcUrl", environment.getJdbcUrl());
-        requestBody.put("envName", environment.getName());
-        requestBody.put("envDescription", environment.getDescription());
+        requestBody.put("connectionId", connection.getId());
         requestBody.put("changelogId", changeLog.getId());
         requestBody.put("operationType", operationType);
         requestBody.put("operationStatusType", "PASS");
         requestBody.put("statusMessage", operationType);
 
         final Operation operation = http.doPost("/api/v1/operations", requestBody, Operation.class);
-        operation.setEnvironment(environment);
+        operation.setConnection(connection);
         return operation;
     }
 
@@ -320,7 +314,7 @@ public class OnlineHubService implements HubService {
             requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
         }
 
-        return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getEnvironment().getPrj().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
+        return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getConnection().getProject().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
 
     }
 

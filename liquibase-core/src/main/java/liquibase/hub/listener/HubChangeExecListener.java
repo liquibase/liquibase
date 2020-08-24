@@ -228,7 +228,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setLogs("LOGS");
         operationChangeEvent.setLogsTimestamp(new Date());
 
-        operationChangeEvent.setProject(hubChangeLog.getPrj());
+        operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
 
         try {
@@ -320,7 +320,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             // Consume
             //
         }
-        operationChangeEvent.setProject(hubChangeLog.getPrj());
+        operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
         try {
             hubService.sendOperationChangeEvent(operationChangeEvent);

@@ -7,7 +7,7 @@ import java.util.UUID;
 public class Operation implements HubModel {
 
     private UUID id;
-    private Environment environment;
+    private Connection connection;
     private OperationStatus operationStatus;
     private Map<String, String> clientMetadata;
     private Map<String, String> parameters;
@@ -23,12 +23,12 @@ public class Operation implements HubModel {
         this.id = id;
     }
 
-    public Environment getEnvironment() {
-        return environment;
+    public Connection getConnection() {
+        return connection;
     }
 
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 
     public OperationStatus getOperationStatus() {

@@ -29,9 +29,7 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.hub.HubUpdater;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.listener.HubChangeExecListener;
-import liquibase.hub.model.Environment;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.Operation;
+import liquibase.hub.model.*;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -87,7 +85,7 @@ public class Liquibase implements AutoCloseable {
     private ChangeExecListener changeExecListener;
     private ChangeLogSyncListener changeLogSyncListener;
 
-    private UUID hubEnvironmentId;
+    private UUID hubConnectionId;
 
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
@@ -137,12 +135,12 @@ public class Liquibase implements AutoCloseable {
         this.changeLogParameters = new ChangeLogParameters(database);
     }
 
-    public UUID getHubEnvironmentId() {
-        return hubEnvironmentId;
+    public UUID getHubConnectionId() {
+        return hubConnectionId;
     }
 
-    public void setHubEnvironmentId(UUID hubEnvironmentId) {
-        this.hubEnvironmentId = hubEnvironmentId;
+    public void setHubConnectionId(UUID hubConnectionId) {
+        this.hubConnectionId = hubConnectionId;
     }
 
     /**
@@ -239,13 +237,13 @@ public class Liquibase implements AutoCloseable {
                 ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
                 //
-                // Create or retrieve the Environment
+                // Create or retrieve the Connection
                 // Make sure the Hub is available here by checking the return
                 //
-                Environment environment = getEnvironment(changeLog);
-                if (environment != null) {
+                Connection connection = getConnection(changeLog);
+                if (connection != null) {
                     updateOperation =
-                       hubUpdater.preUpdateHub("UPDATE", environment, contexts, labelExpression, changeLogFile, changeLogIterator, database);
+                       hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, changeLogIterator, database);
                 }
 
                 //
@@ -287,39 +285,39 @@ public class Liquibase implements AutoCloseable {
 
     /**
      *
-     * Create or retrieve the Environment object
+     * Create or retrieve the Connection object
      *
      * @param   changeLog              Database changelog
-     * @return  Environment
+     * @return  Connection
      * @throws  LiquibaseHubException  Thrown by HubService
      *
      */
-    public Environment getEnvironment(DatabaseChangeLog changeLog) throws LiquibaseHubException {
+    public Connection getConnection(DatabaseChangeLog changeLog) throws LiquibaseHubException {
         String changeLogId = changeLog.getChangeLogId();
         HubUpdater hubUpdater = new HubUpdater(new Date(), changeLog);
         if (hubUpdater.hubIsNotAvailable(changeLogId)) {
           return null;
         }
 
-        Environment environment;
+        Connection connection;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        if (getHubEnvironmentId() == null) {
+        if (getHubConnectionId() == null) {
             HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLogId));
             if (hubChangeLog == null) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                         "Retrieving Hub Change Log failed for Change Log ID: " + changeLogId);
                 return null;
             }
-            Environment exampleEnvironment = new Environment();
-            exampleEnvironment.setPrj(hubChangeLog.getPrj());
-            exampleEnvironment.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
-            environment = hubService.getEnvironment(exampleEnvironment, true);
+            Connection exampleConnection = new Connection();
+            exampleConnection.setProject(hubChangeLog.getProject());
+            exampleConnection.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
+            connection = hubService.getConnection(exampleConnection, true);
 
-            setHubEnvironmentId(environment.getId());
+            setHubConnectionId(connection.getId());
         } else {
-            environment = hubService.getEnvironment(new Environment().setId(getHubEnvironmentId()), true);
+            connection = hubService.getConnection(new Connection().setId(getHubConnectionId()), true);
         }
-        return environment;
+        return connection;
     }
 
 
@@ -448,13 +446,13 @@ public class Liquibase implements AutoCloseable {
                             new CountChangeSetFilter(changesToApply));
 
                     //
-                    // Create or retrieve the Environment
+                    // Create or retrieve the Connection
                     // Make sure the Hub is available here by checking the return
                     //
-                    Environment environment = getEnvironment(changeLog);
-                    if (environment != null) {
+                    Connection connection = getConnection(changeLog);
+                    if (connection != null) {
                         updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", environment, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                            hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
                     }
 
                     //
@@ -559,13 +557,13 @@ public class Liquibase implements AutoCloseable {
                             new UpToTagChangeSetFilter(tag, ranChangeSetList));
 
                     //
-                    // Create or retrieve the Environment
+                    // Create or retrieve the Connection
                     // Make sure the Hub is available here by checking the return
                     //
-                    Environment environment = getEnvironment(changeLog);
-                    if (environment != null) {
+                    Connection connection = getConnection(changeLog);
+                    if (connection != null) {
                         updateOperation =
-                           hubUpdater.preUpdateHub("UPDATE", environment, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                           hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
                     }
 
                     //
@@ -800,12 +798,12 @@ public class Liquibase implements AutoCloseable {
                             new CountChangeSetFilter(changesToRollback));
 
                     //
-                    // Create or retrieve the Environment
+                    // Create or retrieve the Connection
                     // Make sure the Hub is available here by checking the return
                     //
-                    Environment environment = getEnvironment(changeLog);
-                    if (environment != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", environment, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                    Connection connection = getConnection(changeLog);
+                    if (connection != null) {
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
                     }
 
                     //
@@ -1022,12 +1020,12 @@ public class Liquibase implements AutoCloseable {
                             new DbmsChangeSetFilter(database));
 
                     //
-                    // Create or retrieve the Environment
+                    // Create or retrieve the Connection
                     // Make sure the Hub is available here by checking the return
                     //
-                    Environment environment = getEnvironment(changeLog);
-                    if (environment != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", environment, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                    Connection connection = getConnection(changeLog);
+                    if (connection != null) {
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
                     }
 
                     //
@@ -1171,12 +1169,12 @@ public class Liquibase implements AutoCloseable {
                             new DbmsChangeSetFilter(database));
 
                     //
-                    // Create or retrieve the Environment
+                    // Create or retrieve the Connection
                     // Make sure the Hub is available here by checking the return
                     //
-                    Environment environment = getEnvironment(changeLog);
-                    if (environment != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", environment, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                    Connection connection = getConnection(changeLog);
+                    if (connection != null) {
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
                     }
 
                     //
@@ -1318,13 +1316,13 @@ public class Liquibase implements AutoCloseable {
                             new DbmsChangeSetFilter(database));
 
                     //
-                    // Create or retrieve the Environment
+                    // Create or retrieve the Connection
                     // Make sure the Hub is available here by checking the return
                     //
-                    Environment environment = getEnvironment(changeLog);
-                    if (environment != null) {
+                    Connection connection = getConnection(changeLog);
+                    if (connection != null) {
                         changeLogSyncOperation =
-                                hubUpdater.preUpdateHub("CHANGELOGSYNC", environment, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                                hubUpdater.preUpdateHub("CHANGELOGSYNC", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
                     }
 
                     //
