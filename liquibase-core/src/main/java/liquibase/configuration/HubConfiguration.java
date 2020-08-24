@@ -32,7 +32,7 @@ public class HubConfiguration extends AbstractConfigurationContainer {
                 .setDescription("Liquibase Hub Project for operations");
         getContainer().addProperty(LIQUIBASE_HUB_MODE, String.class)
                 .setDescription("Content to send to Liquibase Hub during operations. Values can be 'all', 'meta', or 'off'")
-                .setDefaultValue("all");
+                .setDefaultValue("meta");
     }
 
     @Override
