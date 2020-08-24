@@ -189,7 +189,7 @@ public class OnlineHubService implements HubService {
             return http.doGet("/api/v1/connections/" + exampleConnection.getId().toString(), null, Connection.class);
         }
 
-        final List<Connection> connections;
+        final List<Connection> connections = getConnections(exampleConnection);
 
         if (connections.size() == 0) {
             if (createIfNotExists) {
