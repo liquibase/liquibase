@@ -1316,13 +1316,13 @@ public class Liquibase implements AutoCloseable {
                             new DbmsChangeSetFilter(database));
 
                     //
-                    // Create or retrieve the Environment
+                    // Create or retrieve the Connection
                     // Make sure the Hub is available here by checking the return
                     //
-                    Environment environment = getEnvironment(changeLog);
-                    if (environment != null) {
+                    Connection connection = getConnection(changeLog);
+                    if (connection != null) {
                         changeLogSyncOperation =
-                                hubUpdater.preUpdateHub("CHANGELOGSYNC", environment, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                                hubUpdater.preUpdateHub("CHANGELOGSYNC", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
                     }
 
                     //
