@@ -122,7 +122,7 @@ class HttpClient {
         return doRequest(method, url, requestBodyObject, returnType, null);
     }
 
-    private <T> T doRequest(String method, String url, Object requestBodyObject, Class<T> returnType, Class contentReturnType) throws LiquibaseHubException {
+    protected  <T> T doRequest(String method, String url, Object requestBodyObject, Class<T> returnType, Class contentReturnType) throws LiquibaseHubException {
         try {
             HttpURLConnection connection = (HttpURLConnection) openConnection(url);
             if (requestBodyObject != null) {

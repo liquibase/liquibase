@@ -53,7 +53,7 @@ public class OnlineHubService implements HubService {
             final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
 
             if (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF")) {
-                hubServiceFactory.setOfflineReason("property liquibase.hub.mode is 'OFF'. To send data to Liquibase Hub, please set it to \"realtime\"");
+                hubServiceFactory.setOfflineReason("property liquibase.hub.mode is 'OFF'. To send data to Liquibase Hub, please set it to \"all\"");
                 this.available = false;
             } else if (getApiKey() == null) {
                 hubServiceFactory.setOfflineReason("liquibase.hub.apiKey was not specified");
@@ -329,6 +329,13 @@ public class OnlineHubService implements HubService {
 
     @Override
     public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
+        String changesetBody = null;
+        String[] generatedSql = null;
+        if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
+            changesetBody = operationChangeEvent.getChangesetBody();
+            generatedSql = operationChangeEvent.getGeneratedSql();
+        }
+
         OperationChangeEvent sendOperationChangeEvent =
            new OperationChangeEvent()
               .setEventType(operationChangeEvent.getEventType())
@@ -338,8 +345,8 @@ public class OnlineHubService implements HubService {
               .setStartDate(operationChangeEvent.getStartDate())
               .setEndDate(operationChangeEvent.getEndDate())
               .setOperationStatusType(operationChangeEvent.getOperationStatusType())
-              .setChangesetBody(operationChangeEvent.getChangesetBody())
-              .setGeneratedSql(operationChangeEvent.getGeneratedSql())
+              .setChangesetBody(changesetBody)
+              .setGeneratedSql(generatedSql)
               .setLogs(operationChangeEvent.getLogs())
               .setStatusMessage(operationChangeEvent.getStatusMessage())
               .setLogsTimestamp(operationChangeEvent.getLogsTimestamp());

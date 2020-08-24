@@ -31,8 +31,8 @@ public class HubConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(LIQUIBASE_HUB_PROJECT, String.class)
                 .setDescription("Liquibase Hub Project for operations");
         getContainer().addProperty(LIQUIBASE_HUB_MODE, String.class)
-                .setDescription("Liquibase Hub mode for operations. Values can be 'realtime' or 'off'")
-                .setDefaultValue("REALTIME");
+                .setDescription("Content to send to Liquibase Hub during operations. Values can be 'all', 'meta', or 'off'")
+                .setDefaultValue("all");
     }
 
     @Override
@@ -92,9 +92,9 @@ public class HubConfiguration extends AbstractConfigurationContainer {
     public String getLiquibaseHubMode() {
         final String value = getContainer().getValue(LIQUIBASE_HUB_MODE, String.class);
 
-        final List<String> validValues = Arrays.asList("realtime", "off");
+        final List<String> validValues = Arrays.asList("off", "meta", "all");
         if (!validValues.contains(value.toLowerCase())) {
-            throw new RuntimeException(" An invalid liquibase.hub.mode value of "+value+" detected. Acceptable values are \"realtime\" or \"off\"");
+            throw new RuntimeException(" An invalid liquibase.hub.mode value of "+value+" detected. Acceptable values are "+StringUtil.join(validValues, ", "));
         }
         return value;
     }
