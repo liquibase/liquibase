@@ -15,6 +15,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Field;
+import java.net.ConnectException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -72,10 +73,14 @@ public class OnlineHubService implements HubService {
                         this.organizationId = organization.getId();
                     }
 
-                    log.info("Connected to Liquibase Hub with an API Key '" +  LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKeySecureDescription() + "'");
+                    log.info("Connected to Liquibase Hub with an API Key '" + LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKeySecureDescription() + "'");
                     this.available = true;
                 } catch (LiquibaseHubException e) {
-                    hubServiceFactory.setOfflineReason(e.getMessage());
+                    if (e.getCause() instanceof ConnectException) {
+                        hubServiceFactory.setOfflineReason("Cannot connect to Liquibase Hub");
+                    } else {
+                        hubServiceFactory.setOfflineReason(e.getMessage());
+                    }
                     log.info(e.getMessage(), e);
                     this.available = false;
                 }
