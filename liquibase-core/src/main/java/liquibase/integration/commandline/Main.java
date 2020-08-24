@@ -308,12 +308,7 @@ public class Main {
                     Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
 
-                    if (main.commandParams.contains("--help") &&
-                        (main.command.startsWith("rollbackOneChangeSet") ||
-                         main.command.startsWith("rollbackOneUpdate") ||
-                         (main.command.startsWith("diff") && main.isFormattedDiff()))) {
-                        //don't need to check setup
-                    } else {
+                    if (setupNeeded(main)) {
                         List<String> setupMessages = main.checkSetup();
                         if (!setupMessages.isEmpty()) {
                             main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
@@ -380,12 +375,24 @@ public class Main {
                 if (isHubEnabled(main.command) &&
                     LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKey() != null &&
                     !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
-                    ui.sendMessage("The command "+main.command+"'s operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
+                    ui.sendMessage("WARNING: The command "+main.command+" operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
                 }
 
                 return 0;
             }
         });
+    }
+
+    private static boolean setupNeeded(Main main) throws CommandLineParsingException {
+        if (main.command.toLowerCase().startsWith(COMMANDS.REGISTER_CHANGELOG.toLowerCase())) {
+            return false;
+        }
+        if (! main.commandParams.contains("--help")) {
+            return true;
+        }
+        return !main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_CHANGE_SET.toLowerCase()) &&
+                !main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_UPDATE.toLowerCase()) &&
+                (!main.command.toLowerCase().startsWith(COMMANDS.DIFF.toLowerCase()) || !main.isFormattedDiff());
     }
 
     protected static void setLogLevel(java.util.logging.Logger logger, java.util.logging.Level level) {
