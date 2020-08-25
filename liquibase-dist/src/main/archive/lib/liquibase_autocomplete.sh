@@ -15,6 +15,8 @@ _liquibase()
   updateToTag 
   updateToTagSQL 
   status
+  registerChangeLog
+  syncHub
   rollback
   rollbackSQL
   rollbackOneChangeSet
