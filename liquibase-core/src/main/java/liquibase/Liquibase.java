@@ -513,7 +513,7 @@ public class Liquibase implements AutoCloseable {
      *
      * Update to tag
      *
-     * @param   tag
+     * @param   tag                             Tag to update for
      * @param   contexts
      * @param   labelExpression
      * @throws  LiquibaseException
