@@ -138,8 +138,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                                       String operationStatusType,
                                       String statusMessage) {
         if (operation == null) {
-            boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
-            if (realTime) {
+            boolean hubOn =
+                    ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
+            if (hubOn) {
                 String message =
                         "Hub communication failure.\n" +
                         "The data for operation on changeset '" +
@@ -253,8 +254,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         // If not connected to Hub but we are supposed to be then show message
         //
         if (operation == null) {
-            boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
-            if (realTime) {
+            boolean hubOn =
+                ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
+            if (hubOn) {
                 String message =
                     "Hub communication failure.\n" +
                     "The data for operation on changeset '" +
