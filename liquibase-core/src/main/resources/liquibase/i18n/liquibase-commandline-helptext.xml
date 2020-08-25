@@ -82,7 +82,7 @@ Diff Commands
                                  the database
                                  to the reference database to standard out
 Hub Commands
- registerChangeLog              This interactive CLI command will register the
+ registerChangeLog               This interactive CLI command will register the
                                  specified changelog to a Project in your
                                  Liquibase Hub organization. You can create a
                                  Project from the CLI, or choose one already
@@ -90,7 +90,7 @@ Hub Commands
                                  Hub at https://hub.liquibase.com.
 
 
- syncHub                        Synchronizes your local DATABASECHANGELOG table
+ syncHub                         Synchronizes your local DATABASECHANGELOG table
                                  with its Liquibase Hub counterpart. Learn more
                                  about free Liquibase Hub at https://hub.liquibase.com.
 
