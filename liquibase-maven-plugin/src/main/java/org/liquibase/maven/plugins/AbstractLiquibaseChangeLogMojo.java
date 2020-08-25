@@ -4,12 +4,15 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -38,6 +41,20 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      * @parameter property="liquibase.changeLogFile"
      */
     protected String changeLogFile;
+
+    /**
+     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hub.apiKey"
+     */
+    protected String liquibaseHubApiKey;
+
+    /**
+     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hub.url"
+     */
+    protected String liquibaseHubUrl;
 
 
     /**
@@ -76,6 +93,17 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      */
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+        //
+        // Store the Hub API key and URL for later use
+        //
+        if (StringUtil.isNotEmpty(liquibaseHubApiKey)) {
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            hubConfiguration.setLiquibaseHubApiKey(liquibaseHubApiKey);
+        }
+        if (StringUtil.isNotEmpty(liquibaseHubUrl)) {
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            hubConfiguration.setLiquibaseHubUrl(liquibaseHubUrl);
+        }
     }
 
     @Override
