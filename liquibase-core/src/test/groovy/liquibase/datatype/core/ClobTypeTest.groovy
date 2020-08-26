@@ -64,9 +64,9 @@ class ClobTypeTest extends Specification {
         object          | database            | expected
         null            | new MockDatabase()  | null
         "'"            | new MockDatabase()  | "'"
-        'text'            | new MockDatabase()  | 'text'
-        ""            | new MSSQLDatabase()  | "'"
-        //new DatabaseFunction()            | new MockDatabase()  | ""
-
+        'text'            | new MockDatabase()  | /'text'/
+        ""            | new MSSQLDatabase()  | /''/
+        new DatabaseFunction("NEWID()")                         | new MockDatabase() | "NEWID()"
+        new DatabaseFunction("NEWSEQUENTIALID()")               | new MockDatabase() | "NEWSEQUENTIALID()"
     }
 }
