@@ -513,7 +513,7 @@ public class Liquibase implements AutoCloseable {
      *
      * Update to tag
      *
-     * @param   tag
+     * @param   tag                             Tag to update for
      * @param   contexts
      * @param   labelExpression
      * @throws  LiquibaseException
@@ -542,7 +542,11 @@ public class Liquibase implements AutoCloseable {
                     changeLog = getDatabaseChangeLog();
 
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+
+                    ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
                     changeLog.validate(database, contexts, labelExpression);
+
                     hubUpdater = new HubUpdater(new Date(), changeLog);
 
                     //
