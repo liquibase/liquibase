@@ -1,6 +1,8 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.StandardObjectChangeFilter;
@@ -110,6 +112,12 @@ public class LiquibaseGenerateChangeLogMojo extends
             if (diffIncludeObjects != null) {
                 diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects));
             }
+
+            //
+            // Set the global configuration option based on presence of the dataOutputDirectory
+            //
+            boolean b = dataDir != null;
+            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
 
             CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes),
                     StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), diffOutputControl);

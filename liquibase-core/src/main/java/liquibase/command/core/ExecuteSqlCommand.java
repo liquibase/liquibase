@@ -65,7 +65,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
 
     @Override
     protected CommandResult run() throws Exception {
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
         String sqlText;
         if (sqlFile == null) {
             sqlText = sql;

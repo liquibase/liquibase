@@ -108,7 +108,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         final MockExecutor mockExecutor = new MockExecutor();
 
-        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
 
         final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
@@ -131,7 +131,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         final MockExecutor mockExecutor = new MockExecutor();
 
-        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
 
         final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
@@ -155,7 +155,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         final MockExecutor mockExecutor = new MockExecutor();
 
-        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
 
         final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
@@ -179,7 +179,7 @@ public abstract class AbstractJdbcDatabaseTest {
 
         final MockExecutor mockExecutor = new MockExecutor();
 
-        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
 
         final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 

@@ -25,6 +25,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     protected int driverVersionMajor;
     protected int driverVersionMinor;
     private Logger log = LogService.getLog(getClass());
+    private boolean shutdownEmbeddedDerby = true;
 
     public DerbyDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
@@ -89,6 +90,14 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return "derby";
     }
 
+    public boolean getShutdownEmbeddedDerby() {
+        return shutdownEmbeddedDerby;
+    }
+
+    public void setShutdownEmbeddedDerby(boolean shutdown) {
+        this.shutdownEmbeddedDerby = shutdown;
+    }
+
     @Override
     public boolean supportsSequences() {
         return ((driverVersionMajor == 10) && (driverVersionMinor >= 6)) || (driverVersionMajor >= 11);
@@ -131,34 +140,38 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if ((driverName != null) && driverName.toLowerCase().contains("embedded")) {
-            try {
-                if (url.contains(";")) {
-                    url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
-                } else {
-                    url += ";shutdown=true";
-                }
-                LogService.getLog(getClass()).info(LogType.LOG, "Shutting down derby connection: " + url);
-                // this cleans up the lock files in the embedded derby database folder
-                JdbcConnection connection = (JdbcConnection) getConnection();
-                ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
-                Driver driver = (Driver) classLoader.loadClass(driverName).getConstructor().newInstance();
-                // this cleans up the lock files in the embedded derby database folder
-                driver.connect(url, null);
-            } catch (Exception e) {
-                if (e instanceof SQLException) {
-                    String state = ((SQLException) e).getSQLState();
-                    if ("XJ015".equals(state) || "08006".equals(state)) {
-                        // "The XJ015 error (successful shutdown of the Derby engine) and the 08006 
-                        // error (successful shutdown of a single database) are the only exceptions 
-                        // thrown by Derby that might indicate that an operation succeeded. All other 
-                        // exceptions indicate that an operation failed."
-                        // See http://db.apache.org/derby/docs/dev/getstart/rwwdactivity3.html
-                        return;
-                    }
-                }
-                throw new DatabaseException("Error closing derby cleanly", e);
+        if (getShutdownEmbeddedDerby() && (driverName != null) && driverName.toLowerCase().contains("embedded")) {
+            shutdownDerby(url, driverName);
+        }
+    }
+
+    protected void shutdownDerby(String url, String driverName) throws DatabaseException {
+        try {
+            if (url.contains(";")) {
+                url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
+            } else {
+                url += ";shutdown=true";
             }
+            LogService.getLog(getClass()).info(LogType.LOG, "Shutting down derby connection: " + url);
+            // this cleans up the lock files in the embedded derby database folder
+            JdbcConnection connection = (JdbcConnection) getConnection();
+            ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
+            Driver driver = (Driver) classLoader.loadClass(driverName).getConstructor().newInstance();
+            // this cleans up the lock files in the embedded derby database folder
+            driver.connect(url, null);
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                String state = ((SQLException) e).getSQLState();
+                if ("XJ015".equals(state) || "08006".equals(state)) {
+                    // "The XJ015 error (successful shutdown of the Derby engine) and the 08006 
+                    // error (successful shutdown of a single database) are the only exceptions 
+                    // thrown by Derby that might indicate that an operation succeeded. All other 
+                    // exceptions indicate that an operation failed."
+                    // See http://db.apache.org/derby/docs/dev/getstart/rwwdactivity3.html
+                    return;
+                }
+            }
+            throw new DatabaseException("Error closing derby cleanly", e);
         }
     }
 
@@ -194,7 +207,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
+            return ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
             LogService.getLog(getClass()).info(LogType.LOG, "Error getting default schema", e);
         }

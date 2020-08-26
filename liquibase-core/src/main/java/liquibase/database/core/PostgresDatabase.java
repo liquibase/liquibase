@@ -11,10 +11,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
@@ -70,7 +68,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 "UNIQUE", "USER", "USING", "VARIADIC", "VERBOSE", "WHEN", "WHERE", "WINDOW", "WITH"));
         super.sequenceNextValueFunction = "nextval('%s')";
         super.sequenceCurrentValueFunction = "currval('%s')";
-        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text"));
+        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "oid", "bytea", "date", "timestamptz", "text", "int2[]", "int4[]", "int8[]", "float4[]", "float8[]", "bool[]", "varchar[]", "text[]"));
         super.unquotedObjectsAreUppercased=false;
         log = LogService.getLog(getClass());
     }
@@ -238,6 +236,24 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    protected String getAutoIncrementClause(final String generationType, final Boolean defaultOnNull) {
+        try {
+            if (getDatabaseMajorVersion() < 10) {
+                return "";
+            }
+        } catch (DatabaseException e) {
+            return "";
+        }
+
+        if (StringUtils.isEmpty(generationType)) {
+            return super.getAutoIncrementClause();
+        }
+
+        String autoIncrementClause = "GENERATED %s AS IDENTITY"; // %s -- [ ALWAYS | BY DEFAULT ]
+        return String.format(autoIncrementClause, generationType);
+    }
+
+    @Override
     public boolean generateAutoIncrementStartWith(BigInteger startWith) {
         try {
             if (getDatabaseMajorVersion() < 10) {
@@ -367,12 +383,18 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
         final String sqlToGetVersion = "SELECT version()";
         List<?> result = ExecutorService.getInstance().
-                getExecutor(this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
+                getExecutor("jdbc", this).queryForList(new RawSqlStatement(sqlToGetVersion), String.class);
         if (result != null && !result.isEmpty()){
             return dbFullVersion = result.get(0).toString();
         }
 
         throw new DatabaseException("Connection set to Postgres type we don't support !");
+    }
+
+    @Override
+    public void rollback() throws DatabaseException {
+        super.rollback();
+        DatabaseUtils.initializeDatabase(getDefaultCatalogName(), getDefaultSchemaName(), this);
     }
 
     /**

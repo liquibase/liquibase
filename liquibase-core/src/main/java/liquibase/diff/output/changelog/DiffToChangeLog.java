@@ -481,7 +481,7 @@ public class DiffToChangeLog {
      */
     protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Database database) throws DatabaseException {
         if (database instanceof DB2Database) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
@@ -496,7 +496,7 @@ public class DiffToChangeLog {
                 graph.add(bName, tabName);
             }
         } else if (database instanceof Db2zDatabase) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             String db2ZosSql = "SELECT DSCHEMA AS TABSCHEMA, DNAME AS TABNAME, BSCHEMA, BNAME FROM SYSIBM.SYSDEPENDENCIES WHERE (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
@@ -512,7 +512,7 @@ public class DiffToChangeLog {
                 graph.add(bName, tabName);
             }
         } else if (database instanceof OracleDatabase) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             List<Map<String, ?>> rs = queryForDependenciesOracle(executor, schemas);
             for (Map<String, ?> row : rs) {
                 String tabName = null;
@@ -532,7 +532,7 @@ public class DiffToChangeLog {
                 graph.add(bName, tabName);
             }
         } else if (database instanceof MSSQLDatabase) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             String sql = "select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
@@ -628,17 +628,19 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof PostgresDatabase) {
             final String sql = queryForDependenciesPostgreSql(schemas);
-            final Executor executor = ExecutorService.getInstance().getExecutor(database);
+            final Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
             final List<Map<String, ?>> queryForListResult = executor.queryForList(new RawSqlStatement(sql));
 
             for (Map<String, ?> row : queryForListResult) {
-                String bName = StringUtils.trimToNull(StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) +
-                        "." + StringUtils.trimToNull(row.get("REFERENCING_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
-                String tabName = StringUtils.trimToNull(StringUtils.trimToNull(row.get("REFERENCED_SCHEMA_NAME").toString()) +
-                        "." + StringUtils.trimToNull(row.get("REFERENCED_NAME").toString().replaceAll("\\s*\\([^)]*\\)\\s*", "")));
+                String bName = StringUtils.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCING_NAME"));
+                String tabName = StringUtils.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
+                        "." + StringUtils.trimToEmpty((String)row.get("REFERENCED_NAME"));
 
-                if (tabName != null && bName != null) {
-                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                if (!(tabName.isEmpty() || bName.isEmpty())) {
+                  graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                  graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
+                            tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
                 }
             }
         }
@@ -723,7 +725,6 @@ public class DiffToChangeLog {
             graph.addType(type);
         }
         List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase, generatorType);
-
         if (!loggedOrderFor.contains(generatorType)) {
             String log = generatorType.getSimpleName() + " type order: ";
             for (Class<? extends DatabaseObject> type : types) {
@@ -869,17 +870,35 @@ public class DiffToChangeLog {
         }
 
         public List<Class<? extends DatabaseObject>> sort(Database database, Class<? extends ChangeGenerator> generatorType) {
+            Map<Class<? extends DatabaseObject>, Node> newNodes = new HashMap<>();
             ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
             for (Class<? extends DatabaseObject> type : allNodes.keySet()) {
+                //
+                // For both run* types
+                // make sure that if the Node does not exist
+                // it gets created and saved in the newNodes map
+                //
                 for (Class<? extends DatabaseObject> afterType : changeGeneratorFactory.runBeforeTypes(type, database, generatorType)) {
-                    getNode(type).addEdge(getNode(afterType));
+                    Node typeNode = retrieveOrCreateNode(newNodes, type);
+                    Node afterTypeNode = retrieveOrCreateNode(newNodes, afterType);
+                    typeNode.addEdge(afterTypeNode);
                 }
 
                 for (Class<? extends DatabaseObject> beforeType : changeGeneratorFactory.runAfterTypes(type, database, generatorType)) {
-                    getNode(beforeType).addEdge(getNode(type));
+                    Node beforeTypeNode = retrieveOrCreateNode(newNodes, beforeType);
+                    Node typeNode = retrieveOrCreateNode(newNodes, type);
+                    beforeTypeNode.addEdge(typeNode);
                 }
             }
 
+            //
+            // Add any newly created Node objects to the allNodes map
+            //
+            for (Node newNode : newNodes.values()) {
+                if (! allNodes.containsKey(newNode.type)) {
+                    allNodes.put(newNode.type, newNode);
+                }
+            }
 
             ArrayList<Node> returnNodes = new ArrayList<>();
 
@@ -922,6 +941,25 @@ public class DiffToChangeLog {
                 returnList.add(node.type);
             }
             return returnList;
+        }
+
+        //
+        // If the Node for this type already exists then return it
+        // else look in the newNodes map for one
+        // else create a new Node and put it in the newNodes map
+        //
+        private Node retrieveOrCreateNode(Map<Class<? extends DatabaseObject>, Node> newNodes, Class<? extends DatabaseObject> type) {
+            Node node;
+            if (allNodes.containsKey(type)) {
+                node = allNodes.get(type);
+            } else if (newNodes.containsKey(type)) {
+                node = newNodes.get(type);
+            }
+            else {
+                node = new Node(type);
+                newNodes.put(type, node);
+            }
+            return node;
         }
 
         private void checkForCycleInDependencies(Class<? extends ChangeGenerator> generatorType) {

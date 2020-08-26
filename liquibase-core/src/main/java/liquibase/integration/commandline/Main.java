@@ -14,11 +14,12 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
-import liquibase.command.core.DropAllCommand;
-import liquibase.command.core.ExecuteSqlCommand;
-import liquibase.command.core.SnapshotCommand;
+import liquibase.command.LiquibaseCommand;
+import liquibase.command.core.*;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -41,7 +42,6 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.xml.XMLResourceBundle;
 import liquibase.util.xml.XmlResourceBundleControl;
@@ -127,6 +127,7 @@ public class Main {
     protected String schemas;
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
+    private boolean liquibaseProLicenseValid = false;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
@@ -134,12 +135,13 @@ public class Main {
     protected String rollbackScript;
 
     private static int[] suspiciousCodePoints = {160, 225, 226, 227, 228, 229, 230, 198, 200, 201, 202, 203,
-                                                 204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
-                                                 220, 222, 223, 232, 233, 234, 235, 236, 237, 238, 239, 241,
-                                                 249, 250, 251, 252, 255, 284, 332, 333, 334, 335, 336, 337, 359,
-                                                 360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
-                                                 8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
-                                                };
+            204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 217, 218, 219,
+            220, 222, 223, 232, 233, 234, 235, 236, 237, 238, 239, 241,
+            249, 250, 251, 252, 255, 284, 332, 333, 334, 335, 336, 337, 359,
+            360, 361, 362, 363, 364, 365, 366, 367, 377, 399,
+            8192, 8193, 8194, 8196, 8197, 8199, 8200, 8201, 8202, 8203, 8211, 8287
+    };
+
     protected static class CodePointCheck {
         public int position;
         public char ch;
@@ -203,39 +205,38 @@ public class Main {
                 main.parseDefaultPropertyFiles();
                 PrintStream stream = System.out;
                 stream.println(CommandLineUtils.getBanner());
-                stream.println(
-                        String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
-                                StreamUtil.getLineSeparator()));
+                stream.println(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion()));
+
                 LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
-                if (licenseService != null) {
-                    if (main.liquibaseProLicenseKey == null) {
-                        log.info(LogType.LOG, "No Liquibase Pro license key supplied. Please set liquibaseProLicenseKey on command line or in liquibase.properties to use Liquibase Pro features.");
-                    } 
-                    else {
-                        Location licenseKeyLocation = 
-                            new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
-                        LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
-                        if (result.code != 0) {
-                            String allMessages = String.join("\n", result.messages);
-                            log.warning(LogType.USER_MESSAGE, allMessages);
-                        }
+                if (licenseService != null && main.liquibaseProLicenseKey != null) {
+                    Location licenseKeyLocation =
+                                new Location("property liquibaseProLicenseKey", LocationType.BASE64_STRING, main.liquibaseProLicenseKey);
+                    LicenseInstallResult result = licenseService.installLicense(licenseKeyLocation);
+                    if (result.code != 0) {
+                        String allMessages = String.join("\n", result.messages);
+                        log.warning(LogType.USER_MESSAGE, allMessages);
                     }
-                    stream.println(licenseService.getLicenseInfo());
                 }
+                stream.println(licenseService.getLicenseInfo());
+
+                stream.println(String.format("Running Java under %s (Version %s)",
+                        System.getProperties().getProperty("java.home"),
+                        System.getProperty("java.version")
+                ));
                 return 0;
             }
 
             //
             // Look for characters which cannot be handled
             //
-            for (int i=0; i < args.length; i++) {
+            for (int i = 0; i < args.length; i++) {
                 CodePointCheck codePointCheck = checkArg(args[i]);
                 if (codePointCheck != null) {
                     String message =
-                        "A non-standard character '" + codePointCheck.ch +
-                        "' was detected on the command line at position " +
-                        (codePointCheck.position + 1) + " of argument number " + (i+1) +
-                        ".\nIf problems occur, please remove the character and try again.";
+                            "A non-standard character '" + codePointCheck.ch +
+                                    "' was detected on the command line at position " +
+                                    (codePointCheck.position + 1) + " of argument number " + (i + 1) +
+                                    ".\nIf problems occur, please remove the character and try again.";
                     LOG.warning(message);
                     System.err.println(message);
                 }
@@ -243,6 +244,10 @@ public class Main {
 
             try {
                 main.parseOptions(args);
+                if (main.command == null) {
+                    main.printHelp(System.out);
+                    return 0;
+                }
             } catch (CommandLineParsingException e) {
                 log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
                 log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
@@ -263,15 +268,34 @@ public class Main {
                     if (result.code != 0) {
                         String allMessages = String.join("\n", result.messages);
                         log.warning(LogType.USER_MESSAGE, allMessages);
+                    } else {
+                        main.liquibaseProLicenseValid = true;
                     }
+                }
+
+                //
+                // Check to see if we have an expired license
+                //
+                if (licenseService.daysTilExpiration() < 0) {
+                    main.liquibaseProLicenseValid = false;
                 }
                 log.info(LogType.USER_MESSAGE, licenseService.getLicenseInfo());
             }
 
-            List<String> setupMessages = main.checkSetup();
-            if (!setupMessages.isEmpty()) {
-                main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
-                return 1;
+            log.info(LogType.USER_MESSAGE, CommandLineUtils.getBanner());
+
+
+            if (main.commandParams.contains("--help") &&
+                    (main.command.startsWith("rollbackOneChangeSet") ||
+                            main.command.startsWith("rollbackOneUpdate") ||
+                            (main.command.startsWith("diff") && main.isFormattedDiff()))) {
+                //don't need to check setup
+            } else {
+                List<String> setupMessages = main.checkSetup();
+                if (!setupMessages.isEmpty()) {
+                    main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
+                    return 1;
+                }
             }
 
             main.applyDefaults();
@@ -517,14 +541,18 @@ public class Main {
      */
     private static boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith(COMMANDS.UPDATE)
-                || command.toLowerCase().startsWith(COMMANDS.ROLLBACK)
+                || (command.toLowerCase().startsWith(COMMANDS.ROLLBACK) &&
+                (!command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET) &&
+                        !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_UPDATE)))
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.STATUS.equalsIgnoreCase(command)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
                 || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
-                || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command);
+                || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)
+                || COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command);
     }
 
     /**
@@ -555,6 +583,7 @@ public class Main {
                 || COMMANDS.TAG.equalsIgnoreCase(arg)
                 || COMMANDS.TAG_EXISTS.equalsIgnoreCase(arg)
                 || COMMANDS.LIST_LOCKS.equalsIgnoreCase(arg)
+                || COMMANDS.HISTORY.equalsIgnoreCase(arg)
                 || COMMANDS.DROP_ALL.equalsIgnoreCase(arg)
                 || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(arg)
                 || COMMANDS.STATUS.equalsIgnoreCase(arg)
@@ -573,7 +602,11 @@ public class Main {
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(arg)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(arg)
-                || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(arg);
+                || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(arg)
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(arg)
+                || COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(arg)
+                || COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(arg)
+                || COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(arg);
     }
 
     /**
@@ -809,14 +842,18 @@ public class Main {
                             && !cmdParm.startsWith("--" + OPTIONS.EXCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_OBJECTS)
                             && !cmdParm.startsWith("--" + OPTIONS.DIFF_TYPES)
+                            && !cmdParm.startsWith("--" + OPTIONS.FORMAT)
+                            && !cmdParm.startsWith("--" + OPTIONS.HELP)
                             && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)) {
+                        messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                    }
+                    if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && cmdParm.startsWith("--" + OPTIONS.FORMAT)) {
                         messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                     }
                 }
             }
         } else if ((COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
-                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
-        )
+                || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command))
                 && (!commandParams.isEmpty())) {
             for (String cmdParm : commandParams) {
                 if (!cmdParm.startsWith("--" + OPTIONS.INCLUDE_SCHEMA)
@@ -824,12 +861,50 @@ public class Main {
                         && !cmdParm.startsWith("--" + OPTIONS.INCLUDE_TABLESPACE)
                         && !cmdParm.startsWith("--" + OPTIONS.SCHEMAS)
                         && !cmdParm.startsWith("--" + OPTIONS.SNAPSHOT_FORMAT)
+                        && !cmdParm.startsWith("--" + OPTIONS.DATA_OUTPUT_DIRECTORY)
                         && !cmdParm.startsWith("--" + OPTIONS.OUTPUT_SCHEMAS_AS)) {
                     messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
                 }
             }
+        } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
+                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
+                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                }
+            }
+        } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command)) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
+                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_PATH)
+                        && !cmdParm.startsWith("--" + OPTIONS.CHANGE_SET_AUTHOR)
+                        && !cmdParm.startsWith("--" + OPTIONS.ROLLBACK_SCRIPT)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                }
+            }
+        } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
+                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                }
+            }
+        } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command)) {
+            for (String cmdParm : commandParams) {
+                if (!cmdParm.startsWith("--" + OPTIONS.DEPLOYMENT_ID)
+                        && !cmdParm.startsWith("--" + OPTIONS.HELP)
+                        && !cmdParm.startsWith("--" + OPTIONS.FORCE)) {
+                    messages.add(String.format(coreBundle.getString("unexpected.command.parameter"), cmdParm));
+                }
+            }
         }
-
     }
 
     /**
@@ -966,8 +1041,8 @@ public class Main {
         main = new Main();
         this.logLevel = Level.ERROR.toString();
         main.reconfigureLogging();
-        ch.qos.logback.classic.Logger rootLogger = 
-          (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        ch.qos.logback.classic.Logger rootLogger =
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
         rootLogger.setLevel(Level.ERROR);
         stream.println(CommandLineUtils.getBanner());
         String helpText = commandLineHelpBundle.getString("commandline-helptext");
@@ -975,16 +1050,14 @@ public class Main {
     }
 
     /**
-     *
      * Check the string for known characters which cannot be handled
      *
-     * @param   arg             Input parameter to check
-     * @return  int             A CodePointCheck object, or null to indicate all good
-     *
+     * @param arg Input parameter to check
+     * @return int             A CodePointCheck object, or null to indicate all good
      */
     protected static CodePointCheck checkArg(String arg) {
         char[] chars = arg.toCharArray();
-        for (int i=0; i < chars.length; i++) {
+        for (int i = 0; i < chars.length; i++) {
             for (int j = 0; j < suspiciousCodePoints.length; j++) {
                 if (suspiciousCodePoints[j] == chars[i]) {
                     CodePointCheck codePointCheck = new CodePointCheck();
@@ -1029,11 +1102,11 @@ public class Main {
                 } else {
                     commandParams.add(arg);
                     if (arg.startsWith("--")) {
-                        parseOptionArgument(arg);
+                        parseOptionArgument(arg, true);
                     }
                 }
             } else if (arg.startsWith("--")) {
-                parseOptionArgument(arg);
+                parseOptionArgument(arg, false);
             } else {
                 throw new CommandLineParsingException(
                         String.format(coreBundle.getString("unexpected.value"), arg));
@@ -1051,11 +1124,17 @@ public class Main {
      * @param arg the option to parse (including the "--")
      * @throws CommandLineParsingException if a problem occurs
      */
-    private void parseOptionArgument(String arg) throws CommandLineParsingException {
+    private void parseOptionArgument(String arg, boolean okIfNotAField) throws CommandLineParsingException {
         final String PROMPT_FOR_VALUE = "PROMPT";
 
-        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE))
+        if (arg.toLowerCase().startsWith("--" + OPTIONS.VERBOSE) ||
+            arg.toLowerCase().startsWith("--" + OPTIONS.HELP)) {
             return;
+        }
+
+        if (arg.toLowerCase().equals("--" + OPTIONS.FORCE) || arg.toLowerCase().equals("--" + OPTIONS.HELP)) {
+            arg = arg + "=true";
+        }
 
         String[] splitArg = splitArg(arg);
 
@@ -1086,9 +1165,11 @@ public class Main {
                 field.set(this, value);
             }
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new CommandLineParsingException(
-                    String.format(coreBundle.getString("option.unknown"), attributeName)
-            );
+            if (!okIfNotAField) {
+                throw new CommandLineParsingException(
+                        String.format(coreBundle.getString("option.unknown"), attributeName)
+                );
+            }
         }
     }
 
@@ -1218,6 +1299,29 @@ public class Main {
             return;
         }
 
+        //
+        // Check for a valid license to run PRO commands
+        //
+        String formatValue = getCommandParam(OPTIONS.FORMAT, null);
+        if (isLicenseableCommand(formatValue)) {
+            if (isFormattedDiff()) {
+                if (formatValue != null && ! formatValue.equalsIgnoreCase("json")) {
+                    String messageString =
+                        "\nWARNING: The diff command optional Pro parameter '--format' " +
+                        "currently supports only 'TXT' or 'JSON' as values.  (Blank defaults to 'TXT')";
+                    throw new LiquibaseException(String.format(messageString));
+                }
+            }
+            if (!commandParams.contains("--help") && !liquibaseProLicenseValid) {
+                String warningAboutCommand = command;
+                if (command.equalsIgnoreCase(COMMANDS.DIFF) && formatValue != null && !formatValue.isEmpty()) {
+                    warningAboutCommand = "diff --format=" + formatValue;
+                }
+                String messageString = String.format(coreBundle.getString("no.pro.license.found"), warningAboutCommand);
+                throw new LiquibaseException(messageString);
+            }
+        }
+
         try {
 //            if (null != logFile) {
 //                LogService.getLog(getClass()).setLogLevel(logLevel, logFile);
@@ -1232,19 +1336,29 @@ public class Main {
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
         CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
-        Database database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
-                this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName,
-                Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema),
-                this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
-                this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
-                this.databaseChangeLogLockTableName);
-        database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+        Database database = null;
+        if (this.url != null) {
+            database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
+                    this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName,
+                    Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema),
+                    this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass,
+                    this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName,
+                    this.databaseChangeLogLockTableName);
+            database.setLiquibaseTablespaceName(this.databaseChangeLogTablespaceName);
+        }
+
         try {
             if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
                         String.format(coreBundle.getString("cannot.specify.both"),
                                 OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
+
+            //
+            // Set the global configuration option based on presence of the dataOutputDirectory
+            //
+            boolean b = dataOutputDirectory != null;
+            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
 
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
@@ -1277,9 +1391,29 @@ public class Main {
             }
 
             if (COMMANDS.DIFF.equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiff(
-                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
-                        database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                if (commandParams.contains("--help")) {
+                    System.out.println("liquibase diff" +
+                            "\n" +
+                            "          Outputs a description of differences.  If you have a Liquibase Pro key, you can output the differences as JSON using the --format=JSON option\n");
+                    System.exit(0);
+                }
+                if (isFormattedDiff()) {
+                    LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(COMMANDS.FORMATTED_DIFF);
+                    DiffCommand diffCommand = CommandLineUtils.createDiffCommand(
+                            createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                            database,
+                            StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                    Map<String, Object> argsMap = new HashMap<String, Object>();
+                    argsMap.put("format", getCommandParam(OPTIONS.FORMAT, "JSON"));
+                    argsMap.put("diffCommand", diffCommand);
+                    ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
+                    liquibaseCommand.execute();
+                } else {
+                    CommandLineUtils.doDiff(
+                            createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                            database,
+                            StringUtils.trimToNull(diffTypes), finalSchemaComparisons, objectChangeFilter, new PrintStream(getOutputStream()));
+                }
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
@@ -1323,11 +1457,7 @@ public class Main {
                 SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
                         .getCommand(COMMANDS.SNAPSHOT);
                 snapshotCommand.setDatabase(database);
-                snapshotCommand.setSchemas(
-                        getCommandParam(
-                                OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName()
-                        )
-                );
+                snapshotCommand.setSchemas(getSchemaParams(database));
                 snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 String result = snapshotCommand.execute().print();
@@ -1352,11 +1482,7 @@ public class Main {
                         .getCommand(COMMANDS.SNAPSHOT);
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 snapshotCommand.setDatabase(referenceDatabase);
-                snapshotCommand.setSchemas(
-                        getCommandParam(
-                                OPTIONS.SCHEMAS, referenceDatabase.getDefaultSchema().getSchemaName()
-                        )
-                );
+                snapshotCommand.setSchemas(getSchemaParams(database));
                 snapshotCommand.setSerializerFormat(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
                 Writer outputWriter = getOutputWriter();
                 outputWriter.write(snapshotCommand.execute().print());
@@ -1372,7 +1498,9 @@ public class Main {
                     changeExecListenerClass, changeExecListenerPropertiesFile);
             liquibase.setChangeExecListener(listener);
 
-            database.setCurrentDateTimeFunction(currentDateTimeFunction);
+            if (database != null) {
+                database.setCurrentDateTimeFunction(currentDateTimeFunction);
+            }
             for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
@@ -1419,14 +1547,45 @@ public class Main {
                     );
                 }
                 return;
+            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET.equals(command)) {
+                Map<String, Object> argsMap = new HashMap<>();
+                loadChangeSetInfoToMap(argsMap);
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
+                liquibaseCommand.execute();
+                return;
+            } else if (COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equals(command)) {
+                Writer outputWriter = getOutputWriter();
+                Map<String, Object> argsMap = new HashMap<>();
+                loadChangeSetInfoToMap(argsMap);
+                argsMap.put("outputWriter", outputWriter);
+                argsMap.put("force", true);
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_CHANGE_SET, argsMap);
+                liquibaseCommand.execute();
+                outputWriter.flush();
+                outputWriter.close();
+                return;
+            } else if (COMMANDS.ROLLBACK_ONE_UPDATE.equals(command)) {
+                Map<String, Object> argsMap = new HashMap<>();
+                argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_UPDATE, argsMap);
+                liquibaseCommand.execute();
+                return;
+            } else if (COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equals(command)) {
+                Writer outputWriter = getOutputWriter();
+                Map<String, Object> argsMap = new HashMap<>();
+                argsMap.put("deploymentId", getCommandParam(OPTIONS.DEPLOYMENT_ID, null));
+                argsMap.put("outputWriter", outputWriter);
+                argsMap.put("force", true);
+                LiquibaseCommand liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.ROLLBACK_ONE_UPDATE, argsMap);
+                liquibaseCommand.execute();
+                outputWriter.flush();
+                outputWriter.close();
+                return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
                 DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
                         (COMMANDS.DROP_ALL);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
-                dropAllCommand.setSchemas(getCommandParam(
-                        OPTIONS.SCHEMAS, database.getDefaultSchema().getSchemaName())
-                );
-
+                dropAllCommand.setSchemas(getSchemaParams(database));
                 LogService.getLog(getClass()).info(LogType.USER_MESSAGE, dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
@@ -1583,6 +1742,11 @@ public class Main {
                             (labels), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
+                } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
+                    HistoryCommand historyCommand = (HistoryCommand) CommandFactory.getInstance().getCommand("history");
+                    historyCommand.setDatabase(database);
+                    historyCommand.setOutputStream(new PrintStream(getOutputStream()));
+                    historyCommand.execute();
                 } else {
                     throw new CommandLineParsingException(
                             String.format(coreBundle.getString("command.unknown"), command));
@@ -1593,13 +1757,70 @@ public class Main {
             }
         } finally {
             try {
-                database.rollback();
-                database.close();
+                if (database != null) {
+                    database.rollback();
+                    database.close();
+                }
             } catch (DatabaseException e) {
                 LogService.getLog(getClass()).warning(
                         LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
             }
         }
+    }
+
+    private boolean isLicenseableCommand(String formatValue) {
+        return COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command) ||
+               COMMANDS.ROLLBACK_ONE_UPDATE_SQL.equalsIgnoreCase(command) ||
+               (COMMANDS.DIFF.equalsIgnoreCase(command) && formatValue != null && ! formatValue.toLowerCase().equals("txt"));
+    }
+
+    private void loadChangeSetInfoToMap(Map<String, Object> argsMap) throws CommandLineParsingException {
+        argsMap.put("changeSetId", getCommandParam(OPTIONS.CHANGE_SET_ID, null));
+        argsMap.put("changeSetAuthor", getCommandParam(OPTIONS.CHANGE_SET_AUTHOR, null));
+        argsMap.put("changeSetPath", getCommandParam(OPTIONS.CHANGE_SET_PATH, null));
+    }
+
+    private boolean isFormattedDiff() throws CommandLineParsingException {
+        String formatValue = getCommandParam(OPTIONS.FORMAT, "txt");
+        return ! formatValue.equalsIgnoreCase("txt") && ! formatValue.isEmpty();
+    }
+
+    private String getSchemaParams(Database database) throws CommandLineParsingException {
+        String schemaParams = getCommandParam(OPTIONS.SCHEMAS, schemas);
+        if (schemaParams == null || schemaParams.isEmpty()) {
+            return database.getDefaultSchema().getSchemaName();
+        }
+        return schemaParams;
+    }
+
+    private LiquibaseCommand createLiquibaseCommand(Database database, Liquibase liquibase, String commandName, Map<String, Object> argsMap)
+            throws LiquibaseException {
+        argsMap.put("rollbackScript", rollbackScript);
+        argsMap.put("changeLogFile", changeLogFile);
+        argsMap.put("database", database);
+        argsMap.put("liquibase", liquibase);
+        if (!commandParams.contains("--help")) {
+            argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
+        }
+        argsMap.put("resourceAccessor", liquibase.getResourceAccessor());
+        ChangeLogParameters clp = new ChangeLogParameters(database);
+        for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
+            clp.set(entry.getKey(), entry.getValue());
+        }
+        argsMap.put("changeLogParameters", clp);
+
+        if (this.commandParams.contains("--force")) {
+            argsMap.put("force", true);
+        }
+        if (this.commandParams.contains("--help")) {
+            argsMap.put("help", true);
+        }
+        LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(commandName);
+        AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
+        configuratingCommand.configure(argsMap);
+        return liquibaseCommand;
     }
 
     /**
@@ -1747,12 +1968,18 @@ public class Main {
         private static final String FUTURE_ROLLBACK_TO_TAG_SQL = "futureRollbackToTagSQL";
         private static final String GENERATE_CHANGELOG = "generateChangeLog";
         private static final String HELP = OPTIONS.HELP;
+        private static final String HISTORY = "history";
         private static final String LIST_LOCKS = "listLocks";
         private static final String MARK_NEXT_CHANGESET_RAN = "markNextChangeSetRan";
         private static final String MARK_NEXT_CHANGESET_RAN_SQL = "markNextChangeSetRanSQL";
         private static final String MIGRATE = "migrate";
         private static final String MIGRATE_SQL = "migrateSQL";
         private static final String RELEASE_LOCKS = "releaseLocks";
+        private static final String ROLLBACK_ONE_CHANGE_SET = "rollbackOneChangeSet";
+        private static final String ROLLBACK_ONE_CHANGE_SET_SQL = "rollbackOneChangeSetSQL";
+        private static final String ROLLBACK_ONE_UPDATE = "rollbackOneUpdate";
+        private static final String ROLLBACK_ONE_UPDATE_SQL = "rollbackOneUpdateSQL";
+        private static final String FORMATTED_DIFF = "formattedDiff";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
         private static final String ROLLBACK_COUNT_SQL = "rollbackCountSQL";
@@ -1783,6 +2010,14 @@ public class Main {
         private static final String CHANGELOG_FILE = "changeLogFile";
         private static final String DATA_OUTPUT_DIRECTORY = "dataOutputDirectory";
         private static final String DIFF_TYPES = "diffTypes";
+        private static final String CHANGE_SET_ID = "changeSetId";
+        private static final String CHANGE_SET_AUTHOR = "changeSetAuthor";
+        private static final String CHANGE_SET_PATH = "changeSetPath";
+        private static final String DEPLOYMENT_ID = "deploymentId";
+        private static final String OUTPUT_FILE = "outputFile";
+        private static final String FORCE = "force";
+        private static final String FORMAT = "format";
+        private static final String ROLLBACK_SCRIPT = "rollbackScript";
         private static final String EXCLUDE_OBJECTS = "excludeObjects";
         private static final String INCLUDE_CATALOG = "includeCatalog";
         private static final String INCLUDE_OBJECTS = "includeObjects";

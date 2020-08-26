@@ -34,44 +34,87 @@ public class H2Database extends AbstractJdbcDatabase {
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
     private static List keywords = Arrays.asList(
+            "ALL",
+            "AND",
+            "ARRAY",
+            "AS",
+            "BETWEEN",
+            "BOTH",
+            "CASE",
+            "CHECK",
+            "CONSTRAINT",
             "CROSS",
+            "CURRENT_CATALOG",
             "CURRENT_DATE",
+            "CURRENT_SCHEMA",
             "CURRENT_TIME",
             "CURRENT_TIMESTAMP",
+            "CURRENT_USER",
             "DISTINCT",
             "EXCEPT",
             "EXISTS",
             "FALSE",
             "FETCH",
+            "FILTER",
             "FOR",
+            "FOREIGN",
             "FROM",
             "FULL",
             "GROUP",
+            "GROUPS",
             "HAVING",
+            "IF",
+            "ILIKE",
+            "IN",
             "INNER",
             "INTERSECT",
+            "INTERSECTS",
+            "INTERVAL",
             "IS",
             "JOIN",
+            "LEADING",
+            "LEFT",
             "LIKE",
             "LIMIT",
+            "LOCALTIME",
+            "LOCALTIMESTAMP",
             "MINUS",
             "NATURAL",
             "NOT",
             "NULL",
             "OFFSET",
             "ON",
+            "OR",
             "ORDER",
+            "OVER",
+            "PARTITION",
             "PRIMARY",
+            "QUALIFY",
+            "RANGE",
+            "REGEXP",
+            "RIGHT",
+            "ROW",
+            "_ROWID_",
             "ROWNUM",
+            "ROWS",
             "SELECT",
             "SYSDATE",
             "SYSTIME",
             "SYSTIMESTAMP",
+            "TABLE",
             "TODAY",
+            "TOP",
+            "TRAILING",
             "TRUE",
             "UNION",
             "UNIQUE",
-            "WHERE");
+            "UNKNOWN",
+            "USING",
+            "VALUES",
+            "WHERE",
+            "WINDOW",
+            "WITH"
+    );
     private String connectionSchemaName = "PUBLIC";
 
     private static final int MAJOR_VERSION_FOR_MINMAX_IN_SEQUENCES = 1;
@@ -168,10 +211,7 @@ public class H2Database extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         boolean isLocalURL = (
                 super.isSafeToRunUpdate()
-                        || url.startsWith("jdbc:h2:file:")
-                        || url.startsWith("jdbc:h2:mem:")
-                        || url.startsWith("jdbc:h2:zip:")
-                        || url.startsWith("jdbc:h2:~")
+                        || (!url.startsWith("jdbc:h2:tcp:") && (!url.startsWith("jdbc:h2:ssl:"))) // exclude remote URLs
         );
         return isLocalURL;
     }

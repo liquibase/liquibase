@@ -109,7 +109,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         Executor template = Mock(Executor.class);
         template.update(_) >> 1
 
-        ExecutorService.getInstance().setExecutor(database, template);
+        ExecutorService.getInstance().setExecutor("jdbc", database, template);
         return database;
     }
 

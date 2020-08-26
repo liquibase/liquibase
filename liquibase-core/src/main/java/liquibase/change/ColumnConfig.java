@@ -98,7 +98,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         if ((columnSnapshot.isNullable() != null) && !columnSnapshot.isNullable()) {
             constraints.setNullable(columnSnapshot.isNullable());
-            constraints.setShouldValidateNullable(columnSnapshot.shouldValidateNullable());
+            constraints.setValidateNullable(columnSnapshot.getValidateNullable());
             nonDefaultConstraints = true;
         }
 
@@ -880,10 +880,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));
         constraints.setInitiallyDeferred(constraintsNode.getChildValue(null, "initiallyDeferred", Boolean.class));
         constraints.setDeferrable(constraintsNode.getChildValue(null, "deferrable", Boolean.class));
-        constraints.setShouldValidateNullable(constraintsNode.getChildValue(null, "validateNullable", Boolean.class));
-        constraints.setShouldValidateUnique(constraintsNode.getChildValue(null, "validateUnique", Boolean.class));
-        constraints.setShouldValidatePrimaryKey(constraintsNode.getChildValue(null, "validatePrimaryKey", Boolean.class));
-        constraints.setShouldValidateForeignKey(constraintsNode.getChildValue(null, "validateForeignKey", Boolean.class));
+        constraints.setValidateNullable(constraintsNode.getChildValue(null, "validateNullable", Boolean.class));
+        constraints.setValidateUnique(constraintsNode.getChildValue(null, "validateUnique", Boolean.class));
+        constraints.setValidatePrimaryKey(constraintsNode.getChildValue(null, "validatePrimaryKey", Boolean.class));
+        constraints.setValidateForeignKey(constraintsNode.getChildValue(null, "validateForeignKey", Boolean.class));
         setConstraints(constraints);
     }
 

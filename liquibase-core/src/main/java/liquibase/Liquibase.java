@@ -13,7 +13,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -58,7 +57,7 @@ import static java.util.ResourceBundle.getBundle;
  * Primary facade class for interacting with Liquibase.
  * The built in command line, Ant, Maven and other ways of running Liquibase are wrappers around methods in this class.
  */
-public class Liquibase {
+public class Liquibase implements AutoCloseable {
 
     private static final Logger LOG = LogService.getLog(Liquibase.class);
     protected static final int CHANGESET_ID_NUM_PARTS = 3;
@@ -256,13 +255,8 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(
-            ExecutorService.getInstance().getExecutor(database), output, database
-        );
-        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
         outputHeader("Update Database Script");
 
@@ -278,7 +272,7 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
 
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
     }
 
     public void update(int changesToApply, String contexts) throws LiquibaseException {
@@ -376,26 +370,16 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(
-            ExecutorService.getInstance().getExecutor(database), output, database
-        );
-        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
-
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
         outputHeader("Update " + changesToApply + " Change Sets Database Script");
 
         update(changesToApply, contexts, labelExpression);
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
+        flushOutputWriter(output);
 
         resetServices();
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
     }
 
     public void update(String tag, String contexts, Writer output) throws LiquibaseException {
@@ -417,28 +401,20 @@ public class Liquibase {
 
         /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(
-            ExecutorService.getInstance().getExecutor(database), output, database
-        );
-        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
         outputHeader("Update to '" + tag + "' Database Script");
 
         update(tag, contexts, labelExpression);
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
+        flushOutputWriter(output);
 
         resetServices();
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
     }
 
-    private void outputHeader(String message) throws DatabaseException {
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+    public void outputHeader(String message) throws DatabaseException {
+        Executor executor = ExecutorService.getInstance().getExecutor("logging", database);
         executor.comment("*********************************************************************");
         executor.comment(message);
         executor.comment("*********************************************************************");
@@ -455,9 +431,6 @@ public class Liquibase {
             StreamUtil.getLineSeparator()
         );
 
-        if (database instanceof OracleDatabase) {
-            executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
-        }
         if ((database instanceof MSSQLDatabase) && (database.getDefaultCatalogName() != null)) {
             executor.execute(new RawSqlStatement("USE " +
                 database.escapeObjectName(database.getDefaultCatalogName(), Catalog.class) + ";")
@@ -494,21 +467,14 @@ public class Liquibase {
 
         /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database,
-            new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database)
-        );
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
         outputHeader("Rollback " + changesToRollback + " Change(s) Script");
 
         rollback(changesToRollback, rollbackScript, contexts, labelExpression);
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        flushOutputWriter(output);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
         resetServices();
     }
 
@@ -583,12 +549,12 @@ public class Liquibase {
     }
 
     protected void executeRollbackScript(String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-        final Executor executor = ExecutorService.getInstance().getExecutor(database);
+        final Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
         String rollbackScriptContents;
         try {
             Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
             if ((streams == null) || streams.isEmpty()) {
-                throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
+                throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
             } else if (streams.size() > 1) {
                 throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
             }
@@ -610,15 +576,12 @@ public class Liquibase {
         try {
             executor.execute(rollbackChange);
         } catch (DatabaseException e) {
-            DatabaseException ex = new DatabaseException(
-                "Error executing rollback script. ChangeSets will still be marked as rolled back: " + e.getMessage(),
-                e
-            );
-            LogService.getLog(getClass()).severe(LogType.LOG, ex.getMessage());
-            LOG.severe(LogType.LOG, "Error executing rollback script", ex);
+            LogService.getLog(getClass()).severe(LogType.LOG, e.getMessage());
+            LOG.severe(LogType.LOG, "Error executing rollback script: "+e.getMessage());
             if (changeExecListener != null) {
-                changeExecListener.runFailed(null, databaseChangeLog, database, ex);
+                changeExecListener.runFailed(null, databaseChangeLog, database, e);
             }
+            throw new DatabaseException("Error executing rollback script", e);
         }
         database.commit();
     }
@@ -658,23 +621,16 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        /* We have no other choice than to save the current Executor here. */
+        /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(
-            ExecutorService.getInstance().getExecutor(database), output, database)
-        );
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
         outputHeader("Rollback to '" + tagToRollBackTo + "' Script");
 
         rollback(tagToRollBackTo, contexts, labelExpression);
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        flushOutputWriter(output);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
         resetServices();
     }
 
@@ -758,23 +714,26 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database,
-            new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
         outputHeader("Rollback to " + dateToRollBackTo + " Script");
 
         rollback(dateToRollBackTo, contexts, labelExpression);
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        flushOutputWriter(output);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
         resetServices();
+    }
+
+    private Executor getAndReplaceJdbcExecutor(Writer output) {
+        /* We have no other choice than to save the current Executer here. */
+        @SuppressWarnings("squid:S1941")
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor("jdbc", database);
+        final LoggingExecutor loggingExecutor = new LoggingExecutor(oldTemplate, output, database);
+        ExecutorService.getInstance().setExecutor("logging", database, loggingExecutor);
+        ExecutorService.getInstance().setExecutor("jdbc", database, loggingExecutor);
+        return oldTemplate;
     }
 
     public void rollback(Date dateToRollBackTo, String contexts) throws LiquibaseException {
@@ -839,27 +798,26 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LoggingExecutor outputTemplate = new LoggingExecutor(
-            ExecutorService.getInstance().getExecutor(database), output, database
-        );
-
         /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database, outputTemplate);
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
         outputHeader("SQL to add all changesets to database history table");
 
         changeLogSync(contexts, labelExpression);
 
+        flushOutputWriter(output);
+
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
+        resetServices();
+    }
+
+    private void flushOutputWriter(Writer output) throws LiquibaseException {
         try {
             output.flush();
         } catch (IOException e) {
             throw new LiquibaseException(e);
         }
-
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
-        resetServices();
     }
 
     public void changeLogSync(String contexts) throws LiquibaseException {
@@ -918,26 +876,15 @@ public class Liquibase {
         changeLogParameters.setLabels(labelExpression);
 
 
-        LoggingExecutor outputTemplate = new LoggingExecutor(
-            ExecutorService.getInstance().getExecutor(database), output, database
-        );
-
-        /* We have no other choice than to save the current Executer here. */
         @SuppressWarnings("squid:S1941")
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database, outputTemplate);
-
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
         outputHeader("SQL to add all changesets to database history table");
 
         markNextChangeSetRan(contexts, labelExpression);
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
+        flushOutputWriter(output);
 
-        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
         resetServices();
     }
 
@@ -1032,11 +979,8 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LoggingExecutor outputTemplate = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database),
-            output, database);
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        ExecutorService.getInstance().setExecutor(database, outputTemplate);
-
+        @SuppressWarnings("squid:S1941")
+        Executor oldTemplate = getAndReplaceJdbcExecutor(output);
         outputHeader("SQL to roll back currently unexecuted changes");
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -1121,15 +1065,11 @@ public class Liquibase {
             } catch (LockException e) {
                 LOG.severe(LogType.LOG, MSG_COULD_NOT_RELEASE_LOCK, e);
             }
-            ExecutorService.getInstance().setExecutor(database, oldTemplate);
+            ExecutorService.getInstance().setExecutor("jdbc", database, oldTemplate);
             resetServices();
         }
 
-        try {
-            output.flush();
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        }
+        flushOutputWriter(output);
 
     }
 
@@ -1463,7 +1403,7 @@ public class Liquibase {
                 getDatabase().getDatabaseChangeLogTableName()
             );
             updateStatement.addNewColumnValue("MD5SUM", null);
-            ExecutorService.getInstance().getExecutor(database).execute(updateStatement);
+            ExecutorService.getInstance().getExecutor("jdbc", database).execute(updateStatement);
             getDatabase().commit();
         } finally {
             try {
@@ -1676,5 +1616,11 @@ public class Liquibase {
         }
     }
 
+    @Override
+    public void close() throws Exception {
+        if (database != null) {
+            database.close();
+        }
+    }
 }
 

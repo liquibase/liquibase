@@ -29,7 +29,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
        in line with the column (this implies that a NN constraint can always affects exactly one column). */
     private HashMap<String, NotNullConstraint> notNullColumns = new HashMap<>();
 
-    private Set<UniqueConstraint> uniqueConstraints = new HashSet<>();
+    private Set<UniqueConstraint> uniqueConstraints = new LinkedHashSet<>();
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;

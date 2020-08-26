@@ -2,7 +2,6 @@ package liquibase.util;
 
 import liquibase.Scope;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +26,7 @@ public class LiquibaseUtil {
     // will extract the information from liquibase.build.properties, which should be a properties file in
     // the jar file.
     private static String getBuildInfo(String propertyId) {
-        String value = "UNKONWN";
+        String value = "UNKNOWN";
         if (liquibaseBuildProperties == null) {
             try (InputStream buildProperties =StreamUtil.openStream("liquibase.build.properties", false, null, new ClassLoaderResourceAccessor(LiquibaseUtil.class.getClassLoader()))) {
                 liquibaseBuildProperties = new Properties();

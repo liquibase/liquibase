@@ -11,6 +11,7 @@ import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.util.BooleanUtils;
 import liquibase.util.StringUtils;
 
 import java.sql.SQLException;
@@ -79,7 +80,8 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
         String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));
         String tablespace = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLESPACE_NAME"));
-        
+        String defaultTablespaceString = StringUtils.trimToNull(tableMetadataResultSet.getString("DEFAULT_TABLESPACE"));
+
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
@@ -87,6 +89,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         Table table = new Table().setName(cleanNameFromDatabase(rawTableName, database));
         table.setRemarks(remarks);
         table.setTablespace(tablespace);
+        table.setDefaultTablespace(BooleanUtils.isTrue(Boolean.parseBoolean(defaultTablespaceString)));
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));

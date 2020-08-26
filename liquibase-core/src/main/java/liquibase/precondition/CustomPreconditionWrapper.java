@@ -10,8 +10,12 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ObjectUtil;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -21,7 +25,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     private ClassLoader classLoader;
 
     private SortedSet<String> params = new TreeSet<>();
-    private Map<String, String> paramValues = new HashMap<>();
+    private Map<String, String> paramValues = new LinkedHashMap<>();
 
     public String getClassName() {
         return className;
@@ -100,13 +104,24 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     }
 
     @Override
+    public Set<String> getSerializableFields() {
+        return new LinkedHashSet<>(Arrays.asList("className", "param"));
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        return field.equals("param") ? paramValues
+                                     : super.getSerializableFieldValue(field);
+    }
+
+    @Override
     public String getName() {
         return "customPrecondition";
     }
 
     @Override
     protected boolean shouldAutoLoad(ParsedNode node) {
-        if ("params".equals(node.getName())) {
+        if ("params".equals(node.getName()) || "param".equals(node.getName())) {
             return false;
         }
         return super.shouldAutoLoad(node);

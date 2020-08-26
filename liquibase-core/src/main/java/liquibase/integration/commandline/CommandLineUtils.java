@@ -8,21 +8,14 @@ import liquibase.command.core.DiffToChangeLogCommand;
 import liquibase.command.core.GenerateChangeLogCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.OfflineConnection;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.DatabaseUtils;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.core.Schema;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
@@ -125,55 +118,11 @@ public class CommandLineUtils {
             }
 
             //Todo: move to database object methods in 4.0
-            initializeDatabase(username, defaultCatalogName, defaultSchemaName, database);
+            DatabaseUtils.initializeDatabase(defaultCatalogName, defaultSchemaName, database);
 
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);
-        }
-    }
-
-    /**
-     * Executes RawSqlStatements particular to each database engine to set the default schema for the given Database
-     *
-     * @param username           The username used for the connection. Used with MSSQL databases
-     * @param defaultCatalogName Catalog name and schema name are similar concepts.
-     *                           Used if defaultCatalogName is null.
-     * @param defaultSchemaName  Catalog name and schema name are similar concepts.
-     *                           Catalog is used with Oracle, DB2 and MySQL, and takes
-     *                           precedence over the schema name.
-     * @param database           Which Database object is affected by the initialization.
-     * @throws DatabaseException
-     */
-    public static void initializeDatabase(String username, String defaultCatalogName, String defaultSchemaName,
-                                          Database database) throws DatabaseException {
-        if (((defaultCatalogName != null) || (defaultSchemaName != null)) && !(database.getConnection() instanceof
-            OfflineConnection)) {
-            if (database instanceof OracleDatabase) {
-                String schema = defaultCatalogName;
-                if (schema == null) {
-                    schema = defaultSchemaName;
-                }
-                ExecutorService.getInstance().getExecutor(database).execute(
-                    new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
-                        database.escapeObjectName(schema, Schema.class)));
-            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
-            } else if (database instanceof AbstractDb2Database) {
-                String schema = defaultCatalogName;
-                if (schema == null) {
-                    schema = defaultSchemaName;
-                }
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET CURRENT SCHEMA "
-                        + schema));
-            } else if (database instanceof MySQLDatabase) {
-                String schema = defaultCatalogName;
-                if (schema == null) {
-                    schema = defaultSchemaName;
-                }
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("USE " + schema));
-            }
-
         }
     }
 
@@ -191,8 +140,9 @@ public class CommandLineUtils {
                               CompareControl.SchemaComparison[] schemaComparisons, PrintStream output) throws LiquibaseException {
         doDiff(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, null, output);
     }
-    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
-            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
+
+    public static DiffCommand createDiffCommand(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+                              CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) {
         DiffCommand diffCommand = (DiffCommand) CommandFactory.getInstance().getCommand("diff");
 
         diffCommand
@@ -202,6 +152,12 @@ public class CommandLineUtils {
                 .setObjectChangeFilter(objectChangeFilter)
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(output);
+        return diffCommand;
+    }
+
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
+            CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
+        DiffCommand diffCommand = createDiffCommand(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, objectChangeFilter, output);
 
         System.out.println("");
         System.out.println(coreBundle.getString("diff.results"));
@@ -301,6 +257,24 @@ public class CommandLineUtils {
         buildTimeString = LiquibaseUtil.getBuildTime();
 
         StringBuffer banner = new StringBuffer();
+
+        banner.append("####################################################\n" +
+                "##   _     _             _ _                      ##\n" +
+                "##  | |   (_)           (_) |                     ##\n" +
+                "##  | |    _  __ _ _   _ _| |__   __ _ ___  ___   ##\n" +
+                "##  | |   | |/ _` | | | | | '_ \\ / _` / __|/ _ \\  ##\n" +
+                "##  | |___| | (_| | |_| | | |_) | (_| \\__ \\  __/  ##\n" +
+                "##  \\_____/_|\\__, |\\__,_|_|_.__/ \\__,_|___/\\___|  ##\n" +
+                "##              | |                               ##\n" +
+                "##              |_|                               ##\n" +
+                "##                                                ## \n" +
+                "##  Get documentation at docs.liquibase.com       ##\n" +
+                "##  Get certified courses at learn.liquibase.com  ## \n" +
+                "##  Get advanced features and support at          ##\n" +
+                "##      liquibase.com/protrial                    ##\n" +
+                "##                                                ##\n" +
+                "####################################################\n"
+                        .replaceAll("\n", System.lineSeparator()));
 
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
