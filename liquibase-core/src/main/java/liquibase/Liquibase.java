@@ -55,6 +55,7 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
+import javax.naming.Context;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
@@ -88,6 +89,10 @@ public class Liquibase implements AutoCloseable {
     private ChangeLogSyncListener changeLogSyncListener;
 
     private UUID hubEnvironmentId;
+
+    private enum RollbackMessageType {
+        WILL_ROLLBACK, ROLLED_BACK, ROLLBACK_FAILED
+    }
 
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
@@ -837,8 +842,9 @@ public class Liquibase implements AutoCloseable {
                             logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                         });
                     } else {
-                        executeRollbackScript(rollbackScript, contexts, labelExpression);
-                        removeRunStatus(logIterator, contexts, labelExpression);
+                        List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
+                        executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
                 }
@@ -860,9 +866,9 @@ public class Liquibase implements AutoCloseable {
         });
 
     }
-
-    protected void removeRunStatus(ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression)
+    private List<ChangeSet> determineRollbacks(ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression)
             throws LiquibaseException {
+        List<ChangeSet> changeSetsToRollback = new ArrayList<>();
         logIterator.run(new ChangeSetVisitor() {
             @Override
             public Direction getDirection() {
@@ -872,13 +878,21 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database,
                               Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-                database.removeRanStatus(changeSet);
-                database.commit();
+                changeSetsToRollback.add(changeSet);
             }
         }, new RuntimeEnvironment(database, contexts, labelExpression));
+        return changeSetsToRollback;
     }
 
-    protected void executeRollbackScript(String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    protected void removeRunStatus(List<ChangeSet> changeSets, Contexts contexts, LabelExpression labelExpression)
+            throws LiquibaseException {
+        for (ChangeSet changeSet : changeSets) {
+            database.removeRanStatus(changeSet);
+            database.commit();
+        }
+    }
+
+    protected void executeRollbackScript(String rollbackScript, List<ChangeSet> changeSets, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String rollbackScriptContents;
         try {
@@ -904,16 +918,40 @@ public class Liquibase implements AutoCloseable {
         RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
 
         try {
+            ((HubChangeExecListener)changeExecListener).setRollbackScriptContents(rollbackScriptContents);
+            sendRollbackMessages(changeSets, changelog, RollbackMessageType.WILL_ROLLBACK, contexts, labelExpression, null);
             executor.execute(rollbackChange);
+            sendRollbackMessages(changeSets, changelog, RollbackMessageType.ROLLED_BACK, contexts, labelExpression, null);
         } catch (DatabaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage());
             LOG.severe("Error executing rollback script: " + e.getMessage());
             if (changeExecListener != null) {
-                changeExecListener.runFailed(null, databaseChangeLog, database, e);
+                sendRollbackMessages(changeSets, changelog, RollbackMessageType.ROLLBACK_FAILED, contexts, labelExpression, e);
             }
             throw new DatabaseException("Error executing rollback script", e);
         }
         database.commit();
+    }
+
+    private void sendRollbackMessages(List<ChangeSet> changeSets,
+                                      DatabaseChangeLog changelog,
+                                      RollbackMessageType messageType,
+                                      Contexts contexts,
+                                      LabelExpression labelExpression,
+                                      Exception exception) throws LiquibaseException {
+        for (ChangeSet changeSet : changeSets) {
+            if (messageType == RollbackMessageType.WILL_ROLLBACK) {
+                changeExecListener.willRollback(changeSet, databaseChangeLog, database);
+            }
+            else if (messageType == RollbackMessageType.ROLLED_BACK) {
+                changeExecListener.rolledBack(changeSet, databaseChangeLog, database);
+                Scope.getCurrentScope().getUI().sendMessage("Rolled Back Changeset:" + changeSet.toString(false));
+            }
+            else if (messageType == RollbackMessageType.ROLLBACK_FAILED) {
+                changeExecListener.rollbackFailed(changeSet, databaseChangeLog, database, exception);
+                Scope.getCurrentScope().getUI().sendMessage("Failed rolling back Changeset:" + changeSet.toString(false));
+            }
+        }
     }
 
     protected RawSQLChange buildRawSQLChange(String rollbackScriptContents) {
@@ -1059,8 +1097,9 @@ public class Liquibase implements AutoCloseable {
                             logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                         });
                     } else {
-                        executeRollbackScript(rollbackScript, contexts, labelExpression);
-                        removeRunStatus(logIterator, contexts, labelExpression);
+                        List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
+                        executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
                 }
@@ -1208,8 +1247,9 @@ public class Liquibase implements AutoCloseable {
                             logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                         });
                     } else {
-                        executeRollbackScript(rollbackScript, contexts, labelExpression);
-                        removeRunStatus(logIterator, contexts, labelExpression);
+                        List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
+                        executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
                 }
