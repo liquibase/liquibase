@@ -13,7 +13,7 @@ public class MockHubService implements HubService {
     public static UUID randomUUID;
 
     public List<Project> returnProjects = new ArrayList<>();
-    public List<Environment> returnEnvironments;
+    public List<Connection> returnConnections;
     public List<HubChangeLog> returnChangeLogs = new ArrayList<>();
     public SortedMap<String, List> sentObjects = new TreeMap<>();
     public boolean online = true;
@@ -67,27 +67,27 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public void setRanChangeSets(Environment environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
-        sentObjects.computeIfAbsent("setRanChangeSets/" + environmentId, k -> new ArrayList<>()).addAll(ranChangeSets);
+    public void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+        sentObjects.computeIfAbsent("setRanChangeSets/" + connectionId, k -> new ArrayList<>()).addAll(ranChangeSets);
     }
 
     @Override
-    public List<Environment> getEnvironments(Environment exampleEnvironment) {
-        return returnEnvironments;
+    public List<Connection> getConnections(Connection exampleConnection) {
+        return returnConnections;
     }
 
     @Override
-    public Environment getEnvironment(Environment exampleEnvironment, boolean createIfNotExists) throws LiquibaseHubException {
-        return returnEnvironments.get(0);
+    public Connection getConnection(Connection exampleConnection, boolean createIfNotExists) throws LiquibaseHubException {
+        return returnConnections.get(0);
     }
 
     @Override
-    public Environment createEnvironment(Environment environment) throws LiquibaseHubException {
-        sentObjects.computeIfAbsent("createEnvironment/" + environment.getPrj().getId(), k -> new ArrayList<>()).add(environment);
+    public Connection createConnection(Connection connection) throws LiquibaseHubException {
+        sentObjects.computeIfAbsent("createConnection/" + connection.getProject().getId(), k -> new ArrayList<>()).add(connection);
 
-        return new Environment()
+        return new Connection()
                 .setId(UUID.randomUUID())
-                .setJdbcUrl(environment.getJdbcUrl());
+                .setJdbcUrl(connection.getJdbcUrl());
     }
 
     @Override
@@ -102,8 +102,8 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
-        sentObjects.computeIfAbsent("startOperation/" + environment.getId(), k -> new ArrayList<>()).add(operationParameters);
+    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection, Map<String, String> operationParameters) throws LiquibaseHubException {
+        sentObjects.computeIfAbsent("startOperation/" + connection.getId(), k -> new ArrayList<>()).add(operationParameters);
 
         return null;
     }
@@ -131,18 +131,18 @@ public class MockHubService implements HubService {
                         .setId(randomUUID)
                         .setName("Test project")
         ));
-        this.returnEnvironments = new ArrayList<>(Collections.singletonList(
-                new Environment()
+        this.returnConnections = new ArrayList<>(Collections.singletonList(
+                new Connection()
                         .setId(randomUUID)
                         .setJdbcUrl("jdbc://test")
-                        .setPrj(this.returnProjects.get(0))
+                        .setProject(this.returnProjects.get(0))
         ));
         this.returnChangeLogs = new ArrayList<>(Collections.singletonList(
                 new HubChangeLog()
                         .setId(randomUUID)
                         .setName("Mock changelog")
                         .setFileName("com/example/test.xml")
-                        .setPrj(this.returnProjects.get(0))
+                        .setProject(this.returnProjects.get(0))
         ));
         this.sentObjects = new TreeMap<>();
     }
