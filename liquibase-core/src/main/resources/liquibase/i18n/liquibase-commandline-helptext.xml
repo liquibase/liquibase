@@ -85,10 +85,9 @@ Hub Commands
  registerChangeLog               This interactive CLI command will
                                  register the specified changelog to a Project
                                  in your Liquibase Hub organization. You can
-                                 create a
-                                 Project from the CLI, or choose one already
-                                 created. Learn more about free Liquibase
-                                 Hub at https://hub.liquibase.com.
+                                 create a Project from the CLI, or choose one
+                                 already created. Learn more about free
+                                 Liquibase Hub at https://hub.liquibase.com.
 
 
  syncHub                         Synchronizes your local DATABASECHANGELOG
