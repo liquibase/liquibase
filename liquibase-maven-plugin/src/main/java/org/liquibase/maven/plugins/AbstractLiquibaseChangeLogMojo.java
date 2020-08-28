@@ -42,20 +42,6 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      */
     protected String changeLogFile;
 
-    /**
-     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
-     *
-     * @parameter property="liquibase.hub.apiKey"
-     */
-    protected String liquibaseHubApiKey;
-
-    /**
-     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
-     *
-     * @parameter property="liquibase.hub.url"
-     */
-    protected String liquibaseHubUrl;
-
 
     /**
      * Specifies which contexts Liquibase will execute, which can be separated by a commaif multiple contexts
@@ -96,13 +82,13 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         //
         // Store the Hub API key and URL for later use
         //
-        if (StringUtil.isNotEmpty(liquibaseHubApiKey)) {
+        if (StringUtil.isNotEmpty(hubApiKey)) {
             HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            hubConfiguration.setLiquibaseHubApiKey(liquibaseHubApiKey);
+            hubConfiguration.setLiquibaseHubApiKey(hubApiKey);
         }
-        if (StringUtil.isNotEmpty(liquibaseHubUrl)) {
+        if (StringUtil.isNotEmpty(hubUrl)) {
             HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            hubConfiguration.setLiquibaseHubUrl(liquibaseHubUrl);
+            hubConfiguration.setLiquibaseHubUrl(hubUrl);
         }
     }
 
