@@ -65,8 +65,8 @@ Standard Commands:
                                  the database to its current state after the
                                  changes up to the specified tag have been
                                  applied
- updateTestingRollback           Updates database, then rolls back changes before
-                                 updating again. Useful for testing
+ updateTestingRollback           Updates database, then rolls back changes
+                                 before updating again. Useful for testing
                                  rollback support
  generateChangeLog               Writes Change Log XML to copy the current state
                                  of the database to standard out
@@ -82,24 +82,27 @@ Diff Commands
                                  the database
                                  to the reference database to standard out
 Hub Commands
- registerChangeLog               This interactive CLI command will register the
-                                 specified changelog to a Project in your
-                                 Liquibase Hub organization. You can create a
+ registerChangeLog               This interactive CLI command will
+                                 register the specified changelog to a Project
+                                 in your Liquibase Hub organization. You can
+                                 create a
                                  Project from the CLI, or choose one already
                                  created. Learn more about free Liquibase
                                  Hub at https://hub.liquibase.com.
 
 
- syncHub                         Synchronizes your local DATABASECHANGELOG table
-                                 with its Liquibase Hub counterpart. Learn more
-                                 about free Liquibase Hub at https://hub.liquibase.com.
+ syncHub                         Synchronizes your local DATABASECHANGELOG
+                                 table with its Liquibase Hub counterpart.
+                                 Learn more about free Liquibase Hub at
+                                 https://hub.liquibase.com.
 
 Hub integration CLI parameter
  --liquibaseHubApiKey=<yourApiKey>
                                  A property, which can be set in the CLI or in
                                  liquibase.properties, required to enable
                                  monitoring and reports in your Liquibase Hub
-                                 account. Get a free key at https://hub.liquibase.com.
+                                 account. Get a free key at
+                                 https://hub.liquibase.com.
 
 Documentation Commands
  dbDoc <outputDirectory>         Generates Javadoc-like documentation
