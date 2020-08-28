@@ -21,11 +21,14 @@ import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     private Database database;
     private CatalogAndSchema[] schemas;
+    private String changeLogFile;
+    private UUID hubConnectionId;
 
     @Override
     public String getName() {
@@ -71,6 +74,18 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
         return this;
 
+    }
+
+    public String getChangeLogFile() {
+        return changeLogFile;
+    }
+
+    public void setChangeLogFile(String changeLogFile) {
+        this.changeLogFile = changeLogFile;
+    }
+
+    public void setHubConnectionId(String hubConnectionIdString) {
+        this.hubConnectionId = UUID.fromString(hubConnectionIdString);
     }
 
     @Override
