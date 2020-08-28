@@ -88,7 +88,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             if (hubChangeLog != null) {
                 return new CommandResult("Changelog '" + changeLogFile +
                         "' is already registered with changeLogId '" + changeLogId + "' to project '" +
-                        hubChangeLog.getPrj().getName() + "' with project ID '" + hubChangeLog.getPrj().getId().toString() + "'.\n" +
+                        hubChangeLog.getProject().getName() + "' with project ID '" + hubChangeLog.getProject().getId().toString() + "'.\n" +
                         "For more information visit https://docs.liquibase.com.", false);
             }
             else {
@@ -164,7 +164,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         // Go create the Hub Changelog
         //
         HubChangeLog newChangeLog = new HubChangeLog();
-        newChangeLog.setPrj(project);
+        newChangeLog.setProject(project);
         newChangeLog.setFileName(databaseChangeLog.getFilePath());
         newChangeLog.setName(databaseChangeLog.getFilePath());
 
