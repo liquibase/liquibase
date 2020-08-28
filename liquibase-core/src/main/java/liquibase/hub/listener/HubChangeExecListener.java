@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.AbstractChangeExecListener;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.ChangeLogSyncListener;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -31,15 +32,21 @@ import java.io.IOException;
 import java.util.*;
 
 public class HubChangeExecListener extends AbstractChangeExecListener
-                                   implements ChangeExecListener {
+                                   implements ChangeExecListener, ChangeLogSyncListener {
     private static final Logger logger = Scope.getCurrentScope().getLog(HubChangeExecListener.class);
 
     private final Operation operation;
 
     private final Map<ChangeSet, Date> startDateMap = new HashMap<>();
 
+    private String rollbackScriptContents;
+
     public HubChangeExecListener(Operation operation) {
         this.operation = operation;
+    }
+
+    public void setRollbackScriptContents(String rollbackScriptContents) {
+        this.rollbackScriptContents = rollbackScriptContents;
     }
 
     @Override
@@ -58,9 +65,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                     Database database,
                     ChangeSet.ExecType execType) {
         String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
-        updateHub(changeSet, databaseChangeLog, database, "PASS", message);
+        updateHub(changeSet, databaseChangeLog, database, "UPDATE", "PASS", message);
     }
-
 
     /**
      * Called before a change is rolled back.
@@ -121,7 +127,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
     @Override
     public void runFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
-        updateHub(changeSet, databaseChangeLog, database, "FAIL", exception.getMessage());
+        updateHub(changeSet, databaseChangeLog, database, "UPDATE", "FAIL", exception.getMessage());
+    }
+
+    @Override
+    public void markedRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        startDateMap.put(changeSet, new Date());
+        String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
+        updateHub(changeSet, databaseChangeLog, database, "SYNC", "PASS", message);
     }
 
     //
@@ -172,7 +185,10 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
         List<String> sqlList = new ArrayList<>();
         try {
-           if (changeSet.hasCustomRollbackChanges()) {
+            if (rollbackScriptContents != null) {
+                sqlList.add(rollbackScriptContents);
+            }
+            else if (changeSet.hasCustomRollbackChanges()) {
                List<Change> changes = changeSet.getRollback().getChanges();
                for (Change change : changes) {
                     SqlStatement[] statements = change.generateStatements(database);
@@ -182,12 +198,12 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                         }
                     }
                 }
-           }
-           else {
-               List<Change> changes = changeSet.getChanges();
-               for (Change change : changes) {
-                   SqlStatement[] statements = change.generateRollbackStatements(database);
-                   for (SqlStatement statement : statements) {
+            }
+            else {
+                List<Change> changes = changeSet.getChanges();
+                for (Change change : changes) {
+                    SqlStatement[] statements = change.generateRollbackStatements(database);
+                    for (SqlStatement statement : statements) {
                         for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, database)) {
                             sqlList.add(sql.toSql());
                         }
@@ -239,6 +255,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     private void updateHub(ChangeSet changeSet,
                            DatabaseChangeLog databaseChangeLog,
                            Database database,
+                           String eventType,
                            String operationStatusType,
                            String statusMessage) {
         //
@@ -287,7 +304,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
-        operationChangeEvent.setEventType("UPDATE");
+        operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
         operationChangeEvent.setEndDate(new Date());
         operationChangeEvent.setChangesetId(changeSet.getId());
