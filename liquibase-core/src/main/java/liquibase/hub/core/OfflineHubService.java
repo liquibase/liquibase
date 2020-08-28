@@ -38,22 +38,22 @@ public class OfflineHubService implements HubService {
     }
 
     @Override
-    public void setRanChangeSets(Environment environmentId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
+    public void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 
     @Override
-    public Environment getEnvironment(Environment exampleEnvironment, boolean createIfNotExists) throws LiquibaseHubException {
+    public Connection getConnection(Connection exampleConnection, boolean createIfNotExists) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 
     @Override
-    public List<Environment> getEnvironments(Environment exampleEnvironment) throws LiquibaseHubException {
+    public List<Connection> getConnections(Connection exampleConnection) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 
     @Override
-    public Environment createEnvironment(Environment environment) throws LiquibaseHubException {
+    public Connection createConnection(Connection connection) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 
@@ -73,7 +73,7 @@ public class OfflineHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(String operationType, HubChangeLog changeLog, Environment environment, Map<String, String> operationParameters) throws LiquibaseHubException {
+    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection, Map<String, String> operationParameters) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 

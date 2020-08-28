@@ -7,7 +7,7 @@ public class HubChangeLog implements HubModel {
     private UUID id;
     private String fileName;
     private String name;
-    private Project prj;
+    private Project project;
 
     @Override
     public UUID getId() {
@@ -42,12 +42,12 @@ public class HubChangeLog implements HubModel {
         return "ID " + getId() + " (" + fileName + "::" + name + ")";
     }
 
-    public Project getPrj() {
-        return prj;
+    public Project getProject() {
+        return project;
     }
 
-    public HubChangeLog setPrj(Project prj) {
-        this.prj = prj;
+    public HubChangeLog setProject(Project project) {
+        this.project = project;
         return this;
     }
 }
