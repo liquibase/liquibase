@@ -154,7 +154,12 @@ class HttpClient {
 //                    peopleDescription.addPropertyParameters("content", List.class, contentReturnType);
 //                    yaml.addTypeDescription(peopleDescription);
 //                }
-
+                String contentType = connection.getContentType();
+                if (! contentType.equals("application/json")) {
+                    int responseCode = connection.getResponseCode();
+                    throw new LiquibaseHubException("\nUnexpected content type '" + contentType +
+                            "' returned from Hub.  Response code is " + responseCode);
+                }
                 return (T) yaml.loadAs(response, returnType);
             } catch (IOException e) {
                 if (connection.getResponseCode() == 401) {
