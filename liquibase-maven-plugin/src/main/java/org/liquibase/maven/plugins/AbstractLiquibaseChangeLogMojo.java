@@ -90,6 +90,10 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
             HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
             hubConfiguration.setLiquibaseHubUrl(hubUrl);
         }
+        if (StringUtil.isNotEmpty(hubMode)) {
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            hubConfiguration.setLiquibaseHubMode(hubMode);
+        }
     }
 
     @Override
