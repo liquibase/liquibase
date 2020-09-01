@@ -25,6 +25,8 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
+
         if ((database instanceof DerbyDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
             H2Database) || (database instanceof HsqlDatabase)) {
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP);
@@ -35,14 +37,13 @@ public class DateTimeType extends LiquibaseDataType {
 		}
 
         if (database instanceof OracleDatabase) {
-            if (getRawDefinition().toUpperCase(Locale.US).contains("TIME ZONE")) {
+            if (originalDefinition.toUpperCase(Locale.US).contains("TIME ZONE")) {
                 // remove the last data type size that comes from column size
-                return new DatabaseDataType(getRawDefinition().replaceFirst("\\(\\d+\\)$", ""));
+                return new DatabaseDataType(originalDefinition.replaceFirst("\\(\\d+\\)$", ""));
             }
             return new DatabaseDataType(SQL_DATETYPE_TIMESTAMP, getParameters());
         }
 
-        String originalDefinition = StringUtil.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
             if (originalDefinition.matches("(?i)^\\[?smalldatetime.*")) {
