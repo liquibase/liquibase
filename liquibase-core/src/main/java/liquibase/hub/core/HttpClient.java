@@ -5,6 +5,7 @@ import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.LiquibaseHubObjectNotFoundException;
+import liquibase.hub.LiquibaseHubRedirectException;
 import liquibase.hub.LiquibaseHubSecurityException;
 import liquibase.hub.model.ListResponse;
 import liquibase.util.LiquibaseUtil;
@@ -57,12 +58,15 @@ class HttpClient {
     }
 
     protected <T> ListResponse doGet(String url, Map<String, String> parameters, Class<ListResponse> listResponseClass, Class<T> contentType) throws LiquibaseHubException {
-        if (parameters != null && parameters.size() > 0) {
-            url += "?" + toQueryString(parameters);
+        try {
+            if (parameters != null && parameters.size() > 0) {
+                url += "?" + toQueryString(parameters);
+            }
+            return doRequest("GET", url, null, listResponseClass, contentType);
         }
-
-        return doRequest("GET", url, null, listResponseClass, contentType);
-
+        catch (LiquibaseHubRedirectException lhre) {
+            return doRequest("GET", url, null, listResponseClass, contentType);
+        }
     }
 
     protected <T> T doGet(String url, Map<String, String> parameters, Class<T> returnType) throws LiquibaseHubException {
@@ -119,7 +123,12 @@ class HttpClient {
     }
 
     private <T> T doRequest(String method, String url, Object requestBodyObject, Class<T> returnType) throws LiquibaseHubException {
-        return doRequest(method, url, requestBodyObject, returnType, null);
+        try {
+            return doRequest(method, url, requestBodyObject, returnType, null);
+        }
+        catch (LiquibaseHubRedirectException lhre) {
+            return doRequest(method, url, requestBodyObject, returnType, null);
+        }
     }
 
     private <T> T doRequest(String method, String url, Object requestBodyObject, Class<T> returnType, Class contentReturnType) throws LiquibaseHubException {
@@ -154,9 +163,25 @@ class HttpClient {
 //                    peopleDescription.addPropertyParameters("content", List.class, contentReturnType);
 //                    yaml.addTypeDescription(peopleDescription);
 //                }
+                int responseCode = connection.getResponseCode();
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+                        responseCode == HttpURLConnection.HTTP_MOVED_PERM ||
+                        responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
+                        //
+                        // Get redirect url from "location" header field
+                        //
+                        String newHubUrl = connection.getHeaderField("Location");
+                        newHubUrl = newHubUrl.replaceAll(url, "");
+                        Scope.getCurrentScope().getLog(getClass()).info("Redirecting to URL: " + newHubUrl);
+                        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+                        hubConfiguration.setLiquibaseHubUrl(newHubUrl);
+                        throw new LiquibaseHubRedirectException();
+                    }
+                }
+
                 String contentType = connection.getContentType();
                 if (! contentType.equals("application/json")) {
-                    int responseCode = connection.getResponseCode();
                     throw new LiquibaseHubException("\nUnexpected content type '" + contentType +
                             "' returned from Hub.  Response code is " + responseCode);
                 }
