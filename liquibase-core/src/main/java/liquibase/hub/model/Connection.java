@@ -3,7 +3,7 @@ package liquibase.hub.model;
 import java.util.Date;
 import java.util.UUID;
 
-public class Environment implements HubModel {
+public class Connection implements HubModel {
 
     private UUID id;
     private String jdbcUrl;
@@ -13,13 +13,13 @@ public class Environment implements HubModel {
     private Date updateDate;
     private Date removeDate;
 
-    private Project prj;
+    private Project project;
 
     public UUID getId() {
         return id;
     }
 
-    public Environment setId(UUID id) {
+    public Connection setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -28,7 +28,7 @@ public class Environment implements HubModel {
         return jdbcUrl;
     }
 
-    public Environment setJdbcUrl(String jdbcUrl) {
+    public Connection setJdbcUrl(String jdbcUrl) {
         this.jdbcUrl = jdbcUrl;
         return this;
     }
@@ -38,7 +38,7 @@ public class Environment implements HubModel {
         return name;
     }
 
-    public Environment setName(String name) {
+    public Connection setName(String name) {
         this.name = name;
         return this;
     }
@@ -47,7 +47,7 @@ public class Environment implements HubModel {
         return description;
     }
 
-    public Environment setDescription(String description) {
+    public Connection setDescription(String description) {
         this.description = description;
 
         return this;
@@ -57,7 +57,7 @@ public class Environment implements HubModel {
         return createDate;
     }
 
-    public Environment setCreateDate(Date createDate) {
+    public Connection setCreateDate(Date createDate) {
         this.createDate = createDate;
         return this;
     }
@@ -66,7 +66,7 @@ public class Environment implements HubModel {
         return updateDate;
     }
 
-    public Environment setUpdateDate(Date updateDate) {
+    public Connection setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
         return this;
     }
@@ -75,23 +75,23 @@ public class Environment implements HubModel {
         return removeDate;
     }
 
-    public Environment setRemoveDate(Date removeDate) {
+    public Connection setRemoveDate(Date removeDate) {
         this.removeDate = removeDate;
         return this;
     }
 
 
-    public Project getPrj() {
-        return prj;
+    public Project getProject() {
+        return project;
     }
 
-    public Environment setPrj(Project prj) {
-        this.prj = prj;
+    public Connection setProject(Project project) {
+        this.project = project;
         return this;
     }
 
     @Override
     public String toString() {
-        return "Environment " + jdbcUrl + " (" + id + ")";
+        return "Connection " + jdbcUrl + " (" + id + ")";
     }
 }

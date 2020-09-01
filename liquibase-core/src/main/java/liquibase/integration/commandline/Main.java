@@ -69,7 +69,7 @@ public class Main {
     protected String username;
     protected String password;
     protected String url;
-    protected String hubEnvironmentId;
+    protected String hubConnectionId;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -317,12 +317,7 @@ public class Main {
                     Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
 
-                    if (main.commandParams.contains("--help") &&
-                        (main.command.startsWith("rollbackOneChangeSet") ||
-                         main.command.startsWith("rollbackOneUpdate") ||
-                         (main.command.startsWith("diff") && main.isFormattedDiff()))) {
-                        //don't need to check setup
-                    } else {
+                    if (setupNeeded(main)) {
                         List<String> setupMessages = main.checkSetup();
                         if (!setupMessages.isEmpty()) {
                             main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
@@ -389,12 +384,24 @@ public class Main {
                 if (isHubEnabled(main.command) &&
                     LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKey() != null &&
                     !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
-                    ui.sendMessage("The command "+main.command+"'s operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
+                    ui.sendMessage("WARNING: The command "+main.command+" operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
                 }
 
                 return 0;
             }
         });
+    }
+
+    private static boolean setupNeeded(Main main) throws CommandLineParsingException {
+        if (main.command.toLowerCase().startsWith(COMMANDS.REGISTER_CHANGELOG.toLowerCase())) {
+            return false;
+        }
+        if (! main.commandParams.contains("--help")) {
+            return true;
+        }
+        return !main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_CHANGE_SET.toLowerCase()) &&
+                !main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_UPDATE.toLowerCase()) &&
+                (!main.command.toLowerCase().startsWith(COMMANDS.DIFF.toLowerCase()) || !main.isFormattedDiff());
     }
 
     protected static void setLogLevel(LogService logService, java.util.logging.Logger rootLogger, java.util.logging.Logger liquibaseLogger, Level level) {
@@ -1525,15 +1532,15 @@ public class Main {
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             try {
-                if (hubEnvironmentId != null) {
+                if (hubConnectionId != null) {
                     try {
-                        liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+                        liquibase.setHubConnectionId(UUID.fromString(hubConnectionId));
                     } catch (IllegalArgumentException e) {
-                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubEnvironmentId' has invalid value '"+hubEnvironmentId+"' Learn more at https://hub.liquibase.com");
+                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubConnectionId' has invalid value '"+hubConnectionId+"' Learn more at https://hub.liquibase.com");
                     }
                 }
             } catch (IllegalArgumentException  e) {
-                throw new LiquibaseException("Unexpected hubEnvironmentId format: "+hubEnvironmentId, e);
+                throw new LiquibaseException("Unexpected hubConnectionId format: "+hubConnectionId, e);
             }
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
@@ -1639,7 +1646,7 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
-                liquibaseCommand.setHubEnvironmentId(hubEnvironmentId);
+                liquibaseCommand.setHubConnectionId(hubConnectionId);
                 liquibaseCommand.setUrl(url);
                 liquibaseCommand.setDatabase(database);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
