@@ -309,6 +309,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected String hubMode;
 
+
     protected String commandName;
 
     protected boolean hasProLicense() {
