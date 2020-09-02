@@ -82,16 +82,14 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         //
         // Store the Hub API key and URL for later use
         //
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         if (StringUtil.isNotEmpty(hubApiKey)) {
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
             hubConfiguration.setLiquibaseHubApiKey(hubApiKey);
         }
         if (StringUtil.isNotEmpty(hubUrl)) {
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
             hubConfiguration.setLiquibaseHubUrl(hubUrl);
         }
         if (StringUtil.isNotEmpty(hubMode)) {
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
             hubConfiguration.setLiquibaseHubMode(hubMode);
         }
     }
