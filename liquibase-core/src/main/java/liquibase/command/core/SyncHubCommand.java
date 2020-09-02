@@ -94,7 +94,6 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         if (hubConnectionId == null) {
             Project project = null;
             if (changeLogFile != null) {
-                Scope.getCurrentScope().getLog(getClass()).info("No changeLogFile specified. Searching for jdbcUrl across the entire organization.");
                 final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
                 final DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, new ChangeLogParameters(), resourceAccessor);
                 final String changeLogId = databaseChangeLog.getChangeLogId();
@@ -108,6 +107,9 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                     }
                     project = changeLog.getProject();
                 }
+            }
+            else {
+                Scope.getCurrentScope().getLog(getClass()).info("No changeLogFile specified. Searching for jdbcUrl across the entire organization.");
             }
 
             final Connection searchConnection = new Connection()

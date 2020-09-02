@@ -283,32 +283,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      */
     protected String liquibaseProLicenseKey;
-    /**
-     *
-     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
-     *
-     * @parameter property="liquibase.hub.hubApiKey"
-     *
-     */
-    protected String hubApiKey;
-
-    /**
-     *
-     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
-     *
-     * @parameter property="liquibase.hub.hubUrl"
-     *
-     */
-    protected String hubUrl;
-
-    /**
-     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
-     *
-     * @parameter property="liquibase.hub.hubMode"
-     *
-     */
-    protected String hubMode;
-
 
     protected String commandName;
 

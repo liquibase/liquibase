@@ -61,6 +61,32 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      */
     protected String labels;
 
+    /**
+     *
+     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hub.apiKey"
+     *
+     */
+    protected String apiKey;
+
+    /**
+     *
+     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hub.url"
+     *
+     */
+    protected String hubUrl;
+
+    /**
+     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hub.mode"
+     *
+     */
+    protected String mode;
+
     @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
@@ -83,14 +109,14 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         // Store the Hub API key and URL for later use
         //
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        if (StringUtil.isNotEmpty(hubApiKey)) {
-            hubConfiguration.setLiquibaseHubApiKey(hubApiKey);
+        if (StringUtil.isNotEmpty(apiKey)) {
+            hubConfiguration.setLiquibaseHubApiKey(apiKey);
         }
         if (StringUtil.isNotEmpty(hubUrl)) {
             hubConfiguration.setLiquibaseHubUrl(hubUrl);
         }
-        if (StringUtil.isNotEmpty(hubMode)) {
-            hubConfiguration.setLiquibaseHubMode(hubMode);
+        if (StringUtil.isNotEmpty(mode)) {
+            hubConfiguration.setLiquibaseHubMode(mode);
         }
     }
 

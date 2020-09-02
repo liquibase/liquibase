@@ -28,7 +28,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      *
      * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
      *
-     * @parameter property="liquibase.hub.hubProjectId"
+     * @parameter property="liquibase.hub.projectId"
      *
      */
     protected String projectId;
