@@ -27,7 +27,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
 	/**
 	 * Specifies the <i>Liquibase Hub Connection ID</i> for Liquibase to use.
 	 *
-	 * @parameter property="liquibase.hub.hubConnectionId"
+	 * @parameter property="liquibase.hubConnectionId"
 	 *
 	 */
 	protected String hubConnectionId;

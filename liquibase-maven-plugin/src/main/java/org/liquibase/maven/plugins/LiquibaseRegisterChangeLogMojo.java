@@ -28,15 +28,15 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      *
      * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
      *
-     * @parameter property="liquibase.hub.projectId"
+     * @parameter property="liquibase.hubProjectId"
      *
      */
-    protected String projectId;
+    protected String hubProjectId;
 
 	  @Override
   	protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
-        if (projectId == null) {
+        if (hubProjectId == null) {
             throw new MojoFailureException("\nThe Hub project ID must be specified.");
         }
     }
@@ -49,7 +49,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         RegisterChangeLogCommand registerChangeLog =
             (RegisterChangeLogCommand) CommandFactory.getInstance().getCommand("registerChangeLog");
         registerChangeLog.setChangeLogFile(changeLogFile);
-        registerChangeLog.setHubProjectId(UUID.fromString(projectId));
+        registerChangeLog.setHubProjectId(UUID.fromString(hubProjectId));
         Map<String, Object> argsMap = new HashMap<>();
         argsMap.put("changeLogFile", changeLogFile);
         argsMap.put("database", database);
