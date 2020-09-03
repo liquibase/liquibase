@@ -1,5 +1,6 @@
 package liquibase.logging.core;
 
+import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 
@@ -10,7 +11,8 @@ public class CompositeLogger extends AbstractLogger {
 
     private final List<Logger> loggers;
 
-    public CompositeLogger(List<Logger> loggers) {
+    public CompositeLogger(List<Logger> loggers, LogMessageFilter filter) {
+        super(filter);
         this.loggers = loggers;
     }
 
@@ -24,7 +26,7 @@ public class CompositeLogger extends AbstractLogger {
     @Override
     public void log(Level level, String message, Throwable e) {
         for (Logger logger : loggers) {
-            logger.log(level, message, e);
+            logger.log(level, filterMessage(message), e);
         }
 
     }

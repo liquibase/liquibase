@@ -130,6 +130,8 @@ class HttpClient {
             }
             connection.setRequestMethod(method);
 
+            String requestBodyDescription = "";
+
             if (requestBodyObject != null) {
                 String requestBody = yaml.dumpAs(requestBodyObject, Tag.MAP, DumperOptions.FlowStyle.FLOW);
 
@@ -145,7 +147,11 @@ class HttpClient {
                 try (OutputStream output = connection.getOutputStream()) {
                     output.write(requestBody.getBytes(StandardCharsets.UTF_8));
                 }
+
+                requestBodyDescription = " with a " +requestBody.length() + " char " + requestBodyObject.getClass().getName() + " request body";
             }
+
+            Scope.getCurrentScope().getLog(getClass()).fine(method.toUpperCase() + " " + url + requestBodyDescription);
 
             try (InputStream response = connection.getInputStream()) {
                 //TODO: figure out how to populate ListResponse.content with objects rather than maps
