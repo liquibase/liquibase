@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -179,6 +180,16 @@ public class LiquibaseTest {
         liquibase.update("test1, test2");
         assertEquals("context is set correctly", "test1,test2", liquibase.objectToVerify.toString());
         liquibase.reset();
+    }
+
+    @Test
+    public void testScopeWithNullParent() {
+        try {
+            new Scope(null, Collections.emptyMap());
+            fail("null parent is not allowed");
+        } catch (NullPointerException e) {
+            assertTrue(e.getMessage().contains("parent"));
+        }
     }
 
 //    @Test(expected = LockException.class)

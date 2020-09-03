@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
@@ -22,6 +21,8 @@ import liquibase.util.SmartMap;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import java.util.*;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * This scope object is used to hold configuration and other parameters within a call without needing complex method signatures.
@@ -114,8 +115,12 @@ public class Scope {
         values.put(Attr.ui.name(), new ConsoleUIService());
     }
 
+    /**
+     * @param parent The new Scopes parent in the hierarchy of Scopes, not null. 
+     * @param scopeValues The values for the new Scope.
+     */
     protected Scope(Scope parent, Map<String, Object> scopeValues) {
-        this.parent = parent;
+        this.parent = requireNonNull(parent, "A 'null' parent would detach this scope from the hierarchy.");
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
                 values.put(entry.getKey(), entry.getValue());
