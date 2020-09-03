@@ -288,6 +288,7 @@ public class OnlineHubService implements HubService {
         try {
             return http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
         } catch (LiquibaseHubObjectNotFoundException lbe) {
+            Scope.getCurrentScope().getLog(getClass()).severe(lbe.getMessage(), lbe);
             return null;
         }
     }
@@ -322,8 +323,10 @@ public class OnlineHubService implements HubService {
         }
 
         if (operationEvent.getOperationEventLog() != null) {
-            requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
-            requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
+            if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
+                requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
+                requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
+            }
         }
 
         return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getConnection().getProject().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
@@ -339,10 +342,16 @@ public class OnlineHubService implements HubService {
     public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
         String changesetBody = null;
         String[] generatedSql = null;
+        String logs = null;
+        Date logsTimestamp = null;
         if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
             changesetBody = operationChangeEvent.getChangesetBody();
             generatedSql = operationChangeEvent.getGeneratedSql();
+
+            logs = operationChangeEvent.getLogs();
+            logsTimestamp = operationChangeEvent.getLogsTimestamp();
         }
+
 
         OperationChangeEvent sendOperationChangeEvent =
            new OperationChangeEvent()
@@ -355,9 +364,9 @@ public class OnlineHubService implements HubService {
               .setOperationStatusType(operationChangeEvent.getOperationStatusType())
               .setChangesetBody(changesetBody)
               .setGeneratedSql(generatedSql)
-              .setLogs(operationChangeEvent.getLogs())
+              .setLogs(logs)
               .setStatusMessage(operationChangeEvent.getStatusMessage())
-              .setLogsTimestamp(operationChangeEvent.getLogsTimestamp());
+              .setLogsTimestamp(logsTimestamp);
         http.doPost("/api/v1" +
                         "/organizations/" + getOrganization().getId().toString() +
                         "/projects/" + operationChangeEvent.getProject().getId().toString() +
