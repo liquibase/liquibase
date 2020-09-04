@@ -613,7 +613,6 @@ public class Main {
                 || COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(arg)
                 || COMMANDS.LIST_LOCKS.equalsIgnoreCase(arg)
-                || COMMANDS.DROP_ALL.equalsIgnoreCase(arg)
                 || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(arg)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(arg)
                 || COMMANDS.HELP.equalsIgnoreCase(arg)
@@ -1336,6 +1335,9 @@ public class Main {
         if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubUrl())) {
             LOG.fine("Liquibase Hub URL:      " + hubConfiguration.getLiquibaseHubUrl());
         }
+        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubMode())) {
+            LOG.fine("Liquibase Hub Mode:     " + hubConfiguration.getLiquibaseHubMode());
+        }
 
         //
         // Check for a valid license to run PRO commands
@@ -1652,28 +1654,30 @@ public class Main {
                 } else {
                     throw new RuntimeException(result.print());
                 }
-
                 return;
             } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {
-                Map<String, Object> argsMap = new HashMap<>();
-                loadChangeSetInfoToMap(argsMap);
-                SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
-                liquibaseCommand.setHubConnectionId(hubConnectionId);
-                liquibaseCommand.setUrl(url);
-                liquibaseCommand.setDatabase(database);
-                liquibaseCommand.setChangeLogFile(changeLogFile);
-                final CommandResult commandResult = liquibaseCommand.execute();
-                if (commandResult.succeeded) {
-                    Scope.getCurrentScope().getUI().sendMessage(commandResult.print());
-                } else {
-                    throw new RuntimeException(commandResult.print());
-                }
-
-
+                executeSyncHub(database, liquibase);
                 return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
-                DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
-                        (COMMANDS.DROP_ALL);
+                String liquibaseHubApiKey = hubConfiguration.getLiquibaseHubApiKey();
+                String hubMode = hubConfiguration.getLiquibaseHubMode();
+                if (liquibaseHubApiKey != null && ! hubMode.toLowerCase().equals("off")) {
+                    if (hubConnectionId == null && changeLogFile == null) {
+                        String errorMessage =
+                           "\nERROR: The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
+                           "can send reports to your Hub project. To enable this, please add the \n" +
+                           "'--hubConnectionId =<hubConnectionId>' parameter to the CLI, or ensure\n" +
+                           "a registered changelog file is passed in your defaults file or in the CLI.\n" +
+                           "Learn more at https://hub.liquibase.com";
+                        throw new UnexpectedLiquibaseException(errorMessage);
+                    }
+                }
+                DropAllCommand dropAllCommand =
+                        (DropAllCommand) CommandFactory.getInstance().getCommand(COMMANDS.DROP_ALL);
+                if (hubConnectionId != null) {
+                    dropAllCommand.setHubConnectionId(hubConnectionId);
+                }
+                dropAllCommand.setLiquibase(liquibase);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
                 dropAllCommand.setSchemas(getSchemaParams(database));
                 Scope.getCurrentScope().getUI().sendMessage(dropAllCommand.execute().print());
@@ -1854,6 +1858,21 @@ public class Main {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                         coreBundle.getString("problem.closing.connection"), e);
             }
+        }
+    }
+
+    private void executeSyncHub(Database database, Liquibase liquibase) throws CommandLineParsingException, LiquibaseException, liquibase.command.CommandExecutionException {
+        Map<String, Object> argsMap = new HashMap<>();
+        SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
+        liquibaseCommand.setHubConnectionId(hubConnectionId);
+        liquibaseCommand.setUrl(url);
+        liquibaseCommand.setDatabase(database);
+        liquibaseCommand.setChangeLogFile(changeLogFile);
+        final CommandResult commandResult = liquibaseCommand.execute();
+        if (commandResult.succeeded) {
+            Scope.getCurrentScope().getUI().sendMessage(commandResult.print());
+        } else {
+            throw new RuntimeException(commandResult.print());
         }
     }
 
