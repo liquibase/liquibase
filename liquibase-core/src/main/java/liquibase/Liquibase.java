@@ -1669,6 +1669,8 @@ public class Liquibase implements AutoCloseable {
                     DropAllCommand dropAll = (DropAllCommand) CommandFactory.getInstance().getCommand("dropAll");
                     dropAll.setDatabase(Liquibase.this.getDatabase());
                     dropAll.setSchemas(finalSchemas);
+                    dropAll.setLiquibase(Liquibase.this);
+                    dropAll.setChangeLogFile(changeLogFile);
 
                     try {
                         dropAll.execute();
