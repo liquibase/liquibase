@@ -8,6 +8,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -17,6 +18,9 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.descriptor.MojoDescriptor;
+import org.apache.maven.plugin.descriptor.Parameter;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
@@ -90,7 +94,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected boolean emptyPassword;
     /**
-     *
      * Specifies whether to ignore the schema name.
      *
      * @parameter property="liquibase.outputDefaultSchema" default-value="false"
@@ -276,11 +279,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private boolean hasProLicense;
 
     /**
-     *
      * Specifies your Liquibase Pro license key.
      *
      * @parameter property="liquibase.liquibaseProLicenseKey"
-     *
      */
     protected String liquibaseProLicenseKey;
 
@@ -289,6 +290,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean hasProLicense() {
         return hasProLicense;
     }
+
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
@@ -330,14 +332,52 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
             scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
 
+            IntegrationDetails integrationDetails = new IntegrationDetails();
+            integrationDetails.setName("maven");
+
+            final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
+            for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
+                if (!descriptor.getImplementationClass().equals(this.getClass())) {
+                    continue;
+                }
+
+                for (Parameter param : descriptor.getParameters()) {
+                    final String name = param.getName();
+                    if (name.equalsIgnoreCase("project")) {
+                        continue;
+                    }
+
+                    final Field field = getField(this.getClass(), name);
+                    if (field == null) {
+                        getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
+                    } else {
+                        final Object value = field.get(this);
+                        if (value != null) {
+                            try {
+                                String expression = param.getExpression();
+                                if (expression == null) {
+                                    expression = pluginDescriptor.getGoalPrefix() + "." + param.getName();
+                                }
+                                integrationDetails.setParameter("maven__" + expression.replaceAll("[${}]", ""), String.valueOf(value));
+                            } catch (Throwable e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+            scopeValues.put("integrationDetails", integrationDetails);
+
+            final Map pluginContext = this.getPluginContext();
+            System.out.println(pluginContext.keySet());
             Scope.child(scopeValues, () -> {
 
                 configureFieldsAndValues();
 
-        //
-        // Check for a LiquibasePro license
-        //
-        hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+                //
+                // Check for a LiquibasePro license
+                //
+                hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
 
                 //        LogService.getInstance().setDefaultLoggingLevel(logging);
                 getLog().info(CommandLineUtils.getBanner());
@@ -407,7 +447,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     performLiquibaseTask(liquibase);
                 } catch (LiquibaseException e) {
                     cleanup(database);
-            throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
+                    throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
                 }
 
                 cleanup(database);
@@ -418,6 +458,18 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             throw new MojoExecutionException(e.getMessage(), e);
         }
 
+    }
+
+    protected Field getField(Class clazz, String name) throws NoSuchFieldException {
+        try {
+            return clazz.getDeclaredField(name);
+        } catch (NoSuchFieldException e) {
+            if (clazz.equals(Object.class)) {
+                return null;
+            } else {
+                return getField(clazz.getSuperclass(), name);
+            }
+        }
     }
 
     protected Liquibase getLiquibase() {

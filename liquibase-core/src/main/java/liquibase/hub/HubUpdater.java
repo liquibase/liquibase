@@ -74,7 +74,7 @@ public class HubUpdater {
     //
     final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
     final HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
-    Operation updateOperation = hubService.createOperation(operationType, hubChangeLog, connection, null);
+    Operation updateOperation = hubService.createOperation(operationType, hubChangeLog, connection);
     try {
         hubService.sendOperationEvent(updateOperation, new OperationEvent()
                 .setEventType("START")
