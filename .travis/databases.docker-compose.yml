@@ -28,7 +28,7 @@ services:
   postgres-10:
     image: postgres:10
     ports:
-      - "5432:5432"
+      - "5433:5432"
     restart: always
     environment:
       POSTGRES_PASSWORD: LbRootPass1
@@ -39,7 +39,7 @@ services:
   postgres-11:
     image: postgres:11
     ports:
-      - "5432:5432"
+      - "5434:5432"
     restart: always
     environment:
       POSTGRES_PASSWORD: LbRootPass1
@@ -50,7 +50,7 @@ services:
   postgres-latest:
     image: postgres:latest
     ports:
-      - "5432:5432"
+      - "5435:5432"
     restart: always
     environment:
       POSTGRES_PASSWORD: LbRootPass1
