@@ -25,6 +25,39 @@ services:
     volumes:
       - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
 
+  postgres-10:
+    image: postgres:10
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: LbRootPass1
+      POSTGRES_DB: lbcat
+    volumes:
+      - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
+
+  postgres-11:
+    image: postgres:11
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: LbRootPass1
+      POSTGRES_DB: lbcat
+    volumes:
+      - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
+
+  postgres-latest:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: LbRootPass1
+      POSTGRES_DB: lbcat
+    volumes:
+      - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
+
   mssql:
     image: mcr.microsoft.com/mssql/server:2017-latest
     ports:
