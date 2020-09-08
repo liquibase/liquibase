@@ -931,6 +931,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return;
         }
         rollback.getChanges().add(change);
+        System.out.println("Added Change");
         change.setChangeSet(this);
     }
 
