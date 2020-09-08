@@ -281,9 +281,12 @@ public class Liquibase implements AutoCloseable {
                 } catch (LockException e) {
                     LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
-
+                if (changeExecListener != null && updateOperation != null) {
+                    LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                    LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                }
                 resetServices();
-                this.changeExecListener = null;
+                setChangeExecListener(null);
             }
         });
     }
@@ -497,6 +500,10 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
+                    if (changeExecListener != null && updateOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    }
                     resetServices();
                     setChangeExecListener(null);
                 }
@@ -612,7 +619,12 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
+                    if (changeExecListener != null && updateOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    }
                     resetServices();
+                    setChangeExecListener(null);
                 }
             }
         });
@@ -856,6 +868,10 @@ public class Liquibase implements AutoCloseable {
                         lockService.releaseLock();
                     } catch (LockException e) {
                         LOG.severe("Error releasing lock", e);
+                    }
+                    if (changeExecListener != null && rollbackOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -1113,6 +1129,10 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                 }
+                if (changeExecListener != null && rollbackOperation != null) {
+                    LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                    LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                }
                 resetServices();
                 setChangeExecListener(null);
             }
@@ -1262,9 +1282,13 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
+                    if (changeExecListener != null && rollbackOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    }
+                    resetServices();
+                    setChangeExecListener(null);
                 }
-                resetServices();
-                setChangeExecListener(null);
             }
         });
 
@@ -1402,7 +1426,12 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
+                    if (changeExecListener != null && changeLogSyncOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    }
                     resetServices();
+                    setChangeExecListener(null);
                 }
             }
         });
