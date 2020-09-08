@@ -26,6 +26,7 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,8 +40,25 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
     private final Map<ChangeSet, Date> startDateMap = new HashMap<>();
 
+    private String rollbackScriptContents;
+
+    private int postCount;
+    private int failedToPostCount;
+
     public HubChangeExecListener(Operation operation) {
         this.operation = operation;
+    }
+
+    public void setRollbackScriptContents(String rollbackScriptContents) {
+        this.rollbackScriptContents = rollbackScriptContents;
+    }
+
+    public int getPostCount() {
+        return postCount;
+    }
+
+    public int getFailedToPostCount() {
+        return failedToPostCount;
     }
 
     @Override
@@ -254,8 +272,11 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         // If not connected to Hub but we are supposed to be then show message
         //
         if (operation == null) {
-            boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
-            if (realTime) {
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
+            boolean hubOn =
+                ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
+            if (apiKey != null && hubOn) {
                 String message =
                     "Hub communication failure.\n" +
                     "The data for operation on changeset '" +
@@ -293,12 +314,15 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             }
         }
 
+        Date executedDate = new Date();
+
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
-        operationChangeEvent.setEndDate(new Date());
+        operationChangeEvent.setEndDate(executedDate);
+        operationChangeEvent.setExecutedDate(executedDate);
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
@@ -324,10 +348,12 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setOperation(operation);
         try {
             hubService.sendOperationChangeEvent(operationChangeEvent);
+            postCount++;
         }
         catch (LiquibaseException lbe) {
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
                     " change set '" + changeSet.toString(false));
+            failedToPostCount++;
         }
     }
 }
