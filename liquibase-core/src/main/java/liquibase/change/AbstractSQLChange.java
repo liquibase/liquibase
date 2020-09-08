@@ -80,6 +80,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        System.out.println("Validation sql = " + sql);
         if (StringUtil.trimToNull(sql) == null) {
             validationErrors.addError("'sql' is required");
         }
