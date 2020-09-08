@@ -343,13 +343,12 @@ public class OnlineHubService implements HubService {
         String changesetBody = null;
         String[] generatedSql = null;
         String logs = null;
-        Date logsTimestamp = null;
+        Date logsTimestamp = operationChangeEvent.getLogsTimestamp();
         if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
             changesetBody = operationChangeEvent.getChangesetBody();
             generatedSql = operationChangeEvent.getGeneratedSql();
 
             logs = operationChangeEvent.getLogs();
-            logsTimestamp = operationChangeEvent.getLogsTimestamp();
         }
 
 
