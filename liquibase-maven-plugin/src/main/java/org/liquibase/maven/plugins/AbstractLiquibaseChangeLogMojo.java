@@ -4,12 +4,15 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.Scope;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -58,6 +61,32 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      */
     protected String labels;
 
+    /**
+     *
+     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hub.apiKey"
+     *
+     */
+    protected String apiKey;
+
+    /**
+     *
+     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hub.url"
+     *
+     */
+    protected String hubUrl;
+
+    /**
+     * Specifies the <i>Liquibase Hub URL</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hub.mode"
+     *
+     */
+    protected String mode;
+
     @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
@@ -76,6 +105,19 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
      */
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+        //
+        // Store the Hub API key and URL for later use
+        //
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        if (StringUtil.isNotEmpty(apiKey)) {
+            hubConfiguration.setLiquibaseHubApiKey(apiKey);
+        }
+        if (StringUtil.isNotEmpty(hubUrl)) {
+            hubConfiguration.setLiquibaseHubUrl(hubUrl);
+        }
+        if (StringUtil.isNotEmpty(mode)) {
+            hubConfiguration.setLiquibaseHubMode(mode);
+        }
     }
 
     @Override

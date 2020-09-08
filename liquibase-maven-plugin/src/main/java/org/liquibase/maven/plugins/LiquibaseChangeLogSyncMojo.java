@@ -13,10 +13,10 @@ import liquibase.exception.LiquibaseException;
  */
 public class LiquibaseChangeLogSyncMojo extends AbstractLiquibaseChangeLogMojo {
 
-	@Override
-	protected void performLiquibaseTask(Liquibase liquibase)
-			throws LiquibaseException {
-		liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels));
-	}
-
+  	@Override
+  	protected void performLiquibaseTask(Liquibase liquibase)
+  			throws LiquibaseException {
+    		super.performLiquibaseTask(liquibase);
+	    	liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels));
+	  }
 }
