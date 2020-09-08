@@ -42,12 +42,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
     private String rollbackScriptContents;
 
-<<<<<<< HEAD
-=======
     private int postCount;
     private int failedToPostCount;
 
->>>>>>> origin/DAT-5125
     public HubChangeExecListener(Operation operation) {
         this.operation = operation;
     }
@@ -56,8 +53,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         this.rollbackScriptContents = rollbackScriptContents;
     }
 
-<<<<<<< HEAD
-=======
     public int getPostCount() {
         return postCount;
     }
@@ -66,7 +61,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         return failedToPostCount;
     }
 
->>>>>>> origin/DAT-5125
     @Override
     public void willRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ChangeSet.RunStatus runStatus) {
         startDateMap.put(changeSet, new Date());

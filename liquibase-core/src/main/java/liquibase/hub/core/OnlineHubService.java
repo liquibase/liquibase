@@ -22,6 +22,7 @@ public class OnlineHubService implements HubService {
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     private Boolean available;
     private UUID organizationId;
+    private String organizationName;
     private UUID userId;
 
     private HttpClient http;
@@ -117,20 +118,18 @@ public class OnlineHubService implements HubService {
 
     @Override
     public Organization getOrganization() throws LiquibaseHubException {
-        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations", Map.class);
-
-        Organization org = new Organization();
-        List<Map> contentList = response.get("content");
         if (organizationId == null) {
+            final Map<String, List<Map>> response = http.doGet("/api/v1/organizations", Map.class);
+            List<Map> contentList = response.get("content");
             String id = (String) contentList.get(0).get("id");
             if (id != null) {
                 organizationId = UUID.fromString(id);
             }
+            organizationName = (String) contentList.get(0).get("name");
         }
+        Organization org = new Organization();
         org.setId(organizationId);
-        String name = (String) contentList.get(0).get("name");
-        org.setName(name);
-
+        org.setName(organizationName);
         return org;
     }
 
