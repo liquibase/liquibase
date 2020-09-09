@@ -4,7 +4,7 @@ package liquibase.hub
 import liquibase.configuration.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.core.OnlineHubService
-import liquibase.hub.model.Environment
+import liquibase.hub.model.Connection
 import spock.lang.Specification
 
 import static org.junit.Assume.assumeTrue
@@ -16,7 +16,7 @@ class OnlineHubServiceTest extends Specification {
     private Properties integrationTestProperties
 
     private UUID knownProjectId = UUID.fromString("ce1a237e-e005-4288-a243-4856823a25a6")
-    private UUID knownEnvironmentId = UUID.fromString("d92e6505-cd0f-4e91-bb66-b12e6a285184")
+    private UUID knownConnectionId = UUID.fromString("d92e6505-cd0f-4e91-bb66-b12e6a285184")
 
     def setup() {
         if (integrationTestProperties == null) {
@@ -88,11 +88,11 @@ class OnlineHubServiceTest extends Specification {
 
     }
 */
-    def "getEnvironment throws exception if 404"() {
+    def "getConnection throws exception if 404"() {
         when:
-        def environment = new Environment()
-        environment.setId(UUID.randomUUID())
-        hubService.getEnvironment(environment, false)
+        def connection = new Connection()
+        connection.setId(UUID.randomUUID())
+        hubService.getConnection(connection, false)
 
         then:
         def e = thrown(LiquibaseHubObjectNotFoundException)
@@ -100,27 +100,27 @@ class OnlineHubServiceTest extends Specification {
 
     }
 
-    def "getEnvironments can return all environments"() {
+    def "getConnections can return all connections"() {
         when:
         String jdbcUrl = integrationTestProperties.get("integration.test.oracle.url")
         jdbcUrl = jdbcUrl.replaceAll("//","")
         def hubUrl = integrationTestProperties.get("integration.test.hub.url")
-        def environments = hubService.getEnvironments(null)
+        def connections = hubService.getConnections(null)
 
         then:
-        environments*.id.toString() != null
-        environments*.name.toString() contains jdbcUrl
-        environments*.jdbcUrl.toString() == "[" + jdbcUrl + "]"
+        connections*.id.toString() != null
+        connections*.name.toString() contains jdbcUrl
+        connections*.jdbcUrl.toString() == "[" + jdbcUrl + "]"
     }
 
     /*
      @Unroll
-     def "getEnvironments can search"() {
+     def "getConnections can search"() {
          when:
-         def environments = hubService.getEnvironments(new Environment(search))
+         def connections = hubService.getConnections(new Connection(search))
 
          then:
-         environments*.name.toString() == expectedName
+         connections*.name.toString() == expectedName
 
          where:
          search                                                                                            | expectedName

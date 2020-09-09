@@ -80,7 +80,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         updateHub(changeSet, databaseChangeLog, database, "UPDATE", "PASS", message);
     }
 
-
     /**
      * Called before a change is rolled back.
      *
@@ -159,8 +158,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                                       String operationStatusType,
                                       String statusMessage) {
         if (operation == null) {
-            boolean realTime = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("realtime");
-            if (realTime) {
+            boolean hubOn =
+                    ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
+            if (hubOn) {
                 String message =
                         "Hub communication failure.\n" +
                         "The data for operation on changeset '" +
@@ -198,7 +198,10 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
         List<String> sqlList = new ArrayList<>();
         try {
-           if (changeSet.hasCustomRollbackChanges()) {
+            if (rollbackScriptContents != null) {
+                sqlList.add(rollbackScriptContents);
+            }
+            else if (changeSet.hasCustomRollbackChanges()) {
                List<Change> changes = changeSet.getRollback().getChanges();
                for (Change change : changes) {
                     SqlStatement[] statements = change.generateStatements(database);
@@ -208,12 +211,12 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                         }
                     }
                 }
-           }
-           else {
-               List<Change> changes = changeSet.getChanges();
-               for (Change change : changes) {
-                   SqlStatement[] statements = change.generateRollbackStatements(database);
-                   for (SqlStatement statement : statements) {
+            }
+            else {
+                List<Change> changes = changeSet.getChanges();
+                for (Change change : changes) {
+                    SqlStatement[] statements = change.generateRollbackStatements(database);
+                    for (SqlStatement statement : statements) {
                         for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, database)) {
                             sqlList.add(sql.toSql());
                         }
@@ -246,7 +249,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setLogs("LOGS");
         operationChangeEvent.setLogsTimestamp(new Date());
 
-        operationChangeEvent.setProject(hubChangeLog.getPrj());
+        operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
 
         try {
@@ -344,7 +347,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             // Consume
             //
         }
-        operationChangeEvent.setProject(hubChangeLog.getPrj());
+        operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
         try {
             hubService.sendOperationChangeEvent(operationChangeEvent);

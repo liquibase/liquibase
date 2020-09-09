@@ -37,6 +37,12 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     private HubChangeLog hubChangeLog;
     private String changeLogFile;
     private Map<String, Object> argsMap = new HashMap<>();
+    private UUID hubProjectId;
+
+
+    public void setHubProjectId(UUID hubProjectId) {
+        this.hubProjectId = hubProjectId;
+    }
 
     @Override
     public void configure(Map<String, Object> argsMap) throws LiquibaseException {
@@ -88,7 +94,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             if (hubChangeLog != null) {
                 return new CommandResult("Changelog '" + changeLogFile +
                         "' is already registered with changeLogId '" + changeLogId + "' to project '" +
-                        hubChangeLog.getPrj().getName() + "' with project ID '" + hubChangeLog.getPrj().getId().toString() + "'.\n" +
+                        hubChangeLog.getProject().getName() + "' with project ID '" + hubChangeLog.getProject().getId().toString() + "'.\n" +
                         "For more information visit https://docs.liquibase.com.", false);
             }
             else {
@@ -101,33 +107,42 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         //
         // Retrieve the projects
         //
+        Project project = null;
         List<Project> projects = getProjectsFromHub();
 
         //
         // Look for a project in the HubConfiguration
         // If not found then read from console
         //
-        Project project = null;
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         final String hubProjectName = hubConfiguration.getLiquibaseHubProject();
         if (hubProjectName != null) {
             for (Project testProject : projects) {
                 if (testProject.getName().equalsIgnoreCase(hubProjectName)) {
                     project = testProject;
+                    break;
+                }
+            }
+        }
+        else if (hubProjectId != null) {
+            for (Project testProject : projects) {
+                if (testProject.getId().equals(hubProjectId)) {
+                    project = testProject;
+                    break;
                 }
             }
         }
         else {
             boolean done = false;
             String input = null;
-            while (! done) {
+            while (!done) {
                 input = readProjectFromConsole(projects);
                 try {
                     if (input.equalsIgnoreCase("C")) {
                         String projectName = readProjectNameFromConsole();
                         if (StringUtil.isEmpty(projectName)) {
-                           outputStream.print("\nNo project created\n\n");
-                           continue;
+                            outputStream.print("\nNo project created\n\n");
+                            continue;
                         } else if (projectName.length() > 255) {
                             outputStream.print("\nThe project name you entered is longer than 255 characters\n\n");
                             continue;
@@ -140,9 +155,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                         projects = getProjectsFromHub();
                         done = true;
                         continue;
-                    }
-                    else if (input.equalsIgnoreCase("N")) {
-                        return new CommandResult("Your changelog "+changeLogFile+" was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.", false);
+                    } else if (input.equalsIgnoreCase("N")) {
+                        return new CommandResult("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.", false);
                     }
                     int projectIdx = Integer.parseInt(input);
                     if (projectIdx > 0 && projectIdx <= projects.size()) {
@@ -153,8 +167,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                     } else {
                         outputStream.printf("\nInvalid project '%d' selected\n\n", projectIdx);
                     }
-                }
-                catch (NumberFormatException nfe) {
+                } catch (NumberFormatException nfe) {
                     outputStream.printf("\nInvalid selection '" + input + "'\n\n");
                 }
             }
@@ -164,7 +177,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         // Go create the Hub Changelog
         //
         HubChangeLog newChangeLog = new HubChangeLog();
-        newChangeLog.setPrj(project);
+        newChangeLog.setProject(project);
         newChangeLog.setFileName(databaseChangeLog.getFilePath());
         newChangeLog.setName(databaseChangeLog.getFilePath());
 

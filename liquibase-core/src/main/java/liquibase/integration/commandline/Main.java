@@ -22,7 +22,10 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogMessageFilter;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
+import liquibase.logging.core.JavaLogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -66,7 +69,8 @@ public class Main {
     protected String username;
     protected String password;
     protected String url;
-    protected String hubEnvironmentId;
+    protected String hubConnectionId;
+    protected String hubProjectId;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -250,21 +254,27 @@ public class Main {
                     System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
                     java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+                    java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
+                    liquibaseLogger.setParent(rootLogger);
+
+                    final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+                    logService.setParent(liquibaseLogger);
+
                     if (main.logLevel == null) {
                         String defaultLogLevel = System.getProperty("liquibase.log.level");
                         if (defaultLogLevel == null) {
-                            setLogLevel(rootLogger, Level.OFF);
+                            setLogLevel(logService, rootLogger, liquibaseLogger, Level.OFF);
                         } else {
-                            setLogLevel(rootLogger, parseLogLevel(defaultLogLevel, ui));
+                            setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(defaultLogLevel, ui));
                         }
                     } else {
-                        setLogLevel(rootLogger, parseLogLevel(main.logLevel, ui));
+                        setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(main.logLevel, ui));
                     }
 
                     if (main.logFile != null) {
                         FileHandler fileHandler = new FileHandler(main.logFile, true);
                         fileHandler.setFormatter(new SimpleFormatter());
-                        if (rootLogger.getLevel() == Level.OFF) {
+                        if (liquibaseLogger.getLevel() == Level.OFF) {
                             fileHandler.setLevel(Level.FINE);
                         }
 
@@ -395,11 +405,18 @@ public class Main {
                 (!main.command.toLowerCase().startsWith(COMMANDS.DIFF.toLowerCase()) || !main.isFormattedDiff());
     }
 
-    protected static void setLogLevel(java.util.logging.Logger logger, java.util.logging.Level level) {
-        logger.setLevel(level);
+    protected static void setLogLevel(LogService logService, java.util.logging.Logger rootLogger, java.util.logging.Logger liquibaseLogger, Level level) {
+        if (level.intValue() < Level.INFO.intValue()) {
+            //limit non-liquibase logging to INFO at a minimum to avoid too much logs
+            rootLogger.setLevel(Level.INFO);
+        } else {
+            rootLogger.setLevel(level);
+        }
+        liquibaseLogger.setLevel(level);
 
-        for (Handler handler : logger.getHandlers()) {
+        for (Handler handler : rootLogger.getHandlers()) {
             handler.setLevel(level);
+            handler.setFilter(new SecureLogFilter(logService.getFilter()));
         }
     }
 
@@ -1516,15 +1533,15 @@ public class Main {
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             try {
-                if (hubEnvironmentId != null) {
+                if (hubConnectionId != null) {
                     try {
-                        liquibase.setHubEnvironmentId(UUID.fromString(hubEnvironmentId));
+                        liquibase.setHubConnectionId(UUID.fromString(hubConnectionId));
                     } catch (IllegalArgumentException e) {
-                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubEnvironmentId' has invalid value '"+hubEnvironmentId+"' Learn more at https://hub.liquibase.com");
+                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubConnectionId' has invalid value '"+hubConnectionId+"' Learn more at https://hub.liquibase.com");
                     }
                 }
             } catch (IllegalArgumentException  e) {
-                throw new LiquibaseException("Unexpected hubEnvironmentId format: "+hubEnvironmentId, e);
+                throw new LiquibaseException("Unexpected hubConnectionId format: "+hubConnectionId, e);
             }
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
@@ -1613,10 +1630,21 @@ public class Main {
                 return;
             } else if (COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
-                loadChangeSetInfoToMap(argsMap);
                 RegisterChangeLogCommand liquibaseCommand =
                    (RegisterChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
+                try {
+                    if (hubProjectId != null) {
+                        try {
+                            liquibaseCommand.setHubProjectId(UUID.fromString(hubProjectId));
+                        } catch (IllegalArgumentException e) {
+                            throw new LiquibaseException("The command '"+command+
+                                    "' failed because parameter 'hubProjectId' has invalid value '"+hubProjectId+"'. Learn more at https://hub.liquibase.com");
+                        }
+                    }
+                } catch (IllegalArgumentException  e) {
+                    throw new LiquibaseException("Unexpected hubProjectId format: "+hubProjectId, e);
+                }
                 CommandResult result = liquibaseCommand.execute();
 
                 if (result.succeeded) {
@@ -1630,7 +1658,7 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 loadChangeSetInfoToMap(argsMap);
                 SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
-                liquibaseCommand.setHubEnvironmentId(hubEnvironmentId);
+                liquibaseCommand.setHubConnectionId(hubConnectionId);
                 liquibaseCommand.setUrl(url);
                 liquibaseCommand.setDatabase(database);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
@@ -2001,6 +2029,23 @@ public class Main {
      */
     public boolean isWindows() {
         return System.getProperty("os.name").startsWith("Windows ");
+    }
+
+    public static class SecureLogFilter implements Filter {
+
+        private LogMessageFilter filter;
+
+        public SecureLogFilter(LogMessageFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public boolean isLoggable(LogRecord record) {
+            final String filteredMessage = filter.filterMessage(record.getMessage());
+
+            final boolean equals = filteredMessage.equals(record.getMessage());
+            return equals;
+        }
     }
 
     @SuppressWarnings("HardCodedStringLiteral")

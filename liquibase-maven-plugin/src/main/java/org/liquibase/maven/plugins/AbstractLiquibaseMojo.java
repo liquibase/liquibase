@@ -334,10 +334,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 configureFieldsAndValues();
 
-        //
-        // Check for a LiquibasePro license
-        //
-        hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+                //
+                // Check for a LiquibasePro license
+                //
+                hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
 
                 //        LogService.getInstance().setDefaultLoggingLevel(logging);
                 getLog().info(CommandLineUtils.getBanner());
