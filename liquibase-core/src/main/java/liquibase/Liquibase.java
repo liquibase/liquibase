@@ -53,7 +53,6 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import javax.naming.Context;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
@@ -310,7 +309,7 @@ public class Liquibase implements AutoCloseable {
         Connection connection;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         if (getHubConnectionId() == null) {
-            HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLogId));
+            HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId));
             if (hubChangeLog == null) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                         "Retrieving Hub Change Log failed for Change Log ID: " + changeLogId);

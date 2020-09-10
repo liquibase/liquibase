@@ -91,7 +91,7 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
+    public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
         for (HubChangeLog changeLog : returnChangeLogs) {
             if (String.valueOf(changeLog.getId()).equals(String.valueOf(changeLogId))) {
                 return changeLog;

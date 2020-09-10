@@ -15,7 +15,6 @@ import liquibase.command.core.SyncHubCommand;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.hub.listener.HubChangeExecListener;
 import liquibase.hub.model.*;
 import liquibase.logging.core.BufferedLogService;
 
@@ -74,7 +73,7 @@ public class HubUpdater {
     // Send the START operation event
     //
     final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-    final HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
+    final HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLog.getChangeLogId()));
     Operation updateOperation = hubService.createOperation(operationType, hubChangeLog, connection, null);
     try {
         hubService.sendOperationEvent(updateOperation, new OperationEvent()

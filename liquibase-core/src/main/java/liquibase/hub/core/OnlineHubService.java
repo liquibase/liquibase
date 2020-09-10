@@ -24,6 +24,7 @@ public class OnlineHubService implements HubService {
     private UUID organizationId;
     private String organizationName;
     private UUID userId;
+    private Map<UUID, HubChangeLog> hubChangeLogCache = new HashMap<>();
 
     private HttpClient http;
 
@@ -277,15 +278,21 @@ public class OnlineHubService implements HubService {
 
     /**
      * Query for a changelog ID.  If no result we return null
+     * We cache this result and a map
      *
      * @param changeLogId Changelog ID for query
      * @return HubChangeLog               Object container for result
      * @throws LiquibaseHubException
      */
     @Override
-    public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
+    public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
+        if (hubChangeLogCache.containsKey(changeLogId)) {
+            return hubChangeLogCache.get(changeLogId);
+        }
         try {
-            return http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
+            HubChangeLog hubChangeLog = http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
+            hubChangeLogCache.put(changeLogId, hubChangeLog);
+            return hubChangeLog;
         } catch (LiquibaseHubObjectNotFoundException lbe) {
             return null;
         }
