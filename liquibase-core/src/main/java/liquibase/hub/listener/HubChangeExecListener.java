@@ -234,7 +234,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         }
         operationChangeEvent.setOperationStatusType(operationStatusType);
         operationChangeEvent.setStatusMessage(statusMessage);
-        operationChangeEvent.setLogs("LOGS");
         operationChangeEvent.setLogsTimestamp(new Date());
 
         operationChangeEvent.setProject(hubChangeLog.getProject());
@@ -317,7 +316,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
-        operationChangeEvent.setLogs("LOGS");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
