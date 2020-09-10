@@ -312,7 +312,7 @@ public class OnlineHubService implements HubService {
         clientMetadata.put("liquibaseVersion", LiquibaseUtil.getBuildVersion());
         clientMetadata.put("hostName", hostName);
         clientMetadata.put("systemUser", System.getProperty("user.name"));
-        clientMetadata.put("integration", integrationDetails.getName());
+        clientMetadata.put("clientInterface", integrationDetails.getName());
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("connectionId", connection.getId());
