@@ -20,6 +20,7 @@ import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Operation;
 import liquibase.hub.model.OperationChangeEvent;
 import liquibase.logging.Logger;
+import liquibase.logging.core.BufferedLogService;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
@@ -30,6 +31,7 @@ import liquibase.statement.SqlStatement;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class HubChangeExecListener extends AbstractChangeExecListener
                                    implements ChangeExecListener, ChangeLogSyncListener {
@@ -234,7 +236,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         }
         operationChangeEvent.setOperationStatusType(operationStatusType);
         operationChangeEvent.setStatusMessage(statusMessage);
-        operationChangeEvent.setLogs("LOGS");
+        operationChangeEvent.setLogs(getCurrentLog());
         operationChangeEvent.setLogsTimestamp(new Date());
 
         operationChangeEvent.setProject(hubChangeLog.getProject());
@@ -248,6 +250,15 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
                     " change set '" + changeSet.toString(false));
         }
+    }
+
+    private String getCurrentLog() {
+        BufferedLogService bufferedLogService =
+           Scope.getCurrentScope().get(BufferedLogService.class.getName(), BufferedLogService.class);
+        if (bufferedLogService != null) {
+            return bufferedLogService.getLogAsString(Level.INFO);
+        }
+        return null;
     }
 
     //
@@ -317,7 +328,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
-        operationChangeEvent.setLogs("LOGS");
+        operationChangeEvent.setLogs(getCurrentLog());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
