@@ -7,7 +7,7 @@ public class OperationChangeEvent implements HubModel {
     private String eventType;
     private Date startDate;
     private Date endDate;
-    private Date executedDate;
+    private Date dateExecuted;
     private UUID hubChangeId;
     private String changesetId;
     private String changesetAuthor;
@@ -62,12 +62,12 @@ public class OperationChangeEvent implements HubModel {
         return this;
     }
 
-    public Date getExecutedDate() {
-        return executedDate;
+    public Date getDateExecuted() {
+        return dateExecuted;
     }
 
-    public OperationChangeEvent setExecutedDate(Date executedDate) {
-        this.executedDate = executedDate;
+    public OperationChangeEvent setDateExecuted(Date dateExecuted) {
+        this.dateExecuted = dateExecuted;
         return this;
     }
 

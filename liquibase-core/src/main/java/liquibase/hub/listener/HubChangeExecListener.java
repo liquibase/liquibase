@@ -186,13 +186,16 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             return;
         }
 
+        Date dateExecuted = new Date();
+
         //
         //  POST /organizations/{id}/projects/{id}/operations/{id}/change-events
         //
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType("ROLLBACK");
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
-        operationChangeEvent.setEndDate(new Date());
+        operationChangeEvent.setEndDate(dateExecuted);
+        operationChangeEvent.setDateExecuted(dateExecuted);
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
@@ -317,15 +320,15 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             }
         }
 
-        Date executedDate = new Date();
+        Date dateExecuted = new Date();
 
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
-        operationChangeEvent.setEndDate(executedDate);
-        operationChangeEvent.setExecutedDate(executedDate);
+        operationChangeEvent.setEndDate(dateExecuted);
+        operationChangeEvent.setDateExecuted(dateExecuted);
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
