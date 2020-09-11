@@ -70,6 +70,7 @@ public class Main {
     protected String password;
     protected String url;
     protected String hubConnectionId;
+    protected String hubProjectId;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -1629,10 +1630,21 @@ public class Main {
                 return;
             } else if (COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
-                loadChangeSetInfoToMap(argsMap);
                 RegisterChangeLogCommand liquibaseCommand =
                    (RegisterChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
+                try {
+                    if (hubProjectId != null) {
+                        try {
+                            liquibaseCommand.setHubProjectId(UUID.fromString(hubProjectId));
+                        } catch (IllegalArgumentException e) {
+                            throw new LiquibaseException("The command '"+command+
+                                    "' failed because parameter 'hubProjectId' has invalid value '"+hubProjectId+"'. Learn more at https://hub.liquibase.com");
+                        }
+                    }
+                } catch (IllegalArgumentException  e) {
+                    throw new LiquibaseException("Unexpected hubProjectId format: "+hubProjectId, e);
+                }
                 CommandResult result = liquibaseCommand.execute();
 
                 if (result.succeeded) {
