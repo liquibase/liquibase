@@ -1,5 +1,6 @@
 package liquibase.command.core
 
+import liquibase.Liquibase
 import liquibase.Scope
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.configuration.HubConfiguration
@@ -43,6 +44,9 @@ class DropAllCommandTest extends Specification {
         def hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
         hubConfiguration.setLiquibaseHubProject("PROJECT 1")
         def command = new DropAllCommand()
+        JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
+        Liquibase liquibase = new Liquibase(outputFile.getName(), testResourceAccessor, new MockDatabase())
+        command.setLiquibase(liquibase)
         command.setChangeLogFile(outputFile.getName())
         command.setDatabase(new MockDatabase())
         command.setSchemas("")
