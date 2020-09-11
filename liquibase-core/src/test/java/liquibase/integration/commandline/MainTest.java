@@ -597,7 +597,7 @@ public class MainTest {
 
         String[] noArgCommand = { "migrate", "migrateSQL", "update", "updateSQL",
                 "futureRollbackSQL", "updateTestingRollback", "listLocks",
-                "dropAll", "releaseLocks", "validate", "help",
+                "releaseLocks", "validate", "help",
                 "clearCheckSums", "changelogSync", "changelogSyncSQL",
                 "markNextChangeSetRan", "markNextChangeSetRanSQL"
         };
