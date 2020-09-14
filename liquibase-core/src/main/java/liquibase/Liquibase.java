@@ -242,22 +242,28 @@ public class Liquibase implements AutoCloseable {
                 ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
                 //
-                // Create or retrieve the Connection
+                // Create or retrieve the Connection if this is not SQL generation
                 // Make sure the Hub is available here by checking the return
                 //
-                Connection connection = getConnection(changeLog);
-                if (connection != null) {
-                    updateOperation =
-                       hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, changeLogIterator, database);
+                Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+                if (! (executor instanceof LoggingExecutor)) {
+                    Connection connection = getConnection(changeLog);
+                    if (connection != null) {
+                        updateOperation =
+                            hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, changeLogIterator, database);
+                    }
                 }
 
                 //
+                // Only set up the listener if we are not generating SQL
                 // Make sure we don't already have a listener
                 //
-                if (changeExecListener != null) {
-                    throw new RuntimeException("ChangeExecListener already defined");
+                if (! (executor instanceof LoggingExecutor)) {
+                    if (changeExecListener != null) {
+                        throw new RuntimeException("ChangeExecListener already defined");
+                    }
+                    changeExecListener = new HubChangeExecListener(updateOperation);
                 }
-                changeExecListener = new HubChangeExecListener(updateOperation);
 
                 //
                 // Create another iterator to run
@@ -281,9 +287,12 @@ public class Liquibase implements AutoCloseable {
                 } catch (LockException e) {
                     LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
-
+                if (changeExecListener != null && updateOperation != null) {
+                    LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                    LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                }
                 resetServices();
-                this.changeExecListener = null;
+                setChangeExecListener(null);
             }
         });
     }
@@ -497,6 +506,10 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
+                    if (changeExecListener != null && updateOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    }
                     resetServices();
                     setChangeExecListener(null);
                 }
@@ -612,7 +625,12 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
+                    if (changeExecListener != null && updateOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    }
                     resetServices();
+                    setChangeExecListener(null);
                 }
             }
         });
@@ -861,6 +879,10 @@ public class Liquibase implements AutoCloseable {
                         lockService.releaseLock();
                     } catch (LockException e) {
                         LOG.severe("Error releasing lock", e);
+                    }
+                    if (changeExecListener != null && rollbackOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -1123,6 +1145,10 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                 }
+                if (changeExecListener != null && rollbackOperation != null) {
+                    LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                    LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                }
                 resetServices();
                 setChangeExecListener(null);
             }
@@ -1161,7 +1187,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     private Executor getAndReplaceJdbcExecutor(Writer output) {
-        /* We have no other choice than to save the current Executer here. */
+        /* We have no other choice than to save the current Executor here. */
         @SuppressWarnings("squid:S1941")
         Executor oldTemplate = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         final LoggingExecutor loggingExecutor = new LoggingExecutor(oldTemplate, output, database);
@@ -1277,9 +1303,13 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
+                    if (changeExecListener != null && rollbackOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    }
+                    resetServices();
+                    setChangeExecListener(null);
                 }
-                resetServices();
-                setChangeExecListener(null);
             }
         });
 
@@ -1417,7 +1447,12 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
+                    if (changeExecListener != null && changeLogSyncOperation != null) {
+                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    }
                     resetServices();
+                    setChangeExecListener(null);
                 }
             }
         });
