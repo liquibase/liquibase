@@ -15,6 +15,7 @@ import liquibase.command.core.SyncHubCommand;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.hub.listener.HubChangeExecListener;
 import liquibase.hub.model.*;
 import liquibase.logging.core.BufferedLogService;
 
@@ -41,7 +42,7 @@ public class HubUpdater {
    * If there is an error or the Hub is not available it returns null
    *
    * @param  operationType              Operation type (UPDATE or ROLLBACK)
-   * @param  connection                Connection for this operation
+   * @param  connection                 Connection for this operation
    * @param  contexts                   Contexts to use for filtering
    * @param  labelExpression            Labels to use for filtering
    * @param  changeLogIterator          Iterator to use for going through change sets
@@ -125,7 +126,7 @@ public class HubUpdater {
    */
   public void postUpdateHub(Operation updateOperation, BufferedLogService bufferLog) {
     try {
-      if (hubIsNotAvailable(changeLog.getChangeLogId()) || updateOperation == null) {
+      if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
         return;
       }
 
