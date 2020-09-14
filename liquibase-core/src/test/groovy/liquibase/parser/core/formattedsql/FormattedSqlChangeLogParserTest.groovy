@@ -301,6 +301,83 @@ select 1
         "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
     }
 
+    @Unroll
+    def parse_MultiLineRollback() throws Exception {
+        when:
+        String changeLogWithMultiLineRollback = """                
+--liquibase formatted sql
+
+--changeset eK:12345 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
+create table table1 (
+    id int primary key
+);
+
+/* --multiline-rollback
+ delete from table1;
+ drop table table1;
+*/
+               """.trim()
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultiLineRollback).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 1
+        changeLog.getChangeSets().get(0).getAuthor() == "eK"
+        changeLog.getChangeSets().get(0).getId() == "12345"
+        changeLog.getChangeSets().get(0).getRollback().getChanges().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)).getSql() == "delete from table1; drop table table1;"
+    }
+
+    @Unroll
+    def parse_MultiLineRollbackInBetween() throws Exception {
+        when:
+        String changeLogWithMultiLineRollback = """                
+--liquibase formatted sql
+
+--changeset eK:12345 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
+create table table1 (
+    id int primary key
+);
+
+--rollback delete from table1;
+--rollback drop table table1;
+
+--changeset eK:12346 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)
+create table table2 (
+    id int primary key
+);
+
+/* --multiline-rollback
+ delete from table2;
+ drop table table2;
+*/
+
+--ChangeSet nvoxland:3
+select (*) from table3;
+--rollback not required
+               """.trim()
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultiLineRollback).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 3
+
+        changeLog.getChangeSets().get(0).getAuthor() == "eK"
+        changeLog.getChangeSets().get(0).getId() == "12345"
+        changeLog.getChangeSets().get(0).getRollback().getChanges().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(0).getRollback().getChanges().get(0)).getSql().replace("\r\n", "\n") == "delete from table1;\ndrop table table1;"
+
+        changeLog.getChangeSets().get(1).getAuthor() == "eK"
+        changeLog.getChangeSets().get(1).getId() == "12346"
+        changeLog.getChangeSets().get(1).getRollback().getChanges().size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(1).getRollback().getChanges().get(0)).getSql() == "delete from table2; drop table table2;"
+
+        changeLog.getChangeSets().get(2).getAuthor() == "nvoxland"
+        changeLog.getChangeSets().get(2).getId() == "3"
+        changeLog.getChangeSets().get(2).getRollback().getChanges().size() == 1
+        assert changeLog.getChangeSets().get(2).getRollback().getChanges().get(0) instanceof EmptyChange
+    }
+
     @LiquibaseService(skip = true)
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
         private String changeLog
