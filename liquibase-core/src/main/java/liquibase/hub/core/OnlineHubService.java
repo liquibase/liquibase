@@ -54,7 +54,7 @@ public class OnlineHubService implements HubService {
             final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
 
             if (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF")) {
-                hubServiceFactory.setOfflineReason("property liquibase.hub.mode is 'OFF'. To send data to Liquibase Hub, please set it to \"realtime\"");
+                hubServiceFactory.setOfflineReason("property liquibase.hub.mode is 'OFF'. To send data to Liquibase Hub, please set it to \"all\"");
                 this.available = false;
             } else if (getApiKey() == null) {
                 hubServiceFactory.setOfflineReason("liquibase.hub.apiKey was not specified");
@@ -288,6 +288,7 @@ public class OnlineHubService implements HubService {
         try {
             return http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
         } catch (LiquibaseHubObjectNotFoundException lbe) {
+            Scope.getCurrentScope().getLog(getClass()).severe(lbe.getMessage(), lbe);
             return null;
         }
     }
@@ -322,8 +323,10 @@ public class OnlineHubService implements HubService {
         }
 
         if (operationEvent.getOperationEventLog() != null) {
-            requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
-            requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
+            if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
+                requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
+                requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
+            }
         }
 
         return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getConnection().getProject().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
@@ -337,6 +340,18 @@ public class OnlineHubService implements HubService {
 
     @Override
     public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
+        String changesetBody = null;
+        String[] generatedSql = null;
+        String logs = null;
+        Date logsTimestamp = operationChangeEvent.getLogsTimestamp();
+        if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
+            changesetBody = operationChangeEvent.getChangesetBody();
+            generatedSql = operationChangeEvent.getGeneratedSql();
+
+            logs = operationChangeEvent.getLogs();
+        }
+
+
         OperationChangeEvent sendOperationChangeEvent =
            new OperationChangeEvent()
               .setEventType(operationChangeEvent.getEventType())
@@ -347,11 +362,11 @@ public class OnlineHubService implements HubService {
               .setEndDate(operationChangeEvent.getEndDate())
               .setDateExecuted(operationChangeEvent.getDateExecuted())
               .setOperationStatusType(operationChangeEvent.getOperationStatusType())
-              .setChangesetBody(operationChangeEvent.getChangesetBody())
-              .setGeneratedSql(operationChangeEvent.getGeneratedSql())
-              .setLogs(operationChangeEvent.getLogs())
+              .setChangesetBody(changesetBody)
+              .setGeneratedSql(generatedSql)
+              .setLogs(logs)
               .setStatusMessage(operationChangeEvent.getStatusMessage())
-              .setLogsTimestamp(operationChangeEvent.getLogsTimestamp());
+              .setLogsTimestamp(logsTimestamp);
         http.doPost("/api/v1" +
                         "/organizations/" + getOrganization().getId().toString() +
                         "/projects/" + operationChangeEvent.getProject().getId().toString() +
