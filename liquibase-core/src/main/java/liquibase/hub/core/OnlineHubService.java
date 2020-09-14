@@ -345,6 +345,7 @@ public class OnlineHubService implements HubService {
               .setChangesetFilename(operationChangeEvent.getChangesetFilename())
               .setStartDate(operationChangeEvent.getStartDate())
               .setEndDate(operationChangeEvent.getEndDate())
+              .setDateExecuted(operationChangeEvent.getDateExecuted())
               .setOperationStatusType(operationChangeEvent.getOperationStatusType())
               .setChangesetBody(operationChangeEvent.getChangesetBody())
               .setGeneratedSql(operationChangeEvent.getGeneratedSql())
