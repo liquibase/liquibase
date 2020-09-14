@@ -101,35 +101,37 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
-            Matcher rollbackSplitStatementsPatternMatcher=null;
+            Pattern rollbackMultiLineStartPattern = Pattern.compile("\\s*\\/\\*\\s*\\-\\-[\\s]*multiline-rollback\\s*$", Pattern.CASE_INSENSITIVE);
+
+            Matcher rollbackSplitStatementsPatternMatcher = null;
             boolean rollbackSplitStatements = true;
             String rollbackEndDelimiter = null;
 
             String line;
             while ((line = reader.readLine()) != null) {
 
-                Matcher changeLogPatterMatcher = changeLogPattern.matcher (line);
-                if (changeLogPatterMatcher.matches ()) {
-                   Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
-                   changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
+                Matcher changeLogPatterMatcher = changeLogPattern.matcher(line);
+                if (changeLogPatterMatcher.matches()) {
+                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher(line);
+                    changeLog.setLogicalFilePath(parseString(logicalFilePathMatcher));
                 }
 
                 Matcher ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
-                if (ignoreLinesMatcher.matches ()) {
-                    if ("start".equals(ignoreLinesMatcher.group(1))){
-                        while ((line = reader.readLine()) != null){
+                if (ignoreLinesMatcher.matches()) {
+                    if ("start".equals(ignoreLinesMatcher.group(1))) {
+                        while ((line = reader.readLine()) != null) {
                             ignoreLinesMatcher = ignoreLinesPattern.matcher(line);
-                            if (ignoreLinesMatcher.matches ()) {
-                                if ("end".equals(ignoreLinesMatcher.group(1))){
+                            if (ignoreLinesMatcher.matches()) {
+                                if ("end".equals(ignoreLinesMatcher.group(1))) {
                                     break;
                                 }
                             }
                         }
                         continue;
-                    }else{
+                    } else {
                         try {
                             long ignoreCount = Long.parseLong(ignoreLinesMatcher.group(1));
-                            while ( ignoreCount>0 && (line = reader.readLine()) != null){
+                            while (ignoreCount > 0 && (line = reader.readLine()) != null) {
                                 ignoreCount--;
                             }
                             continue;
@@ -174,7 +176,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher endDelimiterPatternMatcher = endDelimiterPattern.matcher(line);
                     Matcher rollbackEndDelimiterPatternMatcher = rollbackEndDelimiterPattern.matcher(line);
 
-                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
+                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher(line);
                     Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
                     Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
                     Matcher contextPatternMatcher = contextPattern.matcher(line);
@@ -200,13 +202,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String labels = parseString(labelsPatternMatcher);
                     String logicalFilePath = parseString(logicalFilePathMatcher);
                     if ((logicalFilePath == null) || "".equals(logicalFilePath)) {
-                       logicalFilePath = changeLog.getLogicalFilePath ();
+                        logicalFilePath = changeLog.getLogicalFilePath();
                     }
                     String dbms = parseString(dbmsPatternMatcher);
 
 
                     changeSet =
-                       new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                            new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, logicalFilePath, context, dbms, runWith, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
@@ -229,6 +231,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
                         Matcher preconditionMatcher = preconditionPattern.matcher(line);
                         Matcher validCheckSumMatcher = validCheckSumPattern.matcher(line);
+                        Matcher rollbackMultiLineStartMatcher = rollbackMultiLineStartPattern.matcher(line);
 
                         if (commentMatcher.matches()) {
                             if (commentMatcher.groupCount() == 1) {
@@ -241,6 +244,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         } else if (rollbackMatcher.matches()) {
                             if (rollbackMatcher.groupCount() == 1) {
                                 currentRollbackSql.append(rollbackMatcher.group(1)).append(System.lineSeparator());
+                            }
+                        } else if (rollbackMultiLineStartMatcher.matches()) {
+                            if (rollbackMultiLineStartMatcher.groupCount() == 0) {
+                                currentRollbackSql.append(extractMultiLineRollBackSQL(reader));
                             }
                         } else if (preconditionsMatcher.matches()) {
                             if (preconditionsMatcher.groupCount() == 1) {
@@ -309,13 +316,28 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         return changeLog;
     }
 
+    private StringBuilder extractMultiLineRollBackSQL(BufferedReader reader) throws IOException, ChangeLogParseException {
+        StringBuilder multiLineRollbackSQL = new StringBuilder();
+        Pattern rollbackMultiLineEndPattern = Pattern.compile("\\s*\\*\\/\\s*$", Pattern.CASE_INSENSITIVE);
 
+        String line;
+        if (reader != null) {
+            while ((line = reader.readLine()) != null) {
+                if (rollbackMultiLineEndPattern.matcher(line).matches()) {
+                    return multiLineRollbackSQL;
+                }
+                multiLineRollbackSQL.append(line);
+            }
+            throw new ChangeLogParseException("The multi line rollback end not found.");
+        }
+        return multiLineRollbackSQL;
+    }
 
-    private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{
-        Pattern[] patterns = new Pattern[] {
-            Pattern.compile("^(?:expectedResult:)?(\\w+) (.*)", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^(?:expectedResult:)?'([^']+)' (.*)", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("^(?:expectedResult:)?\"([^\"]+)\" (.*)", Pattern.CASE_INSENSITIVE)
+    private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException {
+        Pattern[] patterns = new Pattern[]{
+                Pattern.compile("^(?:expectedResult:)?(\\w+) (.*)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("^(?:expectedResult:)?'([^']+)' (.*)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("^(?:expectedResult:)?\"([^\"]+)\" (.*)", Pattern.CASE_INSENSITIVE)
         };
         for (Pattern pattern : patterns) {
             Matcher matcher = pattern.matcher(body);
@@ -328,7 +350,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         }
         throw new ChangeLogParseException("Could not parse a SqlCheck precondition from '" + body + "'.");
     }
-
 
 
     private String parseString(Matcher matcher) {
@@ -345,7 +366,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             try {
                 stripComments = Boolean.parseBoolean(matcher.group(1));
             } catch (Exception e) {
-                throw new ChangeLogParseException("Cannot parse "+changeSet+" "+matcher.toString().replaceAll("\\.*","")+" as a boolean");
+                throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean");
             }
         }
         return stripComments;
