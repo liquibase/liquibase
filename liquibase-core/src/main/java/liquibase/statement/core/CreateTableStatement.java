@@ -107,10 +107,16 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         return this;
     }
 
+    @Deprecated
     public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue,
-        Boolean validate,String keyName, String tablespace, ColumnConstraint... constraints) {
+                                                    Boolean validate,String keyName, String tablespace, ColumnConstraint... constraints) {
+        return addPrimaryKeyColumn(columnName, columnType, null, defaultValue, validate, keyName, tablespace, constraints);
+    }
+
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, String remarks, Object defaultValue,
+                                                    Boolean validate, String keyName, String tablespace, ColumnConstraint... constraints) {
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
-        if (validate!=null) {
+        if (validate != null) {
             pkConstraint.setValidatePrimaryKey(validate);
         }
         pkConstraint.addColumns(columnName);
@@ -120,8 +126,7 @@ public class CreateTableStatement extends AbstractSqlStatement implements Compou
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
-
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, remarks, allConstraints.toArray(new ColumnConstraint[0]));
 
         return this;
     }

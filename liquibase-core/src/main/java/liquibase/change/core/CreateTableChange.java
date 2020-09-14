@@ -69,8 +69,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             LiquibaseDataType columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""), database);
             if ((constraints != null) && (constraints.isPrimaryKey() != null) && constraints.isPrimaryKey()) {
-                statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getValidatePrimaryKey(),
-                    constraints.getPrimaryKeyName(),constraints.getPrimaryKeyTablespace());
+                statement.addPrimaryKeyColumn(column.getName(), columnType, column.getRemarks(), defaultValue, constraints.getValidatePrimaryKey(),
+                        constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
 
             } else {
                 statement.addColumn(column.getName(),
