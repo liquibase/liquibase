@@ -337,7 +337,6 @@ public class OnlineHubService implements HubService {
                 "url",
                 "username",
                 "password",
-                "liquibaseProLicenseKey",
                 "apiKey",
                 "classpath"
         ));
@@ -354,7 +353,14 @@ public class OnlineHubService implements HubService {
             }
 
             if (allowed) {
-                returnMap.put(param.getKey(), param.getValue());
+                String value = param.getValue();
+                if (param.getKey().toLowerCase().contains("liquibaseProLicenseKey".toLowerCase())) {
+                    if (value != null && value.length() > 8) {
+                        value = value.substring(0, 8) + "************";
+                    }
+                }
+
+                returnMap.put(param.getKey(), value);
             }
         }
 
