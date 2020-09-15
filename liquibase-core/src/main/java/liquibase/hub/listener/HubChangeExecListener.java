@@ -343,7 +343,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
-        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
         operationChangeEvent.setEndDate(dateExecuted);
