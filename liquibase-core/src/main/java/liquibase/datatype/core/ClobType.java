@@ -50,8 +50,14 @@ public class ClobType extends LiquibaseDataType {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
-                type.addAdditionalInformation("(max)"
-                        + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                type.addAdditionalInformation("(max)");
+                if(!StringUtils.isEmpty(originalExtraInfo)) {
+                    //if we still have something like (25555) remove it
+                    //since we already set it to max, otherwise add collate or other info
+                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
+                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
+                    }
+                }
                 return type;
             }
         }
@@ -67,8 +73,14 @@ public class ClobType extends LiquibaseDataType {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?text\\]?\\s*", "");
-                type.addAdditionalInformation("(max)"
-                        + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                type.addAdditionalInformation("(max)");
+                if(!StringUtils.isEmpty(originalExtraInfo)) {
+                    //if we still have something like (25555) remove it
+                    //since we already set it to max, otherwise add collate or other info
+                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
+                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
+                    }
+                }
                 return type;
             }
             if (originalDefinition.toLowerCase(Locale.US).startsWith("ntext")
@@ -78,8 +90,14 @@ public class ClobType extends LiquibaseDataType {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^(?i)\\[?ntext\\]?\\s*", "");
-                type.addAdditionalInformation("(max)"
-                    + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
+                type.addAdditionalInformation("(max)");
+                if(!StringUtils.isEmpty(originalExtraInfo)) {
+                    //if we still have something like (25555) remove it
+                    //since we already set it to max, otherwise add collate or other info
+                    if(originalExtraInfo.lastIndexOf(")") < (originalExtraInfo.length() - 1)) {
+                        type.addAdditionalInformation(originalExtraInfo.substring(originalExtraInfo.lastIndexOf(")") + 1));
+                    }
+                }
                 return type;
             }
             if ("nclob".equals(originalDefinition.toLowerCase(Locale.US))) {
