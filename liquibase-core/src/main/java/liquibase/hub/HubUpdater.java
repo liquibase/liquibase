@@ -125,7 +125,7 @@ public class HubUpdater {
    */
   public void postUpdateHub(Operation updateOperation, BufferedLogService bufferLog) {
     try {
-      if (hubIsNotAvailable(changeLog.getChangeLogId()) || updateOperation == null) {
+      if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
         return;
       }
 

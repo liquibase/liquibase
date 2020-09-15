@@ -186,13 +186,16 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             return;
         }
 
+        Date dateExecuted = new Date();
+
         //
         //  POST /organizations/{id}/projects/{id}/operations/{id}/change-events
         //
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType("ROLLBACK");
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
-        operationChangeEvent.setEndDate(new Date());
+        operationChangeEvent.setEndDate(dateExecuted);
+        operationChangeEvent.setDateExecuted(dateExecuted);
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
@@ -307,46 +310,54 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         //
         //  POST /organizations/{id}/projects/{id}/operations/{id}/change-events
+        //  Do not send generated SQL or changeset body for changeLogSync operation
         //
-        List<Change> changes = changeSet.getChanges();
+        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         List<String> sqlList = new ArrayList<>();
-        for (Change change : changes) {
-            Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
-            for (Sql sql : sqls) {
-                sqlList.add(sql.toSql());
+        if (! eventType.equals("SYNC")) {
+            List<Change> changes = changeSet.getChanges();
+            for (Change change : changes) {
+                Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
+                for (Sql sql : sqls) {
+                    sqlList.add(sql.toSql());
+                }
+            }
+            String[] sqlArray = new String[sqlList.size()];
+            sqlArray = sqlList.toArray(sqlArray);
+            operationChangeEvent.setGeneratedSql(sqlArray);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
+            try {
+                serializer.write(Collections.singletonList(changeSet), baos);
+                operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
+            } catch (IOException ioe) {
+                //
+                // Just log message
+                //
+                logger.warning("Unable to serialize change set '" + changeSet.toString(false) + "' for Hub.");
             }
         }
 
-        Date executedDate = new Date();
+        Date dateExecuted = new Date();
 
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
-        operationChangeEvent.setEndDate(executedDate);
-        operationChangeEvent.setExecutedDate(executedDate);
+        operationChangeEvent.setEndDate(dateExecuted);
+        operationChangeEvent.setDateExecuted(dateExecuted);
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
         operationChangeEvent.setOperationStatusType(operationStatusType);
-        operationChangeEvent.setStatusMessage(statusMessage.length() <= 255 ? statusMessage : statusMessage.substring(0,255));
+        operationChangeEvent.setStatusMessage(statusMessage);
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
         operationChangeEvent.setLogs("LOGS");
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
-        try {
-            serializer.write(Collections.singletonList(changeSet), baos);
-            operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
-        }
-        catch (IOException ioe) {
-            //
-            // Consume
-            //
-        }
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
         try {
