@@ -51,7 +51,10 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
 		syncHub.setDatabase(database);
 		syncHub.setFailIfOnline(false);
 		try {
-			syncHub.execute();
+			CommandResult result = syncHub.execute();
+			if (!result.succeeded) {
+				throw new LiquibaseException(result.message);
+			}
 		}
 		catch (CommandExecutionException cee) {
 			throw new LiquibaseException("Error executing syncHub", cee);
