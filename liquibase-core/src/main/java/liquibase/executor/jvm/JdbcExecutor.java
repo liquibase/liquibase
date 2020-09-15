@@ -416,7 +416,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.info(LogType.WRITE_SQL, String.format("%s", statement));
+                log.debug(LogType.WRITE_SQL, String.format("%s", statement));
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -488,7 +488,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                log.info(LogType.READ_SQL, sqlToExecute[0]);
+                log.debug(LogType.READ_SQL, sqlToExecute[0]);
 
                 rs = stmt.executeQuery(sqlToExecute[0]);
                 ResultSet rsToUse = rs;
