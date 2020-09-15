@@ -283,12 +283,19 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             boolean hubOn =
                 ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
             if (apiKey != null && hubOn) {
-                String message =
-                    "Hub communication failure.\n" +
-                    "The data for operation on changeset '" +
-                    changeSet.getId() +
-                    "' by author '" + changeSet.getAuthor() + "'\n" +
-                    "was not successfully recorded in your Liquibase Hub project";
+                String message;
+                if (databaseChangeLog.getChangeLogId() == null) {
+                    message = "The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub.\n" +
+                              "The data for operation on changeset '" + changeSet.getId() + "' by author '" + changeSet.getAuthor() + "'\n" +
+                              "was not successfully recorded in your Liquibase Hub project.";
+                }
+                else {
+                    message = "Hub communication failure.\n" +
+                              "The data for operation on changeset '" +
+                              changeSet.getId() +
+                              "' by author '" + changeSet.getAuthor() + "'\n" +
+                              "was not successfully recorded in your Liquibase Hub project.";
+                }
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 logger.info(message);
             }
