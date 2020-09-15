@@ -15,6 +15,7 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
+import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
@@ -198,13 +199,13 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             Matcher matcher = pattern.matcher(changeLogString);
             if (matcher.find()) {
                 //
-                // Update the XSD versions to 4.0
+                // Update the XSD versions
                 //
                 String header = changeLogString.substring(matcher.start(), matcher.end() - 1);
                 String xsdPatternString = "([dbchangelog|liquibase-pro])-3.[0-9]?[0-9]?.xsd";
                 Pattern xsdPattern = Pattern.compile(xsdPatternString);
                 Matcher xsdMatcher = xsdPattern.matcher(header);
-                String editedString = xsdMatcher.replaceAll("$1-4.0.xsd");
+                String editedString = xsdMatcher.replaceAll("$1-"+ XMLChangeLogSAXParser.getSchemaVersion() +".xsd");
 
                 //
                 // Add the changeLogId attribute
