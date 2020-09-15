@@ -9,10 +9,11 @@ import liquibase.plugin.Plugin;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExecutorService extends AbstractPluginFactory<Executor>  {
 
-    private Map<String, Executor> executors = new HashMap<>();
+    private Map<String, Executor> executors = new ConcurrentHashMap<>();
 
     private ExecutorService() {
     }
