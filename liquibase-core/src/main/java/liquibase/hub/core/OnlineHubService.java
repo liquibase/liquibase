@@ -22,7 +22,9 @@ public class OnlineHubService implements HubService {
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     private Boolean available;
     private UUID organizationId;
+    private String organizationName;
     private UUID userId;
+    private Map<UUID, HubChangeLog> hubChangeLogCache = new HashMap<>();
 
     private HttpClient http;
 
@@ -117,20 +119,18 @@ public class OnlineHubService implements HubService {
 
     @Override
     public Organization getOrganization() throws LiquibaseHubException {
-        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations", Map.class);
-
-        Organization org = new Organization();
-        List<Map> contentList = response.get("content");
         if (organizationId == null) {
+            final Map<String, List<Map>> response = http.doGet("/api/v1/organizations", Map.class);
+            List<Map> contentList = response.get("content");
             String id = (String) contentList.get(0).get("id");
             if (id != null) {
                 organizationId = UUID.fromString(id);
             }
+            organizationName = (String) contentList.get(0).get("name");
         }
+        Organization org = new Organization();
         org.setId(organizationId);
-        String name = (String) contentList.get(0).get("name");
-        org.setName(name);
-
+        org.setName(organizationName);
         return org;
     }
 
@@ -278,15 +278,21 @@ public class OnlineHubService implements HubService {
 
     /**
      * Query for a changelog ID.  If no result we return null
+     * We cache this result and a map
      *
      * @param changeLogId Changelog ID for query
      * @return HubChangeLog               Object container for result
      * @throws LiquibaseHubException
      */
     @Override
-    public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
+    public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
+        if (hubChangeLogCache.containsKey(changeLogId)) {
+            return hubChangeLogCache.get(changeLogId);
+        }
         try {
-            return http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
+            HubChangeLog hubChangeLog = http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
+            hubChangeLogCache.put(changeLogId, hubChangeLog);
+            return hubChangeLog;
         } catch (LiquibaseHubObjectNotFoundException lbe) {
             return null;
         }

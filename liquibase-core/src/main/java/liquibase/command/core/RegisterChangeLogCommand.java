@@ -90,7 +90,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog)argsMap.get("changeLog");
         final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
         if (changeLogId != null) {
-            hubChangeLog = service.getChangeLog(UUID.fromString(changeLogId));
+            hubChangeLog = service.getHubChangeLog(UUID.fromString(changeLogId));
             if (hubChangeLog != null) {
                 return new CommandResult("Changelog '" + changeLogFile +
                         "' is already registered with changeLogId '" + changeLogId + "' to project '" +

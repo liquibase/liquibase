@@ -175,7 +175,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         HubChangeLog hubChangeLog;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         try {
-            hubChangeLog = hubService.getChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
             if (hubChangeLog == null) {
                 logger.warning("The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub");
                 return;
@@ -297,7 +297,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         HubChangeLog hubChangeLog;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         try {
-            hubChangeLog = hubService.getChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
             if (hubChangeLog == null) {
                 logger.warning("The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub");
                 return;
@@ -343,7 +343,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
-        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
         operationChangeEvent.setEndDate(dateExecuted);

@@ -68,7 +68,7 @@ public class OfflineHubService implements HubService {
     }
 
     @Override
-    public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
+    public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }
 
