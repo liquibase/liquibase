@@ -24,37 +24,40 @@ import java.util.Objects;
  */
 public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
 
-	/**
-	 * Specifies the <i>Liquibase Hub Connection ID</i> for Liquibase to use.
-	 *
-	 * @parameter property="liquibase.hubConnectionId"
-	 *
-	 */
-	protected String hubConnectionId;
+  	/**
+  	 * Specifies the <i>Liquibase Hub Connection ID</i> for Liquibase to use.
+  	 *
+  	 * @parameter property="liquibase.hubConnectionId"
+  	 *
+  	 */
+  	protected String hubConnectionId;
 
-	@Override
-	protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-	  //
-		// Override because changeLogFile is not required
-		//
-	}
+  	@Override
+  	protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
+    	  //
+	    	// Override because changeLogFile is not required
+		    //
+	  }
 
-	@Override
-	protected void performLiquibaseTask(Liquibase liquibase)
+  	@Override
+  	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-		super.performLiquibaseTask(liquibase);
-		Database database = liquibase.getDatabase();
-		SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
-		syncHub.setChangeLogFile(changeLogFile);
-		syncHub.setUrl(database.getConnection().getURL());
-		syncHub.setHubConnectionId(hubConnectionId);
-		syncHub.setDatabase(database);
-		syncHub.setFailIfOnline(false);
-		try {
-			syncHub.execute();
-		}
-		catch (CommandExecutionException cee) {
-			throw new LiquibaseException("Error executing syncHub", cee);
-		}
-	}
+		    super.performLiquibaseTask(liquibase);
+        Database database = liquibase.getDatabase();
+        SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
+        syncHub.setChangeLogFile(changeLogFile);
+        syncHub.setUrl(database.getConnection().getURL());
+        syncHub.setHubConnectionId(hubConnectionId);
+        syncHub.setDatabase(database);
+        syncHub.setFailIfOnline(false);
+        try {
+            CommandResult result = syncHub.execute();
+            if (!result.succeeded) {
+                throw new LiquibaseException(result.message);
+            }
+        }
+        catch (CommandExecutionException cee) {
+            throw new LiquibaseException("Error executing syncHub", cee);
+        }
+    }
 }

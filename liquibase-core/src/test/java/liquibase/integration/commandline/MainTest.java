@@ -597,7 +597,7 @@ public class MainTest {
 
         String[] noArgCommand = { "migrate", "migrateSQL", "update", "updateSQL",
                 "futureRollbackSQL", "updateTestingRollback", "listLocks",
-                "dropAll", "releaseLocks", "validate", "help",
+                "releaseLocks", "validate", "help",
                 "clearCheckSums", "changelogSync", "changelogSyncSQL",
                 "markNextChangeSetRan", "markNextChangeSetRanSQL"
         };
@@ -608,7 +608,7 @@ public class MainTest {
         // verify unexpected parameter
         for(int i=0; i<noArgCommand.length; i++) {
             cli.command = noArgCommand[i];
-            assertEquals(1, cli.checkSetup().size());
+            assertEquals("Command " + cli.command, 1, cli.checkSetup().size());
         }
 
         // test update cmd with -D parameter

@@ -176,7 +176,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         HubChangeLog hubChangeLog;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         try {
-            hubChangeLog = hubService.getChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
             if (hubChangeLog == null) {
                 logger.warning("The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub");
                 return;
@@ -307,7 +307,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         HubChangeLog hubChangeLog;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         try {
-            hubChangeLog = hubService.getChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
             if (hubChangeLog == null) {
                 logger.warning("The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub");
                 return;
@@ -320,13 +320,32 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         //
         //  POST /organizations/{id}/projects/{id}/operations/{id}/change-events
+        //  Do not send generated SQL or changeset body for changeLogSync operation
         //
-        List<Change> changes = changeSet.getChanges();
+        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         List<String> sqlList = new ArrayList<>();
-        for (Change change : changes) {
-            Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
-            for (Sql sql : sqls) {
-                sqlList.add(sql.toSql());
+        if (! eventType.equals("SYNC")) {
+            List<Change> changes = changeSet.getChanges();
+            for (Change change : changes) {
+                Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
+                for (Sql sql : sqls) {
+                    sqlList.add(sql.toSql());
+                }
+            }
+            String[] sqlArray = new String[sqlList.size()];
+            sqlArray = sqlList.toArray(sqlArray);
+            operationChangeEvent.setGeneratedSql(sqlArray);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
+            try {
+                serializer.write(Collections.singletonList(changeSet), baos);
+                operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
+            } catch (IOException ioe) {
+                //
+                // Just log message
+                //
+                logger.warning("Unable to serialize change set '" + changeSet.toString(false) + "' for Hub.");
             }
         }
 
@@ -334,7 +353,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
-        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
         operationChangeEvent.setEndDate(dateExecuted);
@@ -349,17 +367,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setLogsTimestamp(new Date());
         operationChangeEvent.setLogs(getCurrentLog());
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
-        try {
-            serializer.write(Collections.singletonList(changeSet), baos);
-            operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
-        }
-        catch (IOException ioe) {
-            //
-            // Consume
-            //
-        }
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
         try {
