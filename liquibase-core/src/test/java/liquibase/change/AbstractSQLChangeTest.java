@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -249,6 +250,29 @@ public class AbstractSQLChangeTest {
 //        assertEquals(1, statements.length);
 //        assertEquals("SOME SQL", ((RawSqlStatement) statements[0]).getSql());
 //    }
+
+
+    @Test
+    public void escapingPostgresQuestionmarkOperators() throws DatabaseException {
+        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("? ??'Is this escaped?' col? another?? ?");
+
+        Database postgresDatabase = mock(PostgresDatabase.class);
+        DatabaseConnection connection = mock(DatabaseConnection.class);
+        when(postgresDatabase.getConnection()).thenReturn(connection);
+        when(connection.nativeSQL("?? ??'Is this escaped?' col?? another?? ??")).thenReturn("ESCAPED");
+
+        SqlStatement[] statements = change.generateStatements(postgresDatabase);
+        assertEquals(1, statements.length);
+        assertEquals("ESCAPED", ((RawSqlStatement) statements[0]).getSql());
+
+        Database database = mock(Database.class);
+        when(database.getConnection()).thenReturn(connection);
+        when(connection.nativeSQL("? ??'Is this escaped?' col? another?? ?")).thenReturn("NOT_ESCAPED");
+
+        statements = change.generateStatements(database);
+        assertEquals(1, statements.length);
+        assertEquals("NOT_ESCAPED", ((RawSqlStatement) statements[0]).getSql());
+    }
 
     @DatabaseChange(name = "exampleAbstractSQLChange", description = "Used for the AbstractSQLChangeTest unit test", priority = 1)
     private static class ExampleAbstractSQLChange extends AbstractSQLChange {
