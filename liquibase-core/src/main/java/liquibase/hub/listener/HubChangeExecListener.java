@@ -158,9 +158,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                                       String operationStatusType,
                                       String statusMessage) {
         if (operation == null) {
-            boolean hubOn =
-                    ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
-            if (hubOn) {
+            boolean hubOff = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off");
+            if (!hubOff) {
                 String message =
                         "Hub communication failure.\n" +
                         "The data for operation on changeset '" +
@@ -259,7 +258,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             hubService.sendOperationChangeEvent(operationChangeEvent);
         }
         catch (LiquibaseException lbe) {
-            logger.warning(lbe.getMessage());
+            logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
                     " change set '" + changeSet.toString(false));
         }
@@ -364,6 +363,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             postCount++;
         }
         catch (LiquibaseException lbe) {
+            logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
                     " change set '" + changeSet.toString(false));
             failedToPostCount++;
