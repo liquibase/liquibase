@@ -39,4 +39,26 @@
             <column name="title" value="Liquibase 1.0 Released"/>
         </insert>
     </changeSet>
+
+    <changeSet id="4" author="sudiptosarkar">
+        <sql endDelimiter=";">
+            create type public.sample_enum as enum ('EnumValOne', 'EnumValTwo');
+        </sql>
+    </changeSet>
+
+    <changeSet id="5" author="sudiptosarkar">
+        <createTable tableName="sample_enum_table">
+            <column name="int_col" type="int"/>
+            <column name="str_col" type="varchar(50)"/>
+            <column name="enum_col" type="sample_enum"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="sudiptosarkar">
+        <loadData file="changelogs/enum-data.csv" tableName="sample_enum_table">
+            <column header="int_col" name="int_col" type="NUMERIC"/>
+            <column header="str_col" name="str_col" type="STRING"/>
+            <column header="enum_col" name="enum_col" type="OTHER"/>
+        </loadData>
+    </changeSet>
 </databaseChangeLog>
