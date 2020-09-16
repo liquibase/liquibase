@@ -36,7 +36,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException;
 
-    HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException;
+    HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException;
 
     Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection, Map<String, String> operationParameters) throws LiquibaseHubException;
 

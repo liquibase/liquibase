@@ -90,7 +90,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected boolean emptyPassword;
     /**
-     *
      * Specifies whether to ignore the schema name.
      *
      * @parameter property="liquibase.outputDefaultSchema" default-value="false"
@@ -276,11 +275,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private boolean hasProLicense;
 
     /**
-     *
      * Specifies your Liquibase Pro license key.
      *
      * @parameter property="liquibase.liquibaseProLicenseKey"
-     *
      */
     protected String liquibaseProLicenseKey;
 
@@ -289,6 +286,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean hasProLicense() {
         return hasProLicense;
     }
+
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
@@ -300,123 +298,127 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info(MavenUtils.LOG_SEPARATOR);
-
-        if (server != null) {
-            AuthenticationInfo info = wagonManager.getAuthenticationInfo(server);
-            if (info != null) {
-                username = info.getUserName();
-                password = info.getPassword();
-            }
-        }
-
-        processSystemProperties();
-
-        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-
-        if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic
-                    (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
-            return;
-        }
-        if (skip) {
-            getLog().warn("Liquibase skipped due to Maven configuration");
-            return;
-        }
-
-        ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
         try {
-            Map<String, Object> scopeValues = new HashMap<>();
-            scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
-            scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
+            Scope.child(Scope.Attr.logService, new MavenLogService(getLog()), () -> {
 
-            Scope.child(scopeValues, () -> {
+                getLog().info(MavenUtils.LOG_SEPARATOR);
 
-                configureFieldsAndValues();
-
-                //
-                // Check for a LiquibasePro license
-                //
-                hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
-
-                //        LogService.getInstance().setDefaultLoggingLevel(logging);
-                getLog().info(CommandLineUtils.getBanner());
-
-                // Displays the settings for the Mojo depending of verbosity mode.
-                displayMojoSettings();
-
-                // Check that all the parameters that must be specified have been by the user.
-                checkRequiredParametersAreSpecified();
-
-                Database database = null;
-                try {
-                    String dbPassword = (emptyPassword || (password == null)) ? "" : password;
-                    String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
-                    database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
-                            url,
-                            username,
-                            dbPassword,
-                            driver,
-                            defaultCatalogName,
-                            defaultSchemaName,
-                            outputDefaultCatalog,
-                            outputDefaultSchema,
-                            databaseClass,
-                            driverPropsFile,
-                            propertyProviderClass,
-                            changelogCatalogName,
-                            changelogSchemaName,
-                            databaseChangeLogTableName,
-                            databaseChangeLogLockTableName);
-                    liquibase = createLiquibase(database);
-
-                    configureChangeLogProperties();
-
-                    getLog().debug("expressionVars = " + String.valueOf(expressionVars));
-
-                    if (expressionVars != null) {
-                        for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
-                            this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
-                        }
+                if (server != null) {
+                    AuthenticationInfo info = wagonManager.getAuthenticationInfo(server);
+                    if (info != null) {
+                        username = info.getUserName();
+                        password = info.getPassword();
                     }
+                }
 
-                    getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
-                    if (expressionVariables != null) {
-                        for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
-                            if (var.getValue() != null) {
+                processSystemProperties();
+
+                LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
+
+                if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
+                    getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic
+                            (GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+                    return;
+                }
+                if (skip) {
+                    getLog().warn("Liquibase skipped due to Maven configuration");
+                    return;
+                }
+
+                ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
+                Map<String, Object> scopeValues = new HashMap<>();
+                scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
+                scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
+
+                Scope.child(scopeValues, () -> {
+
+                    configureFieldsAndValues();
+
+                    //
+                    // Check for a LiquibasePro license
+                    //
+                    hasProLicense = MavenUtils.checkProLicense(liquibaseProLicenseKey, commandName, getLog());
+
+                    //        LogService.getInstance().setDefaultLoggingLevel(logging);
+                    getLog().info(CommandLineUtils.getBanner());
+
+                    // Displays the settings for the Mojo depending of verbosity mode.
+                    displayMojoSettings();
+
+                    // Check that all the parameters that must be specified have been by the user.
+                    checkRequiredParametersAreSpecified();
+
+                    Database database = null;
+                    try {
+                        String dbPassword = (emptyPassword || (password == null)) ? "" : password;
+                        String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
+                        database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
+                                url,
+                                username,
+                                dbPassword,
+                                driver,
+                                defaultCatalogName,
+                                defaultSchemaName,
+                                outputDefaultCatalog,
+                                outputDefaultSchema,
+                                databaseClass,
+                                driverPropsFile,
+                                propertyProviderClass,
+                                changelogCatalogName,
+                                changelogSchemaName,
+                                databaseChangeLogTableName,
+                                databaseChangeLogLockTableName);
+                        liquibase = createLiquibase(database);
+
+                        configureChangeLogProperties();
+
+                        getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+
+                        if (expressionVars != null) {
+                            for (Map.Entry<Object, Object> var : expressionVars.entrySet()) {
                                 this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
                             }
                         }
-                    }
 
-                    if (clearCheckSums) {
-                        getLog().info("Clearing the Liquibase checksums on the database");
-                        liquibase.clearCheckSums();
-                    }
-
-                    getLog().info("Executing on Database: " + url);
-
-                    if (isPromptOnNonLocalDatabase()) {
-                        if (!liquibase.isSafeToRunUpdate()) {
-                            if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                                throw new LiquibaseException("User decided not to run against non-local database");
+                        getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+                        if (expressionVariables != null) {
+                            for (Map.Entry var : (Set<Map.Entry>) expressionVariables.entrySet()) {
+                                if (var.getValue() != null) {
+                                    this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+                                }
                             }
                         }
-                    }
-                    setupBindInfoPackage();
-                    performLiquibaseTask(liquibase);
-                } catch (LiquibaseException e) {
-                    cleanup(database);
-            throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
-                }
 
-                cleanup(database);
-                getLog().info(MavenUtils.LOG_SEPARATOR);
-                getLog().info("");
+                        if (clearCheckSums) {
+                            getLog().info("Clearing the Liquibase checksums on the database");
+                            liquibase.clearCheckSums();
+                        }
+
+                        getLog().info("Executing on Database: " + url);
+
+                        if (isPromptOnNonLocalDatabase()) {
+                            if (!liquibase.isSafeToRunUpdate()) {
+                                if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                                    throw new LiquibaseException("User decided not to run against non-local database");
+                                }
+                            }
+                        }
+                        setupBindInfoPackage();
+                        performLiquibaseTask(liquibase);
+                    } catch (LiquibaseException e) {
+                        cleanup(database);
+                        throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
+                    }
+
+                    cleanup(database);
+                    getLog().info(MavenUtils.LOG_SEPARATOR);
+                    getLog().info("");
+                });
             });
         } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
+
 
     }
 
