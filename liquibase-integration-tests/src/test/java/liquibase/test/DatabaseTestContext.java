@@ -141,13 +141,13 @@ public class DatabaseTestContext {
         try {
             if (url.startsWith("jdbc:hsql")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA";
-                LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             } else if (url.startsWith("jdbc:sqlserver")
                 || url.startsWith("jdbc:postgresql")
                 || url.startsWith("jdbc:h2")) {
                 String sql = "CREATE SCHEMA " + ALT_SCHEMA;
-                LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
                 ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             }
             if (!databaseConnection.getAutoCommit()) {

@@ -220,7 +220,7 @@ public abstract class AbstractIntegrationTest {
             try {
                 if (database.getConnection() != null) {
                     String sql = "DROP TABLE " + database.getDatabaseChangeLogLockTableName();
-                    LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
                     ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
                             sql
                     );
@@ -424,7 +424,7 @@ public abstract class AbstractIntegrationTest {
                 "tag VARCHAR(255)" + nullableKeyword + ", " +
                 "liquibase VARCHAR(10)" + nullableKeyword + ", " +
                 "PRIMARY KEY (id, author, filename))";
-        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+        LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
         boolean savedAcSetting = conn.getAutoCommit();
@@ -492,7 +492,7 @@ public abstract class AbstractIntegrationTest {
                                     database.getLiquibaseSchemaName(),
                                     database.getDatabaseChangeLogTableName()
                             );
-                    LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
                     statement.execute(sql);
                     database.commit();
                 }
@@ -520,7 +520,7 @@ public abstract class AbstractIntegrationTest {
                                     database.getLiquibaseSchemaName(),
                                     database.getDatabaseChangeLogLockTableName()
                             );
-                    LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                    LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
                     statement.execute(sql);
                     database.commit();
                 }
