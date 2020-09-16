@@ -42,19 +42,22 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
   	@Override
   	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-    		super.performLiquibaseTask(liquibase);
-	    	Database database = liquibase.getDatabase();
-		    SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
-    		syncHub.setChangeLogFile(changeLogFile);
-    		syncHub.setUrl(database.getConnection().getURL());
-    		syncHub.setHubConnectionId(hubConnectionId);
-	    	syncHub.setDatabase(database);
-    		syncHub.setFailIfOnline(false);
-	    	try {
-		      	syncHub.execute();
-		    }
-		    catch (CommandExecutionException cee) {
-			      throw new LiquibaseException("Error executing syncHub", cee);
-		    }
-	  }
+		    super.performLiquibaseTask(liquibase);
+        Database database = liquibase.getDatabase();
+        SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
+        syncHub.setChangeLogFile(changeLogFile);
+        syncHub.setUrl(database.getConnection().getURL());
+        syncHub.setHubConnectionId(hubConnectionId);
+        syncHub.setDatabase(database);
+        syncHub.setFailIfOnline(false);
+        try {
+            CommandResult result = syncHub.execute();
+            if (!result.succeeded) {
+                throw new LiquibaseException(result.message);
+            }
+        }
+        catch (CommandExecutionException cee) {
+            throw new LiquibaseException("Error executing syncHub", cee);
+        }
+    }
 }

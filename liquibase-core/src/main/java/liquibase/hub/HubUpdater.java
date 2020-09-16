@@ -42,7 +42,8 @@ public class HubUpdater {
    *
    * @param  operationType              Operation type (UPDATE or ROLLBACK)
    * @param  database                   Database object for connection
-   * @param  connection                Connection for this operation
+   * @param  connection                 Connection for this operation
+   * @param  changeLogFile              Path to DatabaseChangelog for this operatoin
    * @param  contexts                   Contexts to use for filtering
    * @param  labelExpression            Labels to use for filtering
    * @param  changeLogIterator          Iterator to use for going through change sets
@@ -73,7 +74,7 @@ public class HubUpdater {
     // Send the START operation event
     //
     final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-    final HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLog.getChangeLogId()));
+    final HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLog.getChangeLogId()));
     Operation updateOperation = hubService.createOperation(operationType, hubChangeLog, connection, null);
     try {
         hubService.sendOperationEvent(updateOperation, new OperationEvent()
@@ -127,7 +128,7 @@ public class HubUpdater {
    */
   public void postUpdateHub(Operation updateOperation, BufferedLogService bufferLog) {
     try {
-      if (hubIsNotAvailable(changeLog.getChangeLogId()) || updateOperation == null) {
+      if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
         return;
       }
 

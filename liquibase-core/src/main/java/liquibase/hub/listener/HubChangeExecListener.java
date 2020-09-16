@@ -26,6 +26,7 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.util.StringUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,12 +42,23 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
     private String rollbackScriptContents;
 
+    private int postCount;
+    private int failedToPostCount;
+
     public HubChangeExecListener(Operation operation) {
         this.operation = operation;
     }
 
     public void setRollbackScriptContents(String rollbackScriptContents) {
         this.rollbackScriptContents = rollbackScriptContents;
+    }
+
+    public int getPostCount() {
+        return postCount;
+    }
+
+    public int getFailedToPostCount() {
+        return failedToPostCount;
     }
 
     @Override
@@ -163,7 +175,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         HubChangeLog hubChangeLog;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         try {
-            hubChangeLog = hubService.getChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
             if (hubChangeLog == null) {
                 logger.warning("The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub");
                 return;
@@ -174,13 +186,16 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             return;
         }
 
+        Date dateExecuted = new Date();
+
         //
         //  POST /organizations/{id}/projects/{id}/operations/{id}/change-events
         //
         OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType("ROLLBACK");
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
-        operationChangeEvent.setEndDate(new Date());
+        operationChangeEvent.setEndDate(dateExecuted);
+        operationChangeEvent.setDateExecuted(dateExecuted);
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
@@ -263,9 +278,11 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         // If not connected to Hub but we are supposed to be then show message
         //
         if (operation == null) {
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
             boolean hubOn =
                 ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
-            if (hubOn) {
+            if (apiKey != null && hubOn) {
                 String message =
                     "Hub communication failure.\n" +
                     "The data for operation on changeset '" +
@@ -280,7 +297,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         HubChangeLog hubChangeLog;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         try {
-            hubChangeLog = hubService.getChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
             if (hubChangeLog == null) {
                 logger.warning("The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub");
                 return;
@@ -293,51 +310,63 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         //
         //  POST /organizations/{id}/projects/{id}/operations/{id}/change-events
+        //  Do not send generated SQL or changeset body for changeLogSync operation
         //
-        List<Change> changes = changeSet.getChanges();
+        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         List<String> sqlList = new ArrayList<>();
-        for (Change change : changes) {
-            Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
-            for (Sql sql : sqls) {
-                sqlList.add(sql.toSql());
+        if (! eventType.equals("SYNC")) {
+            List<Change> changes = changeSet.getChanges();
+            for (Change change : changes) {
+                Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
+                for (Sql sql : sqls) {
+                    sqlList.add(sql.toSql());
+                }
+            }
+            String[] sqlArray = new String[sqlList.size()];
+            sqlArray = sqlList.toArray(sqlArray);
+            operationChangeEvent.setGeneratedSql(sqlArray);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
+            try {
+                serializer.write(Collections.singletonList(changeSet), baos);
+                operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
+            } catch (IOException ioe) {
+                //
+                // Just log message
+                //
+                logger.warning("Unable to serialize change set '" + changeSet.toString(false) + "' for Hub.");
             }
         }
 
+        Date dateExecuted = new Date();
+
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
-        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
-        operationChangeEvent.setEndDate(new Date());
+        operationChangeEvent.setEndDate(dateExecuted);
+        operationChangeEvent.setDateExecuted(dateExecuted);
         operationChangeEvent.setChangesetId(changeSet.getId());
         operationChangeEvent.setChangesetFilename(changeSet.getFilePath());
         operationChangeEvent.setChangesetAuthor(changeSet.getAuthor());
         operationChangeEvent.setOperationStatusType(operationStatusType);
-        operationChangeEvent.setStatusMessage(statusMessage.length() <= 255 ? statusMessage : statusMessage.substring(0,255));
+        operationChangeEvent.setStatusMessage(statusMessage);
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
         operationChangeEvent.setLogs("LOGS");
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
-        try {
-            serializer.write(Collections.singletonList(changeSet), baos);
-            operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
-        }
-        catch (IOException ioe) {
-            //
-            // Consume
-            //
-        }
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
         try {
             hubService.sendOperationChangeEvent(operationChangeEvent);
+            postCount++;
         }
         catch (LiquibaseException lbe) {
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
                     " change set '" + changeSet.toString(false));
+            failedToPostCount++;
         }
     }
 }
