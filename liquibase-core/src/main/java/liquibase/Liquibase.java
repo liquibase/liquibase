@@ -243,13 +243,14 @@ public class Liquibase implements AutoCloseable {
                 //
                 // Create or retrieve the Connection if this is not SQL generation
                 // Make sure the Hub is available here by checking the return
+                // We do not need a connection if we are using a LoggingExecutor
                 //
                 Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
                 if (! (executor instanceof LoggingExecutor)) {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, changeLogIterator, database);
+                            hubUpdater.preUpdateHub("UPDATE", database, connection, changeLogFile, contexts, labelExpression, changeLogIterator);
                     }
                 }
 
@@ -465,7 +466,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                            hubUpdater.preUpdateHub("UPDATE", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -584,7 +585,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                           hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                           hubUpdater.preUpdateHub("UPDATE", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -829,7 +830,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1088,7 +1089,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1242,7 +1243,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1395,7 +1396,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         changeLogSyncOperation =
-                                hubUpdater.preUpdateHub("CHANGELOGSYNC", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                                hubUpdater.preUpdateHub("CHANGELOGSYNC", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1704,6 +1705,8 @@ public class Liquibase implements AutoCloseable {
                     DropAllCommand dropAll = (DropAllCommand) CommandFactory.getInstance().getCommand("dropAll");
                     dropAll.setDatabase(Liquibase.this.getDatabase());
                     dropAll.setSchemas(finalSchemas);
+                    dropAll.setLiquibase(Liquibase.this);
+                    dropAll.setChangeLogFile(changeLogFile);
 
                     try {
                         dropAll.execute();

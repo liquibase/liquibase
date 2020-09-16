@@ -41,11 +41,12 @@ public class HubUpdater {
    * If there is an error or the Hub is not available it returns null
    *
    * @param  operationType              Operation type (UPDATE or ROLLBACK)
+   * @param  database                   Database object for connection
    * @param  connection                 Connection for this operation
+   * @param  changeLogFile              Path to DatabaseChangelog for this operatoin
    * @param  contexts                   Contexts to use for filtering
    * @param  labelExpression            Labels to use for filtering
    * @param  changeLogIterator          Iterator to use for going through change sets
-   * @param  database                   Database object for connection
    * @return Operation                  Valid Operation object or null
    * @throws LiquibaseHubException      Thrown by HubService
    * @throws DatabaseException          Thrown by Liquibase core
@@ -53,12 +54,12 @@ public class HubUpdater {
    *
    */
   public Operation preUpdateHub(String operationType,
+                                Database database,
                                 Connection connection,
+                                String changeLogFile,
                                 Contexts contexts,
                                 LabelExpression labelExpression,
-                                String changeLogFile,
-                                ChangeLogIterator changeLogIterator,
-                                Database database)
+                                ChangeLogIterator changeLogIterator)
           throws LiquibaseHubException, DatabaseException, LiquibaseException {
     if (hubIsNotAvailable(changeLog.getChangeLogId())) {
         return null;
@@ -91,14 +92,16 @@ public class HubUpdater {
 
     //
     // Send the list of change sets which will be updated/rolled back
+    // If the operation type is DROPALL then we send no changes
     //
     ListVisitor listVisitor;
-    if (operationType.equals("ROLLBACK")) {
+    if (operationType.toUpperCase().equals("ROLLBACK")) {
         listVisitor = new RollbackListVisitor();
     }
     else {
         listVisitor = new ListVisitor();
     }
+
     changeLogIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
     List<ChangeSet> operationChangeSets = listVisitor.getSeenChangeSets();
     OperationChange operationChange = new OperationChange();
@@ -206,11 +209,11 @@ public class HubUpdater {
     return ! hubService.isOnline() || changeLogId == null;
   }
 
-  private void syncHub(String changeLogFile, Database database, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) {
+  public void syncHub(String changeLogFile, Database database, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) {
     final SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
     syncHub.setChangeLogFile(changeLogFile);
     syncHub.setUrl(database.getConnection().getURL());
-    syncHub.setHubConnectionId(Objects.toString(hubConnectionId));
+    syncHub.setHubConnectionId(hubConnectionId != null ? Objects.toString(hubConnectionId) : null);
     syncHub.setDatabase(database);
     syncHub.setFailIfOnline(false);
 
