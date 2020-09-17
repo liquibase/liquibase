@@ -287,8 +287,7 @@ public class Liquibase implements AutoCloseable {
                     LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
                 if (changeExecListener != null && updateOperation != null) {
-                    LOG.fine("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                    LOG.fine("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    showHubMessageCounts();
                 }
                 resetServices();
                 setChangeExecListener(null);
@@ -506,14 +505,18 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                     if (changeExecListener != null && updateOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
                 }
             }
         });
+    }
+
+    private void showHubMessageCounts() {
+        LOG.info("Number of successful Liquibase Hub API messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+        LOG.info("Number of failed Liquibase Hub API messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
     }
 
     public void update(String tag, String contexts) throws LiquibaseException {
@@ -625,8 +628,7 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                     if (changeExecListener != null && updateOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();;
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -875,8 +877,7 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe("Error releasing lock", e);
                     }
                     if (changeExecListener != null && rollbackOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -1135,8 +1136,7 @@ public class Liquibase implements AutoCloseable {
                     }
                 }
                 if (changeExecListener != null && rollbackOperation != null) {
-                    LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                    LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    showHubMessageCounts();
                 }
                 resetServices();
                 setChangeExecListener(null);
@@ -1288,8 +1288,7 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                     if (changeExecListener != null && rollbackOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -1432,8 +1431,7 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                     if (changeExecListener != null && changeLogSyncOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
