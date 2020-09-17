@@ -64,4 +64,5 @@ public class CockroachDatabase extends PostgresDatabase {
     public boolean supportsDDLInTransaction() {
         return false;
     }
+
 }
