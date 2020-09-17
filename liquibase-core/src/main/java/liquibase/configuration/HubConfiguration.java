@@ -12,7 +12,6 @@ public class HubConfiguration extends AbstractConfigurationContainer {
 
     public static final String LIQUIBASE_HUB_API_KEY = "apiKey";
     public static final String LIQUIBASE_HUB_URL = "url";
-    public static final String LIQUIBASE_HUB_PROJECT = "project";
     public static final String LIQUIBASE_HUB_MODE = "mode";
 
     public HubConfiguration() {
@@ -28,8 +27,6 @@ public class HubConfiguration extends AbstractConfigurationContainer {
                     }
                     return value.toString().replaceFirst("(https?://[^/]+).*", "$1");
                 });
-        getContainer().addProperty(LIQUIBASE_HUB_PROJECT, String.class)
-                .setDescription("Liquibase Hub Project for operations");
         getContainer().addProperty(LIQUIBASE_HUB_MODE, String.class)
                 .setDescription("Content to send to Liquibase Hub during operations. Values can be 'all', 'meta', or 'off'")
                 .setDefaultValue("all");
@@ -72,16 +69,6 @@ public class HubConfiguration extends AbstractConfigurationContainer {
             return "https://hub.liquibase.com";
         }
         return hubUrl;
-    }
-
-    public HubConfiguration setLiquibaseHubProject(String liquibaseHubProject) {
-        getContainer().setValue(LIQUIBASE_HUB_PROJECT, liquibaseHubProject);
-        return this;
-    }
-
-    public String getLiquibaseHubProject() {
-        String project = getContainer().getValue(LIQUIBASE_HUB_PROJECT, String.class);
-        return project;
     }
 
     public HubConfiguration setLiquibaseHubMode(String liquibaseHubMode) {

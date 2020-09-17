@@ -110,21 +110,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         Project project = null;
         List<Project> projects = getProjectsFromHub();
 
-        //
-        // Look for a project in the HubConfiguration
-        // If not found then read from console
-        //
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        final String hubProjectName = hubConfiguration.getLiquibaseHubProject();
-        if (hubProjectName != null) {
-            for (Project testProject : projects) {
-                if (testProject.getName().equalsIgnoreCase(hubProjectName)) {
-                    project = testProject;
-                    break;
-                }
-            }
-        }
-        else if (hubProjectId != null) {
+        if (hubProjectId != null) {
             for (Project testProject : projects) {
                 if (testProject.getId().equals(hubProjectId)) {
                     project = testProject;
