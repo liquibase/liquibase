@@ -515,8 +515,8 @@ public class Liquibase implements AutoCloseable {
     }
 
     private void showHubMessageCounts() {
-        LOG.info("Number of successful Liquibase Hub API messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-        LOG.info("Number of failed Liquibase Hub API messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+        LOG.fine("Number of successful Liquibase Hub API messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+        LOG.fine("Number of failed Liquibase Hub API messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
     }
 
     public void update(String tag, String contexts) throws LiquibaseException {
