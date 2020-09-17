@@ -134,6 +134,12 @@
     </changeSet>
 
     <changeSet id="14" author="nvoxland">
+
+        <comment>
+            This test also ensures that changesets are not run in a transaction. If this test is run in a transaction
+            in current cockroachdb, the insert may error.
+        </comment>
+
         <createTable tableName="liquibaseRunInfo">
             <column name="timesRan" type="int"/>
         </createTable>

@@ -59,4 +59,10 @@ public class CockroachDatabase extends PostgresDatabase {
     public boolean supportsTablespaces() {
         return false;
     }
+
+    @Override
+    public boolean supportsDDLInTransaction() {
+        return false;
+    }
+
 }
