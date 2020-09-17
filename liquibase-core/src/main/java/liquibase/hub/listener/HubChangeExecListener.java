@@ -250,9 +250,19 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         }
         operationChangeEvent.setOperationStatusType(operationStatusType);
         operationChangeEvent.setStatusMessage(statusMessage);
-        operationChangeEvent.setLogs(getCurrentLog());
+        if ("FAIL".equals(operationStatusType)) {
+            operationChangeEvent.setLogs(statusMessage);
+        }
+        else {
+            String logs = getCurrentLog();
+            if (! StringUtil.isEmpty(logs)) {
+                operationChangeEvent.setLogs(logs);
+            }
+            else {
+                operationChangeEvent.setLogs(statusMessage);
+            }
+        }
         operationChangeEvent.setLogsTimestamp(new Date());
-
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
 
@@ -366,7 +376,18 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
-        operationChangeEvent.setLogs(getCurrentLog());
+        if ("FAIL".equals(operationStatusType)) {
+            operationChangeEvent.setLogs(statusMessage);
+        }
+        else {
+            String logs = getCurrentLog();
+            if (! StringUtil.isEmpty(logs)) {
+                operationChangeEvent.setLogs(logs);
+            }
+            else {
+                operationChangeEvent.setLogs(statusMessage);
+            }
+        }
 
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);

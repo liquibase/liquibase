@@ -970,12 +970,15 @@ public class Liquibase implements AutoCloseable {
                 changeExecListener.willRollback(changeSet, databaseChangeLog, database);
             }
             else if (messageType == RollbackMessageType.ROLLED_BACK) {
+                final String message = "Rolled Back Changeset:" + changeSet.toString(false);
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                LOG.info(message);
                 changeExecListener.rolledBack(changeSet, databaseChangeLog, database);
-                Scope.getCurrentScope().getUI().sendMessage("Rolled Back Changeset:" + changeSet.toString(false));
             }
             else if (messageType == RollbackMessageType.ROLLBACK_FAILED) {
+                final String message = "Failed rolling back Changeset:" + changeSet.toString(false);
+                Scope.getCurrentScope().getUI().sendMessage(message);
                 changeExecListener.rollbackFailed(changeSet, databaseChangeLog, database, exception);
-                Scope.getCurrentScope().getUI().sendMessage("Failed rolling back Changeset:" + changeSet.toString(false));
             }
         }
     }
@@ -2314,4 +2317,3 @@ public class Liquibase implements AutoCloseable {
         }
     }
 }
-
