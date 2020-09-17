@@ -258,6 +258,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         try {
             hubService.sendOperationChangeEvent(operationChangeEvent);
+            postCount++;
         }
         catch (LiquibaseException lbe) {
             logger.warning(lbe.getMessage(), lbe);
