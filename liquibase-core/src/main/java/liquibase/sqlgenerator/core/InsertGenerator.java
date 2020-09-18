@@ -7,6 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.DatabaseSchemaBasedFunction;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -21,10 +22,6 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", insertStatement.getTableName());
         validationErrors.checkRequiredField("columns", insertStatement.getColumnValues());
-
-//        if (insertStatement.getSchemaName() != null && !database.supportsSchemas()) {
-//           validationErrors.addError("Database does not support schemas");
-//       }
 
         return validationErrors;
     }
@@ -84,6 +81,10 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
                     sql.append(DataTypeFactory.getInstance().getFalseBooleanValue(database));
                 }
             } else if (newValue instanceof DatabaseFunction) {
+                if (newValue instanceof DatabaseSchemaBasedFunction) {
+                    ((DatabaseSchemaBasedFunction) newValue).setSchemaName(statement.getSchemaName());
+                }
+
                 sql.append(database.generateDatabaseFunctionValue((DatabaseFunction) newValue));
             }
             else {
@@ -99,8 +100,6 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         }
 
         sql.append(")");
-        
-        
     }
 
 

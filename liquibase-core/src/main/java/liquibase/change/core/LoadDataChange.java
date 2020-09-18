@@ -408,7 +408,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                     sequenceName = value.toString();
                                 }
                                 liquibase.statement.SequenceNextValueFunction function =
-                                    new liquibase.statement.SequenceNextValueFunction(sequenceName);
+                                    new liquibase.statement.SequenceNextValueFunction(sequenceName, getSchemaName());
                                 valueConfig.setValueComputed(function);
 
                             } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BLOB.toString())) {
