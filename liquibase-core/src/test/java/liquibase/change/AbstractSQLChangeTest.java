@@ -2,10 +2,15 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StreamUtil;
 import org.junit.Test;
 
@@ -249,6 +254,33 @@ public class AbstractSQLChangeTest {
 //        assertEquals(1, statements.length);
 //        assertEquals("SOME SQL", ((RawSqlStatement) statements[0]).getSql());
 //    }
+
+
+    @Test
+    public void escapingPostgresQuestionmarkOperators() throws DatabaseException,Exception {
+        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("? ??'Is this escaped?' col? another?? ?");
+
+        //Postgres Offline
+        Database postgresDatabase = new PostgresDatabase();
+        ResourceAccessor junitResourceAccessor = new JUnitResourceAccessor();
+        OfflineConnection offlineConnection = new OfflineConnection("offline:postgresql", junitResourceAccessor);
+        postgresDatabase.setConnection(offlineConnection);
+        SqlStatement[] statements = change.generateStatements(postgresDatabase);
+        assertEquals(1, statements.length);
+        assertEquals("?? ??'Is this escaped?' col?? another?? ??", ((RawSqlStatement) statements[0]).getSql());
+
+        //Postgres No connection
+        Database postgresDatabaseNC = new PostgresDatabase();
+        statements = change.generateStatements(postgresDatabaseNC);
+        assertEquals(1, statements.length);
+        assertEquals("?? ??'Is this escaped?' col?? another?? ??", ((RawSqlStatement) statements[0]).getSql());
+
+        //Mock Database as baseline
+        Database database = new MockDatabase();
+        statements = change.generateStatements(database);
+        assertEquals(1, statements.length);
+        assertEquals("? ??'Is this escaped?' col? another?? ?", ((RawSqlStatement) statements[0]).getSql());
+    }
 
     @DatabaseChange(name = "exampleAbstractSQLChange", description = "Used for the AbstractSQLChangeTest unit test", priority = 1)
     private static class ExampleAbstractSQLChange extends AbstractSQLChange {
