@@ -20,6 +20,7 @@ import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Operation;
 import liquibase.hub.model.OperationChangeEvent;
 import liquibase.logging.Logger;
+import liquibase.logging.core.BufferedLogService;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
@@ -31,6 +32,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class HubChangeExecListener extends AbstractChangeExecListener
                                    implements ChangeExecListener, ChangeLogSyncListener {
@@ -248,20 +250,40 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         }
         operationChangeEvent.setOperationStatusType(operationStatusType);
         operationChangeEvent.setStatusMessage(statusMessage);
-        operationChangeEvent.setLogs("LOGS");
+        if ("FAIL".equals(operationStatusType)) {
+            operationChangeEvent.setLogs(statusMessage);
+        }
+        else {
+            String logs = getCurrentLog();
+            if (! StringUtil.isEmpty(logs)) {
+                operationChangeEvent.setLogs(logs);
+            }
+            else {
+                operationChangeEvent.setLogs(statusMessage);
+            }
+        }
         operationChangeEvent.setLogsTimestamp(new Date());
-
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
 
         try {
             hubService.sendOperationChangeEvent(operationChangeEvent);
+            postCount++;
         }
         catch (LiquibaseException lbe) {
             logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
                     " change set '" + changeSet.toString(false));
         }
+    }
+
+    private String getCurrentLog() {
+        BufferedLogService bufferedLogService =
+           Scope.getCurrentScope().get(BufferedLogService.class.getName(), BufferedLogService.class);
+        if (bufferedLogService != null) {
+            return bufferedLogService.getLogAsString(Level.INFO);
+        }
+        return null;
     }
 
     //
@@ -354,7 +376,18 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
-        operationChangeEvent.setLogs("LOGS");
+        if ("FAIL".equals(operationStatusType)) {
+            operationChangeEvent.setLogs(statusMessage);
+        }
+        else {
+            String logs = getCurrentLog();
+            if (! StringUtil.isEmpty(logs)) {
+                operationChangeEvent.setLogs(logs);
+            }
+            else {
+                operationChangeEvent.setLogs(statusMessage);
+            }
+        }
 
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
