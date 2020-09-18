@@ -47,7 +47,7 @@ public class SqlPrecondition extends AbstractPrecondition {
             throws PreconditionFailedException, PreconditionErrorException {
         DatabaseConnection connection = database.getConnection();
         try {
-            Object oResult = ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
+            Object oResult = ExecutorService.getInstance().getExecutor("jdbc", database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
             if (oResult == null) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }

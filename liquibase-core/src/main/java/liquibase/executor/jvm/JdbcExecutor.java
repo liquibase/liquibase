@@ -1,5 +1,6 @@
 package liquibase.executor.jvm;
 
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -12,6 +13,8 @@ import liquibase.executor.AbstractExecutor;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
+import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
@@ -41,12 +44,37 @@ public class JdbcExecutor extends AbstractExecutor {
 
     private Logger log = LogService.getLog(getClass());
 
+    /**
+     *
+     * Return the name of the Executor
+     *
+     * @return String   The Executor name
+     *
+     */
+    @Override
+    public String getName() {
+        return "jdbc";
+    }
+
+    /**
+     *
+     * Return the Executor priority
+     *
+     * @return int      The Executor priority
+     *
+     */
+    @Override
+    public int getPriority() {
+        return PrioritizedService.PRIORITY_DEFAULT;
+    }
+
     @Override
     public boolean updatesDatabase() {
         return true;
     }
 
     public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        log.debug("Executing with the '" + getName() + "' executor");
         DatabaseConnection con = database.getConnection();
         Statement stmt = null;
         try {
@@ -388,7 +416,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.info(LogType.WRITE_SQL, String.format("%s", statement));
+                log.debug(LogType.WRITE_SQL, String.format("%s", statement));
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -460,7 +488,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                log.info(LogType.READ_SQL, sqlToExecute[0]);
+                log.debug(LogType.READ_SQL, sqlToExecute[0]);
 
                 rs = stmt.executeQuery(sqlToExecute[0]);
                 ResultSet rsToUse = rs;

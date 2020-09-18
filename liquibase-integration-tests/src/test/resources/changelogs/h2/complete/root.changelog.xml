@@ -342,4 +342,14 @@
       <createSequence sequenceName="liquidbase_applicationuserSQ" startValue="1" />
     </changeSet>
 
+    <changeSet id="failingColumnNameSince197" author="tholu">
+        <createTable tableName="columnTest">
+            <column name="table" type="varchar(50)"/>
+        </createTable>
+        <update tableName="columnTest">
+            <column name="table" value="test"/>
+            <where>1</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

@@ -95,7 +95,9 @@ public class OfflineChangeLogHistoryServiceTest {
         assertTrue(writer.toString().contains("INSERT INTO PUBLIC.DATABASECHANGELOG"));
     }
     /**
+     *
      * Create OfflineChangeLogHistoryService and register LoggingExecutor
+     *
      */
     private OfflineChangeLogHistoryService createService(Writer writer, String outputLiquibaseSql) {
         HsqlDatabase database = new HsqlDatabase();
@@ -104,8 +106,14 @@ public class OfflineChangeLogHistoryServiceTest {
         database.setConnection(connection);
         connection.attached(database);
         OfflineChangeLogHistoryService changeLogHistoryService = (OfflineChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), writer, database);
-        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+
+        //
+        // Create the new LoggingExecutor and give it the original Executor as a delegator
+        // We also set the LoggingExecutor as the JDBC Executor
+        //
+        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor("jdbc", database), writer, database);
+        ExecutorService.getInstance().setExecutor("logging", database, loggingExecutor);
+        ExecutorService.getInstance().setExecutor("jdbc", database, loggingExecutor);
         return changeLogHistoryService;
     }
 

@@ -48,7 +48,7 @@ public class DB2Database extends AbstractDb2Database {
 		if (getConnection() == null || getConnection() instanceof OfflineConnection)
 			return null;
 		try {
-			return ExecutorService.getInstance().getExecutor(this).queryForObject(
+			return ExecutorService.getInstance().getExecutor("jdbc", this).queryForObject(
 					new RawSqlStatement("SELECT fixpack_num FROM TABLE (sysproc.env_get_inst_info()) as INSTANCEINFO"),
 					Integer.class);
 		} catch (final Exception e) {

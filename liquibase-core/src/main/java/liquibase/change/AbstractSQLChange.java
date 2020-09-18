@@ -5,6 +5,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -29,6 +30,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     private boolean stripComments;
     private boolean splitStatements;
+    /**
+     *
+     * @deprecated  To be removed when splitStatements is changed to be type Boolean
+     *
+     */
+    private boolean splitStatementsSet;
+
     private String endDelimiter;
     private String sql;
     private String dbms;
@@ -124,7 +132,17 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             this.splitStatements = true;
         } else {
             this.splitStatements = splitStatements;
+            splitStatementsSet = true;
         }
+    }
+
+    /**
+     * @deprecated  To be removed when splitStatements is changed to be Boolean type
+     * @return
+     */
+    @Deprecated
+    public boolean isSplitStatementsSet() {
+        return splitStatementsSet;
     }
 
     /**
@@ -224,8 +242,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
-                 statement = statement.replaceAll("\\n", "\r\n");
-             }
+                statement = statement.replaceAll("\\n", "\r\n");
+            }
+            if (database instanceof PostgresDatabase) {
+                statement = statement.replaceAll("(^|[^\\?])\\?(?!\\?)(?=([^']*'[^']*')*[^']*$)", "$1??");
+            }
 
             String escapedStatement = statement;
             try {

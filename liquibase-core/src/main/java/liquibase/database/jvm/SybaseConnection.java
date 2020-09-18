@@ -11,6 +11,9 @@ import java.sql.Savepoint;
  *
  */
 public class SybaseConnection extends JdbcConnection {
+
+    public SybaseConnection() {}
+
     public SybaseConnection(Connection delegate) {
         super(delegate);
     }

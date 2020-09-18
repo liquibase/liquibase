@@ -36,16 +36,16 @@ public class JdbcExecutorTest {
             }
         };
 
-        assertNotNull(ExecutorService.getInstance().getExecutor(oracle1));
-        assertNotNull(ExecutorService.getInstance().getExecutor(oracle2));
-        assertNotNull(ExecutorService.getInstance().getExecutor(mysql));
+        assertNotNull(ExecutorService.getInstance().getExecutor("jdbc", oracle1));
+        assertNotNull(ExecutorService.getInstance().getExecutor("jdbc", oracle2));
+        assertNotNull(ExecutorService.getInstance().getExecutor("jdbc", mysql));
 
-        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) == ExecutorService.getInstance().getExecutor(oracle1));
-        assertTrue(ExecutorService.getInstance().getExecutor(oracle2) == ExecutorService.getInstance().getExecutor(oracle2));
-        assertTrue(ExecutorService.getInstance().getExecutor(mysql) == ExecutorService.getInstance().getExecutor(mysql));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", oracle1) == ExecutorService.getInstance().getExecutor("jdbc", oracle1));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", oracle2) == ExecutorService.getInstance().getExecutor("jdbc", oracle2));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", mysql) == ExecutorService.getInstance().getExecutor("jdbc", mysql));
 
-        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) != ExecutorService.getInstance().getExecutor(oracle2));
-        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) != ExecutorService.getInstance().getExecutor(mysql));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", oracle1) != ExecutorService.getInstance().getExecutor("jdbc", oracle2));
+        assertTrue(ExecutorService.getInstance().getExecutor("jdbc", oracle1) != ExecutorService.getInstance().getExecutor("jdbc", mysql));
     }
 
     @Test

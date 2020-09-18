@@ -1120,4 +1120,10 @@
         </preConditions>
     </changeSet>
 
+    <changeSet id="output messages" author="nvoxland">
+        <output>Message using default target</output>
+        <output target="stdout">Message using stdout target</output>
+        <output target="stderr">Message using stderr target</output>
+    </changeSet>
+
 </databaseChangeLog>

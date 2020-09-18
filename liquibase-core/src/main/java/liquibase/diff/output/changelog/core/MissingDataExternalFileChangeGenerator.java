@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -115,6 +116,8 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                                     dataTypes[i] = "BOOLEAN";
                                 } else if (value instanceof Date) {
                                     dataTypes[i] = "DATE";
+                                } else if (value instanceof byte[]) {
+                                    dataTypes[i] = "BLOB";
                                 } else {
                                     dataTypes[i] = "STRING";
                                 }
@@ -124,6 +127,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                             } else {
                                 if (value instanceof Date) {
                                     line[i] = new ISODateFormat().format(((Date) value));
+                                } else if (value instanceof byte[]) {
+                                    // extract the value as a Base64 string, to safely store the
+                                    // binary data
+                                    line[i] = Base64.getEncoder().encodeToString((byte[])value);
                                 } else {
                                     line[i] = value.toString();
                                 }

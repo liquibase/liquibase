@@ -6,10 +6,12 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
+import liquibase.servicelocator.PrioritizedService;
 
 import java.sql.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * A ConnectionWrapper implementation which delegates completely to an
@@ -18,10 +20,31 @@ import java.util.Map;
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
 
+    public JdbcConnection() {
+
+    }
+
     public JdbcConnection(java.sql.Connection connection) {
         this.con = connection;
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
+    @Override
+    public void open(String url, Driver driverObject, Properties driverProperties) throws DatabaseException {
+        try {
+            this.con = driverObject.connect(url, driverProperties);
+            if (this.con == null) {
+                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            }
+        }
+        catch (SQLException sqle) {
+            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  " + sqle.getMessage());
+        }
+    }
 
     @Override
     public void attached(Database database) {

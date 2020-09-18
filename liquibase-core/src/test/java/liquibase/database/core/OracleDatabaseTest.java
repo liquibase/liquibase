@@ -110,7 +110,7 @@ public class OracleDatabaseTest extends AbstractJdbcDatabaseTest {
         MockExecutor mockExecutor = new MockExecutor();
         mockExecutor.setDatabase(database);
 
-        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        ExecutorService.getInstance().setExecutor("jdbc", database, mockExecutor);
 
         UpdateStatement updateStatement = new UpdateStatement(null, null, "test_table");
         updateStatement.addNewColumnValue("id", new SequenceNextValueFunction("test_table_id_seq"));

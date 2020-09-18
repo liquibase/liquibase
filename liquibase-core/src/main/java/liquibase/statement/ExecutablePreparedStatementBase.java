@@ -4,6 +4,8 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogService;
@@ -19,10 +21,7 @@ import liquibase.util.file.FilenameUtils;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
@@ -73,7 +72,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
 
         String sql = generateSql(cols);
-        LOG.info(LogType.WRITE_SQL, sql);
+        LOG.debug(LogType.WRITE_SQL, sql);
         LOG.debug(LogType.LOG, "Number of columns = " + cols.size());
 
         // create prepared statement
@@ -127,9 +126,13 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
         if (col.getValue() != null) {
-            LOG.debug(LogType.LOG, "value is string = " + col.getValue());
+            LOG.debug(LogType.LOG, "value is string/UUID/blob = " + col.getValue());
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
                 stmt.setObject(i, UUID.fromString(col.getValue()));
+            } else if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.OTHER.name())) {
+                stmt.setObject(i, col.getValue(), Types.OTHER);
+            } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
+                stmt.setBlob(i, new ByteArrayInputStream(Base64.getDecoder().decode(col.getValue())));
             } else {
                 stmt.setString(i, col.getValue());
             }
@@ -201,7 +204,43 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
             LOG.debug(LogType.LOG, "value is explicit null");
-            stmt.setNull(i, java.sql.Types.NULL);
+            if (col.getType() == null) {
+                stmt.setNull(i, java.sql.Types.NULL);
+                return;
+            }
+            if (col.getType().toLowerCase().contains("datetime")) {
+                stmt.setNull(i, java.sql.Types.TIMESTAMP);
+            } else {
+                //
+                // Get the array of aliases and use them to find the
+                // correct java.sql.Types constant for the call to setNull
+                //
+                boolean isSet = false;
+                LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(col.getType(), database);
+                String[] aliases = dataType.getAliases();
+                for (String alias : aliases) {
+                    if (! alias.contains("java.sql.Types")) {
+                        continue;
+                    }
+                    String name = alias.replaceAll("java.sql.Types.","");
+                    try {
+                        JDBCType jdbcType = Enum.valueOf(JDBCType.class, name);
+                        stmt.setNull(i, jdbcType.getVendorTypeNumber());
+                        isSet = true;
+                    }
+                    catch (Exception e) {
+                        //
+                        // fall back to using java.sql.Types.NULL by catching any exceptions
+                        //
+                    }
+                    break;
+                }
+                if (! isSet) {
+                    LOG.info(LogType.LOG,
+                            String.format("Using java.sql.Types.NULL to set null value for type %s", dataType.getName()));
+                    stmt.setNull(i, java.sql.Types.NULL);
+                }
+            }
         }
     }
 
