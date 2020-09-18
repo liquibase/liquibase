@@ -501,7 +501,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             super.init();
             try {
                 final ResourcePatternResolver resolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
-                for (final String ending : new String[]{"xml", "yml", "yaml"}) {
+                for (final String ending : new String[]{"xml", "yml", "yaml", "json", "sql"}) {
                     Resource[] resources = resolver.getResources("classpath*:**/*." + ending);
                     for (Resource resource : resources) {
                         String url = resource.getURL().toExternalForm();
