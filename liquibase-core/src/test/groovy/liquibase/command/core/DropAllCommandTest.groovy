@@ -41,8 +41,6 @@ class DropAllCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
-        hubConfiguration.setLiquibaseHubProject("PROJECT 1")
         def command = new DropAllCommand()
         JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
         Liquibase liquibase = new Liquibase(outputFile.getName(), testResourceAccessor, new MockDatabase())
