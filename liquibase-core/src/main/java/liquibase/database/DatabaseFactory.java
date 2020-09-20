@@ -2,7 +2,6 @@ package liquibase.database;
 
 import liquibase.Scope;
 import liquibase.database.core.UnsupportedDatabase;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
@@ -11,7 +10,6 @@ import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.Connection;
 import java.sql.Driver;
 import java.util.*;
 
@@ -165,10 +163,6 @@ public class DatabaseFactory {
         }
 
         DatabaseConnection databaseConnection = null;
-        driver = StringUtil.trimToNull(driver);
-        if (driver == null) {
-            driver = DatabaseFactory.getInstance().findDefaultDriver(url);
-        }
 
         try {
             Driver driverObject;
@@ -178,16 +172,17 @@ public class DatabaseFactory {
                 databaseFactory.register((Database) Class.forName(databaseClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance());
             }
 
+            String selectedDriverClass = StringUtil.trimToNull(driver);
+            if (selectedDriverClass == null) {
+                selectedDriverClass = databaseFactory.findDefaultDriver(url);
+            }
+
+            if (selectedDriverClass == null) {
+                throw new RuntimeException("Driver class was not specified and could not be determined from the url (" + url + ")");
+            }
+            
             try {
-                if (driver == null) {
-                    driver = databaseFactory.findDefaultDriver(url);
-                }
-
-                if (driver == null) {
-                    throw new RuntimeException("Driver class was not specified and could not be determined from the url (" + url + ")");
-                }
-
-                driverObject = (Driver) Class.forName(driver, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+                driverObject = (Driver) Class.forName(selectedDriverClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("Cannot find database driver: " + e.getMessage());
             }
@@ -237,9 +232,9 @@ public class DatabaseFactory {
                 }
             }
 
-            if(driver.contains("oracle")) {
+            if(selectedDriverClass.contains("oracle")) {
               driverProperties.put("remarksReporting", "true");
-            } else if(driver.contains("mysql")) {
+            } else if(selectedDriverClass.contains("mysql")) {
               driverProperties.put("useInformationSchema", "true");
             }
 
