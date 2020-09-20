@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -130,7 +131,7 @@ public class PostgresAdvisoryLockService implements LockService {
     }
 
     Executor getExecutor() {
-        return ExecutorService.getInstance().getExecutor(database);
+        return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
     }
 
     @Override
