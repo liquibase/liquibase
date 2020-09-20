@@ -62,6 +62,7 @@ public class DatabaseFactoryTest {
     public void openConnectionUsesDriverArgument() throws Exception {
         DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", "org.h2.Driver", null, null, null, resourceAccessor);
         assertThat(dbConnection, notNullValue());
+        assertThat(dbConnection.getDatabaseProductName(), equalTo("H2"));
     }
 
     @Test
@@ -71,6 +72,13 @@ public class DatabaseFactoryTest {
         expectedException.expectMessage(containsString("Driver class was not specified and could not be determined from the url"));
 
         databaseFactory.openConnection("not:a:driver", "", "", null, resourceAccessor);
+    }
+
+    @Test
+    public void openConnectionLoadsGivenDatabaseClass() throws Exception {
+        DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, "liquibase.database.core.H2Database", null, null, resourceAccessor);
+        assertThat(dbConnection, notNullValue());
+        assertThat(dbConnection.getDatabaseProductName(), equalTo("H2"));
     }
 
     @Test
@@ -86,13 +94,15 @@ public class DatabaseFactoryTest {
 
         DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, propsFilePath, null, resourceAccessor);
         assertThat(dbConnection, notNullValue());
+        assertThat(dbConnection.getDatabaseProductName(), equalTo("H2"));
         // TODO: Figure out how to assert the properties are loaded
     }
 
     @Test
     public void openConnectionCreatesCustomPropertyProviderClassWhenGiven() throws Exception {
-        DatabaseConnection databaseConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", "liquibase.database.DatabaseFactoryTest$CustomProperties", resourceAccessor);
-        assertThat(databaseConnection, notNullValue());
+        DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", "liquibase.database.DatabaseFactoryTest$CustomProperties", resourceAccessor);
+        assertThat(dbConnection, notNullValue());
+        assertThat(dbConnection.getDatabaseProductName(), equalTo("H2"));
     }
 
     @Test
@@ -106,9 +116,9 @@ public class DatabaseFactoryTest {
     
     @Test
     public void openConnectionReturnsAConnection() throws Exception {
-        DatabaseConnection databaseConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, resourceAccessor);
-        assertThat(databaseConnection, notNullValue());
-        assertThat(databaseConnection.getDatabaseProductName(), equalTo("H2"));
+        DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, resourceAccessor);
+        assertThat(dbConnection, notNullValue());
+        assertThat(dbConnection.getDatabaseProductName(), equalTo("H2"));
     }
 
     /**
