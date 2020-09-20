@@ -8,10 +8,7 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -216,7 +213,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
 
             if (isCompressedFile(rootPath)) {
-                try (FileSystem fs = FileSystems.newFileSystem(rootPath)) {
+                try (FileSystem fs = FileSystems.newFileSystem(rootPath, (Map<String, ?>) null)) {
                     Path basePath = fs.getRootDirectories().iterator().next();
 
                     if (relativeTo != null) {
