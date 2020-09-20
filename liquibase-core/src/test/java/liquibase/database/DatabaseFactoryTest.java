@@ -59,6 +59,21 @@ public class DatabaseFactoryTest {
     }
 
     @Test
+    public void openConnectionUsesDriverArgument() throws Exception {
+        DatabaseConnection dbConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", "org.h2.Driver", null, null, null, resourceAccessor);
+        assertThat(dbConnection, notNullValue());
+    }
+
+    @Test
+    public void openConnectionThrowsExceptionWhenDriverCannotBeFoundByUrl() throws Exception {
+        expectedException.expect(instanceOf(DatabaseException.class));
+        expectedException.expectCause(instanceOf(RuntimeException.class));
+        expectedException.expectMessage(containsString("Driver class was not specified and could not be determined from the url"));
+
+        databaseFactory.openConnection("not:a:driver", "", "", null, resourceAccessor);
+    }
+
+    @Test
     public void openConnectionLoadsDriverPropertiesFromGivenFile() throws Exception {
         File propsFile = temporaryFolder.newFile("db-factory-test-connection-props.properties");
         Properties expectedProps = new Properties();
@@ -88,13 +103,12 @@ public class DatabaseFactoryTest {
 
         databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, null, "unknown file", null, resourceAccessor);
     }
-
-    // Misc
-    // TODO: Delete this test
+    
     @Test
-    public void name() throws Exception {
+    public void openConnectionReturnsAConnection() throws Exception {
         DatabaseConnection databaseConnection = databaseFactory.openConnection("jdbc:h2:mem:DatabaseFactoryTest", "sa", "", null, resourceAccessor);
-        assertNotNull(databaseConnection);
+        assertThat(databaseConnection, notNullValue());
+        assertThat(databaseConnection.getDatabaseProductName(), equalTo("H2"));
     }
 
     /**
