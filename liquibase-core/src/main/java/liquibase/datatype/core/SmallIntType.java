@@ -16,6 +16,7 @@ public class SmallIntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
 
+    @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -42,7 +43,7 @@ public class SmallIntType extends LiquibaseDataType {
         }
 
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 5);
+            return new DatabaseDataType("NUMBER", 5, 0);
         }
 
         if (database instanceof PostgresDatabase)

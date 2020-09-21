@@ -21,6 +21,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;

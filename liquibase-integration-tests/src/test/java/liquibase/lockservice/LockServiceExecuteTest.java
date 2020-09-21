@@ -38,7 +38,7 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogTableName()
                                 );
-                        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                        LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok
@@ -50,7 +50,7 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogLockTableName()
                                 );
-                        LogService.getLog(getClass()).info(LogType.WRITE_SQL, sql);
+                        LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok

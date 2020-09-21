@@ -1,27 +1,28 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.core.H2Database;
-import liquibase.exception.DatabaseException;
-import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
-import liquibase.sqlgenerator.MockSqlGeneratorChain;
-import liquibase.statement.core.CreateSequenceStatement;
-import org.junit.Before;
-import org.junit.Test;
+import static org.mockito.Mockito.*;
 
 import java.math.BigInteger;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.DatabaseException;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
+import liquibase.sqlgenerator.MockSqlGeneratorChain;
+import liquibase.statement.core.CreateSequenceStatement;
 
 public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<CreateSequenceStatement> {
 
     protected static final String SEQUENCE_NAME = "SEQUENCE_NAME";
     protected static final String CATALOG_NAME = "CATALOG_NAME";
     protected static final String SCHEMA_NAME = "SCHEMA_NAME";
-    private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
-    private DatabaseConnection mockedSupportedMinMaxSequenceConnection;
+//    private DatabaseConnection mockedUnsupportedMinMaxSequenceConnection;
+//    private DatabaseConnection mockedSupportedMinMaxSequenceConnection;
 
     public CreateSequenceGeneratorTest() throws Exception {
         super(new CreateSequenceGenerator());
@@ -30,6 +31,41 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
     @Override
     protected CreateSequenceStatement createSampleSqlStatement() {
         return new CreateSequenceStatement(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+    }
+
+    @Test
+    public void postgresDatabaseSupportIfNotExistsByVersion() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(4);
+
+        PostgresDatabase database = spy(new PostgresDatabase());
+        database.setConnection(dbConnection);
+        doReturn(SEQUENCE_NAME).when(database).escapeSequenceName(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+
+        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+        createSequenceStatement.setStartValue(new BigInteger("1"));
+
+        // verify that for version <= 9.4 no IF NOT EXISTS is not in the statement
+        Sql[] sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).doesNotContain("IF NOT EXISTS");
+
+        // verify that if no version is available the optional no IF NOT EXISTS is not in the statement
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenThrow(DatabaseException.class);
+
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).doesNotContain("IF NOT EXISTS");
+
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(5);
+
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).contains("IF NOT EXISTS");
     }
 
 //    @Before

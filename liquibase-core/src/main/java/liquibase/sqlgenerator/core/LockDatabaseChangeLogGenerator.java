@@ -5,6 +5,7 @@ import static liquibase.statement.DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDE
 import java.sql.Timestamp;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -25,8 +26,9 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
 
     protected static final String hostname;
     protected static final String hostaddress;
-    protected static final String hostDescription = (System.getProperty("liquibase.hostDescription") == null) ? "" :
-        ("#" + System.getProperty("liquibase.hostDescription"));
+    protected static final String hostDescription = (System.getProperty("liquibase" +
+            ".hostDescription") == null) ? "" :
+            ("#" + System.getProperty("liquibase.hostDescription"));
 
     static {
         try {
@@ -43,45 +45,54 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         String liquibaseSchema = database.getLiquibaseSchemaName();
         String liquibaseCatalog = database.getLiquibaseCatalogName();
 
-        UpdateStatement updateStatement = new UpdateStatement(liquibaseCatalog, liquibaseSchema,
-            database.getDatabaseChangeLogLockTableName());
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        try {
+            UpdateStatement updateStatement = new UpdateStatement(liquibaseCatalog, liquibaseSchema,
+                    database.getDatabaseChangeLogLockTableName());
 
-        updateStatement.addNewColumnValue("LOCKED", true);
-        updateStatement.addNewColumnValue("LOCKGRANTED",
-            new DatabaseFunction(CURRENT_DATE_TIME_PLACE_HOLDER));
+            updateStatement.addNewColumnValue("LOCKED", true);
+            updateStatement.addNewColumnValue("LOCKGRANTED",
+                    new DatabaseFunction(CURRENT_DATE_TIME_PLACE_HOLDER));
 
-        // If this lock gets actively prolonged, fill this column, otherwise leave NULL
-        if (statement.isProlongedLock()) {
+            // If this lock gets actively prolonged, fill this column, otherwise leave NULL
+            if (statement.isProlongedLock()) {
 
-            updateStatement.addNewColumnValue("LOCKEXPIRES",
-                new Timestamp(statement.getLockExpiresOnServer().getTime()));
+                updateStatement.addNewColumnValue("LOCKEXPIRES",
+                        new Timestamp(statement.getLockExpiresOnServer().getTime()));
 
-        } else {
-            // for standard lock service, set to NULL
-            updateStatement.addNewColumnValue("LOCKEXPIRES", null);
+            } else {
+                // for standard lock service, set to NULL
+                updateStatement.addNewColumnValue("LOCKEXPIRES", null);
+            }
+
+            // also add ID of this instance (can be NULL)
+            updateStatement.addNewColumnValue("LOCKEDBYID",
+                    statement.getLockedById());
+
+            updateStatement.addNewColumnValue("LOCKEDBY",
+                    hostname + hostDescription + " (" + hostaddress + ")");
+
+            String idColumn = database.escapeColumnName(liquibaseCatalog, liquibaseSchema,
+                    database.getDatabaseChangeLogTableName(), "ID");
+
+            String lockedColumn = database.escapeColumnName(liquibaseCatalog,
+                    liquibaseSchema,
+                    database
+                            .getDatabaseChangeLogTableName(),
+                    "LOCKED");
+
+            String falseConverted = DataTypeFactory
+                    .getInstance()
+                    .fromDescription("boolean", database)
+                    .objectToSql(false, database);
+
+            updateStatement.setWhereClause(idColumn + " = 1 AND " + lockedColumn + " = " + falseConverted);
+
+            return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
         }
-
-        // also add ID of this instance (can be NULL)
-        updateStatement.addNewColumnValue("LOCKEDBYID",
-            statement.getLockedById());
-
-        updateStatement.addNewColumnValue("LOCKEDBY",
-            hostname + hostDescription + " (" + hostaddress + ")");
-
-        String idColumn = database.escapeColumnName(liquibaseCatalog, liquibaseSchema,
-            database.getDatabaseChangeLogTableName(), "ID");
-
-        String lockedColumn = database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database
-            .getDatabaseChangeLogTableName(), "LOCKED");
-
-        String falseConverted = DataTypeFactory
-            .getInstance()
-            .fromDescription("boolean", database)
-            .objectToSql(false, database);
-
-        updateStatement.setWhereClause(idColumn + " = 1 AND " + lockedColumn + " = " + falseConverted);
-
-        return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
-
     }
 }

@@ -1,6 +1,7 @@
 package liquibase.database.jvm;
 
 import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.LiquibaseService;
 
 import java.sql.Connection;
 import java.sql.Savepoint;
@@ -10,6 +11,7 @@ import java.sql.Savepoint;
  * and rollback as Sybase requires that autocommit be set to true.
  *
  */
+@LiquibaseService(skip=true)
 public class SybaseConnection extends JdbcConnection {
 
     public SybaseConnection() {}

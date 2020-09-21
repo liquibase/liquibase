@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -20,29 +21,34 @@ public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<Unloc
     public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, Database database,
                              SqlGeneratorChain sqlGeneratorChain) {
         String liquibaseSchema = database.getLiquibaseSchemaName();
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        try {
+            UpdateStatement releaseStatement =
+                    new UpdateStatement(database.getLiquibaseCatalogName(),
+                            liquibaseSchema,
+                            database.getDatabaseChangeLogLockTableName());
+            releaseStatement.addNewColumnValue("LOCKED", false);
+            releaseStatement.addNewColumnValue("LOCKGRANTED", null);
+            releaseStatement.addNewColumnValue("LOCKEXPIRES", null);
+            releaseStatement.addNewColumnValue("LOCKEDBY", null);
+            releaseStatement.addNewColumnValue("LOCKEDBYID", null);
 
-        UpdateStatement releaseStatement = new UpdateStatement(database.getLiquibaseCatalogName()
-            , liquibaseSchema, database
-            .getDatabaseChangeLogLockTableName());
+            String idColumnName = database.escapeColumnName(
+                    database.getLiquibaseCatalogName(),
+                    liquibaseSchema,
+                    database.getDatabaseChangeLogTableName(),
+                    "ID");
 
-        releaseStatement.addNewColumnValue("LOCKED", false);
-        releaseStatement.addNewColumnValue("LOCKGRANTED", null);
-        releaseStatement.addNewColumnValue("LOCKEXPIRES", null);
-        releaseStatement.addNewColumnValue("LOCKEDBY", null);
-        releaseStatement.addNewColumnValue("LOCKEDBYID", null);
+            releaseStatement.setWhereClause(idColumnName + " = 1 AND " +
+                    // make sure we are only removing our own lock
+                    // (in case its the standard lock service, this is NULL)
+                    "LOCKEDBYID " + lockedByIdCheck(statement.getLockedById()));
 
-        String idColumnName = database.escapeColumnName(
-            database.getLiquibaseCatalogName(),
-            liquibaseSchema,
-            database.getDatabaseChangeLogTableName(),
-            "ID");
-
-        releaseStatement.setWhereClause(idColumnName + " = 1 AND " +
-            // make sure we are only removing our own lock
-            // (in case its the standard lock service, this is NULL)
-            "LOCKEDBYID " + lockedByIdCheck(statement.getLockedById()));
-
-        return SqlGeneratorFactory.getInstance().generateSql(releaseStatement, database);
+            return SqlGeneratorFactory.getInstance().generateSql(releaseStatement, database);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
+        }
     }
 
     private String lockedByIdCheck(String lockedById) {

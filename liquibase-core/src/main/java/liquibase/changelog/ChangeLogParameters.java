@@ -156,19 +156,34 @@ public class ChangeLogParameters {
                 found.add(param);
             }
         }
-        
-        if (found.size() == 1) {
-            // this case is typically a global param, but could also be a unique non-global param in one specific
-            // changelog
-            result = found.get(0);
-        } else if (found.size() > 1) {
+
+        // if any parameters were found, determine which parameter value to use
+        // (even if only one was found, we can not assume it should be used)
+        if (found.size() > 0) {
+            // look for the first global parameter
             for (ChangeLogParameter changeLogParameter : found) {
-                if (changeLogParameter.getChangeLog().equals(changeLog)) {
+                if (changeLogParameter.isGlobal()) {
                     result = changeLogParameter;
+                    break;
                 }
             }
+
+            // if none of the found parameters are global (all of them are local) and
+            // the parameter is searched in the context of a changeSet (otherwise implicitly a global parameter is wanted)
+            if (result == null && changeLog != null) {
+                // look for the first parameter belonging to the current changeLog or the closest ancestor of the changeLog
+                DatabaseChangeLog changeLogOrParent = changeLog;
+                do {
+                    for (ChangeLogParameter changeLogParameter : found) {
+                        if (changeLogParameter.getChangeLog().equals(changeLogOrParent)) {
+                            result = changeLogParameter;
+                            break;
+                        }
+                    }
+                } while (result == null && (changeLogOrParent = changeLogOrParent.getParentChangeLog()) != null);
+            }
         }
-        
+
         return result;
     }
 

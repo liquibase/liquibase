@@ -16,6 +16,7 @@ public class TinyIntType  extends LiquibaseDataType {
 
     private boolean autoIncrement;
 
+    @Override
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
@@ -39,7 +40,7 @@ public class TinyIntType  extends LiquibaseDataType {
             return type;
         }
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER",3);
+            return new DatabaseDataType("NUMBER", 3, 0);
         }
         return super.toDatabaseDataType(database);
     }

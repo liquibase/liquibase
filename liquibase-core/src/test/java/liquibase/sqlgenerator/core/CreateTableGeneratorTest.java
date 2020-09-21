@@ -4,7 +4,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 
+import com.example.liquibase.change.UniqueConstraintConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.database.MockDatabaseConnection;
+import liquibase.datatype.LiquibaseDataType;
+import liquibase.statement.*;
 import org.junit.Test;
 
 import liquibase.change.ColumnConfig;
@@ -24,11 +28,6 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.IntType;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.ForeignKeyConstraint;
-import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
 
@@ -1123,5 +1122,26 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         statement.addColumnConstraint(new ForeignKeyConstraint("fk_test_parent", TABLE_NAME + "(id)").setColumn("id"));
         Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
         assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (, CONSTRAINT fk_test_parent FOREIGN KEY (id) REFERENCES \"my-schema\".TABLE_NAME(id))", generatedSql[0].toSql());
+    }
+
+    @Test
+    public void combineUniqueConstraints() {
+        Database database = new SQLiteDatabase();
+        database.setOutputDefaultSchema(true);
+        LiquibaseDataType integerType = DataTypeFactory.getInstance().fromDescription("INTEGER", database);
+
+        CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+        statement.addColumn("MY_KEY", integerType, new UniqueConstraint("SAME"));
+        statement.addColumn("MY_OTHER_KEY", integerType, new UniqueConstraint("SAME"));
+        statement.addColumn("SINGLE_UNIQUE_KEY", integerType, new UniqueConstraint("DIFFERENT"));
+        statement.addColumn("UNIQUE_NO_CONSTRAINT_NAME", integerType, new UniqueConstraint());
+        Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+        String expectedSql = "CREATE TABLE CATALOG_NAME.TABLE_NAME " +
+                "(MY_KEY INTEGER, MY_OTHER_KEY INTEGER, " +
+                "SINGLE_UNIQUE_KEY INTEGER, UNIQUE_NO_CONSTRAINT_NAME INTEGER, " +
+                "UNIQUE (UNIQUE_NO_CONSTRAINT_NAME), " +
+                "CONSTRAINT SAME UNIQUE (MY_KEY, MY_OTHER_KEY), " +
+                "CONSTRAINT DIFFERENT UNIQUE (SINGLE_UNIQUE_KEY))";
+        assertEquals(expectedSql, generatedSql[0].toSql());
     }
 }
