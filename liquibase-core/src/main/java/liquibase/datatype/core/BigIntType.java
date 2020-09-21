@@ -38,7 +38,7 @@ public class BigIntType extends LiquibaseDataType {
             }
         }
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 38,0);
+            return new DatabaseDataType("NUMBER", 38, 0);
         }
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType("BIGINT");

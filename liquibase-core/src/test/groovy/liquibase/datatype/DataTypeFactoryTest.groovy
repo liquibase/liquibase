@@ -224,6 +224,12 @@ class DataTypeFactoryTest extends Specification {
         "java.sql.Types.TIMESTAMP(6)"                  | new OracleDatabase()   | "TIMESTAMP(6)"                                 | TimestampType | false
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE"       | new OracleDatabase()   | "TIMESTAMP WITH TIMEZONE"                      | TimestampType | false
         "java.sql.Types.TIMESTAMP_WITH_TIMEZONE(6)"    | new OracleDatabase()   | "TIMESTAMP(6) WITH TIMEZONE"                   | TimestampType | false
+        "tinyint"                                      | new OracleDatabase()   | "NUMBER(3, 0)"                                 | TinyIntType   | false
+        "smallint"                                     | new OracleDatabase()   | "NUMBER(5, 0)"                                 | SmallIntType  | false
+        "mediumint"                                    | new OracleDatabase()   | "NUMBER(7, 0)"                                 | MediumIntType | false
+        "int"                                          | new OracleDatabase()   | "INTEGER"                                      | IntType       | false
+        "integer"                                      | new OracleDatabase()   | "INTEGER"                                      | IntType       | false
+        "bigint"                                       | new OracleDatabase()   | "NUMBER(38, 0)"                                | BigIntType    | false
         "xml"                                          | new PostgresDatabase() | "XML"                                          | XMLType       | false
         "timestamp"                                    | new PostgresDatabase() | "TIMESTAMP WITHOUT TIME ZONE"                  | TimestampType | false
         "timestamp(6)"                                 | new PostgresDatabase() | "TIMESTAMP(6) WITHOUT TIME ZONE"               | TimestampType | false
