@@ -7,6 +7,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -14,7 +16,9 @@ import liquibase.executor.ExecutorService;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.HubUpdater;
+import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.Connection;
+import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Operation;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -109,6 +113,10 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             lockService.waitForLock();
 
             DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog();
+            if (changeLogFile != null) {
+                checkForRegisteredChangeLog(changeLog);
+            }
+
             hubUpdater = new HubUpdater(new Date(), changeLog);
             for (CatalogAndSchema schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + schema);
@@ -127,6 +135,30 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         }
 
         return new CommandResult("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
+    }
+
+    private void checkForRegisteredChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
+        String hubMode = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubMode());
+        String changeLogId = changeLog.getChangeLogId();
+        final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
+        if (apiKey == null || hubMode.equals("off") || ! hubServiceFactory.isOnline()) {
+            return;
+        }
+        final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+        HubChangeLog hubChangeLog = (changeLogId != null ? service.getHubChangeLog(UUID.fromString(changeLogId)) : null);
+        if (changeLogId != null && hubChangeLog != null) {
+            return;
+        }
+        String message =
+            "The changelog file specified is not registered with any Liquibase Hub project,\n" +
+            "so the results will not be recorded in Liquibase Hub.\n" +
+            "To register the changelog with your Hub Project run 'liquibase registerchangelog'.\n" +
+            "Learn more at https://hub.liquibase.com.";
+        Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+        log.warning(message);
     }
 
     protected void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {

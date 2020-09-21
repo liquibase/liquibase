@@ -1680,6 +1680,7 @@ public class Main {
                 dropAllCommand.setLiquibase(liquibase);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
                 dropAllCommand.setSchemas(getSchemaParams(database));
+                dropAllCommand.setChangeLogFile(changeLogFile);
                 Scope.getCurrentScope().getUI().sendMessage(dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
