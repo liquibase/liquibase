@@ -249,6 +249,13 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
 
             liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+
+            if (database instanceof DerbyDatabase) {
+                ((DerbyDatabase) database).setShutdownEmbeddedDerby(false);
+            }
+            if (lockDatabase instanceof DerbyDatabase) {
+                ((DerbyDatabase) lockDatabase).setShutdownEmbeddedDerby(false);
+            }
         }
         finally {
 
