@@ -84,8 +84,8 @@ public class OnlineHubService implements HubService {
                     this.available = false;
                 }
             }
-
-            if (!this.available) {
+            String apiKey = getApiKey();
+            if (!this.available && apiKey != null) {
               String message = "Hub communication failure: " + hubServiceFactory.getOfflineReason() + ".\n" +
                       "The data for your operations will not be recorded in your Liquibase Hub project";
               Scope.getCurrentScope().getUI().sendMessage(message);
