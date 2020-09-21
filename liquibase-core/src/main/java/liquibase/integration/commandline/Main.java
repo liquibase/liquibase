@@ -996,7 +996,9 @@ public class Main {
             if (entry.getValue() != null) {
                 entryValue = String.valueOf(entry.getValue());
             }
-            integrationDetails.setParameter("defaultsFile__"+String.valueOf(entry.getKey()), entryValue);
+            if (integrationDetails != null) {
+                integrationDetails.setParameter("defaultsFile__" + String.valueOf(entry.getKey()), entryValue);
+            }
 
             try {
                 if ("promptOnNonLocalDatabase".equals(entry.getKey())) {
