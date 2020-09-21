@@ -20,6 +20,7 @@ import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Operation;
 import liquibase.hub.model.OperationChangeEvent;
 import liquibase.logging.Logger;
+import liquibase.logging.core.BufferedLogService;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
@@ -31,6 +32,7 @@ import liquibase.util.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class HubChangeExecListener extends AbstractChangeExecListener
                                    implements ChangeExecListener, ChangeLogSyncListener {
@@ -158,9 +160,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                                       String operationStatusType,
                                       String statusMessage) {
         if (operation == null) {
-            boolean hubOn =
-                    ! (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off"));
-            if (hubOn) {
+            boolean hubOff = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("off");
+            if (!hubOff) {
                 String message =
                         "Hub communication failure.\n" +
                         "The data for operation on changeset '" +
@@ -175,7 +176,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         HubChangeLog hubChangeLog;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         try {
-            hubChangeLog = hubService.getChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
             if (hubChangeLog == null) {
                 logger.warning("The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub");
                 return;
@@ -249,20 +250,40 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         }
         operationChangeEvent.setOperationStatusType(operationStatusType);
         operationChangeEvent.setStatusMessage(statusMessage);
-        operationChangeEvent.setLogs("LOGS");
+        if ("FAIL".equals(operationStatusType)) {
+            operationChangeEvent.setLogs(statusMessage);
+        }
+        else {
+            String logs = getCurrentLog();
+            if (! StringUtil.isEmpty(logs)) {
+                operationChangeEvent.setLogs(logs);
+            }
+            else {
+                operationChangeEvent.setLogs(statusMessage);
+            }
+        }
         operationChangeEvent.setLogsTimestamp(new Date());
-
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
 
         try {
             hubService.sendOperationChangeEvent(operationChangeEvent);
+            postCount++;
         }
         catch (LiquibaseException lbe) {
-            logger.warning(lbe.getMessage());
+            logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
                     " change set '" + changeSet.toString(false));
         }
+    }
+
+    private String getCurrentLog() {
+        BufferedLogService bufferedLogService =
+           Scope.getCurrentScope().get(BufferedLogService.class.getName(), BufferedLogService.class);
+        if (bufferedLogService != null) {
+            return bufferedLogService.getLogAsString(Level.INFO);
+        }
+        return null;
     }
 
     //
@@ -297,7 +318,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         HubChangeLog hubChangeLog;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         try {
-            hubChangeLog = hubService.getChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
+            hubChangeLog = hubService.getHubChangeLog(UUID.fromString(databaseChangeLog.getChangeLogId()));
             if (hubChangeLog == null) {
                 logger.warning("The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub");
                 return;
@@ -310,13 +331,32 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         //
         //  POST /organizations/{id}/projects/{id}/operations/{id}/change-events
+        //  Do not send generated SQL or changeset body for changeLogSync operation
         //
-        List<Change> changes = changeSet.getChanges();
+        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         List<String> sqlList = new ArrayList<>();
-        for (Change change : changes) {
-            Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
-            for (Sql sql : sqls) {
-                sqlList.add(sql.toSql());
+        if (! eventType.equals("SYNC")) {
+            List<Change> changes = changeSet.getChanges();
+            for (Change change : changes) {
+                Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
+                for (Sql sql : sqls) {
+                    sqlList.add(sql.toSql());
+                }
+            }
+            String[] sqlArray = new String[sqlList.size()];
+            sqlArray = sqlList.toArray(sqlArray);
+            operationChangeEvent.setGeneratedSql(sqlArray);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
+            try {
+                serializer.write(Collections.singletonList(changeSet), baos);
+                operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
+            } catch (IOException ioe) {
+                //
+                // Just log message
+                //
+                logger.warning("Unable to serialize change set '" + changeSet.toString(false) + "' for Hub.");
             }
         }
 
@@ -324,7 +364,6 @@ public class HubChangeExecListener extends AbstractChangeExecListener
 
         String[] sqlArray = new String[sqlList.size()];
         sqlArray = sqlList.toArray(sqlArray);
-        OperationChangeEvent operationChangeEvent = new OperationChangeEvent();
         operationChangeEvent.setEventType(eventType);
         operationChangeEvent.setStartDate(startDateMap.get(changeSet));
         operationChangeEvent.setEndDate(dateExecuted);
@@ -337,19 +376,19 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         operationChangeEvent.setGeneratedSql(sqlArray);
         operationChangeEvent.setOperation(operation);
         operationChangeEvent.setLogsTimestamp(new Date());
-        operationChangeEvent.setLogs("LOGS");
+        if ("FAIL".equals(operationStatusType)) {
+            operationChangeEvent.setLogs(statusMessage);
+        }
+        else {
+            String logs = getCurrentLog();
+            if (! StringUtil.isEmpty(logs)) {
+                operationChangeEvent.setLogs(logs);
+            }
+            else {
+                operationChangeEvent.setLogs(statusMessage);
+            }
+        }
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ChangeLogSerializer serializer = ChangeLogSerializerFactory.getInstance().getSerializer(".json");
-        try {
-            serializer.write(Collections.singletonList(changeSet), baos);
-            operationChangeEvent.setChangesetBody(baos.toString("UTF-8"));
-        }
-        catch (IOException ioe) {
-            //
-            // Consume
-            //
-        }
         operationChangeEvent.setProject(hubChangeLog.getProject());
         operationChangeEvent.setOperation(operation);
         try {
@@ -357,6 +396,7 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             postCount++;
         }
         catch (LiquibaseException lbe) {
+            logger.warning(lbe.getMessage(), lbe);
             logger.warning("Unable to send Operation Change Event for operation '" + operation.getId().toString() +
                     " change set '" + changeSet.toString(false));
             failedToPostCount++;

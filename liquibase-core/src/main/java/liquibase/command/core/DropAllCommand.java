@@ -1,9 +1,6 @@
 package liquibase.command.core;
 
-import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.DatabaseChangeLog;
@@ -14,18 +11,30 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.hub.HubService;
+import liquibase.hub.HubServiceFactory;
+import liquibase.hub.HubUpdater;
+import liquibase.hub.model.Connection;
+import liquibase.hub.model.Operation;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
+import liquibase.logging.core.BufferedLogService;
+import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     private Database database;
     private CatalogAndSchema[] schemas;
+    private String changeLogFile;
+    private UUID hubConnectionId;
+    private Liquibase liquibase;
 
     @Override
     public String getName() {
@@ -34,8 +43,11 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     @Override
     public CommandValidationErrors validate() {
-        CommandValidationErrors commandValidationErrors = new CommandValidationErrors(this);
-        return commandValidationErrors;
+        return new CommandValidationErrors(this);
+    }
+
+    public void setLiquibase(Liquibase liquibase) {
+        this.liquibase = liquibase;
     }
 
     public Database getDatabase() {
@@ -73,18 +85,37 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     }
 
+    public String getChangeLogFile() {
+        return changeLogFile;
+    }
+
+    public void setChangeLogFile(String changeLogFile) {
+        this.changeLogFile = changeLogFile;
+    }
+
+    public void setHubConnectionId(String hubConnectionIdString) {
+        if (hubConnectionIdString == null) {
+            return;
+        }
+        this.hubConnectionId = UUID.fromString(hubConnectionIdString);
+    }
+
     @Override
     protected CommandResult run() throws Exception {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         Logger log = Scope.getCurrentScope().getLog(getClass());
+        HubUpdater hubUpdater = null;
         try {
             lockService.waitForLock();
 
+            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog();
+            hubUpdater = new HubUpdater(new Date(), changeLog);
             for (CatalogAndSchema schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + schema);
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }
+            hubUpdater.syncHub(changeLogFile, database, changeLog, hubConnectionId);
         } catch (DatabaseException e) {
             throw e;
         } catch (Exception e) {

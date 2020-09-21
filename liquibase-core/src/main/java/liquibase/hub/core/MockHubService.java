@@ -55,7 +55,7 @@ public class MockHubService implements HubService {
     @Override
     public List<Project> getProjects() throws LiquibaseHubException {
         Project project1 = new Project();
-        project1.setId(UUID.randomUUID());
+        project1.setId(UUID.fromString("72e4bc5a-5404-45be-b9e1-280a80c98cbf"));
         project1.setName("Project 1");
         project1.setCreateDate(new Date());
 
@@ -91,7 +91,7 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
+    public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
         for (HubChangeLog changeLog : returnChangeLogs) {
             if (String.valueOf(changeLog.getId()).equals(String.valueOf(changeLogId))) {
                 return changeLog;

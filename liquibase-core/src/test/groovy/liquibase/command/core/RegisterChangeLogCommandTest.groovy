@@ -4,6 +4,7 @@ import liquibase.Scope
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.configuration.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
+import liquibase.hub.HubServiceFactory
 import liquibase.resource.ResourceAccessor
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.test.JUnitResourceAccessor
@@ -40,9 +41,8 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
-        hubConfiguration.setLiquibaseHubProject("PROJECT 1")
         def command = new RegisterChangeLogCommand()
+        command.setHubProjectId(((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).projects.get(0).getId())
         command.setOutputStream(new PrintStream(outputStream))
         command.setChangeLogFile(outputFile.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.xml")])
@@ -63,7 +63,6 @@ class RegisterChangeLogCommandTest extends Specification {
         def outputStream = new ByteArrayOutputStream()
 
         def hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
-        hubConfiguration.setLiquibaseHubProject("PROJECT 1")
         def command = new RegisterChangeLogCommand()
         command.setChangeLogFile("changelog.xml")
         DatabaseChangeLog changeLog = new DatabaseChangeLog(".")

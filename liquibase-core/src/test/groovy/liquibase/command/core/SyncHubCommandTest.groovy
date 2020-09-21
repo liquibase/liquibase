@@ -30,6 +30,7 @@ class SyncHubCommandTest extends Specification {
         ])
 
         mockHubService = (MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()
+        mockHubService.reset()
         ChangeLogParserFactory.getInstance().register(new MockChangeLogParser(changeLogs: [
                 "com/example/unregistered.mock": new DatabaseChangeLog(),
                 "com/example/registered.mock"  : new DatabaseChangeLog(changeLogId: MockHubService.randomUUID.toString())

@@ -53,7 +53,6 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import javax.naming.Context;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
@@ -244,13 +243,14 @@ public class Liquibase implements AutoCloseable {
                 //
                 // Create or retrieve the Connection if this is not SQL generation
                 // Make sure the Hub is available here by checking the return
+                // We do not need a connection if we are using a LoggingExecutor
                 //
                 Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
                 if (! (executor instanceof LoggingExecutor)) {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, changeLogIterator, database);
+                            hubUpdater.preUpdateHub("UPDATE", database, connection, changeLogFile, contexts, labelExpression, changeLogIterator);
                     }
                 }
 
@@ -288,8 +288,7 @@ public class Liquibase implements AutoCloseable {
                     LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
                 if (changeExecListener != null && updateOperation != null) {
-                    LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                    LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    showHubMessageCounts();
                 }
                 resetServices();
                 setChangeExecListener(null);
@@ -316,7 +315,7 @@ public class Liquibase implements AutoCloseable {
         Connection connection;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         if (getHubConnectionId() == null) {
-            HubChangeLog hubChangeLog = hubService.getChangeLog(UUID.fromString(changeLogId));
+            HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId));
             if (hubChangeLog == null) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                         "Retrieving Hub Change Log failed for Change Log ID: " + changeLogId);
@@ -466,7 +465,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                            hubUpdater.preUpdateHub("UPDATE", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -507,14 +506,18 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                     if (changeExecListener != null && updateOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
                 }
             }
         });
+    }
+
+    private void showHubMessageCounts() {
+        LOG.fine("Number of successful Liquibase Hub API requests: " + ((HubChangeExecListener)changeExecListener).getPostCount());
+        LOG.fine("Number of failed Liquibase Hub API requests:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
     }
 
     public void update(String tag, String contexts) throws LiquibaseException {
@@ -585,7 +588,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         updateOperation =
-                           hubUpdater.preUpdateHub("UPDATE", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                           hubUpdater.preUpdateHub("UPDATE", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -626,8 +629,7 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                     if (changeExecListener != null && updateOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();;
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -830,7 +832,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -852,14 +854,19 @@ public class Liquibase implements AutoCloseable {
                             new IgnoreChangeSetFilter(),
                             new CountChangeSetFilter(changesToRollback));
 
+                    CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     if (rollbackScript == null) {
-                        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                         Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
                             logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                         });
                     } else {
                         List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
-                        executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        Map<String, Object> values = new HashMap<>();
+                        values.put(Scope.Attr.logService.name(), compositeLogService);
+                        values.put(BufferedLogService.class.getName(), bufferLog);
+                        Scope.child(values, () -> {
+                            executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        });
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
@@ -876,8 +883,7 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe("Error releasing lock", e);
                     }
                     if (changeExecListener != null && rollbackOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -964,12 +970,15 @@ public class Liquibase implements AutoCloseable {
                 changeExecListener.willRollback(changeSet, databaseChangeLog, database);
             }
             else if (messageType == RollbackMessageType.ROLLED_BACK) {
+                final String message = "Rolled Back Changeset:" + changeSet.toString(false);
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                LOG.info(message);
                 changeExecListener.rolledBack(changeSet, databaseChangeLog, database);
-                Scope.getCurrentScope().getUI().sendMessage("Rolled Back Changeset:" + changeSet.toString(false));
             }
             else if (messageType == RollbackMessageType.ROLLBACK_FAILED) {
+                final String message = "Failed rolling back Changeset:" + changeSet.toString(false);
+                Scope.getCurrentScope().getUI().sendMessage(message);
                 changeExecListener.rollbackFailed(changeSet, databaseChangeLog, database, exception);
-                Scope.getCurrentScope().getUI().sendMessage("Failed rolling back Changeset:" + changeSet.toString(false));
             }
         }
     }
@@ -1089,7 +1098,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1111,14 +1120,19 @@ public class Liquibase implements AutoCloseable {
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
 
+                    CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     if (rollbackScript == null) {
-                        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                         Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
                             logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                         });
                     } else {
                         List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
-                        executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        Map<String, Object> values = new HashMap<>();
+                        values.put(Scope.Attr.logService.name(), compositeLogService);
+                        values.put(BufferedLogService.class.getName(), bufferLog);
+                        Scope.child(values, () -> {
+                            executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        });
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
@@ -1136,8 +1150,7 @@ public class Liquibase implements AutoCloseable {
                     }
                 }
                 if (changeExecListener != null && rollbackOperation != null) {
-                    LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                    LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                    showHubMessageCounts();
                 }
                 resetServices();
                 setChangeExecListener(null);
@@ -1243,7 +1256,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
-                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                        rollbackOperation = hubUpdater.preUpdateHub("ROLLBACK", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1265,14 +1278,19 @@ public class Liquibase implements AutoCloseable {
                             new IgnoreChangeSetFilter(),
                             new DbmsChangeSetFilter(database));
 
+                    CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     if (rollbackScript == null) {
-                        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                         Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
                             logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                         });
                     } else {
                         List<ChangeSet> changeSets = determineRollbacks(logIterator, contexts, labelExpression);
-                        executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        Map<String, Object> values = new HashMap<>();
+                        values.put(Scope.Attr.logService.name(), compositeLogService);
+                        values.put(BufferedLogService.class.getName(), bufferLog);
+                        Scope.child(values, () -> {
+                            executeRollbackScript(rollbackScript, changeSets, contexts, labelExpression);
+                        });
                         removeRunStatus(changeSets, contexts, labelExpression);
                     }
                     hubUpdater.postUpdateHub(rollbackOperation, bufferLog);
@@ -1289,8 +1307,7 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                     if (changeExecListener != null && rollbackOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -1396,7 +1413,7 @@ public class Liquibase implements AutoCloseable {
                     Connection connection = getConnection(changeLog);
                     if (connection != null) {
                         changeLogSyncOperation =
-                                hubUpdater.preUpdateHub("CHANGELOGSYNC", connection, contexts, labelExpression, changeLogFile, listLogIterator, database);
+                                hubUpdater.preUpdateHub("CHANGELOGSYNC", database, connection, changeLogFile, contexts, labelExpression, listLogIterator);
                     }
 
                     //
@@ -1433,8 +1450,7 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                     if (changeExecListener != null && changeLogSyncOperation != null) {
-                        LOG.info("Number of successful messages posted: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-                        LOG.info("Number of failed messages posted:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
+                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -1705,6 +1721,8 @@ public class Liquibase implements AutoCloseable {
                     DropAllCommand dropAll = (DropAllCommand) CommandFactory.getInstance().getCommand("dropAll");
                     dropAll.setDatabase(Liquibase.this.getDatabase());
                     dropAll.setSchemas(finalSchemas);
+                    dropAll.setLiquibase(Liquibase.this);
+                    dropAll.setChangeLogFile(changeLogFile);
 
                     try {
                         dropAll.execute();
@@ -2299,4 +2317,3 @@ public class Liquibase implements AutoCloseable {
         }
     }
 }
-

@@ -2,10 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.command.AbstractSelfConfiguratingCommand;
-import liquibase.command.CommandExecutionException;
-import liquibase.command.CommandFactory;
-import liquibase.command.LiquibaseCommand;
+import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -112,7 +109,10 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         argsMap.put("liquibase", liquibase);
         configuratingCommand.configure(argsMap);
         try {
-            liquibaseCommand.execute();
+            final CommandResult execute = liquibaseCommand.execute();
+            if (!execute.succeeded) {
+                throw new LiquibaseException(execute.message);
+            }
         }
         catch (CommandExecutionException cee) {
             throw new LiquibaseException("Error executing rollbackOneChangeSet", cee);

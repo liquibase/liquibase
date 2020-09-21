@@ -25,7 +25,9 @@ public class OnlineHubService implements HubService {
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     private Boolean available;
     private UUID organizationId;
+    private String organizationName;
     private UUID userId;
+    private Map<UUID, HubChangeLog> hubChangeLogCache = new HashMap<>();
 
     private HttpClient http;
 
@@ -57,7 +59,7 @@ public class OnlineHubService implements HubService {
             final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
 
             if (LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF")) {
-                hubServiceFactory.setOfflineReason("property liquibase.hub.mode is 'OFF'. To send data to Liquibase Hub, please set it to \"realtime\"");
+                hubServiceFactory.setOfflineReason("property liquibase.hub.mode is 'OFF'. To send data to Liquibase Hub, please set it to \"all\"");
                 this.available = false;
             } else if (getApiKey() == null) {
                 hubServiceFactory.setOfflineReason("liquibase.hub.apiKey was not specified");
@@ -120,20 +122,18 @@ public class OnlineHubService implements HubService {
 
     @Override
     public Organization getOrganization() throws LiquibaseHubException {
-        final Map<String, List<Map>> response = http.doGet("/api/v1/organizations", Map.class);
-
-        Organization org = new Organization();
-        List<Map> contentList = response.get("content");
         if (organizationId == null) {
+            final Map<String, List<Map>> response = http.doGet("/api/v1/organizations", Map.class);
+            List<Map> contentList = response.get("content");
             String id = (String) contentList.get(0).get("id");
             if (id != null) {
                 organizationId = UUID.fromString(id);
             }
+            organizationName = (String) contentList.get(0).get("name");
         }
+        Organization org = new Organization();
         org.setId(organizationId);
-        String name = (String) contentList.get(0).get("name");
-        org.setName(name);
-
+        org.setName(organizationName);
         return org;
     }
 
@@ -281,16 +281,23 @@ public class OnlineHubService implements HubService {
 
     /**
      * Query for a changelog ID.  If no result we return null
+     * We cache this result and a map
      *
      * @param changeLogId Changelog ID for query
      * @return HubChangeLog               Object container for result
      * @throws LiquibaseHubException
      */
     @Override
-    public HubChangeLog getChangeLog(UUID changeLogId) throws LiquibaseHubException {
+    public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
+        if (hubChangeLogCache.containsKey(changeLogId)) {
+            return hubChangeLogCache.get(changeLogId);
+        }
         try {
-            return http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
+            HubChangeLog hubChangeLog = http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
+            hubChangeLogCache.put(changeLogId, hubChangeLog);
+            return hubChangeLog;
         } catch (LiquibaseHubObjectNotFoundException lbe) {
+            Scope.getCurrentScope().getLog(getClass()).severe(lbe.getMessage(), lbe);
             return null;
         }
     }
@@ -383,8 +390,10 @@ public class OnlineHubService implements HubService {
         }
 
         if (operationEvent.getOperationEventLog() != null) {
-            requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
-            requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
+            if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
+                requestParams.put("logs", operationEvent.getOperationEventLog().getLogMessage());
+                requestParams.put("logsTimestamp", operationEvent.getOperationEventLog().getTimestampLog());
+            }
         }
 
         return http.doPost("/api/v1/organizations/" + organization.getId() + "/projects/" + operation.getConnection().getProject().getId() + "/operations/" + operation.getId() + "/operation-events", requestParams, OperationEvent.class);
@@ -398,6 +407,18 @@ public class OnlineHubService implements HubService {
 
     @Override
     public void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException {
+        String changesetBody = null;
+        String[] generatedSql = null;
+        String logs = null;
+        Date logsTimestamp = operationChangeEvent.getLogsTimestamp();
+        if (!LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("meta")) {
+            changesetBody = operationChangeEvent.getChangesetBody();
+            generatedSql = operationChangeEvent.getGeneratedSql();
+
+            logs = operationChangeEvent.getLogs();
+        }
+
+
         OperationChangeEvent sendOperationChangeEvent =
            new OperationChangeEvent()
               .setEventType(operationChangeEvent.getEventType())
@@ -408,11 +429,11 @@ public class OnlineHubService implements HubService {
               .setEndDate(operationChangeEvent.getEndDate())
               .setDateExecuted(operationChangeEvent.getDateExecuted())
               .setOperationStatusType(operationChangeEvent.getOperationStatusType())
-              .setChangesetBody(operationChangeEvent.getChangesetBody())
-              .setGeneratedSql(operationChangeEvent.getGeneratedSql())
-              .setLogs(operationChangeEvent.getLogs())
+              .setChangesetBody(changesetBody)
+              .setGeneratedSql(generatedSql)
+              .setLogs(logs)
               .setStatusMessage(operationChangeEvent.getStatusMessage())
-              .setLogsTimestamp(operationChangeEvent.getLogsTimestamp());
+              .setLogsTimestamp(logsTimestamp);
         http.doPost("/api/v1" +
                         "/organizations/" + getOrganization().getId().toString() +
                         "/projects/" + operationChangeEvent.getProject().getId().toString() +
