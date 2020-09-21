@@ -11,6 +11,7 @@ import liquibase.util.StringUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Driver;
 import java.util.*;
 
@@ -156,6 +157,21 @@ public class DatabaseFactory {
                                              String driverPropertiesFile,
                                              String propertyProviderClass,
                                              ResourceAccessor resourceAccessor) throws DatabaseException {
+        Properties driverProperties;
+        try {
+            driverProperties = buildDriverProperties(username, password, driverPropertiesFile, propertyProviderClass);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+        return openConnection(url, username, driver, databaseClass, driverProperties, resourceAccessor);
+    }
+
+    public DatabaseConnection openConnection(String url,
+                                             String username,
+                                             String driver,
+                                             String databaseClass,
+                                             Properties driverProperties,
+                                             ResourceAccessor resourceAccessor) throws DatabaseException {
 
         if (url.startsWith("offline:")) {
             OfflineConnection offlineConnection = new OfflineConnection(url, resourceAccessor);
@@ -175,10 +191,8 @@ public class DatabaseFactory {
             Driver driverObject = loadDriver(selectedDriverClass);
 
             if (driverObject instanceof LiquibaseExtDriver) {
-                ((LiquibaseExtDriver)driverObject).setResourceAccessor(resourceAccessor);
+                ((LiquibaseExtDriver) driverObject).setResourceAccessor(resourceAccessor);
             }
-
-            Properties driverProperties = buildDriverProperties(username, password, driverPropertiesFile, propertyProviderClass);
 
             if(selectedDriverClass.contains("oracle")) {
               driverProperties.put("remarksReporting", "true");
@@ -250,36 +264,41 @@ public class DatabaseFactory {
         return driverObject;
     }
 
-    private Properties buildDriverProperties(String username, String password, String driverPropertiesFile, String propertyProviderClass) throws InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IOException {
+    private Properties buildDriverProperties(String username, String password, String driverPropertiesFile, String propertyProviderClass) {
         Properties driverProperties;
-        if (propertyProviderClass == null) {
-            driverProperties = new Properties();
-        } else {
-            driverProperties = (Properties) Class.forName(propertyProviderClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
-        }
-
-        if (username != null) {
-            driverProperties.put("user", username);
-        }
-        if (password != null) {
-            driverProperties.put("password", password);
-        }
-        if (null != driverPropertiesFile) {
-            File propertiesFile = new File(driverPropertiesFile);
-            if (propertiesFile.exists()) {
-                LOG.fine(
-                        "Loading properties from the file:'" + driverPropertiesFile + "'"
-                );
-                FileInputStream inputStream = new FileInputStream(propertiesFile);
-                try {
-                    driverProperties.load(inputStream);
-                } finally {
-                    inputStream.close();
-                }
+        try {
+            if (propertyProviderClass == null) {
+                driverProperties = new Properties();
             } else {
-                throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
-                        + driverPropertiesFile + "'");
+                driverProperties = (Properties) Class.forName(propertyProviderClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
             }
+
+            if (username != null) {
+                driverProperties.put("user", username);
+            }
+            if (password != null) {
+                driverProperties.put("password", password);
+            }
+            if (null != driverPropertiesFile) {
+                File propertiesFile = new File(driverPropertiesFile);
+                if (propertiesFile.exists()) {
+                    LOG.fine(
+                            "Loading properties from the file:'" + driverPropertiesFile + "'"
+                    );
+                    FileInputStream inputStream = new FileInputStream(propertiesFile);
+                    try {
+                        driverProperties.load(inputStream);
+                    } finally {
+                        inputStream.close();
+                    }
+                } else {
+                    throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
+                            + driverPropertiesFile + "'");
+                }
+            }
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException | IOException e) {
+            throw new RuntimeException("Exception opening JDBC Driver specific properties from the file: '"
+                    + driverPropertiesFile + "'", e);
         }
 
 
