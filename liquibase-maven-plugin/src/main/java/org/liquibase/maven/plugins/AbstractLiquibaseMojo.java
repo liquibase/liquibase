@@ -345,7 +345,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 for (Parameter param : descriptor.getParameters()) {
                     final String name = param.getName();
-                    if (name.equalsIgnoreCase("project")) {
+                    if (name.equalsIgnoreCase("project") || name.equalsIgnoreCase("systemProperties")) {
                         continue;
                     }
 
@@ -356,11 +356,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                         final Object value = field.get(this);
                         if (value != null) {
                             try {
-                                String expression = param.getExpression();
-                                if (expression == null) {
-                                    expression = pluginDescriptor.getGoalPrefix() + "." + param.getName();
-                                }
-                                integrationDetails.setParameter("maven__" + expression.replaceAll("[${}]", ""), String.valueOf(value));
+                                integrationDetails.setParameter("maven__" + param.getName().replaceAll("[${}]", ""), String.valueOf(value));
                             } catch (Throwable e) {
                                 e.printStackTrace();
                             }
