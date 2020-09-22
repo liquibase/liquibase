@@ -36,6 +36,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
     private AntClassLoader classLoader;
     private Liquibase liquibase;
+    private ResourceAccessor resourceAccessor;
 
     private Path classpath;
     private DatabaseType databaseType;
@@ -105,6 +106,13 @@ public abstract class BaseLiquibaseTask extends Task {
         return liquibase;
     }
 
+    protected ResourceAccessor getResourceAccessor() {
+        if (resourceAccessor == null) {
+            throw new IllegalStateException("The ResourceAccessor has not been initialized. This usually means this " +
+                    "method has been called before the task's execute method has called.");
+        }
+        return resourceAccessor;
+    }
 
     /**
      * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
