@@ -67,6 +67,16 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public Project getProject(UUID projectId) throws LiquibaseHubException {
+        Project project1 = new Project();
+        project1.setId(projectId);
+        project1.setName("Project 1");
+        project1.setCreateDate(new Date());
+
+        return project1;
+    }
+
+    @Override
     public void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         sentObjects.computeIfAbsent("setRanChangeSets/" + connectionId, k -> new ArrayList<>()).addAll(ranChangeSets);
     }

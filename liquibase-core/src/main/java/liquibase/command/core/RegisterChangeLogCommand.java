@@ -79,8 +79,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         // Stop if we do no have a key
         //
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        if (! hubServiceFactory.isOnline()) {
-            return new CommandResult("The command registerChangeLog requires access to Liquibase Hub: " + hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com", false);
+        if (!hubServiceFactory.isOnline()) {
+            return new CommandResult("The command registerChangeLog requires access to Liquibase Hub: " + hubServiceFactory.getOfflineReason() + ".  Learn more at https://hub.liquibase.com", false);
         }
 
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
@@ -88,7 +88,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         //
         // CHeck for existing changeLog file
         //
-        DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog)argsMap.get("changeLog");
+        DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) argsMap.get("changeLog");
         final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
         if (changeLogId != null) {
             hubChangeLog = service.getHubChangeLog(UUID.fromString(changeLogId));
@@ -97,10 +97,9 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                         "' is already registered with changeLogId '" + changeLogId + "' to project '" +
                         hubChangeLog.getProject().getName() + "' with project ID '" + hubChangeLog.getProject().getId().toString() + "'.\n" +
                         "For more information visit https://docs.liquibase.com.", false);
-            }
-            else {
+            } else {
                 return new CommandResult("Changelog '" + changeLogFile +
-                        "' is already registered with changeLogId '" + changeLogId + "'.\n"  +
+                        "' is already registered with changeLogId '" + changeLogId + "'.\n" +
                         "For more information visit https://docs.liquibase.com.", false);
             }
         }
@@ -109,17 +108,16 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         // Retrieve the projects
         //
         Project project = null;
-        List<Project> projects = getProjectsFromHub();
 
         if (hubProjectId != null) {
-            for (Project testProject : projects) {
-                if (testProject.getId().equals(hubProjectId)) {
-                    project = testProject;
-                    break;
-                }
+            project = service.getProject(hubProjectId);
+
+            if (project == null) {
+                return new CommandResult("Project Id '" + hubProjectId + "' does not exist or you do not have access to it", false);
             }
-        }
-        else {
+
+        } else {
+            List<Project> projects = getProjectsFromHub();
             boolean done = false;
             String input = null;
             while (!done) {
@@ -191,7 +189,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                 String xsdPatternString = "([dbchangelog|liquibase-pro])-3.[0-9]?[0-9]?.xsd";
                 Pattern xsdPattern = Pattern.compile(xsdPatternString);
                 Matcher xsdMatcher = xsdPattern.matcher(header);
-                String editedString = xsdMatcher.replaceAll("$1-"+ XMLChangeLogSAXParser.getSchemaVersion() +".xsd");
+                String editedString = xsdMatcher.replaceAll("$1-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
 
                 //
                 // Add the changeLogId attribute
@@ -205,8 +203,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             //
             changeLogString = changeLogString.replaceFirst("--liquibase formatted sql",
                     "--liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
-        }
-        else {
+        } else {
             return new CommandResult("Changelog file '" + changeLogFile + "' is not a supported format", false);
         }
 
@@ -260,7 +257,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
 
     private String readProjectFromConsole(List<Project> projects) throws CommandLineParsingException {
         System.out.println("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting. ");
-        System.out.println("Register changelog "+changeLogFile+" to an existing Project, or create a new one.");
+        System.out.println("Register changelog " + changeLogFile + " to an existing Project, or create a new one.");
 
         System.out.println("Please make a selection:");
 
@@ -279,13 +276,13 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                 maxLen = project.getName().length();
             }
         }
-        for (int i=0; i < projects.size(); i++) {
+        for (int i = 0; i < projects.size(); i++) {
             Project project = projects.get(i);
-            System.out.println(String.format(projFormat + " %-" + maxLen + "s (Project ID:%s) %s", i+1, project.getName(), projects.get(i).getId(), projects.get(i).getCreateDate()));
+            System.out.println(String.format(projFormat + " %-" + maxLen + "s (Project ID:%s) %s", i + 1, project.getName(), projects.get(i).getId(), projects.get(i).getCreateDate()));
         }
         System.out.println("[N] to not register this changelog right now.\n" +
-            "You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.\n" +
-            " Learn more at https://hub.liquibase.com.");
+                "You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.\n" +
+                " Learn more at https://hub.liquibase.com.");
         System.out.print("?> ");
         Console c = getConsole();
         String input = c.readLine();

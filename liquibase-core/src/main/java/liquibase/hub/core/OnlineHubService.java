@@ -135,6 +135,18 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
+    public Project getProject(UUID projectId) throws LiquibaseHubException {
+        final UUID organizationId = getOrganization().getId();
+
+        try {
+            return http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects/"+projectId, Project.class);
+        } catch (LiquibaseHubObjectNotFoundException lbe) {
+            Scope.getCurrentScope().getLog(getClass()).severe(lbe.getMessage(), lbe);
+            return null;
+        }
+    }
+
+    @Override
     public List<Project> getProjects() throws LiquibaseHubException {
         final UUID organizationId = getOrganization().getId();
 
