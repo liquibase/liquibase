@@ -87,6 +87,32 @@ class SyncHubCommandTest extends Specification {
         assert mockHubService.sentObjects.toString() == "[setRanChangeSets/Connection jdbc://test ($randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
     }
 
+    def "Sync is successful with projectId passed"() {
+        setup:
+        mockHubService.reset()
+        def randomUUID = UUID.randomUUID()
+        def otherUUID = UUID.randomUUID()
+        mockHubService.returnConnections = [
+            new Connection(
+                id: MockHubService.randomUUID,
+                jdbcUrl: "jdbc://test",
+            )
+        ]
+
+        when:
+        def command = new SyncHubCommand()
+        command.url = "jdbc://test"
+        command.hubProjectId = MockHubService.randomUUID
+        command.database = new MockDatabase()
+
+        def result = command.run()
+
+        then:
+        assert result.succeeded: result.message
+        assert mockHubService.sentObjects.toString() ==
+            "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
+    }
+
     def "Will auto-create connections if changeLogFile is passed"() {
         mockHubService.returnConnections = []
 
@@ -112,6 +138,23 @@ class SyncHubCommandTest extends Specification {
         assert result.succeeded: result.message
         assert mockHubService.sentObjects["createConnection/$MockHubService.randomUUID" as String].toString() == ("[Connection jdbc://test2 (null)]")
 
+    }
+
+    def "Fails with both hubConnectionId and projectId"() {
+        setup:
+        mockHubService.returnConnections = []
+
+        when:
+        def command = new SyncHubCommand()
+        command.url = "jdbc://test2"
+        command.hubConnectionId = MockHubService.randomUUID
+        command.hubProjectId = MockHubService.randomUUID
+
+        def result = command.run()
+
+        then:
+        assert !result.succeeded
+        assert result.message == "The syncHub command requires only one valid hubConnectionId or hubProjectId or unique URL. Please remove extra values."
     }
 
     def "Fails with invalid hubConnectionId"() {

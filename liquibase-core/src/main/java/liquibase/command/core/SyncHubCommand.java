@@ -22,6 +22,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     private String url;
     private String changeLogFile;
     private String hubConnectionId;
+    private String hubProjectId;
     private Database database;
     private boolean failIfOnline = true;
 
@@ -49,6 +50,13 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         this.hubConnectionId = hubConnectionId;
     }
 
+    public String getHubProjectId() {
+        return hubProjectId;
+    }
+
+    public void setHubProjectId(String hubProjectId) {
+        this.hubProjectId = hubProjectId;
+    }
 
     public void setDatabase(Database database) {
         this.database = database;
@@ -78,18 +86,25 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
     @Override
     protected CommandResult run() throws Exception {
-        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-
-
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (! hubServiceFactory.isOnline()) {
             if (failIfOnline) {
-                return new CommandResult("The command syncHub requires access to Liquibase Hub: " + hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com", false);
+                return new CommandResult("The command syncHub requires access to Liquibase Hub: " +
+                        hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com", false);
             } else {
                 return new CommandResult("Sync skipped, offline", true);
             }
         }
 
+        //
+        // Check for both connection and project specified
+        //
+        if (hubConnectionId != null && hubProjectId != null) {
+            String message = "The syncHub command requires only one valid hubConnectionId or hubProjectId or unique URL. Please remove extra values.";
+            Scope.getCurrentScope().getLog(getClass()).severe(message);
+            return new CommandResult(message, false);
+        }
+        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         Connection connectionToSync;
         if (hubConnectionId == null) {
             Project project = null;
@@ -108,8 +123,14 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                     project = changeLog.getProject();
                 }
             }
+            else if (hubProjectId != null) {
+                project = hubService.getProject(UUID.fromString(hubProjectId));
+                if (project == null) {
+                    return new CommandResult("Project Id '" + hubProjectId + "' does not exist or you do not have access to it", false);
+                }
+            }
             else {
-                Scope.getCurrentScope().getLog(getClass()).info("No changeLogFile specified. Searching for jdbcUrl across the entire organization.");
+                Scope.getCurrentScope().getLog(getClass()).info("No project or changeLogFile specified. Searching for jdbcUrl across the entire organization.");
             }
 
             final Connection searchConnection = new Connection()
@@ -122,7 +143,6 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                 if (project == null) {
                     return new CommandResult("The url " + url + " does not match any defined connections. To auto-create a connection, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId.", false);
                 }
-
 
                 Connection inputConnection = new Connection();
                 inputConnection.setJdbcUrl(url);
@@ -146,7 +166,6 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         Scope.child(Scope.Attr.database, database, () -> {
             final ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
-
 
             hubService.setRanChangeSets(connectionToSync, ranChangeSets);
 
