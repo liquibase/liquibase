@@ -68,7 +68,7 @@ public abstract class BaseLiquibaseTask extends Task {
             scopeValues.put(Scope.Attr.classLoader.name(), classLoader);
 
             Scope.child(scopeValues, () -> {
-                database[0] = createDatabaseFromType(databaseType);
+                database[0] = createDatabaseFromType(databaseType, resourceAccessor);
                 liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database[0]);
                 if (changeLogParameters != null) {
                     changeLogParameters.applyParameters(liquibase);
@@ -95,11 +95,11 @@ public abstract class BaseLiquibaseTask extends Task {
     protected abstract void executeWithLiquibaseClassloader() throws BuildException;
 
     protected Database createDatabaseFromConfiguredDatabaseType() {
-        return createDatabaseFromType(databaseType);
+        return createDatabaseFromType(databaseType, getResourceAccessor());
     }
 
-    protected Database createDatabaseFromType(DatabaseType databaseType) {
-        return databaseType.createDatabase(classLoader);
+    protected Database createDatabaseFromType(DatabaseType databaseType, ResourceAccessor resourceAccessor) {
+        return databaseType.createDatabase(resourceAccessor);
     }
 
     protected Liquibase getLiquibase() {
