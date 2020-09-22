@@ -140,6 +140,15 @@ public class DatabaseFactory {
         return this.findCorrectDatabaseImplementation(openConnection(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor));
     }
 
+    public Database openDatabase(String url,
+                                 String username,
+                                 String driver,
+                                 String databaseClass,
+                                 Properties driverProperties,
+                                 ResourceAccessor resourceAccessor) throws DatabaseException {
+        return this.findCorrectDatabaseImplementation(openConnection(url, username, driver, databaseClass, driverProperties, resourceAccessor));
+    }
+
     public DatabaseConnection openConnection(String url,
                                              String username,
                                              String password,
@@ -254,10 +263,10 @@ public class DatabaseFactory {
         return selectedDriverClass;
     }
 
-    private Driver loadDriver(String selectedDriverClass) {
+    private Driver loadDriver(String driverClass) {
         Driver driverObject;
         try {
-            driverObject = (Driver) Class.forName(selectedDriverClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
+            driverObject = (Driver) Class.forName(driverClass, true, Scope.getCurrentScope().getClassLoader()).getConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("Cannot find database driver: " + e.getMessage());
         }
