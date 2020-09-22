@@ -274,6 +274,9 @@
                 </dependencies>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <skipTests>false</skipTests>
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <forkMode>once</forkMode>
                 </configuration>
             </plugin>
 

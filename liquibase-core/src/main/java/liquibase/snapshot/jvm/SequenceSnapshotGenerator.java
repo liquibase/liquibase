@@ -269,7 +269,15 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "FROM SYS.SYSSEQUENCE s " +
                     "JOIN SYS.SYSUSER u ON s.OWNER = u.USER_ID "+
                     "WHERE u.USER_NAME = '" + schema.getName() + "'";
-        	} else {
+        } else if (database.getClass().getSimpleName().equals("SnowflakeDatabase")) {
+            return "SELECT SEQUENCE_NAME, " +
+                    "cast(START_VALUE AS BIGINT) AS START_VALUE, " +
+                    "cast(MINIMUM_VALUE AS BIGINT) AS MIN_VALUE, " +
+                    "cast(MAXIMUM_VALUE AS BIGINT) AS MAX_VALUE, " +
+                    "CAST(\"INCREMENT\" AS BIGINT) AS INCREMENT_BY, " +
+                    "CYCLE_OPTION AS WILL_CYCLE " +
+                    "FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
+        } else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
         }
 

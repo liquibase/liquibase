@@ -1538,6 +1538,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (tableName != null) {
                             sql += " and systable.table_name = '" + tableName + "'";
                         }
+                    } else if(database.getClass().getSimpleName().equals("SnowflakeDatabase")) {
+                        sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME "
+                                + "from " + database.getSystemSchema() + ".TABLE_CONSTRAINTS "
+                                + "where constraint_schema='" + jdbcSchemaName + "' "
+                                + "and constraint_catalog='" + jdbcCatalogName + "' "
+                                + "and constraint_type='UNIQUE'";
+                        if (tableName != null) {
+                            sql += " and table_name='" + tableName + "'";
+                        }
                     } else {
                         sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME "
                                 + "from " + database.getSystemSchema() + ".constraints "
