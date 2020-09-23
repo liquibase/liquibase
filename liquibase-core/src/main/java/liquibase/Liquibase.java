@@ -287,9 +287,6 @@ public class Liquibase implements AutoCloseable {
                 } catch (LockException e) {
                     LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                 }
-                if (changeExecListener != null && updateOperation != null) {
-                    showHubMessageCounts();
-                }
                 resetServices();
                 setChangeExecListener(null);
             }
@@ -505,19 +502,11 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
-                    if (changeExecListener != null && updateOperation != null) {
-                        showHubMessageCounts();
-                    }
                     resetServices();
                     setChangeExecListener(null);
                 }
             }
         });
-    }
-
-    private void showHubMessageCounts() {
-        LOG.fine("Number of successful Liquibase Hub API requests: " + ((HubChangeExecListener)changeExecListener).getPostCount());
-        LOG.fine("Number of failed Liquibase Hub API requests:     " + ((HubChangeExecListener)changeExecListener).getFailedToPostCount());
     }
 
     public void update(String tag, String contexts) throws LiquibaseException {
@@ -627,9 +616,6 @@ public class Liquibase implements AutoCloseable {
                         lockService.releaseLock();
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                    if (changeExecListener != null && updateOperation != null) {
-                        showHubMessageCounts();;
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -881,9 +867,6 @@ public class Liquibase implements AutoCloseable {
                         lockService.releaseLock();
                     } catch (LockException e) {
                         LOG.severe("Error releasing lock", e);
-                    }
-                    if (changeExecListener != null && rollbackOperation != null) {
-                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
@@ -1149,9 +1132,6 @@ public class Liquibase implements AutoCloseable {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
                 }
-                if (changeExecListener != null && rollbackOperation != null) {
-                    showHubMessageCounts();
-                }
                 resetServices();
                 setChangeExecListener(null);
             }
@@ -1306,9 +1286,6 @@ public class Liquibase implements AutoCloseable {
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
                     }
-                    if (changeExecListener != null && rollbackOperation != null) {
-                        showHubMessageCounts();
-                    }
                     resetServices();
                     setChangeExecListener(null);
                 }
@@ -1448,9 +1425,6 @@ public class Liquibase implements AutoCloseable {
                         lockService.releaseLock();
                     } catch (LockException e) {
                         LOG.severe(MSG_COULD_NOT_RELEASE_LOCK, e);
-                    }
-                    if (changeExecListener != null && changeLogSyncOperation != null) {
-                        showHubMessageCounts();
                     }
                     resetServices();
                     setChangeExecListener(null);
