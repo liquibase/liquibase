@@ -56,7 +56,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
   													"'--hubConnectionId =<hubConnectionId>' parameter to the CLI, or ensure\n" +
   													"a registered changelog file is passed in your defaults file or in the CLI.\n" +
   													"Learn more at https://hub.liquibase.com";
-  			    		throw new UnexpectedLiquibaseException(errorMessage);
+							getLog().warn(errorMessage);
   				}
         }
 	  }
