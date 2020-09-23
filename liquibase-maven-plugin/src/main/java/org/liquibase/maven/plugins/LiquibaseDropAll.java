@@ -51,11 +51,11 @@ public class LiquibaseDropAll extends AbstractLiquibaseChangeLogMojo {
   			if (liquibaseHubApiKey != null && ! hubMode.toLowerCase().equals("off")) {
   		  		if (hubConnectionId == null && changeLogFile == null) {
   		    			String errorMessage =
-  									"\nERROR: The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
-  													"can send reports to your Hub project. To enable this, please add the \n" +
-  													"'--hubConnectionId =<hubConnectionId>' parameter to the CLI, or ensure\n" +
-  													"a registered changelog file is passed in your defaults file or in the CLI.\n" +
-  													"Learn more at https://hub.liquibase.com";
+  									"\nThe dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
+  									"can send reports to your Hub project. To enable this, please add the \n" +
+  									"'--hubConnectionId =<hubConnectionId>' parameter to the CLI, or ensure\n" +
+  									"a registered changelog file is passed in your defaults file or in the CLI.\n" +
+  									"Learn more at https://hub.liquibase.com";
 							getLog().warn(errorMessage);
   				}
         }

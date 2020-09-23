@@ -113,8 +113,9 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             lockService.waitForLock();
 
             boolean doSyncHub = true;
-            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog();
-            if (changeLogFile != null) {
+            DatabaseChangeLog changeLog = null;
+            if (StringUtil.isNotEmpty(changeLogFile)) {
+                changeLog = liquibase.getDatabaseChangeLog();
                 doSyncHub = checkForRegisteredChangeLog(changeLog);
             }
 
