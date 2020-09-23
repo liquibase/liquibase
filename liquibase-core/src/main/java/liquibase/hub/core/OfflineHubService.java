@@ -37,6 +37,11 @@ public class OfflineHubService implements HubService {
     }
 
     @Override
+    public Project getProject(UUID projectId) throws LiquibaseHubException {
+        throw new LiquibaseHubException("Hub is not available");
+    }
+
+    @Override
     public void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         throw new LiquibaseHubException("Hub is not available");
     }

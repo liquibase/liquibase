@@ -21,6 +21,8 @@ public interface HubService extends Plugin, PrioritizedService {
 
     Organization getOrganization() throws LiquibaseHubException;
 
+    Project getProject(UUID projectId) throws LiquibaseHubException;
+
     List<Project> getProjects() throws LiquibaseHubException;
 
     Project createProject(Project project) throws LiquibaseException;
