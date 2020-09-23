@@ -35,6 +35,7 @@ public class DatabaseFactoryTest {
     @Before
     public void setUp() {
         resourceAccessor = mock(ResourceAccessor.class);
+        DatabaseFactory.reset();
         databaseFactory = DatabaseFactory.getInstance();
     }
 
