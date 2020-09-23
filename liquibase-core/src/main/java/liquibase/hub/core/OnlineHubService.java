@@ -8,13 +8,16 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.*;
 import liquibase.hub.model.*;
+import liquibase.integration.IntegrationDetails;
 import liquibase.logging.Logger;
 import liquibase.plugin.Plugin;
 import liquibase.util.ISODateFormat;
+import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
 import java.lang.reflect.Field;
 import java.net.ConnectException;
+import java.net.InetAddress;
 import java.text.ParseException;
 import java.util.*;
 
@@ -300,17 +303,75 @@ public class OnlineHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection, Map<String, String> operationParameters) throws LiquibaseHubException {
+    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
+
+        String hostName;
+        try {
+            hostName = InetAddress.getLocalHost().getHostName();
+        } catch (Throwable e) {
+            Scope.getCurrentScope().getLog(getClass()).severe("Cannot determine hostname to send to hub", e);
+            hostName = null;
+        }
+
+        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
+
+        Map<String, Object> clientMetadata = new HashMap<>();
+        clientMetadata.put("liquibaseVersion", LiquibaseUtil.getBuildVersion());
+        clientMetadata.put("hostName", hostName);
+        clientMetadata.put("systemUser", System.getProperty("user.name"));
+        clientMetadata.put("clientInterface", integrationDetails.getName());
+
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("connectionId", connection.getId());
         requestBody.put("changelogId", changeLog.getId());
         requestBody.put("operationType", operationType);
         requestBody.put("operationStatusType", "PASS");
         requestBody.put("statusMessage", operationType);
+        requestBody.put("clientMetadata", clientMetadata);
+        requestBody.put("operationParameters", getCleanOperationParameters(integrationDetails.getParameters()));
 
         final Operation operation = http.doPost("/api/v1/operations", requestBody, Operation.class);
         operation.setConnection(connection);
         return operation;
+    }
+
+    protected Map<String, String> getCleanOperationParameters(Map<String, String> originalParams) {
+        if (originalParams == null) {
+            return null;
+        }
+
+        Set<String> paramsToRemove = new HashSet<>(Arrays.asList(
+                "url",
+                "username",
+                "password",
+                "apiKey",
+                "classpath"
+        ));
+
+        final Map<String, String> returnMap = new HashMap<>();
+
+        for (Map.Entry<String, String> param : originalParams.entrySet()) {
+            boolean allowed = true;
+            for (String skipKey : paramsToRemove) {
+                if (param.getKey().toLowerCase().contains(skipKey.toLowerCase())) {
+                    allowed = false;
+                    break;
+                }
+            }
+
+            if (allowed) {
+                String value = param.getValue();
+                if (param.getKey().toLowerCase().contains("liquibaseProLicenseKey".toLowerCase())) {
+                    if (value != null && value.length() > 8) {
+                        value = value.substring(0, 8) + "************";
+                    }
+                }
+
+                returnMap.put(param.getKey(), value);
+            }
+        }
+
+        return returnMap;
     }
 
     @Override
