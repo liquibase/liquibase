@@ -270,7 +270,7 @@ public class CommandLineUtils {
 	    try {
 			banner.append(readFromInputStream(inputStream));
 		} catch (IOException e) {
-			LogService.getLog(commandLinUtilsClass).debug("Unable to locate banner file.");
+			Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
 		}
 
         banner.append(String.format(

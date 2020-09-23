@@ -1,13 +1,12 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sdk.database.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.test.JUnitResourceAccessor;
