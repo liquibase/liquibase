@@ -353,6 +353,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     if (field == null) {
                         getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
                     } else {
+                        field.setAccessible(true);
                         final Object value = field.get(this);
                         if (value != null) {
                             try {

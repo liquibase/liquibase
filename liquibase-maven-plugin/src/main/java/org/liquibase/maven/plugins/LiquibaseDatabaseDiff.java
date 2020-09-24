@@ -129,7 +129,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.referenceServer"
      */
-    private String referenceServer;
+    protected String referenceServer;
 
     /**
      *
