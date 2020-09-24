@@ -19,6 +19,7 @@ import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.hub.HubServiceFactory;
+import liquibase.integration.IntegrationDetails;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -172,6 +173,21 @@ public class Main {
         ConsoleUIService ui = new ConsoleUIService();
 
         Map<String, Object> scopeObjects = new HashMap<>();
+        final IntegrationDetails integrationDetails = new IntegrationDetails();
+        integrationDetails.setName("cli");
+        for (String arg : args) {
+            if (arg.startsWith("--")) {
+                String[] splitArg = arg.split("=", 2);
+                String argKey = "argument__"+splitArg[0].replaceFirst("^--", "");
+                if (splitArg.length == 2) {
+                    integrationDetails.setParameter(argKey, splitArg[1]);
+                } else {
+                    integrationDetails.setParameter(argKey, "true");
+                }
+            }
+        }
+
+        scopeObjects.put("integrationDetails", integrationDetails);
         scopeObjects.put(Scope.Attr.ui.name(), ui);
 
         return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
@@ -961,6 +977,8 @@ public class Main {
      */
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException,
             CommandLineParsingException {
+        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
+
         Properties props = new Properties();
         props.load(propertiesInputStream);
         if (props.containsKey("strict")) {
@@ -974,6 +992,14 @@ public class Main {
         //   local member variable
         //
         for (Map.Entry entry : props.entrySet()) {
+            String entryValue = null;
+            if (entry.getValue() != null) {
+                entryValue = String.valueOf(entry.getValue());
+            }
+            if (integrationDetails != null) {
+                integrationDetails.setParameter("defaultsFile__" + String.valueOf(entry.getKey()), entryValue);
+            }
+
             try {
                 if ("promptOnNonLocalDatabase".equals(entry.getKey())) {
                     continue;
@@ -1663,13 +1689,14 @@ public class Main {
                 String hubMode = hubConfiguration.getLiquibaseHubMode();
                 if (liquibaseHubApiKey != null && ! hubMode.toLowerCase().equals("off")) {
                     if (hubConnectionId == null && changeLogFile == null) {
-                        String errorMessage =
-                           "\nERROR: The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
+                        String warningMessage =
+                           "The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
                            "can send reports to your Hub project. To enable this, please add the \n" +
-                           "'--hubConnectionId =<hubConnectionId>' parameter to the CLI, or ensure\n" +
+                           "'--hubConnectionId=<hubConnectionId>' parameter to the CLI, or ensure\n" +
                            "a registered changelog file is passed in your defaults file or in the CLI.\n" +
                            "Learn more at https://hub.liquibase.com";
-                        throw new UnexpectedLiquibaseException(errorMessage);
+                        Scope.getCurrentScope().getUI().sendMessage("\nWARNING: " + warningMessage);
+                        LOG.warning("\n" + warningMessage);
                     }
                 }
                 DropAllCommand dropAllCommand =
@@ -1680,6 +1707,7 @@ public class Main {
                 dropAllCommand.setLiquibase(liquibase);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
                 dropAllCommand.setSchemas(getSchemaParams(database));
+                dropAllCommand.setChangeLogFile(changeLogFile);
                 Scope.getCurrentScope().getUI().sendMessage(dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {

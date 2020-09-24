@@ -11,6 +11,7 @@ import java.util.*;
 public class MockHubService implements HubService {
 
     public static UUID randomUUID;
+    public static Date operationCreateDate;
 
     public List<Project> returnProjects = new ArrayList<>();
     public List<Connection> returnConnections;
@@ -67,6 +68,16 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public Project getProject(UUID projectId) throws LiquibaseHubException {
+        Project project1 = new Project();
+        project1.setId(projectId);
+        project1.setName("Project 1");
+        project1.setCreateDate(new Date());
+
+        return project1;
+    }
+
+    @Override
     public void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         sentObjects.computeIfAbsent("setRanChangeSets/" + connectionId, k -> new ArrayList<>()).addAll(ranChangeSets);
     }
@@ -102,8 +113,9 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection, Map<String, String> operationParameters) throws LiquibaseHubException {
-        sentObjects.computeIfAbsent("startOperation/" + connection.getId(), k -> new ArrayList<>()).add(operationParameters);
+    public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
+        operationCreateDate = new Date();
+        sentObjects.computeIfAbsent("startOperation/" + connection.getId(), k -> new ArrayList<>()).add(operationCreateDate);
 
         return null;
     }
