@@ -345,9 +345,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         if (! eventType.equals("SYNC")) {
             List<Change> changes = changeSet.getChanges();
             for (Change change : changes) {
-                Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
-                for (Sql sql : sqls) {
-                    sqlList.add(sql.toSql());
+                try {
+                    Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change, database);
+                    for (Sql sql : sqls) {
+                        sqlList.add(sql.toSql());
+                    }
+                }
+                catch (Exception e) {
+                    logger.warning("Unable to generate SQL for Hub failure message: " + e.getMessage());
                 }
             }
             String[] sqlArray = new String[sqlList.size()];
