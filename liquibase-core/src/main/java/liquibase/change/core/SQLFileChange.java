@@ -1,10 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.Scope;
-import liquibase.change.AbstractSQLChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
@@ -25,12 +22,12 @@ import java.io.InputStream;
  */
 @DatabaseChange(name = "sqlFile",
         description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a " +
-            "file. It is useful for complex changes that are not supported through Liquibase's automated refactoring " +
-          "tags such as stored procedures.\n" +
+                "file. It is useful for complex changes that are not supported through Liquibase's automated refactoring " +
+                "tags such as stored procedures.\n" +
                 "\n" +
                 "The sqlFile refactoring finds the file by searching in the following order:\n" +
                 "\n" +
-            "The file is searched for in the classpath. This can be manually set and by default the Liquibase " +
+                "The file is searched for in the classpath. This can be manually set and by default the Liquibase " +
                 "startup script adds the current directory when run.\n" +
                 "The file is searched for using the file attribute as a file name. This allows absolute paths to be " +
                 "used or relative paths to the working directory to be used.\n" +
@@ -45,7 +42,7 @@ import java.io.InputStream;
                 "A multiline comment that starts with /* and ends with */.\n" +
                 "A single line comment starting with <space>--<space> and finishing at the end of the line",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class SQLFileChange extends AbstractSQLChange {
+public class SQLFileChange extends AbstractSQLChange implements ResourceDependentChange {
 
     private String path;
     private Boolean relativeToChangelogFile;
@@ -61,7 +58,7 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     @DatabaseChangeProperty(description = "The file path of the SQL file to load",
-        exampleValue = "my/path/file.sql", requiredForDatabase = "all")
+            exampleValue = "my/path/file.sql", requiredForDatabase = "all")
     public String getPath() {
         return path;
     }
@@ -182,5 +179,10 @@ public class SQLFileChange extends AbstractSQLChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public InputStream openStream() throws IOException {
+        return openSqlStream();
     }
 }

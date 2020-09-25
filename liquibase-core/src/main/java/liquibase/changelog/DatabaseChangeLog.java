@@ -4,10 +4,12 @@ import liquibase.*;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
+import liquibase.changelog.visitor.ResourceValidationChangeSetVisitor;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.*;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
@@ -645,6 +647,19 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public void clearCheckSums() {
         for (ChangeSet changeSet : getChangeSets()) {
             changeSet.clearCheckSum();
+        }
+    }
+
+    public void validateResources(ResourceAccessor resourceAccessor) throws LiquibaseException {
+        ChangeLogIterator logIterator = new ChangeLogIterator(this);
+        logIterator.setIncludeMD5Sum(false);
+        ResourceValidationChangeSetVisitor changeSetVisitor = new ResourceValidationChangeSetVisitor(resourceAccessor);
+
+        logIterator.run(changeSetVisitor, new RuntimeEnvironment(new MockDatabase(), new Contexts(), new LabelExpression()));
+
+        ValidationErrors validationErrors = changeSetVisitor.getValidationErrors();
+        if (validationErrors.hasErrors()) {
+            throw new ResourceValidationFailedException(validationErrors);
         }
     }
 

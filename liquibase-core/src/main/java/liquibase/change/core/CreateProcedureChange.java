@@ -27,16 +27,16 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 @DatabaseChange(
-    name = "createProcedure",
-    description = "Defines the definition for a stored procedure. This command is better to use for creating " +
-        "procedures than the raw sql command because it will not attempt to strip comments or break up lines.\n\n" +
-        "Often times it is best to use the CREATE OR REPLACE syntax along with setting runOnChange='true' on the " +
-        "enclosing changeSet tag. That way if you need to make a change to your procedure you can simply change your " +
-        "existing code rather than creating a new REPLACE PROCEDURE call. The advantage to this approach is that it " +
-        "keeps your change log smaller and allows you to more easily see what has changed in your procedure code " +
-        "through your source control system's diff command.",
-    priority = ChangeMetaData.PRIORITY_DEFAULT)
-public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange {
+        name = "createProcedure",
+        description = "Defines the definition for a stored procedure. This command is better to use for creating " +
+                "procedures than the raw sql command because it will not attempt to strip comments or break up lines.\n\n" +
+                "Often times it is best to use the CREATE OR REPLACE syntax along with setting runOnChange='true' on the " +
+                "enclosing changeSet tag. That way if you need to make a change to your procedure you can simply change your " +
+                "existing code rather than creating a new REPLACE PROCEDURE call. The advantage to this approach is that it " +
+                "keeps your change log smaller and allows you to more easily see what has changed in your procedure code " +
+                "through your source control system's diff command.",
+        priority = ChangeMetaData.PRIORITY_DEFAULT)
+public class CreateProcedureChange extends AbstractChange implements DbmsTargetedChange, ResourceDependentChange {
     private String comments;
     private String catalogName;
     private String schemaName;
@@ -94,9 +94,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @DatabaseChangeProperty(
-        description = "File containing the procedure text. Either this attribute or a nested procedure text is " +
-            "required.",
-        exampleValue = "com/example/my-logic.sql"
+            description = "File containing the procedure text. Either this attribute or a nested procedure text is " +
+                    "required.",
+            exampleValue = "com/example/my-logic.sql"
     )
     public String getPath() {
         return path;
@@ -115,12 +115,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @DatabaseChangeProperty(
-        exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
-                "    IS\n" +
-                "    BEGIN\n" +
-                "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
-                "    END;",
-        serializationType = SerializationType.DIRECT_VALUE)
+            exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
+                    "    IS\n" +
+                    "    BEGIN\n" +
+                    "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
+                    "    END;",
+            serializationType = SerializationType.DIRECT_VALUE)
     /**
      * @deprecated Use getProcedureText() instead
      */
@@ -146,8 +146,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @DatabaseChangeProperty(
-        exampleValue = "h2, oracle",
-        since = "3.1"
+            exampleValue = "h2, oracle",
+            since = "3.1"
     )
     public String getDbms() {
         return dbms;
@@ -183,7 +183,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
         if ((StringUtil.trimToNull(getProcedureText()) != null) && (StringUtil.trimToNull(getPath()) != null)) {
             validate.addError(
-                "Cannot specify both 'path' and a nested procedure text in " +
+                    "Cannot specify both 'path' and a nested procedure text in " +
                     Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName()
             );
         }
@@ -223,9 +223,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         } catch (IOException e) {
             throw new IOException(
                 "<" + Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(this).getName() + " path=" +
-                path +
-                "> -Unable to read file",
-                e
+                            path +
+                            "> -Unable to read file",
+                    e
             );
         }
     }
@@ -255,14 +255,14 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             }
 
             String encoding =
-                LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+                    LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
             if (procedureText != null) {
                 try {
                     stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
                 } catch (UnsupportedEncodingException e) {
                     throw new AssertionError(encoding +
-                        " is not supported by the JVM, this should not happen according to the JavaDoc of " +
-                        "the Charset class"
+                            " is not supported by the JVM, this should not happen according to the JavaDoc of " +
+                            "the Charset class"
                     );
                 }
             }
@@ -322,13 +322,13 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
     protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {
         CreateProcedureStatement statement =
-            new CreateProcedureStatement(
-                getCatalogName(),
-                getSchemaName(),
-                getProcedureName(),
-                logicText,
-                endDelimiter
-            );
+                new CreateProcedureStatement(
+                        getCatalogName(),
+                        getSchemaName(),
+                        getProcedureName(),
+                        logicText,
+                        endDelimiter
+                );
         statement.setReplaceIfExists(getReplaceIfExists());
         return new SqlStatement[]{
                 statement,
@@ -352,20 +352,25 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
     @Override
     protected Map<String, Object> createExampleValueMetaData(
-        String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+            String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
 
         if ("procedureText".equals(parameterName) || "procedureBody".equals(parameterName)) {
             Map<String, Object> returnMap = super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
             returnMap.put(
-                new HsqlDatabase().getShortName(),
-                "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
-                    "   MODIFIES SQL DATA\n" +
-                    "   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)"
+                    new HsqlDatabase().getShortName(),
+                    "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
+                            "   MODIFIES SQL DATA\n" +
+                            "   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)"
             );
 
             return returnMap;
         } else {
             return super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
         }
+    }
+
+    @Override
+    public InputStream openStream() throws IOException {
+        return openSqlStream();
     }
 }

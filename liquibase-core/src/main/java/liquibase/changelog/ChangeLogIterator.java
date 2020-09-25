@@ -27,6 +27,7 @@ public class ChangeLogIterator {
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected static final String MSG_COULD_NOT_FIND_EXECUTOR = coreBundle.getString("no.executor.found");
     private Set<String> seenChangeSets = new HashSet<>();
+    private boolean includeMD5Sum = true;
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
@@ -163,7 +164,7 @@ public class ChangeLogIterator {
         Labels labels = changeSet.getLabels();
         ContextExpression contexts = changeSet.getContexts();
 
-        return changeSet.toString(true)
+        return changeSet.toString(includeMD5Sum)
                 + ":" + (labels == null ? null : labels.toString())
                 + ":" + (contexts == null ? null : contexts.toString())
                 + ":" + StringUtil.join(changeSet.getDbmsSet(), ",");
@@ -178,5 +179,9 @@ public class ChangeLogIterator {
 
     public List<ChangeSetFilter> getChangeSetFilters() {
         return Collections.unmodifiableList(changeSetFilters);
+    }
+
+    public void setIncludeMD5Sum(boolean includeMD5Sum) {
+        this.includeMD5Sum = includeMD5Sum;
     }
 }
