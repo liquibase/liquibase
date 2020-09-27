@@ -42,6 +42,8 @@ public class OSGiPackageScanClassResolver extends DefaultPackageScanClassResolve
                 }
             } catch (ClassNotFoundException e) {
                 log.debug(LogType.LOG, "Cant load class: " + e.getMessage());
+            } catch (NoClassDefFoundError e) {
+                log.debug(LogType.LOG, "Cant find class definition: " + e.getMessage());
             }
 
         }
