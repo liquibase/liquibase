@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.listener.LiquibaseListener;
 import liquibase.logging.LogService;
@@ -18,6 +17,7 @@ import liquibase.servicelocator.StandardServiceLocator;
 import liquibase.ui.ConsoleUIService;
 import liquibase.ui.UIService;
 import liquibase.util.SmartMap;
+import liquibase.util.StringUtil;
 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
@@ -56,6 +56,7 @@ public class Scope {
 
     private Scope parent;
     private SmartMap values = new SmartMap();
+    private String scopeId;
 
     private LiquibaseListener listener;
 
@@ -162,15 +163,53 @@ public class Scope {
     }
 
     public static <T> T child(LiquibaseListener listener, Map<String, Object> scopeValues, ScopedRunnerWithReturn<T> runner) throws Exception{
+        String scopeId = enter(listener, scopeValues);
+
+        try {
+            return runner.run();
+        } finally {
+            exit(scopeId);
+        }
+    }
+
+    /**
+     * Convenience version of {@link #enter(LiquibaseListener, Map)} with no {@link LiquibaseListener}
+     */
+    public static String enter(Map<String, Object> scopeValues) throws Exception {
+        return enter(null, scopeValues);
+    }
+
+    /**
+     * Creates a new scope without passing a ScopedRunner.
+     * This mainly exists for tests where you have a setup/cleanup method pattern.
+     * The recommended way to create Scopes is the "child" methods.
+     * When done with the scope, call {@link #exit(String)}
+     *
+     * @return Returns the scopeId to pass to to {@link #exit(String)}
+     */
+    public static String enter(LiquibaseListener listener, Map<String, Object> scopeValues) throws Exception {
+        String scopeId = StringUtil.randomIdentifer(10).toLowerCase();
+
         Scope originalScope = getCurrentScope();
         Scope child = new Scope(originalScope, scopeValues);
         child.listener = listener;
-        try {
-            scopeManager.setCurrentScope(child);
-            return runner.run();
-        } finally {
-            scopeManager.setCurrentScope(originalScope);
+        child.scopeId = scopeId;
+        scopeManager.setCurrentScope(child);
+
+        return scopeId;
+    }
+
+    /**
+     * Exits the scope started with {@link #enter(LiquibaseListener, Map)}
+     * @param scopeId The id of the scope to exit. Throws an exception if the name does not match the current scope.
+     */
+    public static void exit(String scopeId) throws Exception {
+        Scope currentScope = getCurrentScope();
+        if (!currentScope.scopeId.equals(scopeId)) {
+            throw new RuntimeException("Cannot end scope "+scopeId+" when currently at scope "+currentScope.scopeId);
         }
+
+        scopeManager.setCurrentScope(currentScope.getParent());
     }
 
     /**

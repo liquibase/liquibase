@@ -46,4 +46,45 @@ class ScopeTest extends Specification {
         } as Scope.ScopedRunner)
     }
 
+    def "start and end works"() {
+        expect:
+        Scope.currentScope.describe() == "scope(database=null)"
+
+        assert Scope.currentScope.get("test1", String) == null
+        assert Scope.currentScope.get("test2", String) == null
+        assert Scope.currentScope.get("test3", String) == null
+
+        def scope1 = Scope.enter(null, [test1: "Level 1 A", test2: "Level 1 B"])
+        assert Scope.currentScope.get("test1", String) == "Level 1 A"
+        assert Scope.currentScope.get("test2", String) == "Level 1 B"
+        assert Scope.currentScope.get("test3", String) == null
+
+        def scope2 = Scope.enter(null, ["test1": "Level 2 A", "test3": "Level 2 C"])
+        assert Scope.currentScope.get("test1", String) == "Level 2 A"
+        assert Scope.currentScope.get("test2", String) == "Level 1 B"
+        assert Scope.currentScope.get("test3", String) == "Level 2 C"
+
+        Scope.exit(scope2)
+        assert Scope.currentScope.get("test1", String) == "Level 1 A"
+        assert Scope.currentScope.get("test2", String) == "Level 1 B"
+        assert Scope.currentScope.get("test3", String) == null
+
+        Scope.exit(scope1)
+        assert Scope.currentScope.get("test1", String) == null
+        assert Scope.currentScope.get("test2", String) == null
+        assert Scope.currentScope.get("test3", String) == null
+    }
+
+    def "cannot end the wrong scope id"() {
+        when:
+        def scope1 = Scope.enter(null, [test1: "a"])
+        def scope2 = Scope.enter(null, [test1: "b"])
+
+        Scope.exit(scope1)
+
+        then:
+        def e = thrown(RuntimeException)
+        e.message.startsWith("Cannot end scope ")
+    }
+
 }

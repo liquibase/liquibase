@@ -4,10 +4,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.command.AbstractSelfConfiguratingCommand;
-import liquibase.command.CommandExecutionException;
-import liquibase.command.CommandFactory;
-import liquibase.command.LiquibaseCommand;
+import liquibase.command.*;
 import liquibase.command.core.DiffCommand;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
@@ -132,7 +129,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter property="liquibase.referenceServer"
      */
-    private String referenceServer;
+    protected String referenceServer;
 
     /**
      *
@@ -261,7 +258,10 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 argsMap.put("diffCommand", diffCommand);
                 ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
                 try {
-                    liquibaseCommand.execute();
+                    CommandResult result = liquibaseCommand.execute();
+                    if (!result.succeeded) {
+                        throw new LiquibaseException(result.message);
+                    }
                 } catch (CommandExecutionException cee) {
                     throw new LiquibaseException(cee);
                 }
