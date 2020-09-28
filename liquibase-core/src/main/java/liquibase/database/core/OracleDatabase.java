@@ -143,7 +143,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
                 CallableStatement statement = null;
                 try {
-                    statement = (CallableStatement) sqlConn.createStatement();
                     //noinspection HardCodedStringLiteral
                     statement = sqlConn.prepareCall("{call DBMS_UTILITY.DB_VERSION(?,?)}");
                     statement.registerOutParameter(1, Types.VARCHAR);
