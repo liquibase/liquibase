@@ -3,6 +3,7 @@ package org.liquibase.maven.plugins;
 import liquibase.Liquibase;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
+import liquibase.command.CommandResult;
 import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.HistoryCommand;
 import liquibase.exception.LiquibaseException;
@@ -20,7 +21,10 @@ public class LiquibaseHistoryMojo extends AbstractLiquibaseMojo {
 
       historyCommand.setDatabase(getLiquibase().getDatabase());
       try {
-        historyCommand.execute();
+          CommandResult result = historyCommand.execute();
+          if (!result.succeeded) {
+              throw new LiquibaseException(result.message);
+          }
       } catch (CommandExecutionException e) {
         throw new LiquibaseException(e);
       }

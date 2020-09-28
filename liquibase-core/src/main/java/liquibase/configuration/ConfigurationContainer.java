@@ -12,4 +12,6 @@ public interface ConfigurationContainer {
     void setValue(String propertyName, Object value);
 
     void init(ConfigurationValueProvider... configurationValueProviders);
+
+    String getNamespace();
 }

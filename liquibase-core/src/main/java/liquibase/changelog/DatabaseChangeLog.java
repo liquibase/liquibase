@@ -36,6 +36,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
+    private String changeLogId;
     private ObjectQuotingStrategy objectQuotingStrategy;
 
     private List<ChangeSet> changeSets = new ArrayList<>();
@@ -114,6 +115,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void setPhysicalFilePath(String physicalFilePath) {
         this.physicalFilePath = physicalFilePath;
+    }
+
+    public String getChangeLogId() {
+        return changeLogId;
+    }
+
+    public void setChangeLogId(String changeLogId) {
+        this.changeLogId = changeLogId;
     }
 
     public String getLogicalFilePath() {
@@ -300,6 +309,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor)
             throws ParsedNodeException, SetupException {
+        setChangeLogId(parsedNode.getChildValue(null, "changeLogId", String.class));
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
         setContexts(new ContextExpression(parsedNode.getChildValue(null, "context", String.class)));
         String objectQuotingStrategy = parsedNode.getChildValue(null, "objectQuotingStrategy", String.class);

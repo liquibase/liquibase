@@ -2,10 +2,7 @@ package liquibase.configuration;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Base class for configuration classes used by {@link liquibase.configuration.LiquibaseConfiguration}.
@@ -75,6 +72,11 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
       getContainer().setValue(propertyName, value);
     }
 
+    @Override
+    public String getNamespace() {
+        return getContainer().getNamespace();
+    }
+
     /**
      * Like a java.util.Map, but with extra logic for working with ConfigurationProperties.
      * Used to define and hold available properties. Methods return "this" to allow easy chaining.
@@ -88,6 +90,9 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
             this.namespace = namespace;
         }
 
+        public String getNamespace() {
+            return namespace;
+        }
 
         /**
          * Adds a property definition to this configuration.
@@ -104,11 +109,23 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
          */
         public ConfigurationProperty getProperty(String propertyName) {
             ConfigurationProperty property = properties.get(propertyName);
-            if (property == null) {
-                throw new UnexpectedLiquibaseException("Unknown property on "+getClass().getName()+": "+propertyName);
+            if (property != null) {
+                return property;
             }
 
-            return property;
+            //
+            // Not matching with the actual key then try case insensitive
+            //
+            for (Map.Entry<String ,ConfigurationProperty> entry : properties.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(propertyName)) {
+                    return entry.getValue();
+                }
+            }
+
+            //
+            // No match so throw the exception
+            //
+            throw new UnexpectedLiquibaseException("Unknown property on "+getClass().getName()+": "+propertyName);
         }
 
         /**
@@ -130,7 +147,7 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
          * If the property was not defined, an exception is thrown.
          */
         public void setValue(String propertyName, Object value) {
-            ConfigurationProperty property = properties.get(propertyName);
+            ConfigurationProperty property = getProperty(propertyName); // properties.get(propertyName);
 
             if (property == null) {
                 throw new UnexpectedLiquibaseException("Unknown property on "+getClass().getName()+": "+propertyName);

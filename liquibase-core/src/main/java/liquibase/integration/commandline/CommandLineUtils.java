@@ -271,8 +271,7 @@ public class CommandLineUtils {
                 "##                                                ## \n" +
                 "##  Get documentation at docs.liquibase.com       ##\n" +
                 "##  Get certified courses at learn.liquibase.com  ## \n" +
-                "##  Get advanced features and support at          ##\n" +
-                "##      liquibase.com/protrial                    ##\n" +
+                "##  Get support at liquibase.com/support          ##\n" +
                 "##                                                ##\n" +
                 "####################################################\n"
                         .replaceAll("\n", System.lineSeparator()));

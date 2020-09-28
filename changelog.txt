@@ -1,6 +1,16 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.1.0
+
+- Added support for hub.liquibase.com to CLI and Maven integrations
+- New registerChangeLog command
+- New syncHub command
+- Added hubApiKey argument
+- Added hubConnectionId argument
+- CLI commands and arguments are now case insensitive
+- Includes changes from 3.10.2
+
 Changes in version 3.10.2 (2020.7.27)
 
  - Dependency cycle error during generateChangeLog with --diffTypes=tables,columns,data

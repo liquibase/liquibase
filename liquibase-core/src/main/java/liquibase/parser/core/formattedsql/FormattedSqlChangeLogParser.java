@@ -93,6 +93,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern contextPattern = Pattern.compile(".*context:(\".*\"|\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern logicalFilePathPattern = Pattern.compile(".*logicalFilePath:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern changeLogIdPattern = Pattern.compile(".*changeLogId:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern labelsPattern = Pattern.compile(".*labels:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern dbmsPattern = Pattern.compile(".*dbms:([^,][\\w!,]+).*", Pattern.CASE_INSENSITIVE);
@@ -112,6 +113,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (changeLogPatterMatcher.matches ()) {
                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
                    changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
+
+                    Matcher changeLogIdMatcher = changeLogIdPattern.matcher (line);
+                    changeLog.setChangeLogId (parseString(changeLogIdMatcher));
                 }
 
                 Matcher ignoreLinesMatcher = ignoreLinesPattern.matcher(line);

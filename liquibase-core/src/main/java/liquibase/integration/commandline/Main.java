@@ -6,9 +6,11 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandFactory;
+import liquibase.command.CommandResult;
 import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.*;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
@@ -16,10 +18,15 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
+import liquibase.hub.HubServiceFactory;
+import liquibase.integration.IntegrationDetails;
 import liquibase.license.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogMessageFilter;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
+import liquibase.logging.core.JavaLogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -63,6 +70,8 @@ public class Main {
     protected String username;
     protected String password;
     protected String url;
+    protected String hubConnectionId;
+    protected String hubProjectId;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -114,6 +123,8 @@ public class Main {
     protected String snapshotFormat;
     protected String liquibaseProLicenseKey;
     private boolean liquibaseProLicenseValid = false;
+    protected String liquibaseHubApiKey;
+    protected String liquibaseHubUrl;
     private Boolean managingLogConfig = null;
     private boolean outputsLogMessages = false;
     protected String sqlFile;
@@ -146,6 +157,7 @@ public class Main {
         } catch (Throwable e) {
             System.exit(-1);
         }
+
         System.exit(errorLevel);
     }
 
@@ -161,6 +173,21 @@ public class Main {
         ConsoleUIService ui = new ConsoleUIService();
 
         Map<String, Object> scopeObjects = new HashMap<>();
+        final IntegrationDetails integrationDetails = new IntegrationDetails();
+        integrationDetails.setName("cli");
+        for (String arg : args) {
+            if (arg.startsWith("--")) {
+                String[] splitArg = arg.split("=", 2);
+                String argKey = "argument__"+splitArg[0].replaceFirst("^--", "");
+                if (splitArg.length == 2) {
+                    integrationDetails.setParameter(argKey, splitArg[1]);
+                } else {
+                    integrationDetails.setParameter(argKey, "true");
+                }
+            }
+        }
+
+        scopeObjects.put("integrationDetails", integrationDetails);
         scopeObjects.put(Scope.Attr.ui.name(), ui);
 
         return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
@@ -179,6 +206,7 @@ public class Main {
                                                 globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)))));
                         return 0;
                     }
+                    HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
 
                     if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                         main.printHelp(System.out);
@@ -210,6 +238,7 @@ public class Main {
                         ));
                         return 0;
                     }
+
                     //
                     // Look for characters which cannot be handled
                     //
@@ -228,10 +257,10 @@ public class Main {
 
                     try {
                         main.parseOptions(args);
-                if (main.command == null) {
-                    main.printHelp(System.out);
-                    return 0;
-                }
+                        if (main.command == null) {
+                            main.printHelp(System.out);
+                            return 0;
+                        }
                     } catch (CommandLineParsingException e) {
                         Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
                         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("how.to.display.help"));
@@ -241,21 +270,27 @@ public class Main {
                     System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tF %1$tT] %4$s [%2$s] %5$s%6$s%n");
 
                     java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+                    java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
+                    liquibaseLogger.setParent(rootLogger);
+
+                    final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
+                    logService.setParent(liquibaseLogger);
+
                     if (main.logLevel == null) {
                         String defaultLogLevel = System.getProperty("liquibase.log.level");
                         if (defaultLogLevel == null) {
-                            setLogLevel(rootLogger, Level.OFF);
+                            setLogLevel(logService, rootLogger, liquibaseLogger, Level.OFF);
                         } else {
-                            setLogLevel(rootLogger, parseLogLevel(defaultLogLevel, ui));
+                            setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(defaultLogLevel, ui));
                         }
                     } else {
-                        setLogLevel(rootLogger, parseLogLevel(main.logLevel, ui));
+                        setLogLevel(logService, rootLogger, liquibaseLogger, parseLogLevel(main.logLevel, ui));
                     }
 
                     if (main.logFile != null) {
                         FileHandler fileHandler = new FileHandler(main.logFile, true);
                         fileHandler.setFormatter(new SimpleFormatter());
-                        if (rootLogger.getLevel() == Level.OFF) {
+                        if (liquibaseLogger.getLevel() == Level.OFF) {
                             fileHandler.setLevel(Level.FINE);
                         }
 
@@ -282,35 +317,44 @@ public class Main {
                             if (result.code != 0) {
                                 String allMessages = String.join("\n", result.messages);
                                 Scope.getCurrentScope().getUI().sendMessage( allMessages);
-                    } else {
-                        main.liquibaseProLicenseValid = true;
+                            } else {
+                                main.liquibaseProLicenseValid = true;
                             }
                         }
 
-                //
-                // Check to see if we have an expired license
-                //
-                if (licenseService.daysTilExpiration() < 0) {
-                    main.liquibaseProLicenseValid = false;
-                }
-                        Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
+                       //
+                       // Check to see if we have an expired license
+                       //
+                       if (licenseService.daysTilExpiration() < 0) {
+                           main.liquibaseProLicenseValid = false;
+                       }
+                       Scope.getCurrentScope().getUI().sendMessage(licenseService.getLicenseInfo());
                     }
 
-            Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
+                    Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
 
-            if (main.commandParams.contains("--help") &&
-                    (main.command.startsWith("rollbackOneChangeSet") ||
-                            main.command.startsWith("rollbackOneUpdate") ||
-                            (main.command.startsWith("diff") && main.isFormattedDiff()))) {
-                //don't need to check setup
-                    } else {
-                    List<String> setupMessages = main.checkSetup();
-                    if (!setupMessages.isEmpty()) {
-                        main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
-                        return 1;
+                    if (setupNeeded(main)) {
+                        List<String> setupMessages = main.checkSetup();
+                        if (!setupMessages.isEmpty()) {
+                            main.printHelp(setupMessages, isStandardOutputRequired(main.command) ? System.err : System.out);
+                            return 1;
+                        }
                     }
-            }
+
+                    //
+                    // Store the Hub API key for later use
+                    //
+                    if (StringUtil.isNotEmpty(main.liquibaseHubApiKey)) {
+                        hubConfiguration.setLiquibaseHubApiKey(main.liquibaseHubApiKey);
+                    }
+
+                    //
+                    // Store the Hub URL for later use
+                    //
+                    if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
+                        hubConfiguration.setLiquibaseHubUrl(main.liquibaseHubUrl);
+                    }
 
                     main.applyDefaults();
                     Scope.child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {
@@ -323,7 +367,6 @@ public class Main {
                         } else {
                             Scope.getCurrentScope().getUI().sendMessage(String.format(coreBundle.getString("command.successful"), main.command));
                         }
-
                     });
                 } catch (Throwable e) {
                     String message = e.getMessage();
@@ -354,18 +397,42 @@ public class Main {
                     }
                     throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
                 }
+
+                if (isHubEnabled(main.command) &&
+                    LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKey() != null &&
+                    !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
+                    ui.sendMessage("WARNING: The command "+main.command+" operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
+                }
+
                 return 0;
             }
         });
-
-
     }
 
-    protected static void setLogLevel(java.util.logging.Logger logger, java.util.logging.Level level) {
-        logger.setLevel(level);
+    private static boolean setupNeeded(Main main) throws CommandLineParsingException {
+        if (main.command.toLowerCase().startsWith(COMMANDS.REGISTER_CHANGELOG.toLowerCase())) {
+            return false;
+        }
+        if (! main.commandParams.contains("--help")) {
+            return true;
+        }
+        return !main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_CHANGE_SET.toLowerCase()) &&
+                !main.command.toLowerCase().startsWith(COMMANDS.ROLLBACK_ONE_UPDATE.toLowerCase()) &&
+                (!main.command.toLowerCase().startsWith(COMMANDS.DIFF.toLowerCase()) || !main.isFormattedDiff());
+    }
 
-        for (Handler handler : logger.getHandlers()) {
+    protected static void setLogLevel(LogService logService, java.util.logging.Logger rootLogger, java.util.logging.Logger liquibaseLogger, Level level) {
+        if (level.intValue() < Level.INFO.intValue()) {
+            //limit non-liquibase logging to INFO at a minimum to avoid too much logs
+            rootLogger.setLevel(Level.INFO);
+        } else {
+            rootLogger.setLevel(level);
+        }
+        liquibaseLogger.setLevel(level);
+
+        for (Handler handler : rootLogger.getHandlers()) {
             handler.setLevel(level);
+            handler.setFilter(new SecureLogFilter(logService.getFilter()));
         }
     }
 
@@ -426,10 +493,32 @@ public class Main {
     }
 
     /**
+     * Returns true if the given command is Hub-enabled
+     *
+     * @param command the command to check
+     * @return true if this command has Hub integration false if not
+     *
+     */
+    private static boolean isHubEnabled(String command) {
+        return COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
+            || COMMANDS.UPDATE_COUNT.equalsIgnoreCase(command)
+            || COMMANDS.UPDATE_TO_TAG.equalsIgnoreCase(command)
+            || COMMANDS.UPDATE.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK_TO_DATE.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK_COUNT.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)
+            || COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command)
+            || COMMANDS.DROP_ALL.equalsIgnoreCase(command);
+    }
+
+    /**
+     *
      * Returns true if the given command requires stdout
      *
      * @param command the command to check
      * @return true if stdout needs for a command, false if not
+     *
      */
     private static boolean isStandardOutputRequired(String command) {
         return COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
@@ -458,6 +547,7 @@ public class Main {
                 || (command.toLowerCase().startsWith(COMMANDS.ROLLBACK) &&
                 (!command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET) &&
                         !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_UPDATE)))
+                || COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.STATUS.equalsIgnoreCase(command)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
@@ -490,6 +580,7 @@ public class Main {
                 || COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.ROLLBACK_TO_DATE_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.ROLLBACK_COUNT_SQL.equalsIgnoreCase(arg)
+                || COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_COUNT_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_TO_TAG_SQL.equalsIgnoreCase(arg)
@@ -509,6 +600,7 @@ public class Main {
                 || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(arg)
                 || COMMANDS.SNAPSHOT.equalsIgnoreCase(arg)
                 || COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(arg)
+                || COMMANDS.SYNC_HUB.equalsIgnoreCase(arg)
                 || COMMANDS.EXECUTE_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(arg)
                 || COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(arg)
@@ -537,7 +629,6 @@ public class Main {
                 || COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(arg)
                 || COMMANDS.LIST_LOCKS.equalsIgnoreCase(arg)
-                || COMMANDS.DROP_ALL.equalsIgnoreCase(arg)
                 || COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(arg)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(arg)
                 || COMMANDS.HELP.equalsIgnoreCase(arg)
@@ -886,22 +977,65 @@ public class Main {
      */
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException,
             CommandLineParsingException {
+        final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
+
         Properties props = new Properties();
         props.load(propertiesInputStream);
         if (props.containsKey("strict")) {
             strict = Boolean.valueOf(props.getProperty("strict"));
         }
 
+        //
+        // Load property values into
+        //   changeLogParameters
+        //   ConfigurationContainer
+        //   local member variable
+        //
         for (Map.Entry entry : props.entrySet()) {
+            String entryValue = null;
+            if (entry.getValue() != null) {
+                entryValue = String.valueOf(entry.getValue());
+            }
+            if (integrationDetails != null) {
+                integrationDetails.setParameter("defaultsFile__" + String.valueOf(entry.getKey()), entryValue);
+            }
+
             try {
                 if ("promptOnNonLocalDatabase".equals(entry.getKey())) {
                     continue;
                 }
                 if (((String) entry.getKey()).startsWith("parameter.")) {
-                    changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue
-                            ());
+                    changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue());
+                } else if (((String) entry.getKey()).contains(".")) {
+                    //
+                    // Determine the namespace and value keys
+                    // then set the property value
+                    //
+                    final String[] splitKey = ((String) entry.getKey()).split("\\.", 3);
+                    String namespace="";
+                    for (int i=0; i < splitKey.length-1; i++) {
+                        if (! namespace.equals("")) {
+                            namespace += ".";
+                        }
+                        namespace += splitKey[i];
+                    }
+                    String valueKey = splitKey[splitKey.length-1];
+                    try {
+                        LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
+                    }
+                    catch (Exception e) {
+                        if (strict) {
+                            throw new CommandLineParsingException(
+                                    String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
+                            );
+                        } else {
+                            Scope.getCurrentScope().getLog(getClass()).warning(
+                                    String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
+                            );
+                        }
+                    }
                 } else {
-                    Field field = getClass().getDeclaredField((String) entry.getKey());
+                    Field field = getDeclaredField((String)entry.getKey());
                     Object currentValue = field.get(this);
 
                     if (currentValue == null) {
@@ -1066,7 +1200,7 @@ public class Main {
         }
 
         try {
-            Field field = getClass().getDeclaredField(attributeName);
+            Field field = getDeclaredField(attributeName); //getClass().getDeclaredField(attributeName);
             if (field.getType().equals(Boolean.class)) {
                 field.set(this, Boolean.valueOf(value));
             } else {
@@ -1079,6 +1213,16 @@ public class Main {
                 );
             }
         }
+    }
+
+    private Field getDeclaredField(String attributeName) throws NoSuchFieldException {
+        Field[] fields = getClass().getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getName().equalsIgnoreCase(attributeName)) {
+                return field;
+            }
+        }
+        throw new NoSuchFieldException();
     }
 
     @SuppressWarnings("HardCodedStringLiteral")
@@ -1205,6 +1349,20 @@ public class Main {
         if (COMMANDS.HELP.equalsIgnoreCase(command)) {
             printHelp(System.err);
             return;
+        }
+
+        //
+        // Log setting for Hub properties
+        //
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubApiKey())) {
+            LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKeySecureDescription());
+        }
+        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubUrl())) {
+            LOG.fine("Liquibase Hub URL:      " + hubConfiguration.getLiquibaseHubUrl());
+        }
+        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubMode())) {
+            LOG.fine("Liquibase Hub Mode:     " + hubConfiguration.getLiquibaseHubMode());
         }
 
         //
@@ -1402,6 +1560,17 @@ public class Main {
             }
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            try {
+                if (hubConnectionId != null) {
+                    try {
+                        liquibase.setHubConnectionId(UUID.fromString(hubConnectionId));
+                    } catch (IllegalArgumentException e) {
+                        throw new LiquibaseException("The command '"+command+"' failed because parameter 'hubConnectionId' has invalid value '"+hubConnectionId+"' Learn more at https://hub.liquibase.com");
+                    }
+                }
+            } catch (IllegalArgumentException  e) {
+                throw new LiquibaseException("Unexpected hubConnectionId format: "+hubConnectionId, e);
+            }
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);
@@ -1487,11 +1656,58 @@ public class Main {
                 outputWriter.flush();
                 outputWriter.close();
                 return;
+            } else if (COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)) {
+                Map<String, Object> argsMap = new HashMap<>();
+                RegisterChangeLogCommand liquibaseCommand =
+                   (RegisterChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
+                liquibaseCommand.setChangeLogFile(changeLogFile);
+                try {
+                    if (hubProjectId != null) {
+                        try {
+                            liquibaseCommand.setHubProjectId(UUID.fromString(hubProjectId));
+                        } catch (IllegalArgumentException e) {
+                            throw new LiquibaseException("The command '"+command+
+                                    "' failed because parameter 'hubProjectId' has invalid value '"+hubProjectId+"'. Learn more at https://hub.liquibase.com");
+                        }
+                    }
+                } catch (IllegalArgumentException  e) {
+                    throw new LiquibaseException("Unexpected hubProjectId format: "+hubProjectId, e);
+                }
+                CommandResult result = liquibaseCommand.execute();
+
+                if (result.succeeded) {
+                    Scope.getCurrentScope().getUI().sendMessage(result.print());
+                } else {
+                    throw new RuntimeException(result.print());
+                }
+                return;
+            } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {
+                executeSyncHub(database, liquibase);
+                return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
-                DropAllCommand dropAllCommand = (DropAllCommand) CommandFactory.getInstance().getCommand
-                        (COMMANDS.DROP_ALL);
+                String liquibaseHubApiKey = hubConfiguration.getLiquibaseHubApiKey();
+                String hubMode = hubConfiguration.getLiquibaseHubMode();
+                if (liquibaseHubApiKey != null && ! hubMode.toLowerCase().equals("off")) {
+                    if (hubConnectionId == null && changeLogFile == null) {
+                        String warningMessage =
+                           "The dropAll command used with a hub.ApiKey and hub.mode='" + hubMode + "'\n" +
+                           "can send reports to your Hub project. To enable this, please add the \n" +
+                           "'--hubConnectionId=<hubConnectionId>' parameter to the CLI, or ensure\n" +
+                           "a registered changelog file is passed in your defaults file or in the CLI.\n" +
+                           "Learn more at https://hub.liquibase.com";
+                        Scope.getCurrentScope().getUI().sendMessage("\nWARNING: " + warningMessage);
+                        LOG.warning("\n" + warningMessage);
+                    }
+                }
+                DropAllCommand dropAllCommand =
+                        (DropAllCommand) CommandFactory.getInstance().getCommand(COMMANDS.DROP_ALL);
+                if (hubConnectionId != null) {
+                    dropAllCommand.setHubConnectionId(hubConnectionId);
+                }
+                dropAllCommand.setLiquibase(liquibase);
                 dropAllCommand.setDatabase(liquibase.getDatabase());
                 dropAllCommand.setSchemas(getSchemaParams(database));
+                dropAllCommand.setChangeLogFile(changeLogFile);
                 Scope.getCurrentScope().getUI().sendMessage(dropAllCommand.execute().print());
                 return;
             } else if (COMMANDS.STATUS.equalsIgnoreCase(command)) {
@@ -1673,6 +1889,21 @@ public class Main {
         }
     }
 
+    private void executeSyncHub(Database database, Liquibase liquibase) throws CommandLineParsingException, LiquibaseException, liquibase.command.CommandExecutionException {
+        Map<String, Object> argsMap = new HashMap<>();
+        SyncHubCommand liquibaseCommand = (SyncHubCommand) createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
+        liquibaseCommand.setHubConnectionId(hubConnectionId);
+        liquibaseCommand.setUrl(url);
+        liquibaseCommand.setDatabase(database);
+        liquibaseCommand.setChangeLogFile(changeLogFile);
+        final CommandResult commandResult = liquibaseCommand.execute();
+        if (commandResult.succeeded) {
+            Scope.getCurrentScope().getUI().sendMessage(commandResult.print());
+        } else {
+            throw new RuntimeException(commandResult.print());
+        }
+    }
+
     private boolean isLicenseableCommand(String formatValue) {
         return COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command) ||
                COMMANDS.ROLLBACK_ONE_CHANGE_SET_SQL.equalsIgnoreCase(command) ||
@@ -1847,6 +2078,23 @@ public class Main {
         return System.getProperty("os.name").startsWith("Windows ");
     }
 
+    public static class SecureLogFilter implements Filter {
+
+        private LogMessageFilter filter;
+
+        public SecureLogFilter(LogMessageFilter filter) {
+            this.filter = filter;
+        }
+
+        @Override
+        public boolean isLoggable(LogRecord record) {
+            final String filteredMessage = filter.filterMessage(record.getMessage());
+
+            final boolean equals = filteredMessage.equals(record.getMessage());
+            return equals;
+        }
+    }
+
     @SuppressWarnings("HardCodedStringLiteral")
     private enum FILE_SUFFIXES {
         ;
@@ -1883,6 +2131,7 @@ public class Main {
         private static final String ROLLBACK_ONE_CHANGE_SET_SQL = "rollbackOneChangeSetSQL";
         private static final String ROLLBACK_ONE_UPDATE = "rollbackOneUpdate";
         private static final String ROLLBACK_ONE_UPDATE_SQL = "rollbackOneUpdateSQL";
+        private static final String REGISTER_CHANGELOG = "registerChangeLog";
         private static final String FORMATTED_DIFF = "formattedDiff";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
@@ -1894,6 +2143,7 @@ public class Main {
         private static final String SNAPSHOT = "snapshot";
         private static final String SNAPSHOT_REFERENCE = "snapshotReference";
         private static final String STATUS = "status";
+        private static final String SYNC_HUB = "syncHub";
         private static final String TAG = "tag";
         private static final String TAG_EXISTS = "tagExists";
         private static final String UNEXPECTED_CHANGESETS = "unexpectedChangeSets";
