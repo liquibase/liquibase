@@ -240,6 +240,12 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 }
             }
 
+            //
+            // If there is a computed setting then use it
+            //
+            if (column.getComputed() != null) {
+                columnConfig.setComputed(column.getComputed());
+            }
             change.addColumn(columnConfig);
             control.setAlreadyHandledMissing(column);
         }
