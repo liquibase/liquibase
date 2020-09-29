@@ -6,10 +6,17 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @LiquibaseService(skip = true)
 public class MockChangeLogParser implements ChangeLogParser {
 
     private String[] validExtensions;
+    public Map<String, DatabaseChangeLog> changeLogs = new HashMap<>();
+
+    public MockChangeLogParser() {
+    }
 
     public MockChangeLogParser(String... validExtensions) {
         this.validExtensions = validExtensions;
@@ -22,6 +29,9 @@ public class MockChangeLogParser implements ChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
+        if (changeLogs.containsKey(changeLogFile)) {
+            return true;
+        }
         for (String ext : validExtensions) {
             if (changeLogFile.endsWith(ext)) {
                 return true;
@@ -33,6 +43,6 @@ public class MockChangeLogParser implements ChangeLogParser {
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
                                    ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        return null;
+        return changeLogs.get(physicalChangeLogLocation);
     }
 }

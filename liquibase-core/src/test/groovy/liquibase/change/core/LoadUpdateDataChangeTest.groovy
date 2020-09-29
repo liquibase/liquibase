@@ -1,6 +1,7 @@
 package liquibase.change.core
 
 import liquibase.change.ChangeStatus
+import liquibase.database.DatabaseConnection
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.change.StandardChangeTest;
@@ -43,6 +44,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
     def "loadUpdate generates InsertOrUpdateStatements"() throws Exception {
         when:
         MockDatabase database = new MockDatabase();
+        database.setConnection((DatabaseConnection) null)
 
         LoadUpdateDataChange change = new LoadUpdateDataChange();
 
@@ -61,6 +63,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
     def "loadUpdate generates InsertOrUpdateStatements with onlyUpdate"() throws Exception {
         when:
         MockDatabase database = new MockDatabase();
+        database.setConnection((DatabaseConnection) null)
 
         LoadUpdateDataChange change = new LoadUpdateDataChange();
 
