@@ -24,6 +24,7 @@ public class RanChangeSet {
     private ContextExpression contextExpression;
     private Labels labels;
     private String deploymentId;
+    private String liquibaseVersion;
 
 
     public RanChangeSet(ChangeSet changeSet) {
@@ -150,6 +151,14 @@ public class RanChangeSet {
 
     public void setDeploymentId(String deploymentId) {
         this.deploymentId = deploymentId;
+    }
+
+    public String getLiquibaseVersion() {
+        return liquibaseVersion;
+    }
+
+    public void setLiquibaseVersion(String liquibaseVersion) {
+        this.liquibaseVersion = liquibaseVersion;
     }
 
     @Override

@@ -91,12 +91,38 @@ public class LiquibaseConfiguration {
         return (T) configurations.get(type);
     }
 
+    /**
+     *
+     * Return an instance of the passed ConfigurationContainer type
+     * The typeName can be the name of a class or the namespace associated with the container
+     *
+     * @param    typeName
+     * @return   ConfigurationContainer
+     *
+     */
     public ConfigurationContainer getConfiguration(String typeName) {
+        //
+        // Lookup by class name
+        //
         for (Map.Entry<Class, ConfigurationContainer> entry : configurations.entrySet()) {
             if (entry.getKey().getName().equals(typeName)) {
                 return entry.getValue();
             }
         }
+
+        //
+        // Lookup by namespace
+        //
+        for (ConfigurationContainer container : configurations.values()) {
+            String namespace = container.getNamespace();
+            if (namespace.equalsIgnoreCase(typeName)) {
+                return container;
+            }
+        }
+
+        //
+        // Instantiate and put in the map
+        //
         try {
             Class typeClass = Class.forName(typeName);
             configurations.put(typeClass, createConfiguration(typeClass));

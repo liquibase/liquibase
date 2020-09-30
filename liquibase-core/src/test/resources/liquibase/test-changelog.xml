@@ -1,0 +1,28 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
+  http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd">
+
+<!-- SETUP: Create tables for other objects to use. -->
+  <changeSet author="Liquibase Pro User" id="1::createTableforSynonym-PROSCHEMA" objectQuotingStrategy="QUOTE_ALL_OBJECTS" labels="setup">
+        <createTable tableName="PRIMARY_TABLE" schemaName="PROSCHEMA">
+            <column name="NULLABLECOL" type="VARCHAR2(20 BYTE)"/>
+            <column name="NOTNULLCOL" type="VARCHAR2(20 BYTE)"/>
+            <column name="PKCOL" type="VARCHAR2(20 BYTE)"/>
+            <column name="UQCOL" type="NUMBER(*, 0)"/>
+            <column name="INCCOL" type="NUMBER(*, 0)"/>
+            <column defaultValue="defaultVal" name="DEFVALCOL" type="VARCHAR2(20 BYTE)"/>
+            <column defaultValueNumeric="22" name="NUMVALCOL" type="NUMBER(*, 0)"/>
+            <column defaultValueDate="2014-08-11" name="DATEVALCOL" type="date"/>
+            <column defaultValueComputed="1*22" name="COMPVALCOL" type="NUMBER"/>
+            <column name="IDXUNCLUSTEREDCOL" type="NUMBER"/>
+            <column name="COMMENTCOL" remarks="This is a remark." type="VARCHAR2(20 BYTE)"/>
+      <column name="COLUMNTOMARKUNUSED" remarks="This column is not used by any other refactorings in this changelog." type="VARCHAR2(20 BYTE)"/>
+        </createTable>
+  </changeSet>
+</databaseChangeLog>
+
