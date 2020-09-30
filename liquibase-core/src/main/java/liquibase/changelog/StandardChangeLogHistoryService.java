@@ -308,6 +308,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         throw e;
                     }
                 }
+                LogFactory.getLogger().info("Read of " + databaseChangeLogTableName + " complete");
             }
 
             this.ranChangeSetList = ranChangeSetList;
