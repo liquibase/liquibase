@@ -554,6 +554,7 @@ public class Main {
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
                 || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
+                || COMMANDS.UNEXPECTED_CHANGESETS.equalsIgnoreCase(command)
                 || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
                 || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(command)
                 || COMMANDS.ROLLBACK_ONE_UPDATE.equalsIgnoreCase(command);
