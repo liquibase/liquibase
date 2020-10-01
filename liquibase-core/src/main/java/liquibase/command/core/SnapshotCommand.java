@@ -96,7 +96,6 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     @Override
     protected SnapshotCommandResult run() throws Exception {
         SnapshotCommand.logUnsupportedDatabase(database, this.getClass());
-
         SnapshotControl snapshotControl = new SnapshotControl(database);
         snapshotControl.setSnapshotListener(snapshotListener);
 
@@ -156,6 +155,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
         if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
             if (!(database instanceof MSSQLDatabase
                || database instanceof OracleDatabase
+               || database instanceof MySQLDatabase
                || database instanceof DB2Database
                || database instanceof PostgresDatabase)) {
                 Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
