@@ -569,8 +569,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     private boolean isLoggingExecutor(Database database) {
-        return ExecutorService.getInstance().executorExists("logging", database) &&
-              (ExecutorService.getInstance().getExecutor("logging", database) instanceof LoggingExecutor);
+        final ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
+
+        return executorService.executorExists("logging", database) &&
+              (executorService.getExecutor("logging", database) instanceof LoggingExecutor);
     }
     /**
      * Iterate through the List of LoadDataColumnConfig and ask the database for any column types that we have
