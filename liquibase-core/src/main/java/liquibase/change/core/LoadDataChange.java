@@ -257,7 +257,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public SqlStatement[] generateStatements(Database database) {
         boolean databaseSupportsBatchUpdates = false;
         try {
-            databaseSupportsBatchUpdates = database.supportsBatchUpdates();
+            if (database instanceof PostgresDatabase) {
+                databaseSupportsBatchUpdates = false;
+            }
+            else {
+                databaseSupportsBatchUpdates = database.supportsBatchUpdates();
+            }
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
