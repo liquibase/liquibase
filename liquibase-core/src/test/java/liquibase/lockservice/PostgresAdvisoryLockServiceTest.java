@@ -75,6 +75,9 @@ public class PostgresAdvisoryLockServiceTest {
     public void supportsPostgresReturnFalseIfUseDbLockIsFalse_Default() throws DatabaseException {
         when(database.getDatabaseMajorVersion()).thenReturn(9);
         when(database.getDatabaseMinorVersion()).thenReturn(1);
+        LiquibaseConfiguration.getInstance()
+                .getConfiguration(GlobalConfiguration.class)
+                .setUseDbLock(false);
 
         assertThat(lockService.supports(database), is(false));
     }
