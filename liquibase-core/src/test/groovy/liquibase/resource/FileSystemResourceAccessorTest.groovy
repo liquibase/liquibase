@@ -65,6 +65,7 @@ class FileSystemResourceAccessorTest extends Specification {
                 "\\liquibase\\resource\\FileSystemResourceAccessor.class",
                 "file-in-jar-root.txt",
                 "file-in-zip-root.txt",
+                "com/example/file with space.txt",
                 "com/example/shared/file-in-zip.txt",
                 "com/example/shared/file-in-jar.txt",
                 "com/example/zip/file-in-zip.txt",
