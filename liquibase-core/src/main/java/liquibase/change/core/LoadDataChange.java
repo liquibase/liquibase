@@ -257,7 +257,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public SqlStatement[] generateStatements(Database database) {
         boolean databaseSupportsBatchUpdates = false;
         try {
-            databaseSupportsBatchUpdates = database.supportsBatchUpdates();
+            if (database instanceof PostgresDatabase) {
+                databaseSupportsBatchUpdates = false;
+            }
+            else {
+                databaseSupportsBatchUpdates = database.supportsBatchUpdates();
+            }
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -330,13 +335,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     ColumnConfig valueConfig = new ColumnConfig();
 
                     ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
-
-                    //
-                    // Always set the type for the valueConfig if the value is NULL
-                    //
-                    if ("NULL".equalsIgnoreCase(value.toString())) {
-                        valueConfig.setType(columnConfig.getType());
-                    }
                     if (columnConfig != null) {
                         if ("skip".equalsIgnoreCase(columnConfig.getType())) {
                             continue;
@@ -347,6 +345,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             columnName = columnConfig.getName();
                         }
 
+                        //
+                        // Always set the type for the valueConfig if the value is NULL
+                        //
+                        if ("NULL".equalsIgnoreCase(value.toString())) {
+                            valueConfig.setType(columnConfig.getType());
+                        }
                         valueConfig.setName(columnName);
 
                         if (columnConfig.getType() != null) {
@@ -369,7 +373,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                 columnConfig.getType().toLowerCase().contains("date")
                                     || columnConfig.getType().toLowerCase().contains("time")
                             ) {
-                                if ("NULL".equalsIgnoreCase(value.toString())) {
+                                if ("NULL".equalsIgnoreCase(value.toString()) ||
+                                    "".equals(value.toString())) {
                                     valueConfig.setValue(null);
                                 } else {
                                     try {
@@ -436,6 +441,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                 } else {
                                     valueConfig.setValue(value.toString());
                                 }                                
+                            } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
+                                valueConfig.setType(columnConfig.getType());
+                                if ("NULL".equalsIgnoreCase(value.toString())) {
+                                    valueConfig.setValue(null);
+                                } else {
+                                    valueConfig.setValue(value.toString());
+                                }
                             } else {
                                 throw new UnexpectedLiquibaseException(
                                     String.format(coreBundle.getString("loaddata.type.is.not.supported"),
@@ -467,10 +479,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 // 2. The database supports batched statements (for improved performance) AND we are not in an
                 //    "SQL" mode (i.e. we generate an SQL file instead of actually modifying the database).
                 if
-                ((needsPreparedStatement || (databaseSupportsBatchUpdates &&
-                        Scope.getCurrentScope().getSingleton(ExecutorService.class).executorExists("logging", database) &&
-                        !(Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("logging", database) instanceof LoggingExecutor))) &&
-                        hasPreparedStatementsImplemented()) {
+                ((needsPreparedStatement || (databaseSupportsBatchUpdates && ! isLoggingExecutor(database) &&
+                        hasPreparedStatementsImplemented()))) {
                     anyPreparedStatements = true;
                     ExecutablePreparedStatementBase stmt =
                         this.createPreparedStatement(
@@ -563,6 +573,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
     }
 
+    private boolean isLoggingExecutor(Database database) {
+        final ExecutorService executorService = Scope.getCurrentScope().getSingleton(ExecutorService.class);
+
+        return executorService.executorExists("logging", database) &&
+              (executorService.getExecutor("logging", database) instanceof LoggingExecutor);
+    }
     /**
      * Iterate through the List of LoadDataColumnConfig and ask the database for any column types that we have
      * no data type of.
@@ -824,6 +840,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     @SuppressWarnings("HardCodedStringLiteral")
     public enum LOAD_DATA_TYPE {
-        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID
+        BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE, BLOB, CLOB, SKIP,UUID, OTHER
     }
 }

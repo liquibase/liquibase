@@ -15,7 +15,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import org.springframework.beans.factory.BeanNameAware;
@@ -394,7 +393,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 * Create a new resourceOpener.
 	 */
 	protected SpringResourceAccessor createResourceOpener() {
-		return new SpringResourceAccessor();
+		return new SpringResourceAccessor(resourceLoader);
 	}
 
 	/**
@@ -443,9 +442,4 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         return getClass().getName() + "(" + this.getResourceLoader().toString() + ")";
     }
 
-    public class SpringResourceAccessor extends ClassLoaderResourceAccessor {
-		public SpringResourceAccessor() {
-			super(Thread.currentThread().getContextClassLoader());
-		}
-	}
 }
