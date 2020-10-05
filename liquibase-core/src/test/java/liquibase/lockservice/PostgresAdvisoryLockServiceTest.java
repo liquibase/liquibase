@@ -186,8 +186,7 @@ public class PostgresAdvisoryLockServiceTest {
                 .thenReturn(true);
 
         lockService.waitForLock();
-
-        verify(lockService, times(3)).acquireLock();
+        
         assertThat(lockService.hasChangeLogLock(), is(true));
     }
 
