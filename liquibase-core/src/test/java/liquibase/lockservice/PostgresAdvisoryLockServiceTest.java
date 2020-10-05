@@ -1,11 +1,5 @@
 package liquibase.lockservice;
 
-import static liquibase.lockservice.PostgresAdvisoryLockService.TRY_ACQUIRE_LOCK_SQL;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.*;
-
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.H2Database;
@@ -15,18 +9,33 @@ import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.servicelocator.PrioritizedService;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Random;
 
+import static liquibase.lockservice.PostgresAdvisoryLockService.TRY_ACQUIRE_LOCK_SQL;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.*;
+
 public class PostgresAdvisoryLockServiceTest {
 
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule();
+    private class TestablePostgresAdvisoryLockService extends PostgresAdvisoryLockService {
+        private final Executor executor;
+
+        public TestablePostgresAdvisoryLockService(Executor executor) {
+            super();
+            this.executor = executor;
+        }
+
+        @Override
+        Executor getExecutor() {
+            return executor;
+        }
+    }
 
     private PostgresAdvisoryLockService lockService;
 
@@ -38,7 +47,8 @@ public class PostgresAdvisoryLockServiceTest {
 
     @Before
     public void setUp() {
-        lockService = spy(new PostgresAdvisoryLockService());
+        MockitoAnnotations.initMocks(this);
+        lockService = new TestablePostgresAdvisoryLockService(executor);
         lockService.setDatabase(database);
     }
 
@@ -60,13 +70,14 @@ public class PostgresAdvisoryLockServiceTest {
         assertThat(acquired, is(false));
     }
 
+
     @Test
     public void supportsPostgres() throws DatabaseException {
         when(database.getDatabaseMajorVersion()).thenReturn(9);
         when(database.getDatabaseMinorVersion()).thenReturn(1);
         LiquibaseConfiguration.getInstance()
-            .getConfiguration(GlobalConfiguration.class)
-            .setUseDbLock(true);
+                .getConfiguration(GlobalConfiguration.class)
+                .setUseDbLock(true);
 
         assertThat(lockService.supports(database), is(true));
     }
@@ -82,6 +93,7 @@ public class PostgresAdvisoryLockServiceTest {
         assertThat(lockService.supports(database), is(false));
     }
 
+
     @Test
     public void supportsH2() {
         assertThat(lockService.supports(mock(H2Database.class)), is(false));
@@ -90,8 +102,8 @@ public class PostgresAdvisoryLockServiceTest {
     @Test
     public void changeLogLockWaitTimeDefault() {
         final Long expected = LiquibaseConfiguration.getInstance()
-            .getConfiguration(GlobalConfiguration.class)
-            .getDatabaseChangeLogLockWaitTime();
+                .getConfiguration(GlobalConfiguration.class)
+                .getDatabaseChangeLogLockWaitTime();
 
         final long actual = lockService.getChangeLogLockWaitTime();
 
@@ -111,8 +123,8 @@ public class PostgresAdvisoryLockServiceTest {
     @Test
     public void changeLogLockRecheckTimeDefault() {
         final Long expected = LiquibaseConfiguration.getInstance()
-            .getConfiguration(GlobalConfiguration.class)
-            .getDatabaseChangeLogLockPollRate();
+                .getConfiguration(GlobalConfiguration.class)
+                .getDatabaseChangeLogLockPollRate();
 
         final long actual = lockService.getChangeLogLocRecheckTime();
 
@@ -131,12 +143,13 @@ public class PostgresAdvisoryLockServiceTest {
 
     @Test
     public void hasChangeLogLockDefaultToFalse() {
+        LockService lockService = new PostgresAdvisoryLockService();
         assertThat(lockService.hasChangeLogLock(), is(false));
     }
 
+    // executor is not mocked
     @Test
     public void hasChangeLogLockTrue() throws DatabaseException, LockException {
-        when(lockService.getExecutor()).thenReturn(executor);
         when(executor.queryForObject(TRY_ACQUIRE_LOCK_SQL, Boolean.class)).thenReturn(true);
 
         lockService.acquireLock();
@@ -144,9 +157,9 @@ public class PostgresAdvisoryLockServiceTest {
         assertThat(lockService.hasChangeLogLock(), is(true));
     }
 
+
     @Test
     public void hasChangeLogLockFalse() throws DatabaseException, LockException {
-        when(lockService.getExecutor()).thenReturn(executor);
         when(executor.queryForObject(TRY_ACQUIRE_LOCK_SQL, Boolean.class)).thenReturn(false);
 
         lockService.acquireLock();
@@ -154,9 +167,9 @@ public class PostgresAdvisoryLockServiceTest {
         assertThat(lockService.hasChangeLogLock(), is(false));
     }
 
+
     @Test
     public void waitForLock() throws DatabaseException, LockException {
-        when(lockService.getExecutor()).thenReturn(executor);
         when(executor.queryForObject(TRY_ACQUIRE_LOCK_SQL, Boolean.class)).thenReturn(true);
 
         lockService.waitForLock();
@@ -167,11 +180,10 @@ public class PostgresAdvisoryLockServiceTest {
     @Test
     public void waitForLockRetry() throws DatabaseException, LockException {
         lockService.setChangeLogLockRecheckTime(1);
-        when(lockService.getExecutor()).thenReturn(executor);
         when(executor.queryForObject(TRY_ACQUIRE_LOCK_SQL, Boolean.class))
-            .thenReturn(false)
-            .thenReturn(false)
-            .thenReturn(true);
+                .thenReturn(false)
+                .thenReturn(false)
+                .thenReturn(true);
 
         lockService.waitForLock();
 
