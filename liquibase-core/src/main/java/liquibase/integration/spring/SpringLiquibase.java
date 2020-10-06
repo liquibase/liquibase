@@ -25,10 +25,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 
 import javax.sql.DataSource;
 import java.io.*;
+import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -369,7 +371,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-		SpringResourceOpener resourceAccessor = createResourceOpener();
+		ResourceAccessor resourceAccessor = createResourceOpener();
 		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
         liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
 		if (parameters != null) {
@@ -439,7 +441,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	/**
 	 * Create a new resourceOpener.
 	 */
-	protected SpringResourceOpener createResourceOpener() {
+	protected ResourceAccessor createResourceOpener() {
 		return new SpringResourceOpener(getChangeLog());
 	}
 
@@ -498,38 +500,24 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         protected void init() {
             super.init();
             try {
-                Resource[] resources = getResources("");
-                if ((resources.length != 0) && ((resources.length != 1) || resources[0].exists())) {
-                    for (Resource res : resources) {
-                        addRootPath(res.getURL());
-                    }
-                    return;
-                }
-                //sometimes not able to look up by empty string, try all the liquibase packages
-                Set<String> liquibasePackages = new HashSet<>();
-                for (Resource manifest : getResources("META-INF/MANIFEST.MF")) {
-                    liquibasePackages.addAll(getPackagesFromManifest(manifest));
-                }
-
-                if (liquibasePackages.isEmpty()) {
-                    LogService.getLog(getClass()).warning(LogType.LOG,
-                        "No Liquibase-Packages entry found in MANIFEST.MF. " +
-                        "Using fallback of entire 'liquibase' package");
-                    liquibasePackages.add("liquibase");
-                }
-
-                for (String foundPackage : liquibasePackages) {
-                    for (Resource res : getResources(foundPackage)) {
-                        if (res.exists()) {
-                            addRootPath(res.getURL());
-                        } else {
-                            LogService.getLog(getClass()).warning(LogType.LOG,
-                                "Resource does not exist: " +
-                                res.getDescription());
+                final ResourcePatternResolver resolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+                for (final String ending : new String[]{"xml", "yml", "yaml", "json", "sql"}) {
+                    Resource[] resources = resolver.getResources("classpath*:**/*." + ending);
+                    for (Resource resource : resources) {
+                        String url = resource.getURL().toExternalForm();
+                        if (!url.startsWith("jar:")) {
+                            continue;
+                        }
+                        url = url.substring(4, url.indexOf('!'));
+                        url = url.replace("\\", "/");
+                        if (url.startsWith("file:") && url.charAt(5) != '/') {
+                            url = "file:/" + url.substring(5) + "/";
+                        }
+                        if (!getRootPaths().contains(url)) {
+                            addRootPath(new URL(url));
                         }
                     }
                 }
-
             } catch (IOException e) {
                 LogService.getLog(getClass()).warning(LogType.LOG, "Error initializing SpringLiquibase", e);
             }

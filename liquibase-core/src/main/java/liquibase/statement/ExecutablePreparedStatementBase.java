@@ -72,7 +72,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
 
         String sql = generateSql(cols);
-        LOG.info(LogType.WRITE_SQL, sql);
+        LOG.debug(LogType.WRITE_SQL, sql);
         LOG.debug(LogType.LOG, "Number of columns = " + cols.size());
 
         // create prepared statement
@@ -129,6 +129,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             LOG.debug(LogType.LOG, "value is string/UUID/blob = " + col.getValue());
             if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.UUID.name())) {
                 stmt.setObject(i, UUID.fromString(col.getValue()));
+            } else if (col.getType() != null && col.getType().equalsIgnoreCase(LoadDataChange.LOAD_DATA_TYPE.OTHER.name())) {
+                stmt.setObject(i, col.getValue(), Types.OTHER);
             } else if (LoadDataChange.LOAD_DATA_TYPE.BLOB.name().equalsIgnoreCase(col.getType())) {
                 stmt.setBlob(i, new ByteArrayInputStream(Base64.getDecoder().decode(col.getValue())));
             } else {

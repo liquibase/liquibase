@@ -164,7 +164,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             return string;
         } else {
             try {
-                return "file:" + new File(string).getCanonicalPath().substring(this.baseDirectory.getCanonicalPath().length());
+                return "file:" + new File(string).getCanonicalPath().substring(this.baseDirectory.getCanonicalPath().length()+1);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
