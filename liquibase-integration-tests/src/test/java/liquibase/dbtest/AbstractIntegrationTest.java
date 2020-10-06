@@ -1,5 +1,36 @@
 package liquibase.dbtest;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeNotNull;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.slf4j.LoggerFactory;
+
 import ch.qos.logback.classic.Level;
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
@@ -39,25 +70,17 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.DropTableStatement;
-import liquibase.structure.core.*;
-import liquibase.test.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
+import liquibase.test.DatabaseTestContext;
+import liquibase.test.DatabaseTestURL;
+import liquibase.test.DiffResultAssert;
+import liquibase.test.JUnitResourceAccessor;
+import liquibase.test.TestContext;
 import liquibase.util.RegexMatcher;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
-
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeNotNull;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -158,6 +181,7 @@ public abstract class AbstractIntegrationTest {
 
     private void openConnection(String url, String username, String password) throws Exception {
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url, username, password);
+        DatabaseConnection lockConnection = DatabaseTestContext.getInstance().getConnection(url, username, password);
 
         if (connection != null) {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
@@ -234,6 +258,7 @@ public abstract class AbstractIntegrationTest {
 
             SnapshotGeneratorFactory.resetAll();
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+
             emptyTestSchema(CatalogAndSchema.DEFAULT.getCatalogName(), CatalogAndSchema.DEFAULT.getSchemaName(),
                     database);
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
@@ -332,7 +357,8 @@ public abstract class AbstractIntegrationTest {
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) {
         ExecutorService.getInstance().clearExecutor("jdbc", database);
         database.resetInternalState();
-        return new Liquibase(changeLogFile, resourceAccessor, database);
+        LockServiceFactory.getInstance().getLockService(database).reset();
+        return new Liquibase(changeLogFile, resourceAccessor, database, database);
     }
 
     @Test

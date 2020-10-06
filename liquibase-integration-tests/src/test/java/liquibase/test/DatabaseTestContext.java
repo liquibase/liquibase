@@ -1,8 +1,21 @@
 package liquibase.test;
 
-import liquibase.database.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -12,11 +25,6 @@ import liquibase.logging.LogType;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sdk.database.MockDatabase;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.util.*;
-
 public class DatabaseTestContext {
     public static final String ALT_CATALOG = "LIQUIBASEC";
     public static final String ALT_SCHEMA = "LIQUIBASEB";
@@ -24,24 +32,24 @@ public class DatabaseTestContext {
     private static final String TEST_DATABASES_PROPERTY = "test.databases";
     private static DatabaseTestContext instance = new DatabaseTestContext();
     private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
-    /* @todo Extract all remaining connection string examples into liquibase.integrationtest.properties, then delete this code block. */
-    /*
-            new DatabaseTestURL("Cache","jdbc:Cache://"+AbstractIntegrationTest.getDatabaseServerHostname("Cache")+":1972/liquibase"),
-            new DatabaseTestURL("DB2","jdbc:db2://"+AbstractIntegrationTest.getDatabaseServerHostname("DB2")+":50000/liquibas"),
-            new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
-            new DatabaseTestURL("FireBird","jdbc:firebirdsql:"+AbstractIntegrationTest.getDatabaseServerHostname("Firebird")+"/3050:c:\\firebird\\liquibase.fdb"),
-            new DatabaseTestURL("H2","jdbc:h2:mem:liquibase"),
-            new DatabaseTestURL("Hsql","jdbc:hsqldb:mem:liquibase"),
-            new DatabaseTestURL("MssqlJtds","jdbc:jtds:sqlserver://"+AbstractIntegrationTest.getDatabaseServerHostname("MSSQL")+";databaseName=liquibase"),
-//            "jdbc:sqlserver://localhost;databaseName=liquibase",
-            new DatabaseTestURL("MySQL","jdbc:mysql://"+AbstractIntegrationTest.getDatabaseServerHostname("mysql")+"/liquibase"),
-            new DatabaseTestURL("Oracle","jdbc:oracle:thin:@"+AbstractIntegrationTest.getDatabaseServerHostname("oracle")+"/XE"),
-//            "jdbc:jtds:sybase://localhost/nathan:5000",
-//            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
-            new DatabaseTestURL("SAPDB","jdbc:sapdb://"+AbstractIntegrationTest.getDatabaseServerHostname("sapdb")+"/liquibas"),
-            new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
-            new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
-            */
+        /* @todo Extract all remaining connection string examples into liquibase.integrationtest.properties, then delete this code block. */
+        /*
+                new DatabaseTestURL("Cache","jdbc:Cache://"+AbstractIntegrationTest.getDatabaseServerHostname("Cache")+":1972/liquibase"),
+                new DatabaseTestURL("DB2","jdbc:db2://"+AbstractIntegrationTest.getDatabaseServerHostname("DB2")+":50000/liquibas"),
+                new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
+                new DatabaseTestURL("FireBird","jdbc:firebirdsql:"+AbstractIntegrationTest.getDatabaseServerHostname("Firebird")+"/3050:c:\\firebird\\liquibase.fdb"),
+                new DatabaseTestURL("H2","jdbc:h2:mem:liquibase"),
+                new DatabaseTestURL("Hsql","jdbc:hsqldb:mem:liquibase"),
+                new DatabaseTestURL("MssqlJtds","jdbc:jtds:sqlserver://"+AbstractIntegrationTest.getDatabaseServerHostname("MSSQL")+";databaseName=liquibase"),
+    //            "jdbc:sqlserver://localhost;databaseName=liquibase",
+                new DatabaseTestURL("MySQL","jdbc:mysql://"+AbstractIntegrationTest.getDatabaseServerHostname("mysql")+"/liquibase"),
+                new DatabaseTestURL("Oracle","jdbc:oracle:thin:@"+AbstractIntegrationTest.getDatabaseServerHostname("oracle")+"/XE"),
+    //            "jdbc:jtds:sybase://localhost/nathan:5000",
+    //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
+                new DatabaseTestURL("SAPDB","jdbc:sapdb://"+AbstractIntegrationTest.getDatabaseServerHostname("sapdb")+"/liquibas"),
+                new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
+                new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
+                */
     };
     private Set<Database> availableDatabases = new HashSet<Database>();
     private Set<Database> allDatabases;
@@ -195,7 +203,7 @@ public class DatabaseTestContext {
     }
 
     public DatabaseConnection openDatabaseConnection(String url,
-        String username, String password) throws Exception {
+                                                     String username, String password) throws Exception {
 
         JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
         final Driver driver;
@@ -253,7 +261,7 @@ public class DatabaseTestContext {
     public Set<Database> getAvailableDatabases() throws Exception {
         if (availableDatabases.isEmpty()) {
             for (DatabaseConnection conn : getAvailableConnections()) {
-                    availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+                availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
             }
         }
         //Check to don't return closed databases

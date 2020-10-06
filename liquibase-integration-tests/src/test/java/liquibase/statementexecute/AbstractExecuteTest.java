@@ -1,5 +1,18 @@
 package liquibase.statementexecute;
 
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.After;
+
 import liquibase.CatalogAndSchema;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
@@ -22,17 +35,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.structure.core.Table;
 import liquibase.test.DatabaseTestContext;
 import liquibase.test.TestContext;
-import org.junit.After;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public abstract class AbstractExecuteTest {
 
@@ -97,6 +99,7 @@ public abstract class AbstractExecuteTest {
 
                     if (database.getConnection() != null) {
                         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
+                        // in tests, its ok to use the same database for locking
                         LockServiceFactory.getInstance().getLockService(database).init();
                     }
 
@@ -204,6 +207,7 @@ public abstract class AbstractExecuteTest {
 
             try {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+                LockServiceFactory.getInstance().getLockService(database).destroy();
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }

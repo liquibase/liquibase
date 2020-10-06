@@ -1,5 +1,22 @@
 package liquibase.database;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
@@ -30,7 +47,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
-import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -58,27 +74,9 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.structure.core.View;
 import liquibase.util.ISODateFormat;
+import liquibase.util.NowAndTodayUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.util.NowAndTodayUtil;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 
 /**
  * AbstractJdbcDatabase is extended by all supported databases as a facade to the underlying database.
@@ -811,7 +809,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
 
             ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).destroy();
-            LockServiceFactory.getInstance().getLockService(this).destroy();
 
             this.setAutoCommit(previousAutoCommit);
             LogService.getLog(getClass()).info(LogType.LOG, String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
@@ -1353,7 +1350,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void resetInternalState() {
         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).reset();
-        LockServiceFactory.getInstance().getLockService(this).reset();
     }
 
     @Override

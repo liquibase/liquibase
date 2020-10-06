@@ -15,6 +15,9 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String OUTPUT_ENCODING = "outputFileEncoding";
     public static final String CHANGELOGLOCK_WAIT_TIME = "changeLogLockWaitTimeInMinutes";
     public static final String CHANGELOGLOCK_POLL_RATE = "changeLogLockPollRate";
+    public static final String CHANGELOGLOCK_AUTO_PROLONG = "changeLogLockAutoProlong";
+    public static final String CHANGELOGLOCK_PROLONGING_RATE_IN_SECONDS = "changeLogLockProlongingRateInSeconds";
+    public static final String STALE_CHANGELOGLOCK_REMOVAL_RATE_IN_SECONDS = "staleChangeLogLockRemovalTimeInSeconds";
     public static final String CONVERT_DATA_TYPES = "convertDataTypes";
     public static final String GENERATE_CHANGESET_CREATED_VALUES = "generateChangeSetCreatedValues";
     public static final String AUTO_REORG = "autoReorg";
@@ -23,6 +26,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
     public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
     public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
+
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -47,6 +51,19 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(CHANGELOGLOCK_POLL_RATE, Long.class)
                 .setDescription("Number of seconds wait between checks to the changelog lock when it is locked")
                 .setDefaultValue(10);
+
+        getContainer().addProperty(CHANGELOGLOCK_AUTO_PROLONG, Boolean.class)
+                .setDescription("If change log locks should be automatically prolonged")
+                .setDefaultValue(false);
+
+        getContainer().addProperty(CHANGELOGLOCK_PROLONGING_RATE_IN_SECONDS, Long.class)
+                .setDescription("How often (in seconds) shall we prolong the lock when using prolonging lock service.")
+                .setDefaultValue(20);
+
+        getContainer().addProperty(STALE_CHANGELOGLOCK_REMOVAL_RATE_IN_SECONDS, Long.class)
+                .setDescription("After what time (in seconds) shall we remove a lock that is automatically prolonged?")
+                .setDefaultValue(85);
+
 
         getContainer().addProperty(LIQUIBASE_TABLESPACE_NAME, String.class)
             .setDescription("Tablespace to use for Liquibase objects");
@@ -87,7 +104,6 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, Boolean.class)
                 .setDescription("When generating SQL for createProcedure, should the procedure schema be forced to the default schema if no schemaName attribute is set?")
                 .setDefaultValue(false);
-
 
         getContainer().addProperty(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, Boolean.class)
             .setDescription("Should Liquibase include the change description in the id when generating changeSets?")
@@ -262,6 +278,33 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setGeneratedChangeSetIdsContainDescription(boolean containDescription) {
         getContainer().setValue(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, containDescription);
+        return this;
+    }
+
+    public boolean getAutomaticChangeLogLockProlongingEnabled() {
+        return getContainer().getValue(CHANGELOGLOCK_AUTO_PROLONG, Boolean.class);
+    }
+
+    public GlobalConfiguration setAutomaticChangeLogLockProlongingEnabled(boolean autoProlong) {
+        getContainer().setValue(CHANGELOGLOCK_AUTO_PROLONG, autoProlong);
+        return this;
+    }
+
+    public Long getChangeLogLockProlongingRateInSeconds() {
+        return getContainer().getValue(CHANGELOGLOCK_PROLONGING_RATE_IN_SECONDS, Long.class);
+    }
+
+    public Long getStaleChangeLogLockRemovalTimeInSeconds() {
+        return getContainer().getValue(STALE_CHANGELOGLOCK_REMOVAL_RATE_IN_SECONDS, Long.class);
+    }
+
+    public GlobalConfiguration setChangeLogLockProlongingRateInSeconds(Long rate) {
+        getContainer().setValue(CHANGELOGLOCK_PROLONGING_RATE_IN_SECONDS, rate);
+        return this;
+    }
+
+    public GlobalConfiguration setStaleChangeLogLockRemovalTimeInSeconds(Long rate) {
+        getContainer().setValue(STALE_CHANGELOGLOCK_REMOVAL_RATE_IN_SECONDS, rate);
         return this;
     }
 }

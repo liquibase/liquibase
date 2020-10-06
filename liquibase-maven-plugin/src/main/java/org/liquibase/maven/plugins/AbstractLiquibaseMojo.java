@@ -1,5 +1,33 @@
 package org.liquibase.maven.plugins;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.xml.bind.annotation.XmlSchema;
+import org.apache.maven.artifact.manager.WagonManager;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
+
 import liquibase.Liquibase;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -13,21 +41,7 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.ui.UIFactory;
-import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
-import javax.xml.bind.annotation.XmlSchema;
-import java.io.*;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.text.MessageFormat;
-import java.util.*;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
@@ -343,6 +357,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         checkRequiredParametersAreSpecified();
 
         Database database = null;
+        Database lockDatabase = null;
         try {
             String dbPassword = (emptyPassword || (password == null)) ? "" : password;
             String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
@@ -362,7 +377,25 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     changelogSchemaName,
                     databaseChangeLogTableName,
                     databaseChangeLogLockTableName);
-            liquibase = createLiquibase(fileOpener, database);
+
+            lockDatabase = CommandLineUtils.createDatabaseObject(artifactClassLoader,
+                    url,
+                    username,
+                    dbPassword,
+                    driver,
+                    defaultCatalogName,
+                    defaultSchemaName,
+                    outputDefaultCatalog,
+                    outputDefaultSchema,
+                    databaseClass,
+                    driverPropsFile,
+                    propertyProviderClass,
+                    changelogCatalogName,
+                    changelogSchemaName,
+                    databaseChangeLogTableName,
+                    databaseChangeLogLockTableName);
+
+            liquibase = createLiquibase(fileOpener, database, lockDatabase);
 
             configureChangeLogProperties(fileOpener);
 
@@ -402,10 +435,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         catch (LiquibaseException e) {
             cleanup(database);
+            cleanup(lockDatabase);
             throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
         }
 
         cleanup(database);
+        cleanup(lockDatabase);
         getLog().info(MavenUtils.LOG_SEPARATOR);
         getLog().info("");
     }
@@ -454,8 +489,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
     }
 
-    protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
-        return new Liquibase("", fo, db);
+    protected Liquibase createLiquibase(ResourceAccessor fo, Database db, Database lockDatabase) throws MojoExecutionException {
+        return new Liquibase("", fo, db, lockDatabase);
     }
 
     public void configureFieldsAndValues(ResourceAccessor fo)

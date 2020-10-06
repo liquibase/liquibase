@@ -1,5 +1,12 @@
 package liquibase.lockservice;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -8,13 +15,6 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.test.TestContext;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-
 public class LockServiceExecuteTest {
 
     @Before
@@ -77,33 +77,32 @@ public class LockServiceExecuteTest {
 
     }
 
-    //todo: failing on build server: re-enable
-//    @Test
-//    public void waitForLock_twoConnections() throws Exception {
-//        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-//            public void performTest(Database database) throws Exception {
-////                if (database instanceof H2Database) {
-////                    return;
-////                }
-//
-//                String url = DatabaseTestContext.getInstance().getTestUrl(database);
-//                System.out.println(url);
-//                DatabaseConnection connection2 = DatabaseTestContext.getInstance().openDatabaseConnection(url);
-//                Database database2 = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection2);
-//
-//                assertTrue(LockService.getInstance(database).acquireLock());
-//                assertTrue(LockService.getInstance(database).hasChangeLogLock());
-//                assertFalse(LockService.getInstance(database2).hasChangeLogLock());
-//
-//                assertFalse(LockService.getInstance(database2).acquireLock());
-//                assertFalse(LockService.getInstance(database2).acquireLock());
-//
-//                LockService.getInstance(database).releaseLock();
-//                assertTrue(LockService.getInstance(database2).acquireLock());
-//
-//            }
-//        });
-//    }
+  /*  //todo: failing on build server: re-enable
+    @Test
+    public void waitForLock_twoConnections() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
+            public void performTest(Database database) throws Exception {
+
+                String url = DatabaseTestContext.getInstance().getTestUrl(database);
+                System.out.println(url);
+                DatabaseConnection connection2 = DatabaseTestContext.getInstance().openDatabaseConnection(url);
+                Database database2 = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection2);
+
+                assertTrue(LockServiceFactory.getInstance().getLockService(lockDatabase).acquireLock());
+                assertTrue(LockServiceFactory.getInstance().getLockService(lockDatabase).hasChangeLogLock());
+                assertFalse(LockServiceFactory.getInstance().getLockService(database2).hasChangeLogLock());
+
+                assertFalse(LockServiceFactory.getInstance().getLockService(database2).acquireLock());
+                assertFalse(LockServiceFactory.getInstance().getLockService(database2).acquireLock());
+
+                LockServiceFactory.getInstance().getLockService(lockDatabase).releaseLock();
+                assertTrue(LockServiceFactory.getInstance().getLockService(database2).acquireLock());
+                assertFalse(LockServiceFactory.getInstance().getLockService(lockDatabase).hasChangeLogLock());
+                assertTrue(LockServiceFactory.getInstance().getLockService(database2).hasChangeLogLock());
+
+            }
+        });
+    }*/
 //
 //    @Test
 //    public void waitForLock_severalAquireLocksCalled() throws Exception {

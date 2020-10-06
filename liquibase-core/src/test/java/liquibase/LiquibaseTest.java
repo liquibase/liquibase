@@ -1,5 +1,16 @@
 package liquibase;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -10,14 +21,6 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.sdk.resource.MockResourceAccessor;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 public class LiquibaseTest {
     private MockResourceAccessor mockResourceAccessor;
@@ -82,12 +85,12 @@ public class LiquibaseTest {
         MockResourceAccessor resourceAccessor = this.mockResourceAccessor;
         MockDatabase database = new MockDatabase();
 
-        Liquibase liquibase = new Liquibase("com/example/test.xml", resourceAccessor, database);
+        Liquibase liquibase = new Liquibase("com/example/test.xml", resourceAccessor, database, database);
 
         assertNotNull("change log object may not be null", liquibase.getLog());
 
         assertEquals("correct name of the change log file is returned",
-        "com/example/test.xml", liquibase.getChangeLogFile());
+            "com/example/test.xml", liquibase.getChangeLogFile());
 
         assertSame("ressourceAccessor property is set as requested",
             resourceAccessor, liquibase.getResourceAccessor());
@@ -105,15 +108,15 @@ public class LiquibaseTest {
 
     @Test
     public void testConstructorChangelogPathsStandardize() throws Exception {
-        Liquibase liquibase = new Liquibase("path\\with\\windows\\separators.xml", mockResourceAccessor, new MockDatabase());
+        Liquibase liquibase = new Liquibase("path\\with\\windows\\separators.xml", mockResourceAccessor, new MockDatabase(), new MockDatabase());
         assertEquals("Windows path separators are translated correctly",
             "path/with/windows/separators.xml", liquibase.getChangeLogFile());
 
-        liquibase = new Liquibase("path/with/unix/separators.xml", mockResourceAccessor, new MockDatabase());
+        liquibase = new Liquibase("path/with/unix/separators.xml", mockResourceAccessor, new MockDatabase(), new MockDatabase());
         assertEquals("Unix path separators are left intact",
             "path/with/unix/separators.xml", liquibase.getChangeLogFile());
 
-        liquibase = new Liquibase("/absolute/path/remains.xml", mockResourceAccessor, new MockDatabase());
+        liquibase = new Liquibase("/absolute/path/remains.xml", mockResourceAccessor, new MockDatabase(), new MockDatabase());
         assertEquals("An absolute path is left intact",
             "/absolute/path/remains.xml", liquibase.getChangeLogFile());
     }
@@ -138,7 +141,7 @@ public class LiquibaseTest {
 
     @Test
     public void testGetResourceAccessor() throws LiquibaseException {
-        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
+        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase, mockDatabase);
         assertSame("ressourceAccessor is set as requested",
             liquibase.getResourceAccessor(), liquibase.getResourceAccessor());
     }
@@ -257,7 +260,7 @@ public class LiquibaseTest {
         protected Object objectToVerify;
 
         private LiquibaseDelegate() throws LiquibaseException {
-            super("com/example/test.xml", new MockResourceAccessor(), new MockDatabase());
+            super("com/example/test.xml", new MockResourceAccessor(), new MockDatabase(), new MockDatabase());
         }
 
         /**

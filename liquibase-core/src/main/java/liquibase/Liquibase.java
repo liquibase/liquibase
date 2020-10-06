@@ -1,10 +1,56 @@
 package liquibase;
 
+import static java.util.ResourceBundle.getBundle;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.Writer;
+import java.text.DateFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.change.CheckSum;
 import liquibase.change.core.RawSQLChange;
-import liquibase.changelog.*;
-import liquibase.changelog.filter.*;
-import liquibase.changelog.visitor.*;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.ChangeLogIterator;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.ChangeSetStatus;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.filter.AfterTagChangeSetFilter;
+import liquibase.changelog.filter.AlreadyRanChangeSetFilter;
+import liquibase.changelog.filter.ChangeSetFilter;
+import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.changelog.filter.ContextChangeSetFilter;
+import liquibase.changelog.filter.CountChangeSetFilter;
+import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.changelog.filter.ExecutedAfterChangeSetFilter;
+import liquibase.changelog.filter.IgnoreChangeSetFilter;
+import liquibase.changelog.filter.LabelChangeSetFilter;
+import liquibase.changelog.filter.NotRanChangeSetFilter;
+import liquibase.changelog.filter.ShouldRunChangeSetFilter;
+import liquibase.changelog.filter.UpToTagChangeSetFilter;
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.changelog.visitor.ChangeLogSyncListener;
+import liquibase.changelog.visitor.ChangeLogSyncVisitor;
+import liquibase.changelog.visitor.ChangeSetVisitor;
+import liquibase.changelog.visitor.DBDocVisitor;
+import liquibase.changelog.visitor.ExpectedChangesVisitor;
+import liquibase.changelog.visitor.ListVisitor;
+import liquibase.changelog.visitor.RollbackVisitor;
+import liquibase.changelog.visitor.StatusVisitor;
+import liquibase.changelog.visitor.UpdateVisitor;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.core.DropAllCommand;
@@ -46,16 +92,10 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.text.DateFormat;
-import java.util.*;
-
-import static java.util.ResourceBundle.getBundle;
-
 /**
  * Primary facade class for interacting with Liquibase.
- * The built in command line, Ant, Maven and other ways of running Liquibase are wrappers around methods in this class.
+ * The built in command line, Ant, Maven and other ways of running Liquibase are wrappers around
+ * methods in this class.
  */
 public class Liquibase implements AutoCloseable {
 
@@ -65,8 +105,10 @@ public class Liquibase implements AutoCloseable {
     protected static final int CHANGESET_ID_CHANGESET_PART = 1;
     protected static final int CHANGESET_ID_CHANGELOG_PART = 0;
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    protected static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
+    protected static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString(
+        "could.not.release.lock");
 
+    private final Database lockDatabase;
     protected Database database;
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
@@ -78,28 +120,37 @@ public class Liquibase implements AutoCloseable {
     private boolean ignoreClasspathPrefix = true;
 
     /**
-     * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
+     * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used
+     * will be found with
+     * {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
      *
      * @see DatabaseConnection
      * @see Database
-     * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database)
+     * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database, liquibase.database.Database)
      * @see ResourceAccessor
      */
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn)
-        throws LiquibaseException {
-        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+    public Liquibase(String changeLogFile,
+                     ResourceAccessor resourceAccessor,
+                     DatabaseConnection conn,
+                     DatabaseConnection lockConnection) throws LiquibaseException {
+        this(changeLogFile,
+            resourceAccessor,
+            DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn),
+            DatabaseFactory.getInstance().findCorrectDatabaseImplementation(lockConnection));
     }
 
     /**
-     * Creates a Liquibase instance. The changeLogFile parameter must be a path that can be resolved by the passed
-     * ResourceAccessor. If windows style path separators are used for the changeLogFile, they will be standardized to
+     * Creates a Liquibase instance. The changeLogFile parameter must be a path that can be
+     * resolved by the passed
+     * ResourceAccessor. If windows style path separators are used for the changeLogFile, they
+     * will be standardized to
      * unix style for better cross-system compatibility.
      *
      * @see DatabaseConnection
      * @see Database
      * @see ResourceAccessor
      */
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) {
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database, Database lockDatabase) {
         if (changeLogFile != null) {
             // Convert to STANDARD / if using absolute path on windows:
             this.changeLogFile = changeLogFile.replace('\\', '/');
@@ -108,9 +159,10 @@ public class Liquibase implements AutoCloseable {
         this.resourceAccessor = resourceAccessor;
         this.changeLogParameters = new ChangeLogParameters(database);
         this.database = database;
+        this.lockDatabase = lockDatabase;
     }
 
-    public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
+    public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database, Database lockDatabase) {
         this.databaseChangeLog = changeLog;
 
         if (changeLog != null) {
@@ -122,6 +174,7 @@ public class Liquibase implements AutoCloseable {
         }
         this.resourceAccessor = resourceAccessor;
         this.database = database;
+        this.lockDatabase = lockDatabase;
         this.changeLogParameters = new ChangeLogParameters(database);
     }
 
@@ -154,6 +207,16 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
+     * Returns the Database used by this Liquibase instance for locking.
+     * <p>
+     * Should be a separate one as some lock services might commit transactions asynchronously,
+     * and hence should not rollback or commit what the actual updates is doing.
+     */
+    public Database getLockDatabase() {
+        return lockDatabase;
+    }
+
+    /**
      * Return ResourceAccessor used by this Liquibase instance.
      */
     public ResourceAccessor getResourceAccessor() {
@@ -161,11 +224,13 @@ public class Liquibase implements AutoCloseable {
     }
 
     /**
-     * Convience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
+     * Convience method for {@link #update(Contexts)} that constructs the Context object from the
+     * passed string.
      */
     public void update(String contexts) throws LiquibaseException {
         this.update(new Contexts(contexts));
     }
+
     /**
      * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to date according to
      * the configured changelog file. To run in "no context mode", pass a null or empty context object.
@@ -179,7 +244,7 @@ public class Liquibase implements AutoCloseable {
     }
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables)
         throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         changeLogParameters.setContexts(contexts);
@@ -212,7 +277,8 @@ public class Liquibase implements AutoCloseable {
 
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {
         if (databaseChangeLog == null) {
-            ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
+            ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile
+                , resourceAccessor);
             databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
         }
 
@@ -228,14 +294,15 @@ public class Liquibase implements AutoCloseable {
         return new RollbackVisitor(database, changeExecListener);
     }
 
-    protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, LabelExpression labelExpression,
+    protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts,
+                                                             LabelExpression labelExpression,
                                                              DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter());
+            new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
+            new ContextChangeSetFilter(contexts),
+            new LabelChangeSetFilter(labelExpression),
+            new DbmsChangeSetFilter(database),
+            new IgnoreChangeSetFilter());
     }
 
     public void update(String contexts, Writer output) throws LiquibaseException {
@@ -246,12 +313,17 @@ public class Liquibase implements AutoCloseable {
         update(contexts, new LabelExpression(), output);
     }
 
-    public void update(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+    public void update(Contexts contexts,
+                       LabelExpression labelExpression,
+                       Writer output) throws LiquibaseException {
         update(contexts, labelExpression, output, true);
     }
-    
-    public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables)
-            throws LiquibaseException {
+
+    public void update(Contexts contexts,
+                       LabelExpression labelExpression,
+                       Writer output,
+                       boolean checkLiquibaseTables)
+        throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -260,7 +332,7 @@ public class Liquibase implements AutoCloseable {
 
         outputHeader("Update Database Script");
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -284,7 +356,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -297,12 +369,12 @@ public class Liquibase implements AutoCloseable {
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new DbmsChangeSetFilter(database),
-                    new IgnoreChangeSetFilter(),
-                    new CountChangeSetFilter(changesToApply));
+                new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter(),
+                new CountChangeSetFilter(changesToApply));
 
             logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
@@ -331,7 +403,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -343,14 +415,15 @@ public class Liquibase implements AutoCloseable {
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new DbmsChangeSetFilter(database),
-                    new IgnoreChangeSetFilter(),
-                    new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter(),
+                new UpToTagChangeSetFilter(tag, ranChangeSetList));
 
-            logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts,
+                labelExpression));
         } finally {
             try {
                 lockService.releaseLock();
@@ -361,11 +434,16 @@ public class Liquibase implements AutoCloseable {
         }
     }
 
-    public void update(int changesToApply, String contexts, Writer output) throws LiquibaseException {
+    public void update(int changesToApply,
+                       String contexts,
+                       Writer output) throws LiquibaseException {
         this.update(changesToApply, new Contexts(contexts), new LabelExpression(), output);
     }
 
-    public void update(int changesToApply, Contexts contexts, LabelExpression labelExpression, Writer output)
+    public void update(int changesToApply,
+                       Contexts contexts,
+                       LabelExpression labelExpression,
+                       Writer output)
         throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -390,7 +468,10 @@ public class Liquibase implements AutoCloseable {
         update(tag, contexts, new LabelExpression(), output);
     }
 
-    public void update(String tag, Contexts contexts, LabelExpression labelExpression, Writer output)
+    public void update(String tag,
+                       Contexts contexts,
+                       LabelExpression labelExpression,
+                       Writer output)
         throws LiquibaseException {
         if (tag == null) {
             update(contexts, labelExpression, output);
@@ -438,28 +519,42 @@ public class Liquibase implements AutoCloseable {
         }
     }
 
-    public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
+    public void rollback(int changesToRollback,
+                         String contexts,
+                         Writer output) throws LiquibaseException {
         rollback(changesToRollback, null, contexts, output);
     }
 
-    public void rollback(int changesToRollback, Contexts contexts, Writer output) throws LiquibaseException {
+    public void rollback(int changesToRollback,
+                         Contexts contexts,
+                         Writer output) throws LiquibaseException {
         rollback(changesToRollback, null, contexts, output);
     }
 
-    public void rollback(int changesToRollback, Contexts contexts, LabelExpression labelExpression, Writer output)
+    public void rollback(int changesToRollback,
+                         Contexts contexts,
+                         LabelExpression labelExpression,
+                         Writer output)
         throws LiquibaseException {
         rollback(changesToRollback, null, contexts, labelExpression, output);
     }
 
-    public void rollback(int changesToRollback, String rollbackScript, String contexts, Writer output)
+    public void rollback(int changesToRollback,
+                         String rollbackScript,
+                         String contexts,
+                         Writer output)
         throws LiquibaseException {
         rollback(changesToRollback, rollbackScript, new Contexts(contexts), output);
     }
 
-    public void rollback(int changesToRollback, String rollbackScript, Contexts contexts, Writer output)
+    public void rollback(int changesToRollback,
+                         String rollbackScript,
+                         Contexts contexts,
+                         Writer output)
         throws LiquibaseException {
         rollback(changesToRollback, rollbackScript, contexts, new LabelExpression(), output);
     }
+
     public void rollback(int changesToRollback, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression, Writer output) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
@@ -487,7 +582,9 @@ public class Liquibase implements AutoCloseable {
         rollback(changesToRollback, null, contexts, labelExpression);
     }
 
-    public void rollback(int changesToRollback, String rollbackScript, String contexts) throws LiquibaseException {
+    public void rollback(int changesToRollback,
+                         String rollbackScript,
+                         String contexts) throws LiquibaseException {
         rollback(changesToRollback, rollbackScript, new Contexts(contexts), new LabelExpression());
     }
 
@@ -496,7 +593,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -506,18 +603,20 @@ public class Liquibase implements AutoCloseable {
             changeLog.validate(database, contexts, labelExpression);
             changeLog.setIgnoreClasspathPrefix(ignoreClasspathPrefix);
 
-            ChangeLogIterator logIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
-                    new AlreadyRanChangeSetFilter(database.getRanChangeSetList(), ignoreClasspathPrefix),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new DbmsChangeSetFilter(database),
-                    new IgnoreChangeSetFilter(),
-                    new CountChangeSetFilter(changesToRollback));
+            ChangeLogIterator logIterator = new ChangeLogIterator(database.getRanChangeSetList(),
+                changeLog,
+                new AlreadyRanChangeSetFilter(database.getRanChangeSetList(),
+                    ignoreClasspathPrefix),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter(),
+                new CountChangeSetFilter(changesToRollback));
 
             if (rollbackScript == null) {
-                logIterator.run(createRollbackVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
-            }
-            else {
+                logIterator.run(createRollbackVisitor(),
+                    new RuntimeEnvironment(database, contexts, labelExpression));
+            } else {
                 executeRollbackScript(rollbackScript, contexts, labelExpression);
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
@@ -531,7 +630,9 @@ public class Liquibase implements AutoCloseable {
         }
     }
 
-    protected void removeRunStatus(ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression)
+    protected void removeRunStatus(ChangeLogIterator logIterator,
+                                   Contexts contexts,
+                                   LabelExpression labelExpression)
         throws LiquibaseException {
         logIterator.run(new ChangeSetVisitor() {
             @Override
@@ -540,7 +641,9 @@ public class Liquibase implements AutoCloseable {
             }
 
             @Override
-            public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database,
+            public void visit(ChangeSet changeSet,
+                              DatabaseChangeLog databaseChangeLog,
+                              Database database,
                               Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
                 database.removeRanStatus(changeSet);
                 database.commit();
@@ -548,19 +651,21 @@ public class Liquibase implements AutoCloseable {
         }, new RuntimeEnvironment(database, contexts, labelExpression));
     }
 
-    protected void executeRollbackScript(String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    protected void executeRollbackScript(String rollbackScript, Contexts contexts,
+                                         LabelExpression labelExpression) throws LiquibaseException {
         final Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
         String rollbackScriptContents;
         try {
             Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
             if ((streams == null) || streams.isEmpty()) {
-                throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
+                throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript +
+                    "' was not located.  Please check your parameters. No rollback was performed");
             } else if (streams.size() > 1) {
-                throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
+                throw new LiquibaseException("Found multiple rollbackScripts named " + rollbackScript);
             }
             rollbackScriptContents = StreamUtil.getStreamContents(streams.iterator().next());
         } catch (IOException e) {
-            throw new LiquibaseException("Error reading rollbackScript "+executor+": "+e.getMessage());
+            throw new LiquibaseException("Error reading rollbackScript " + executor + ": " + e.getMessage());
         }
 
         //
@@ -569,7 +674,8 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
         DatabaseChangeLog changelog = getDatabaseChangeLog();
-        rollbackScriptContents = changeLogParameters.expandExpressions(rollbackScriptContents, changelog);
+        rollbackScriptContents = changeLogParameters.expandExpressions(rollbackScriptContents,
+            changelog);
 
         RawSQLChange rollbackChange = buildRawSQLChange(rollbackScriptContents);
 
@@ -577,7 +683,7 @@ public class Liquibase implements AutoCloseable {
             executor.execute(rollbackChange);
         } catch (DatabaseException e) {
             LogService.getLog(getClass()).severe(LogType.LOG, e.getMessage());
-            LOG.severe(LogType.LOG, "Error executing rollback script: "+e.getMessage());
+            LOG.severe(LogType.LOG, "Error executing rollback script: " + e.getMessage());
             if (changeExecListener != null) {
                 changeExecListener.runFailed(null, databaseChangeLog, database, e);
             }
@@ -593,25 +699,38 @@ public class Liquibase implements AutoCloseable {
         return rollbackChange;
     }
 
-    public void rollback(String tagToRollBackTo, String contexts, Writer output) throws LiquibaseException {
+    public void rollback(String tagToRollBackTo,
+                         String contexts,
+                         Writer output) throws LiquibaseException {
         rollback(tagToRollBackTo, null, contexts, output);
     }
 
-    public void rollback(String tagToRollBackTo, Contexts contexts, Writer output) throws LiquibaseException {
+    public void rollback(String tagToRollBackTo,
+                         Contexts contexts,
+                         Writer output) throws LiquibaseException {
         rollback(tagToRollBackTo, null, contexts, output);
     }
 
-    public void rollback(String tagToRollBackTo, Contexts contexts, LabelExpression labelExpression, Writer output)
+    public void rollback(String tagToRollBackTo,
+                         Contexts contexts,
+                         LabelExpression labelExpression,
+                         Writer output)
         throws LiquibaseException {
         rollback(tagToRollBackTo, null, contexts, labelExpression, output);
     }
 
-    public void rollback(String tagToRollBackTo, String rollbackScript, String contexts, Writer output)
+    public void rollback(String tagToRollBackTo,
+                         String rollbackScript,
+                         String contexts,
+                         Writer output)
         throws LiquibaseException {
         rollback(tagToRollBackTo, rollbackScript, new Contexts(contexts), output);
     }
 
-    public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts, Writer output)
+    public void rollback(String tagToRollBackTo,
+                         String rollbackScript,
+                         Contexts contexts,
+                         Writer output)
         throws LiquibaseException {
         rollback(tagToRollBackTo, rollbackScript, contexts, new LabelExpression(), output);
     }
@@ -647,19 +766,24 @@ public class Liquibase implements AutoCloseable {
         rollback(tagToRollBackTo, null, contexts, labelExpression);
     }
 
-    public void rollback(String tagToRollBackTo, String rollbackScript, String contexts) throws LiquibaseException {
+    public void rollback(String tagToRollBackTo,
+                         String rollbackScript,
+                         String contexts) throws LiquibaseException {
         rollback(tagToRollBackTo, rollbackScript, new Contexts(contexts));
     }
 
-    public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts) throws LiquibaseException {
+    public void rollback(String tagToRollBackTo,
+                         String rollbackScript,
+                         Contexts contexts) throws LiquibaseException {
         rollback(tagToRollBackTo, rollbackScript, contexts, new LabelExpression());
     }
+
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts,
                          LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -672,12 +796,12 @@ public class Liquibase implements AutoCloseable {
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
-                    new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
-                    new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database));
+                new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
+                new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new IgnoreChangeSetFilter(),
+                new DbmsChangeSetFilter(database));
 
             if (rollbackScript == null) {
                 logIterator.run(createRollbackVisitor(),
@@ -696,15 +820,24 @@ public class Liquibase implements AutoCloseable {
         resetServices();
     }
 
-    public void rollback(Date dateToRollBackTo, String contexts, Writer output) throws LiquibaseException {
+    public void rollback(Date dateToRollBackTo,
+                         String contexts,
+                         Writer output) throws LiquibaseException {
         rollback(dateToRollBackTo, null, contexts, output);
     }
 
-    public void rollback(Date dateToRollBackTo, String rollbackScript, String contexts, Writer output)
+    public void rollback(Date dateToRollBackTo,
+                         String rollbackScript,
+                         String contexts,
+                         Writer output)
         throws LiquibaseException {
         rollback(dateToRollBackTo, new Contexts(contexts), new LabelExpression(), output);
     }
-    public void rollback(Date dateToRollBackTo, Contexts contexts, LabelExpression labelExpression, Writer output)
+
+    public void rollback(Date dateToRollBackTo,
+                         Contexts contexts,
+                         LabelExpression labelExpression,
+                         Writer output)
         throws LiquibaseException {
         rollback(dateToRollBackTo, null, contexts, labelExpression, output);
     }
@@ -740,12 +873,14 @@ public class Liquibase implements AutoCloseable {
         rollback(dateToRollBackTo, null, contexts);
     }
 
-    public void rollback(Date dateToRollBackTo, Contexts contexts,  LabelExpression labelExpression)
+    public void rollback(Date dateToRollBackTo, Contexts contexts, LabelExpression labelExpression)
         throws LiquibaseException {
         rollback(dateToRollBackTo, null, contexts, labelExpression);
     }
 
-    public void rollback(Date dateToRollBackTo, String rollbackScript, String contexts) throws LiquibaseException {
+    public void rollback(Date dateToRollBackTo,
+                         String rollbackScript,
+                         String contexts) throws LiquibaseException {
         rollback(dateToRollBackTo, new Contexts(contexts), new LabelExpression());
     }
 
@@ -754,7 +889,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -765,12 +900,12 @@ public class Liquibase implements AutoCloseable {
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
-                    new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
-                    new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database));
+                new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
+                new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new IgnoreChangeSetFilter(),
+                new DbmsChangeSetFilter(database));
 
             if (rollbackScript == null) {
                 logIterator.run(createRollbackVisitor(),
@@ -836,7 +971,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -847,11 +982,11 @@ public class Liquibase implements AutoCloseable {
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new IgnoreChangeSetFilter(),
-                    new DbmsChangeSetFilter(database));
+                new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new IgnoreChangeSetFilter(),
+                new DbmsChangeSetFilter(database));
 
             logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
                 new RuntimeEnvironment(database, contexts, labelExpression)
@@ -870,7 +1005,9 @@ public class Liquibase implements AutoCloseable {
         markNextChangeSetRan(new Contexts(contexts), new LabelExpression(), output);
     }
 
-    public void markNextChangeSetRan(Contexts contexts, LabelExpression labelExpression, Writer output)
+    public void markNextChangeSetRan(Contexts contexts,
+                                     LabelExpression labelExpression,
+                                     Writer output)
         throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -896,7 +1033,7 @@ public class Liquibase implements AutoCloseable {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -907,12 +1044,12 @@ public class Liquibase implements AutoCloseable {
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                    new ContextChangeSetFilter(contexts),
-                    new LabelChangeSetFilter(labelExpression),
-                    new DbmsChangeSetFilter(database),
-                    new IgnoreChangeSetFilter(),
-                    new CountChangeSetFilter(1));
+                new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                new ContextChangeSetFilter(contexts),
+                new LabelChangeSetFilter(labelExpression),
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter(),
+                new CountChangeSetFilter(1));
 
             logIterator.run(new ChangeLogSyncVisitor(database),
                 new RuntimeEnvironment(database, contexts, labelExpression)
@@ -935,47 +1072,72 @@ public class Liquibase implements AutoCloseable {
         futureRollbackSQL(null, null, new Contexts(), new LabelExpression(), output);
     }
 
-    public void futureRollbackSQL(String contexts, Writer output, boolean checkLiquibaseTables) 
-           throws LiquibaseException {
+    public void futureRollbackSQL(String contexts, Writer output, boolean checkLiquibaseTables)
+        throws LiquibaseException {
         futureRollbackSQL(null, contexts, output, checkLiquibaseTables);
     }
 
-    public void futureRollbackSQL(Integer count, String contexts, Writer output) throws LiquibaseException {
+    public void futureRollbackSQL(Integer count,
+                                  String contexts,
+                                  Writer output) throws LiquibaseException {
         futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output, true);
     }
-    
+
     public void futureRollbackSQL(Contexts contexts, LabelExpression labelExpression, Writer output)
         throws LiquibaseException {
         futureRollbackSQL(null, null, contexts, labelExpression, output);
     }
 
-    public void futureRollbackSQL(Integer count, String contexts, Writer output, boolean checkLiquibaseTables) 
-           throws LiquibaseException {
-        futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output, checkLiquibaseTables);
+    public void futureRollbackSQL(Integer count,
+                                  String contexts,
+                                  Writer output,
+                                  boolean checkLiquibaseTables)
+        throws LiquibaseException {
+        futureRollbackSQL(count,
+            new Contexts(contexts),
+            new LabelExpression(),
+            output,
+            checkLiquibaseTables);
     }
 
-    public void futureRollbackSQL(Integer count, Contexts contexts, LabelExpression labelExpression, Writer output)
+    public void futureRollbackSQL(Integer count,
+                                  Contexts contexts,
+                                  LabelExpression labelExpression,
+                                  Writer output)
         throws LiquibaseException {
         futureRollbackSQL(count, contexts, labelExpression, output, true);
     }
 
-    public void futureRollbackSQL(Integer count, Contexts contexts, LabelExpression labelExpression, Writer output,
+    public void futureRollbackSQL(Integer count,
+                                  Contexts contexts,
+                                  LabelExpression labelExpression,
+                                  Writer output,
                                   boolean checkLiquibaseTables) throws LiquibaseException {
         futureRollbackSQL(count, null, contexts, labelExpression, output);
     }
 
-    public void futureRollbackSQL(String tag, Contexts contexts, LabelExpression labelExpression, Writer output)
+    public void futureRollbackSQL(String tag,
+                                  Contexts contexts,
+                                  LabelExpression labelExpression,
+                                  Writer output)
         throws LiquibaseException {
         futureRollbackSQL(null, tag, contexts, labelExpression, output);
     }
 
-    protected void futureRollbackSQL(Integer count, String tag, Contexts contexts, LabelExpression labelExpression,
+    protected void futureRollbackSQL(Integer count,
+                                     String tag,
+                                     Contexts contexts,
+                                     LabelExpression labelExpression,
                                      Writer output) throws LiquibaseException {
         futureRollbackSQL(count, tag, contexts, labelExpression, output, true);
     }
 
-    protected void futureRollbackSQL(Integer count, String tag, Contexts contexts, LabelExpression labelExpression,
-                                     Writer output, boolean checkLiquibaseTables) throws LiquibaseException {
+    protected void futureRollbackSQL(Integer count,
+                                     String tag,
+                                     Contexts contexts,
+                                     LabelExpression labelExpression,
+                                     Writer output,
+                                     boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -983,7 +1145,7 @@ public class Liquibase implements AutoCloseable {
         Executor oldTemplate = getAndReplaceJdbcExecutor(output);
         outputHeader("SQL to roll back currently unexecuted changes");
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -998,62 +1160,64 @@ public class Liquibase implements AutoCloseable {
             ChangeLogIterator logIterator;
             if ((count == null) && (tag == null)) {
                 logIterator = new ChangeLogIterator(changeLog,
-                        new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                        new ContextChangeSetFilter(contexts),
-                        new LabelChangeSetFilter(labelExpression),
-                        new IgnoreChangeSetFilter(),
-                        new DbmsChangeSetFilter(database));
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new IgnoreChangeSetFilter(),
+                    new DbmsChangeSetFilter(database));
             } else if (count != null) {
                 ChangeLogIterator forwardIterator = new ChangeLogIterator(changeLog,
-                        new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                        new ContextChangeSetFilter(contexts),
-                        new LabelChangeSetFilter(labelExpression),
-                        new DbmsChangeSetFilter(database),
-                        new IgnoreChangeSetFilter(),
-                        new CountChangeSetFilter(count));
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
+                    new CountChangeSetFilter(count));
                 final ListVisitor listVisitor = new ListVisitor();
-                forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+                forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts,
+                    labelExpression));
 
                 logIterator = new ChangeLogIterator(changeLog,
-                        new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                        new ContextChangeSetFilter(contexts),
-                        new LabelChangeSetFilter(labelExpression),
-                        new DbmsChangeSetFilter(database),
-                        new IgnoreChangeSetFilter(),
-                        new ChangeSetFilter() {
-                            @Override
-                            public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-                                return new ChangeSetFilterResult(
-                                    listVisitor.getSeenChangeSets().contains(changeSet), null, null
-                                );
-                            }
-                        });
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
+                    new ChangeSetFilter() {
+                        @Override
+                        public ChangeSetFilterResult accepts(ChangeSet changeSet) {
+                            return new ChangeSetFilterResult(
+                                listVisitor.getSeenChangeSets().contains(changeSet), null, null
+                            );
+                        }
+                    });
             } else {
                 List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
                 ChangeLogIterator forwardIterator = new ChangeLogIterator(changeLog,
-                        new NotRanChangeSetFilter(ranChangeSetList),
-                        new ContextChangeSetFilter(contexts),
-                        new LabelChangeSetFilter(labelExpression),
-                        new DbmsChangeSetFilter(database),
-                        new IgnoreChangeSetFilter(),
-                        new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                    new NotRanChangeSetFilter(ranChangeSetList),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
+                    new UpToTagChangeSetFilter(tag, ranChangeSetList));
                 final ListVisitor listVisitor = new ListVisitor();
-                forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+                forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts,
+                    labelExpression));
 
                 logIterator = new ChangeLogIterator(changeLog,
-                        new NotRanChangeSetFilter(ranChangeSetList),
-                        new ContextChangeSetFilter(contexts),
-                        new LabelChangeSetFilter(labelExpression),
-                        new DbmsChangeSetFilter(database),
-                        new IgnoreChangeSetFilter(),
-                        new ChangeSetFilter() {
-                            @Override
-                            public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-                                return new ChangeSetFilterResult(
-                                    listVisitor.getSeenChangeSets().contains(changeSet), null, null
-                                );
-                            }
-                        });
+                    new NotRanChangeSetFilter(ranChangeSetList),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new DbmsChangeSetFilter(database),
+                    new IgnoreChangeSetFilter(),
+                    new ChangeSetFilter() {
+                        @Override
+                        public ChangeSetFilterResult accepts(ChangeSet changeSet) {
+                            return new ChangeSetFilterResult(
+                                listVisitor.getSeenChangeSets().contains(changeSet), null, null
+                            );
+                        }
+                    });
             }
 
             logIterator.run(createRollbackVisitor(),
@@ -1083,7 +1247,8 @@ public class Liquibase implements AutoCloseable {
      * Drops all database objects in the default schema.
      */
     public final void dropAll() throws DatabaseException {
-        dropAll(new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
+        dropAll(new CatalogAndSchema(getDatabase().getDefaultCatalogName(),
+            getDatabase().getDefaultSchemaName()));
     }
 
     /**
@@ -1091,13 +1256,17 @@ public class Liquibase implements AutoCloseable {
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
         if ((schemas == null) || (schemas.length == 0)) {
-            schemas = new CatalogAndSchema[] {
-                new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName())
+            schemas = new CatalogAndSchema[]{
+                new CatalogAndSchema(getDatabase().getDefaultCatalogName(),
+                    getDatabase().getDefaultSchemaName())
             };
         }
 
-        DropAllCommand dropAll = (DropAllCommand) CommandFactory.getInstance().getCommand("dropAll");
+        DropAllCommand dropAll = (DropAllCommand) CommandFactory
+            .getInstance()
+            .getCommand("dropAll");
         dropAll.setDatabase(this.getDatabase());
+        dropAll.setLockDatabase(this.getLockDatabase());
         dropAll.setSchemas(schemas);
 
         try {
@@ -1111,11 +1280,14 @@ public class Liquibase implements AutoCloseable {
      * 'Tags' the database for future rollback
      */
     public void tag(String tagString) throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
-            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+            ChangeLogHistoryServiceFactory
+                .getInstance()
+                .getChangeLogService(database)
+                .generateDeploymentId();
 
             checkLiquibaseTables(false, null, new Contexts(),
                 new LabelExpression());
@@ -1130,7 +1302,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -1150,11 +1322,15 @@ public class Liquibase implements AutoCloseable {
         updateTestingRollback(new Contexts(contexts), new LabelExpression());
     }
 
-    public void updateTestingRollback(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    public void updateTestingRollback(Contexts contexts,
+                                      LabelExpression labelExpression) throws LiquibaseException {
         updateTestingRollback(null, contexts, labelExpression);
 
     }
-    public void updateTestingRollback(String tag, Contexts contexts, LabelExpression labelExpression)
+
+    public void updateTestingRollback(String tag,
+                                      Contexts contexts,
+                                      LabelExpression labelExpression)
         throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -1165,21 +1341,25 @@ public class Liquibase implements AutoCloseable {
         update(tag, contexts, labelExpression);
     }
 
-    public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog,
-                                     Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    public void checkLiquibaseTables(boolean updateExistingNullChecksums,
+                                     DatabaseChangeLog databaseChangeLog,
+                                     Contexts contexts,
+                                     LabelExpression labelExpression) throws LiquibaseException {
         ChangeLogHistoryService changeLogHistoryService =
             ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(getDatabase());
         changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
         }
-        LockServiceFactory.getInstance().getLockService(getDatabase()).init();
+        LockServiceFactory.getInstance().getLockService(getLockDatabase()).init();
     }
 
     /**
      * Returns true if it is "save" to migrate the database.
-     * Currently, "safe" is defined as running in an output-sql mode or against a database on localhost.
-     * It is fine to run Liquibase against a "non-safe" database, the method is mainly used to determine if the user
+     * Currently, "safe" is defined as running in an output-sql mode or against a database on
+     * localhost.
+     * It is fine to run Liquibase against a "non-safe" database, the method is mainly used to
+     * determine if the user
      * should be prompted before continuing.
      */
     public boolean isSafeToRunUpdate() throws DatabaseException {
@@ -1192,12 +1372,14 @@ public class Liquibase implements AutoCloseable {
     public DatabaseChangeLogLock[] listLocks() throws LiquibaseException {
         checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
 
-        return LockServiceFactory.getInstance().getLockService(database).listLocks();
+        return LockServiceFactory.getInstance().getLockService(lockDatabase).listLocks();
     }
 
     public void reportLocks(PrintStream out) throws LiquibaseException {
         DatabaseChangeLogLock[] locks = listLocks();
-        out.println("Database change log locks for " + getDatabase().getConnection().getConnectionUserName()
+        out.println("Database change log locks for " + getDatabase()
+            .getConnection()
+            .getConnectionUserName()
             + "@" + getDatabase().getConnection().getURL());
         if (locks.length == 0) {
             out.println(" - No locks");
@@ -1212,7 +1394,7 @@ public class Liquibase implements AutoCloseable {
     public void forceReleaseLocks() throws LiquibaseException {
         checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
 
-        LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
+        LockServiceFactory.getInstance().getLockService(lockDatabase).forceReleaseLock();
     }
 
     /**
@@ -1227,7 +1409,9 @@ public class Liquibase implements AutoCloseable {
         return listUnrunChangeSets(contexts, labels, true);
     }
 
-    public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels, boolean checkLiquibaseTables) throws LiquibaseException {
+    public List<ChangeSet> listUnrunChangeSets(Contexts contexts,
+                                               LabelExpression labels,
+                                               boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labels);
 
@@ -1254,15 +1438,19 @@ public class Liquibase implements AutoCloseable {
         return getChangeSetStatuses(contexts, new LabelExpression());
     }
 
-    public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts, LabelExpression labelExpression)
+    public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts,
+                                                      LabelExpression labelExpression)
         throws LiquibaseException {
         return getChangeSetStatuses(contexts, labelExpression, true);
     }
-        /**
-         * Returns the ChangeSetStatuses of all changesets in the change log file and history in the order they
-         * would be ran.
-         */
-    public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts, LabelExpression labelExpression,
+
+    /**
+     * Returns the ChangeSetStatuses of all changesets in the change log file and history in
+     * the order they
+     * would be ran.
+     */
+    public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts,
+                                                      LabelExpression labelExpression,
                                                       boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -1275,18 +1463,23 @@ public class Liquibase implements AutoCloseable {
 
         changeLog.validate(database, contexts, labelExpression);
 
-        ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
+        ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, labelExpression,
+            changeLog);
 
         StatusVisitor visitor = new StatusVisitor(database);
         logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
         return visitor.getStatuses();
     }
 
-    public void reportStatus(boolean verbose, String contexts, Writer out) throws LiquibaseException {
+    public void reportStatus(boolean verbose,
+                             String contexts,
+                             Writer out) throws LiquibaseException {
         reportStatus(verbose, new Contexts(contexts), new LabelExpression(), out);
     }
 
-    public void reportStatus(boolean verbose, Contexts contexts, Writer out) throws LiquibaseException {
+    public void reportStatus(boolean verbose,
+                             Contexts contexts,
+                             Writer out) throws LiquibaseException {
         reportStatus(verbose, contexts, new LabelExpression(), out);
     }
 
@@ -1329,7 +1522,8 @@ public class Liquibase implements AutoCloseable {
         return listUnexpectedChangeSets(new Contexts(contexts), new LabelExpression());
     }
 
-    public Collection<RanChangeSet> listUnexpectedChangeSets(Contexts contexts, LabelExpression labelExpression)
+    public Collection<RanChangeSet> listUnexpectedChangeSets(Contexts contexts,
+                                                             LabelExpression labelExpression)
         throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -1338,27 +1532,32 @@ public class Liquibase implements AutoCloseable {
         changeLog.validate(database, contexts, labelExpression);
 
         ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                new ContextChangeSetFilter(contexts),
-                new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database),
-                new IgnoreChangeSetFilter());
+            new ContextChangeSetFilter(contexts),
+            new LabelChangeSetFilter(labelExpression),
+            new DbmsChangeSetFilter(database),
+            new IgnoreChangeSetFilter());
         ExpectedChangesVisitor visitor = new ExpectedChangesVisitor(database.getRanChangeSetList());
         logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
         return visitor.getUnexpectedChangeSets();
     }
 
 
-    public void reportUnexpectedChangeSets(boolean verbose, String contexts, Writer out) throws LiquibaseException {
+    public void reportUnexpectedChangeSets(boolean verbose,
+                                           String contexts,
+                                           Writer out) throws LiquibaseException {
         reportUnexpectedChangeSets(verbose, new Contexts(contexts), new LabelExpression(), out);
     }
 
-    public void reportUnexpectedChangeSets(boolean verbose, Contexts contexts, LabelExpression labelExpression,
+    public void reportUnexpectedChangeSets(boolean verbose,
+                                           Contexts contexts,
+                                           LabelExpression labelExpression,
                                            Writer out) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
         try {
-            Collection<RanChangeSet> unexpectedChangeSets = listUnexpectedChangeSets(contexts, labelExpression);
+            Collection<RanChangeSet> unexpectedChangeSets = listUnexpectedChangeSets(contexts,
+                labelExpression);
             if (unexpectedChangeSets.isEmpty()) {
                 out.append(getDatabase().getConnection().getConnectionUserName());
                 out.append("@");
@@ -1391,7 +1590,7 @@ public class Liquibase implements AutoCloseable {
      */
     public void clearCheckSums() throws LiquibaseException {
         LOG.info(LogType.LOG, "Clearing database change log checksums");
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -1431,7 +1630,8 @@ public class Liquibase implements AutoCloseable {
 
     public CheckSum calculateCheckSum(final String filename, final String id, final String author)
         throws LiquibaseException {
-        LOG.info(LogType.LOG, String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
+        LOG.info(LogType.LOG,
+            String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
         final ChangeLogParameters clParameters = this.getChangeLogParameters();
         final ResourceAccessor resourceAccessor = this.getResourceAccessor();
         final DatabaseChangeLog changeLog =
@@ -1456,7 +1656,8 @@ public class Liquibase implements AutoCloseable {
         generateDocumentation(outputDirectory, new Contexts(), new LabelExpression());
     }
 
-    public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
+    public void generateDocumentation(String outputDirectory,
+                                      String contexts) throws LiquibaseException {
         generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression());
     }
 
@@ -1465,7 +1666,7 @@ public class Liquibase implements AutoCloseable {
         LOG.info(LogType.LOG, "Generating Database Documentation");
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = LockServiceFactory.getInstance().getLockService(lockDatabase);
         lockService.waitForLock();
 
         try {
@@ -1492,9 +1693,13 @@ public class Liquibase implements AutoCloseable {
         }
     }
 
-    public DiffResult diff(Database referenceDatabase, Database targetDatabase, CompareControl compareControl)
+    public DiffResult diff(Database referenceDatabase,
+                           Database targetDatabase,
+                           CompareControl compareControl)
         throws LiquibaseException {
-        return DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, compareControl);
+        return DiffGeneratorFactory
+            .getInstance()
+            .compare(referenceDatabase, targetDatabase, compareControl);
     }
 
     /**
@@ -1512,39 +1717,55 @@ public class Liquibase implements AutoCloseable {
 
     /**
      * Add safe database properties as changelog parameters.<br/>
-     * Safe properties are the ones that doesn't have side effects in liquibase state and also don't change in during the liquibase execution
+     * Safe properties are the ones that doesn't have side effects in liquibase state and also
+     * don't change in during the liquibase execution
      * @param database Database which propeties are put in the changelog
      * @throws DatabaseException
      */
     private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
-            setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null, null, null));
-            setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
-            setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
-            setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
-            setChangeLogParameter("database.databaseMajorVersion", database.getDatabaseMajorVersion());
-            setChangeLogParameter("database.databaseMinorVersion", database.getDatabaseMinorVersion());
-            setChangeLogParameter("database.databaseProductName", database.getDatabaseProductName());
-            setChangeLogParameter("database.databaseProductVersion", database.getDatabaseProductVersion());
+            setChangeLogParameter("database.autoIncrementClause",
+                database.getAutoIncrementClause(null, null, null, null));
+        setChangeLogParameter("database.currentDateTimeFunction",
+            database.getCurrentDateTimeFunction());
+        setChangeLogParameter("database.databaseChangeLogLockTableName",
+            database.getDatabaseChangeLogLockTableName());
+            setChangeLogParameter("database.databaseChangeLogTableName",
+                database.getDatabaseChangeLogTableName());
+            setChangeLogParameter("database.databaseMajorVersion",
+                database.getDatabaseMajorVersion());
+            setChangeLogParameter("database.databaseMinorVersion",
+                database.getDatabaseMinorVersion());
+            setChangeLogParameter("database.databaseProductName",
+                database.getDatabaseProductName());
+            setChangeLogParameter("database.databaseProductVersion",
+                database.getDatabaseProductVersion());
             setChangeLogParameter("database.defaultCatalogName", database.getDefaultCatalogName());
             setChangeLogParameter("database.defaultSchemaName", database.getDefaultSchemaName());
-            setChangeLogParameter("database.defaultSchemaNamePrefix", StringUtils.trimToNull(database.getDefaultSchemaName())==null?"":"."+database.getDefaultSchemaName());
+            setChangeLogParameter("database.defaultSchemaNamePrefix",
+                StringUtils.trimToNull(database.getDefaultSchemaName())==null?"":
+                    "."+database.getDefaultSchemaName());
             setChangeLogParameter("database.lineComment", database.getLineComment());
-            setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
-            setChangeLogParameter("database.liquibaseTablespaceName", database.getLiquibaseTablespaceName());
+            setChangeLogParameter("database.liquibaseSchemaName",
+                database.getLiquibaseSchemaName());
+            setChangeLogParameter("database.liquibaseTablespaceName",
+                database.getLiquibaseTablespaceName());
             setChangeLogParameter("database.typeName", database.getShortName());
             setChangeLogParameter("database.isSafeToRunUpdate", database.isSafeToRunUpdate());
             setChangeLogParameter("database.requiresPassword", database.requiresPassword());
             setChangeLogParameter("database.requiresUsername", database.requiresUsername());
-            setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
-            setChangeLogParameter("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
-            setChangeLogParameter("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
+            setChangeLogParameter("database.supportsForeignKeyDisable",
+                database.supportsForeignKeyDisable());
+            setChangeLogParameter("database.supportsInitiallyDeferrableColumns",
+                database.supportsInitiallyDeferrableColumns());
+            setChangeLogParameter("database.supportsRestrictForeignKeys",
+                database.supportsRestrictForeignKeys());
             setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
             setChangeLogParameter("database.supportsSequences", database.supportsSequences());
             setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
     }
 
     private LockService getLockService() {
-        return LockServiceFactory.getInstance().getLockService(database);
+        return LockServiceFactory.getInstance().getLockService(lockDatabase);
     }
 
     public void setChangeExecListener(ChangeExecListener listener) {
@@ -1564,16 +1785,20 @@ public class Liquibase implements AutoCloseable {
     }
 
     @SafeVarargs
-    public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
-                                  PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes)
+    public final void generateChangeLog(CatalogAndSchema catalogAndSchema,
+                                        DiffToChangeLog changeLogWriter,
+                                        PrintStream outputStream,
+                                        Class<? extends DatabaseObject>... snapshotTypes)
         throws DatabaseException, IOException, ParserConfigurationException {
         generateChangeLog(catalogAndSchema, changeLogWriter, outputStream, null, snapshotTypes);
     }
 
     @SafeVarargs
-    public final void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter,
-                                  PrintStream outputStream, ChangeLogSerializer changeLogSerializer,
-                                  Class<? extends DatabaseObject>... snapshotTypes)
+    public final void generateChangeLog(CatalogAndSchema catalogAndSchema,
+                                        DiffToChangeLog changeLogWriter,
+                                        PrintStream outputStream,
+                                        ChangeLogSerializer changeLogSerializer,
+                                        Class<? extends DatabaseObject>... snapshotTypes)
         throws DatabaseException, IOException, ParserConfigurationException {
 
         Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
@@ -1582,7 +1807,7 @@ public class Liquibase implements AutoCloseable {
         }
 
         SnapshotControl snapshotControl = new SnapshotControl(this.getDatabase(), snapshotTypes);
-        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[] {
+        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{
             new CompareControl.SchemaComparison(catalogAndSchema, catalogAndSchema)
         }, finalCompareTypes);
 
@@ -1606,7 +1831,7 @@ public class Liquibase implements AutoCloseable {
 
             changeLogWriter.setDiffResult(diffResult);
 
-            if(changeLogSerializer != null) {
+            if (changeLogSerializer != null) {
                 changeLogWriter.print(outputStream, changeLogSerializer);
             } else {
                 changeLogWriter.print(outputStream);
