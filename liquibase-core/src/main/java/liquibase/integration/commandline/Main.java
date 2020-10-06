@@ -155,7 +155,7 @@ public class Main {
         try {
             errorLevel = run(args);
         } catch (Throwable e) {
-            System.exit(-1);
+            System.exit(1);
         }
 
         System.exit(errorLevel);
@@ -385,8 +385,8 @@ public class Main {
                             if (main.outputsLogMessages) {
                                 Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)), e);
                             } else {
-                                Scope.getCurrentScope().getUI().sendMessage((String.format(coreBundle.getString("unexpected.error"), message)));
-                                Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
+                                Scope.getCurrentScope().getUI().sendErrorMessage((String.format(coreBundle.getString("unexpected.error"), message)));
+                                Scope.getCurrentScope().getUI().sendErrorMessage(coreBundle.getString("for.more.information.use.loglevel.flag"));
 
                                 //send it to the LOG in case we're using logFile
                                 Scope.getCurrentScope().getLog(getClass()).severe((String.format(coreBundle.getString("unexpected.error"), message)), e);
@@ -1728,12 +1728,7 @@ public class Main {
                 liquibase.reportUnexpectedChangeSets(runVerbose, contexts, getOutputWriter());
                 return;
             } else if (COMMANDS.VALIDATE.equalsIgnoreCase(command)) {
-                try {
-                    liquibase.validate();
-                } catch (ValidationFailedException e) {
-                    e.printDescriptiveError(System.err);
-                    return;
-                }
+                liquibase.validate();
                 Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("no.validation.errors.found"));
                 return;
             } else if (COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(command)) {

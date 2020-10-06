@@ -10,7 +10,7 @@ import java.io.PrintStream;
 public class ConsoleUIService extends AbstractExtensibleObject implements UIService {
 
     private PrintStream outputStream = System.out;
-    private PrintStream errorStream = System.out;
+    private PrintStream errorStream = System.err;
     private boolean outputStackTraces = false;
 
     /**
