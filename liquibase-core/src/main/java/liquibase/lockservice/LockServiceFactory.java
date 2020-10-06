@@ -1,94 +1,53 @@
 package liquibase.lockservice;
 
-import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
+import liquibase.plugin.AbstractPluginFactory;
+import liquibase.plugin.Plugin;
 
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * @author John Sanda
- */
-public class LockServiceFactory {
+public class LockServiceFactory extends AbstractPluginFactory<LockService> {
 
-	private static LockServiceFactory instance;
+	private final Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
 
-	private List<LockService> registry = new ArrayList<>();
-
-	private Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
-
-	public static synchronized LockServiceFactory getInstance() {
-		if (instance == null) {
-			instance = new LockServiceFactory();
-		}
-		return instance;
+	protected LockServiceFactory() {
 	}
 
-    /**
-     * Set the instance used by this singleton. Used primarily for testing.
-     */
-    public static void setInstance(LockServiceFactory lockServiceFactory) {
-        LockServiceFactory.instance = lockServiceFactory;
-    }
-
-
-    public static synchronized void reset() {
-        instance = null;
-    }
-
-    private LockServiceFactory() {
-		try {
-			for (LockService lockService : Scope.getCurrentScope().getServiceLocator().findInstances(LockService.class)) {
-				register(lockService);
-			}
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	@Override
+	protected Class<LockService> getPluginClass() {
+		return LockService.class;
 	}
 
-	public void register(LockService lockService) {
-		registry.add(0, lockService);
+	@Override
+	protected int getPriority(LockService obj, Object... args) {
+		if (obj.supports((Database) args[0])) {
+			return obj.getPriority();
+		}
+		return Plugin.PRIORITY_NOT_APPLICABLE;
 	}
 
 	public LockService getLockService(Database database) {
 		if (!openLockServices.containsKey(database)) {
-			SortedSet<LockService> foundServices = new TreeSet<>(new Comparator<LockService>() {
-                @Override
-                public int compare(LockService o1, LockService o2) {
-                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
-                }
-            });
+			LockService lockService = getPlugin(database);
 
-			for (LockService lockService : registry) {
-				if (lockService.supports(database)) {
-					foundServices.add(lockService);
-				}
-			}
-
-			if (foundServices.isEmpty()) {
+			if (lockService == null) {
 				throw new UnexpectedLiquibaseException("Cannot find LockService for " + database.getShortName());
 			}
 
-			try {
-				LockService lockService = foundServices.iterator().next().getClass().getConstructor().newInstance();
-				lockService.setDatabase(database);
-				openLockServices.put(database, lockService);
-			} catch (Exception e) {
-				throw new UnexpectedLiquibaseException(e);
-			}
+			lockService = (LockService) lockService.clone();
+			lockService.setDatabase(database);
+			openLockServices.put(database, lockService);
 		}
 		return openLockServices.get(database);
 
 	}
 
 	public synchronized void resetAll() {
-		for (LockService lockService : registry) {
+		for (LockService lockService : openLockServices.values()) {
 			lockService.reset();
 		}
-		instance = null;
 	}
 
 }

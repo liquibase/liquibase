@@ -214,7 +214,7 @@ public class Liquibase implements AutoCloseable {
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         runInScope(() -> {
 
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
             lockService.waitForLock();
 
             changeLogParameters.setContexts(contexts);
@@ -386,7 +386,7 @@ public class Liquibase implements AutoCloseable {
 
                 outputHeader("Update Database Script");
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 try {
@@ -426,7 +426,7 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 Operation updateOperation = null;
@@ -538,7 +538,7 @@ public class Liquibase implements AutoCloseable {
         runInScope(new Scope.ScopedRunner() {
             @Override
             public void run() throws Exception {
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 HubUpdater hubUpdater = null;
@@ -784,7 +784,7 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 Operation rollbackOperation = null;
@@ -1044,7 +1044,7 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 Operation rollbackOperation = null;
@@ -1201,7 +1201,7 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 Operation rollbackOperation = null;
@@ -1355,7 +1355,7 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 Operation changeLogSyncOperation = null;
@@ -1473,7 +1473,7 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 try {
@@ -1570,7 +1570,7 @@ public class Liquibase implements AutoCloseable {
 
                 outputHeader("SQL to roll back currently unexecuted changes");
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 try {
@@ -1663,7 +1663,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     protected void resetServices() {
-        LockServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }
@@ -1722,7 +1722,7 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 try {
@@ -1743,7 +1743,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     public boolean tagExists(String tagString) throws LiquibaseException {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -1787,7 +1787,7 @@ public class Liquibase implements AutoCloseable {
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
         }
-        LockServiceFactory.getInstance().getLockService(getDatabase()).init();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(getDatabase()).init();
     }
 
     /**
@@ -1806,7 +1806,7 @@ public class Liquibase implements AutoCloseable {
     public DatabaseChangeLogLock[] listLocks() throws LiquibaseException {
         checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
 
-        return LockServiceFactory.getInstance().getLockService(database).listLocks();
+        return Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database).listLocks();
     }
 
     public void reportLocks(PrintStream out) throws LiquibaseException {
@@ -1826,7 +1826,7 @@ public class Liquibase implements AutoCloseable {
     public void forceReleaseLocks() throws LiquibaseException {
         checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
 
-        LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database).forceReleaseLock();
     }
 
     /**
@@ -2031,7 +2031,7 @@ public class Liquibase implements AutoCloseable {
             @Override
             public void run() throws Exception {
 
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 try {
@@ -2111,7 +2111,7 @@ public class Liquibase implements AutoCloseable {
                 LOG.info("Generating Database Documentation");
                 changeLogParameters.setContexts(contexts);
                 changeLogParameters.setLabels(labelExpression);
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.waitForLock();
 
                 try {
@@ -2193,7 +2193,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     private LockService getLockService() {
-        return LockServiceFactory.getInstance().getLockService(database);
+        return Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
     }
 
     public void setChangeExecListener(ChangeExecListener listener) {

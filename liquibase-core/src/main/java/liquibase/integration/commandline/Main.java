@@ -1587,7 +1587,7 @@ public class Main {
                 liquibase.reportLocks(System.err);
                 return;
             } else if (COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
-                LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
                 lockService.forceReleaseLock();
                 Scope.getCurrentScope().getUI().sendMessage(String.format(
                         coreBundle.getString("successfully.released.database.change.log.locks"),

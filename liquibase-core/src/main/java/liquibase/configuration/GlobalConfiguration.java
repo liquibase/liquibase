@@ -15,6 +15,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String OUTPUT_ENCODING = "outputFileEncoding";
     public static final String CHANGELOGLOCK_WAIT_TIME = "changeLogLockWaitTimeInMinutes";
     public static final String CHANGELOGLOCK_POLL_RATE = "changeLogLockPollRate";
+    public static final String CHANGELOGLOCK_ENABLED = "changeLogLockEnabled";
     public static final String CONVERT_DATA_TYPES = "convertDataTypes";
     public static final String GENERATE_CHANGESET_CREATED_VALUES = "generateChangeSetCreatedValues";
     public static final String AUTO_REORG = "autoReorg";
@@ -48,6 +49,10 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(CHANGELOGLOCK_POLL_RATE, Long.class)
                 .setDescription("Number of seconds wait between checks to the changelog lock when it is locked")
                 .setDefaultValue(10);
+
+        getContainer().addProperty(CHANGELOGLOCK_ENABLED, Boolean.class)
+                .setDescription("Return false if a no-op lock service should be used.")
+                .setDefaultValue(true);
 
         getContainer().addProperty(LIQUIBASE_TABLESPACE_NAME, String.class)
             .setDescription("Tablespace to use for Liquibase objects");
@@ -152,6 +157,18 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setDatabaseChangeLogLockWaitTime(Long minutes) {
         getContainer().setValue(CHANGELOGLOCK_WAIT_TIME, minutes);
+        return this;
+    }
+
+    /**
+     * Return false if a no-op lock service like {@link liquibase.lockservice.NoLockService} should be used.
+     */
+    public boolean getDatabaseChangeLogLockEnabled() {
+        return getContainer().getValue(CHANGELOGLOCK_ENABLED, Boolean.class);
+    }
+
+    public GlobalConfiguration setDatabaseChangeLogLockEnabled(boolean enable) {
+        getContainer().setValue(CHANGELOGLOCK_ENABLED, enable);
         return this;
     }
 

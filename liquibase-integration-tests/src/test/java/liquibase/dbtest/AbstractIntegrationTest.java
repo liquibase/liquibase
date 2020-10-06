@@ -213,8 +213,8 @@ public abstract class AbstractIntegrationTest {
             SnapshotGeneratorFactory.resetAll();
             Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
 
-            LockServiceFactory.getInstance().resetAll();
-            LockServiceFactory.getInstance().getLockService(database).init();
+            Scope.getCurrentScope().getSingleton(LockServiceFactory.class).resetAll();
+            Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database).init();
 
             ChangeLogHistoryServiceFactory.getInstance().resetAll();
         }
@@ -248,7 +248,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             SnapshotGeneratorFactory.resetAll();
-            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
             emptyTestSchema(CatalogAndSchema.DEFAULT.getCatalogName(), CatalogAndSchema.DEFAULT.getSchemaName(),
                     database);
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
@@ -790,7 +790,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
 
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
         lockService.forceReleaseLock();
 
         liquibase.update(includedChangeLog);
@@ -1039,9 +1039,6 @@ public abstract class AbstractIntegrationTest {
         } catch (ChangeLogParseException ignored) {
             //expected
         }
-
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-        assertFalse(lockService.hasChangeLogLock());
     }
 
     @Test

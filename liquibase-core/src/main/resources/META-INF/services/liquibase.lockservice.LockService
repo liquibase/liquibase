@@ -1,4 +1,4 @@
-liquibase.lockservice.LockServiceImpl
 liquibase.lockservice.MockLockService
+liquibase.lockservice.NoLockService
 liquibase.lockservice.OfflineLockService
 liquibase.lockservice.StandardLockService

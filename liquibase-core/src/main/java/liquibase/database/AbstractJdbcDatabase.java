@@ -807,7 +807,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
 
             ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).destroy();
-            LockServiceFactory.getInstance().getLockService(this).destroy();
+            Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(this).close();
 
             this.setAutoCommit(previousAutoCommit);
             Scope.getCurrentScope().getLog(getClass()).info(String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
@@ -1349,7 +1349,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void resetInternalState() {
         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).reset();
-        LockServiceFactory.getInstance().getLockService(this).reset();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(this).reset();
     }
 
     @Override

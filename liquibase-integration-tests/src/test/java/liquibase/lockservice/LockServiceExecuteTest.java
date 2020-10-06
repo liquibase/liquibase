@@ -20,7 +20,7 @@ public class LockServiceExecuteTest {
     @Before
     public void setUp() throws DatabaseException, LockException {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
-        LockServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).resetAll();
 
         fixupLockTables();
     }
@@ -70,7 +70,7 @@ public class LockServiceExecuteTest {
 
     @After
     public void tearDown() throws LockException, DatabaseException {
-        LockServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).resetAll();
 
         fixupLockTables();
     }

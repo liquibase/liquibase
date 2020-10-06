@@ -17,6 +17,8 @@ import liquibase.exception.LockException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.core.AbstractLogger;
+import liquibase.plugin.Plugin;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -31,63 +33,29 @@ import java.util.*;
 
 import static java.util.ResourceBundle.getBundle;
 
-public class StandardLockService implements LockService {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-
-    protected Database database;
+public class StandardLockService extends AbstractLockService {
 
     protected boolean hasChangeLogLock;
-
-    private Long changeLogLockPollRate;
-    private Long changeLogLockRecheckTime;
 
     private Boolean hasDatabaseChangeLogLockTable;
     private boolean isDatabaseChangeLogLockTableInitialized;
     private ObjectQuotingStrategy quotingStrategy;
-
 
     public StandardLockService() {
     }
 
     @Override
     public int getPriority() {
-        return PRIORITY_DEFAULT;
+        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockEnabled()) {
+            return Plugin.PRIORITY_DEFAULT;
+        } else {
+            return Plugin.PRIORITY_NOT_APPLICABLE;
+        }
     }
 
     @Override
     public boolean supports(Database database) {
         return true;
-    }
-
-    @Override
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public Long getChangeLogLockWaitTime() {
-        if (changeLogLockPollRate != null) {
-            return changeLogLockPollRate;
-        }
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getDatabaseChangeLogLockWaitTime();
-    }
-
-    @Override
-    public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
-        this.changeLogLockPollRate = changeLogLockWaitTime;
-    }
-
-    public Long getChangeLogLockRecheckTime() {
-        if (changeLogLockRecheckTime != null) {
-            return changeLogLockRecheckTime;
-        }
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getDatabaseChangeLogLockPollRate();
-    }
-
-    @Override
-    public void setChangeLogLockRecheckTime(long changeLogLockRecheckTime) {
-        this.changeLogLockRecheckTime = changeLogLockRecheckTime;
     }
 
     @Override
@@ -185,11 +153,6 @@ public class StandardLockService implements LockService {
         return isDatabaseChangeLogLockTableInitialized;
     }
 
-    @Override
-    public boolean hasChangeLogLock() {
-        return hasChangeLogLock;
-    }
-
     public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
         if (hasDatabaseChangeLogLockTable == null) {
             try {
@@ -201,41 +164,7 @@ public class StandardLockService implements LockService {
         }
         return hasDatabaseChangeLogLockTable;
     }
-
-
-    @Override
-    public void waitForLock() throws LockException {
-
-        boolean locked = false;
-        long timeToGiveUp = new Date().getTime() + (getChangeLogLockWaitTime() * 1000 * 60);
-        while (!locked && (new Date().getTime() < timeToGiveUp)) {
-            locked = acquireLock();
-            if (!locked) {
-                Scope.getCurrentScope().getLog(getClass()).info("Waiting for changelog lock....");
-                try {
-                    Thread.sleep(getChangeLogLockRecheckTime() * 1000);
-                } catch (InterruptedException e) {
-                    // Restore thread interrupt status
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
-
-        if (!locked) {
-            DatabaseChangeLogLock[] locks = listLocks();
-            String lockedBy;
-            if (locks.length > 0) {
-                DatabaseChangeLogLock lock = locks[0];
-                lockedBy = lock.getLockedBy() + " since " +
-                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                                .format(lock.getLockGranted());
-            } else {
-                lockedBy = "UNKNOWN";
-            }
-            throw new LockException("Could not acquire change log lock.  Currently locked by " + lockedBy);
-        }
-    }
-
+    
     @Override
     public boolean acquireLock() throws LockException {
         if (hasChangeLogLock) {
@@ -283,7 +212,7 @@ public class StandardLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                Scope.getCurrentScope().getLog(getClass()).info(coreBundle.getString("successfully.acquired.change.log.lock"));
+                Scope.getCurrentScope().getLog(getClass()).info("Successfully acquired change log lock");
 
                 hasChangeLogLock = true;
 
@@ -425,7 +354,7 @@ public class StandardLockService implements LockService {
     }
 
     @Override
-    public void destroy() throws DatabaseException {
+    public void close() throws DatabaseException {
         try {
             //
             // This code now uses the ChangeGeneratorFactory to

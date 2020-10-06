@@ -17,14 +17,10 @@ import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.HubUpdater;
 import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.Connection;
 import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.Operation;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
-import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -106,7 +102,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     @Override
     protected CommandResult run() throws Exception {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        LockService lockService = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
         Logger log = Scope.getCurrentScope().getLog(getClass());
         HubUpdater hubUpdater = null;
         try {
@@ -134,7 +130,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             throw new DatabaseException(e);
         } finally {
             lockService.releaseLock();
-            lockService.destroy();
+            lockService.close();
             resetServices();
         }
 
@@ -172,11 +168,11 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
         }
-        LockServiceFactory.getInstance().getLockService(database).init();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database).init();
     }
 
     protected void resetServices() {
-        LockServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).resetAll();
         ChangeLogHistoryServiceFactory.getInstance().resetAll();
         Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
     }

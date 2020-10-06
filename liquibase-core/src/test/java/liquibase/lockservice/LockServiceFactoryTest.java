@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.MySQLDatabase;
@@ -12,27 +13,24 @@ import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author John Sanda
- */
 public class LockServiceFactoryTest {
 
     @Before
     public void before() {
-        LockServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).resetAll();
     }
 
     @After
     public void after() {
-        LockServiceFactory.getInstance().resetAll();
+        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).resetAll();
     }
 
     @Test
     public void getInstance() {
-        assertNotNull(LockServiceFactory.getInstance());
-        assertTrue(LockServiceFactory.getInstance() == LockServiceFactory.getInstance());
+        assertNotNull(Scope.getCurrentScope().getSingleton(LockServiceFactory.class));
+        assertTrue(Scope.getCurrentScope().getSingleton(LockServiceFactory.class) == Scope.getCurrentScope().getSingleton(LockServiceFactory.class));
 
-//        Collection<LockService> lockServices = LockServiceFactory.getInstance().getLockServices();
+//        Collection<LockService> lockServices = Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockServices();
 //        assertEquals(0, lockServices.size());
     }
 
@@ -63,7 +61,7 @@ public class LockServiceFactoryTest {
         databaseFactory.register(oracle2);
         databaseFactory.register(mysql);
 
-        LockServiceFactory lockServiceFactory = LockServiceFactory.getInstance();
+        LockServiceFactory lockServiceFactory = Scope.getCurrentScope().getSingleton(LockServiceFactory.class);
 
         assertNotNull(lockServiceFactory.getLockService(oracle1));
         assertNotNull(lockServiceFactory.getLockService(oracle2));
