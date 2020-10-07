@@ -1,6 +1,7 @@
 Liquibase Core Changelog
 ===========================================
-Changes in version 3.10.3
+
+Changes in version 3.10.3 (2020.10.09)
 
 - GH PR#912  - CORE-3379 escaping postgres questionmark operators to prevent unwanted parameter syntax
 - GH PR#936  - SpringLiquibase createResourceOpener() now returns a ResourceAccessor, which allows it to be overridden with any kind of ResourceAccessor
@@ -21,6 +22,9 @@ Changes in version 3.10.3
 - GH PR#1418 - Revert "[CORE-3523] Consistently map Liquibase integer types to Oracle integer types"  UNMERGE 945
 - GH PR#1422 - Updates for #1081 in 3.10.x
 - GH PR#1431 - Fix merge issue in OracleDatabase
+- GH PR#1443 - Handle MSSQL computed columns in generate changelog LB-366
+- GH PR#1447 - Do not use batched statements for Postgres LoadDataChange LB-744
+- Fixed schema version number for 3.10
 
 Changes in version 4.1.0 (2020.9.28)
 
