@@ -5,24 +5,24 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExecutorService {
 
     private static ExecutorService instance = new ExecutorService();
 
-    private List<Executor> registry = new ArrayList<>();
+    private final List<Executor> registry;
 
-    private Map<String, Executor> executors = new HashMap<>();
+    private final Map<String, Executor> executors = new ConcurrentHashMap<>();
 
     private ExecutorService() {
-        Class<? extends Executor>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(Executor.class);
+            Class<? extends Executor>[] classes = ServiceLocator.getInstance().findClasses(Executor.class);
+            registry = new ArrayList<>(classes.length);
 
             for (Class<? extends Executor> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+                registry.add(clazz.getConstructor().newInstance());
             }
-
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -34,10 +34,6 @@ public class ExecutorService {
     }
 
     private Executor getExecutorValue(String executorName, Database database) throws UnexpectedLiquibaseException {
-        String key = createKey(executorName, database);
-        if (executors.containsKey(key)) {
-            return executors.get(key);
-        }
         SortedSet<Executor> foundExecutors = new TreeSet<>(new Comparator<Executor>() {
             @Override
             public int compare(Executor o1, Executor o2) {
@@ -70,10 +66,6 @@ public class ExecutorService {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
-    }
-
-    private void register(Executor executor) {
-        registry.add(0, executor);
     }
 
     public static ExecutorService getInstance() {
