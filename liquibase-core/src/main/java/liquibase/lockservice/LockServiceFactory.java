@@ -1,6 +1,7 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.plugin.AbstractPluginFactory;
 import liquibase.plugin.Plugin;
@@ -22,13 +23,14 @@ public class LockServiceFactory extends AbstractPluginFactory<LockService> {
 
 	@Override
 	protected int getPriority(LockService obj, Object... args) {
-		if (obj.supports((Database) args[0])) {
+		final Database database = (Database) args[0];
+		if (obj.supports(database)) {
 			return obj.getPriority();
 		}
 		return Plugin.PRIORITY_NOT_APPLICABLE;
 	}
 
-	public LockService getLockService(Database database) {
+	public LockService getLockService(Database database) throws DatabaseException {
 		if (!openLockServices.containsKey(database)) {
 			LockService lockService = getPlugin(database);
 
@@ -38,6 +40,8 @@ public class LockServiceFactory extends AbstractPluginFactory<LockService> {
 
 			lockService = (LockService) lockService.clone();
 			lockService.setDatabase(database);
+			lockService.init();
+
 			openLockServices.put(database, lockService);
 		}
 		return openLockServices.get(database);

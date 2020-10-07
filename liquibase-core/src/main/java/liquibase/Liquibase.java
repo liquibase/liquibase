@@ -1787,7 +1787,6 @@ public class Liquibase implements AutoCloseable {
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts, labelExpression);
         }
-        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(getDatabase()).init();
     }
 
     /**
@@ -2192,7 +2191,7 @@ public class Liquibase implements AutoCloseable {
         setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
     }
 
-    private LockService getLockService() {
+    private LockService getLockService() throws DatabaseException {
         return Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database);
     }
 

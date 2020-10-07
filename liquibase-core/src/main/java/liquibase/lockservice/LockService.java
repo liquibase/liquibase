@@ -7,7 +7,7 @@ import liquibase.exception.LockException;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.PrioritizedService;
 
-public interface LockService extends Plugin, ExtensibleObject, PrioritizedService, AutoCloseable {
+public interface LockService extends Plugin, ExtensibleObject, PrioritizedService {
 
     boolean supports(Database database);
 
@@ -42,7 +42,8 @@ public interface LockService extends Plugin, ExtensibleObject, PrioritizedServic
 
 
     /**
-     * Closes any resources used by this lock service.
+     * Destroys any resources used by this lock service.
+     * Used primarily by dropAll to clean up this table after releasing the lock.
      */
-    void close() throws DatabaseException;
+    void destroy() throws DatabaseException;
 }

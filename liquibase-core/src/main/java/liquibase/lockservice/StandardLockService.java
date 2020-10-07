@@ -9,6 +9,9 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.BooleanType;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.exception.DatabaseException;
@@ -17,29 +20,24 @@ import liquibase.exception.LockException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.core.AbstractLogger;
 import liquibase.plugin.Plugin;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DataType;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-import java.text.DateFormat;
 import java.util.*;
-
-import static java.util.ResourceBundle.getBundle;
 
 public class StandardLockService extends AbstractLockService {
 
     protected boolean hasChangeLogLock;
-
-    private Boolean hasDatabaseChangeLogLockTable;
-    private boolean isDatabaseChangeLogLockTableInitialized;
-    private ObjectQuotingStrategy quotingStrategy;
 
     public StandardLockService() {
     }
@@ -61,56 +59,81 @@ public class StandardLockService extends AbstractLockService {
     @Override
     public void init() throws DatabaseException {
         boolean createdTable = false;
-        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc",  database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
 
-        if (!hasDatabaseChangeLogLockTable()) {
-            try {
-                executor.comment("Create Database Lock Table");
-                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                database.commit();
-                Scope.getCurrentScope().getLog(getClass()).fine(
-                        "Created database lock table with name: " +
-                                database.escapeTableName(
-                                        database.getLiquibaseCatalogName(),
-                                        database.getLiquibaseSchemaName(),
-                                        database.getDatabaseChangeLogLockTableName()
-                                )
-                );
-            } catch (DatabaseException e) {
-                if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
-                    //hit a race condition where the table got created by another node.
-                    Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
-                            "due to exception: " + e.getMessage() + ". Continuing on");
-                }  else {
-                    throw e;
+        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(getRequiredQuotingStrategy());
+
+        try {
+            if (!hasDatabaseChangeLogLockTable()) {
+                try {
+                    executor.comment("Create and initialize Database Lock Table");
+                    for (SqlStatement statement : getSetupStatements()) {
+                        executor.execute(statement);
+                    }
+                    database.commit();
+
+                    Scope.getCurrentScope().getLog(getClass()).fine(
+                            "Created database lock table: " +
+                                    database.escapeTableName(
+                                            database.getLiquibaseCatalogName(),
+                                            database.getLiquibaseSchemaName(),
+                                            database.getDatabaseChangeLogLockTableName()
+                                    )
+                    );
+
+                    createdTable = true;
+                } catch (DatabaseException e) {
+                    if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
+                        //hit a race condition where the table got created by another node.
+                        Scope.getCurrentScope().getLog(getClass()).fine("Database lock table already appears to exist " +
+                                "due to exception: " + e.getMessage() + ". Continuing on");
+                    } else {
+                        throw e;
+                    }
                 }
             }
-            this.hasDatabaseChangeLogLockTable = true;
-            createdTable = true;
-            hasDatabaseChangeLogLockTable = true;
+
+            if (!createdTable && executor.updatesDatabase()) {
+                checkChangeLogLockTableStructure(executor);
+            }
+        } finally {
+            database.setObjectQuotingStrategy(originalQuotingStrategy);
         }
 
-        if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
-            executor.comment("Initialize Database Lock Table");
-            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-            database.commit();
-        }
+    }
 
-        if (executor.updatesDatabase() && (database instanceof DerbyDatabase) && ((DerbyDatabase) database)
-                .supportsBooleanDataType() || database.getClass().isAssignableFrom(DB2Database.class) && ((DB2Database) database)
-    			.supportsBooleanDataType()) {
-            //check if the changelog table is of an old smallint vs. boolean format
-            String lockTable = database.escapeTableName(
-                    database.getLiquibaseCatalogName(),
-                    database.getLiquibaseSchemaName(),
-                    database.getDatabaseChangeLogLockTableName()
-            );
-            Object obj = executor.queryForObject(
-                    new RawSqlStatement(
-                            "SELECT MIN(locked) AS test FROM " + lockTable + " FETCH FIRST ROW ONLY"
-                    ), Object.class
-            );
-            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
+    /**
+     * Upgrades old table structures to match the current expectation
+     */
+    protected void checkChangeLogLockTableStructure(Executor executor) throws DatabaseException {
+        Table changeLogTableDef = (Table) new Table()
+                .setName(database.getDatabaseChangeLogLockTableName())
+                .setSchema(new Schema(
+                        database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()
+                ));
+
+        try {
+            final Table existingTable = SnapshotGeneratorFactory.getInstance().createSnapshot(changeLogTableDef, database);
+            String recreateReason = null;
+
+            if ((database instanceof DerbyDatabase && ((DerbyDatabase) database).supportsBooleanDataType())
+                    || database instanceof DB2Database && ((DB2Database) database).supportsBooleanDataType()) {
+
+                final DataType lockedType = existingTable.getColumn("locked").getType();
+                LiquibaseDataType lockedDataType = DataTypeFactory.getInstance().fromDescription(lockedType.toString(), database);
+
+                if (!(lockedDataType instanceof BooleanType)) {
+                    recreateReason = "locked column is not a boolean";
+                }
+            }
+
+            if (existingTable.getColumn("heartbeat") == null) {
+                recreateReason = "missing heartbeat column";
+            }
+
+            if (recreateReason != null) {
+                executor.comment("Rebuilding lock table because " + recreateReason);
                 executor.execute(
                         new DropTableStatement(
                                 database.getLiquibaseCatalogName(),
@@ -119,65 +142,57 @@ public class StandardLockService extends AbstractLockService {
                                 false
                         )
                 );
-                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-            }
-        }
 
-    }
-
-
-    public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
-        if (!isDatabaseChangeLogLockTableInitialized) {
-            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-
-            try {
-                isDatabaseChangeLogLockTableInitialized = executor.queryForInt(
-                        new RawSqlStatement("SELECT COUNT(*) FROM " +
-                                database.escapeTableName(
-                                        database.getLiquibaseCatalogName(),
-                                        database.getLiquibaseSchemaName(),
-                                        database.getDatabaseChangeLogLockTableName()
-                                )
-                        )
-                ) > 0;
-            } catch (LiquibaseException e) {
-                if (executor.updatesDatabase()) {
-                    throw new UnexpectedLiquibaseException(e);
-                } else {
-                    //probably didn't actually create the table yet.
-                    isDatabaseChangeLogLockTableInitialized = !tableJustCreated;
+                for (SqlStatement statement : getSetupStatements()) {
+                    executor.execute(statement);
                 }
+                database.commit();
             }
+
+        } catch (InvalidExampleException e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-        return isDatabaseChangeLogLockTableInitialized;
     }
 
-    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        if (hasDatabaseChangeLogLockTable == null) {
-            try {
-                hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance()
-                        .hasDatabaseChangeLogLockTable(database);
-            } catch (LiquibaseException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        }
-        return hasDatabaseChangeLogLockTable;
+    /**
+     * The quoting strategy to use when accessing the databsechangelog table.
+     * This implementation uses {@link ObjectQuotingStrategy#LEGACY} for historical reasons
+     */
+    protected ObjectQuotingStrategy getRequiredQuotingStrategy() {
+        return ObjectQuotingStrategy.LEGACY;
     }
-    
+
+
+    /**
+     * Checks if the changelog lock table exists
+     */
+    protected boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+        try {
+            return SnapshotGeneratorFactory.getInstance().has(
+                    new Table()
+                            .setName(database.getDatabaseChangeLogLockTableName())
+                            .setSchema(new Schema(
+                                    database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()
+                            )),
+                    database);
+        } catch (InvalidExampleException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     @Override
     public boolean acquireLock() throws LockException {
         if (hasChangeLogLock) {
             return true;
         }
 
-        quotingStrategy = database.getObjectQuotingStrategy();
-
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+
+        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(getRequiredQuotingStrategy());
 
         try {
             database.rollback();
-            this.init();
 
             Boolean locked = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForObject(
                     new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class
@@ -186,7 +201,6 @@ public class StandardLockService extends AbstractLockService {
             if (locked) {
                 return false;
             } else {
-
                 executor.comment("Lock Database");
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
                 if ((rowsUpdated == -1) && (database instanceof MSSQLDatabase)) {
@@ -198,7 +212,7 @@ public class StandardLockService extends AbstractLockService {
                             new LockDatabaseChangeLogStatement(), database
                     );
                     if (sql.length != 1) {
-                        throw new UnexpectedLiquibaseException("Did not expect "+sql.length+" statements");
+                        throw new UnexpectedLiquibaseException("Did not expect " + sql.length + " statements");
                     }
                     rowsUpdated = executor.update(new RawSqlStatement("EXEC sp_executesql N'SET NOCOUNT OFF " +
                             sql[0].toSql().replace("'", "''") + "'"));
@@ -206,8 +220,7 @@ public class StandardLockService extends AbstractLockService {
                 if (rowsUpdated > 1) {
                     throw new LockException("Did not update change log lock correctly");
                 }
-                if (rowsUpdated == 0)
-                {
+                if (rowsUpdated == 0) {
                     // another node was faster
                     return false;
                 }
@@ -222,6 +235,7 @@ public class StandardLockService extends AbstractLockService {
         } catch (Exception e) {
             throw new LockException(e);
         } finally {
+            database.setObjectQuotingStrategy(originalQuotingStrategy);
             try {
                 database.rollback();
             } catch (DatabaseException e) {
@@ -232,14 +246,10 @@ public class StandardLockService extends AbstractLockService {
 
     @Override
     public void releaseLock() throws LockException {
-
-        ObjectQuotingStrategy incomingQuotingStrategy = null;
-        if (this.quotingStrategy != null) {
-            incomingQuotingStrategy = database.getObjectQuotingStrategy();
-            database.setObjectQuotingStrategy(this.quotingStrategy);
-        }
-
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+
+        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(getRequiredQuotingStrategy());
         try {
             if (this.hasDatabaseChangeLogLockTable()) {
                 executor.comment("Release Database Lock");
@@ -254,7 +264,7 @@ public class StandardLockService extends AbstractLockService {
                             new UnlockDatabaseChangeLogStatement(), database
                     );
                     if (sql.length != 1) {
-                        throw new UnexpectedLiquibaseException("Did not expect "+sql.length+" statements");
+                        throw new UnexpectedLiquibaseException("Did not expect " + sql.length + " statements");
                     }
                     updatedRows = executor.update(
                             new RawSqlStatement(
@@ -291,15 +301,17 @@ public class StandardLockService extends AbstractLockService {
                 Scope.getCurrentScope().getLog(getClass()).info("Successfully released change log lock");
                 database.rollback();
             } catch (DatabaseException e) {
+                Scope.getCurrentScope().getLog(getClass()).fine("Error rolling back: "+e.getMessage(), e);
             }
-            if (incomingQuotingStrategy != null) {
-                database.setObjectQuotingStrategy(incomingQuotingStrategy);
-            }
+            database.setObjectQuotingStrategy(originalQuotingStrategy);
         }
     }
 
     @Override
     public DatabaseChangeLogLock[] listLocks() throws LockException {
+        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(getRequiredQuotingStrategy());
+
         try {
             if (!this.hasDatabaseChangeLogLockTable()) {
                 return new DatabaseChangeLogLock[0];
@@ -328,33 +340,26 @@ public class StandardLockService extends AbstractLockService {
                     );
                 }
             }
-            return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
+            return allLocks.toArray(new DatabaseChangeLogLock[0]);
         } catch (Exception e) {
             throw new LockException(e);
+        } finally {
+            database.setObjectQuotingStrategy(originalQuotingStrategy);
         }
     }
 
     @Override
     public void forceReleaseLock() throws LockException, DatabaseException {
-        this.init();
         releaseLock();
-        /*try {
-            releaseLock();
-        } catch (LockException e) {
-            // ignore ?
-            Scope.getCurrentScope().getLog(getClass()).info("Ignored exception in forceReleaseLock: " + e.getMessage());
-        }*/
     }
 
     @Override
     public void reset() {
         hasChangeLogLock = false;
-        hasDatabaseChangeLogLockTable = null;
-        isDatabaseChangeLogLockTableInitialized = false;
     }
 
     @Override
-    public void close() throws DatabaseException {
+    public void destroy() throws DatabaseException {
         try {
             //
             // This code now uses the ChangeGeneratorFactory to
@@ -369,7 +374,7 @@ public class StandardLockService extends AbstractLockService {
             //
             DatabaseObject example =
                     new Table().setName(database.getDatabaseChangeLogLockTableName())
-                               .setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
+                            .setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
             if (SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 DatabaseObject table = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
                 DiffOutputControl diffOutputControl = new DiffOutputControl(true, true, false, null);
@@ -381,5 +386,41 @@ public class StandardLockService extends AbstractLockService {
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    protected List<SqlStatement> getSetupStatements() {
+        List<SqlStatement> returnList = new ArrayList<>();
+
+        String charTypeName = getCharTypeName(database);
+        String dateTimeTypeString = getDateTimeTypeString(database);
+
+        returnList.add(new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+                .setTablespace(database.getLiquibaseTablespaceName())
+                .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("int", database), null, null, null, new NotNullConstraint())
+                .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("boolean", database), null, null, new NotNullConstraint())
+                .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription(dateTimeTypeString, database))
+                .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database)));
+
+        returnList.add(new DeleteStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+        returnList.add(new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+                .addColumnValue("ID", 1)
+                .addColumnValue("LOCKED", Boolean.FALSE));
+
+
+        return returnList;
+    }
+
+    protected String getCharTypeName(Database database) {
+        if ((database instanceof MSSQLDatabase) && ((MSSQLDatabase) database).sendsStringParametersAsUnicode()) {
+            return "nvarchar";
+        }
+        return "varchar";
+    }
+
+    protected String getDateTimeTypeString(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return "datetime2(3)";
+        }
+        return "datetime";
     }
 }

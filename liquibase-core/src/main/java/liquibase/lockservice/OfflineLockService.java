@@ -1,6 +1,7 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
@@ -15,7 +16,9 @@ public class OfflineLockService extends AbstractLockService {
 
     @Override
     public boolean supports(Database database) {
-        return (database.getConnection() != null) && (database.getConnection() instanceof OfflineConnection);
+        final DatabaseConnection connection = database.getConnection();
+
+        return connection == null || connection instanceof OfflineConnection;
     }
 
     @Override

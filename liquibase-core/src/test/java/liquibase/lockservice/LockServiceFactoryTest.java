@@ -35,7 +35,7 @@ public class LockServiceFactoryTest {
     }
 
     @Test
-    public void getLockService() {
+    public void getLockService() throws Exception {
         final Database oracle1 = new OracleDatabase() {
             @Override
             public boolean equals(Object o) {

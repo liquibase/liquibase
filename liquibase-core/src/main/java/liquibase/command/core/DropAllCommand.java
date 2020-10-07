@@ -130,7 +130,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             throw new DatabaseException(e);
         } finally {
             lockService.releaseLock();
-            lockService.close();
+            lockService.destroy();
             resetServices();
         }
 

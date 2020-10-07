@@ -214,7 +214,6 @@ public abstract class AbstractIntegrationTest {
             Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
 
             Scope.getCurrentScope().getSingleton(LockServiceFactory.class).resetAll();
-            Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database).init();
 
             ChangeLogHistoryServiceFactory.getInstance().resetAll();
         }
@@ -344,7 +343,7 @@ public abstract class AbstractIntegrationTest {
         return createLiquibase(changeLogFile, fileOpener);
     }
 
-    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) {
+    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws DatabaseException {
         Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);

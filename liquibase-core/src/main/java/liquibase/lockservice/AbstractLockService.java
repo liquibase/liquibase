@@ -106,7 +106,7 @@ public abstract class AbstractLockService extends AbstractPlugin implements Lock
      * Default implementation does nothing
      */
     @Override
-    public void close() throws DatabaseException {
+    public void destroy() throws DatabaseException {
     }
 
 }

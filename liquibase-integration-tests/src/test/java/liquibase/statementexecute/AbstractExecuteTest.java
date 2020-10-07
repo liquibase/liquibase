@@ -97,7 +97,6 @@ public abstract class AbstractExecuteTest {
 
                     if (database.getConnection() != null) {
                         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
-                        Scope.getCurrentScope().getSingleton(LockServiceFactory.class).getLockService(database).init();
                     }
 
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, database);

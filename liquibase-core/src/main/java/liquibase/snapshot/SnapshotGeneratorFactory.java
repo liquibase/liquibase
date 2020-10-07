@@ -274,15 +274,6 @@ public class SnapshotGeneratorFactory {
         }
     }
 
-    public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
-        try {
-            return has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(
-                    new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database);
-        } catch (InvalidExampleException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-    }
-
     public Set<Class<? extends DatabaseObject>> getContainerTypes(Class<? extends DatabaseObject> type,
                                                                   Database database) {
         Set<Class<? extends DatabaseObject>>  returnSet = new HashSet<>();
