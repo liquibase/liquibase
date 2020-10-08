@@ -13,7 +13,9 @@ import liquibase.resource.ResourceAccessor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class ResourceSupplier {
 
@@ -56,6 +58,11 @@ public class ResourceSupplier {
         @Override
         public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
             return null;
+        }
+
+        @Override
+        public SortedSet<String> describeLocations() {
+            return new TreeSet<>(Arrays.asList("Logic in ResourceSupplier.java"));
         }
     }
 }

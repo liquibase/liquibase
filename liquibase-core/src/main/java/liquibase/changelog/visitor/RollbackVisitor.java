@@ -9,6 +9,11 @@ import liquibase.changelog.RollbackContainer;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.MigrationFailedException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
+import liquibase.logging.LogService;
 
 import java.util.List;
 import java.util.Set;
@@ -39,12 +44,28 @@ public class RollbackVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset:" + changeSet);
-        changeSet.rollback(this.database, this.execListener);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        if (! (executor instanceof LoggingExecutor)) {
+            Scope.getCurrentScope().getUI().sendMessage("Rolling Back Changeset:" + changeSet);
+        }
+        sendRollbackWillRunEvent(changeSet, databaseChangeLog, database);
+        try {
+            changeSet.rollback(this.database, this.execListener);
+        }
+        catch (Exception e) {
+            fireRollbackFailed(changeSet, databaseChangeLog, database, e);
+            throw e;
+        }
         this.database.removeRanStatus(changeSet);
         sendRollbackEvent(changeSet, databaseChangeLog, database);
         this.database.commit();
         checkForEmptyRollbackFile(changeSet);
+    }
+
+    protected void fireRollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {
+        if (execListener != null) {
+            execListener.rollbackFailed(changeSet, databaseChangeLog, database, e);
+        }
     }
 
     private void checkForEmptyRollbackFile(ChangeSet changeSet) {
@@ -65,7 +86,13 @@ public class RollbackVisitor implements ChangeSetVisitor {
         }
     }
 
-    private void sendRollbackEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2) {
+    private void sendRollbackWillRunEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        if (execListener != null) {
+            execListener.willRollback(changeSet, databaseChangeLog, database);
+        }
+    }
+
+    private void sendRollbackEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         if (execListener != null) {
             execListener.rolledBack(changeSet, databaseChangeLog, database);
         }

@@ -54,7 +54,7 @@ public class Column extends AbstractDatabaseObject {
         ConstraintsConfig constraints = columnConfig.getConstraints();
         if (constraints != null) {
             setNullable(constraints.isNullable());
-            setShouldValidateNullable(constraints.shouldValidateNullable());
+            setValidateNullable(constraints.getValidateNullable());
         }
 
         setRemarks(columnConfig.getRemarks());
@@ -191,19 +191,19 @@ public class Column extends AbstractDatabaseObject {
      * should be checked if it refers to a valid row or not.
      * @return true if ENABLE VALIDATE (this is the default), or false if ENABLE NOVALIDATE.
      */
-    public boolean shouldValidate() {
+    public boolean getValidate() {
         return getAttribute("validate", true);
     }
 
     /**
-     * @param shouldValidateNullable - if shouldValidateNullable is set to FALSE then the constraint will be created
+     * @param validateNullable - if validateNullable is set to FALSE then the constraint will be created
      * with the 'ENABLE NOVALIDATE' mode. This means the constraint would be created, but that no
      * check will be done to ensure old data has valid not null constraint - only new data would be checked
      * to see if it complies with the constraint logic. The default state for not null constraint is to
      * have 'ENABLE VALIDATE' set.
      */
-    public Column setShouldValidateNullable(Boolean shouldValidateNullable) {
-        this.setAttribute("validateNullable", shouldValidateNullable);
+    public Column setValidateNullable(Boolean validateNullable) {
+        this.setAttribute("validateNullable", validateNullable);
         return this;
     }
 
@@ -212,7 +212,7 @@ public class Column extends AbstractDatabaseObject {
      * otherwise returns true.
      * @return
      */
-    public boolean shouldValidateNullable() {
+    public boolean getValidateNullable() {
         return getAttribute("validateNullable", true);
     }
 

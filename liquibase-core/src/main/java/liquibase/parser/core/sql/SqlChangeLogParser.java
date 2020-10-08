@@ -8,6 +8,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.FileUtil;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
         try {
             InputStream sqlStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
             if (sqlStream == null) {
-                throw new ChangeLogParseException("File does not exist: "+physicalChangeLogLocation);
+                throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
             }
             String sql = StreamUtil.readStreamAsString(sqlStream);
             change.setSql(sql);

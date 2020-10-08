@@ -7,6 +7,7 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -44,18 +45,22 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         ChangeSet changeSet = statement.getChangeSet();
 
         SqlStatement runStatement;
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
-            if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
-                return new Sql[0]; //don't mark
-            }
-
-            String tag = null;
-            for (Change change : changeSet.getChanges()) {
-                if (change instanceof TagDatabaseChange) {
-                    TagDatabaseChange tagChange = (TagDatabaseChange) change;
-                    tag = tagChange.getTag();
+            try {
+                if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
+                    return new Sql[0]; //don't mark
                 }
-            }
+
+                String tag = null;
+                for (Change change : changeSet.getChanges()) {
+                    if (change instanceof TagDatabaseChange) {
+                        TagDatabaseChange tagChange = (TagDatabaseChange) change;
+                        tag = tagChange.getTag();
+                    }
+                }
 
             if (statement.getExecType().ranBefore) {
                 runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
@@ -69,18 +74,18 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                                 "AND " + database.escapeObjectName("FILENAME", LiquibaseColumn.class) + " = ?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
 
-                if (tag != null) {
-                    ((UpdateStatement) runStatement).addNewColumnValue("TAG", tag);
-                }
-            } else {
-                runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                        .addColumnValue("ID", changeSet.getId())
-                        .addColumnValue("AUTHOR", changeSet.getAuthor())
-                        .addColumnValue("FILENAME", changeSet.getFilePath())
-                        .addColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
-                        .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
-                        .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
-                        .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
+                    if (tag != null) {
+                        ((UpdateStatement) runStatement).addNewColumnValue("TAG", tag);
+                    }
+                } else {
+                    runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                            .addColumnValue("ID", changeSet.getId())
+                            .addColumnValue("AUTHOR", changeSet.getAuthor())
+                            .addColumnValue("FILENAME", changeSet.getFilePath())
+                            .addColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
+                            .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
+                            .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                            .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                         .addColumnValue("COMMENTS", limitSize(StringUtil.trimToEmpty(changeSet.getComments())))
                         .addColumnValue("EXECTYPE", statement.getExecType().value)
                         .addColumnValue("CONTEXTS", ((changeSet.getContexts() == null) || changeSet.getContexts()
@@ -88,21 +93,24 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addColumnValue("LABELS", ((changeSet.getLabels() == null) || changeSet.getLabels().isEmpty()
                         ) ? null : changeSet.getLabels().toString())
                         .addColumnValue("LIQUIBASE", StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
-                                .replaceAll("SNAPSHOT", "SNP")
-                                .replaceAll("beta", "b")
-                                .replaceAll("alpha", "b"), 20)
-                        )
-                        .addColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId());
+                                                                                            .replaceAll("SNAPSHOT", "SNP")
+                                                                                            .replaceAll("beta", "b")
+                                                                                            .replaceAll("alpha", "b"), 20)
+                            )
+                            .addColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId());
 
-                if (tag != null) {
-                    ((InsertStatement) runStatement).addColumnValue("TAG", tag);
+                    if (tag != null) {
+                        ((InsertStatement) runStatement).addColumnValue("TAG", tag);
+                    }
                 }
+            } catch (LiquibaseException e) {
+                throw new UnexpectedLiquibaseException(e);
             }
-        } catch (LiquibaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
 
-        return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
+            return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
+        } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
+        }
     }
 
     private String buildFullContext(ChangeSet changeSet) {

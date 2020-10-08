@@ -9,6 +9,11 @@ import java.util.*;
 public class StandardServiceLocator implements ServiceLocator {
 
     @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
+    @Override
     public <T> List<T> findInstances(Class<T> interfaceType) throws ServiceNotFoundException {
         List<T> allInstances = new ArrayList<>();
 
@@ -22,18 +27,6 @@ public class StandardServiceLocator implements ServiceLocator {
             } catch (Throwable e) {
                 log.info("Cannot load service: "+e.getMessage());
             }
-        }
-
-        return Collections.unmodifiableList(allInstances);
-
-    }
-
-    @Override
-    public <T> List<Class<? extends T>> findClasses(Class<T> interfaceType) throws ServiceNotFoundException {
-        List<Class<T>> allInstances = new ArrayList<>();
-
-        for (T t : findInstances(interfaceType)) {
-            allInstances.add((Class<T>) t.getClass());
         }
 
         return Collections.unmodifiableList(allInstances);

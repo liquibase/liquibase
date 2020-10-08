@@ -190,8 +190,8 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                     constraintsConfig = new ConstraintsConfig();
                 }
                 constraintsConfig.setNullable(false);
-                if (!column.shouldValidateNullable()) {
-                    constraintsConfig.setShouldValidateNullable(false);
+                if (!column.getValidateNullable()) {
+                    constraintsConfig.setValidateNullable(false);
                 }
                 constraintsConfig.setNotNullConstraintName(column.getAttribute("notNullConstraintName", String.class));
             }
@@ -240,6 +240,12 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 }
             }
 
+            //
+            // If there is a computed setting then use it
+            //
+            if (column.getComputed() != null) {
+                columnConfig.setComputed(column.getComputed());
+            }
             change.addColumn(columnConfig);
             control.setAlreadyHandledMissing(column);
         }

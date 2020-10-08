@@ -127,7 +127,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         && searchCondition.matches("\"?\\w+\" IS NOT NULL")) {
                     // not validated not null constraint found
                     column.setNullable(false);
-                    column.setShouldValidateNullable(false);
+                    column.setValidateNullable(false);
                 }
                 if (Boolean.FALSE.equals(column.isNullable()) && hasValidObjectName(constraintName)) {
                     column.setAttribute("notNullConstraintName", constraintName);
@@ -223,7 +223,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     (Map) snapshot.getScratchData("autoIncrementColumns");
             if (autoIncrementColumns == null) {
                 autoIncrementColumns = new HashMap<>();
-                Executor executor = ExecutorService.getInstance().getExecutor(database);
+                Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
                 try {
                     List<Map<String, ?>> rows = executor.queryForList(
                             new RawSqlStatement(
@@ -272,12 +272,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         Integer position = columnMetadataResultSet.getInt("ORDINAL_POSITION");
 
-
         Column column = new Column();
         column.setName(StringUtil.trimToNull(rawColumnName));
         column.setRelation(table);
         column.setRemarks(remarks);
         column.setOrder(position);
+        Boolean isComputed = columnMetadataResultSet.getBoolean("IS_COMPUTED");
+        if (isComputed != null) {
+            column.setComputed(isComputed);
+        }
+
 
         if (columnMetadataResultSet.get("IS_FILESTREAM") != null && (Boolean) columnMetadataResultSet.get("IS_FILESTREAM")) {
             column.setAttribute("fileStream", true);
@@ -478,6 +482,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         } else if (database instanceof PostgresDatabase) {
             columnTypeName = database.unescapeDataTypeName(columnTypeName);
+            // https://www.postgresql.org/message-id/20061016193942.GF23302%40svana.org says that internally array datatypes are defined with an underscore prefix.
+            if (columnTypeName.startsWith("_")) {
+                columnTypeName = columnTypeName.replaceFirst("_", "").concat("[]");
+            }
         }
 
         if (database instanceof FirebirdDatabase) {
@@ -499,7 +507,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     // SET
                     boilerLength = "6";
                 }
-                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(
+                List<String> enumValues = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(
                         new RawSqlStatement(
                                 "SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength +
                                         ", LENGTH(COLUMN_TYPE) - " + boilerLength +

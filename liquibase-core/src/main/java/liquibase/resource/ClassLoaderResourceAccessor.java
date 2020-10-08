@@ -24,6 +24,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     private ClassLoader classLoader;
     protected List<FileSystem> rootPaths;
+    protected SortedSet<String> description;
 
     public ClassLoaderResourceAccessor() {
         this(Thread.currentThread().getContextClassLoader());
@@ -35,6 +36,20 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     }
 
     /**
+     * Performs the configuration of this resourceAccessor.
+     * Not done in the constructor for performance reasons, but can be called at the beginning of every public method.
+     */
+    protected void init() {
+        if (rootPaths == null) {
+            this.rootPaths = new ArrayList<>();
+            this.description = new TreeSet<>();
+
+            loadRootPaths(classLoader);
+        }
+    }
+
+
+    /**
      * The classloader search logic in {@link #list(String, String, boolean, boolean, boolean)} does not handle jar files well.
      * This method is called by that method to populate {@link #rootPaths} with additional paths to search.
      */
@@ -44,6 +59,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             if (urls != null) {
                 for (URL url : urls) {
                     try {
+                        addDescription(url);
                         this.rootPaths.add(FileSystems.newFileSystem(Paths.get(url.toURI()), this.getClass().getClassLoader()));
                     } catch (ProviderNotFoundException e) {
                         if (url.toExternalForm().startsWith("file:/")) {
@@ -65,8 +81,18 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     }
 
+    private void addDescription(URL url) {
+        try {
+            this.description.add(Paths.get(url.toURI()).toString());
+        } catch (Throwable e) {
+            this.description.add(url.toExternalForm());
+        }
+    }
+
     @Override
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
+        init();
+
         InputStreamList returnList = new InputStreamList();
 
         streamPath = getFinalPath(relativeTo, streamPath);
@@ -124,6 +150,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public SortedSet<String> list(String relativeTo, String path, boolean recursive, boolean includeFiles, boolean includeDirectories) throws IOException {
+        init();
 
         String finalPath = getFinalPath(relativeTo, path);
 
@@ -137,11 +164,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
      * Called by {@link #list(String, String, boolean, boolean, boolean)} to find files in {@link #rootPaths}.
      */
     protected SortedSet<String> listFromRootPaths(String path, boolean recursive, boolean includeFiles, boolean includeDirectories) {
-        if (rootPaths == null) {
-            this.rootPaths = new ArrayList<>();
-
-            loadRootPaths(classLoader);
-        }
         SortedSet<String> returnSet = new TreeSet<>();
 
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
@@ -256,5 +278,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         //fallback logic depends on files having an extension and directories not
         String lastPortion = path.replaceFirst(".*/", "");
         return !lastPortion.contains(".");
+    }
+
+    @Override
+    public SortedSet<String> describeLocations() {
+        init();
+
+        return description;
     }
 }

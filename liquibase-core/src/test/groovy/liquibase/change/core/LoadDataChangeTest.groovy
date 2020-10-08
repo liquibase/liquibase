@@ -3,18 +3,17 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
+import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
-import liquibase.parser.core.ParsedNodeException
-import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.resource.ResourceAccessor
 import liquibase.database.core.MockDatabase
+import liquibase.parser.core.ParsedNodeException
+import liquibase.resource.ResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
-import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
 import spock.lang.Unroll
 
@@ -32,6 +31,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 "superuser", "superpass", null, resourceAccessor));
 
         mockDb = new MockDatabase();
+        mockDb.setConnection((DatabaseConnection) null)
     }
 
 
@@ -122,7 +122,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
             refactoring.setQuotchar(quotChar);
         }
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
 
         then:
         sqlStatements.length == 2
@@ -209,7 +209,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         activeConfig.setType("BOOLEAN");
         refactoring.addColumn(activeConfig);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
 
         then:
         sqlStatements.length == 2
@@ -248,7 +248,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         parentIdConfig.setType("UUID");
         refactoring.addColumn(parentIdConfig);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
 
         then:
         sqlStatements.length == 2
@@ -303,15 +303,14 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def "checkStatus"() {
         when:
-        def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
         SnapshotGeneratorFactory.instance = snapshotFactory
 
         def change = new LoadDataChange()
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
-        assert change.checkStatus(database).message == "Cannot check loadData status"
+        assert change.checkStatus(mockDb).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(mockDb).message == "Cannot check loadData status"
     }
 
     def "load works"() {

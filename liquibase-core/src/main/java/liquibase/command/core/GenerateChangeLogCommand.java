@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.CommandResult;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
@@ -48,6 +49,8 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     @Override
     protected CommandResult run() throws Exception {
+        outputBestPracticeMessage();
+
         String changeLogFile = StringUtil.trimToNull(getChangeLogFile());
         if (changeLogFile.toLowerCase().endsWith(".sql")) {
             Scope.getCurrentScope().getUI().sendMessage("\n" + INFO_MESSAGE + "\n");
@@ -64,14 +67,21 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
         changeLogWriter.setChangeSetContext(context);
         changeLogWriter.setChangeSetPath(getChangeLogFile());
 
-        if (StringUtil.trimToNull(getChangeLogFile()) != null) {
-            changeLogWriter.print(getChangeLogFile());
-        } else {
-            PrintStream outputStream = getOutputStream();
-            if (outputStream == null) {
-                outputStream = System.out;
+        ObjectQuotingStrategy originalStrategy = getReferenceDatabase().getObjectQuotingStrategy();
+        try {
+            getReferenceDatabase().setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            if (StringUtil.trimToNull(getChangeLogFile()) != null) {
+                changeLogWriter.print(getChangeLogFile());
+            } else {
+                PrintStream outputStream = getOutputStream();
+                if (outputStream == null) {
+                    outputStream = System.out;
+                }
+                changeLogWriter.print(outputStream);
             }
-            changeLogWriter.print(outputStream);
+        }
+        finally {
+            getReferenceDatabase().setObjectQuotingStrategy(originalStrategy);
         }
 
         return new CommandResult("OK");

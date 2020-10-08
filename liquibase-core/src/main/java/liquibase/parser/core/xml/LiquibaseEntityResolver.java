@@ -34,10 +34,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
 
-        //need to ensure XSD can be loaded from the system classpath, even if resourceAccessor is not configured to look there
-        ResourceAccessor currentScopeResourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor(getClass().getClassLoader());
-        InputStreamList streams = new CompositeResourceAccessor(currentScopeResourceAccessor, classLoaderResourceAccessor).openStreams(null, path);
+        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        InputStreamList streams = resourceAccessor.openStreams(null, path);
         if (streams.isEmpty()) {
             log.fine("Unable to resolve XML entity locally. Will load from network.");
             return null;

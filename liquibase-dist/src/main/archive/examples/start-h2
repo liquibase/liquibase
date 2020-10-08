@@ -5,7 +5,7 @@ if [ -z "${LIQUIBASE_HOME}" ]; then
 
   LIQUIBASE_PATH="$(which liquibase)"
 
-  if [ -z "${LIQUIBASE_PATH}"]; then
+  if [ -z "${LIQUIBASE_PATH}" ]; then
     echo "Must set LIQUIBASE_HOME environment variable, or have liquibase in your PATH"
     exit 1
   fi
@@ -13,7 +13,7 @@ if [ -z "${LIQUIBASE_HOME}" ]; then
   LIQUIBASE_HOME=$(dirname "$(which liquibase)")
 fi
 
-if [ -z "${JAVA_HOME}"]; then
+if [ -z "${JAVA_HOME}" ]; then
   #JAVA_HOME not set, try to find a bundled version
   if [ -d "${LIQUIBASE_HOME}/jre" ]; then
     JAVA_HOME="$LIQUIBASE_HOME/jre"

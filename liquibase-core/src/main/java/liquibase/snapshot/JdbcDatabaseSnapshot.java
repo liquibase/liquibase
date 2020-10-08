@@ -521,7 +521,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 "c.column_id as ORDINAL_POSITION, " +
                 "c.scale as DECIMAL_DIGITS, " +
                 "c.max_length as COLUMN_SIZE, " +
-                "c.precision as DATA_PRECISION " +
+                "c.precision as DATA_PRECISION, " +
+                "c.is_computed as IS_COMPUTED " +
                 "FROM "+databasePrefix+"sys.columns c " +
                 "inner join "+databasePrefix+"sys.types t on c.user_type_id=t.user_type_id " +
                 "{REMARKS_JOIN_PLACEHOLDER}" +
@@ -1038,8 +1039,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.TABLE_NAME as TABLE_NAME, " +
                             "a.TEMPORARY as TEMPORARY, a.DURATION as DURATION, 'TABLE' as TABLE_TYPE, " +
-                             "c.COMMENTS as REMARKS, CASE WHEN A.tablespace_name = " +
-                              "(SELECT DEFAULT_TABLESPACE FROM USER_USERS) THEN NULL ELSE tablespace_name END AS tablespace_name  " +
+                             "c.COMMENTS as REMARKS, A.tablespace_name as tablespace_name, CASE WHEN A.tablespace_name = " +
+                            "(SELECT DEFAULT_TABLESPACE FROM USER_USERS) THEN 'true' ELSE null END as default_tablespace " +
                             "from ALL_TABLES a " +
                             "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner ";
                     String allCatalogsString = getAllCatalogsStringScratchData();

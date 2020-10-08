@@ -23,6 +23,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION = "generatedChangeSetIdsContainsDescription";
     public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
     public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
+    public static final String FILTER_LOG_MESSAGES = "filterLogMessages";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -100,6 +101,10 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(SHOULD_SNAPSHOT_DATA, Boolean.class)
                 .setDescription("Should Liquibase snapshot data by default?")
                 .setDefaultValue(false);
+
+        getContainer().addProperty(FILTER_LOG_MESSAGES, Boolean.class)
+                .setDescription("Should Liquibase filter log messages for potentially insecure data?")
+                .setDefaultValue(true);
     }
 
     /**
@@ -185,6 +190,15 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setShouldSnapshotData(boolean shouldSnapshotData) {
         getContainer().setValue(SHOULD_SNAPSHOT_DATA, shouldSnapshotData);
+        return this;
+    }
+
+    public boolean getShouldFilterLogMessages() {
+        return getContainer().getValue(FILTER_LOG_MESSAGES, Boolean.class);
+    }
+
+    public GlobalConfiguration setShouldFilterLogMessages(boolean filter) {
+        getContainer().setValue(FILTER_LOG_MESSAGES, filter);
         return this;
     }
 
