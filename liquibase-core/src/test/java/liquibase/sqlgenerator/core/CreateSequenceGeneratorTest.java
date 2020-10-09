@@ -68,6 +68,50 @@ public class CreateSequenceGeneratorTest extends AbstractSqlGeneratorTest<Create
         Assertions.assertThat(sql[0].toSql()).contains("IF NOT EXISTS");
     }
 
+    @Test
+    public void postgresDatabaseSupportAsByVersion() throws Exception {
+        DatabaseConnection dbConnection = mock(DatabaseConnection.class);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(4);
+
+        PostgresDatabase database = spy(new PostgresDatabase());
+        database.setConnection(dbConnection);
+        doReturn(SEQUENCE_NAME).when(database).escapeSequenceName(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+
+        CreateSequenceStatement createSequenceStatement = createSampleSqlStatement();
+        createSequenceStatement.setStartValue(new BigInteger("1"));
+        createSequenceStatement.setDataType("INT");
+
+        // verify that for version <= 9.4 no IF NOT EXISTS is not in the statement
+        Sql[] sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).doesNotContain("AS INT");
+
+        // verify that if no version is available the optional no IF NOT EXISTS is not in the statement
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenThrow(DatabaseException.class);
+
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).contains("AS INT");
+
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(9);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(5);
+
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).doesNotContain("AS INT");
+
+        reset(dbConnection);
+        when(dbConnection.getDatabaseMajorVersion()).thenReturn(10);
+        when(dbConnection.getDatabaseMinorVersion()).thenReturn(2);
+
+        sql = new CreateSequenceGenerator().generateSql(createSequenceStatement, database, new MockSqlGeneratorChain());
+        Assertions.assertThat(sql).isNotEmpty().hasSize(1);
+        Assertions.assertThat(sql[0].toSql()).contains("AS INT");
+    }
+
 //    @Before
 //    public void setUpMocks() throws DatabaseException {
 //
