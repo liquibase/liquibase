@@ -29,11 +29,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database, FirebirdDatabase.class);
 
         if (isH2WithMinMaxSupport(database)) {
-
             validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, HsqlDatabase.class);
             validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, HsqlDatabase.class);
         } else {
-
             validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
             validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
         }
@@ -46,23 +44,16 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
 
     @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer queryStringBuilder = new StringBuffer();
+        StringBuilder queryStringBuilder = new StringBuilder();
         queryStringBuilder.append("CREATE SEQUENCE ");
-        if (database instanceof PostgresDatabase) {
+        if (isPostgresDbAtLeast9_5(database)) {
             // supported only for version >= 9.5 https://www.postgresql.org/docs/9.5/sql-createsequence.html
-            try {
-                if (database.getDatabaseMajorVersion() > 9
-                        || (database.getDatabaseMajorVersion() == 9 && database.getDatabaseMinorVersion() >= 5)) {
-                    queryStringBuilder.append(" IF NOT EXISTS ");
-                }
-            } catch (DatabaseException e) {
-                // we can not determinate the PostgreSQL version so we do not add this statement
-            }
+                queryStringBuilder.append(" IF NOT EXISTS ");
         }
         queryStringBuilder.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
         if (database instanceof HsqlDatabase || database instanceof Db2zDatabase) {
             queryStringBuilder.append(" AS BIGINT ");
-        } else if (statement.getDataType() != null) {
+        } else if (statement.getDataType() != null && !isPostgresDbUnder10(database)) {
             queryStringBuilder.append(" AS " + statement.getDataType());
         }
         if (!(database instanceof MariaDBDatabase) && statement.getStartValue() != null) {
@@ -111,6 +102,23 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
 
         return new Sql[]{new UnparsedSql(queryStringBuilder.toString(), getAffectedSequence(statement))};
+    }
+
+    protected boolean isPostgresDbAtLeast9_5(Database database) {
+        try {
+            int majorVersion = database.getDatabaseMajorVersion();
+            int minorVersion = database.getDatabaseMinorVersion();
+            return database instanceof PostgresDatabase && majorVersion > 9 || (majorVersion == 9 && minorVersion >= 5);
+        } catch (DatabaseException e) {
+            return false;
+        }
+    }
+    protected boolean isPostgresDbUnder10(Database database) {
+        try {
+            return database instanceof PostgresDatabase && database.getDatabaseMajorVersion() < 10;
+        } catch (DatabaseException e) {
+            return false;
+        }
     }
 
     protected Sequence getAffectedSequence(CreateSequenceStatement statement) {
