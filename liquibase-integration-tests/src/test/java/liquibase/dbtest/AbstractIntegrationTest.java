@@ -1,10 +1,13 @@
 package liquibase.dbtest;
 
 import liquibase.*;
+import liquibase.change.ColumnConfig;
+import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -12,6 +15,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.core.ClobType;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -33,6 +37,9 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.InsertExecutablePreparedStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.*;
 import liquibase.test.DatabaseTestContext;
@@ -196,28 +203,26 @@ public abstract class AbstractIntegrationTest {
         // Do not count the test as successful if we skip it because of a failed login. Count it as skipped instead.
         org.junit.Assume.assumeTrue(database != null);
 
-        if (database != null) {
-            if (database.supportsTablespaces()) {
-                // Use the opportunity to test if the DATABASECHANGELOG table is placed in the correct tablespace
-                database.setLiquibaseTablespaceName(DatabaseTestContext.ALT_TABLESPACE);
-            }
-            if (!database.getConnection().getAutoCommit()) {
-                database.rollback();
-            }
-
-            // If we should test with a custom defaultSchemaName:
-            if (getDefaultSchemaName() != null && getDefaultSchemaName().length() > 0) {
-                database.setDefaultSchemaName(getDefaultSchemaName());
-            }
-
-            SnapshotGeneratorFactory.resetAll();
-            Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
-
-            LockServiceFactory.getInstance().resetAll();
-            LockServiceFactory.getInstance().getLockService(database).init();
-
-            ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        if (database.supportsTablespaces()) {
+            // Use the opportunity to test if the DATABASECHANGELOG table is placed in the correct tablespace
+            database.setLiquibaseTablespaceName(DatabaseTestContext.ALT_TABLESPACE);
         }
+        if (!database.getConnection().getAutoCommit()) {
+            database.rollback();
+        }
+
+        // If we should test with a custom defaultSchemaName:
+        if (getDefaultSchemaName() != null && getDefaultSchemaName().length() > 0) {
+            database.setDefaultSchemaName(getDefaultSchemaName());
+        }
+
+        SnapshotGeneratorFactory.resetAll();
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+
+        LockServiceFactory.getInstance().resetAll();
+        LockServiceFactory.getInstance().getLockService(database).init();
+
+        ChangeLogHistoryServiceFactory.getInstance().resetAll();
     }
 
     /**
@@ -1112,6 +1117,38 @@ public abstract class AbstractIntegrationTest {
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
         assertEquals("generating two change logs without any changes in between should result in an empty generated " +
                 "differential change set.", 0, changeSets.size());
+    }
+
+    @Test
+    public void testInsertLongClob() {
+        assumeNotNull(this.getDatabase());
+
+        DatabaseChangeLog longClobChangelog = new DatabaseChangeLog();
+        ChangeSet longClobInsert = new ChangeSet(longClobChangelog);
+        ColumnConfig clobColumn = new ColumnConfig();
+        clobColumn.setName("clobColumn");
+        clobColumn.setType(LoadDataChange.LOAD_DATA_TYPE.CLOB.name());
+        // Oracle database only allows string values of up to 4000 characters
+        // so we test that the CLOB insertion is actually done as a CLOB in the JDBC statement
+        StringBuilder longClobString = new StringBuilder(4001);
+        for (int i=0;i<4001;i++) {
+            longClobString.append('a');
+        }
+        clobColumn.setValue(longClobString.toString());
+
+        CreateTableStatement clobTableCreator = new CreateTableStatement(
+                database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), "tableWithClob");
+        clobTableCreator.addColumn("clobColumn", new ClobType());
+        InsertExecutablePreparedStatement insertStatement = new InsertExecutablePreparedStatement(
+                database, database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(),
+                "tableWithClob", Arrays.asList(clobColumn),
+                longClobInsert, Scope.getCurrentScope().getResourceAccessor());
+        try {
+            database.execute(new SqlStatement[] {clobTableCreator, insertStatement}, new ArrayList<>());
+        } catch(LiquibaseException ex) {
+            ex.printStackTrace();
+            fail("Long clob insertion failed!");
+        }
     }
 
     protected Database getDatabase(){

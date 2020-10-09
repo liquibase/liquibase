@@ -1,6 +1,5 @@
 package liquibase.dbtest.pgsql;
 
-import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.CreateTableChange;
