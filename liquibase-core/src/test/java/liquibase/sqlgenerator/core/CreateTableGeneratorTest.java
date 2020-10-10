@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 
-import com.example.liquibase.change.UniqueConstraintConfig;
-import liquibase.change.ConstraintsConfig;
 import liquibase.database.MockDatabaseConnection;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
@@ -26,6 +24,7 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.IntType;
+import liquibase.datatype.core.TimestampType;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.core.CreateTableStatement;
@@ -59,6 +58,26 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
                 if (shouldBeImplementation(database)) {
                     assertEquals("CREATE TABLE CATALOG_NAME.TABLE_NAME (COLUMN1_NAME TIMESTAMP DEFAULT null)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
                 }
+            }
+        }
+    }
+
+    @Test
+    public void testWithColumnWithInfiniteDefaultValuePostgresDatabase() throws Exception {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database instanceof PostgresDatabase) {
+                MockDatabaseConnection conn = new MockDatabaseConnection();
+                database.setConnection(conn);
+                CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(
+                    COLUMN_NAME1,
+                    DataTypeFactory.getInstance().from(new TimestampType().toDatabaseDataType(database), database),
+                    "INFINITY"
+                );
+
+                Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+
+                assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME TIMESTAMP WITHOUT TIME ZONE DEFAULT 'INFINITY')".toUpperCase(), generatedSql[0].toSql().toUpperCase());
             }
         }
     }

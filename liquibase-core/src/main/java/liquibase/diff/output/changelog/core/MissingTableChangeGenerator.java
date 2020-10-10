@@ -75,6 +75,8 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                         }
                     }
                 }
+            } else if (database instanceof PostgresDatabase && "INFINITY".equalsIgnoreCase(function.getValue())) {
+                function = new DatabaseFunction("'INFINITY'");
             }
 
             columnConfig.setDefaultValueComputed(function);
