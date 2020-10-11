@@ -63,7 +63,7 @@ public abstract class BaseLiquibaseTask extends Task {
         validateParameters();
         final Database[] database = {null};
         try {
-            ResourceAccessor resourceAccessor = createResourceAccessor(classLoader);
+            resourceAccessor = createResourceAccessor(classLoader);
             scopeValues.put(Scope.Attr.resourceAccessor.name(), resourceAccessor);
             scopeValues.put(Scope.Attr.classLoader.name(), classLoader);
 
