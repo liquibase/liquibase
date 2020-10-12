@@ -574,39 +574,28 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         fileName = fileName.replaceFirst("classpath:", "");
         DatabaseChangeLog changeLog;
-        try {
-            DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
-            if (rootChangeLog == null) {
-                ROOT_CHANGE_LOG.set(this);
-            }
-            DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
-            PARENT_CHANGE_LOG.set(this);
-            try {
-                ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
-                changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
-                changeLog.setIncludeContexts(includeContexts);
-                changeLog.setIncludeLabels(labelExpression);
-                changeLog.setIncludeIgnore(ignore != null ? ignore.booleanValue() : false);
-            } finally {
-                if (rootChangeLog == null) {
-                    ROOT_CHANGE_LOG.remove();
-                }
-                if (parentChangeLog == null) {
-                    PARENT_CHANGE_LOG.remove();
-                } else {
-                    PARENT_CHANGE_LOG.set(parentChangeLog);
-                }
-            }
-        } catch (UnknownChangelogFormatException e) {
-            // This matches only an extension, but filename can be a full path, too. Is it right?
-            boolean matchesFileExtension = StringUtil.trimToEmpty(fileName).matches("\\.\\w+$");
-            if (matchesFileExtension || logEveryUnknownFileFormat) {
-                Scope.getCurrentScope().getLog(getClass()).warning(
-                        "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
-                );
-            }
-            return false;
+        DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
+        if (rootChangeLog == null) {
+            ROOT_CHANGE_LOG.set(this);
         }
+        DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
+        PARENT_CHANGE_LOG.set(this);
+
+        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
+        changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
+        changeLog.setIncludeContexts(includeContexts);
+        changeLog.setIncludeLabels(labelExpression);
+        changeLog.setIncludeIgnore(ignore != null ? ignore.booleanValue() : false);
+
+        if (rootChangeLog == null) {
+            ROOT_CHANGE_LOG.remove();
+        }
+        if (parentChangeLog == null) {
+            PARENT_CHANGE_LOG.remove();
+        } else {
+            PARENT_CHANGE_LOG.set(parentChangeLog);
+        }
+
         PreconditionContainer preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
             if (null == this.getPreconditions()) {

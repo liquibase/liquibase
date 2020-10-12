@@ -52,7 +52,7 @@ public class ChangeLogParserFactory {
             }
         }
 
-        throw new UnknownChangelogFormatException("Cannot find parser that supports " + fileNameOrExtension);
+        throw new UnknownChangelogFormatException("Cannot find parser that supports file extension:" + fileNameOrExtension);
     }
 
     public void register(ChangeLogParser changeLogParsers) {
