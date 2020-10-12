@@ -355,6 +355,31 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 0;
     }
 
+    /**
+     *
+     * Check to see if this instance of a MySQL database is equal to or greater
+     * than the specified version
+     *
+     * @param   minimumVersion
+     * @return  boolean
+     *
+     */
+    public boolean isMinimumMySQLVersion(String minimumVersion) {
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+        try {
+            major = getDatabaseMajorVersion();
+            minor = getDatabaseMinorVersion();
+            patch = getDatabasePatchVersion();
+        } catch (DatabaseException x) {
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                    "Unable to determine exact database server version");
+            return false;
+        }
+        return StringUtil.isMinimumVersion(minimumVersion, major, minor, patch);
+    }
+
     protected String getMinimumVersionForFractionalDigitsForTimestamp() {
         // MySQL 5.6.4 introduced fractional support...
         // https://dev.mysql.com/doc/refman/5.7/en/data-types.html
