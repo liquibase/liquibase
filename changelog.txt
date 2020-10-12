@@ -1,6 +1,13 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.1.1 (2020.10.09)
+
+- GH #1276 Rewrote SpringResourceAccessor
+- GH PR#1285 Remove deprecated code in Ant tasks
+- GH PR#1286 Fix usage of AntTaskLogger
+- GH #1097 diffChangeLog overwrites first changeset in formatted sql changelog
+
 Changes in version 3.10.3 (2020.10.09)
 
 - GH PR#912  - CORE-3379 escaping postgres questionmark operators to prevent unwanted parameter syntax

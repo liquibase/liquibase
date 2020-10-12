@@ -402,8 +402,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         try {
             enterpriseDb = getDatabaseFullVersion().toLowerCase().contains("enterprisedb");
         } catch (DatabaseException e) {
-            Scope.getCurrentScope().getLog(getClass()).severe("Can't get full version of Postgres DB. Used EDB as default", e);
-            return  DbTypes.EDB;
+            if (getConnection() != null) {
+                Scope.getCurrentScope().getLog(getClass()).severe("Can't get full version of Postgres DB. Used EDB as default", e);
+                return DbTypes.EDB;
+            }
         }
         return enterpriseDb ? DbTypes.EDB : DbTypes.COMMUNITY;
     }
