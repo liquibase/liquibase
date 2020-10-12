@@ -112,9 +112,11 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         try {
             lockService.waitForLock();
 
-            DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog();
-            if (changeLogFile != null) {
-                checkForRegisteredChangeLog(changeLog);
+            boolean doSyncHub = true;
+            DatabaseChangeLog changeLog = null;
+            if (StringUtil.isNotEmpty(changeLogFile)) {
+                changeLog = liquibase.getDatabaseChangeLog();
+                doSyncHub = checkForRegisteredChangeLog(changeLog);
             }
 
             hubUpdater = new HubUpdater(new Date(), changeLog);
@@ -123,7 +125,9 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }
-            hubUpdater.syncHub(changeLogFile, database, changeLog, hubConnectionId);
+            if (doSyncHub || hubConnectionId != null) {
+                hubUpdater.syncHub(changeLogFile, database, changeLog, hubConnectionId);
+            }
         } catch (DatabaseException e) {
             throw e;
         } catch (Exception e) {
@@ -137,7 +141,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         return new CommandResult("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
     }
 
-    private void checkForRegisteredChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
+    private boolean checkForRegisteredChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
@@ -145,12 +149,12 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         String changeLogId = changeLog.getChangeLogId();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (apiKey == null || hubMode.equals("off") || ! hubServiceFactory.isOnline()) {
-            return;
+            return false;
         }
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         HubChangeLog hubChangeLog = (changeLogId != null ? service.getHubChangeLog(UUID.fromString(changeLogId)) : null);
         if (changeLogId != null && hubChangeLog != null) {
-            return;
+            return true;
         }
         String message =
             "The changelog file specified is not registered with any Liquibase Hub project,\n" +
@@ -159,6 +163,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             "Learn more at https://hub.liquibase.com.";
         Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
         log.warning(message);
+        return false;
     }
 
     protected void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {

@@ -1,6 +1,41 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.10.3 (2020.10.09)
+
+- GH PR#912  - CORE-3379 escaping postgres questionmark operators to prevent unwanted parameter syntax
+- GH PR#936  - SpringLiquibase createResourceOpener() now returns a ResourceAccessor, which allows it to be overridden with any kind of ResourceAccessor
+- GH PR#983  - Fixes for loadData to support Postgres enums with java.sql.Types.OTHER
+- GH PR#1010 - Potential fix for generated columns on postgres
+- GH PR#1258 - Reduced the verbosity of logging by moving SQL logging from info to debug logging
+- GH PR#1239 - Fix xsd, remove surplus space after validateForeignKey
+- GH PR#1296 - Put the banner in an external file for easier editing.
+- GH PR#1327 - Fix varchar(max) extrainfo in 3.10 branch
+- GH PR#1406 - Fixed integration tests for 983
+- GH PR#781  - feat: Maven Liquibase Plugin generateChangeLog mysql sql comment supported
+- GH PR#945  - [CORE-3523] Consistently map Liquibase integer types to Oracle integer types.  MERGED THEN UNMERGED
+- GH PR#1140 - fix root paths for spring boot fat jar
+- GH PR#1332 - Update FileSystemResourceAccessor.java
+- GH PR#1372 - Fix for PR 1001 in 3.10.x branch
+- Fixed priority for JDBC Connections
+- GH PR#1140 - Added json and sql to the list
+- GH PR#1418 - Revert "[CORE-3523] Consistently map Liquibase integer types to Oracle integer types"  UNMERGE 945
+- GH PR#1422 - Updates for #1081 in 3.10.x
+- GH PR#1431 - Fix merge issue in OracleDatabase
+- GH PR#1443 - Handle MSSQL computed columns in generate changelog LB-366
+- GH PR#1447 - Do not use batched statements for Postgres LoadDataChange LB-744
+- Fixed schema version number for 3.10
+
+Changes in version 4.1.0 (2020.9.28)
+
+- Added support for hub.liquibase.com to CLI and Maven integrations
+- New registerChangeLog command
+- New syncHub command
+- Added hubApiKey argument
+- Added hubConnectionId argument
+- CLI commands and arguments are now case insensitive
+- Includes changes from 3.10.2
+
 Changes in version 3.10.2 (2020.7.27)
 
  - Dependency cycle error during generateChangeLog with --diffTypes=tables,columns,data
@@ -15,6 +50,7 @@ Changes in version 3.10.2 (2020.7.27)
  - GH PR#1177 - CORE-3643: fixed the 'shouldValidateX' methods in the Constraints
  - GH PR#1201 - H2 unknown reserved word
 
+
 Changes in version 4.0.0 (2020.07.14)
 - No changes since 4.0.0 beta2
 
@@ -22,7 +58,6 @@ Changes in version 4.0.0 Beta2 (2020.07.1)
 - Re-introduced deprecated versions of commonly used 3.x methods that had been removed for 4.0
 - Fix to handle --logLevel=debug/fine CLI argument
 - Do not include root filesystem in default CLI search paths
-
 Changes in version 3.10.1 (2020.7.2)
 
  - GH PR#913 - [CORE-3471] Fixed NPE in LiquibaseUtil when MANIFEST.MF doesn't contain Bundle-Version or Build-Time

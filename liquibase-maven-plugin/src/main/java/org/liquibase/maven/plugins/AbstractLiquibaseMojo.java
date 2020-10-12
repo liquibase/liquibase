@@ -8,6 +8,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -17,6 +18,9 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.descriptor.MojoDescriptor;
+import org.apache.maven.plugin.descriptor.Parameter;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
@@ -330,6 +334,41 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
 
+            IntegrationDetails integrationDetails = new IntegrationDetails();
+            integrationDetails.setName("maven");
+
+            final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
+            for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
+                if (!descriptor.getImplementationClass().equals(this.getClass())) {
+                    continue;
+                }
+
+                for (Parameter param : descriptor.getParameters()) {
+                    final String name = param.getName();
+                    if (name.equalsIgnoreCase("project") || name.equalsIgnoreCase("systemProperties")) {
+                        continue;
+                    }
+
+                    final Field field = getField(this.getClass(), name);
+                    if (field == null) {
+                        getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
+                    } else {
+                        field.setAccessible(true);
+                        final Object value = field.get(this);
+                        if (value != null) {
+                            try {
+                                integrationDetails.setParameter("maven__" + param.getName().replaceAll("[${}]", ""), String.valueOf(value));
+                            } catch (Throwable e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+            scopeValues.put("integrationDetails", integrationDetails);
+
+            final Map pluginContext = this.getPluginContext();
+            System.out.println(pluginContext.keySet());
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
@@ -396,19 +435,19 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                         getLog().info("Executing on Database: " + url);
 
-                        if (isPromptOnNonLocalDatabase()) {
-                            if (!liquibase.isSafeToRunUpdate()) {
-                                if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                                    throw new LiquibaseException("User decided not to run against non-local database");
-                                }
+                    if (isPromptOnNonLocalDatabase()) {
+                        if (!liquibase.isSafeToRunUpdate()) {
+                            if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                                throw new LiquibaseException("User decided not to run against non-local database");
                             }
                         }
-                        setupBindInfoPackage();
-                        performLiquibaseTask(liquibase);
-                    } catch (LiquibaseException e) {
-                        cleanup(database);
-                        throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
                     }
+                    setupBindInfoPackage();
+                    performLiquibaseTask(liquibase);
+                } catch (LiquibaseException e) {
+                    cleanup(database);
+                    throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
+                }
 
                     cleanup(database);
                     getLog().info(MavenUtils.LOG_SEPARATOR);
@@ -420,6 +459,18 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
 
 
+    }
+
+    protected Field getField(Class clazz, String name) throws NoSuchFieldException {
+        try {
+            return clazz.getDeclaredField(name);
+        } catch (NoSuchFieldException e) {
+            if (clazz.equals(Object.class)) {
+                return null;
+            } else {
+                return getField(clazz.getSuperclass(), name);
+            }
+        }
     }
 
     protected Liquibase getLiquibase() {

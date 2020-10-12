@@ -521,7 +521,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 "c.column_id as ORDINAL_POSITION, " +
                 "c.scale as DECIMAL_DIGITS, " +
                 "c.max_length as COLUMN_SIZE, " +
-                "c.precision as DATA_PRECISION " +
+                "c.precision as DATA_PRECISION, " +
+                "c.is_computed as IS_COMPUTED " +
                 "FROM "+databasePrefix+"sys.columns c " +
                 "inner join "+databasePrefix+"sys.types t on c.user_type_id=t.user_type_id " +
                 "{REMARKS_JOIN_PLACEHOLDER}" +

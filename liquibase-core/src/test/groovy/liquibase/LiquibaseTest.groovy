@@ -76,6 +76,7 @@ class LiquibaseTest extends Specification {
         ])
 
         mockHubService = (MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()
+        mockHubService.reset()
         ChangeLogParserFactory.getInstance().register(new MockChangeLogParser(changeLogs: [
                 "com/example/changelog.mock": new DatabaseChangeLog(changeLogId: MockHubService.randomUUID.toString())
         ]))
@@ -84,11 +85,9 @@ class LiquibaseTest extends Specification {
     def cleanup() {
 //        verifyNoMoreInteractions(mockLockService, mockChangeLogParser, mockChangeLog, mockChangeLogIterator); //for no other interactions of normal use objects. Not automatically checking mockDatabase and the *Factory mocks
 //        Mockito.reset(mockDatabase, mockLockServiceFactory, mockLockService, mockChangeLogParserFactory, mockChangeLogParser, mockChangeLog, mockChangeLogIterator);
+        mockHubService.reset()
         LockServiceFactory.reset()
         ChangeLogParserFactory.reset()
-
-        mockHubService.reset()
-
         Scope.exit(setupScopeId)
         ChangeLogParserFactory.reset()
     }
@@ -188,7 +187,8 @@ class LiquibaseTest extends Specification {
         liquibase.update("")
 
         then:
-        mockHubService.sentObjects.toString() == "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[null]]"
+        mockHubService.sentObjects.toString() ==
+            "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
 
     }
 

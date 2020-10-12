@@ -13,6 +13,7 @@ import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtil;
 
 import java.util.List;
 import java.util.UUID;
@@ -108,7 +109,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         Connection connectionToSync;
         if (hubConnectionId == null) {
             Project project = null;
-            if (changeLogFile != null) {
+            if (StringUtil.isNotEmpty(changeLogFile)) {
                 final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
                 final DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, new ChangeLogParameters(), resourceAccessor);
                 final String changeLogId = databaseChangeLog.getChangeLogId();
