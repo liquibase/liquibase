@@ -131,7 +131,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                 }
             }
             else {
-                Scope.getCurrentScope().getLog(getClass()).info("No project or changeLogFile specified. Searching for jdbcUrl across the entire organization.");
+                Scope.getCurrentScope().getLog(getClass()).info("No project, connection, or changeLogFile specified. Searching for jdbcUrl across the entire organization.");
             }
 
             final Connection searchConnection = new Connection()
@@ -158,7 +158,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         } else {
             final List<Connection> connections = hubService.getConnections(new Connection().setId(UUID.fromString(hubConnectionId)));
             if (connections.size() == 0) {
-                return new CommandResult("Unknown hubConnectionId "+ hubConnectionId, false);
+                return new CommandResult("Hub connection Id "+ hubConnectionId + " was either not found, or you do not have access", false);
             } else {
                 connectionToSync = connections.get(0);
             }
