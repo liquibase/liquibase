@@ -36,15 +36,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testChangeLogSyncLegacy">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:changeLogSync driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                          changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
-
     <target name="testChangeLogSync">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
@@ -87,15 +78,6 @@
 
 	
 	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
-    
-    <target name="testChangeLogSyncChangeLegacyLogDirectory">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:changeLogSync driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-        		changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
 
 	<target name="testChangeLogSyncChangeLogDirectory">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"

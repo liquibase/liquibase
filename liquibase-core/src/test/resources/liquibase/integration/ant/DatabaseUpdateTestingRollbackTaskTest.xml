@@ -26,16 +26,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testUpdateTestingRollbackLegacy">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:updateTestingRollback driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                           changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml"
-                           classpathref="basic-classpath"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
-
     <target name="testUpdateTestingRollback">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
