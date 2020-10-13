@@ -18,7 +18,6 @@ import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
-import liquibase.structure.core.Column;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.csv.CSVReader;
@@ -26,7 +25,6 @@ import liquibase.util.csv.CSVWriter;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -122,9 +120,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     protected void writeHeader(File file) throws IOException {
         try (FileOutputStream outputStream = new FileOutputStream(file);
              Writer writer = new OutputStreamWriter(outputStream,
-                     LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())
+                     LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+             CSVWriter csvWriter = new CSVWriter(writer);
         ) {
-            CSVWriter csvWriter = new CSVWriter(writer);
             String[] columns = new String[Columns.values().length];
             int i = 0;
             for (Columns column : Columns.values()) {
@@ -151,10 +149,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         try (
-                    Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            CSVReader csvReader = new CSVReader(reader);
         )
         {
-            CSVReader csvReader = new CSVReader(reader);
             String[] line = csvReader.readNext();
 
             if (line == null) { //empty file
@@ -320,13 +318,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
             try (
                 Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-            )
-            {
-                
                 CSVReader csvReader = new CSVReader(reader);
+            ) {
                 String[] line = csvReader.readNext(); //skip header line
 
-                List<RanChangeSet> returnList = new ArrayList<>();
                 while ((line = csvReader.readNext()) != null) {
                     try {
                         lastChangeSetSequenceValue = Integer.valueOf(line[Columns.ORDEREXECUTED.ordinal()]);
