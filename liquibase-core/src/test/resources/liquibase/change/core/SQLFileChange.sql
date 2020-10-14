@@ -1,0 +1,1 @@
+create table sql_table;

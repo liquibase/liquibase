@@ -118,7 +118,7 @@ public class SQLFileChange extends AbstractSQLChange {
         try {
             String relativeTo = null;
             if (ObjectUtil.defaultIfNull(isRelativeToChangelogFile(), false)) {
-                relativeTo = getChangeSet().getFilePath();
+                relativeTo = getChangeSet().getChangeLog().getPhysicalFilePath();
             }
             inputStream = Scope.getCurrentScope().getResourceAccessor().openStream(relativeTo, path);
         } catch (IOException e) {

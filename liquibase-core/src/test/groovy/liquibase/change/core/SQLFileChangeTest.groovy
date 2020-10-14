@@ -5,10 +5,13 @@ import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet
+import liquibase.changelog.DatabaseChangeLog
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.database.core.MockDatabase
+import liquibase.parser.core.xml.XMLChangeLogSAXParser
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.statement.SqlStatement
+import liquibase.test.JUnitResourceAccessor
 import spock.lang.Unroll
 
 import static org.junit.Assert.assertEquals
@@ -112,4 +115,30 @@ public class SQLFileChangeTest extends StandardChangeTest {
 
     }
 
+    def "relativeToChangelogFile works if change set has a logical file path"() throws Exception {
+        when:
+        DatabaseChangeLog changeLog = new DatabaseChangeLog("liquibase/empty.changelog.xml");
+        ChangeSet changeSet = new ChangeSet(null, null, true, false,
+                "logical-path/empty.changelog.xml",
+                null, null, false, null, changeLog);
+
+        SQLFileChange relativeChange = new SQLFileChange();
+
+        relativeChange.setRelativeToChangelogFile(Boolean.TRUE);
+        relativeChange.setChangeSet(changeSet);
+        relativeChange.setPath("change/core/SQLFileChange.sql");
+
+        SqlStatement[] relativeStatements = relativeChange.generateStatements(new MockDatabase());
+
+        SQLFileChange nonRelativeChange = new SQLFileChange();
+        nonRelativeChange.setChangeSet(changeSet);
+        nonRelativeChange.setPath("liquibase/change/core/SQLFileChange.sql");
+
+        SqlStatement[] nonRelativeStatements = nonRelativeChange.generateStatements(new MockDatabase());
+
+        then:
+        assert relativeStatements != null
+        assert nonRelativeStatements != null
+        assert relativeStatements.size() == nonRelativeStatements.size()
+    }
 }
