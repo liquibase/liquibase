@@ -342,6 +342,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnCache = new HashMap<>();
                 snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
+                    if (!row.containsKey("CONSTRAINT_CONTAINER"))
+                    {
+                        throw new IllegalArgumentException("Missing 'CONSTRAINT_CONTAINER' for bulk query!");
+                    }
+                    if (!row.containsKey("CONSTRAINT_NAME"))
+                    {
+                        throw new IllegalArgumentException("Missing 'CONSTRAINT_NAME' for bulk query!");
+                    }
                     String key = row.get("CONSTRAINT_CONTAINER") + "_" + row.get("CONSTRAINT_NAME");
                     List<Map<String, ?>> constraintRows = columnCache.get(key);
                     if (constraintRows == null) {
