@@ -33,7 +33,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>                <executions>
+                <version>3.0.1</version>
+                <executions>
                     <execution>
                         <id>root-source-aggregate</id>
                         <goals>
@@ -84,7 +85,7 @@
 
 
 
-            <!--            <plugin>-->
+<!--            <plugin>-->
 <!--                <artifactId>maven-install-plugin</artifactId>-->
 <!--                <version>2.5.2</version>-->
 <!--                <configuration>-->
@@ -100,15 +101,20 @@
 <!--            </plugin>-->
 
         </plugins>
-<!--        <pluginManagement>-->
-<!--            <plugins>-->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
 <!--                <plugin>-->
 <!--                    <groupId>org.jacoco</groupId>-->
 <!--                    <artifactId>jacoco-maven-plugin</artifactId>-->
 <!--                    <version>0.8.5</version>-->
 <!--                </plugin>-->
-<!--            </plugins>-->
-<!--        </pluginManagement>-->
+            </plugins>
+        </pluginManagement>
 
     </build>
 </project>

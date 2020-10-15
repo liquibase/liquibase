@@ -126,6 +126,17 @@
         </resources>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>liquibase</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
             <!-- need to build javadocs for other module javadocs to reference -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

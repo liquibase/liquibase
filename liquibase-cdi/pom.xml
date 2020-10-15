@@ -34,6 +34,17 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>liquibase.integration.cdi</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.1.0</version>
@@ -43,8 +54,8 @@
                     <flattenedPomFilename>release.pom.xml</flattenedPomFilename>
                     <pomElements>
                         <profiles>remove</profiles>
-                        <organization/>
-                        <issueManagement/>
+                        <organization />
+                        <issueManagement />
                     </pomElements>
                     <flattenMode>ossrh</flattenMode>
                 </configuration>
