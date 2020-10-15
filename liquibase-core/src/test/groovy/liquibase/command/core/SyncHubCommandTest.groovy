@@ -170,7 +170,7 @@ class SyncHubCommandTest extends Specification {
 
         then:
         assert !result.succeeded
-        assert result.message == "Unknown hubConnectionId " + command.hubConnectionId
+        assert result.message == "Hub connection Id " + command.hubConnectionId + " was either not found, or you do not have access"
     }
 
     def "Fails with multiple matching connections"() {
