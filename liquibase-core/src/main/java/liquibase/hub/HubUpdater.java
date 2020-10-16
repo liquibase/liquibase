@@ -13,11 +13,14 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.SyncHubCommand;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.hub.model.*;
+import liquibase.integration.IntegrationDetails;
 import liquibase.logging.core.BufferedLogService;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -60,7 +63,7 @@ public class HubUpdater {
                                 Contexts contexts,
                                 LabelExpression labelExpression,
                                 ChangeLogIterator changeLogIterator)
-          throws LiquibaseHubException, DatabaseException, LiquibaseException {
+          throws LiquibaseHubException, DatabaseException, LiquibaseException, SQLException {
     if (hubIsNotAvailable(changeLog.getChangeLogId())) {
         return null;
     }
@@ -69,6 +72,11 @@ public class HubUpdater {
     // Perform syncHub
     //
     syncHub(changeLogFile, database, changeLog, connection.getId());
+
+    //
+    // Load up metadata for database/driver version
+    //
+    loadDatabaseMetadata(database);
 
     //
     // Send the START operation event
@@ -226,5 +234,31 @@ public class HubUpdater {
     } catch (Exception e) {
       Scope.getCurrentScope().getLog(getClass()).warning("Liquibase Hub sync failed: " + e.getMessage(), e);
     }
+  }
+
+  //
+  // Put database/driver version information in the details map
+  //
+  private void loadDatabaseMetadata(Database database) throws DatabaseException, SQLException {
+      if (database.getConnection() == null) {
+        return;
+      }
+      final IntegrationDetails integrationDetails = Scope.getCurrentScope().get("integrationDetails", IntegrationDetails.class);
+      if (integrationDetails == null) {
+          return;
+      }
+      JdbcConnection jdbcConnection = (JdbcConnection)database.getConnection();
+      String databaseProductName = database.getDatabaseProductName();
+      String databaseProductVersion = database.getDatabaseProductVersion();
+      java.sql.Connection conn = jdbcConnection.getUnderlyingConnection();
+      int driverMajorVersion = conn.getMetaData().getDriverMajorVersion();
+      int driverMinorVersion = conn.getMetaData().getDriverMinorVersion();
+      Scope.getCurrentScope().getLog(getClass()).fine("Database product name         " + databaseProductName);
+      Scope.getCurrentScope().getLog(getClass()).fine("Database product version      " + databaseProductVersion);
+      Scope.getCurrentScope().getLog(getClass()).fine("Database driver version       " +
+              Integer.toString(driverMajorVersion) + "." + Integer.toString(driverMinorVersion));
+      integrationDetails.setParameter("db__databaseProduct", databaseProductName);
+      integrationDetails.setParameter("db__databaseVersion", databaseProductVersion);
+      integrationDetails.setParameter("db__driverVersion", Integer.toString(driverMajorVersion) + "." + Integer.toString(driverMinorVersion));
   }
 }
