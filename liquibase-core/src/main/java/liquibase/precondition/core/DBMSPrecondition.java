@@ -58,8 +58,6 @@ public class DBMSPrecondition extends AbstractPrecondition {
             if (!DatabaseList.definitionMatches(this.type, database, false)) {
                 throw new PreconditionFailedException("DBMS Precondition failed: expected "+type+", got "+dbType, changeLog, this);
             }
-        } catch (PreconditionFailedException e) {
-            throw e;
         } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }

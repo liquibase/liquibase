@@ -75,11 +75,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         try {
             if (attributes != null) {
                 for (int i=0; i< attributes.getLength(); i++) {
-                    try {
-                        node.addChild(null, attributes.getLocalName(i), attributes.getValue(i));
-                    } catch (NullPointerException e) {
-                        throw e;
-                    }
+                    node.addChild(null, attributes.getLocalName(i), attributes.getValue(i));
                 }
             }
             if (!nodeStack.isEmpty()) {
