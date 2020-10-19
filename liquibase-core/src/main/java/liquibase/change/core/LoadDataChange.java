@@ -479,8 +479,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 // 2. The database supports batched statements (for improved performance) AND we are not in an
                 //    "SQL" mode (i.e. we generate an SQL file instead of actually modifying the database).
                 if
-                ((needsPreparedStatement || (databaseSupportsBatchUpdates && ! isLoggingExecutor(database) &&
-                        hasPreparedStatementsImplemented()))) {
+                ((needsPreparedStatement || (databaseSupportsBatchUpdates && ! isLoggingExecutor(database))) &&
+                        hasPreparedStatementsImplemented()) {
                     anyPreparedStatements = true;
                     ExecutablePreparedStatementBase stmt =
                         this.createPreparedStatement(
