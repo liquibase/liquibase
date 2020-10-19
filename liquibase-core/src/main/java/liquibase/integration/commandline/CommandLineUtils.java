@@ -264,9 +264,9 @@ public class CommandLineUtils {
 
         StringBuilder banner = new StringBuilder();
 
-        // Banner is stored in banner.txt in resources.
+        // Banner is stored in liquibase/banner.txt in resources.
 	    Class commandLinUtilsClass = CommandLineUtils.class;
-	    InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/banner.txt");
+	    InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
 	    try {
 			banner.append(readFromInputStream(inputStream));
 		} catch (IOException e) {
