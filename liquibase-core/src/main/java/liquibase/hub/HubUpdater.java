@@ -13,6 +13,7 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.SyncHubCommand;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -247,18 +248,25 @@ public class HubUpdater {
       if (integrationDetails == null) {
           return;
       }
-      JdbcConnection jdbcConnection = (JdbcConnection)database.getConnection();
       String databaseProductName = database.getDatabaseProductName();
       String databaseProductVersion = database.getDatabaseProductVersion();
-      java.sql.Connection conn = jdbcConnection.getUnderlyingConnection();
-      int driverMajorVersion = conn.getMetaData().getDriverMajorVersion();
-      int driverMinorVersion = conn.getMetaData().getDriverMinorVersion();
       Scope.getCurrentScope().getLog(getClass()).fine("Database product name         " + databaseProductName);
       Scope.getCurrentScope().getLog(getClass()).fine("Database product version      " + databaseProductVersion);
-      Scope.getCurrentScope().getLog(getClass()).fine("Database driver version       " +
-              Integer.toString(driverMajorVersion) + "." + Integer.toString(driverMinorVersion));
+
+      DatabaseConnection connection = database.getConnection();
+      if (connection instanceof JdbcConnection) {
+          JdbcConnection jdbcConnection = (JdbcConnection)connection;
+          java.sql.Connection conn = jdbcConnection.getUnderlyingConnection();
+          int driverMajorVersion = conn.getMetaData().getDriverMajorVersion();
+          int driverMinorVersion = conn.getMetaData().getDriverMinorVersion();
+          Scope.getCurrentScope().getLog(getClass()).fine("Database driver version       " +
+                  Integer.toString(driverMajorVersion) + "." + Integer.toString(driverMinorVersion));
+          integrationDetails.setParameter("db__driverVersion", Integer.toString(driverMajorVersion) + "." + Integer.toString(driverMinorVersion));
+      }
+      else {
+          integrationDetails.setParameter("db__driverVersion", "Unable to determine");
+      }
       integrationDetails.setParameter("db__databaseProduct", databaseProductName);
       integrationDetails.setParameter("db__databaseVersion", databaseProductVersion);
-      integrationDetails.setParameter("db__driverVersion", Integer.toString(driverMajorVersion) + "." + Integer.toString(driverMinorVersion));
   }
 }
