@@ -166,10 +166,10 @@
 
     <changeSet id="19" author="nvoxland">
         <createView viewName="personView">
-            select id, firstname, lastname from public.person
+            select id, firstname, lastname from person
         </createView>
         <createView viewName="personView" replaceIfExists="true">
-            select id, firstname, lastname from public.person
+            select id, firstname, lastname from person
         </createView>
     </changeSet>
 
