@@ -1,36 +1,60 @@
 package liquibase.dbtest.cockroachdb;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import org.junit.Test;
 
-import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 public class CockroachDBIntegrationTest extends AbstractIntegrationTest {
 
     public CockroachDBIntegrationTest() throws Exception {
         super("cockroachdb", DatabaseFactory.getInstance().getDatabase("cockroachdb"));
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "CREATE USER IF NOT EXISTS lbuser"
+        );
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "CREATE DATABASE IF NOT EXISTS lbcat"
+        );
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "CREATE DATABASE IF NOT EXISTS lbcat2"
+        );
+        // Create schemas for tests testRerunDiffChangeLogAltSchema
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "CREATE SCHEMA IF NOT EXISTS lbcat2"
+        );
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "GRANT ALL PRIVILEGES ON DATABASE lbcat TO lbuser"
+        );//
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "GRANT ALL PRIVILEGES ON DATABASE lbcat2 TO lbuser"
+        );
+        // Create schemas for tests testRerunDiffChangeLogAltSchema
+        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "GRANT ALL PRIVILEGES ON SCHEMA lbcat2 TO lbuser"
+        );
+
+        getDatabase().commit();
+
     }
 
     @Override

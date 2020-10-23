@@ -297,7 +297,7 @@
     <changeSet id="50" author="rafiss" runInTransaction="false">
         <sql>SET enable_experimental_alter_column_type_general = true</sql>
         <modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>
-    </changeSet>    
+    </changeSet>
 
     <include file="changelogs/cockroachdb/complete/included.changelog.xml"/>
 
@@ -319,7 +319,7 @@
     </changeSet>
     <changeSet id="58" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
-    </changeSet>    
+    </changeSet>
 
     <changeSet id="60" author="nvoxland">
         <executeCommand executable="getmac" os="Windows XP">
@@ -334,7 +334,7 @@
             <column name="bigSerialColumn" type="bigserial"/>
             <column name="bitVarColumn" type="bit varying(10)"/>
             <column name="doubleColumn" type="double precision"/>
-            <column name="realColumn" type="real"/>            
+            <column name="realColumn" type="real"/>
         </createTable>
     </changeSet>
 

@@ -26,7 +26,7 @@ services:
       - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
 
   cockroachdb:
-    image: cockroachdb/cockroach-unstable:v20.2.0-alpha.3
+    image: cockroachdb/cockroach-unstable:v20.2.0-rc.2
     command: start-single-node --logtostderr --insecure
     ports:
       - "26257:26257"
