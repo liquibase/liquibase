@@ -2,9 +2,6 @@ package liquibase.logging.core;
 
 import liquibase.logging.LogMessageFilter;
 import liquibase.logging.LogService;
-import liquibase.logging.Logger;
-
-import java.util.logging.Level;
 
 /**
  * Convenience base implementation of a LoggerFactory.

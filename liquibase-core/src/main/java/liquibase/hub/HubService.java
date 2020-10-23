@@ -3,10 +3,6 @@ package liquibase.hub;
 import liquibase.changelog.RanChangeSet;
 import liquibase.hub.model.*;
 import liquibase.exception.LiquibaseException;
-import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.HubUser;
-import liquibase.hub.model.Organization;
-import liquibase.hub.model.Project;
 import liquibase.plugin.Plugin;
 import liquibase.servicelocator.PrioritizedService;
 

@@ -11,7 +11,6 @@ import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.servicelocator.PrioritizedService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;

@@ -3,8 +3,6 @@ package liquibase.logging;
 import liquibase.logging.core.JavaLogService;
 import liquibase.plugin.Plugin;
 
-import java.util.logging.Level;
-
 /**
  * This service is used to create named {@link Logger} instances through a {@link LogService}.
  *

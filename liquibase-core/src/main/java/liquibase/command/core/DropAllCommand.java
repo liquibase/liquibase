@@ -17,14 +17,10 @@ import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.HubUpdater;
 import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.Connection;
 import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.Operation;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
-import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;

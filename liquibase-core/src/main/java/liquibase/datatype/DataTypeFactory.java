@@ -10,7 +10,6 @@ import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.plugin.AbstractPluginFactory;
 import liquibase.structure.core.DataType;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;

@@ -11,10 +11,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
     @Override
     public int getPriority() {
