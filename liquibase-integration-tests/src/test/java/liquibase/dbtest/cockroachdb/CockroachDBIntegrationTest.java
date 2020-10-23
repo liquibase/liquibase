@@ -11,6 +11,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class CockroachDBIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -98,5 +100,13 @@ public class CockroachDBIntegrationTest extends AbstractIntegrationTest {
         assertNull(columns.get(1).getDescending());
         assertEquals("c", columns.get(2).getName());
         assertTrue(columns.get(2).getDescending());
+    }
+
+    @Test
+    @Override
+    public void testRunUpdateOnOldChangelogTableFormat() throws Exception {
+        // This test is skipped because CockroachDB doesn't allow the columns of the same table to be altered
+        // concurrently.
+        // See https://github.com/cockroachdb/cockroach/issues/47137
     }
 }
