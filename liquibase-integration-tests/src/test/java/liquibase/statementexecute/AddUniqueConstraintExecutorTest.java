@@ -104,6 +104,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table \"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", PostgresDatabase.class, CockroachDatabase.class);
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])");
+        assertCorrect(" alter table adduqtest add constraint \"primary\" primary key (id ASC, coltomakeuq DESC)", CockroachDatabase.class);
     }
 
     @SuppressWarnings("unchecked")
