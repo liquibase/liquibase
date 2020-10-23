@@ -1,7 +1,5 @@
 package liquibase.hub;
 
-import liquibase.exception.LiquibaseException;
-
 public class LiquibaseHubObjectNotFoundException extends LiquibaseHubException {
 
     public LiquibaseHubObjectNotFoundException() {

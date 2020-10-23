@@ -9,7 +9,6 @@ import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 
 import java.io.PrintStream;
-import java.io.Writer;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;

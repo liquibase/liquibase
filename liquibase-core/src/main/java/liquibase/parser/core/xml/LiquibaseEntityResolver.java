@@ -2,8 +2,6 @@ package liquibase.parser.core.xml;
 
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 import org.xml.sax.InputSource;

@@ -1,18 +1,11 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
 import liquibase.command.core.SyncHubCommand;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  *

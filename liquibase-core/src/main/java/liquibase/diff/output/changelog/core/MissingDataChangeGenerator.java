@@ -5,7 +5,6 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -18,7 +17,6 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

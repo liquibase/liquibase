@@ -1,6 +1,5 @@
 package liquibase.executor;
 
-import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;

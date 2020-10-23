@@ -2,7 +2,6 @@ package liquibase.command;
 
 import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.ArrayList;
 import java.util.Collections;

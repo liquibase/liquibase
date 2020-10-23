@@ -2,7 +2,6 @@ package liquibase.database;
 
 import liquibase.Scope;
 import liquibase.database.core.UnsupportedDatabase;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
@@ -11,7 +10,6 @@ import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.Connection;
 import java.sql.Driver;
 import java.util.*;
 
