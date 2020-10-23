@@ -222,7 +222,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     public void setSeparator(String separator) {
-        if ((separator != null) && "\\t".equals(separator)) {
+        if ("\\t".equals(separator)) {
             separator = "\t";
         }
         this.separator = separator;
