@@ -273,8 +273,7 @@ public class Main {
                     java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
                     liquibaseLogger.setParent(rootLogger);
 
-                    final JavaLogService logService = (JavaLogService) Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
-                    logService.setParent(liquibaseLogger);
+                    final LogService logService = Scope.getCurrentScope().get(Scope.Attr.logService, LogService.class);
 
                     if (main.logLevel == null) {
                         String defaultLogLevel = System.getProperty("liquibase.log.level");
