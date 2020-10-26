@@ -26,13 +26,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testDbDocLegacy">
-        <lb:dbDoc driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                  outputdirectory="${temp.dir}/dbdoc"
-                  changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
-        <au:assertFileExists file="${temp.dir}/dbdoc"/>
-    </target>
-
     <target name="testDbDoc">
         <lb:dbDoc outputdirectory="${temp.dir}/dbdoc" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>

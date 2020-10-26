@@ -26,15 +26,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testTagDatabaseLegacy">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:tagDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                           classpathref="basic-classpath" tag="test-tag"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
-
     <target name="testTagDatabase">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>

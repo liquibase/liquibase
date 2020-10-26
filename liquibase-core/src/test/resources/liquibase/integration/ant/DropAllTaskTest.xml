@@ -27,15 +27,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testDropAllTaskLegacy">
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="USERS"/>
-        <lb:dropAllDatabaseObjects driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                        classpathref="basic-classpath"/>
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="USERS"/>
-    </target>
-
     <target name="testDropAllTask">
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                              table="USERS"/>
