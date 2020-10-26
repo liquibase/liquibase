@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.Assert.*;
 
@@ -279,6 +280,24 @@ public class AbstractSQLChangeTest {
         statements = change.generateStatements(database);
         assertEquals(1, statements.length);
         assertEquals("? ??'Is this escaped?' col? another?? ?", ((RawSqlStatement) statements[0]).getSql());
+    }
+
+    @Test
+    public void escapingPostgresQuestionmarkOperatorsInRealStatement() throws Exception {
+        ResourceAccessor junitResourceAccessor = new JUnitResourceAccessor();
+        String longSqlStatement;
+        try(InputStream sqlStatementStream = junitResourceAccessor.openStream("liquibase/change", "long-statement.sql")) {
+            longSqlStatement = StreamUtil.readStreamAsString(sqlStatementStream);
+        }
+        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange(longSqlStatement);
+
+        //Postgres Offline
+        Database postgresDatabase = new PostgresDatabase();
+        OfflineConnection offlineConnection = new OfflineConnection("offline:postgresql", junitResourceAccessor);
+        postgresDatabase.setConnection(offlineConnection);
+        SqlStatement[] statements = change.generateStatements(postgresDatabase);
+        assertEquals(1, statements.length);
+        assertEquals(longSqlStatement, ((RawSqlStatement) statements[0]).getSql());
     }
 
     @DatabaseChange(name = "exampleAbstractSQLChange", description = "Used for the AbstractSQLChangeTest unit test", priority = 1)
