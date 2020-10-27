@@ -309,7 +309,10 @@ public class OnlineHubService implements HubService {
             hubChangeLogCache.put(changeLogId, hubChangeLog);
             return hubChangeLog;
         } catch (LiquibaseHubObjectNotFoundException lbe) {
-            Scope.getCurrentScope().getLog(getClass()).severe(lbe.getMessage(), lbe);
+            final String message = lbe.getMessage();
+            String uiMessage = "Retrieving Hub Change Log failed for Changelog ID " + changeLogId.toString();
+            Scope.getCurrentScope().getUI().sendMessage(uiMessage + ": " + message);
+            Scope.getCurrentScope().getLog(getClass()).severe(message, lbe);
             return null;
         }
     }

@@ -307,9 +307,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         } catch (DatabaseException|SQLException e) {
             throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug.", e);
         } finally {
+            try {
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(
                         new RawSqlStatement("DROP TABLE " + randomIdentifier));
+            }
+            catch (Throwable t) {
+                //
+                // Trap for any errors that occur during the drop
+                //
+            }
         }
 
         return getHasJdbcConstraintDeferrableBug();
