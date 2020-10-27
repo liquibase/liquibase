@@ -1307,6 +1307,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "  result.a_attnum = (result.keys).x " +
                                     "ORDER BY " +
                                     "  result.table_name, result.pk_name, result.key_seq";
+
                             try {
                                 return executeAndExtract(sql, database);
                             } catch (DatabaseException e) {

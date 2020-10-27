@@ -122,9 +122,13 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="17" author="nvoxland">
-        <addPrimaryKey tableName="page" columnNames="id" constraintName="pk_page"/>
-    </changeSet>
+    <!-- CockroachDB (as of 20.2) does not support dropping a primary key. -->
+    <!-- https://github.com/cockroachdb/cockroach/issues/48026 -->
+<!--    <changeSet id="17" author="nvoxland">-->
+        <!-- CockroachDB has an issue where the PK constraint always is named primary, even if another name is specified -->
+        <!-- https://github.com/cockroachdb/cockroach/issues/52833 -->
+<!--        <addPrimaryKey tableName="page" columnNames="id" constraintName="primary"/>-->
+<!--    </changeSet>-->
 
     <changeSet id="18" author="nvoxland">
         <addUniqueConstraint tableName="publication" columnNames="title" constraintName="uq_publication_title"/>
