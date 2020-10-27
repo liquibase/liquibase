@@ -45,14 +45,14 @@ public class CockroachDBIntegrationTest extends AbstractIntegrationTest {
                 "CREATE SCHEMA IF NOT EXISTS lbcat2"
         );
         ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "GRANT ALL PRIVILEGES ON DATABASE lbcat TO lbuser"
+                "GRANT ALL ON DATABASE lbcat TO lbuser"
         );//
         ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "GRANT ALL PRIVILEGES ON DATABASE lbcat2 TO lbuser"
+                "GRANT ALL ON DATABASE lbcat2 TO lbuser"
         );
         // Create schemas for tests testRerunDiffChangeLogAltSchema
         ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                "GRANT ALL PRIVILEGES ON SCHEMA lbcat2 TO lbuser"
+                "GRANT ALL ON SCHEMA lbcat2 TO lbuser"
         );
 
         getDatabase().commit();
