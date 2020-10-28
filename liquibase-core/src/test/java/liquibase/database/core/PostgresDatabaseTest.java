@@ -8,6 +8,8 @@ import liquibase.structure.core.Table;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.Assert.*;
 
 /**
@@ -115,12 +117,42 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         tableName = database.escapeObjectName("My Table", Table.class);
         assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
     }
+
     @Test
     public void test_getConcatSql() {
         assertEquals("", database.getConcatSql());
         assertEquals("foo", database.getConcatSql("foo"));
         assertEquals("foo || bar", database.getConcatSql("foo", "bar"));
         assertEquals("one || two || | three", database.getConcatSql("one", "two", "| three"));
+    }
+
+    @Test
+    public void generatePrimaryKeyName_tableSizeNameLessThan63Bytes_nameIsBuiltCorrectly() {
+
+        // Arrange
+        final String tableName = "name";
+        final String expectedPrimaryKeyName = "name_pkey";
+
+        // Act
+        final String pk = this.database.generatePrimaryKeyName(tableName);
+
+        // Assert
+        assertEquals(pk, expectedPrimaryKeyName);
+    }
+
+    @Test
+    public void generatePrimaryKeyName_tableSizeNameMoreThan63Bytes_nameIsBuiltCorrectly() {
+
+        // Arrange
+        final String tableName = "name_______________________________________________________________________";
+        final String expectedPrimaryKeyName = "name_______________________________________________________pkey";
+
+        // Act
+        final String pk = this.database.generatePrimaryKeyName(tableName);
+
+        // Assert
+        assertEquals(pk, expectedPrimaryKeyName);
+        assertEquals(expectedPrimaryKeyName.getBytes(StandardCharsets.UTF_8).length, 63L);
     }
 
 }

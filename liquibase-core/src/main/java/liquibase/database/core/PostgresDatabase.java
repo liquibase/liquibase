@@ -7,18 +7,19 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.logging.Logger;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.executor.ExecutorService;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -34,6 +35,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
+
+    /**
+     * Maximum length of PostgresSQL identifier.
+     * For details see https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS.
+     */
+    private static final int PGSQL_PK_BYTES_LIMIT = 63;
+    private static final String PGSQL_PK_SUFFIX = "_pkey";
 
     /**
      * Represents Postgres DB types.
@@ -330,9 +338,22 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return new RawCallStatement("select current_schema()");
     }
 
+    /**
+     * Generates PK following {@code PostgreSQL} conventions:
+     * <li>Postgres PK size is limited with 63 bytes.
+     * <li>Postgres PK is suffixed with '_pkey'.
+     *
+     * @param tableName Table name as the base name for the generated PK.
+     * @return PK name.
+     */
     @Override
     public String generatePrimaryKeyName(final String tableName) {
-        return tableName.toUpperCase(Locale.US) + "_PKEY";
+        final byte[] bytes = tableName.getBytes(StandardCharsets.UTF_8);
+        final int suffixBytes = PGSQL_PK_SUFFIX.length(); // All characters are ASCII symbols => 1 byte per symbol.
+
+        return bytes.length <= PGSQL_PK_BYTES_LIMIT - suffixBytes
+            ? tableName + PGSQL_PK_SUFFIX
+            : new String(bytes, 0, PGSQL_PK_BYTES_LIMIT - suffixBytes, StandardCharsets.UTF_8) + PGSQL_PK_SUFFIX;
     }
 
     @Override
