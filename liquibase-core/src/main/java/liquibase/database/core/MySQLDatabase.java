@@ -425,6 +425,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             "CROSS",
             "CLONE",
             "COMPONENT",
+            "CUBE",
             "CUME_DIST",
             "CURRENT_DATE",
             "CURRENT_TIME",
