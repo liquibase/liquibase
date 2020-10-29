@@ -19,7 +19,7 @@ import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,6 +35,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
     private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
     private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
+    private static final Charset CHARSET = Scope.getCurrentScope().getFileEncoding();
 
     /**
      * Maximum length of PostgresSQL identifier.
@@ -348,12 +349,17 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String generatePrimaryKeyName(final String tableName) {
-        final byte[] bytes = tableName.getBytes(StandardCharsets.UTF_8);
-        final int suffixBytes = PGSQL_PK_SUFFIX.length(); // All characters are ASCII symbols => 1 byte per symbol.
+        final byte[] tableNameBytes = tableName.getBytes(CHARSET);
+        final int pkNameBaseAllowedBytesCount = PGSQL_PK_BYTES_LIMIT - PGSQL_PK_SUFFIX.getBytes(CHARSET).length;
 
-        return bytes.length <= PGSQL_PK_BYTES_LIMIT - suffixBytes
-            ? tableName + PGSQL_PK_SUFFIX
-            : new String(bytes, 0, PGSQL_PK_BYTES_LIMIT - suffixBytes, StandardCharsets.UTF_8) + PGSQL_PK_SUFFIX;
+        if (tableNameBytes.length <= pkNameBaseAllowedBytesCount) {
+            return tableName + PGSQL_PK_SUFFIX;
+        }
+
+        // As symbols could be encoded with more than 1 byte, the last symbol bytes couldn't be identified precisely.
+        // To avoid the last symbol being the invalid one, just truncate it.
+        final String baseName = new String(tableNameBytes, 0, pkNameBaseAllowedBytesCount, CHARSET);
+        return baseName.substring(0, baseName.length() - 1) + PGSQL_PK_SUFFIX;
     }
 
     @Override
