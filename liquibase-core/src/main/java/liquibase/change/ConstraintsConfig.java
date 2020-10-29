@@ -32,7 +32,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     private Boolean validateNullable;
     private Boolean validateUnique;
     private Boolean validatePrimaryKey;
-    private Boolean validateForeignKey ;
+    private Boolean validateForeignKey;
 
     /**
      * Returns if the column should be nullable. Returns null if unspecified.
