@@ -6,10 +6,7 @@ import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
-import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.OfflineConnection;
+import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
@@ -21,6 +18,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -41,6 +39,7 @@ public class DiffToChangeLog {
     public static final String DATABASE_CHANGE_LOG_CLOSING_XML_TAG = "</databaseChangeLog>";
     public static final String EXTERNAL_FILE_DIR_SCOPE_KEY = "DiffToChangeLog.externalFilesDir";
     public static final String DIFF_OUTPUT_CONTROL_SCOPE_KEY = "diffOutputControl";
+    public static final String DIFF_SNAPSHOT_DATABASE = "snapshotDatabase";
 
     private String idRoot = String.valueOf(new Date().getTime());
     private boolean overriddenIdRoot;
@@ -116,6 +115,15 @@ public class DiffToChangeLog {
         newScopeObjects.put(DIFF_OUTPUT_CONTROL_SCOPE_KEY, diffOutputControl);
 
         try {
+            //
+            // Get a Database instance and save it in the scope for later use
+            //
+            DatabaseSnapshot snapshot = diffResult.getReferenceSnapshot();
+            Database database = determineDatabase(diffResult.getReferenceSnapshot());
+            if (database == null) {
+                database = determineDatabase(diffResult.getComparisonSnapshot());
+            }
+            newScopeObjects.put(DIFF_SNAPSHOT_DATABASE, database);
             Scope.child(newScopeObjects, new Scope.ScopedRunner() {
                 @Override
                 public void run() {
@@ -194,6 +202,19 @@ public class DiffToChangeLog {
 
             throw new RuntimeException(e);
         }
+    }
+
+    //
+    // Return the Database from this snapshot
+    // if it is not offline
+    //
+    private Database determineDatabase(DatabaseSnapshot snapshot) {
+        Database database = snapshot.getDatabase();
+        DatabaseConnection connection = database.getConnection();
+        if (! (connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
+            return database;
+        }
+        return null;
     }
 
     /**
