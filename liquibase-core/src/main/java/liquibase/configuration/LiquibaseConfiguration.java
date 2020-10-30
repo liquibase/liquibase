@@ -38,6 +38,10 @@ public class LiquibaseConfiguration {
             instance.init(new SystemPropertyProvider());
         }
 
+
+        //ensure this configuration gets loaded
+        instance.getConfiguration(SqlConfiguration.class);
+
         return instance;
     }
 

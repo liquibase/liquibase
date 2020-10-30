@@ -1,6 +1,8 @@
 package liquibase.executor.jvm;
 
 import liquibase.Scope;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.SqlConfiguration;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -31,6 +33,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
@@ -385,6 +388,9 @@ public class JdbcExecutor extends AbstractExecutor {
                     listener.writeSqlWillRun(String.format("%s", statement));
                 }
 
+                Level sqlLogLevel = LiquibaseConfiguration.getInstance().getConfiguration(SqlConfiguration.class).getLogLevel();
+
+                log.log(sqlLogLevel, statement, null);
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -392,7 +398,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     //if execute returns false, we can retrieve the affected rows count
                     // (true used when resultset is returned)
                     if (!stmt.execute(statement)) {
-                        log.fine(Integer.toString(stmt.getUpdateCount()) + " row(s) affected");
+                        log.log(sqlLogLevel, stmt.getUpdateCount() + " row(s) affected", null);
                     }
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: " + getErrorCode(e) + statement+"]", e);
@@ -404,7 +410,7 @@ public class JdbcExecutor extends AbstractExecutor {
                         if (!stmt.getMoreResults()) {
                             updateCount = stmt.getUpdateCount();
                             if (updateCount != -1)
-                                log.fine(Integer.toString(updateCount) + " row(s) affected");
+                                log.log(sqlLogLevel, updateCount + " row(s) affected", null);
                         }
                     } while (updateCount != -1);
 
