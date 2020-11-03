@@ -5,7 +5,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.PostgresDatabase
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -14,7 +14,6 @@ import liquibase.sql.Sql
 import liquibase.sqlgenerator.SqlGeneratorFactory
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.ForeignKeyConstraint
-import liquibase.statement.NotNullConstraint
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.statement.core.CreateTableStatement
 import liquibase.structure.core.Column

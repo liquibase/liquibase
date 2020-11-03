@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.AddUniqueConstraintChange;
 import liquibase.database.AbstractJdbcDatabase;
@@ -149,7 +150,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
                 found = SnapshotGeneratorFactory.getInstance().has(backingIndexCopy, comparisonDatabase);
             }
         } catch (Exception e) {
-            LogFactory.getInstance().getLog().warning("Error checking for backing index "+backingIndex.toString()+": "+e.getMessage(), e);
+            Scope.getCurrentScope().getLog(getClass()).warning("Error checking for backing index "+backingIndex.toString()+": "+e.getMessage(), e);
         }
         return found;
     }

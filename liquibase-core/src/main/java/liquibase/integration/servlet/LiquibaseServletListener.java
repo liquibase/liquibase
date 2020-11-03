@@ -3,6 +3,7 @@ package liquibase.integration.servlet;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.GlobalConfiguration;
@@ -12,14 +13,12 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.NetUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -150,7 +149,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
         GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run on " + hostName
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
                     + " because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                             + " was set to false");
             return false;
@@ -209,7 +208,7 @@ public class LiquibaseServletListener implements ServletContextListener {
 
         setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS));
         setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS));
-        this.defaultSchema = StringUtils.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
+        this.defaultSchema = StringUtil.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
 
         Connection connection = null;
         Database database = null;

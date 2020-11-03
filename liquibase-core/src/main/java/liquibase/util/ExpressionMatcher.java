@@ -40,7 +40,7 @@ public final class ExpressionMatcher {
      * @return {@code true} if provided list of items satisfy expression criteria. {@code false} otherwise.
      */
     public static boolean matches(String expression, Collection<String> items) {
-        expression = StringUtils.trimToEmpty(expression);
+        expression = StringUtil.trimToEmpty(expression);
         if (items.isEmpty()) {
             return true;
         }

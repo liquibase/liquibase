@@ -1,6 +1,6 @@
 package liquibase;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -29,12 +29,12 @@ public class Labels {
     }
 
     private void parseLabelString(String labels) {
-        labels = StringUtils.trimToNull(labels);
+        labels = StringUtil.trimToNull(labels);
 
         if (labels == null) {
             return;
         }
-        for (String label : StringUtils.splitAndTrim(labels, ",")) {
+        for (String label : StringUtil.splitAndTrim(labels, ",")) {
             this.labels.add(label.toLowerCase());
         }
 
@@ -59,7 +59,7 @@ public class Labels {
 
     @Override
     public String toString() {
-        return StringUtils.join(new LinkedHashSet<>(this.labels),",");
+        return StringUtil.join(new LinkedHashSet<>(this.labels),",");
     }
 
     public boolean isEmpty() {

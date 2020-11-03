@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.exception.ValidationErrors;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.core.MockSqlStatement;
 import org.junit.Test;

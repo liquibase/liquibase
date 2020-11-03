@@ -41,7 +41,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     protected String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
-        StringBuffer where = new StringBuffer();
+        StringBuilder where = new StringBuilder();
 
         String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");
 
@@ -68,7 +68,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer insertBuffer = new StringBuffer();
+        StringBuilder insertBuffer = new StringBuilder();
         InsertGenerator insert = new InsertGenerator();
         Sql[] insertSql = insert.generateSql(insertOrUpdateStatement,database,sqlGeneratorChain);
 
@@ -93,7 +93,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
      */
     protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
 
-        StringBuffer updateSqlString = new StringBuffer();
+        StringBuilder updateSqlString = new StringBuilder();
 
         UpdateGenerator update = new UpdateGenerator();
         UpdateStatement updateStatement = new UpdateStatement(
@@ -109,10 +109,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<>(Arrays.asList(pkFields));
-        for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
+        for(String columnKey:insertOrUpdateStatement.getColumnUpdateValues().keySet())
         {
             if (!hashPkFields.contains(columnKey)) {
-                updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnValue(columnKey));
+                updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnUpdateValue(columnKey));
             }
         }
         // this isn't very elegant but the code fails above without any columns to update
@@ -137,11 +137,11 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     @Override
     public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer completeSql = new StringBuffer();
+        StringBuilder completeSql = new StringBuilder();
         String whereClause = getWhereClause(insertOrUpdateStatement, database);
         if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
 	        completeSql.append( getRecordCheck(insertOrUpdateStatement, database, whereClause));
-	
+
 	        completeSql.append(getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
         }
         try {

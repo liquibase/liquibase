@@ -11,7 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import liquibase.util.beans.PropertyUtils;
 
 import java.beans.PropertyDescriptor;
@@ -70,13 +70,13 @@ public class ChangeParameterMetaData {
         this.description = description;
         this.exampleValues = exampleValues;
         if (dataType instanceof Class) {
-            this.dataType = StringUtils.lowerCaseFirst(((Class) dataType).getSimpleName());
+            this.dataType = StringUtil.lowerCaseFirst(((Class) dataType).getSimpleName());
             this.dataTypeClass = (Class) dataType;
         } else if (dataType instanceof ParameterizedType) {
-            this.dataType = StringUtils.lowerCaseFirst(
+            this.dataType = StringUtil.lowerCaseFirst(
                 ((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
                     " of " +
-                    StringUtils.lowerCaseFirst(
+                    StringUtil.lowerCaseFirst(
                         ((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
                     )
             );
@@ -105,7 +105,7 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if ((supportedDatabases.length == 1) && StringUtils.join(supportedDatabases, ",").equals
+        if ((supportedDatabases.length == 1) && StringUtil.join(supportedDatabases, ",").equals
             (ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
@@ -155,7 +155,7 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if ((requiredDatabases.length == 1) && StringUtils.join(requiredDatabases, ",").equals
+        if ((requiredDatabases.length == 1) && StringUtil.join(requiredDatabases, ",").equals
             (ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
@@ -296,7 +296,7 @@ public class ChangeParameterMetaData {
                     Method readMethod = descriptor.getReadMethod();
                     if (readMethod == null) {
                         readMethod = change.getClass().getMethod(
-                            "is" + StringUtils.upperCaseFirst(descriptor.getName())
+                            "is" + StringUtil.upperCaseFirst(descriptor.getName())
                         );
                     }
                     readMethodRef = Optional.of(readMethod);
@@ -443,7 +443,7 @@ public class ChangeParameterMetaData {
 
         for (String prefix : new String[] {"base", "referenced", "new", "old"}) {
             if (parameterName.startsWith(prefix)) {
-                String mainName = StringUtils.lowerCaseFirst(parameterName.replaceFirst("^"+prefix, ""));
+                String mainName = StringUtil.lowerCaseFirst(parameterName.replaceFirst("^"+prefix, ""));
                 if (standardExamples.containsKey(mainName)) {
                     return standardExamples.get(mainName);
                 }
@@ -497,7 +497,7 @@ public class ChangeParameterMetaData {
         standardDescriptions.put("catalogName", "Name of the catalog");
         standardDescriptions.put("columnName", "Name of the column");
 
-        return StringUtils.trimToEmpty(standardDescriptions.get(parameterName));
+        return StringUtil.trimToEmpty(standardDescriptions.get(parameterName));
 
     }
 

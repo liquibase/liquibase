@@ -1,7 +1,7 @@
 package liquibase.database
 
 import liquibase.resource.ResourceAccessor
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
 import spock.lang.Specification

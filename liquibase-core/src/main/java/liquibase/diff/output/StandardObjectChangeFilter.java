@@ -5,7 +5,7 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
     }
 
     protected void parseFilter(String filter) {
-        filter = StringUtils.trimToNull(filter);
+        filter = StringUtil.trimToNull(filter);
         if (filter == null) {
             return;
         }
@@ -47,7 +47,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
             if (split.length == 1) {
                 filters.add(new Filter(null, Pattern.compile(split[0])));
             } else {
-                String className = StringUtils.upperCaseFirst(split[0]);
+                String className = StringUtil.upperCaseFirst(split[0]);
                 className = "liquibase.structure.core."+className;
                 try {
                     Class<DatabaseObject> clazz = (Class<DatabaseObject>) Class.forName(className);

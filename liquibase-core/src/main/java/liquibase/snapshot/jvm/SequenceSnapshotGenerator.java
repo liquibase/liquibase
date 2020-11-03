@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
@@ -26,8 +27,6 @@ import java.util.StringJoiner;
  */
 public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
-    private Logger log = LogFactory.getInstance().getLog(SequenceSnapshotGenerator.class.getSimpleName());
-
     public SequenceSnapshotGenerator() {
         super(Sequence.class, new Class[]{Schema.class});
     }
@@ -41,7 +40,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
 
         //noinspection unchecked
-        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor("jdbc", database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
+        List<Map<String, ?>> sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
 
         if (sequences != null) {
             for (Map<String, ?> sequence : sequences) {
@@ -58,7 +57,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         List<Map<String, ?>> sequences;
         if (database instanceof Db2zDatabase) {
-            sequences = ExecutorService.getInstance()
+            sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
                     .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
             return getSequences(example, database, sequences);
@@ -73,7 +72,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                 return null;
             }
 
-            sequences = ExecutorService.getInstance()
+            sequences = Scope.getCurrentScope().getSingleton(ExecutorService.class)
                     .getExecutor("jdbc", database)
                     .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
             DatabaseObject sequenceRow = getSequences(example, database, sequences);
@@ -206,7 +205,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 version = database.getDatabaseMajorVersion();
             } catch (Exception ignore) {
-                log.warning("Failed to retrieve database version: " + ignore);
+                Scope.getCurrentScope().getLog(getClass()).warning("Failed to retrieve database version: " + ignore);
             }
             if (version < 10) { // 'pg_sequence' view does not exists yet
                 return "SELECT c.relname AS \"SEQUENCE_NAME\" FROM pg_class c " +
@@ -237,8 +236,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof MariaDBDatabase) {
             StringJoiner j = new StringJoiner(" \n UNION\n");
             try {
-                List<Map<String, ?>> res = ExecutorService.getInstance()
-                        .getExecutor(database)
+                List<Map<String, ?>> res = Scope.getCurrentScope().getSingleton(ExecutorService.class)
+                        .getExecutor("jdbc", database)
                         .queryForList(new RawSqlStatement("select table_name AS SEQUENCE_NAME " +
                                                         "from information_schema.TABLES " +
                                                         "where TABLE_SCHEMA = '" + schema.getName() +"' " +

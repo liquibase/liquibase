@@ -1,12 +1,10 @@
 package liquibase.dbtest;
 
-import ch.qos.logback.classic.Level;
-import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
+import liquibase.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -26,28 +24,27 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
-import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.*;
-import liquibase.test.*;
+import liquibase.test.DatabaseTestContext;
+import liquibase.test.DatabaseTestURL;
+import liquibase.test.DiffResultAssert;
+import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.RegexMatcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -66,10 +63,6 @@ import static org.junit.Assume.assumeNotNull;
  */
 public abstract class AbstractIntegrationTest {
 
-    static {
-        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-        rootLogger.setLevel(Level.INFO);
-    }
     @Rule
     public TemporaryFolder tempDirectory = new TemporaryFolder();
     protected String completeChangeLog;
@@ -100,13 +93,19 @@ public abstract class AbstractIntegrationTest {
         this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
-        logger = LogService.getLog(getClass());
+        logger = Scope.getCurrentScope().getLog(getClass());
 
         // Get the integration test properties for both global settings and (if applicable) local overrides.
         Properties integrationTestProperties;
         integrationTestProperties = new Properties();
-        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-        InputStream localProperties=Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
+        integrationTestProperties.load(
+           Thread.currentThread()
+                 .getContextClassLoader()
+                 .getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
+        InputStream localProperties=
+           Thread.currentThread()
+                 .getContextClassLoader()
+                 .getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
         if(localProperties!=null)
             integrationTestProperties.load(localProperties);
 
@@ -129,15 +128,29 @@ public abstract class AbstractIntegrationTest {
         }
         this.setJdbcUrl(url);
 
-        ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
+        String testHubApiKey = integrationTestProperties.getProperty("integration.test.hub.apiKey");
+        if (testHubApiKey != null) {
+            HubConfiguration hubConfiguration =
+              LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            hubConfiguration.setLiquibaseHubApiKey(testHubApiKey);
+            String testHubUrl = integrationTestProperties.getProperty("integration.test.hub.url");
+            hubConfiguration.setLiquibaseHubUrl(testHubUrl);
+        }
+        Scope.setScopeManager(new TestScopeManager());
     }
 
     public static DatabaseTestURL getDatabaseTestURL(String databaseManager) {
         try {
             Properties integrationTestProperties;
             integrationTestProperties = new Properties();
-            integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-            InputStream localProperties = Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
+            integrationTestProperties.load(
+               Thread.currentThread()
+                     .getContextClassLoader()
+                     .getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
+            InputStream localProperties =
+               Thread.currentThread()
+                     .getContextClassLoader()
+                     .getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
             if (localProperties != null)
                 integrationTestProperties.load(localProperties);
 
@@ -198,7 +211,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             SnapshotGeneratorFactory.resetAll();
-            ExecutorService.getInstance().reset();
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
 
             LockServiceFactory.getInstance().resetAll();
             LockServiceFactory.getInstance().getLockService(database).init();
@@ -220,7 +233,9 @@ public abstract class AbstractIntegrationTest {
             try {
                 if (database.getConnection() != null) {
                     String sql = "DROP TABLE " + database.getDatabaseChangeLogLockTableName();
-                    LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.writeSqlWillRun(sql);
+                    }
                     ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
                             sql
                     );
@@ -312,7 +327,7 @@ public abstract class AbstractIntegrationTest {
             if (shouldRollBack()) {
                 database.rollback();
             }
-            ExecutorService.getInstance().clearExecutor("jdbc", database);
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", database);
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
@@ -325,12 +340,12 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected Liquibase createLiquibase(String changeLogFile) throws Exception {
-        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(new JUnitResourceAccessor(), new FileSystemResourceAccessor());
+        ResourceAccessor fileOpener = new JUnitResourceAccessor();
         return createLiquibase(changeLogFile, fileOpener);
     }
 
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) {
-        ExecutorService.getInstance().clearExecutor("jdbc", database);
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).clearExecutor("jdbc", database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
     }
@@ -424,7 +439,9 @@ public abstract class AbstractIntegrationTest {
                 "tag VARCHAR(255)" + nullableKeyword + ", " +
                 "liquibase VARCHAR(10)" + nullableKeyword + ", " +
                 "PRIMARY KEY (id, author, filename))";
-        LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
+        for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+            listener.writeSqlWillRun(sql);
+        }
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
         boolean savedAcSetting = conn.getAutoCommit();
@@ -492,12 +509,14 @@ public abstract class AbstractIntegrationTest {
                                     database.getLiquibaseSchemaName(),
                                     database.getDatabaseChangeLogTableName()
                             );
-                    LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.writeSqlWillRun(sql);
+                    }
                     statement.execute(sql);
                     database.commit();
                 }
             } catch (Exception e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangelog table");
+                Scope.getCurrentScope().getLog(getClass()).warning("Probably expected error dropping databasechangelog table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -520,12 +539,14 @@ public abstract class AbstractIntegrationTest {
                                     database.getLiquibaseSchemaName(),
                                     database.getDatabaseChangeLogLockTableName()
                             );
-                    LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sql);
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.writeSqlWillRun(sql);
+                    }
                     statement.execute(sql);
                     database.commit();
                 }
             } catch (Exception e) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangeloglock table");
+                Scope.getCurrentScope().getLog(getClass()).warning("Probably expected error dropping databasechangeloglock table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -738,7 +759,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             liquibase = createLiquibase(tempFile.getName());
-            LogService.getLog(getClass()).info(LogType.LOG, "updating from "+tempFile.getCanonicalPath());
+            Scope.getCurrentScope().getLog(getClass()).info("updating from "+tempFile.getCanonicalPath());
             try {
                 liquibase.update(this.contexts);
             } catch (LiquibaseException e) {
@@ -801,7 +822,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         //run again to test changelog testing logic
-        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         try {
             executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogTableName(), false));
         } catch (DatabaseException e) {
@@ -896,17 +917,16 @@ public abstract class AbstractIntegrationTest {
     public void testAbsolutePathChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
 
+        String fileUrlToChangeLog = getClass().getResource("/" + includedChangeLog).toString();
+        assertTrue(fileUrlToChangeLog.startsWith("file:/"));
 
-        Set<String> urls = new JUnitResourceAccessor().list(null, includedChangeLog, true, false, true);
-        String absolutePathOfChangeLog = urls.iterator().next();
-
-        absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/", "");
+        String absolutePathOfChangeLog = fileUrlToChangeLog.replaceFirst("file:\\/", "");
         if (System.getProperty("os.name").startsWith("Windows ")) {
             absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');
         } else {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
-        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor());
+        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor(File.listRoots()));
         clearDatabase();
 
         liquibase.update(this.contexts);
@@ -918,7 +938,7 @@ public abstract class AbstractIntegrationTest {
 
     private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) {
         try {
-            ExecutorService.getInstance().getExecutor("jdbc", database).execute(
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(
                 new DropTableStatement(catalog, schema, database.getDatabaseChangeLogTableName(), false)
             );
         } catch (DatabaseException e) {
@@ -962,7 +982,7 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts);
 
         Path outputDir = tempDirectory.newFolder().toPath().normalize();
-        logger.debug(LogType.LOG, "Database documentation will be written to this temporary folder: " + outputDir);
+        logger.fine("Database documentation will be written to this temporary folder: " + outputDir);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());

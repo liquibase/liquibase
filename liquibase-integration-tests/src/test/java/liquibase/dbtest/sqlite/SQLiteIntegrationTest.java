@@ -1,11 +1,10 @@
 package liquibase.dbtest.sqlite;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.ValidationFailedException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import org.junit.Test;
 
 import java.io.File;
@@ -69,7 +68,7 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
 
     @Override
     public void testOutputChangeLog() throws Exception {
-        LogService.getLog(getClass()).info(LogType.LOG, "Due to several unimplemented ALTER TABLE substatements in SQLite, " +
+        Scope.getCurrentScope().getLog(getClass()).info("Due to several unimplemented ALTER TABLE substatements in SQLite, " +
                 "this test is technically impossible on this RDBMS.");
         assertTrue(true);
     }

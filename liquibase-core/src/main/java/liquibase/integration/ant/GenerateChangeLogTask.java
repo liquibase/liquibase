@@ -57,7 +57,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
             } catch (ParserConfigurationException e) {
                 throw new BuildException("Unable to generate a change log. Error configuring parser.", e);
             } catch (DatabaseException e) {
-                throw new BuildException("Unable to generate a change log. " + e.toString(), e);
+                throw new BuildException("Unable to generate a change log: " + e.getMessage(), e);
             } finally {
                 FileUtils.close(printStream);
             }
@@ -156,16 +156,5 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
     public void setExcludeObjects(String excludeObjects) {
         this.excludeObjects = excludeObjects;
-    }
-
-    /**
-     * @deprecated Use {@link #addConfiguredXml(ChangeLogOutputFile)} instead.
-     */
-    @Deprecated
-    public void setOutputFile(FileResource outputFile) {
-        log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, <yaml>, or <txt> element instead.", Project.MSG_WARN);
-        ChangeLogOutputFile changeLogOutputFile = new ChangeLogOutputFile();
-        changeLogOutputFile.setOutputFile(outputFile);
-        addConfiguredXml(changeLogOutputFile);
     }
 }

@@ -8,6 +8,7 @@ import java.sql.Types;
 import java.util.*;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -16,15 +17,13 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperNotNullConstraintsResultSetExtractor;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
@@ -269,7 +268,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         protected void warnAboutDbaRecycleBin() {
             if (!ignoreWarnAboutDbaRecycleBin && !warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
-                LogService.getLog(getClass()).warning(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
+                Scope.getCurrentScope().getLog(getClass()).warning(((OracleDatabase) database).getDbaRecycleBinWarning());
                 warnedAboutDbaRecycleBin = true;
             }
         }
@@ -458,7 +457,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
           protected List<CachedRow> mssqlQuery(boolean bulk) throws DatabaseException, SQLException {
             CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-              String databaseName = StringUtils.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+              String databaseName = StringUtil.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
               String dbIdParam;
               String databasePrefix;
               if (databaseName == null) {
@@ -1001,7 +1000,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryMssql(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class);
 
-                    String databaseName = StringUtils.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
+                    String databaseName = StringUtil.trimToNull(database.correctObjectName(catalogAndSchema.getCatalogName(), Catalog.class));
                     String dbIdParam;
                     String databasePrefix;
                     if (databaseName == null) {
@@ -1530,7 +1529,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        LogService.getLog(getClass()).warning(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
+                        Scope.getCurrentScope().getLog(getClass()).warning("Finding unique constraints not currently supported for Sybase");
                         return null; //TODO: find sybase sql
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +

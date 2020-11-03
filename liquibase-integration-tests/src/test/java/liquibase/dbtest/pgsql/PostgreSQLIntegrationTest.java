@@ -1,6 +1,7 @@
 package liquibase.dbtest.pgsql;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
@@ -34,38 +35,38 @@ public class PostgreSQLIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void testMissingDataGenerator() throws Exception {
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("CREATE TABLE \"FIRST_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20), \"LAST_NAME\" VARCHAR(20) DEFAULT 'Snow', " +
                                                     "\"AGE\" INT DEFAULT 25, \"REGISTRATION_DATE\" date DEFAULT TO_DATE('2014-08-11', 'YYYY-MM-DD'), " +
                                                     "\"COMPVALCOL\" INT DEFAULT 1*22)"));
 
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("CREATE TABLE \"SECOND_TABLE\" (\"ID\" INT, \"NAME\" VARCHAR(20))"));
 
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("ALTER TABLE \"FIRST_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_PK\" PRIMARY KEY (\"ID\")"));
 
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("ALTER TABLE \"SECOND_TABLE\" ADD CONSTRAINT \"FIRST_TABLE_FK\" FOREIGN KEY (\"ID\") REFERENCES \"FIRST_TABLE\"(\"ID\")"));
 
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("CREATE INDEX \"IDX_FIRST_TABLE\" ON \"FIRST_TABLE\"(\"NAME\")"));
 
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("INSERT INTO \"FIRST_TABLE\"(\"ID\", \"NAME\", \"LAST_NAME\", \"AGE\", \"REGISTRATION_DATE\", \"COMPVALCOL\") VALUES (2, 'JEREMY', 'IRONS', 71, TO_DATE('2020-04-01', 'YYYY-MM-DD'), 2*11 )"));
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (1, 'JOHN')"));
-        ExecutorService.getInstance().getExecutor(getDatabase())
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase())
                   .execute(
                           new RawSqlStatement("INSERT INTO \"SECOND_TABLE\"(\"ID\", \"NAME\") VALUES (2, 'JEREMY')"));
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());

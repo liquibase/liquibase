@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -8,9 +9,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtils;
@@ -318,7 +316,7 @@ public class H2Database extends AbstractJdbcDatabase {
                         this.connectionSchemaName = schemaName;
                     }
                 } catch (SQLException e) {
-                    LogService.getLog(getClass()).info(LogType.LOG, "Could not read current schema name: "+e.getMessage());
+                    Scope.getCurrentScope().getLog(getClass()).info("Could not read current schema name: "+e.getMessage());
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }
@@ -344,7 +342,7 @@ public class H2Database extends AbstractJdbcDatabase {
             }
 
         } catch (DatabaseException e) {
-            LogFactory.getInstance().getLog().warning("Failed to determine database version, reported error: " + e.getMessage());
+            Scope.getCurrentScope().getLog(getClass()).warning("Failed to determine database version, reported error: " + e.getMessage());
         }
         return false;
     }
@@ -358,7 +356,7 @@ public class H2Database extends AbstractJdbcDatabase {
             return Integer.parseInt(matcher.group(1));
         }
         else {
-            LogFactory.getInstance().getLog().warning("Failed to determine H2 build number from product version: " + getDatabaseProductVersion());
+            Scope.getCurrentScope().getLog(getClass()).warning("Failed to determine H2 build number from product version: " + getDatabaseProductVersion());
             return -1;
         }
 

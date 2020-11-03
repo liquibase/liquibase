@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
@@ -9,7 +10,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.FileUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.File;
 import java.util.List;
@@ -65,7 +66,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
 
     @Override
     protected CommandResult run() throws Exception {
-        Executor executor = ExecutorService.getInstance().getExecutor("jdbc", database);
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String sqlText;
         if (sqlFile == null) {
             sqlText = sql;
@@ -78,7 +79,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
         }
 
         String out = "";
-        String[] sqlStrings = StringUtils.processMutliLineSQL(sqlText, true, true, delimiter);
+        String[] sqlStrings = StringUtil.processMutliLineSQL(sqlText, true, true, delimiter);
         for (String sql : sqlStrings) {
             if (sql.toLowerCase().matches("\\s*select .*")) {
                 List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sql));
@@ -90,7 +91,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
                     for (Map<String, ?> row : rows) {
                         keys.addAll(row.keySet());
                     }
-                    out += StringUtils.join(keys, " | ")+" |\n";
+                    out += StringUtil.join(keys, " | ")+" |\n";
 
                     for (Map<String, ?> row : rows) {
                         for (String key : keys) {

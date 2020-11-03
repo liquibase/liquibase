@@ -2,7 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.statement.NotNullConstraint;
 import liquibase.util.BooleanUtils;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class Table extends Relation {
 
     @Override
     public int hashCode() {
-        return StringUtils.trimToEmpty(getName()).toUpperCase().hashCode();
+        return StringUtil.trimToEmpty(getName()).toUpperCase().hashCode();
     }
 
     @Override

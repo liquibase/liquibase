@@ -6,7 +6,7 @@ import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet
 import liquibase.exception.UnexpectedLiquibaseException
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.statement.SqlStatement
 import spock.lang.Unroll
@@ -104,12 +104,11 @@ public class SQLFileChangeTest extends StandardChangeTest {
         when:
         def change = new SQLFileChange()
         change.path = "non-existing.sql"
-        change.resourceAccessor = new MockResourceAccessor()
         change.openSqlStream()
 
         then:
         def e = thrown(IOException)
-        e.message == "File does not exist: 'non-existing.sql'"
+        e.message.startsWith("The file non-existing.sql was not found")
 
     }
 

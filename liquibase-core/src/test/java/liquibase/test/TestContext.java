@@ -5,7 +5,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 
 import java.io.File;
 import java.net.*;

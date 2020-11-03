@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -8,13 +9,11 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigInteger;
 import java.sql.DatabaseMetaData;
@@ -206,14 +205,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = ExecutorService.getInstance().getExecutor("jdbc", this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
-        ExecutorService.getInstance().getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+        boolean enabled = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
         return enabled;
     }
 
     @Override
     public void enableForeignKeyChecks() throws DatabaseException {
-        ExecutorService.getInstance().getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
     }
 
     @Override
@@ -273,7 +272,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         if (getHasJdbcConstraintDeferrableBug() != null)  // cached value
             return getHasJdbcConstraintDeferrableBug();
 
-        String randomIdentifier = "TMP_" + StringUtils.randomIdentifer(16);
+        String randomIdentifier = "TMP_" + StringUtil.randomIdentifer(16);
         try
         {
             // Get the real connection and metadata reference
@@ -284,7 +283,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                     "  self_ref INT NOT NULL,\n" +
                     "  CONSTRAINT c_self_ref FOREIGN KEY(self_ref) REFERENCES " + randomIdentifier + "(id)\n" +
                     ")";
-            ExecutorService.getInstance().getExecutor("jdbc", this).execute(new RawSqlStatement(sql));
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement(sql));
 
             try (
                 ResultSet rs = metaData.getImportedKeys(getDefaultCatalogName(), getDefaultSchemaName(), randomIdentifier)
@@ -296,7 +295,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 }
                 if (rs.getShort("DEFERRABILITY") != DatabaseMetaData.importedKeyNotDeferrable) {
                     setHasJdbcConstraintDeferrableBug(true);
-                    LogService.getLog(getClass()).warning(LogType.LOG, "Your MySQL/MariaDB database JDBC driver might have " +
+                    Scope.getCurrentScope().getLog(getClass()).warning("Your MySQL/MariaDB database JDBC driver might have " +
                             "a bug where constraints are reported as DEFERRABLE, even though MySQL/MariaDB do not " +
                             "support this feature. A workaround for this problem will be used. Please check with " +
                             "MySQL/MariaDB for availability of fixed JDBC drivers to avoid this warning.");
@@ -308,8 +307,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         } catch (DatabaseException|SQLException e) {
             throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug.", e);
         } finally {
-                ExecutorService.getInstance().reset();
-                ExecutorService.getInstance().getExecutor("jdbc", this).execute(
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
+                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(
                         new RawSqlStatement("DROP TABLE " + randomIdentifier));
         }
 
@@ -341,8 +340,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             minor = getDatabaseMinorVersion();
             patch = getDatabasePatchVersion();
         } catch (DatabaseException x) {
-            LogService.getLog(getClass()).warning(
-                    LogType.LOG, "Unable to determine exact database server version"
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                    "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;
@@ -350,7 +349,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
         String minimumVersion = getMinimumVersionForFractionalDigitsForTimestamp();
 
-        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, patch))
+        if (StringUtil.isMinimumVersion(minimumVersion, major, minor, patch))
             return 6;
         else
             return 0;

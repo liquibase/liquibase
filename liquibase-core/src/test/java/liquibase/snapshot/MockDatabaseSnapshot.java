@@ -3,6 +3,7 @@ package liquibase.snapshot;
 import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Arrays;
@@ -24,6 +25,7 @@ public class MockDatabaseSnapshot extends DatabaseSnapshot {
         return new SnapshotGeneratorChain(new TreeSet<SnapshotGenerator>(Arrays.asList(new MockSnapshotGenerator())));
     }
 
+    @LiquibaseService(skip = true)
     private class MockSnapshotGenerator implements SnapshotGenerator, Comparable<SnapshotGenerator> {
 
         @Override

@@ -29,7 +29,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
 
     @Override
     public Sql[] generateSql(CopyRowsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer();
+        StringBuilder sql = new StringBuilder();
         
         if (statement.getCopyColumns().isEmpty()) {
             return new Sql[]{};

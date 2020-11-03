@@ -1,17 +1,13 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.command.AbstractSelfConfiguratingCommand;
-import liquibase.command.CommandExecutionException;
-import liquibase.command.CommandFactory;
-import liquibase.command.LiquibaseCommand;
+import liquibase.command.*;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -99,8 +95,10 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         argsMap.put("liquibase", liquibase);
         configuratingCommand.configure(argsMap);
         try {
-            liquibaseCommand.execute();
-        }
+            CommandResult result = liquibaseCommand.execute();
+            if (!result.succeeded) {
+                throw new LiquibaseException(result.message);
+            }        }
         catch (CommandExecutionException cee) {
             throw new LiquibaseException("Error executing rollbackOneUpdate", cee);
         }
@@ -110,7 +108,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
                 closeOutputWriter(outputWriter);
             }
             catch (IOException ioe) {
-                LogService.getLog(getClass()).info(LogType.LOG, String.format("Unable to close output file"));
+                Scope.getCurrentScope().getLog(getClass()).info("Unable to close output file");
             }
         }
     }
@@ -136,7 +134,7 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         try {
             fileOut = new FileOutputStream(outputFile, false);
         } catch (IOException e) {
-            LogService.getLog(getClass()).severe(LogType.LOG, String.format(
+            Scope.getCurrentScope().getLog(getClass()).severe(String.format(
                     coreBundle.getString("could.not.create.output.file"),
                     outputFile));
             throw e;

@@ -7,7 +7,7 @@ import liquibase.database.core.MSSQLDatabase
 import liquibase.exception.RollbackImpossibleException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.exception.ValidationErrors
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.SqlStatement
 import org.junit.Test

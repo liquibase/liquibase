@@ -37,7 +37,7 @@ public class PreconditionFactoryTest {
 
         assertEquals(0, PreconditionFactory.getInstance().getPreconditions().size());
 
-        PreconditionFactory.getInstance().register(MockPrecondition.class);
+        PreconditionFactory.getInstance().register(new MockPrecondition());
 
         assertEquals(1, PreconditionFactory.getInstance().getPreconditions().size());
     }
@@ -50,10 +50,8 @@ public class PreconditionFactoryTest {
 
         assertEquals(0, factory.getPreconditions().size());
 
-        Class<? extends Precondition> precondition = AndPrecondition.class;
-
-        factory.register(OrPrecondition.class);
-        factory.register(precondition);
+        factory.register(new OrPrecondition());
+        factory.register(new AndPrecondition());
 
         assertEquals(2, factory.getPreconditions().size());
 

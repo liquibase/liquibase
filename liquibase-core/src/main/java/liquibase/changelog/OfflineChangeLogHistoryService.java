@@ -2,6 +2,7 @@ package liquibase.changelog;
 
 import liquibase.ContextExpression;
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.configuration.GlobalConfiguration;
@@ -107,7 +108,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 writeHeader(changeLogFile);
 
                 if (isExecuteDdlAgainstDatabase()) {
-                    ExecutorService.getInstance().getExecutor("jdbc", getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
+                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
                 }
 
 
@@ -136,7 +137,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     protected void replaceChecksum(final ChangeSet changeSet) throws DatabaseException {
         if (isExecuteDmlAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
         }
         replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
             @Override
@@ -276,7 +277,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public void setExecType(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
         if (isExecuteDmlAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor("jdbc", getDatabase()).execute(new MarkChangeSetRanStatement(changeSet, execType));
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new MarkChangeSetRanStatement(changeSet, execType));
             getDatabase().commit();
         }
 
@@ -300,7 +301,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public void removeFromHistory(ChangeSet changeSet) throws DatabaseException {
         if (isExecuteDmlAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor("jdbc", getDatabase()).execute(new RemoveChangeSetRanStatusStatement(changeSet));
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RemoveChangeSetRanStatusStatement(changeSet));
             getDatabase().commit();
         }
 

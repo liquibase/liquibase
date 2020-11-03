@@ -18,8 +18,8 @@ import liquibase.logging.Logger;
  */
 public class UnknownChangeLogFormatLoggingTest {
 
-    private Logger mockLogger;
-
+//    private Logger mockLogger;
+//
 //    @Before
 //    public void setUp() throws Exception {
 //        mockLogger = Mockito.mock(Logger.class);
@@ -40,7 +40,7 @@ public class UnknownChangeLogFormatLoggingTest {
 //            }
 //        });
 //    }
-
+//
 //    @Test
 //    public void testUnknownFileTypeWarning() throws Exception {
 //        ArgumentCaptor<String> loggerCaptor = ArgumentCaptor.forClass(String.class);

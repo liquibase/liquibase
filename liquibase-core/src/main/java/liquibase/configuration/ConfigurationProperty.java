@@ -1,7 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -22,6 +22,8 @@ public class ConfigurationProperty {
     private String description;
     private Object defaultValue;
     private boolean wasOverridden;
+
+    private ConfigurationValueHandler valueHandler;
 
     public ConfigurationProperty(String namespace, String propertyName, Class type) {
         this.namespace = namespace;
@@ -99,7 +101,7 @@ public class ConfigurationProperty {
             } else if (type.equals(Long.class)) {
             	return Long.valueOf((String) value);
             } else if (type.equals(List.class)) {
-                return StringUtils.splitAndTrim((String) value, ",");
+                return StringUtil.splitAndTrim((String) value, ",");
             } else {
                 throw new UnexpectedLiquibaseException("Cannot parse property "+value.getClass().getSimpleName()+" to a "+type.getSimpleName());
             }
@@ -130,6 +132,9 @@ public class ConfigurationProperty {
      * Overwrites the value currently stored in this property. It he passed type is not compatible with the defined type, an exception is thrown.
      */
     public void setValue(Object value) {
+        if (valueHandler != null) {
+            value = valueHandler.convert(value);
+        }
         if ((value != null) && !type.isAssignableFrom(value.getClass())) {
             throw new UnexpectedLiquibaseException("Property "+name+" on is of type "+type.getSimpleName()+", not "+value.getClass().getSimpleName());
         }
@@ -189,5 +194,11 @@ public class ConfigurationProperty {
      */
     public boolean getWasOverridden() {
         return wasOverridden;
+    }
+
+    public ConfigurationProperty setValueHandler(ConfigurationValueHandler handler) {
+        this.valueHandler = handler;
+
+        return this;
     }
 }

@@ -1,11 +1,10 @@
 package liquibase.license;
 
-import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogService;
-import liquibase.logging.Logger;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
+import liquibase.exception.ValidationErrors;
 
 /**
  *
@@ -13,21 +12,20 @@ import liquibase.changelog.ChangeSet;
  *
  */
 public class LicenseServiceUtils {
-    private static Logger LOG = LogService.getLog(LicenseServiceUtils.class);
 
     public static ValidationErrors checkForValidLicense(String licenseType, Change change) {
-      LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+      LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
       if (licenseService == null) {
         return new ValidationErrors();
       }
       if (licenseService.licenseIsValid(licenseType)) {
         String message = String.format("Found valid license with subject '%s' for '%s'",licenseType, change.getDescription());
-        LOG.debug(message);
+        Scope.getCurrentScope().getLog(LicenseService.class).fine(message);
         return new ValidationErrors();
       }
 
       ChangeSet changeSet = change.getChangeSet();
-      String changeType = ChangeFactory.getInstance().getChangeMetaData(change).getName();
+      String changeType = Scope.getCurrentScope().getSingleton(ChangeFactory.class).getChangeMetaData(change).getName();
       ValidationErrors validationErrors = new ValidationErrors();
       String message = "Change Set ID: " + changeSet.getId() + " Change Set Author: " + changeSet.getAuthor() + "\n";
       message += "Change Type 'pro:" + changeType + "' is not allowed without a valid Liquibase Pro License.\n";
@@ -43,7 +41,7 @@ public class LicenseServiceUtils {
    * @return
    */
   public static boolean checkForValidLicense(String licenseType) {
-    LicenseService licenseService = LicenseServiceFactory.getInstance().getLicenseService();
+    LicenseService licenseService = Scope.getCurrentScope().getSingleton(LicenseServiceFactory.class).getLicenseService();
     if (licenseService == null) {
       return false;
     }

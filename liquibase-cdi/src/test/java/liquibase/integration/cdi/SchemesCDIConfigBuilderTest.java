@@ -1,9 +1,8 @@
 package liquibase.integration.cdi;
 
+import liquibase.Scope;
 import liquibase.integration.cdi.annotations.Liquibase;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
+
 /**
  * @author Nikita Lipatov (https://github.com/islonik),
  * @since 27/5/17.
@@ -50,7 +50,7 @@ public class SchemesCDIConfigBuilderTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        log = LogService.getLog(SchemesCDIConfigBuilder.class);
+        log = Scope.getCurrentScope().getLog(SchemesCDIConfigBuilder.class);
 //        log.setLogLevel(LogLevel.WARNING); // you can change it to INFO or DEBUG level if you want to see them
 
         Class c1 = SchemesCDIConfigBuilder.class;
@@ -189,7 +189,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         } finally {
             executors.shutdown();
         }
@@ -218,7 +218,7 @@ public class SchemesCDIConfigBuilderTest {
 
             validateFutures(futures);
         } catch (Exception e) {
-            log.warning(LogType.LOG, e.getMessage(), e);
+            log.warning(e.getMessage(), e);
         } finally {
             executors.shutdown();
         }

@@ -9,7 +9,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
 
@@ -32,7 +32,7 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
-            String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+            String sql = "SELECT " + StringUtil.join(statement.getColumnsToSelect(), ",", new StringUtil.StringUtilFormatter<ColumnConfig>() {
                 @Override
                 public String toString(ColumnConfig col) {
                     if ((col.getComputed() != null) && col.getComputed()) {

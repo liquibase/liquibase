@@ -1,9 +1,8 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -14,7 +13,7 @@ import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -107,7 +106,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                         buffer.append(" ").append(autoIncrementClause);
                     }
                 } else {
-                    LogService.getLog(getClass()).warning(LogType.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    Scope.getCurrentScope().getLog(getClass()).warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
@@ -134,10 +133,10 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         PrimaryKeyConstraint pkConstraint = statement.getPrimaryKeyConstraint();
         if ((statement.getPrimaryKeyConstraint() != null) && !statement.getPrimaryKeyConstraint().getColumns().isEmpty()) {
             buffer.append(" PRIMARY KEY (");
-            buffer.append(StringUtils.join(primaryKeyColumns, ", "));
+            buffer.append(StringUtil.join(primaryKeyColumns, ", "));
             buffer.append(")");
 
-            if (! StringUtils.isEmpty(pkConstraint.getConstraintName() )) {
+            if (! StringUtil.isEmpty(pkConstraint.getConstraintName() )) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(pkConstraint.getConstraintName()));
             }
@@ -178,7 +177,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
-            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
+            buffer.append(database.escapeColumnNameList(StringUtil.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
             if ((uniqueConstraint.getConstraintName() != null) && constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");

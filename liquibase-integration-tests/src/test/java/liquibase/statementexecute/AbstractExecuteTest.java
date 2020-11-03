@@ -1,6 +1,7 @@
 package liquibase.statementexecute;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -11,10 +12,9 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.listener.SqlListener;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -124,7 +124,9 @@ public abstract class AbstractExecuteTest {
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
                 String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
                 try {
-                    LogService.getLog(getClass()).debug(LogType.WRITE_SQL, sqlToRun);
+                    for (SqlListener listener : Scope.getCurrentScope().getListeners(SqlListener.class)) {
+                        listener.writeSqlWillRun(sqlToRun);
+                    }
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
                     System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
@@ -239,7 +241,7 @@ public abstract class AbstractExecuteTest {
             List<? extends SqlStatement> setupStatements = setupStatements(database);
             if (setupStatements != null) {
                 for (SqlStatement statement : setupStatements) {
-                    ExecutorService.getInstance().getExecutor("jdbc", database).execute(statement);
+                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).execute(statement);
                 }
             }
             connectionStatement.close();

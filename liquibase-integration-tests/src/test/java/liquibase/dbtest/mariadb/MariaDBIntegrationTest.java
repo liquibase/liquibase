@@ -1,12 +1,11 @@
 package liquibase.dbtest.mariadb;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -56,11 +55,11 @@ public class MariaDBIntegrationTest extends AbstractIntegrationTest {
         if (getDatabase() == null) {
             return;
         }
-        ExecutorService.getInstance().getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement("DROP TABLE IF " +
+        Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement("DROP TABLE IF " +
              "EXISTS ad"));
     
         try {
-            ExecutorService.getInstance().getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement("CREATE TABLE ad (\n" +
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new RawSqlStatement("CREATE TABLE ad (\n" +
                     "ad_id int(10) unsigned NOT NULL AUTO_INCREMENT,\n" +
                     "advertiser_id int(10) unsigned NOT NULL,\n" +
                     "ad_type_id int(10) unsigned NOT NULL,\n" +
@@ -75,7 +74,7 @@ public class MariaDBIntegrationTest extends AbstractIntegrationTest {
                     ")"));
         } catch (DatabaseException e) {
             if (e.getCause() instanceof SQLSyntaxErrorException) {
-                LogService.getLog(getClass()).warning(LogType.LOG, "MariaDB returned DatabaseException", e);
+                Scope.getCurrentScope().getLog(getClass()).warning("MariaDB returned DatabaseException", e);
                 assumeTrue("MariaDB seems to run in strict mode (no datetime literals with 0000-00-00 allowed). " + "Cannot run this test", false);
                 
             } else {

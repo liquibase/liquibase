@@ -115,4 +115,12 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
         tableName = database.escapeObjectName("My Table", Table.class);
         assertTrue(tableName.matches("[\\[\\\"`]?My Table[\\]\\\"`]?"));
     }
+    @Test
+    public void test_getConcatSql() {
+        assertEquals("", database.getConcatSql());
+        assertEquals("foo", database.getConcatSql("foo"));
+        assertEquals("foo || bar", database.getConcatSql("foo", "bar"));
+        assertEquals("one || two || | three", database.getConcatSql("one", "two", "| three"));
+    }
+
 }

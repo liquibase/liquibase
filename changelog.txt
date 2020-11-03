@@ -1,30 +1,47 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.1.1 (2020.10.09)
+
+- GH #1276 Rewrote SpringResourceAccessor
+- GH PR#1285 Remove deprecated code in Ant tasks
+- GH PR#1286 Fix usage of AntTaskLogger
+- GH #1097 diffChangeLog overwrites first changeset in formatted sql changelog
+
 Changes in version 3.10.3 (2020.10.09)
 
-- GH PR#912  - CORE-3379 escaping postgres questionmark operators to prevent unwanted parameter syntax 
-- GH PR#936  - SpringLiquibase createResourceOpener() now returns a ResourceAccessor, which allows it to be overridden with any kind of ResourceAccessor 
-- GH PR#983  - Fixes for loadData to support Postgres enums with java.sql.Types.OTHER 
-- GH PR#1010 - Potential fix for generated columns on postgres 
-- GH PR#1258 - Reduced the verbosity of logging by moving SQL logging from info to debug logging 
-- GH PR#1239 - Fix xsd, remove surplus space after validateForeignKey 
-- GH PR#1296 - Put the banner in an external file for easier editing. 
-- GH PR#1327 - Fix varchar(max) extrainfo in 3.10 branch 
-- GH PR#1406 - Fixed integration tests for 983 
-- GH PR#781  - feat: Maven Liquibase Plugin generateChangeLog mysql sql comment supported 
+- GH PR#912  - CORE-3379 escaping postgres questionmark operators to prevent unwanted parameter syntax
+- GH PR#936  - SpringLiquibase createResourceOpener() now returns a ResourceAccessor, which allows it to be overridden with any kind of ResourceAccessor
+- GH PR#983  - Fixes for loadData to support Postgres enums with java.sql.Types.OTHER
+- GH PR#1010 - Potential fix for generated columns on postgres
+- GH PR#1258 - Reduced the verbosity of logging by moving SQL logging from info to debug logging
+- GH PR#1239 - Fix xsd, remove surplus space after validateForeignKey
+- GH PR#1296 - Put the banner in an external file for easier editing.
+- GH PR#1327 - Fix varchar(max) extrainfo in 3.10 branch
+- GH PR#1406 - Fixed integration tests for 983
+- GH PR#781  - feat: Maven Liquibase Plugin generateChangeLog mysql sql comment supported
 - GH PR#945  - [CORE-3523] Consistently map Liquibase integer types to Oracle integer types.  MERGED THEN UNMERGED
-- GH PR#1140 - fix root paths for spring boot fat jar 
-- GH PR#1332 - Update FileSystemResourceAccessor.java 
-- GH PR#1372 - Fix for PR 1001 in 3.10.x branch 
-- Fixed priority for JDBC Connections 
-- GH PR#1140 - Added json and sql to the list 
+- GH PR#1140 - fix root paths for spring boot fat jar
+- GH PR#1332 - Update FileSystemResourceAccessor.java
+- GH PR#1372 - Fix for PR 1001 in 3.10.x branch
+- Fixed priority for JDBC Connections
+- GH PR#1140 - Added json and sql to the list
 - GH PR#1418 - Revert "[CORE-3523] Consistently map Liquibase integer types to Oracle integer types"  UNMERGE 945
-- GH PR#1422 - Updates for #1081 in 3.10.x 
+- GH PR#1422 - Updates for #1081 in 3.10.x
 - GH PR#1431 - Fix merge issue in OracleDatabase
 - GH PR#1443 - Handle MSSQL computed columns in generate changelog LB-366
 - GH PR#1447 - Do not use batched statements for Postgres LoadDataChange LB-744
 - Fixed schema version number for 3.10
+
+Changes in version 4.1.0 (2020.9.28)
+
+- Added support for hub.liquibase.com to CLI and Maven integrations
+- New registerChangeLog command
+- New syncHub command
+- Added hubApiKey argument
+- Added hubConnectionId argument
+- CLI commands and arguments are now case insensitive
+- Includes changes from 3.10.2
 
 Changes in version 3.10.2 (2020.7.27)
 
@@ -41,6 +58,13 @@ Changes in version 3.10.2 (2020.7.27)
  - GH PR#1201 - H2 unknown reserved word
 
 
+Changes in version 4.0.0 (2020.07.14)
+- No changes since 4.0.0 beta2
+
+Changes in version 4.0.0 Beta2 (2020.07.1)
+- Re-introduced deprecated versions of commonly used 3.x methods that had been removed for 4.0
+- Fix to handle --logLevel=debug/fine CLI argument
+- Do not include root filesystem in default CLI search paths
 Changes in version 3.10.1 (2020.7.2)
 
  - GH PR#913 - [CORE-3471] Fixed NPE in LiquibaseUtil when MANIFEST.MF doesn't contain Bundle-Version or Build-Time
@@ -76,6 +100,51 @@ Changes in version 3.10.0 (2020.6.12)
 
 Changes in version 3.9.0 (2020.5.13)
 - [Pro] New ""--format=json" argument for diff command
+
+Changes in version 4.0.0 Beta1 (2020.4.20)
+- MAJOR CHANGE: Replaced old custom classpath scanner with java.util.ServiceLoader for finding extensions
+- MAJOR CHANGE: Refactored logging system to clean up API and use java.util.Logging
+- Fixes to ConstraintsConfig https://github.com/liquibase/liquibase/pull/954
+- ignoreLines command in formatted sql log https://github.com/liquibase/liquibase/pull/877
+- postgresql >= 10: use identity columns for autoincrement https://github.com/liquibase/liquibase/pull/874
+- Using proxy user for Oracle Connections https://github.com/liquibase/liquibase/pull/894
+- Capture table remarks on mysql https://github.com/liquibase/liquibase/pull/895
+- Add PERIOD to reserved words for MariaDB https://github.com/liquibase/liquibase/pull/896
+- Don't require columnDataType on H2 for addNotNullConstraint https://github.com/liquibase/liquibase/pull/851
+- Do not remove trailing /'s of comments like /* dsds */ https://github.com/liquibase/liquibase/pull/853
+- Require type xsd:string to where element of update element https://github.com/liquibase/liquibase/pull/875/files
+- runOnChange change set runs every time even if there wasn't changed https://github.com/liquibase/liquibase/pull/891
+- Indexes with DESC sorting are not created for PostgreSQL https://github.com/liquibase/liquibase/pull/880
+- Added Ingress support https://github.com/liquibase/liquibase/pull/683
+- Support boolean in firebird 3.0 https://github.com/liquibase/liquibase/pull/757
+- Change Log Parameters from Environment Variable https://github.com/liquibase/liquibase/pull/758
+- Adds clearCheckSums property in spring integration https://github.com/liquibase/liquibase/pull/792
+- Oracle datatype translation changes https://github.com/liquibase/liquibase/pull/797
+- Implement Sequence Support for MariaDB https://github.com/liquibase/liquibase/pull/852
+- Cleanup checksum classes https://github.com/liquibase/liquibase/pull/869
+- Fix Turkish uppercase column keys bug https://github.com/liquibase/liquibase/pull/857
+- Generate diff with onDelete and onUpdate https://github.com/liquibase/liquibase/pull/858
+- PrimaryKeySnapshotGenerator throws NPE for SQLite https://github.com/liquibase/liquibase/pull/856
+- Handle java.sql.Time when setting prepared statement parameter values in CSV filese https://github.com/liquibase/liquibase/pull/859
+- DB2 LUW supports boolean data type column from version 11.1.1.1 https://github.com/liquibase/liquibase/pull/865
+- Offline history support not correctly closing files https://github.com/liquibase/liquibase/pull/863
+- Use computeIfAbsent to avoid Liquibase concurrency issues https://github.com/liquibase/liquibase/pull/866
+- Firebird does not support RESTRICT option on Foreign Keys https://github.com/liquibase/liquibase/pull/761
+- Liquibase was ignoring DatabaseFunction value and processing only SequenceNextValueFunction when creating tables and generating column default value. https://github.com/liquibase/liquibase/pull/785
+- Restore usage of `DatabaseList.definitionMatches` to match the `dbms` tag against the database type https://github.com/liquibase/liquibase/pull/811
+- DEPLOYMENT_ID column header not included in offline updateSql CSV https://github.com/liquibase/liquibase/pull/813
+- Can't set some parameters for snapshot & generate changelog https://github.com/liquibase/liquibase/pull/822
+- UUID type handling improvements https://github.com/liquibase/liquibase/pull/838
+- Correctly close yaml file in generateChagneLog https://github.com/liquibase/liquibase/pull/844
+- Adding restricted words for MSSQL Server Database https://github.com/liquibase/liquibase/pull/825
+- Getting a java.io.FileNotFoundException using Liquibase with Spring reactive web https://github.com/liquibase/liquibase/pull/814
+- FileSystemResourceAccessor fails with non-hierarchical URLS on classpath https://github.com/liquibase/liquibase/pull/830
+- fix oracle date literal without millis https://github.com/liquibase/liquibase/pull/828
+- fix nullPointerException when migrating RedShift https://github.com/liquibase/liquibase/pull/823
+- Prints the SQL error code on Exception https://github.com/liquibase/liquibase/pull/833
+- Fixed SetColumnRemarks for mysql https://github.com/liquibase/liquibase/pull/835
+- Allow “NOW” and “Today” literal capabilities in CSV filese https://github.com/liquibase/liquibase/pull/808
+- Add ability to disable running of Liquibase via CDILiquibaseConfig https://github.com/liquibase/liquibase/pull/804
 
 Changes in version 3.8.9 (2020.4.06)
 - Fixed an issue with how Liquibase handles SMALLINT columns in PostgreSQL when generating a changelog.
