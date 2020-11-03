@@ -502,8 +502,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                         insertStatement.addColumnValue(columnName, value);
 
-                        if (column.getAllowUpdate() == null || column.getAllowUpdate()) {
-                            insertStatement.addColumnUpdateValue(columnName, value);
+                        if (insertStatement instanceof InsertOrUpdateStatement) {
+                            ((InsertOrUpdateStatement) insertStatement).setAllowColumnUpdate(columnName, column.getAllowUpdate() == null || column.getAllowUpdate());
                         }
                     }
 
