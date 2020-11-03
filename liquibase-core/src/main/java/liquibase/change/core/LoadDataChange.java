@@ -332,7 +332,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     Object value = line[i];
                     String columnName = headers[i].trim();
 
-                    ColumnConfig valueConfig = new ColumnConfig();
+                    LoadDataColumnConfig valueConfig = new LoadDataColumnConfig();
 
                     LoadDataColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
                     if (columnConfig != null) {
@@ -502,7 +502,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                         insertStatement.addColumnValue(columnName, value);
 
-                        if (column.isUpdateable() == null || column.isUpdateable()) {
+                        if (column.getAllowUpdate() == null || column.getAllowUpdate()) {
                             insertStatement.addColumnUpdateValue(columnName, value);
                         }
                     }
@@ -770,7 +770,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     protected ExecutablePreparedStatementBase createPreparedStatement(
             Database database, String catalogName, String schemaName, String tableName,
-            List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
+            List<LoadDataColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         return new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns,
                 changeSet, resourceAccessor);
     }

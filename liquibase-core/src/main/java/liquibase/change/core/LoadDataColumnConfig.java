@@ -9,7 +9,7 @@ public class LoadDataColumnConfig extends ColumnConfig {
 
     private Integer index;
     private String header;
-    private Boolean updateable;
+    private Boolean allowUpdate;
 
     public Integer getIndex() {
         return index;
@@ -30,12 +30,12 @@ public class LoadDataColumnConfig extends ColumnConfig {
     /**
      * Returns true if this Column should be updated. Returns null if update hasn't been explicitly assigned.
      */  
-	public Boolean isUpdateable() {
-		return updateable;
+	public Boolean getAllowUpdate() {
+		return allowUpdate;
 	}
 
-	public void setUpdateable(Boolean updateable) {
-		this.updateable = updateable;
+	public void setAllowUpdate(Boolean getAllowUpdate) {
+		this.allowUpdate = getAllowUpdate;
 	}
 
     @Override
@@ -43,6 +43,6 @@ public class LoadDataColumnConfig extends ColumnConfig {
         super.load(parsedNode, resourceAccessor);
         this.index = parsedNode.getChildValue(null, "index", Integer.class);
         this.header = parsedNode.getChildValue(null, "header", String.class);
-        this.updateable = parsedNode.getChildValue(null, "updateable", Boolean.class);
+        this.allowUpdate = parsedNode.getChildValue(null, "allowUpdate", Boolean.class);
     }
 }

@@ -622,7 +622,7 @@
                         <xsd:attribute name="header" type="xsd:string"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="type" type="xsd:string"/>
-                        <xsd:attribute name="updateable" type="booleanExp"/>
+                        <xsd:attribute name="allowUpdate" type="booleanExp"/>
                         <xsd:attribute name="defaultValue" type="xsd:string"/>
                         <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
                         <xsd:attribute name="defaultValueDate" type="xsd:string"/>
