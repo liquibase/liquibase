@@ -327,14 +327,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     needsPreparedStatement = true;
                 }
 
-                List<ColumnConfig> columnsFromCsv = new ArrayList<>();
+                List<LoadDataColumnConfig> columnsFromCsv = new ArrayList<>();
                 for (int i = 0; i < headers.length; i++) {
                     Object value = line[i];
                     String columnName = headers[i].trim();
 
-                    ColumnConfig valueConfig = new ColumnConfig();
+                    LoadDataColumnConfig valueConfig = new LoadDataColumnConfig();
 
-                    ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
+                    LoadDataColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
                     if (columnConfig != null) {
                         if ("skip".equalsIgnoreCase(columnConfig.getType())) {
                             continue;
@@ -440,7 +440,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                     valueConfig.setValue(null);
                                 } else {
                                     valueConfig.setValue(value.toString());
-                                }                                
+                                }
                             } else if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.OTHER.toString())) {
                                 valueConfig.setType(columnConfig.getType());
                                 if ("NULL".equalsIgnoreCase(value.toString())) {
@@ -492,7 +492,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     InsertStatement insertStatement =
                         this.createStatement(getCatalogName(), getSchemaName(), getTableName());
 
-                    for (ColumnConfig column : columnsFromCsv) {
+                    for (LoadDataColumnConfig column : columnsFromCsv) {
                         String columnName = column.getName();
                         Object value = column.getValueObject();
 
@@ -501,6 +501,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         }
 
                         insertStatement.addColumnValue(columnName, value);
+
+                        if (column.getAllowUpdate() == null || column.getAllowUpdate()) {
+                            insertStatement.addColumnUpdateValue(columnName, value);
+                        }
                     }
 
                     statements.add(insertStatement);
@@ -766,7 +770,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     protected ExecutablePreparedStatementBase createPreparedStatement(
             Database database, String catalogName, String schemaName, String tableName,
-            List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
+            List<LoadDataColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         return new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns,
                 changeSet, resourceAccessor);
     }
@@ -779,7 +783,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return new InsertSetStatement(catalogName, schemaName, tableName);
     }
 
-    protected ColumnConfig getColumnConfig(int index, String header) {
+    protected LoadDataColumnConfig getColumnConfig(int index, String header) {
         for (LoadDataColumnConfig config : columns) {
             if ((config.getIndex() != null) && config.getIndex().equals(index)) {
                 return config;
