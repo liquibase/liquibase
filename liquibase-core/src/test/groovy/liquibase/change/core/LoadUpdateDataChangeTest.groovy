@@ -1,6 +1,7 @@
 package liquibase.change.core
 
 import liquibase.change.ChangeStatus
+import liquibase.database.core.PostgresDatabase
 import liquibase.database.DatabaseConnection
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
@@ -51,6 +52,45 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setFile("liquibase/change/core/sample.data1.csv");
+
+        SqlStatement[] statements = change.generateStatements(database);
+
+        then:
+        assert statements != null
+        assert statements[0] instanceof InsertOrUpdateStatement
+        assert !statements[0].getOnlyUpdate()
+    }
+
+    def "loadUpdate generates InsertOrUpdateStatements for Postgres"() throws Exception {
+        when:
+        PostgresDatabase database = new PostgresDatabase();
+
+        LoadUpdateDataChange change = new LoadUpdateDataChange();
+
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setFile("liquibase/change/core/jhi_text.csv");
+        change.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        LoadDataColumnConfig idConfig = new LoadDataColumnConfig();
+        idConfig.setHeader("id");
+        idConfig.setType("NUMERIC");
+        change.addColumn(idConfig);
+
+        LoadDataColumnConfig pickupConfig = new LoadDataColumnConfig();
+        pickupConfig.setHeader("selected_pickup_date");
+        pickupConfig.setType("DATETIME");
+        change.addColumn(pickupConfig);
+
+        LoadDataColumnConfig effectiveConfig = new LoadDataColumnConfig();
+        effectiveConfig.setHeader("effective_pickup_date");
+        effectiveConfig.setType("DATETIME");
+        change.addColumn(effectiveConfig);
+
+        LoadDataColumnConfig textConfig = new LoadDataColumnConfig();
+        textConfig.setHeader("textfield");
+        textConfig.setType("CLOB");
+        change.addColumn(textConfig);
 
         SqlStatement[] statements = change.generateStatements(database);
 
