@@ -1143,7 +1143,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("dbms".equals(field)) {
             if ((this.getDbmsSet() != null) && !this.getDbmsSet().isEmpty()) {
-                return StringUtil.join(getDbmsSet(), ",xxx");
+                return StringUtil.join(getDbmsSet(), ",");
             } else {
                 return null;
             }
