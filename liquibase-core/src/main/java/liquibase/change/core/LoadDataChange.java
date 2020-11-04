@@ -352,6 +352,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             valueConfig.setType(columnConfig.getType());
                         }
                         valueConfig.setName(columnName);
+                        valueConfig.setAllowUpdate(columnConfig.getAllowUpdate());
 
                         if (columnConfig.getType() != null) {
                             if (columnConfig.getType().equalsIgnoreCase(LOAD_DATA_TYPE.BOOLEAN.toString())) {
