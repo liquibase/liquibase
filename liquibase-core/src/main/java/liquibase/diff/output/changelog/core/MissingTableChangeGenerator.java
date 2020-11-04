@@ -22,8 +22,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtil;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -232,7 +232,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 if ((incrementBy != null) && !incrementBy.equals(BigInteger.ONE)) {
                     columnConfig.setIncrementBy(incrementBy);
                 }
-                if (StringUtils.isNotEmpty(generationType)) {
+                if (StringUtil.isNotEmpty(generationType)) {
                     columnConfig.setGenerationType(generationType);
                     if (defaultOnNull != null) {
                         columnConfig.setDefaultOnNull(defaultOnNull);
@@ -240,6 +240,12 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                 }
             }
 
+            //
+            // If there is a computed setting then use it
+            //
+            if (column.getComputed() != null) {
+                columnConfig.setComputed(column.getComputed());
+            }
             change.addColumn(columnConfig);
             control.setAlreadyHandledMissing(column);
         }

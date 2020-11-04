@@ -60,11 +60,11 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 //		String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
 //		HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
 		for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
-//			if (!hashPkFields.contains(columnKey)) {
+			if (insertOrUpdateStatement.getAllowColumnUpdate(columnKey)) {
 				sql.append(columnKey).append(" = ");
 				sql.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), database));
 				sql.append(",");
-//			}
+			}
 		}
         int lastComma = sql.lastIndexOf(",");
         if (lastComma > -1) {

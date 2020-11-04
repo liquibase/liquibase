@@ -1,0 +1,5 @@
+liquibase.parser.core.formattedsql.FormattedSqlChangeLogParser
+liquibase.parser.core.json.JsonChangeLogParser
+liquibase.parser.core.sql.SqlChangeLogParser
+liquibase.parser.core.xml.XMLChangeLogSAXParser
+liquibase.parser.core.yaml.YamlChangeLogParser

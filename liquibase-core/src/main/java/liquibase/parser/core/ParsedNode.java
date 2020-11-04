@@ -5,7 +5,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -285,12 +285,12 @@ public class ParsedNode {
     public String toString() {
         String string = name;
         if (!children.isEmpty()) {
-            string += "[" + StringUtils.join(children, ",", new StringUtils.ToStringFormatter(), true) + "]";
+            string += "[" + StringUtil.join(children, ",", new StringUtil.ToStringFormatter(), true) + "]";
         }
         if (value != null) {
             String valueString;
             if (value instanceof Collection) {
-                valueString = "("+StringUtils.join(((Collection) value), ",", new StringUtils.ToStringFormatter(), true)+")";
+                valueString = "("+ StringUtil.join(((Collection) value), ",", new StringUtil.ToStringFormatter(), true)+")";
             } else {
                 valueString = value.toString();
             }

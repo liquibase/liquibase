@@ -1,5 +1,6 @@
 package liquibase.database;
 
+import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
@@ -65,12 +66,12 @@ public class ConnectionServiceFactory {
     }
 
     private ConnectionServiceFactory() {
-        Class<? extends DatabaseConnection>[] classes;
+        List<DatabaseConnection> connections;
         try {
-            classes = ServiceLocator.getInstance().findClasses(DatabaseConnection.class);
+            connections = Scope.getCurrentScope().getServiceLocator().findInstances(DatabaseConnection.class);
 
-            for (Class<? extends DatabaseConnection> clazz : classes) {
-                register((DatabaseConnection) clazz.getConstructor().newInstance());
+            for (DatabaseConnection connection : connections) {
+                register(connection.getClass().getConstructor().newInstance());
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

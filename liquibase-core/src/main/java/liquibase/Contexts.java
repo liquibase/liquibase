@@ -1,6 +1,6 @@
 package liquibase;
 
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -38,12 +38,12 @@ public class Contexts {
     }
 
     private void parseContextString(String contexts) {
-        contexts = StringUtils.trimToNull(contexts);
+        contexts = StringUtil.trimToNull(contexts);
 
         if (contexts == null) {
             return;
         }
-        for (String context : StringUtils.splitAndTrim(contexts, ",")) {
+        for (String context : StringUtil.splitAndTrim(contexts, ",")) {
             this.contextStore.add(context.toLowerCase());
         }
 
@@ -59,7 +59,7 @@ public class Contexts {
 
     @Override
     public String toString() {
-        return StringUtils.join(new TreeSet<String>(this.contextStore), ",");
+        return StringUtil.join(new TreeSet<String>(this.contextStore), ",");
     }
 
 

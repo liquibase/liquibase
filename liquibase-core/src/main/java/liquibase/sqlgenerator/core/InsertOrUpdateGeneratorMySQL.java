@@ -23,17 +23,17 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
 
     @Override
     protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer(super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
+        StringBuilder sql = new StringBuilder(super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
         
         sql.deleteCharAt(sql.lastIndexOf(";"));
         
-        StringBuffer updateClause = new StringBuffer("ON DUPLICATE KEY UPDATE ");
+        StringBuilder updateClause = new StringBuilder("ON DUPLICATE KEY UPDATE ");
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<>(Arrays.asList(pkFields));
         boolean hasFields = false;
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {
-            if (!hashPkFields.contains(columnKey)) {
+            if (!hashPkFields.contains(columnKey) && insertOrUpdateStatement.getAllowColumnUpdate(columnKey)) {
             	hasFields = true;
             	updateClause.append(database.escapeObjectName(columnKey, Column.class)).append(" = ");
                 Object columnValue = insertOrUpdateStatement.getColumnValue(columnKey);

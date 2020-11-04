@@ -2,7 +2,8 @@ package liquibase.logging.core;
 
 import liquibase.configuration.AbstractConfigurationContainer;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogLevel;
+
+import java.util.logging.Level;
 
 /**
  * Configuration container for {@link liquibase.logging.LogService} properties
@@ -28,19 +29,19 @@ public class DefaultLoggerConfiguration extends AbstractConfigurationContainer {
      * Transforms the strings DEBUG, INFO, WARNING, ERROR and OFF (case-insensitive) into the appropriate LogLevel.
      * @return a value from the LogLevel enum
      */
-    public LogLevel getLogLevel() {
+    public Level getLogLevel() {
         String logLevel = getLogLevelName();
 
-        if ("debug".equalsIgnoreCase(logLevel)) {
-            return LogLevel.DEBUG;
+        if ("fine".equalsIgnoreCase(logLevel) || "debug".equalsIgnoreCase(logLevel)) {
+            return Level.FINE;
         } else if ("info".equalsIgnoreCase(logLevel)) {
-            return LogLevel.INFO;
+            return Level.INFO;
         } else if ("warning".equalsIgnoreCase(logLevel)) {
-            return LogLevel.WARNING;
+            return Level.WARNING;
         } else if ("error".equalsIgnoreCase(logLevel) || "severe".equalsIgnoreCase(logLevel)) {
-            return LogLevel.SEVERE;
+            return Level.SEVERE;
         } else if ("off".equalsIgnoreCase(logLevel)) {
-            return LogLevel.OFF;
+            return Level.OFF;
         } else {
             throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel+".  Valid levels are: debug, info, warning, error, off");
         }

@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.change.core.RawSQLChange;
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -10,11 +11,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -82,7 +81,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (StringUtils.trimToNull(sql) == null) {
+        if (StringUtil.trimToNull(sql) == null) {
             validationErrors.addError("'sql' is required");
         }
         return validationErrors;
@@ -157,7 +156,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * Set the raw SQL managed by this Change. The passed sql is trimmed and set to null if an empty string is passed.
      */
     public void setSql(String sql) {
-       this.sql = StringUtils.trimToNull(sql);
+       this.sql = StringUtil.trimToNull(sql);
     }
 
     /**
@@ -211,7 +210,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    LogService.getLog(getClass()).debug(LogType.LOG, "Error closing stream", e);
+                    Scope.getCurrentScope().getLog(getClass()).fine("Error closing stream", e);
                 }
             }
         }
@@ -230,7 +229,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         List<SqlStatement> returnStatements = new ArrayList<>();
 
-        String sql = StringUtils.trimToNull(getSql());
+        String sql = StringUtil.trimToNull(getSql());
         if (sql == null) {
             return new SqlStatement[0];
         }
@@ -240,7 +239,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
             return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
         }
-        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
+        for (String statement : StringUtil.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
                 statement = statement.replaceAll("\\n", "\r\n");
             }

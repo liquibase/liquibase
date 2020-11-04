@@ -5,7 +5,9 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.plugin.Plugin;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 
@@ -15,7 +17,7 @@ import java.util.Map;
 /**
  * Interface for a class that is capable of executing statements/queries against a DBMS.
  */
-public interface Executor {
+public interface Executor extends Plugin {
     /**
      *
      * Return the name of the Executor

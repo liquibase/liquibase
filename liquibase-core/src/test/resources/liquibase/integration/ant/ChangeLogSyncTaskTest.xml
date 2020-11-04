@@ -36,15 +36,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testChangeLogSyncLegacy">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:changeLogSync driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                          changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
-
     <target name="testChangeLogSync">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
@@ -87,15 +78,6 @@
 
 	
 	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
-    
-    <target name="testChangeLogSyncChangeLegacyLogDirectory">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:changeLogSync driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-        		changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
 
 	<target name="testChangeLogSyncChangeLogDirectory">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
@@ -108,7 +90,7 @@
     </target>
 
 	<target name="testChangeLogSyncChangeLogDirectoryDoesNotExist">
-        <au:expectfailure expectedmessage="${liquibase.test.ant.basedir}/bad_changelog must be a directory">
+        <au:expectfailure expectedmessage="Unable to sync change log: The file simple-changelog.xml was not found">
 	        <lb:changeLogSync changelogdirectory="${liquibase.test.ant.basedir}/bad_changelog" changelogfile="simple-changelog.xml">
 	            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
 	        </lb:changeLogSync>

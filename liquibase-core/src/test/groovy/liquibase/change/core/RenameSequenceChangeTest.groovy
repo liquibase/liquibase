@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.StandardChangeTest;
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.RenameSequenceStatement;
 

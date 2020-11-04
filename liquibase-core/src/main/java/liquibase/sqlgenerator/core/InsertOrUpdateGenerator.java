@@ -21,7 +21,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     protected abstract String getElse(Database database);
 
-    protected String getPostUpdateStatements(Database database){
+    protected String getPostUpdateStatements(Database database) {
         return "";
     }
 
@@ -41,18 +41,17 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     protected String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
-        StringBuffer where = new StringBuffer();
+        StringBuilder where = new StringBuilder();
 
         String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");
 
-        for(String thisPkColumn:pkColumns)
-        {
+        for (String thisPkColumn : pkColumns) {
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
-                        insertOrUpdateStatement.getSchemaName(),
-                        insertOrUpdateStatement.getTableName(),
-                        thisPkColumn)).append(((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) ?
-                " is " : " = ");
+                    insertOrUpdateStatement.getSchemaName(),
+                    insertOrUpdateStatement.getTableName(),
+                    thisPkColumn)).append(((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) ?
+                    " is " : " = ");
 
             if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
                 where.append("NULL");
@@ -63,17 +62,16 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             where.append(" AND ");
         }
 
-        where.delete(where.lastIndexOf(" AND "),where.lastIndexOf(" AND ") + " AND ".length());
+        where.delete(where.lastIndexOf(" AND "), where.lastIndexOf(" AND ") + " AND ".length());
         return where.toString();
     }
 
     protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer insertBuffer = new StringBuffer();
+        StringBuilder insertBuffer = new StringBuilder();
         InsertGenerator insert = new InsertGenerator();
-        Sql[] insertSql = insert.generateSql(insertOrUpdateStatement,database,sqlGeneratorChain);
+        Sql[] insertSql = insert.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);
 
-        for(Sql s:insertSql)
-        {
+        for (Sql s : insertSql) {
             insertBuffer.append(s.toSql());
             insertBuffer.append(";");
         }
@@ -84,46 +82,45 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     /**
-     * 
      * @param insertOrUpdateStatement
      * @param database
      * @param whereClause
      * @param sqlGeneratorChain
      * @return the update statement, if there is nothing to update return null
      */
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
 
-        StringBuffer updateSqlString = new StringBuffer();
+        StringBuilder updateSqlString = new StringBuilder();
 
         UpdateGenerator update = new UpdateGenerator();
         UpdateStatement updateStatement = new UpdateStatement(
-        		insertOrUpdateStatement.getCatalogName(), 
-        		insertOrUpdateStatement.getSchemaName(),
-        		insertOrUpdateStatement.getTableName());
+                insertOrUpdateStatement.getCatalogName(),
+                insertOrUpdateStatement.getSchemaName(),
+                insertOrUpdateStatement.getTableName());
         if (!((database instanceof OracleDatabase) && (insertOrUpdateStatement.getOnlyUpdate() != null) &&
-            insertOrUpdateStatement.getOnlyUpdate())) {
+                insertOrUpdateStatement.getOnlyUpdate())) {
             whereClause += ";\n";
         }
 
         updateStatement.setWhereClause(whereClause);
 
-        String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
+        String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<>(Arrays.asList(pkFields));
-        for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
-        {
+        for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
             if (!hashPkFields.contains(columnKey)) {
-                updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnValue(columnKey));
+                if (insertOrUpdateStatement.getAllowColumnUpdate(columnKey)) {
+                    updateStatement.addNewColumnValue(columnKey, insertOrUpdateStatement.getColumnValue(columnKey));
+                }
             }
         }
         // this isn't very elegant but the code fails above without any columns to update
-        if(updateStatement.getNewColumnValues().isEmpty()) {
-        	throw new LiquibaseException("No fields to update in set clause");
+        if (updateStatement.getNewColumnValues().isEmpty()) {
+            throw new LiquibaseException("No fields to update in set clause");
         }
 
         Sql[] updateSql = update.generateSql(updateStatement, database, sqlGeneratorChain);
 
-        for(Sql s:updateSql)
-        {
+        for (Sql s : updateSql) {
             updateSqlString.append(s.toSql());
             updateSqlString.append(";");
         }
@@ -137,27 +134,28 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     @Override
     public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer completeSql = new StringBuffer();
+        StringBuilder completeSql = new StringBuilder();
         String whereClause = getWhereClause(insertOrUpdateStatement, database);
-        if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
-	        completeSql.append( getRecordCheck(insertOrUpdateStatement, database, whereClause));
-	
-	        completeSql.append(getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
+        if (!insertOrUpdateStatement.getOnlyUpdate()) {
+            completeSql.append(getRecordCheck(insertOrUpdateStatement, database, whereClause));
+
+            completeSql.append(getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
         }
         try {
-        	
-            String updateStatement = getUpdateStatement(insertOrUpdateStatement,database,whereClause,sqlGeneratorChain);
-            
-            if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
-            	completeSql.append(getElse(database));
+
+            String updateStatement = getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain);
+
+            if (!insertOrUpdateStatement.getOnlyUpdate()) {
+                completeSql.append(getElse(database));
             }
 
             completeSql.append(updateStatement);
-            
-        } catch (LiquibaseException e) {}
 
-        if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
-        	completeSql.append(getPostUpdateStatements(database));
+        } catch (LiquibaseException e) {
+        }
+
+        if (!insertOrUpdateStatement.getOnlyUpdate()) {
+            completeSql.append(getPostUpdateStatements(database));
         }
 
         return new Sql[]{

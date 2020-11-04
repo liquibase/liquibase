@@ -8,7 +8,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -27,7 +27,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
         this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f",
                 null), ChangeSet.ExecType.EXECUTED);
-        String version = StringUtils.limitSize(LiquibaseUtil.getBuildVersion()
+        String version = StringUtil.limitSize(LiquibaseUtil.getBuildVersion()
                 .replaceAll("SNAPSHOT", "SNP")
                 .replaceAll("beta", "b")
                 .replaceAll("alpha", "a")

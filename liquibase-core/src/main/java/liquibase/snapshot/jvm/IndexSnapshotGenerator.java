@@ -11,7 +11,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
@@ -188,7 +188,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
                 short position = row.getShort("ORDINAL_POSITION");
 
-                String definition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
+                String definition = StringUtil.trimToNull(row.getString("FILTER_CONDITION"));
                 if (definition != null) {
                     if (!(database instanceof OracleDatabase)) { //TODO: this replaceAll code has been there for a long time but we don't know why. Investigate when it is ever needed and modify it to be smarter
                         definition = definition.replaceAll("\"", "");

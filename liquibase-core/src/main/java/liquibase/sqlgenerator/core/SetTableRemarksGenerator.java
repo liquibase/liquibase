@@ -9,7 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemarksStatement> {
 
@@ -30,7 +30,7 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 	@Override
     public Sql[] generateSql(SetTableRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		String sql;
-		String remarksEscaped = database.escapeStringForDatabase(StringUtils.trimToEmpty(statement.getRemarks()));
+		String remarksEscaped = database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks()));
 		if (database instanceof MySQLDatabase) {
 			sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " COMMENT = '" + remarksEscaped
 					+ "'";

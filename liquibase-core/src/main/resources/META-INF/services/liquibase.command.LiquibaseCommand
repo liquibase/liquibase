@@ -1,0 +1,10 @@
+liquibase.command.core.DiffCommand
+liquibase.command.core.DiffToChangeLogCommand
+liquibase.command.core.DropAllCommand
+liquibase.command.core.ExecuteSqlCommand
+liquibase.command.core.GenerateChangeLogCommand
+liquibase.command.core.HistoryCommand
+liquibase.command.core.RegisterChangeLogCommand
+liquibase.command.core.SnapshotCommand
+liquibase.command.core.SyncHubCommand
+liquibase.sdk.convert.ConvertCommand

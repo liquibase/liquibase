@@ -46,7 +46,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
 
     @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer queryStringBuilder = new StringBuffer();
+        StringBuilder queryStringBuilder = new StringBuilder();
         queryStringBuilder.append("CREATE SEQUENCE ");
         if (database instanceof PostgresDatabase) {
             // supported only for version >= 9.5 https://www.postgresql.org/docs/9.5/sql-createsequence.html
@@ -96,10 +96,10 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         if (!(database instanceof MariaDBDatabase) && statement.getOrdered() != null) {
             if (!(database instanceof SybaseASADatabase)) {
                 if (statement.getOrdered()) {
-                queryStringBuilder.append(" ORDER");
+                    queryStringBuilder.append(" ORDER");
                 } else {
                    if (database instanceof OracleDatabase) {
-                   queryStringBuilder.append(" NOORDER");
+                       queryStringBuilder.append(" NOORDER");
                    }
                 }
             }

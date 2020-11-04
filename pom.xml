@@ -23,18 +23,12 @@
         <module>liquibase-extension-examples</module>
     </modules>
 
-    <ciManagement>
-        <system>CircleCI</system>
-        <url>https://circleci.com/gh/liquibase/liquibase/tree/master</url>
-    </ciManagement>
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
+                <version>3.0.1</version>                <executions>
                     <execution>
                         <id>root-source-aggregate</id>
                         <goals>

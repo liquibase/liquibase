@@ -1,6 +1,7 @@
 package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.core.DiffCommand;
@@ -18,7 +19,7 @@ import liquibase.logging.LogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -85,12 +86,12 @@ public class CommandLineUtils {
                                                 String databaseChangeLogTableName,
                                                 String databaseChangeLogLockTableName) throws DatabaseException {
         try {
-            liquibaseCatalogName = StringUtils.trimToNull(liquibaseCatalogName);
-            liquibaseSchemaName = StringUtils.trimToNull(liquibaseSchemaName);
-            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
-            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
-            databaseChangeLogTableName = StringUtils.trimToNull(databaseChangeLogTableName);
-            databaseChangeLogLockTableName = StringUtils.trimToNull(databaseChangeLogLockTableName);
+            liquibaseCatalogName = StringUtil.trimToNull(liquibaseCatalogName);
+            liquibaseSchemaName = StringUtil.trimToNull(liquibaseSchemaName);
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
+            databaseChangeLogTableName = StringUtil.trimToNull(databaseChangeLogTableName);
+            databaseChangeLogLockTableName = StringUtil.trimToNull(databaseChangeLogLockTableName);
 
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver,
                     databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
@@ -104,8 +105,8 @@ public class CommandLineUtils {
                 }
             }
 
-            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
-            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
+            defaultCatalogName = StringUtil.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtil.trimToNull(defaultSchemaName);
 
             database.setDefaultCatalogName(defaultCatalogName);
             database.setDefaultSchemaName(defaultSchemaName);
@@ -164,8 +165,8 @@ public class CommandLineUtils {
             CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws LiquibaseException {
         DiffCommand diffCommand = createDiffCommand(referenceDatabase, targetDatabase, snapshotTypes, schemaComparisons, objectChangeFilter, output);
 
-        System.out.println("");
-        System.out.println(coreBundle.getString("diff.results"));
+        Scope.getCurrentScope().getUI().sendMessage("");
+        Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
         try {
             diffCommand.execute();
         } catch (CommandExecutionException e) {
@@ -256,41 +257,41 @@ public class CommandLineUtils {
         String myVersion = "";
         String buildTimeString = "";
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
         myVersion = LiquibaseUtil.getBuildVersion();
         buildTimeString = LiquibaseUtil.getBuildTime();
 
-        StringBuffer banner = new StringBuffer();
-        
-        // Banner is stored in banner.txt in resources.
+        StringBuilder banner = new StringBuilder();
+
+        // Banner is stored in liquibase/banner.txt in resources.
 	    Class commandLinUtilsClass = CommandLineUtils.class;
-	    InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/banner.txt");
+	    InputStream inputStream = commandLinUtilsClass.getResourceAsStream("/liquibase/banner.txt");
 	    try {
 			banner.append(readFromInputStream(inputStream));
 		} catch (IOException e) {
-			LogService.getLog(commandLinUtilsClass).debug("Unable to locate banner file.");
+			Scope.getCurrentScope().getLog(commandLinUtilsClass).fine("Unable to locate banner file.");
 		}
-    
+
         banner.append(String.format(
             coreBundle.getString("starting.liquibase.at.timestamp"), dateFormat.format(calendar.getTime())
         ));
 
-        if (StringUtils.isNotEmpty(myVersion) && StringUtils.isNotEmpty(buildTimeString)) {
+        if (StringUtil.isNotEmpty(myVersion) && StringUtil.isNotEmpty(buildTimeString)) {
             myVersion = myVersion + " #"+ LiquibaseUtil.getBuildNumber();
             banner.append(String.format(coreBundle.getString("liquibase.version.builddate"), myVersion, buildTimeString));
         }
 
         return banner.toString();
     }
-    
+
 	private static String readFromInputStream(InputStream inputStream) throws IOException {
 		StringBuilder resultStringBuilder = new StringBuilder();
 		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
 				resultStringBuilder.append(line + "\n");
-	
+
 			}
 		}
 		return resultStringBuilder.toString();

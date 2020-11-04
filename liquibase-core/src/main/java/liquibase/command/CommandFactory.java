@@ -1,5 +1,6 @@
 package liquibase.command;
 
+import liquibase.Scope;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -18,14 +19,10 @@ public class CommandFactory  {
     private List<LiquibaseCommand> commands;
 
     private CommandFactory() {
-        Class<? extends LiquibaseCommand>[] classes;
-
         commands = new ArrayList<>();
         try {
-            classes = ServiceLocator.getInstance().findClasses(LiquibaseCommand.class);
-
-            for (Class<? extends LiquibaseCommand> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+            for (LiquibaseCommand command : Scope.getCurrentScope().getServiceLocator().findInstances(LiquibaseCommand.class)) {
+                register(command);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

@@ -4,7 +4,7 @@ import liquibase.change.AddColumnConfig
 import liquibase.change.Change
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
-import liquibase.sdk.database.MockDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
@@ -13,7 +13,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
-import spock.lang.Unroll
 
 public class AddColumnChangeTest extends StandardChangeTest {
 

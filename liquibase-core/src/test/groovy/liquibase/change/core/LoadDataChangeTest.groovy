@@ -3,18 +3,17 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
+import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
 import liquibase.database.core.MSSQLDatabase
+import liquibase.database.core.MockDatabase
 import liquibase.parser.core.ParsedNodeException
-import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.resource.ResourceAccessor
-import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
-import liquibase.test.JUnitResourceAccessor
 import liquibase.test.TestContext
 import spock.lang.Unroll
 
@@ -32,6 +31,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
                 "superuser", "superpass", null, resourceAccessor));
 
         mockDb = new MockDatabase();
+        mockDb.setConnection((DatabaseConnection) null)
     }
 
 
@@ -42,9 +42,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/empty.data.csv");
         refactoring.setSeparator(",");
-
-        refactoring.setResourceAccessor(new JUnitResourceAccessor());
-
 
         SqlStatement[] sqlStatement = refactoring.generateStatements(mssqlDb);
         then:
@@ -58,8 +55,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/empty.data.csv");
         refactoring.setSeparator(",");
-
-        refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
 
@@ -81,8 +76,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         if (quotChar != null) {
             refactoring.setQuotchar(quotChar);
         }
-
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
 
         SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
         then:
@@ -129,9 +122,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
             refactoring.setQuotchar(quotChar);
         }
 
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
 
         then:
         sqlStatements.length == 2
@@ -162,8 +153,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1-excel.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-        //refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
         LoadDataColumnConfig ageConfig = new LoadDataColumnConfig();
         ageConfig.setHeader("age");
@@ -209,8 +198,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1-excel.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-        //refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
         LoadDataColumnConfig ageConfig = new LoadDataColumnConfig();
         ageConfig.setHeader("age");
@@ -222,7 +209,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         activeConfig.setType("BOOLEAN");
         refactoring.addColumn(activeConfig);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
 
         then:
         sqlStatements.length == 2
@@ -250,7 +237,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data3.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
 
         LoadDataColumnConfig idConfig = new LoadDataColumnConfig();
         idConfig.setHeader("id");
@@ -262,7 +248,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         parentIdConfig.setType("UUID");
         refactoring.addColumn(parentIdConfig);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        SqlStatement[] sqlStatements = refactoring.generateStatements(mockDb);
 
         then:
         sqlStatements.length == 2
@@ -299,8 +285,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-        //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         String md5sum1 = refactoring.generateCheckSum().toString();
 
@@ -319,15 +303,14 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
     def "checkStatus"() {
         when:
-        def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
         SnapshotGeneratorFactory.instance = snapshotFactory
 
         def change = new LoadDataChange()
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
-        assert change.checkStatus(database).message == "Cannot check loadData status"
+        assert change.checkStatus(mockDb).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(mockDb).message == "Cannot check loadData status"
     }
 
     def "load works"() {
@@ -354,7 +337,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
     def "relativeToChangelogFile works"() throws Exception {
         when:
         ChangeSet changeSet = new ChangeSet(null, null, true, false,
-                "liquibase/change/fakeChangeSet.xml",
+                "liquibase/empty.changelog.xml",
                 null, null, false, null, null);
 
         LoadDataChange relativeChange = new LoadDataChange();
@@ -363,8 +346,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         relativeChange.setTableName("TABLE_NAME");
         relativeChange.setRelativeToChangelogFile(Boolean.TRUE);
         relativeChange.setChangeSet(changeSet);
-        relativeChange.setFile("core/sample.data1.csv");
-        relativeChange.setResourceAccessor(new ClassLoaderResourceAccessor());
+        relativeChange.setFile("change/core/sample.data1.csv");
 
         SqlStatement[] relativeStatements = relativeChange.generateStatements(mockDb);
 
@@ -373,7 +355,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         nonRelativeChange.setTableName("TABLE_NAME");
         nonRelativeChange.setChangeSet(changeSet);
         nonRelativeChange.setFile("liquibase/change/core/sample.data1.csv");
-        nonRelativeChange.setResourceAccessor(new ClassLoaderResourceAccessor());
 
         SqlStatement[] nonRelativeStatements = nonRelativeChange.generateStatements(mockDb);
 
@@ -389,8 +370,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-        //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         refactoring.setCommentLineStartsWith("") //comments disabled
         String md5sum1 = refactoring.generateCheckSum().toString();
@@ -407,8 +386,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-        //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         refactoring.setCommentLineStartsWith("") //comments disabled
         String md5sum1 = refactoring.generateCheckSum().toString();
@@ -426,8 +403,6 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-        //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         refactoring.setCommentLineStartsWith("#");
         String md5sum1 = refactoring.generateCheckSum().toString();
