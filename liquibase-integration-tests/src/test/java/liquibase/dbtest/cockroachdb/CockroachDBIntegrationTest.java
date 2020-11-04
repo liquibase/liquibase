@@ -1,8 +1,10 @@
 package liquibase.dbtest.cockroachdb;
 
+import liquibase.Scope;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -80,9 +82,11 @@ public class CockroachDBIntegrationTest extends AbstractIntegrationTest {
         if (getDatabase() == null) {
             return;
         }
-        ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RawSqlStatement("DROP TABLE IF EXISTS pk"));
+        final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase());
 
-        ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RawSqlStatement("CREATE TABLE pk (\n" +
+        executor.execute(new RawSqlStatement("DROP TABLE IF EXISTS pk"));
+
+        executor.execute(new RawSqlStatement("CREATE TABLE pk (\n" +
                 "a INT8 NOT NULL,\n" +
                 "b INT8 NOT NULL,\n" +
                 "c INT8 NOT NULL,\n" +

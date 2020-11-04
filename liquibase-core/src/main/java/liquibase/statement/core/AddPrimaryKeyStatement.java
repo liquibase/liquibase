@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
-import liquibase.util.StringUtils;
+import liquibase.util.StringUtil;
 
 public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
@@ -53,12 +53,7 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     }
 
     public String getColumnNames() {
-        return StringUtils.join(columns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
-            @Override
-            public String toString(ColumnConfig obj) {
-                return obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : "");
-            }
-        });
+        return StringUtil.join(columns, ", ", (StringUtil.StringUtilFormatter<ColumnConfig>) obj -> obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : ""));
     }
 
 
