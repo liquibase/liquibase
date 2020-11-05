@@ -33,16 +33,17 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
-    private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
-    private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
-    private static final Charset CHARSET = Scope.getCurrentScope().getFileEncoding();
 
     /**
      * Maximum length of PostgresSQL identifier.
      * For details see https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS.
      */
-    private static final int PGSQL_PK_BYTES_LIMIT = 63;
-    private static final String PGSQL_PK_SUFFIX = "_pkey";
+    static final int PGSQL_PK_BYTES_LIMIT = 63;
+    static final String PGSQL_PK_SUFFIX = "_pkey";
+    static final Charset CHARSET = Scope.getCurrentScope().getFileEncoding();
+
+    private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
+    private static final Logger LOG = Scope.getCurrentScope().getLog(PostgresDatabase.class);
 
     /**
      * Represents Postgres DB types.

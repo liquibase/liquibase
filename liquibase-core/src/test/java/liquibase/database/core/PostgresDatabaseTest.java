@@ -1,6 +1,5 @@
 package liquibase.database.core;
 
-import liquibase.Scope;
 import liquibase.changelog.column.LiquibaseColumn;
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
@@ -10,17 +9,12 @@ import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.charset.Charset;
-
 import static org.junit.Assert.*;
 
 /**
  * Tests for {@link PostgresDatabase}
  */
 public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
-
-    private static final long PGSQL_PK_BYTES_LIMIT = 63;
-    private static final Charset CHARSET = Scope.getCurrentScope().getFileEncoding();
 
     public PostgresDatabaseTest() throws Exception {
         super(new PostgresDatabase());
@@ -133,62 +127,39 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
 
     @Test
     public void generatePrimaryKeyName_tableSizeNameLessThan63Bytes_nameIsBuiltCorrectly() {
-
-        // Arrange
         final String tableName = "name";
         final String expectedPrimaryKeyName = "name_pkey";
 
-        // Act
-        final String pk = this.database.generatePrimaryKeyName(tableName);
-
-        // Assert
-        assertEquals(expectedPrimaryKeyName, pk);
-        assertTrue(expectedPrimaryKeyName.getBytes(CHARSET).length <= PGSQL_PK_BYTES_LIMIT);
+        assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(tableName));
     }
 
     @Test
     public void generatePrimaryKeyName_tableSizeNameMoreThan63Bytes_nameIsBuiltCorrectly() {
-
-        // Arrange
         final String tableName = "name_" + StringUtil.repeat("_", 100);
         final String expectedPrimaryKeyName = "name______________________________________________________pkey";
 
-        // Act
-        final String pk = this.database.generatePrimaryKeyName(tableName);
-
-        // Assert
-        assertEquals(expectedPrimaryKeyName, pk);
-        assertTrue(expectedPrimaryKeyName.getBytes(CHARSET).length <= PGSQL_PK_BYTES_LIMIT);
+        assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(tableName));
     }
 
     @Test
     public void generatePrimaryKeyName_tableSizeNameLessThan63BytesAndNonASCIISymbols_nameIsBuiltCorrectly() {
-
-        // Arrange
         final String nameWith15NonAsciiSymbols = "name_" + StringUtil.repeat("\u03A9", 15);
         final String expectedPrimaryKeyName = "name_ΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩ_pkey";
 
-        // Act
-        final String pk = this.database.generatePrimaryKeyName(nameWith15NonAsciiSymbols);
-
-        // Assert
-        assertEquals(expectedPrimaryKeyName, pk);
-        assertTrue(expectedPrimaryKeyName.getBytes(CHARSET).length <= PGSQL_PK_BYTES_LIMIT);
+        assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(nameWith15NonAsciiSymbols));
     }
 
     @Test
     public void generatePrimaryKeyName_tableSizeNameMoreThan63BytesAndNonASCIISymbols_nameIsBuiltCorrectly() {
-
-        // Arrange
         final String nameWith100NonAsciiSymbols = "name_" + StringUtil.repeat("\u03A9", 100);
         final String expectedPrimaryKeyName = "name_ΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩΩ_pkey";
 
-        // Act
-        final String pk = this.database.generatePrimaryKeyName(nameWith100NonAsciiSymbols);
+        assertPrimaryKeyName(expectedPrimaryKeyName, this.database.generatePrimaryKeyName(nameWith100NonAsciiSymbols));
+    }
 
-        // Assert
-        assertEquals(expectedPrimaryKeyName, pk);
-        assertTrue(expectedPrimaryKeyName.getBytes(CHARSET).length <= PGSQL_PK_BYTES_LIMIT);
+    private void assertPrimaryKeyName(String expected, String actual) {
+        assertEquals(expected, actual);
+        assertTrue(expected.getBytes(PostgresDatabase.CHARSET).length <= PostgresDatabase.PGSQL_PK_BYTES_LIMIT);
     }
 
 }
