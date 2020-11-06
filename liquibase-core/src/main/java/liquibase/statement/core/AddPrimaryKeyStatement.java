@@ -19,6 +19,13 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     private String forIndexCatalogName;
     private boolean shouldValidate = true;
 
+    /**
+     * @deprecated
+     */
+    public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
+        this(catalogName, schemaName, tableName, ColumnConfig.arrayFromNames(columnNames), constraintName);
+    }
+
     public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, ColumnConfig[] columns, String constraintName) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
