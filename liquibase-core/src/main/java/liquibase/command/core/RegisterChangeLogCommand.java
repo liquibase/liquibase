@@ -201,8 +201,12 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             //
             // Formatted SQL changelog
             //
-            changeLogString = changeLogString.replaceFirst("--liquibase formatted sql",
-                    "--liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
+            String newChangeLogString = changeLogString.replaceFirst("--(\\s*)liquibase formatted sql",
+                    "-- liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
+            if (newChangeLogString.equals(changeLogString)) {
+                return new CommandResult("Unable to update changeLogId in changelog file '" + changeLogFile + "'", false);
+            }
+            changeLogString = newChangeLogString;
         } else {
             return new CommandResult("Changelog file '" + changeLogFile + "' is not a supported format", false);
         }
