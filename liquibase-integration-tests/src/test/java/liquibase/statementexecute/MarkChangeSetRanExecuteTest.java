@@ -91,7 +91,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
                         "('a', 'b', 'c', now(), 1, " +
                         "'8:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', 'e', null, '" + version + "'," +
                         " null)",
-                PostgresDatabase.class, H2Database.class);
+                PostgresDatabase.class, H2Database.class, CockroachDatabase.class);
         assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, " +
                         "md5sum, description, comments, exectype, contexts, labels, liquibase, deployment_id) values " +
                         "('a', 'b', 'c', date('now'), 1, " +
@@ -143,8 +143,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
         assertCorrect("update [databasechangelog] set [dateexecuted] = NOW(), deployment_id = null, exectype = " +
                         "'reran', md5sum = '8:d41d8cd98f00b204e9800998ecf8427e', orderexecuted = 1 where id = 'a' and" +
                         " author = 'b' and filename = 'c'",
-                MySQLDatabase.class, MariaDBDatabase.class, HsqlDatabase.class, PostgresDatabase.class, H2Database
-                        .class);
+                MySQLDatabase.class, MariaDBDatabase.class, HsqlDatabase.class, PostgresDatabase.class, H2Database.class, CockroachDatabase.class);
         assertCorrectOnRest("update [databasechangelog] set [dateexecuted] = NOW(), [deployment_id] = null, [exectype] = 'reran', [md5sum] = " +
                 "'8:d41d8cd98f00b204e9800998ecf8427e', [orderexecuted] = 1 where id = 'a' and author = 'b' and filename = 'c'");
     }
