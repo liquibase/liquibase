@@ -532,4 +532,33 @@ public class ChangeSetTest extends Specification {
         "validCheckSums" | []
 
     }
+
+    @Unroll("#featureName: #dbmsList=#expectedValues")
+    def "check serialization for field dbms"() {
+        when:
+        def changeSet = new ChangeSet("id1", "author1", false, false, "/test.xml", null, dbmsList, null);
+
+        then:
+        that(((String) changeSet.getSerializableFieldValue("dbms")).split(","), Matchers.arrayContainingInAnyOrder(*expectedValues))
+
+        where:
+        dbmsList            | expectedValues
+        "all"               | ["all"]
+        "dbms1, !dbms2"     | ["dbms1", "!dbms2"]
+        "dbms1,dbms2,dbms3" | ["dbms1", "dbms2", "dbms3"]
+    }
+
+    def "check serialization for field dbms with empty and null value"() {
+        when:
+        def changeSet = new ChangeSet("id2", "author2", false, false, "/test.xml", null, dbmsList, null);
+
+        then:
+        changeSet.getSerializableFieldValue("dbms") == expectedValue
+
+        where:
+        dbmsList | expectedValue
+        ""       | null
+        null     | null
+    }
+
 }

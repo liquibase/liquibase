@@ -1,6 +1,14 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.2.0
+
+- GH #373 Added new allowUpdate attributge to loadUpdateData
+- GH #1495 Fixed loadUpdateData regression from 4.1.1
+- GH #1438 Fixed DBMS field serialization
+- GH #1496 Moved banner.txt file to /liquibase package
+- GH #1427 Cleanup of Ant tasks
+
 Changes in version 4.1.1 (2020.10.09)
 
 - GH #1276 Rewrote SpringResourceAccessor
