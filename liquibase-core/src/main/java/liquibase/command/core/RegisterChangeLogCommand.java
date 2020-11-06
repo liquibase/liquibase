@@ -216,8 +216,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         randomAccessFile.write(changeLogString.getBytes(encoding));
         randomAccessFile.close();
         return new CommandResult("Changelog file '" + changeLogFile +
-                "' has been registered with changelog ID '" + hubChangeLog.getId() + "' " +
-                "and connected to project '" + project.getName() + "' with project ID '" + project.getId() + "'\n", true);
+                "' registered with changelog ID '" + hubChangeLog.getId() + "' " +
+                "to project '" + project.getName()+ "'\n", true);
     }
 
     //
