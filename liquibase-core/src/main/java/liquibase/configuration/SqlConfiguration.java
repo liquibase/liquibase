@@ -10,13 +10,13 @@ import java.util.logging.Level;
  */
 public class SqlConfiguration extends AbstractConfigurationContainer {
 
-    public static final String SQL_LOG_LEVEL = "logLevel";
+    public static final String SQL_SHOW_AT_LOG_LEVEL = "showAtLogLevel";
 
 
     public SqlConfiguration() {
         super("liquibase.sql");
 
-        getContainer().addProperty(SQL_LOG_LEVEL, Level.class)
+        getContainer().addProperty(SQL_SHOW_AT_LOG_LEVEL, Level.class)
                 .setDescription("Log level to execute sql interactions at")
                 .setDefaultValue(Level.FINE)
                 .setValueHandler(new ConfigurationValueHandler() {
@@ -29,7 +29,7 @@ public class SqlConfiguration extends AbstractConfigurationContainer {
                         try {
                             return Scope.getCurrentScope().getSingleton(LogFactory.class).parseLogLevel(String.valueOf(value));
                         } catch (IllegalArgumentException e) {
-                            Scope.getCurrentScope().getLog(getClass()).warning("liquibase.sql.loglevel value of " + value + " is not a logLevel recognized by Liquibase so SQL information sent to FINE level logs by default. For more information check https://docs.liquibase.com");
+                            Scope.getCurrentScope().getLog(getClass()).warning("liquibase.sql.showAtLogLevel value of " + value + " is not a logLevel recognized by Liquibase so SQL information sent to FINE level logs by default. For more information check https://docs.liquibase.com");
                             return Level.FINE;
                         }
                     }
@@ -42,12 +42,12 @@ public class SqlConfiguration extends AbstractConfigurationContainer {
     }
 
 
-    public Level getLogLevel() {
-        return getContainer().getValue(SQL_LOG_LEVEL, Level.class);
+    public Level getShowAtLogLevel() {
+        return getContainer().getValue(SQL_SHOW_AT_LOG_LEVEL, Level.class);
     }
 
-    public SqlConfiguration setLogLevel(Level logLevel) {
-        getContainer().setValue(SQL_LOG_LEVEL, logLevel);
+    public SqlConfiguration setShowAtLogLevel(Level logLevel) {
+        getContainer().setValue(SQL_SHOW_AT_LOG_LEVEL, logLevel);
         return this;
     }
 }

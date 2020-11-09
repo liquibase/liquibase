@@ -388,7 +388,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     listener.writeSqlWillRun(String.format("%s", statement));
                 }
 
-                Level sqlLogLevel = LiquibaseConfiguration.getInstance().getConfiguration(SqlConfiguration.class).getLogLevel();
+                Level sqlLogLevel = LiquibaseConfiguration.getInstance().getConfiguration(SqlConfiguration.class).getShowAtLogLevel();
 
                 log.log(sqlLogLevel, statement, null);
                 if (statement.contains("?")) {
