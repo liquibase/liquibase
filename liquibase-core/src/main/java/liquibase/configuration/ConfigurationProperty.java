@@ -53,7 +53,11 @@ public class ConfigurationProperty {
             value = defaultValue;
         } else {
             try {
-                value = valueOf(containerValue);
+                if (valueHandler == null) {
+                    value = valueOf(containerValue);
+                } else {
+                    value = valueHandler.convert(containerValue);
+                }
                 wasOverridden = true;
             } catch (NumberFormatException e) {
                 throw new UnexpectedLiquibaseException("Error parsing "+containerValue+" as a "+type.getSimpleName());
