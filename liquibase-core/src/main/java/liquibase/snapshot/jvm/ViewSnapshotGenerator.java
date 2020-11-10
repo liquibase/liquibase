@@ -105,10 +105,10 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                         definition = "[CANNOT READ VIEW DEFINITION]";
                         if (database instanceof MySQLDatabase) {
                             String warningMessage =
-                                    "WARNING: The current MySQL user does not have permissions to access view definitions needed for this Liquibase command.\n" +
-                                            "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. This is potentially due to a known\n " +
-                                            "MySQL bug https://bugs.mysql.com/bug.php?id=22763. Learn more about altering permissions with suggested MySQL GRANTs at\n" +
-                                            "https://docs.liquibase.com/workflows/liquibase-pro/mysqlgrants.html";
+                                    "The current MySQL user does not have permissions to access view definitions needed for this Liquibase command.\n" +
+                                    "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. This is potentially due to a known\n " +
+                                    "MySQL bug https://bugs.mysql.com/bug.php?id=22763. Learn more about altering permissions with suggested MySQL GRANTs at\n" +
+                                    "https://docs.liquibase.com/workflows/liquibase-pro/mysqlgrants.html";
                             Scope.getCurrentScope().getUI().sendMessage("WARNING: " + warningMessage);
                             Scope.getCurrentScope().getLog(getClass()).warning(warningMessage);
                         }
