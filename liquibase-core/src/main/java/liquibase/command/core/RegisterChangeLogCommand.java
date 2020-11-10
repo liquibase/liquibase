@@ -136,7 +136,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                         if (project == null) {
                             return new CommandResult("\nUnable to create project '" + projectName + "'.\n\n", false);
                         }
-                        outputStream.print("\nProject '" + project + "' created with project ID '" + project.getId() + "'.\n\n");
+                        outputStream.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
                         projects = getProjectsFromHub();
                         done = true;
                         continue;
@@ -220,8 +220,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         randomAccessFile.write(changeLogString.getBytes(encoding));
         randomAccessFile.close();
         return new CommandResult("Changelog file '" + changeLogFile +
-                "' has been registered with changelog ID '" + hubChangeLog.getId() + "' " +
-                "and connected to project '" + project.getName() + "' with project ID '" + project.getId() + "'\n", true);
+                "' registered with changelog ID '" + hubChangeLog.getId() + "' " +
+                "to project '" + project.getName()+ "'\n", true);
     }
 
     //
