@@ -1896,6 +1896,7 @@ public class Main {
         liquibaseCommand.setUrl(url);
         liquibaseCommand.setDatabase(database);
         liquibaseCommand.setChangeLogFile(changeLogFile);
+        liquibaseCommand.setHubProjectId(hubProjectId);
         final CommandResult commandResult = liquibaseCommand.execute();
         if (commandResult.succeeded) {
             Scope.getCurrentScope().getUI().sendMessage(commandResult.print());
