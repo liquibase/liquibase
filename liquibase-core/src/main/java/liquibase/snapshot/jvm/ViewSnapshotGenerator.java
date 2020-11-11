@@ -84,7 +84,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                     // remove strange zero-termination seen on some Oracle view definitions
                     int length = definition.length();
-                    if (definition.charAt(length-1) == 0) {
+                    if (length > 0 && definition.charAt(length-1) == 0) {
                       definition = definition.substring(0, length-1);
                     }
 
@@ -96,6 +96,11 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         // Strip the schema definition because it can optionally be included in the tag attribute
                         definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
+                    }
+
+                    definition = StringUtil.trimToNull(definition);
+                    if (definition == null) {
+                        definition = "[CANNOT READ VIEW DEFINITION]";
                     }
 
                     view.setDefinition(definition);

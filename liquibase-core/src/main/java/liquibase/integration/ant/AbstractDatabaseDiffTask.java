@@ -21,7 +21,7 @@ public abstract class AbstractDatabaseDiffTask extends BaseLiquibaseTask {
     protected DiffResult getDiffResult() {
         Liquibase liquibase = getLiquibase();
         Database targetDatabase = liquibase.getDatabase();
-        Database referenceDatabase = createDatabaseFromType(referenceDatabaseType);
+        Database referenceDatabase = createDatabaseFromType(referenceDatabaseType, getResourceAccessor());
 
         CatalogAndSchema targetCatalogAndSchema = buildCatalogAndSchema(targetDatabase);
         CatalogAndSchema referenceCatalogAndSchema = buildCatalogAndSchema(referenceDatabase);

@@ -32,6 +32,15 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
   	 */
   	protected String hubConnectionId;
 
+    /**
+     *
+     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
+     *
+     * @parameter property="liquibase.hubProjectId"
+     *
+     */
+    protected String hubProjectId;
+
   	@Override
   	protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
     	  //
@@ -48,6 +57,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
         syncHub.setChangeLogFile(changeLogFile);
         syncHub.setUrl(database.getConnection().getURL());
         syncHub.setHubConnectionId(hubConnectionId);
+        syncHub.setHubProjectId(hubProjectId);
         syncHub.setDatabase(database);
         syncHub.setFailIfOnline(false);
         try {
