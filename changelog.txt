@@ -1,13 +1,18 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 4.2.0
+Changes in version 4.2.0 (2020.11.12)
 
-- GH #373 Added new allowUpdate attributge to loadUpdateData
-- GH #1495 Fixed loadUpdateData regression from 4.1.1
-- GH #1438 Fixed DBMS field serialization
-- GH #1496 Moved banner.txt file to /liquibase package
-- GH #1427 Cleanup of Ant tasks
+- GH PR#373 ⁃ Added option "updateable" to the column tag.
+- GH Issue#1523 ⁃ Fix xsd, remove surplus space after validateForeignKey (4.1.xsd / 4.2.xsd
+- GH Issue#1510 ⁃ MySql 8.0 requires create and drop of temporary tables to run generateChangeLog
+- GH PR#1496 ⁃ Move banner.txt to new location
+- GH PR#1495 ⁃ Fix issue with loadUpdateData GH-1489
+- GH Issue#1489 ⁃ loadUpdateData broken for clob/text fields in 3.10.3
+- GH Issue#1476 ⁃ Consider alternative location for banner.txt
+- GH Issue#1438 ⁃ XML Export adds ',xxx' instead of ','
+- GH Issue#1389 ⁃ Precondition onFail="WARN" doesn't work properly
+- GH PR#1427 ⁃ Update Ant Tasks to use DatabaseFactory rather than create connection itself
 
 Changes in version 4.1.1 (2020.10.09)
 
