@@ -102,6 +102,17 @@ Hub integration CLI parameter
                                  monitoring and reports in your Liquibase Hub
                                  account. Get a free key at
                                  https://hub.liquibase.com.
+ --hubConnectionId=<connectionId>
+                                 Used to identify the specific Connection in
+                                 which to record or extract data at Liquibase
+                                 Hub. Available in your Liquibase Hub Project
+                                 at https://hub.liquibase.com.
+ --hubProjectId=<projectId>
+                                 Used to identify the specific Project in which
+                                 to record or extract data at Liquibase Hub.
+                                 Available in your Liquibase Hub account at
+                                 https://hub.liquibase.com.
+
 
 Documentation Commands
  dbDoc <outputDirectory>         Generates Javadoc-like documentation
