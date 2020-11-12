@@ -1,9 +1,11 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
@@ -101,6 +103,15 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                     definition = StringUtil.trimToNull(definition);
                     if (definition == null) {
                         definition = "[CANNOT READ VIEW DEFINITION]";
+                        if (database instanceof MySQLDatabase) {
+                            String warningMessage =
+                                    "\nThe current MySQL user does not have permissions to access view definitions needed for this Liquibase command.\n" +
+                                    "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. This is\n" +
+                                    "potentially due to a known MySQL bug https://bugs.mysql.com/bug.php?id=22763. Learn more about altering\n" +
+                                    "permissions with suggested MySQL GRANTs at https://docs.liquibase.com/workflows/liquibase-pro/mysqlgrants.html\n";
+                            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + warningMessage);
+                            Scope.getCurrentScope().getLog(getClass()).warning(warningMessage);
+                        }
                     }
 
                     view.setDefinition(definition);
