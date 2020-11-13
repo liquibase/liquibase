@@ -199,17 +199,23 @@ class HttpClient {
                 try {
                     try (InputStream error = connection.getErrorStream()) {
                         if (error != null) {
-                            final Map errorDetails = yaml.load(error);
+                            Object loadedObject = yaml.load(error);
+                            if (loadedObject instanceof Map) {
+                                final Map errorDetails = yaml.load(error);
 
-                            LiquibaseHubException returnException = new LiquibaseHubException((String) errorDetails.get("message"), e);
+                                LiquibaseHubException returnException = new LiquibaseHubException((String) errorDetails.get("message"), e);
 
-                            if (connection.getResponseCode() == 404) {
-                                returnException = new LiquibaseHubObjectNotFoundException(returnException.getMessage(), returnException.getCause());
+                                if (connection.getResponseCode() == 404) {
+                                    returnException = new LiquibaseHubObjectNotFoundException(returnException.getMessage(), returnException.getCause());
+                                }
+                                returnException.setTimestamp((String) errorDetails.get("timestamp"));
+                                returnException.setDetails((String) errorDetails.get("details"));
+                                throw returnException;
                             }
-                            returnException.setTimestamp((String) errorDetails.get("timestamp"));
-                            returnException.setDetails((String) errorDetails.get("details"));
-                            throw returnException;
-
+                            else {
+                                String errorMessage = "Unable to parse '" + loadedObject.toString() + "': " + e.getMessage();
+                                throw new LiquibaseHubException(errorMessage, e.getCause());
+                            }
                         }
                     }
                 } catch (IOException ioException) {
