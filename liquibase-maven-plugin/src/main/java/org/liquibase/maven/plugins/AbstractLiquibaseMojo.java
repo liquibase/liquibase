@@ -23,6 +23,8 @@ import org.apache.maven.plugin.descriptor.Parameter;
 import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import javax.xml.bind.annotation.XmlSchema;
 import java.io.*;
@@ -294,7 +296,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding == null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
-            return new OutputStreamWriter(new FileOutputStream(outputFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            return new OutputStreamWriter(new FileOutputStream(outputFile),
+                    LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                            .getOutputEncoding());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
         return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), outputFileEncoding));
@@ -334,41 +338,43 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
 
-            IntegrationDetails integrationDetails = new IntegrationDetails();
-            integrationDetails.setName("maven");
+                IntegrationDetails integrationDetails = new IntegrationDetails();
+                integrationDetails.setName("maven");
 
-            final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
-            for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
-                if (!descriptor.getImplementationClass().equals(this.getClass())) {
-                    continue;
-                }
-
-                for (Parameter param : descriptor.getParameters()) {
-                    final String name = param.getName();
-                    if (name.equalsIgnoreCase("project") || name.equalsIgnoreCase("systemProperties")) {
+                final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
+                for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
+                    if (!descriptor.getImplementationClass().equals(this.getClass())) {
                         continue;
                     }
 
-                    final Field field = getField(this.getClass(), name);
-                    if (field == null) {
-                        getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
-                    } else {
-                        field.setAccessible(true);
-                        final Object value = field.get(this);
-                        if (value != null) {
-                            try {
-                                integrationDetails.setParameter("maven__" + param.getName().replaceAll("[${}]", ""), String.valueOf(value));
-                            } catch (Throwable e) {
-                                e.printStackTrace();
+                    for (Parameter param : descriptor.getParameters()) {
+                        final String name = param.getName();
+                        if (name.equalsIgnoreCase("project") || name.equalsIgnoreCase("systemProperties")) {
+                            continue;
+                        }
+
+                        final Field field = getField(this.getClass(), name);
+                        if (field == null) {
+                            getLog().debug(
+                                    "Cannot read current maven value for. Will not send the value to hub " + name);
+                        } else {
+                            field.setAccessible(true);
+                            final Object value = field.get(this);
+                            if (value != null) {
+                                try {
+                                    integrationDetails.setParameter("maven__" + param.getName().replaceAll("[${}]", ""),
+                                            String.valueOf(value));
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
                 }
-            }
-            scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put("integrationDetails", integrationDetails);
 
-            final Map pluginContext = this.getPluginContext();
-            System.out.println(pluginContext.keySet());
+                final Map pluginContext = this.getPluginContext();
+                System.out.println(pluginContext.keySet());
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
@@ -390,7 +396,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     Database database = null;
                     try {
                         String dbPassword = (emptyPassword || (password == null)) ? "" : password;
-                        String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
+                        String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile
+                                .getAbsolutePath();
                         database = CommandLineUtils.createDatabaseObject(mavenClassLoader,
                                 url,
                                 username,
@@ -435,19 +442,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                         getLog().info("Executing on Database: " + url);
 
-                    if (isPromptOnNonLocalDatabase()) {
-                        if (!liquibase.isSafeToRunUpdate()) {
-                            if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                                throw new LiquibaseException("User decided not to run against non-local database");
+                        if (isPromptOnNonLocalDatabase()) {
+                            if (!liquibase.isSafeToRunUpdate()) {
+                                if (UIFactory.getInstance().getFacade()
+                                        .promptForNonLocalDatabase(liquibase.getDatabase())) {
+                                    throw new LiquibaseException("User decided not to run against non-local database");
+                                }
                             }
                         }
+                        setupBindInfoPackage();
+                        performLiquibaseTask(liquibase);
+                    } catch (LiquibaseException e) {
+                        cleanup(database);
+                        throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(),
+                                e);
                     }
-                    setupBindInfoPackage();
-                    performLiquibaseTask(liquibase);
-                } catch (LiquibaseException e) {
-                    cleanup(database);
-                    throw new MojoExecutionException("\nError setting up or running Liquibase:\n" + e.getMessage(), e);
-                }
 
                     cleanup(database);
                     getLog().info(MavenUtils.LOG_SEPARATOR);
@@ -527,34 +536,45 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
-            try (InputStream is = handlePropertyFileInputStream(propertyFile)) {
-                parsePropertiesFile(is);
-                getLog().info(MavenUtils.LOG_SEPARATOR);
+            Properties properties;
+            try (InputStream is = openPropertyFileInputStream(propertyFile)) {
+                if (isYamlFile(propertyFile)) {
+                    properties = loadYamlProperties(is);
+                } else {
+                    properties = loadProperties(is);
+                }
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
+            getLog().info(MavenUtils.LOG_SEPARATOR);
+            applyProperties(properties);
         }
     }
 
     protected void configureChangeLogProperties() throws MojoFailureException, MojoExecutionException {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File " + propertyFile + " for changeLog parameters");
-            try (InputStream propertiesInputStream = handlePropertyFileInputStream(propertyFile)) {
-                Properties props = loadProperties(propertiesInputStream);
-                for (Map.Entry entry : props.entrySet()) {
-                    String key = (String) entry.getKey();
-                    if (key.startsWith("parameter.")) {
-                        getLog().debug("Setting changeLog parameter " + key);
-                        liquibase.setChangeLogParameter(key.replaceFirst("^parameter.", ""), entry.getValue());
-                    }
+            Properties properties;
+            try (InputStream propertiesInputStream = openPropertyFileInputStream(propertyFile)) {
+                if (isYamlFile(propertyFile)) {
+                    properties = loadYamlProperties(propertiesInputStream);
+                } else {
+                    properties = loadProperties(propertiesInputStream);
                 }
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                String key = (String) entry.getKey();
+                if (key.startsWith("parameter.")) {
+                    getLog().debug("Setting changeLog parameter " + key);
+                    liquibase.setChangeLogParameter(key.replaceFirst("^parameter.", ""), entry.getValue());
+                }
+            }
         }
     }
 
-    private static InputStream handlePropertyFileInputStream(String propertyFile) throws MojoFailureException {
+    private static InputStream openPropertyFileInputStream(String propertyFile) throws MojoFailureException {
         InputStream is;
         try {
             is = Scope.getCurrentScope().getResourceAccessor().openStream(null, propertyFile);
@@ -566,6 +586,101 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
 
         return is;
+    }
+
+    private static boolean isYamlFile(String filename) {
+        return filename.matches(".*\\.(yml|yaml)");
+    }
+
+    private static Properties loadProperties(InputStream propertiesInputStream) throws MojoExecutionException {
+        Properties props = new Properties();
+        try {
+            props.load(propertiesInputStream);
+            return props;
+        } catch (IOException e) {
+            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
+        }
+    }
+
+    private static Properties loadYamlProperties(InputStream is) {
+        Map<String, Object> yamlProperties = new Yaml(new SafeConstructor()).load(is);
+        Properties properties = new Properties();
+        properties.putAll(yamlProperties);
+        return properties;
+    }
+
+    /**
+     * Sets the provided properties in the plugin.
+     *
+     * @param properties The liquibase properties to be applied
+     */
+    protected void applyProperties(Properties properties) {
+        for (Object propertyKey : properties.keySet()) {
+            String key = (String) propertyKey;
+            try {
+                Field field = MavenUtils.getDeclaredField(this.getClass(), key);
+
+                if (propertyFileWillOverride) {
+                    getLog().debug("  properties file setting value: " + field.getName());
+                    setFieldValue(field, properties.get(key).toString());
+                } else {
+                    if (!isCurrentFieldValueSpecified(field)) {
+                        getLog().debug("  properties file setting value: " + field.getName());
+                        setFieldValue(field, properties.get(key).toString());
+                    }
+                }
+            } catch (Exception e) {
+                getLog().info("  '" + key + "' in properties file is not being used by this task.");
+            }
+        }
+    }
+
+    /**
+     * This method will check to see if the user has specified a value different to that of
+     * the default value. This is not an ideal solution, but should cover most situations in
+     * the use of the plugin.
+     *
+     * @param f The Field to check if a user has specified a value for.
+     * @return <code>true</code> if the user has specified a value.
+     */
+    private boolean isCurrentFieldValueSpecified(Field f) throws IllegalAccessException {
+        Object currentValue = f.get(this);
+        if (currentValue == null) {
+            return false;
+        }
+
+        Object defaultValue = getDefaultValue(f);
+        if (defaultValue == null) {
+            return currentValue != null;
+        } else {
+            // There is a default value, check to see if the user has selected something other
+            // than the default
+            return !defaultValue.equals(f.get(this));
+        }
+    }
+
+    private Object getDefaultValue(Field field) throws IllegalAccessException {
+        List<Field> allFields = new ArrayList<>();
+        allFields.addAll(Arrays.asList(getClass().getDeclaredFields()));
+        allFields.addAll(Arrays.asList(AbstractLiquibaseMojo.class.getDeclaredFields()));
+
+        for (Field f : allFields) {
+            if (f.getName().equals(field.getName() + DEFAULT_FIELD_SUFFIX)) {
+                f.setAccessible(true);
+                return f.get(this);
+            }
+        }
+        return null;
+    }
+
+    private void setFieldValue(Field field, String value) throws IllegalAccessException {
+        if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
+            field.set(this, Boolean.valueOf(value));
+        } else if (field.getType().equals(File.class)) {
+            field.set(this, new File(value));
+        } else {
+            field.set(this, value);
+        }
     }
 
     protected ClassLoader getMavenArtifactClassLoader() throws MojoExecutionException {
@@ -656,101 +771,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             } catch (DatabaseException e) {
                 getLog().error("Failed to close open connection to database.", e);
             }
-        }
-    }
-
-    private static Properties loadProperties(InputStream propertiesInputStream) throws MojoExecutionException {
-        Properties props = new Properties();
-        try {
-            props.load(propertiesInputStream);
-            return props;
-        } catch (IOException e) {
-            throw new MojoExecutionException("Could not load the properties Liquibase file", e);
-        }
-    }
-
-    /**
-     * Parses a properties file and sets the associated fields in the plugin.
-     *
-     * @param propertiesInputStream The input stream which is the Liquibase properties that
-     *                              needs to be parsed.
-     * @throws org.apache.maven.plugin.MojoExecutionException If there is a problem parsing
-     *                                                        the file.
-     */
-    protected void parsePropertiesFile(InputStream propertiesInputStream)
-            throws MojoExecutionException {
-        if (propertiesInputStream == null) {
-            throw new MojoExecutionException("Properties file InputStream is null.");
-        }
-        Properties props = loadProperties(propertiesInputStream);
-
-        for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
-            String key = null;
-            try {
-                key = (String) it.next();
-                Field field = MavenUtils.getDeclaredField(this.getClass(), key);
-
-                if (propertyFileWillOverride) {
-                    getLog().debug("  properties file setting value: " + field.getName());
-                    setFieldValue(field, props.get(key).toString());
-                } else {
-                    if (!isCurrentFieldValueSpecified(field)) {
-                        getLog().debug("  properties file setting value: " + field.getName());
-                        setFieldValue(field, props.get(key).toString());
-                    }
-                }
-            } catch (Exception e) {
-                getLog().info("  '" + key + "' in properties file is not being used by this "
-                        + "task.");
-            }
-        }
-    }
-
-    /**
-     * This method will check to see if the user has specified a value different to that of
-     * the default value. This is not an ideal solution, but should cover most situations in
-     * the use of the plugin.
-     *
-     * @param f The Field to check if a user has specified a value for.
-     * @return <code>true</code> if the user has specified a value.
-     */
-    private boolean isCurrentFieldValueSpecified(Field f) throws IllegalAccessException {
-        Object currentValue = f.get(this);
-        if (currentValue == null) {
-            return false;
-        }
-
-        Object defaultValue = getDefaultValue(f);
-        if (defaultValue == null) {
-            return currentValue != null;
-        } else {
-            // There is a default value, check to see if the user has selected something other
-            // than the default
-            return !defaultValue.equals(f.get(this));
-        }
-    }
-
-    private Object getDefaultValue(Field field) throws IllegalAccessException {
-        List<Field> allFields = new ArrayList<>();
-        allFields.addAll(Arrays.asList(getClass().getDeclaredFields()));
-        allFields.addAll(Arrays.asList(AbstractLiquibaseMojo.class.getDeclaredFields()));
-
-        for (Field f : allFields) {
-            if (f.getName().equals(field.getName() + DEFAULT_FIELD_SUFFIX)) {
-                f.setAccessible(true);
-                return f.get(this);
-            }
-        }
-        return null;
-    }
-
-    private void setFieldValue(Field field, String value) throws IllegalAccessException {
-        if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
-            field.set(this, Boolean.valueOf(value));
-        } else if (field.getType().equals(File.class)) {
-            field.set(this, new File(value));
-        } else {
-            field.set(this, value);
         }
     }
 

@@ -1,8 +1,9 @@
 package org.liquibase.maven.plugins;
 
+import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
-import org.junit.Test;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -20,7 +21,7 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
   private static final Map<String, Object> DIRECTORY_PROPERTIES;
 
   static {
-    DEFAULT_PROPERTIES = new HashMap<String, Object>();
+    DEFAULT_PROPERTIES = new HashMap<>();
     DEFAULT_PROPERTIES.put("changeLogFile", "org/liquibase/changelog.xml");
     DEFAULT_PROPERTIES.put("driver", "com.mysql.cj.jdbc.Driver");
     DEFAULT_PROPERTIES.put("url", "jdbc:mysql://localhost/eformat");
@@ -31,7 +32,7 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
     DEFAULT_PROPERTIES.put("outputDefaultCatalog", false);
     DEFAULT_PROPERTIES.put("outputFileEncoding", "UTF-8");
 
-    DIRECTORY_PROPERTIES = new HashMap<String, Object>();
+    DIRECTORY_PROPERTIES = new HashMap<>();
     DIRECTORY_PROPERTIES.put("changeLogDirectory", "org/liquibase/");
     DIRECTORY_PROPERTIES.put("changeLogFile", "changelog.xml");
     DIRECTORY_PROPERTIES.put("driver", "com.mysql.jdbc.Driver");
@@ -48,127 +49,149 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
 
   }
 
-//  public void testNoPropertiesFile() throws Exception {
-//    testCommonNoPropertiesFile(CONFIG_FILE, DEFAULT_PROPERTIES);
-//  }
-//
-//  public void testDirectoryNoPropertiesFile() throws Exception {
-//    testCommonNoPropertiesFile(DIRECTORY_CONFIG_FILE, DIRECTORY_PROPERTIES);
-//  }
-//
-//  private void testCommonNoPropertiesFile(String configFileName, Map<String, Object> properties) throws Exception {
-//    LiquibaseUpdate mojo = createUpdateMojo(configFileName);
-//    // Clear out any settings for the property file that may be set
-//    setVariableValueToObject(mojo, "propertyFile", null);
-//    setVariableValueToObject(mojo, "propertyFileWillOverride", false);
-//
-//    loadPropertiesFileIfPresent(mojo);
-//
-//    Map values = getVariablesAndValuesFromObject(mojo);
-//    checkValues(properties, values);
-//  }
-//
-//
-//  public void testOverrideAllWithPropertiesFile() throws Exception {
-//    testCommonOverideAllWithPropertiesFile(CONFIG_FILE);
-//  }
-//
-//  public void testDirectoryOverideAllWithPropertiesFile() throws Exception {
-//    testCommonOverideAllWithPropertiesFile(DIRECTORY_CONFIG_FILE);
-//  }
-//
-//  private void testCommonOverideAllWithPropertiesFile(String configFileName) throws Exception {
-//    // Create the properties file for this test
-//    Properties props = new Properties();
-//    props.setProperty("driver", "properties_driver_value");
-//    props.setProperty("url", "properties_url_value");
-//    props.setProperty("username", "properties_user_value");
-//    props.setProperty("password", "properties_password_value");
-//    props.setProperty("changeLogFile", "properties_changeLogFile_value");
-//    createPropertiesFile("update/test.properties", props);
-//
-//    LiquibaseUpdate mojo = createUpdateMojo(configFileName);
-//    setVariableValueToObject(mojo, "propertyFile", "update/test.properties");
-//    setVariableValueToObject(mojo, "propertyFileWillOverride", true);
-//    loadPropertiesFileIfPresent(mojo);
-//
-//    Map values = super.getVariablesAndValuesFromObject(mojo);
-//    checkValues(props, values);
-//  }
-//
-//  public void testOverrideAllButDriverWithPropertiesFile() throws Exception {
-//    testCommonOverrideAllButDriverWithPropertiesFile(CONFIG_FILE, DEFAULT_PROPERTIES);
-//  }
-//
-//  public void testDirectoryOverrideAllButDriverWithPropertiesFile() throws Exception {
-//    testCommonOverrideAllButDriverWithPropertiesFile(DIRECTORY_CONFIG_FILE, DIRECTORY_PROPERTIES);
-//  }
-//
-//  public void testCommonOverrideAllButDriverWithPropertiesFile(String configFileName, Map<String, Object> properties) throws Exception {
-//    // Create the properties file for this test
-//    Properties props = new Properties();
-//    props.setProperty("url", "properties_url_value");
-//    props.setProperty("username", "properties_user_value");
-//    props.setProperty("password", "properties_password_value");
-//    props.setProperty("changeLogDirectory", "properties_changeLogDirectory_value");
-//    props.setProperty("changeLogFile", "properties_changeLogFile_value");
-//    createPropertiesFile("update/test.properties", props);
-//
-//    LiquibaseUpdate mojo = createUpdateMojo(configFileName);
-//    setVariableValueToObject(mojo, "propertyFile", "update/test.properties");
-//    setVariableValueToObject(mojo, "propertyFileWillOverride", true);
-//    loadPropertiesFileIfPresent(mojo);
-//
-//    Map values = getVariablesAndValuesFromObject(mojo);
-//    checkValues(props, values);
-//
-//    // Ensure that the properties file has not overridden the driver value as it was not
-//    // specified in the properties.
-//    assertEquals("Driver should be set to the default value",
-//        properties.get("driver"),
-//                 values.get("driver"));
-//  }
-//
-//  public void testPropertiesFilePresentWithNoOverrideAndMissingProperty() throws Exception {
-//    testCommonPropertiesFilePresentWithNoOverrideAndMissingProperty(CONFIG_FILE, DEFAULT_PROPERTIES);
-//  }
-//
-//  public void testDirectoryPropertiesFilePresentWithNoOverrideAndMissingProperty() throws Exception {
-//    testCommonPropertiesFilePresentWithNoOverrideAndMissingProperty(DIRECTORY_CONFIG_FILE, DIRECTORY_PROPERTIES);
-//  }
-//
-//  public void testCommonPropertiesFilePresentWithNoOverrideAndMissingProperty(String configFileName, Map<String, Object> properties) throws Exception {
-//    // Create the properties file for this test
-//    Properties props = new Properties();
-//    props.setProperty("url", "properties_url_value");
-//    props.setProperty("username", "properties_user_value");
-//    props.setProperty("password", "properties_password_value");
-//    props.setProperty("changeLogDirectory", "properties_changeLogDirectory_value");
-//    props.setProperty("changeLogFile", "properties_changeLogFile_value");
-//    createPropertiesFile("update/test.properties", props);
-//
-//    LiquibaseUpdate mojo = createUpdateMojo(configFileName);
-//    setVariableValueToObject(mojo, "propertyFile", "update/test.properties");
-//    setVariableValueToObject(mojo, "propertyFileWillOverride", false);
-//    loadPropertiesFileIfPresent(mojo);
-//
-//    Map values = super.getVariablesAndValuesFromObject(mojo);
-//    // The password is not specified in the configuration XML so we expect the password
-//    // from the properties file to be injected into the mojo.
-//    Map expected = new HashMap<String, Object>(properties);
-//    expected.put("password", props.getProperty("password"));
-//    checkValues(expected, values);
-//  }
-//
-//
-//  /*-------------------------------------------------------------------------*\
-//   * PRIVATE METHODS
-//  \*-------------------------------------------------------------------------*/
-//
-//  private LiquibaseUpdate createUpdateMojo(String configFileName) throws Exception {
-//    LiquibaseUpdate mojo = new LiquibaseUpdate();
-//    PlexusConfiguration config = loadConfiguration(configFileName);
-//    configureMojo(mojo, config);
-//    return mojo;
-//  }
+  public void testNoPropertiesFile() throws Exception {
+    testCommonNoPropertiesFile(CONFIG_FILE, DEFAULT_PROPERTIES);
+  }
+
+  public void testDirectoryNoPropertiesFile() throws Exception {
+    testCommonNoPropertiesFile(DIRECTORY_CONFIG_FILE, DIRECTORY_PROPERTIES);
+  }
+
+  private void testCommonNoPropertiesFile(String configFileName, Map<String, Object> properties) throws Exception {
+    LiquibaseUpdate mojo = createUpdateMojo(configFileName);
+    // Clear out any settings for the property file that may be set
+    setVariableValueToObject(mojo, "propertyFile", null);
+    setVariableValueToObject(mojo, "propertyFileWillOverride", false);
+
+    loadPropertiesFileIfPresent(mojo);
+
+    Map<String, Object> values = getVariablesAndValuesFromObject(mojo);
+    checkValues(properties, values);
+  }
+
+
+  public void testOverrideAllWithPropertiesFile() throws Exception {
+    testCommonOverideAllWithPropertiesFile(CONFIG_FILE);
+  }
+
+  public void testDirectoryOverideAllWithPropertiesFile() throws Exception {
+    testCommonOverideAllWithPropertiesFile(DIRECTORY_CONFIG_FILE);
+  }
+
+  private void testCommonOverideAllWithPropertiesFile(String configFileName) throws Exception {
+    // Create the properties file for this test
+    Properties props = new Properties();
+    props.setProperty("driver", "properties_driver_value");
+    props.setProperty("url", "properties_url_value");
+    props.setProperty("username", "properties_user_value");
+    props.setProperty("password", "properties_password_value");
+    props.setProperty("changeLogFile", "properties_changeLogFile_value");
+    createPropertiesFile("update/test.properties", props);
+
+    LiquibaseUpdate mojo = createUpdateMojo(configFileName);
+    setVariableValueToObject(mojo, "propertyFile", "update/test.properties");
+    setVariableValueToObject(mojo, "propertyFileWillOverride", true);
+    loadPropertiesFileIfPresent(mojo);
+
+    Map<String, Object> values = super.getVariablesAndValuesFromObject(mojo);
+    checkValues(props, values);
+  }
+
+  public void testOverrideAllButDriverWithPropertiesFile() throws Exception {
+    testCommonOverrideAllButDriverWithPropertiesFile(CONFIG_FILE, DEFAULT_PROPERTIES);
+  }
+
+  public void testDirectoryOverrideAllButDriverWithPropertiesFile() throws Exception {
+    testCommonOverrideAllButDriverWithPropertiesFile(DIRECTORY_CONFIG_FILE, DIRECTORY_PROPERTIES);
+  }
+
+  private void testCommonOverrideAllButDriverWithPropertiesFile(String configFileName, Map<String, Object> properties) throws Exception {
+    // Create the properties file for this test
+    Properties props = new Properties();
+    props.setProperty("url", "properties_url_value");
+    props.setProperty("username", "properties_user_value");
+    props.setProperty("password", "properties_password_value");
+    props.setProperty("changeLogDirectory", "properties_changeLogDirectory_value");
+    props.setProperty("changeLogFile", "properties_changeLogFile_value");
+    createPropertiesFile("update/test.properties", props);
+
+    LiquibaseUpdate mojo = createUpdateMojo(configFileName);
+    setVariableValueToObject(mojo, "propertyFile", "update/test.properties");
+    setVariableValueToObject(mojo, "propertyFileWillOverride", true);
+    loadPropertiesFileIfPresent(mojo);
+
+    Map<String, Object> values = getVariablesAndValuesFromObject(mojo);
+    checkValues(props, values);
+
+    // Ensure that the properties file has not overridden the driver value as it was not
+    // specified in the properties.
+    assertEquals("Driver should be set to the default value",
+        properties.get("driver"),
+                 values.get("driver"));
+  }
+
+  public void testPropertiesFilePresentWithNoOverrideAndMissingProperty() throws Exception {
+    testCommonPropertiesFilePresentWithNoOverrideAndMissingProperty(CONFIG_FILE, DEFAULT_PROPERTIES);
+  }
+
+  public void testDirectoryPropertiesFilePresentWithNoOverrideAndMissingProperty() throws Exception {
+    testCommonPropertiesFilePresentWithNoOverrideAndMissingProperty(DIRECTORY_CONFIG_FILE, DIRECTORY_PROPERTIES);
+  }
+
+  private void testCommonPropertiesFilePresentWithNoOverrideAndMissingProperty(String configFileName, Map<String, Object> properties) throws Exception {
+    // Create the properties file for this test
+    Properties props = new Properties();
+    props.setProperty("url", "properties_url_value");
+    props.setProperty("username", "properties_user_value");
+    props.setProperty("password", "properties_password_value");
+    props.setProperty("changeLogDirectory", "properties_changeLogDirectory_value");
+    props.setProperty("changeLogFile", "properties_changeLogFile_value");
+    createPropertiesFile("update/test.properties", props);
+
+    LiquibaseUpdate mojo = createUpdateMojo(configFileName);
+    setVariableValueToObject(mojo, "propertyFile", "update/test.properties");
+    setVariableValueToObject(mojo, "propertyFileWillOverride", false);
+    loadPropertiesFileIfPresent(mojo);
+
+    Map<String, Object> values = super.getVariablesAndValuesFromObject(mojo);
+    // The password is not specified in the configuration XML so we expect the password
+    // from the properties file to be injected into the mojo.
+    Map<String, Object> expected = new HashMap<>(properties);
+    expected.put("password", props.getProperty("password"));
+    checkValues(expected, values);
+  }
+
+  public void testYamlProperties() throws Exception{
+      String yamlContent = "" +
+              "first:\n" +
+              "  nested:\n" +
+              "    username: first-nested-username\n" +
+              "username: correct-username\n" +
+              "second:\n" +
+              "  nested:\n" +
+              "    username: second-nested-username\n" +
+              "inline.nested.username: inline-nested-username";
+      String propertiesYamlName = "update/properties.yml";
+      FileUtils.writeStringToFile(new File(getBasedir(), "/target/test-classes/" + propertiesYamlName), yamlContent);
+      LiquibaseUpdate mojo = createUpdateMojo(CONFIG_FILE);
+      setVariableValueToObject(mojo, "propertyFile", propertiesYamlName);
+      setVariableValueToObject(mojo, "propertyFileWillOverride", true);
+
+      loadPropertiesFileIfPresent(mojo);
+
+      Map<String, Object> propertyValues = getVariablesAndValuesFromObject(mojo);
+      assertEquals("correct-username", propertyValues.get("username"));
+  }
+
+
+  /*-------------------------------------------------------------------------*\
+   * PRIVATE METHODS
+  \*-------------------------------------------------------------------------*/
+
+  private LiquibaseUpdate createUpdateMojo(String configFileName) throws Exception {
+    LiquibaseUpdate mojo = new LiquibaseUpdate();
+    PlexusConfiguration config = loadConfiguration(configFileName);
+    configureMojo(mojo, config);
+    return mojo;
+  }
 }
