@@ -7,6 +7,7 @@ import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.Properties;
 import java.util.Arrays;
 import java.util.List;
@@ -808,5 +809,41 @@ public class MainTest {
         assertEquals("Custom database change log table gets parsed correctly (as an option argument)",
                 "OPTSCHANGELOG", main.databaseChangeLogTableName);
         assertEquals("Custom database change log LOCK table gets parsed correctly (as an option argument)", "OPTSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
+    }
+
+    @Test
+    public void testParseDefaultPropertyFilesFromResources() throws Exception {
+        Main cli = new Main();
+        File file = new File(cli.defaultsFile);
+        assertFalse(file.exists());
+        assertNotNull(cli.getClass().getClassLoader().getResource(file.getName()));
+
+        try (InputStream is = cli.getClass().getClassLoader().getResourceAsStream(file.getName())) {
+            Properties properties = new Properties();
+            properties.load(is);
+
+            // check the fields are null inside commandline Main class
+            for (Field field : cli.getClass().getDeclaredFields()) {
+                if (properties.containsKey(field.getName())) {
+                    assertNull(field.get(cli));
+                }
+            }
+
+            // fill the fields from the defaultsFile
+            cli.parseDefaultPropertyFiles();
+
+            // check the fields are filled from the defaultsFile
+            for (Field field : cli.getClass().getDeclaredFields()) {
+                if (properties.containsKey(field.getName())) {
+                    Object cliValue = field.get(cli);
+                    Object fileValue = properties.getProperty(field.getName());
+                    assertEquals(
+                            String.format("class and file property '%s' values do not match.", field.getName()),
+                            fileValue,
+                            cliValue);
+                }
+            }
+
+        }
     }
 }
