@@ -17,6 +17,7 @@ class RegisterChangeLogCommandTest extends Specification {
     private File outputFile
     private File outputFileJSON
     private File outputFileYaml
+    private File outputFileYml
 
     def setup() {
         URL url = Thread.currentThread().getContextClassLoader().getResource("liquibase/test-changelog.xml")
@@ -33,6 +34,10 @@ class RegisterChangeLogCommandTest extends Specification {
         outputFileYaml = File.createTempFile("registerChangelog-", ".yaml", new File("target/test-classes"))
         outputFileYaml.deleteOnExit()
         FileUtil.write(contents, outputFileYaml)
+
+        outputFileYml = File.createTempFile("registerChangelog-", ".yml", new File("target/test-classes"))
+        outputFileYml.deleteOnExit()
+        FileUtil.write(contents, outputFileYml)
 
         JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
         Map<String, Object> scopeMap = new HashMap<>()
@@ -106,6 +111,27 @@ class RegisterChangeLogCommandTest extends Specification {
         hubChangeLog.id != null
         hubChangeLog.fileName == "com/example/test.yaml"
         hubChangeLog.name == "com/example/test.yaml"
+    }
+
+    def "happyPathYml"() {
+        when:
+        def outputStream = new ByteArrayOutputStream()
+
+        def command = new RegisterChangeLogCommand()
+        command.setHubProjectId(((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).projects.get(0).getId())
+        command.setOutputStream(new PrintStream(outputStream))
+        command.setChangeLogFile(outputFileYml.getName())
+        command.configure([changeLog: new DatabaseChangeLog("com/example/test.yml")])
+
+        def result = command.run()
+
+        def hubChangeLog = command.getHubChangeLog()
+
+        then:
+        result.succeeded
+        hubChangeLog.id != null
+        hubChangeLog.fileName == "com/example/test.yml"
+        hubChangeLog.name == "com/example/test.yml"
     }
 
     def "changeLogAlreadyRegistered"() {
