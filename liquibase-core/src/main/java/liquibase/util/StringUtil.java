@@ -50,7 +50,7 @@ public class StringUtil {
             return returnString;
         }
     }
-    
+
     /**
      * Removes any comments from multiple line SQL using {@link #stripComments(String)}
      *  and then extracts each individual statement using {@link #splitSQL(String, String)}.
@@ -68,8 +68,16 @@ public class StringUtil {
         String previousPiece = null;
         boolean previousDelimiter = false;
         List<Object> parsedArray = Arrays.asList(parsed.toArray(true));
+        boolean isInClause = false;
         for (Object piece : mergeTokens(parsedArray, endDelimiter)) {
-            if (splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
+            if (piece instanceof String && ((String) piece).equalsIgnoreCase("BEGIN")) {
+                isInClause = true;
+            }
+            if (piece instanceof String && ((String) piece).equalsIgnoreCase("END")) {
+                isInClause = false;
+            }
+
+            if (!isInClause && splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
                 String trimmedString = StringUtil.trimToNull(currentString.toString());
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);

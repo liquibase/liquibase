@@ -31,6 +31,7 @@ class StringUtilTest extends Specification {
         true          | true            | null         | "statement 1;\nstatement 2;\nGO\n\nstatement 3; statement 4;"                                                                                                                                       | ["statement 1", "statement 2", "statement 3", "statement 4"]
         true          | true            | "\\nGO"      | "statement 1 \nGO\nstatement 2"                                                                                                                                                                     | ["statement 1", "statement 2"]
         true          | true            | "\\nGO"      | "CREATE OR REPLACE PACKAGE emp_actions AS  -- spec\nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;\nGO\nanother statement;here\nGO\n" | ["CREATE OR REPLACE PACKAGE emp_actions AS  \nTYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL);\nCURSOR desc_salary RETURN EmpRecTyp);\nEND emp_actions;", "another statement;here"]
+        true          | true            | null         | "CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nanother statement;here; END;"                                                                                                       | ["CREATE OR REPLACE PACKAGE emp_actions AS BEGIN\n statement 1;\nanother statement;here; END"]
 
     }
 
