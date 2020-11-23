@@ -334,41 +334,41 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
 
-            IntegrationDetails integrationDetails = new IntegrationDetails();
-            integrationDetails.setName("maven");
+                IntegrationDetails integrationDetails = new IntegrationDetails();
+                integrationDetails.setName("maven");
 
-            final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
-            for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
-                if (!descriptor.getImplementationClass().equals(this.getClass())) {
-                    continue;
-                }
-
-                for (Parameter param : descriptor.getParameters()) {
-                    final String name = param.getName();
-                    if (name.equalsIgnoreCase("project") || name.equalsIgnoreCase("systemProperties")) {
+                final PluginDescriptor pluginDescriptor = (PluginDescriptor) getPluginContext().get("pluginDescriptor");
+                for (MojoDescriptor descriptor : pluginDescriptor.getMojos()) {
+                    if (!descriptor.getImplementationClass().equals(this.getClass())) {
                         continue;
                     }
 
-                    final Field field = getField(this.getClass(), name);
-                    if (field == null) {
-                        getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
-                    } else {
-                        field.setAccessible(true);
-                        final Object value = field.get(this);
-                        if (value != null) {
-                            try {
-                                integrationDetails.setParameter("maven__" + param.getName().replaceAll("[${}]", ""), String.valueOf(value));
-                            } catch (Throwable e) {
-                                e.printStackTrace();
+                    for (Parameter param : descriptor.getParameters()) {
+                        final String name = param.getName();
+                        if (name.equalsIgnoreCase("project") || name.equalsIgnoreCase("systemProperties")) {
+                            continue;
+                        }
+
+                        final Field field = getField(this.getClass(), name);
+                        if (field == null) {
+                            getLog().debug("Cannot read current maven value for. Will not send the value to hub " + name);
+                        } else {
+                            field.setAccessible(true);
+                            final Object value = field.get(this);
+                            if (value != null) {
+                                try {
+                                    integrationDetails.setParameter("maven__" + param.getName().replaceAll("[${}]", ""), String.valueOf(value));
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
                 }
-            }
-            scopeValues.put("integrationDetails", integrationDetails);
+                scopeValues.put("integrationDetails", integrationDetails);
 
-            final Map pluginContext = this.getPluginContext();
-            System.out.println(pluginContext.keySet());
+                final Map pluginContext = this.getPluginContext();
+                System.out.println(pluginContext.keySet());
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
