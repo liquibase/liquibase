@@ -194,8 +194,14 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                 //
                 // Add the changeLogId attribute
                 //
-                String outputHeader = editedString + " changeLogId=\"" + hubChangeLog.getId().toString() + "\">";
-                changeLogString = changeLogString.replaceFirst(patternString, outputHeader);
+                final String outputChangeLogString = " changeLogId=\"" + hubChangeLog.getId().toString() + "\"";
+                if (changeLogString.trim().endsWith("/>")) {
+                    changeLogString = changeLogString.replaceFirst("/>", outputChangeLogString + "/>");
+                }
+                else {
+                    String outputHeader = editedString + outputChangeLogString + ">";
+                    changeLogString = changeLogString.replaceFirst(patternString, outputHeader);
+                }
             }
         } else if (changeLogFile.toLowerCase().endsWith(".sql")) {
             //
