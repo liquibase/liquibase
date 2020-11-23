@@ -326,7 +326,22 @@
                 <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
               </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>io.snyk</groupId>
+                <artifactId>snyk-maven-plugin</artifactId>
+                <version>1.2.5</version>
+                <configuration>
+                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
+                    <failOnSeverity>high</failOnSeverity>
+                    <org>datical</org>
+                </configuration>
+            </plugin>
+
+
+
         </plugins>
+
 
         <pluginManagement>
             <plugins>
