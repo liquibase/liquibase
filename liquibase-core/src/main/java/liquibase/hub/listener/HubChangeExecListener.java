@@ -309,16 +309,14 @@ public class HubChangeExecListener extends AbstractChangeExecListener
             if (apiKey != null && hubOn) {
                 String message;
                 if (databaseChangeLog.getChangeLogId() == null) {
-                    message = "The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Hub.\n" +
-                              "The data for operation on changeset '" + changeSet.getId() + "' by author '" + changeSet.getAuthor() + "'\n" +
-                              "was not successfully recorded in your Liquibase Hub project.";
+                    message = "The changelog '" + databaseChangeLog.getPhysicalFilePath() + "' has not been registered with Liquibase Hub.\n" +
+                            "To register the changelog with your Hub Project run 'liquibase registerChangeLog'.\n" +
+                            "Learn more at https://hub.liquibase.com.";
                 }
                 else {
-                    message = "Hub communication failure.\n" +
-                              "The data for operation on changeset '" +
-                              changeSet.getId() +
-                              "' by author '" + changeSet.getAuthor() + "'\n" +
-                              "was not successfully recorded in your Liquibase Hub project.";
+                    message = "The changelog file specified is not registered with any Liquibase Hub project, so the results will not be recorded in Liquibase Hub.\n" +
+                            "To register the changelog with your Hub Project run 'liquibase registerChangeLog'.\n" +
+                            "Learn more at https://hub.liquibase.com.";
                 }
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 logger.info(message);
