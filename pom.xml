@@ -77,35 +77,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>io.snyk</groupId>
-                <artifactId>snyk-maven-plugin</artifactId>
-                <version>1.2.5</version>
-                <executions>
-                    <execution>
-                        <id>snyk-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>snyk-monitor</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>monitor</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
-                    <failOnSeverity>high</failOnSeverity>
-                    <org>datical</org>
-                </configuration>
-            </plugin>
-
-
-
             <!--            <plugin>-->
 <!--                <artifactId>maven-install-plugin</artifactId>-->
 <!--                <version>2.5.2</version>-->
