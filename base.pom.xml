@@ -335,6 +335,7 @@
                     <apiToken>${env.SNYK_API_TOKEN}</apiToken>
                     <failOnSeverity>high</failOnSeverity>
                     <org>datical</org>
+                    <includeProvidedDependencies>false</includeProvidedDependencies>
                 </configuration>
             </plugin>
 
