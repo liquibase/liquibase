@@ -1404,7 +1404,7 @@ public class Main {
                 );
 
         Database database = null;
-        if (this.url != null) {
+        if (dbConnectionNeeded(command) && this.url != null) {
             database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
                     this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName,
                     Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema),
@@ -1903,6 +1903,10 @@ public class Main {
         } else {
             throw new RuntimeException(commandResult.print());
         }
+    }
+
+    private boolean dbConnectionNeeded(String command) {
+        return ! COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command);
     }
 
     private boolean isLicenseableCommand(String formatValue) {

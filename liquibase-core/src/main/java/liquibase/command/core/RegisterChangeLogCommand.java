@@ -136,7 +136,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                         if (project == null) {
                             return new CommandResult("\nUnable to create project '" + projectName + "'.\n\n", false);
                         }
-                        outputStream.print("\nProject '" + project + "' created with project ID '" + project.getId() + "'.\n\n");
+                        outputStream.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
                         projects = getProjectsFromHub();
                         done = true;
                         continue;
@@ -201,8 +201,13 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             //
             // Formatted SQL changelog
             //
-            changeLogString = changeLogString.replaceFirst("--liquibase formatted sql",
-                    "--liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
+            String newChangeLogString = changeLogString.replaceFirst("--(\\s*)liquibase formatted sql",
+                    "-- liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
+            if (newChangeLogString.equals(changeLogString)) {
+                return new CommandResult("Unable to update changeLogId in changelog file '" + changeLogFile + "'", false);
+            }
+            changeLogString = newChangeLogString;
+
         } else if (changeLogFile.toLowerCase().endsWith(".json")) {
             changeLogString = changeLogString.replaceFirst("\\[", "\\[\n" +
                     "\"    changeLogId\"" + ":" + "\"" + hubChangeLog.getId().toString() + "\",\n");
@@ -222,8 +227,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         randomAccessFile.write(changeLogString.getBytes(encoding));
         randomAccessFile.close();
         return new CommandResult("Changelog file '" + changeLogFile +
-                "' has been registered with changelog ID '" + hubChangeLog.getId() + "' " +
-                "and connected to project '" + project.getName() + "' with project ID '" + project.getId() + "'\n", true);
+                "' registered with changelog ID '" + hubChangeLog.getId() + "' " +
+                "to project '" + project.getName()+ "'\n", true);
     }
 
     //
