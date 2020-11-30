@@ -201,7 +201,7 @@ class HttpClient {
                         if (error != null) {
                             Object loadedObject = yaml.load(error);
                             if (loadedObject instanceof Map) {
-                                final Map errorDetails = yaml.load(error);
+                                final Map errorDetails = (Map)loadedObject;
 
                                 LiquibaseHubException returnException = new LiquibaseHubException((String) errorDetails.get("message"), e);
 
