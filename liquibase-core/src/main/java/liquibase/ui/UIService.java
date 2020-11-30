@@ -1,6 +1,7 @@
 package liquibase.ui;
 
 import liquibase.ExtensibleObject;
+import liquibase.exception.LiquibaseException;
 import liquibase.plugin.Plugin;
 
 /**
@@ -24,5 +25,13 @@ public interface UIService extends ExtensibleObject, Plugin {
      * Send an "error" message to the user along with a stacktrace.
      */
     void sendErrorMessage(String message, Throwable exception);
+
+    /**
+     *
+     * Prompt the user with the message and wait with a running time
+     * with a running time.  Return the response as a String
+     *
+     */
+    String prompt(String message, int timerValue, ConsoleDelegate consoleDelegate) throws LiquibaseException;
 
 }

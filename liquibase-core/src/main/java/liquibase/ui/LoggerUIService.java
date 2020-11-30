@@ -34,6 +34,21 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
 
     }
 
+    /**
+     *
+     * Prompt the user with the message and wait with a running time
+     * with a running time.  Return the response as a String.
+     * NOT IMPLEMENTED
+     *
+     * @param message
+     * @param timerValue
+     *
+     */
+    @Override
+    public String prompt(String promptString, int timerValue, ConsoleDelegate consoleDelegate) throws IllegalArgumentException {
+        return null;
+    }
+
     public Level getStandardLogLevel() {
         return standardLogLevel;
     }
