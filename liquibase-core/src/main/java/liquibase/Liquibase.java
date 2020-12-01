@@ -8,6 +8,8 @@ import liquibase.changelog.visitor.*;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.core.DropAllCommand;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -226,6 +228,17 @@ public class Liquibase implements AutoCloseable {
             HubUpdater hubUpdater = null;
             try {
 
+                //
+                // Let the user know that they can register for Hub
+                //
+                HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+                String hubMode = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubMode());
+                if (hubMode.equals("off")) {
+                    final String message =
+                       "liquibase.hub.mode=off.  This operation will not be tracked in Hub.  To enable this feature, run liquibase hubsetup.";
+                    Scope.getCurrentScope().getUI().sendMessage(message);
+                    Scope.getCurrentScope().getLog(getClass()).info(message);
+                }
                 changeLog = getDatabaseChangeLog();
 
                 if (checkLiquibaseTables) {
