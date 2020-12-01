@@ -37,7 +37,9 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console input with good timer value"() {
         when:
-        def input = Scope.getCurrentScope().getUI().prompt("Enter (Y/N/S)?", "S", 15, new TestConsoleDelegate("Y", 10))
+        def input =
+            Scope.getCurrentScope().getUI()
+                                   .prompt("Enter (Y/N/S)?", "S", 15, new TestConsoleDelegate("Y", 10))
 
         then:
         input == "Y"
@@ -45,7 +47,9 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console input with default value"() {
         when:
-        def input = Scope.getCurrentScope().getUI().prompt("Enter (Y/N/S)?", "S", 15, new TestConsoleDelegate("", 10))
+        def input =
+            Scope.getCurrentScope().getUI()
+                                   .prompt("Enter (Y/N/S)?", "S", 15, new TestConsoleDelegate("", 0))
 
         then:
         input == "S"
