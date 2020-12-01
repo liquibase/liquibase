@@ -28,7 +28,7 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console input with bad timer value"() {
         when:
-        Scope.getCurrentScope().getUI().prompt("Enter (Y/N/S)?", 0, new TestConsoleDelegate("Y", 10))
+        Scope.getCurrentScope().getUI().prompt("Enter (Y/N/S)?", "Y", 0, new TestConsoleDelegate("Y", 10))
 
         then:
         IllegalArgumentException iae = thrown()
@@ -37,9 +37,17 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console input with good timer value"() {
         when:
-        def input = Scope.getCurrentScope().getUI().prompt("Enter (Y/N/S)?", 15, new TestConsoleDelegate("Y", 10))
+        def input = Scope.getCurrentScope().getUI().prompt("Enter (Y/N/S)?", "S", 15, new TestConsoleDelegate("Y", 10))
 
         then:
         input == "Y"
+    }
+
+    def "Test for console input with default value"() {
+        when:
+        def input = Scope.getCurrentScope().getUI().prompt("Enter (Y/N/S)?", "S", 15, new TestConsoleDelegate("", 10))
+
+        then:
+        input == "S"
     }
 }

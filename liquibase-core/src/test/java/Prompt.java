@@ -10,7 +10,7 @@ public class Prompt {
     public static void main(String[] args) {
       UIService service = new ConsoleUIService();
         try {
-           String input = service.prompt("Enter a value", 10, new ConsoleDelegate());
+           String input = service.prompt("Enter a value", "Yes", 10, new ConsoleDelegate());
            System.out.println(input);
         }
         catch (Exception e) {
