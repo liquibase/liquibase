@@ -32,6 +32,6 @@ public interface UIService extends ExtensibleObject, Plugin {
      * with a running time.  Return the response as a String
      *
      */
-    String prompt(String message, String promptValue, int timerValue, ConsoleDelegate consoleDelegate) throws LiquibaseException;
+    String prompt(String promptString, String defaultValue, int timerValue, ConsoleDelegate consoleDelegate) throws LiquibaseException;
 
 }

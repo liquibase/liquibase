@@ -1,10 +1,14 @@
 package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
+import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
 
-import java.io.Console;
-import java.io.PrintStream;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.io.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static java.lang.Thread.sleep;
 
@@ -63,54 +67,37 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         if (consoleDelegate == null) {
             throw new IllegalArgumentException("You must supply a ConsoleDelegate instance");
         }
+        int count = timerValue;
         String input = null;
-        CountdownTimer countdownTimer = new CountdownTimer(promptString, timerValue);
         try {
-            new Thread(countdownTimer).start();
+            while (! consoleDelegate.ready()) {
+                String promptMessage = "\r" + promptString + " *" + Integer.toString(count) + "*- ";
+                System.out.print(promptMessage);
+                count--;
+                if (count < 0) {
+                    throw new InterruptedException();
+                }
+                Thread.sleep(1000);
+            }
+            try {
+                input = consoleDelegate.readLine().trim();
+            } catch (Exception e) {
+                throw new LiquibaseException(e);
+            }
         }
-        catch (Exception e) {
-            // Consume
+        catch (IOException ioe) {
+
         }
-        input = consoleDelegate.readLine().trim();
+        catch (InterruptedException ie) {
+          if (count >= 0) {
+              Scope.getCurrentScope().getLog(getClass()).warning("Error while waiting for input: " + ie.getMessage());
+          }
+        }
+
         if (input == null || input.isEmpty()) {
             input = defaultValue;
         }
-        countdownTimer.stop();
         return input;
-    }
-
-    private static class CountdownTimer implements Runnable {
-        private final int timerValue;
-        private final String promptString;
-        private boolean stop = false;
-
-        public CountdownTimer(String promptString, int timerValue) {
-            this.timerValue = timerValue;
-            this.promptString = promptString;
-        }
-        public void run() {
-            for (int i=timerValue; i > 0; i--) {
-                if (stop) {
-                    return;
-                }
-                try {
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    // consume
-                }
-                if (stop) {
-                    return;
-                }
-                String promptMessage = "\r" + promptString + " *" + Integer.toString(i) + "*- ";
-                System.out.print(promptMessage);
-            }
-            if (timerValue > 0) {
-                System.out.println();
-            }
-        }
-        public void stop() {
-            this.stop = true;
-        }
     }
 
     @SuppressWarnings("WeakerAccess")
