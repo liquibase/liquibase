@@ -45,7 +45,7 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
      *
      */
     @Override
-    public String prompt(String promptString, int timerValue, ConsoleDelegate consoleDelegate) throws IllegalArgumentException {
+    public String prompt(String promptString, String promptValue, int timerValue, ConsoleDelegate consoleDelegate) throws IllegalArgumentException {
         return null;
     }
 

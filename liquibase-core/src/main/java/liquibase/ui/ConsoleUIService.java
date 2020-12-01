@@ -48,13 +48,15 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
      * Prompt the user with the message and wait with a running time
      * with a running time.  Return the response as a String
      *
-     * @param message          String to display as a prompt
+     * @param promptString     String to display as a prompt
+     * @param defaultValue     String to return as a default
      * @param timerValue       Value to use as a countdown timer
      *                         Must be a valid integer > 0
+     * @param consoleDelegate  Abstraction used to read input
      *
      */
     @Override
-    public String prompt(String message, int timerValue, ConsoleDelegate consoleDelegate) throws LiquibaseException {
+    public String prompt(String promptString, String defaultValue, int timerValue, ConsoleDelegate consoleDelegate) throws LiquibaseException {
         if (timerValue <= 0) {
             throw new IllegalArgumentException("Value for countdown timer must be greater than 0");
         }
@@ -62,7 +64,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             throw new IllegalArgumentException("You must supply a ConsoleDelegate instance");
         }
         String input = null;
-        CountdownTimer countdownTimer = new CountdownTimer(message, timerValue);
+        CountdownTimer countdownTimer = new CountdownTimer(promptString, timerValue);
         try {
             new Thread(countdownTimer).start();
         }
@@ -70,18 +72,21 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             // Consume
         }
         input = consoleDelegate.readLine().trim();
+        if (input == null || input.isEmpty()) {
+            input = defaultValue;
+        }
         countdownTimer.stop();
         return input;
     }
 
     private static class CountdownTimer implements Runnable {
         private final int timerValue;
-        private final String message;
+        private final String promptString;
         private boolean stop = false;
 
-        public CountdownTimer(String message, int timerValue) {
+        public CountdownTimer(String promptString, int timerValue) {
             this.timerValue = timerValue;
-            this.message = message;
+            this.promptString = promptString;
         }
         public void run() {
             for (int i=timerValue; i > 0; i--) {
@@ -96,7 +101,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                 if (stop) {
                     return;
                 }
-                String promptMessage = "\r" + message + " *" + Integer.toString(i) + "*- ";
+                String promptMessage = "\r" + promptString + " *" + Integer.toString(i) + "*- ";
                 System.out.print(promptMessage);
             }
             if (timerValue > 0) {
