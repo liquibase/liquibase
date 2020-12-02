@@ -85,4 +85,10 @@ public class HubConfiguration extends AbstractConfigurationContainer {
         }
         return value;
     }
+
+    public boolean getWasOverridden(String propertyName) {
+        final String value = getContainer().getValue(propertyName, String.class);
+        ConfigurationProperty hubProperty = getContainer().getProperty(propertyName);
+        return ! value.equals(hubProperty.getDefaultValue()) || hubProperty.getWasOverridden();
+    }
 }

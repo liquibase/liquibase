@@ -51,6 +51,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
+import liquibase.ui.ConsoleDelegate;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -227,7 +228,6 @@ public class Liquibase implements AutoCloseable {
             DatabaseChangeLog changeLog = null;
             HubUpdater hubUpdater = null;
             try {
-
                 //
                 // Let the user know that they can register for Hub
                 //
@@ -238,6 +238,15 @@ public class Liquibase implements AutoCloseable {
                        "liquibase.hub.mode=off.  This operation will not be tracked in Hub.  To enable this feature, run liquibase hubsetup.";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
+                }
+                else if (! hubConfiguration.getWasOverridden(HubConfiguration.LIQUIBASE_HUB_MODE)) {
+                    //
+                    // Prompt user to connect with Hub
+                    //
+                    String promptString = "([Y]es, [N]o, [S]kip)? ";
+                    String input =
+                       Scope.getCurrentScope().getUI().prompt(promptString, "Y", 6, new ConsoleDelegate());
+                    Scope.getCurrentScope().getLog(getClass()).info("Input choice is '" + input + "'");
                 }
                 changeLog = getDatabaseChangeLog();
 
