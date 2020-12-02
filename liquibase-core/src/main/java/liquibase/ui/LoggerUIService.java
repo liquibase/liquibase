@@ -37,15 +37,20 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
     /**
      *
      * Prompt the user with the message and wait with a running time
-     * with a running time.  Return the response as a String.
-     * NOT IMPLEMENTED
+     * with a running time.  Return the response as a String
      *
-     * @param message
-     * @param timerValue
+     * @param  promptString     String to display as a prompt
+     * @param  defaultValue     String to return as a default
+     * @param  timerValue       Value to use as a countdown timer
+     *                          Must be a valid integer > 0
+     * @param  type             return type class
+     * @return                  Instance of return type
+     *
+     * NOT IMPLEMENTED
      *
      */
     @Override
-    public String prompt(String promptString, String promptValue, int timerValue, ConsoleDelegate consoleDelegate) throws IllegalArgumentException {
+    public <T> T prompt(String promptString, T defaultValue , int timerValue, Class<T> type) throws IllegalArgumentException {
         return null;
     }
 

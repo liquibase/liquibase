@@ -3,6 +3,7 @@ package liquibase.ui;
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
 import liquibase.exception.LiquibaseException;
+import liquibase.util.ObjectUtil;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -20,6 +21,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private PrintStream outputStream = System.out;
     private PrintStream errorStream = System.out;
     private boolean outputStackTraces = false;
+    private Object defaultValue;
 
     /**
      * Returns {@link liquibase.plugin.Plugin#PRIORITY_NOT_APPLICABLE} because it must be manually configured as needed
@@ -49,30 +51,33 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
 
     /**
      *
-     * Prompt the user with the message and wait with a running time
-     * with a running time.  Return the response as a String
+     * Prompt the user with the message and wait for the timeout period.
+     * If the timeout expires, return the default value.
+     * The return is of type T
      *
-     * @param promptString     String to display as a prompt
-     * @param defaultValue     String to return as a default
-     * @param timerValue       Value to use as a countdown timer
-     *                         Must be a valid integer > 0
-     * @param consoleDelegate  Abstraction used to read input
+     * @param   promptString     String to display as a prompt
+     * @param   defaultValue     String to return as a default
+     * @param   timerValue       Value to use as a countdown timer
+     *                           Must be a valid integer > 0
+     * @param   type             return type
+     * @return  T                Instance of specified type
      *
      */
     @Override
-    public String prompt(String promptString, String defaultValue, int timerValue, ConsoleDelegate consoleDelegate) throws LiquibaseException {
+    @SuppressWarnings("unchecked")
+    public <T> T prompt(String promptString, T defaultValue, int timerValue, Class<T> type) throws LiquibaseException {
         if (timerValue <= 0) {
             throw new IllegalArgumentException("Value for countdown timer must be greater than 0");
         }
-        if (consoleDelegate == null) {
-            throw new IllegalArgumentException("You must supply a ConsoleDelegate instance");
-        }
+        ConsoleDelegate consoleDelegate = getConsoleDelegate();
         int count = timerValue;
         String input = null;
         try {
             while (! consoleDelegate.ready()) {
-                String promptMessage = "\r" + promptString + " *" + Integer.toString(count) + "*- ";
-                System.out.print(promptMessage);
+                if (count == timerValue) {
+                    String promptMessage = promptString + "- ";
+                    System.out.print(promptMessage);
+                }
                 count--;
                 if (count < 0) {
                     throw new InterruptedException();
@@ -86,7 +91,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             }
         }
         catch (IOException ioe) {
-
+            throw new LiquibaseException(ioe);
         }
         catch (InterruptedException ie) {
           if (count >= 0) {
@@ -94,10 +99,17 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
           }
         }
 
+        //
+        // Return the default
+        //
         if (input == null || input.isEmpty()) {
-            input = defaultValue;
+            return defaultValue;
         }
-        return input;
+        return ObjectUtil.convert(input, type);
+    }
+
+    protected ConsoleDelegate getConsoleDelegate() throws LiquibaseException {
+        return new ConsoleDelegate();
     }
 
     @SuppressWarnings("WeakerAccess")
