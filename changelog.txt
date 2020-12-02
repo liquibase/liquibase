@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 4.2.1 (2020.11.24)
+Changes in version 4.2.1 (2020.12.03)
 
 - Fixed invalid casting to JdbcConnection in CockroachDatabase #1536
 - Fixed missing unique constraints in snapshot #1477
