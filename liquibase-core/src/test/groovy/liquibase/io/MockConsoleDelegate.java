@@ -5,10 +5,11 @@ import liquibase.ui.ConsoleDelegate;
 
 import java.io.IOException;
 
-public class TestConsoleDelegate extends ConsoleDelegate {
-    private String returnValue;
-    private int timerValue;
-    public TestConsoleDelegate(String returnValue, int timerValue) {
+public class MockConsoleDelegate extends ConsoleDelegate {
+    private final String returnValue;
+    private final int timerValue;
+
+    public MockConsoleDelegate(String returnValue, int timerValue) {
         this.returnValue = returnValue;
         this.timerValue = timerValue;
     }
@@ -19,20 +20,19 @@ public class TestConsoleDelegate extends ConsoleDelegate {
             return true;
         }
         if (timerValue < 0) {
-            timerValue = (timerValue * 2) + 1;
+            return false;
         }
         try {
-            Thread.sleep((timerValue / 2) * 1000);
+            Thread.sleep(timerValue * 1000);
         }
         catch (Exception e) {
-
+            //
         }
         return true;
     }
 
     @Override
     public String readLine() throws LiquibaseException {
-
         return returnValue;
     }
 }
