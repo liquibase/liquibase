@@ -210,7 +210,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
 
         } else if (changeLogFile.toLowerCase().endsWith(".json")) {
             changeLogString = changeLogString.replaceFirst("\\[", "\\[\n" +
-                    "\"    changeLogId\"" + ":" + "\"" + hubChangeLog.getId().toString() + "\",\n");
+                    "\"changeLogId\"" + ":" + "\"" + hubChangeLog.getId().toString() + "\",\n");
         } else if (changeLogFile.toLowerCase().endsWith(".yml") || changeLogFile.toLowerCase().endsWith(".yaml")) {
             changeLogString = changeLogString.replaceFirst("^databaseChangeLog:\n", "databaseChangeLog:\n" +
                     "- changeLogId: " + hubChangeLog.getId().toString() + "\n");
