@@ -245,7 +245,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     String promptString = "([Y]es, [N]o, [S]kip)? ";
                     String input =
-                       Scope.getCurrentScope().getUI().prompt(promptString, "Y", 6, new ConsoleDelegate());
+                       Scope.getCurrentScope().getUI().prompt(promptString, "Y", 6, String.class);
                     Scope.getCurrentScope().getLog(getClass()).info("Input choice is '" + input + "'");
                 }
                 changeLog = getDatabaseChangeLog();
