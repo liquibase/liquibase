@@ -140,6 +140,12 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                 }
                 validated = true;
             }
+            //
+            // If validation failed then reset the countdown timer
+            //
+            if (! validated) {
+                count = timerValue;
+            }
         }
 
         //
