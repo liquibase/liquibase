@@ -51,7 +51,9 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
+import liquibase.ui.ConnectToHubInputValidator;
 import liquibase.ui.ConsoleDelegate;
+import liquibase.ui.ConsoleInputValidator;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
@@ -243,10 +245,15 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Prompt user to connect with Hub
                     //
-                    String promptString = "([Y]es, [N]o, [S]kip)? ";
-                    String input =
-                       Scope.getCurrentScope().getUI().prompt(promptString, "Y", 6, String.class);
-                    Scope.getCurrentScope().getLog(getClass()).info("Input choice is '" + input + "'");
+                    String promptString =
+                       "Do you want to see this operation's report in Liquibase Hub, which improves team collaboration?\n" +
+                          "([Y]es, [N]o, [S]kip, will default to [S]kip in 6 seconds)? ";
+                    String input=null;
+                    while (input == null) {
+                        input = Scope.getCurrentScope()
+                                     .getUI()
+                                     .prompt(promptString, "S", 6, new ConnectToHubInputValidator(), String.class);
+                    }
                 }
                 changeLog = getDatabaseChangeLog();
 
@@ -895,8 +902,8 @@ public class Liquibase implements AutoCloseable {
                 }
             }
         });
-
     }
+
     private List<ChangeSet> determineRollbacks(ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression)
             throws LiquibaseException {
         List<ChangeSet> changeSetsToRollback = new ArrayList<>();
