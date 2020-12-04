@@ -37,7 +37,7 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console input with good timer value"() {
         when:
-        MockUIService mockUIService = new MockUIService("Y", 5)
+        MockUIService mockUIService = new MockUIService(5, "Y");
         def setupScopeId = Scope.enter([
             (Scope.Attr.ui.toString()): mockUIService
         ])
@@ -51,7 +51,7 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console boolean input value"() {
         when:
-        MockUIService mockUIService = new MockUIService("true", 2)
+        MockUIService mockUIService = new MockUIService(2, "true");
         def setupScopeId = Scope.enter([
             (Scope.Attr.ui.toString()): mockUIService
         ])
@@ -65,7 +65,7 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console integer input value"() {
         when:
-        MockUIService mockUIService = new MockUIService("3", 5)
+        MockUIService mockUIService = new MockUIService(5, "a", "3");
         def setupScopeId = Scope.enter([
             (Scope.Attr.ui.toString()): mockUIService
         ])
@@ -79,7 +79,7 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console integer default input value"() {
         when:
-        MockUIService mockUIService = new MockUIService("", 2)
+        MockUIService mockUIService = new MockUIService( 2, "")
         def setupScopeId = Scope.enter([
             (Scope.Attr.ui.toString()): mockUIService
         ])
@@ -93,7 +93,7 @@ class TestConsoleUIService extends Specification {
 
     def "Test for console input with default value"() {
         when:
-        MockUIService mockUIService = new MockUIService("Y", -1)
+        MockUIService mockUIService = new MockUIService(-1, "Y");
         def setupScopeId = Scope.enter([
             (Scope.Attr.ui.toString()): mockUIService
         ])

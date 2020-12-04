@@ -4,14 +4,17 @@ import liquibase.exception.LiquibaseException;
 import liquibase.ui.ConsoleDelegate;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MockConsoleDelegate extends ConsoleDelegate {
-    private final String returnValue;
+    private String[] returnValues = null;
     private final int timerValue;
+    private int iteration;
 
-    public MockConsoleDelegate(String returnValue, int timerValue) {
-        this.returnValue = returnValue;
+    public MockConsoleDelegate(int timerValue, String ... returnValues) {
         this.timerValue = timerValue;
+        this.returnValues = returnValues;
     }
 
     @Override
@@ -32,7 +35,17 @@ public class MockConsoleDelegate extends ConsoleDelegate {
     }
 
     @Override
+    public boolean hasConsole() {
+        return true;
+    }
+
+    @Override
     public String readLine() throws LiquibaseException {
-        return returnValue;
+        if (iteration >= returnValues.length) {
+            return null;
+        }
+        String value = returnValues[iteration];
+        iteration++;
+        return value;
     }
 }

@@ -20,6 +20,10 @@ public class ConsoleDelegate {
         this.console = System.console();
     }
 
+    public boolean hasConsole() {
+        return this.console != null;
+    }
+
     public boolean ready() throws LiquibaseException, IOException {
         if (this.console == null) {
             throw new LiquibaseException("No console available");

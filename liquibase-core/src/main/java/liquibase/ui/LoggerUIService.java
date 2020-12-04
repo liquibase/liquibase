@@ -2,6 +2,7 @@ package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
+import liquibase.exception.LiquibaseException;
 
 import java.util.logging.Level;
 
@@ -33,7 +34,6 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
         Scope.getCurrentScope().getLog(getClass()).log(errorLogLevel, message, exception);
 
     }
-
     /**
      *
      * Prompt the user with the message and wait with a running time
@@ -50,7 +50,30 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
      *
      */
     @Override
-    public <T> T prompt(String promptString, T defaultValue , int timerValue, Class<T> type) throws IllegalArgumentException {
+    public <T> T prompt(String promptString, T defaultValue , int timerValue, Class<T> type)
+            throws LiquibaseException {
+        return prompt(promptString, defaultValue, timerValue, null, type);
+    }
+
+    /**
+     *
+     * Prompt the user with the message and wait with a running time
+     * with a running time.  Return the response as a String
+     *
+     * @param  promptString     String to display as a prompt
+     * @param  defaultValue     String to return as a default
+     * @param  timerValue       Value to use as a countdown timer
+     *                          Must be a valid integer > 0
+     * @param  validator        Input validator
+     * @param  type             return type class
+     * @return                  Instance of return type
+     *
+     * NOT IMPLEMENTED
+     *
+     */
+    @Override
+    public <T> T prompt(String promptString, T defaultValue , int timerValue, ConsoleInputValidator validator, Class<T> type)
+            throws LiquibaseException {
         return null;
     }
 
