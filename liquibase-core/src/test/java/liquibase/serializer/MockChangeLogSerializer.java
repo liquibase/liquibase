@@ -29,7 +29,7 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
     }
 
     @Override
-    public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
+    public void append(ChangeSet changeSet, String changeLogFilePath) throws IOException {
     }
 
     @Override

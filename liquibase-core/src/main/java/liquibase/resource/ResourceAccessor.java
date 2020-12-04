@@ -2,6 +2,7 @@ package liquibase.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.SortedSet;
 
 /**
@@ -59,4 +60,7 @@ public interface ResourceAccessor {
      */
     SortedSet<String> describeLocations();
 
+    OutputStream openOutputStream(String relativeTo, String path, boolean append) throws IOException;
+
+    boolean exists(String relativeTo, String path);
 }

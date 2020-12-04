@@ -2,7 +2,9 @@ package liquibase.resource;
 
 import liquibase.util.CollectionUtil;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -13,7 +15,7 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     private List<ResourceAccessor> resourceAccessors;
 
     public CompositeResourceAccessor(ResourceAccessor... resourceAccessors) {
-        this.resourceAccessors = Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
+        this.resourceAccessors = new ArrayList<>(Arrays.asList(CollectionUtil.createIfNull(resourceAccessors)));
     }
 
     public CompositeResourceAccessor(Collection<ResourceAccessor> resourceAccessors) {
@@ -57,5 +59,25 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
         }
 
         return returnSet;
+    }
+
+    @Override
+    public OutputStream openOutputStream(String relativeTo, String path, boolean append) throws IOException {
+        for (ResourceAccessor accessor : resourceAccessors) {
+            OutputStream outputStream = accessor.openOutputStream(relativeTo, path, append);
+            if (outputStream != null) {
+                return outputStream;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Unused by this implementation of {@link ResourceAccessor#openOutputStream(String, String, boolean)}
+     */
+    @Override
+    protected File getOutputFile(String relativeTo, String path) {
+        return null;
     }
 }

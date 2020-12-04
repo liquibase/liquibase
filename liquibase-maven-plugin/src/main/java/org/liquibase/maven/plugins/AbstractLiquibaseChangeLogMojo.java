@@ -8,17 +8,10 @@ import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A Liquibase MOJO that requires the user to provide a DatabaseChangeLogFile to be able
@@ -131,17 +124,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
 
     @Override
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
-        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
-        resourceAccessors.add(new MavenResourceAccessor(cl));
-        resourceAccessors.add(new FileSystemResourceAccessor(project.getBasedir()));
-        resourceAccessors.add(new ClassLoaderResourceAccessor(getClass().getClassLoader()));
-
-        if (changeLogDirectory != null) {
-            calculateChangeLogDirectoryAbsolutePath();
-            resourceAccessors.add(new FileSystemResourceAccessor(new File(changeLogDirectory)));
-        }
-
-        return new CompositeResourceAccessor(resourceAccessors);
+        return new MavenResourceAccessor(cl, project, changeLogDirectory);
     }
 
     @Override
@@ -150,18 +133,5 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         String changeLog = (changeLogFile == null) ? "" : changeLogFile.trim();
         return new Liquibase(changeLog, Scope.getCurrentScope().getResourceAccessor(), db);
 
-    }
-
-    private void calculateChangeLogDirectoryAbsolutePath() {
-        if (changeLogDirectory != null) {
-            // convert to standard / if using absolute path on windows
-            changeLogDirectory = changeLogDirectory.trim().replace('\\', '/');
-            // try to know if it's an absolute or relative path : the absolute path case is simpler and don't need more actions
-            File changeLogDirectoryFile = new File(changeLogDirectory);
-            if (!changeLogDirectoryFile.isAbsolute()) {
-                // we are in the relative path case
-                changeLogDirectory = project.getBasedir().getAbsolutePath().replace('\\', '/') + "/" + changeLogDirectory;
-            }
-        }
     }
 }

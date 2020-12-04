@@ -11,6 +11,7 @@ import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -64,5 +65,11 @@ public class ResourceSupplier {
         public SortedSet<String> describeLocations() {
             return new TreeSet<>(Arrays.asList("Logic in ResourceSupplier.java"));
         }
+
+        @Override
+        protected File getOutputFile(String relativeTo, String path) {
+            return null;
+        }
+
     }
 }

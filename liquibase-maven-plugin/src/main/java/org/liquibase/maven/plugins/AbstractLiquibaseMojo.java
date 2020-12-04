@@ -10,7 +10,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
-import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ui.UIFactory;
@@ -602,9 +601,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
-        ResourceAccessor mFO = new MavenResourceAccessor(cl);
-        ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir());
-        return new CompositeResourceAccessor(mFO, fsFO);
+        return new MavenResourceAccessor(cl, project, null);
     }
 
     /**

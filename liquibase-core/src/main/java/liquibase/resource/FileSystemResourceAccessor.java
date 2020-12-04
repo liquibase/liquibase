@@ -309,4 +309,8 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
     }
 
+    @Override
+    protected File getOutputFile(String relativeTo, String path) {
+        return new File(rootPaths.iterator().next().toFile(), path);
+    }
 }

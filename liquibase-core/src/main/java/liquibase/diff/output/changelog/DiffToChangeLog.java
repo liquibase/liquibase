@@ -16,6 +16,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -26,6 +27,7 @@ import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
 import liquibase.util.DependencyUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -90,23 +92,26 @@ public class DiffToChangeLog {
     }
 
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
+        final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+
+        changeLogFile = changeLogFile.replace("\\", "/");
         this.changeSetPath = changeLogFile;
-        File file = new File(changeLogFile);
 
         final Map<String, Object> newScopeObjects = new HashMap<>();
 
-        File objectsDir = null;
+        String parentPath = changeLogFile.replaceFirst("/.*?", "");
+        String objectsDir = null;
         if (changeLogFile.toLowerCase().endsWith("sql")) {
             System.setProperty("liquibase.pro.sql.inline", "true");
         } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
-            objectsDir = new File(file.getParentFile(), "objects");
+            objectsDir = parentPath + "/objects";
         } else {
-            objectsDir = new File(file.getParentFile(), "objects-" + new Date().getTime());
+            objectsDir = parentPath + "/objects-" + new Date().getTime();
         }
 
         if (objectsDir != null) {
-            if (objectsDir.exists()) {
-                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '"+objectsDir.getCanonicalPath()+"' dir in your local project directory");
+            if (resourceAccessor.exists(null, objectsDir)) {
+                throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '" + objectsDir + "' dir in your local project directory");
             }
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
         }
@@ -128,11 +133,11 @@ public class DiffToChangeLog {
                 @Override
                 public void run() {
                     try {
-                        if (!file.exists()) {
+                        if (!resourceAccessor.exists(null, changeSetPath)) {
                             //print changeLog only if there are available changeSets to print instead of printing it always
-                            printNew(changeLogSerializer, file);
+                            printNew(changeLogSerializer, changeSetPath);
                         } else {
-            Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
+                            Scope.getCurrentScope().getLog(getClass()).info(changeSetPath + " exists, appending");
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
                             print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
 
@@ -142,43 +147,33 @@ public class DiffToChangeLog {
                             innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
                             innerXml = innerXml.trim();
                             if ("".equals(innerXml)) {
-                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
+                                Scope.getCurrentScope().getLog(getClass()).info("No changes found, nothing to do");
                                 return;
                             }
 
-                            try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
-
-                                String line;
-                                long offset = 0;
-                                boolean foundEndTag = false;
-                                while ((line = randomAccessFile.readLine()) != null) {
-                                    int index = line.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
-                                    if (index >= 0) {
-                                        foundEndTag = true;
-                                        break;
-                                    } else {
-                                        offset = randomAccessFile.getFilePointer();
-                                    }
+                            try (InputStream existingFileContent = resourceAccessor.openStream(null, changeSetPath);
+                                 OutputStream outputStream = resourceAccessor.openOutputStream(null, changeSetPath, false)) {
+                                if (outputStream == null) {
+                                    throw new UnexpectedLiquibaseException("Unable to find a location to write " + changeSetPath);
                                 }
+                                String finalXml = StreamUtil.readStreamAsString(existingFileContent);
 
-                                String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration
-                                        .class).getOutputLineSeparator();
+                                boolean foundEndTag = finalXml.contains(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
+
+                                String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
 
                                 if (foundEndTag) {
-                                    randomAccessFile.seek(offset);
-                                    randomAccessFile.writeBytes("    ");
-                                    randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
-                                            (GlobalConfiguration.class).getOutputEncoding()));
-                                    randomAccessFile.writeBytes(lineSeparator);
-                                    randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
+                                    finalXml = finalXml.replace(DATABASE_CHANGE_LOG_CLOSING_XML_TAG,
+                                            "    " +
+                                                    innerXml +
+                                                    lineSeparator +
+                                                    DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator
+                                    );
                                 } else {
-                                    randomAccessFile.seek(0);
-                                    long length = randomAccessFile.length();
-                                    randomAccessFile.seek(length);
-                                    randomAccessFile.write(
-                                            xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
-                                            (GlobalConfiguration.class).getOutputEncoding()));
+                                    finalXml = xml;
                                 }
+
+                                outputStream.write(finalXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                             }
 
                         }
@@ -211,7 +206,7 @@ public class DiffToChangeLog {
     private Database determineDatabase(DatabaseSnapshot snapshot) {
         Database database = snapshot.getDatabase();
         DatabaseConnection connection = database.getConnection();
-        if (! (connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
+        if (!(connection instanceof OfflineConnection) && database instanceof PostgresDatabase) {
             return database;
         }
         return null;
@@ -221,7 +216,7 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void printNew(ChangeLogSerializer changeLogSerializer, File file) throws ParserConfigurationException, IOException, DatabaseException {
+    public void printNew(ChangeLogSerializer changeLogSerializer, String filePath) throws ParserConfigurationException, IOException, DatabaseException {
 
         List<ChangeSet> changeSets = generateChangeSets();
 
@@ -229,10 +224,10 @@ public class DiffToChangeLog {
         if (changeSets.isEmpty()) {
             Scope.getCurrentScope().getLog(getClass()).info("No changesets to add.");
         } else {
-            Scope.getCurrentScope().getLog(getClass()).info(file + " does not exist, creating and adding " + changeSets.size() + " changesets.");
+            Scope.getCurrentScope().getLog(getClass()).info(filePath + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
 
-        try (FileOutputStream stream = new FileOutputStream(file);
+        try (OutputStream stream = Scope.getCurrentScope().getResourceAccessor().openOutputStream(null, filePath, false);
              PrintStream out = new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())) {
             changeLogSerializer.write(changeSets, out);
         }
@@ -494,7 +489,7 @@ public class DiffToChangeLog {
      */
     protected boolean supportsSortingObjects(Database database) {
         return (database instanceof AbstractDb2Database) || (database instanceof MSSQLDatabase) || (database instanceof
-            OracleDatabase) || database instanceof PostgresDatabase;
+                OracleDatabase) || database instanceof PostgresDatabase;
     }
 
     /**
@@ -654,13 +649,13 @@ public class DiffToChangeLog {
 
             for (Map<String, ?> row : queryForListResult) {
                 String bName = StringUtil.trimToEmpty((String) row.get("REFERENCING_SCHEMA_NAME")) +
-                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCING_NAME"));
-                String tabName = StringUtil.trimToEmpty((String)row.get("REFERENCED_SCHEMA_NAME")) +
-                        "." + StringUtil.trimToEmpty((String)row.get("REFERENCED_NAME"));
+                        "." + StringUtil.trimToEmpty((String) row.get("REFERENCING_NAME"));
+                String tabName = StringUtil.trimToEmpty((String) row.get("REFERENCED_SCHEMA_NAME")) +
+                        "." + StringUtil.trimToEmpty((String) row.get("REFERENCED_NAME"));
 
                 if (!(tabName.isEmpty() || bName.isEmpty())) {
-                  graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
-                  graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*",""),
+                    graph.add(bName.replace("\"", ""), tabName.replace("\"", ""));
+                    graph.add(bName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""),
                             tabName.replace("\"", "").replaceAll("\\s*\\([^)]*\\)\\s*", ""));
                 }
             }
@@ -865,8 +860,8 @@ public class DiffToChangeLog {
                 this.overriddenIdRoot = true;
             }
 
-             if ((changes != null) && (changes.length > 0)) {
-                 desc = " ("+ StringUtil.join(changes, " :: ", new StringUtil.StringUtilFormatter<Change>() {
+            if ((changes != null) && (changes.length > 0)) {
+                desc = " (" + StringUtil.join(changes, " :: ", new StringUtil.StringUtilFormatter<Change>() {
                     @Override
                     public String toString(Change obj) {
                         return obj.getDescription();
@@ -916,7 +911,7 @@ public class DiffToChangeLog {
             // Add any newly created Node objects to the allNodes map
             //
             for (Node newNode : newNodes.values()) {
-                if (! allNodes.containsKey(newNode.type)) {
+                if (!allNodes.containsKey(newNode.type)) {
                     allNodes.put(newNode.type, newNode);
                 }
             }
@@ -975,8 +970,7 @@ public class DiffToChangeLog {
                 node = allNodes.get(type);
             } else if (newNodes.containsKey(type)) {
                 node = newNodes.get(type);
-            }
-            else {
+            } else {
                 node = new Node(type);
                 newNodes.put(type, node);
             }

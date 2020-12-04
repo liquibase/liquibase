@@ -12,5 +12,5 @@ import java.util.List;
 public interface ChangeLogSerializer extends LiquibaseSerializer, PrioritizedService {
     <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException;
 
-    void append(ChangeSet changeSet, File changeLogFile) throws IOException;
+    void append(ChangeSet changeSet, String changeLogFilePath) throws IOException;
 }

@@ -6,6 +6,7 @@ import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.InputStreamList;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -52,6 +53,12 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public SortedSet<String> describeLocations() {
-        return new TreeSet<String>(Collections.singletonList("MockResouceAccessor.java"));
+        return new TreeSet<String>(Collections.singletonList("MockResourceAccessor.java"));
     }
+
+    @Override
+    protected File getOutputFile(String relativeTo, String path) {
+        return null;
+    }
+
 }
