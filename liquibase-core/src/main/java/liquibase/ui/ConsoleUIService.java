@@ -12,6 +12,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static java.lang.Thread.sleep;
+import static liquibase.util.ObjectUtil.convert;
 
 /**
  * {@link UIService} implementation that sends messages to stdout and stderr.
@@ -48,7 +49,6 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             exception.printStackTrace(getErrorStream());
         }
     }
-
     /**
      *
      * Prompt the user with the message and wait for the timeout period.
@@ -65,47 +65,92 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T prompt(String promptString, T defaultValue, int timerValue, Class<T> type) throws LiquibaseException {
+    public <T> T prompt(String promptString, T defaultValue, int timerValue, Class<T> type)
+            throws LiquibaseException {
+        return prompt(promptString, defaultValue, timerValue, null, type);
+    }
+
+    /**
+     *
+     * Prompt the user with the message and wait for the timeout period.
+     * If the timeout expires, return the default value.
+     * The return is of type T
+     *
+     * @param   promptString     String to display as a prompt
+     * @param   defaultValue     String to return as a default
+     * @param   timerValue       Value to use as a countdown timer
+     *                           Must be a valid integer > 0
+     * @param   validator        Input validator (optional)
+     * @param   type             return type
+     * @return  T                Instance of specified type
+     *
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T prompt(String promptString, T defaultValue, int timerValue, ConsoleInputValidator validator, Class<T> type)
+            throws LiquibaseException {
         if (timerValue <= 0) {
             throw new IllegalArgumentException("Value for countdown timer must be greater than 0");
         }
+
+        //
+        // If we don't have a console then we just return the default value
+        //
         ConsoleDelegate consoleDelegate = getConsoleDelegate();
+        if (! consoleDelegate.hasConsole()) {
+            return defaultValue;
+        }
         int count = timerValue;
         String input = null;
-        try {
-            while (! consoleDelegate.ready()) {
-                if (count == timerValue) {
-                    String promptMessage = promptString + "- ";
-                    System.out.print(promptMessage);
-                }
-                count--;
-                if (count < 0) {
-                    throw new InterruptedException();
-                }
-                Thread.sleep(1000);
-            }
+        T converted = null;
+        boolean validated = false;
+        while (! validated) {
             try {
-                input = consoleDelegate.readLine().trim();
-            } catch (Exception e) {
-                throw new LiquibaseException(e);
+                while (!consoleDelegate.ready()) {
+                    if (count == timerValue) {
+                        String promptMessage = promptString + "- ";
+                        System.out.print(promptMessage);
+                    }
+                    count--;
+                    if (count < 0) {
+                        throw new InterruptedException();
+                    }
+                    Thread.sleep(1000);
+                }
+                try {
+                    input = consoleDelegate.readLine().trim();
+                    converted = ObjectUtil.convert(input, type);
+                    if (validator != null) {
+                        validated = validator.validateInput(input, converted);
+                    }
+                    else {
+                        validated = true;
+                    }
+                } catch (IllegalArgumentException iae) {
+                    Scope.getCurrentScope().getUI().sendMessage(iae.getMessage());
+                }
+            } catch (IOException ioe) {
+                throw new LiquibaseException(ioe);
+            } catch (InterruptedException ie) {
+                //
+                // If we were interrupted and the timer had not rundown then complain and continue
+                //
+                if (count >= 0) {
+                    Scope.getCurrentScope().getLog(getClass()).warning("Error while waiting for input: " + ie.getMessage());
+                }
+                validated = true;
             }
-        }
-        catch (IOException ioe) {
-            throw new LiquibaseException(ioe);
-        }
-        catch (InterruptedException ie) {
-          if (count >= 0) {
-              Scope.getCurrentScope().getLog(getClass()).warning("Error while waiting for input: " + ie.getMessage());
-          }
         }
 
         //
         // Return the default
         //
         if (input == null || input.isEmpty()) {
+            System.out.println();
+            Scope.getCurrentScope().getUI().sendMessage("Using default value of '" + defaultValue + "'");
             return defaultValue;
         }
-        return ObjectUtil.convert(input, type);
+        return converted;
     }
 
     protected ConsoleDelegate getConsoleDelegate() throws LiquibaseException {

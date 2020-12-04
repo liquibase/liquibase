@@ -29,9 +29,18 @@ public interface UIService extends ExtensibleObject, Plugin {
     /**
      *
      * Prompt the user with the message and wait with a running time
-     * with a running time.  Return the response as a String
      *
      */
-    <T> T prompt(String promptString, T defaultValue, int timerValue, Class<T> type) throws LiquibaseException;
+    <T> T prompt(String promptString, T defaultValue, int timerValue, Class<T> type)
+            throws LiquibaseException;
+
+    /**
+     *
+     * Prompt the user with the message and wait with a running time
+     * The input can be validated with the ConsoleInputValidator
+     *
+     */
+    <T> T prompt(String promptString, T defaultValue, int timerValue, ConsoleInputValidator validator, Class<T> type)
+            throws LiquibaseException;
 
 }

@@ -3,16 +3,20 @@ package liquibase.io;
 import liquibase.exception.LiquibaseException;
 import liquibase.ui.ConsoleDelegate;
 import liquibase.ui.ConsoleUIService;
+import liquibase.util.ObjectUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MockUIService extends ConsoleUIService {
-    final private String returnValue;
+    private String[] returnValues = null;
     final private int timerValue;
 
-    public MockUIService(String returnValue, int timerValue) {
-        this.returnValue = returnValue;
+    public MockUIService(int timerValue, String... returnValues) {
+        this.returnValues = returnValues;
         this.timerValue = timerValue;
     }
     protected ConsoleDelegate getConsoleDelegate() throws LiquibaseException {
-        return new MockConsoleDelegate(returnValue, timerValue);
+        return new MockConsoleDelegate(timerValue, returnValues);
     }
 }
