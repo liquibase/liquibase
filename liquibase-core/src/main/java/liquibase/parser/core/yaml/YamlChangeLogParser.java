@@ -45,24 +45,30 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             }
 
             for (Object obj : (List) rootList) {
-                if ((obj instanceof Map) && ((Map) obj).containsKey("property")) {
-                    Map property = (Map) ((Map) obj).get("property");
-                    ContextExpression context = new ContextExpression((String) property.get("context"));
-                    Labels labels = new Labels((String) property.get("labels"));
+                if (obj instanceof Map) {
+                    if (((Map) obj).containsKey("property")) {
+                        Map property = (Map) ((Map) obj).get("property");
+                        ContextExpression context = new ContextExpression((String) property.get("context"));
+                        Labels labels = new Labels((String) property.get("labels"));
 
-                    Boolean global = getGlobalParam(property);
+                        Boolean global = getGlobalParam(property);
 
-                    if (property.containsKey("name")) {
-                        Object value = property.get("value");
-                        if (value != null) {
-                            value = value.toString(); // TODO: not nice...
+                        if (property.containsKey("name")) {
+                            Object value = property.get("value");
+                            if (value != null) {
+                                value = value.toString(); // TODO: not nice...
+                            }
+
+                            changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
+                        } else if (property.containsKey("file")) {
+                            loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
+                                    context, labels, global);
                         }
-
-                        changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
-                    } else if (property.containsKey("file")) {
-                        loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
-                        context, labels, global);
                     }
+                }
+                else if (((Map) obj).containsKey("changeLogId")) {
+                    String changeLogId = (String)((Map)obj).get("changeLogId");
+                    changeLog.setChangeLogId(changeLogId);
                 }
             }
 
