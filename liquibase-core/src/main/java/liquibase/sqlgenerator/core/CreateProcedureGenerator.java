@@ -74,10 +74,13 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         }
 
         procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
+        if (procedureText == null) {
+            return sql.toArray(new Sql[0]);
+        }
 
         if ((database instanceof MSSQLDatabase) &&
             procedureText.toLowerCase().contains("merge") &&
-            !procedureText.endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
+                !procedureText.endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
             StringClauses parsed = SqlParser.parse(procedureText);
             StringClauses.ClauseIterator clauseIterator = parsed.getClauseIterator();
             boolean reallyMerge = false;
@@ -91,7 +94,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 procedureText = procedureText + ";";
             }
         }
-        if (database instanceof Db2zDatabase & procedureText.toLowerCase().contains("replace")) {
+        if (database instanceof Db2zDatabase  && procedureText.toLowerCase().contains("replace")) {
             procedureText = procedureText.replace("OR REPLACE", "");
             procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }

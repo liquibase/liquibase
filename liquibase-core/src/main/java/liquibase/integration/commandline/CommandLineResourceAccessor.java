@@ -18,16 +18,18 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
 
     @Override
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
-        InputStreamList resourcesAsStream = super.openStreams(relativeTo, streamPath);
-        if (resourcesAsStream == null) {
+        try (InputStreamList resourcesAsStream = super.openStreams(relativeTo, streamPath)) {
+            if (resourcesAsStream != null) {
+                return resourcesAsStream;
+            }
             for (String altPath : getAlternatePaths(streamPath)) {
-                resourcesAsStream = super.openStreams(relativeTo, altPath);
-                if (resourcesAsStream != null) {
-                    return resourcesAsStream;
+                InputStreamList altResourcesAsStream = super.openStreams(relativeTo, altPath);
+                if (altResourcesAsStream != null) {
+                    return altResourcesAsStream;
                 }
             }
+            return null;
         }
-        return resourcesAsStream;
     }
 
 
