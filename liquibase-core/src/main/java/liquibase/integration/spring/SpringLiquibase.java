@@ -104,6 +104,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.shouldRun = shouldRun;
 	}
 
+	@java.lang.SuppressWarnings("squid:S2095")
 	public String getDatabaseProductName() throws DatabaseException {
     Connection connection = null;
     Database database = null;
@@ -323,6 +324,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		}
   }
 
+	@java.lang.SuppressWarnings("squid:S2095")
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
 		SpringResourceAccessor resourceAccessor = createResourceOpener();
 		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));

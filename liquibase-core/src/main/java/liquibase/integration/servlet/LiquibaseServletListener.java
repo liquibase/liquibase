@@ -195,6 +195,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     /**
      * Executes the Liquibase update.
      */
+    @java.lang.SuppressWarnings("squid:S2095")
     private void executeUpdate(ServletContext servletContext, InitialContext ic) throws NamingException, SQLException, LiquibaseException {
         setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE));
         if (getDataSource() == null) {
