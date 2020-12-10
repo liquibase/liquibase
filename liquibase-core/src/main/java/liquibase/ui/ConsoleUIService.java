@@ -2,17 +2,15 @@ package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
-import liquibase.exception.LiquibaseException;
-import liquibase.util.ObjectUtil;
+import liquibase.configuration.ConfigurationProperty;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.Logger;
+import liquibase.util.StringUtil;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.io.*;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import static java.lang.Thread.sleep;
-import static liquibase.util.ObjectUtil.convert;
+import java.io.Console;
+import java.io.PrintStream;
 
 /**
  * {@link UIService} implementation that sends messages to stdout and stderr.
@@ -22,7 +20,6 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private PrintStream outputStream = System.out;
     private PrintStream errorStream = System.out;
     private boolean outputStackTraces = false;
-    private Object defaultValue;
 
     /**
      * Returns {@link liquibase.plugin.Plugin#PRIORITY_NOT_APPLICABLE} because it must be manually configured as needed
@@ -49,118 +46,59 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             exception.printStackTrace(getErrorStream());
         }
     }
-    /**
-     *
-     * Prompt the user with the message and wait for the timeout period.
-     * If the timeout expires, return the default value.
-     * The return is of type T
-     *
-     * @param   promptString     String to display as a prompt
-     * @param   defaultValue     String to return as a default
-     * @param   timerValue       Value to use as a countdown timer
-     *                           Must be a valid integer > 0
-     * @param   type             return type
-     * @return  T                Instance of specified type
-     *
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T prompt(String promptString, T defaultValue, int timerValue, Class<T> type)
-            throws LiquibaseException {
-        return prompt(promptString, defaultValue, timerValue, null, type);
-    }
 
-    /**
-     *
-     * Prompt the user with the message and wait for the timeout period.
-     * If the timeout expires, return the default value.
-     * The return is of type T
-     *
-     * @param   promptString     String to display as a prompt
-     * @param   defaultValue     String to return as a default
-     * @param   timerValue       Value to use as a countdown timer
-     *                           Must be a valid integer > 0
-     * @param   validator        Input validator (optional)
-     * @param   type             return type
-     * @return  T                Instance of specified type
-     *
-     */
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T prompt(String promptString, T defaultValue, int timerValue, ConsoleInputValidator validator, Class<T> type)
-            throws LiquibaseException {
-        if (timerValue <= 0) {
-            throw new IllegalArgumentException("Value for countdown timer must be greater than 0");
+    public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+
+        ConsoleWrapper console = getConsole();
+
+        final ConfigurationProperty headless = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.HEADLESS);
+        if (headless.getWasOverridden()) {
+            if (headless.getValue(Boolean.class)) {
+                console = null;
+            } else {
+                if (console == null) {
+                    throw new UnexpectedLiquibaseException("liquibase.headless was set to true, but Liquibase was run in a headless environment");
+                }
+            }
         }
 
-        //
-        // If we don't have a console then we just return the default value
-        //
-        ConsoleDelegate consoleDelegate = getConsoleDelegate();
-        if (! consoleDelegate.hasConsole()) {
+        if (console == null) {
+            log.fine("No console attached so cannot prompt '" + prompt + "'. Using default value '" + defaultValue + "'");
             return defaultValue;
         }
-        int count = timerValue;
-        String input = null;
-        T converted = null;
-        boolean validated = false;
-        while (! validated) {
+
+        if (inputHandler == null) {
+            inputHandler = new DefaultInputHandler<>();
+        }
+
+        String initialMessage = prompt;
+        if (defaultValue != null) {
+            initialMessage += " (default \"" + defaultValue + "\")";
+        }
+        this.sendMessage(initialMessage + ": ");
+
+        while (true) {
+            String input = StringUtil.trimToNull(console.readLine());
             try {
-                while (!consoleDelegate.ready()) {
-                    if (count == timerValue) {
-                        String promptMessage = promptString + "- ";
-                        System.out.print(promptMessage);
-                    }
-                    count--;
-                    if (count < 0) {
-                        throw new InterruptedException();
-                    }
-                    Thread.sleep(1000);
+                if (input == null) {
+                    return defaultValue;
                 }
-                try {
-                    input = consoleDelegate.readLine().trim();
-                    converted = ObjectUtil.convert(input, type);
-                    if (validator != null) {
-                        validated = validator.validateInput(input, converted);
-                    }
-                    else {
-                        validated = true;
-                    }
-                } catch (IllegalArgumentException iae) {
-                    Scope.getCurrentScope().getUI().sendMessage(iae.getMessage());
-                }
-            } catch (IOException ioe) {
-                throw new LiquibaseException(ioe);
-            } catch (InterruptedException ie) {
-                //
-                // If we were interrupted and the timer had not rundown then complain and continue
-                //
-                if (count >= 0) {
-                    Scope.getCurrentScope().getLog(getClass()).warning("Error while waiting for input: " + ie.getMessage());
-                }
-                validated = true;
-            }
-            //
-            // If validation failed then reset the countdown timer
-            //
-            if (! validated) {
-                count = timerValue;
+                return inputHandler.parseInput(input, type);
+            } catch (IllegalArgumentException e) {
+                this.sendMessage("Invalid value: \"" + input + "\"");
+                this.sendMessage(prompt + ": ");
             }
         }
-
-        //
-        // Return the default
-        //
-        if (input == null || input.isEmpty()) {
-            System.out.println();
-            Scope.getCurrentScope().getUI().sendMessage("Using default value of '" + defaultValue + "'");
-            return defaultValue;
-        }
-        return converted;
     }
 
-    protected ConsoleDelegate getConsoleDelegate() throws LiquibaseException {
-        return new ConsoleDelegate();
+    protected ConsoleWrapper getConsole() {
+        final Console console = System.console();
+        if (console == null) {
+            return null;
+        }
+        return new ConsoleWrapper(console);
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -194,5 +132,21 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     @SuppressWarnings("unused")
     public void setOutputStackTraces(boolean outputStackTraces) {
         this.outputStackTraces = outputStackTraces;
+    }
+
+    /**
+     * Wrapper around {@link Console} to allow replacements as needed. Primarily used for testing.
+     */
+    public static class ConsoleWrapper {
+
+        private Console console;
+
+        public ConsoleWrapper(Console console) {
+            this.console = console;
+        }
+
+        public String readLine() {
+            return console.readLine();
+        }
     }
 }
