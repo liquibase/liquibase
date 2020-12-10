@@ -1,0 +1,10 @@
+{
+  "resources":[
+    {"pattern":"\\Qliquibase.build.properties\\E"},
+    {"pattern":"\\Qwww.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\\E"}
+  ],
+  "bundles":[
+    {"name":"com.sun.org.apache.xerces.internal.impl.xpath.regex.message"},
+    {"name":"liquibase/i18n/liquibase-core"}
+  ]
+}
