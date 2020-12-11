@@ -18,6 +18,7 @@ import liquibase.hub.model.Project;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.InputStreamList;
 import liquibase.resource.ResourceAccessor;
+import liquibase.ui.UIService;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
@@ -249,30 +250,23 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     }
 
     private String readProjectNameFromConsole() throws CommandLineParsingException {
+        final UIService ui = Scope.getCurrentScope().getUI();
+
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         String hubUrl = hubConfiguration.getLiquibaseHubUrl();
-        System.out.println("Please enter your Project name and press [enter].  This is editable in your Liquibase Hub account at " + hubUrl + ".");
-        System.out.print("? ");
-        Console c = getConsole();
-        String input = c.readLine();
-        return input.trim();
-    }
-
-    private Console getConsole() throws CommandLineParsingException {
-        Console c = System.console();
-        if (c == null) {
-            throw new CommandLineParsingException("No console available");
-        }
-        return c;
+        String input = ui.prompt("Please enter your Project name and press [enter].  This is editable in your Liquibase Hub account at " + hubUrl, null, null, String.class);
+        return StringUtil.trimToEmpty(input);
     }
 
     private String readProjectFromConsole(List<Project> projects) throws CommandLineParsingException {
-        System.out.println("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting. ");
-        System.out.println("Register changelog " + changeLogFile + " to an existing Project, or create a new one.");
+        final UIService ui = Scope.getCurrentScope().getUI();
 
-        System.out.println("Please make a selection:");
+        ui.sendMessage("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting. ");
+        ui.sendMessage("Register changelog " + changeLogFile + " to an existing Project, or create a new one.");
 
-        System.out.println("[c] Create new Project");
+        ui.sendMessage("Please make a selection:");
+
+        ui.sendMessage("[c] Create new Project");
         String projFormat = "[%d]";
         if (projects.size() >= 10 && projects.size() < 100) {
             projFormat = "[%2d]";
@@ -289,14 +283,12 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         }
         for (int i = 0; i < projects.size(); i++) {
             Project project = projects.get(i);
-            System.out.println(String.format(projFormat + " %-" + maxLen + "s (Project ID:%s) %s", i + 1, project.getName(), projects.get(i).getId(), projects.get(i).getCreateDate()));
+            ui.sendMessage(String.format(projFormat + " %-" + maxLen + "s (Project ID:%s) %s", i + 1, project.getName(), projects.get(i).getId(), projects.get(i).getCreateDate()));
         }
-        System.out.println("[N] to not register this changelog right now.\n" +
+        ui.sendMessage("[N] to not register this changelog right now.\n" +
                 "You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.\n" +
                 " Learn more at https://hub.liquibase.com.");
-        System.out.print("?> ");
-        Console c = getConsole();
-        String input = c.readLine();
-        return input.trim();
+
+        return StringUtil.trimToEmpty(ui.prompt("?", "N", null, String.class));
     }
 }
