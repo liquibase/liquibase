@@ -367,8 +367,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             }
             scopeValues.put("integrationDetails", integrationDetails);
 
-            final Map pluginContext = this.getPluginContext();
-            System.out.println(pluginContext.keySet());
                 Scope.child(scopeValues, () -> {
 
                     configureFieldsAndValues();
