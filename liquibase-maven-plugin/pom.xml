@@ -208,6 +208,14 @@
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>io.snyk</groupId>
+				<artifactId>snyk-maven-plugin</artifactId>
+				<configuration>
+					<skip>false</skip>
+				</configuration>
+			</plugin>
+
 		</plugins>
 
 	</build>

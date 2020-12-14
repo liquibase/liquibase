@@ -272,12 +272,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         Integer position = columnMetadataResultSet.getInt("ORDINAL_POSITION");
 
-
         Column column = new Column();
         column.setName(StringUtil.trimToNull(rawColumnName));
         column.setRelation(table);
         column.setRemarks(remarks);
         column.setOrder(position);
+        Boolean isComputed = columnMetadataResultSet.getBoolean("IS_COMPUTED");
+        if (isComputed != null) {
+            column.setComputed(isComputed);
+        }
+
 
         if (columnMetadataResultSet.get("IS_FILESTREAM") != null && (Boolean) columnMetadataResultSet.get("IS_FILESTREAM")) {
             column.setAttribute("fileStream", true);

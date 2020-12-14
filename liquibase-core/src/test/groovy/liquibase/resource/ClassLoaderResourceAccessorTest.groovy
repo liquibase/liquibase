@@ -87,6 +87,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                                 "com/example/everywhere",
                                 "com/example/everywhere/file-everywhere.txt",
                                 "com/example/everywhere/other-file-everywhere.txt",
+                                "com/example/file with space.txt",
                                 "com/example/file-in-jar.txt",
                                 "com/example/file-in-zip.txt",
                                 "com/example/jar",
@@ -114,6 +115,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                         null, "com/example", false, true, true,
                         [
                                 "com/example/everywhere",
+                                "com/example/file with space.txt",
                                 "com/example/file-in-jar.txt",
                                 "com/example/file-in-zip.txt",
                                 "com/example/jar",
@@ -127,6 +129,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
                 [
                         null, "com/example", false, true, false,
                         [
+                                "com/example/file with space.txt",
                                 "com/example/file-in-jar.txt",
                                 "com/example/file-in-zip.txt",
                                 "com/example/my-logic.sql",

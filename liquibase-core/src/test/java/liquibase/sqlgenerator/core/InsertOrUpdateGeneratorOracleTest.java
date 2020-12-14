@@ -21,10 +21,12 @@ public class InsertOrUpdateGeneratorOracleTest {
     public void ContainsInsertStatement() {
         OracleDatabase database = new OracleDatabase();
         InsertOrUpdateGeneratorOracle generator = new InsertOrUpdateGeneratorOracle();
-        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema", "mytable", "pk_col1");
-        statement.addColumnValue("pk_col1", "value1");
-        statement.addColumnValue("col2", "value2");
-        Sql[] sql = generator.generateSql(statement, database, null);
+        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
+        statement.addColumnValue("pk_col1","value1");
+        statement.addColumnValue("col2","value2");
+        statement.addColumnValue("pk_col1","value1");
+        statement.addColumnValue("col2","value2");
+        Sql[] sql = generator.generateSql( statement, database,  null);
         String theSql = sql[0].toSql();
         assertTrue(theSql.contains("INSERT INTO mycatalog.mytable (pk_col1, col2) VALUES ('value1', 'value2');"));
         assertTrue(theSql.contains("UPDATE mycatalog.mytable"));

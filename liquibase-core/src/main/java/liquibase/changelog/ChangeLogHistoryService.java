@@ -29,7 +29,7 @@ public interface ChangeLogHistoryService extends PrioritizedService {
      */
     void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException;
 
-    public List<RanChangeSet> getRanChangeSets() throws DatabaseException;
+    List<RanChangeSet> getRanChangeSets() throws DatabaseException;
 
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 

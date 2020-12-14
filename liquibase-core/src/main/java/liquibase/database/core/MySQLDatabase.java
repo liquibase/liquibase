@@ -30,11 +30,9 @@ import java.util.Set;
 public class MySQLDatabase extends AbstractJdbcDatabase {
     private static final String PRODUCT_NAME = "MySQL";
     private static final Set<String> RESERVED_WORDS = createReservedWords();
-    private Boolean hasJdbcConstraintDeferrableBug;
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
-        setHasJdbcConstraintDeferrableBug(null);
     }
 
     @Override
@@ -257,77 +255,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     }
 
-    /**
-     * Tests if this MySQL / MariaDB database has a bug where the JDBC driver returns constraints as
-     * DEFERRABLE INITIAL IMMEDIATE even though neither MySQL nor MariaDB support DEFERRABLE CONSTRAINTs at all.
-     * We need to know about this because this could lead to errors in database snapshots.
-     * @return true if this database is affected, false if not, null if we cannot tell (e.g. OfflineConnection)
-     */
-    @SuppressWarnings("squid:S2447") // null is explicitly documented as a possible return value.
-    // TODO: MariaDB connector 2.0.2 appearantly fixes this problem, and MySQL-ConnectorJ 6.0.6 did not have it in
-    // the first place.. Replace this crude workaround with a proper JDBC driver version check
-    public Boolean hasBugJdbcConstraintsDeferrable() throws DatabaseException {
-        if (getConnection() instanceof OfflineConnection)
-            return null;
-        if (getHasJdbcConstraintDeferrableBug() != null)  // cached value
-            return getHasJdbcConstraintDeferrableBug();
-
-        String randomIdentifier = "TMP_" + StringUtil.randomIdentifer(16);
-        try
-        {
-            // Get the real connection and metadata reference
-            java.sql.Connection conn = ((JdbcConnection) getConnection()).getUnderlyingConnection();
-            java.sql.DatabaseMetaData metaData = conn.getMetaData();
-            String sql = "CREATE TABLE " + randomIdentifier + " (\n" +
-                    "  id INT PRIMARY KEY,\n" +
-                    "  self_ref INT NOT NULL,\n" +
-                    "  CONSTRAINT c_self_ref FOREIGN KEY(self_ref) REFERENCES " + randomIdentifier + "(id)\n" +
-                    ")";
-            Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(new RawSqlStatement(sql));
-
-            try (
-                ResultSet rs = metaData.getImportedKeys(getDefaultCatalogName(), getDefaultSchemaName(), randomIdentifier)
-            ) {
-                if (!rs.next()) {
-                    throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug: " +
-                            "could not retrieve JDBC metadata information for temporary table '" +
-                            randomIdentifier + "'");
-                }
-                if (rs.getShort("DEFERRABILITY") != DatabaseMetaData.importedKeyNotDeferrable) {
-                    setHasJdbcConstraintDeferrableBug(true);
-                    Scope.getCurrentScope().getLog(getClass()).warning("Your MySQL/MariaDB database JDBC driver might have " +
-                            "a bug where constraints are reported as DEFERRABLE, even though MySQL/MariaDB do not " +
-                            "support this feature. A workaround for this problem will be used. Please check with " +
-                            "MySQL/MariaDB for availability of fixed JDBC drivers to avoid this warning.");
-                } else {
-                    setHasJdbcConstraintDeferrableBug(false);
-                }
-            }
-
-        } catch (DatabaseException|SQLException e) {
-            throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug.", e);
-        } finally {
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).reset();
-                Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).execute(
-                        new RawSqlStatement("DROP TABLE " + randomIdentifier));
-        }
-
-        return getHasJdbcConstraintDeferrableBug();
-    }
-
-    /**
-     * returns true if the JDBC drivers suffers from a bug where constraints are reported as DEFERRABLE, even though
-     * MySQL/MariaDB do not support this feature.
-     * @return true if the JDBC is probably affected, false if not.
-     */
-    protected Boolean getHasJdbcConstraintDeferrableBug() {
-        return hasJdbcConstraintDeferrableBug;
-    }
-
-    protected void setHasJdbcConstraintDeferrableBug(Boolean hasJdbcConstraintDeferrableBug) {
-        this.hasJdbcConstraintDeferrableBug = hasJdbcConstraintDeferrableBug;
-    }
-
     @Override
     public int getMaxFractionalDigitsForTimestamp() {
 
@@ -353,6 +280,31 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return 6;
         else
             return 0;
+    }
+
+    /**
+     *
+     * Check to see if this instance of a MySQL database is equal to or greater
+     * than the specified version
+     *
+     * @param   minimumVersion
+     * @return  boolean
+     *
+     */
+    public boolean isMinimumMySQLVersion(String minimumVersion) {
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+        try {
+            major = getDatabaseMajorVersion();
+            minor = getDatabaseMinorVersion();
+            patch = getDatabasePatchVersion();
+        } catch (DatabaseException x) {
+            Scope.getCurrentScope().getLog(getClass()).warning(
+                    "Unable to determine exact database server version");
+            return false;
+        }
+        return StringUtil.isMinimumVersion(minimumVersion, major, minor, patch);
     }
 
     protected String getMinimumVersionForFractionalDigitsForTimestamp() {

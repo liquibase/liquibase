@@ -40,50 +40,6 @@
         <delete dir="${temp.dir}"/>
     </target>
 
-    <target name="testUpdateDatabaseLegacy">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                           changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
-                           classpathref="basic-classpath"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
-
-    <target name="testUpdateDatabaseLegacyOutputToFile">
-        <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                           changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
-                           classpathref="basic-classpath" outputfile="${temp.dir}/output.sql"/>
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-        <au:assertFileExists file="${temp.dir}/output.sql"/>
-    </target>
-
-    <target name="testUpdateDatabaseLegacyFailMissingUrl">
-        <au:expectfailure>
-            <lb:updateDatabase driver="${jdbc.driver}" username="${db.user}" password="${db.password}"
-                               changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
-                               classpathref="basic-classpath"/>
-        </au:expectfailure>
-    </target>
-
-    <target name="testUpdateDatabaseLegacyWithChangeLogParameters">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                           changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-properties.xml"
-                           classpathref="basic-classpath">
-            <lb:changeLogProperty name="column.one" value="new_column_one"/>
-            <lb:changeLogProperty name="column.two" value="new_column_two"/>
-        </lb:updateDatabase>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-        <db:assertColumnExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                               table="USERS" column="NEW_COLUMN_ONE"/>
-        <db:assertColumnExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                               table="USERS" column="NEW_COLUMN_TWO"/>
-    </target>
-
     <target name="testUpdateDatabase">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
@@ -156,17 +112,6 @@
 
 	
 	<!-- ADDED FOR THE NEW changeLogDirectory PROPERTY -->
-	
-    <target name="testUpdateDatabaseChangeLogDirectoryLegacy">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-        	               changelogdirectory="${liquibase.test.ant.basedir}/changelog"
-        	               changelogfile="simple-changelog.xml"
-                           classpathref="basic-classpath"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-    </target>
 
 	<target name="testUpdateDatabaseChangeLogDirectory">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"

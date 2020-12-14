@@ -8,6 +8,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
 import liquibase.serializer.ChangeLogSerializer;
@@ -39,14 +40,20 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         if (object instanceof ChangeSet) {
             StringBuilder builder = new StringBuilder();
-
             ChangeSet changeSet = (ChangeSet) object;
-            Database database = getTargetDatabase(changeSet);
+
+            //
+            // If there is a Database object in the current scope, then use it for serialization
+            //
+            Database database = Scope.getCurrentScope().get(DiffToChangeLog.DIFF_SNAPSHOT_DATABASE, Database.class);
+            if (database == null) {
+                database = getTargetDatabase(changeSet);
+            }
 
             String author = (changeSet.getAuthor()).replaceAll("\\s+", "_");
             author = author.replace("_(generated)","");
 
-            builder.append("--changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
+            builder.append("-- changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
             for (Change change : changeSet.getChanges()) {
                 Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
@@ -91,7 +98,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         StringBuilder builder = new StringBuilder();
-        builder.append("--liquibase formatted sql\n\n");
+        builder.append("-- liquibase formatted sql\n\n");
 
         for (T child : children) {
             builder.append(serialize(child, true));

@@ -790,7 +790,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
      */
-    protected boolean hasCustomRollbackChanges() {
+    public boolean hasCustomRollbackChanges() {
         return (rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty();
     }
 
@@ -1143,7 +1143,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("dbms".equals(field)) {
             if ((this.getDbmsSet() != null) && !this.getDbmsSet().isEmpty()) {
-                return StringUtil.join(getDbmsSet(), ",xxx");
+                return StringUtil.join(getDbmsSet(), ",");
             } else {
                 return null;
             }
