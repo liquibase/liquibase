@@ -559,12 +559,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         try {
             is = Scope.getCurrentScope().getResourceAccessor().openStream(null, propertyFile);
         } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
+            throw new MojoFailureException("Failed to resolve the properties file.", e);
         }
-        if (is == null) {
-            throw new MojoFailureException("Failed to resolve the properties file.");
-        }
-
         return is;
     }
 

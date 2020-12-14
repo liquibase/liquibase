@@ -47,9 +47,10 @@ public class Ingres9Database extends AbstractJdbcDatabase {
                 throw new DatabaseException("Cannot execute commands against an offline database");
             }
             stmt = ((JdbcConnection) getConnection()).getUnderlyingConnection().createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            while(rs.next()) {
-                definition += rs.getString("text_segment");
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    definition += rs.getString("text_segment");
+                }
             }
         }
         catch (Exception ex) {
