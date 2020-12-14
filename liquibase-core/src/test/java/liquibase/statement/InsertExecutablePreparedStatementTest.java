@@ -19,7 +19,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.mockito.Mockito.*;
 
-public class UpdateExecutablePreparedStatementTest {
+public class InsertExecutablePreparedStatementTest {
     @Mock
     private ChangeSet changeSet;
 
@@ -47,7 +47,7 @@ public class UpdateExecutablePreparedStatementTest {
 	@Test
 	public void testExecuteWithClobAndComputedValue() throws Exception {
         // given
-        UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(
+        InsertExecutablePreparedStatement statement = new InsertExecutablePreparedStatement(
                         database,
                         null,
                         null,
@@ -66,7 +66,7 @@ public class UpdateExecutablePreparedStatementTest {
         statement.execute(preparedStatementFactory);
 
         // then
-        verify(connection).prepareStatement("UPDATE DATABASECHANGELOG SET MD5SUM = ?, DATEEXECUTED = GETDATE()");
+        verify(connection).prepareStatement("INSERT INTO DATABASECHANGELOG(MD5SUM, DATEEXECUTED) VALUES(?, GETDATE())");
 		verify(ps).setString(1, "7:e27bf9c0c2313160ef960a15d44ced47");
 		verify(ps, never()).setNull(eq(2), anyInt());
 	}
