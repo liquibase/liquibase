@@ -1,6 +1,23 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.2.2 (2020.12.09)
+
+- Handle null statement objects coming from JdbcConnection objects #1576
+
+Changes in version 4.2.1 (2020.12.03)
+
+- Fixed invalid casting to JdbcConnection in CockroachDatabase #1536
+- Fixed missing unique constraints in snapshot #1477
+- Fixed unexpectedChangeSets command throwing a null pointer exception
+- If error occurs during generating SQL, Liquibase stops and does not send POST to Hub
+- Use ConcurrentHashMap in ExecutorService #1402
+- DropDefaultValue on postgresql now drops the default value vs. setting the default value to null #931
+- Updated banner to reference to hub.liquibase.com
+- [PRO] GenerateChangeLog on postgresql stored logic now hashes parameters in filenames instead of listing them all out
+- [PRO] Fix in postgresql check constraints snapshot
+- [HUB] Command registerChangeLog now supports YAML and JSON changelog files
+
 Changes in version 4.2.0 (2020.11.12)
 
 - [PRO] Support for snapshotting Mysql stored logic
