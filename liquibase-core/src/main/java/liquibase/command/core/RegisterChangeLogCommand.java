@@ -172,28 +172,30 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         // Make changes to the changelog file
         //
         final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        InputStreamList list = resourceAccessor.openStreams("", changeLogFile);
-        List<URI> uris = list.getURIs();
-        InputStream is = list.iterator().next();
-        String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
-        String changeLogString = StreamUtil.readStreamAsString(is, encoding);
-        if (changeLogFile.toLowerCase().endsWith(".xml")) {
-            String patternString = "(?ms).*<databaseChangeLog[^>]*>";
-            Pattern pattern = Pattern.compile(patternString);
-            Matcher matcher = pattern.matcher(changeLogString);
-            if (matcher.find()) {
-                //
-                // Update the XSD versions
-                //
-                String header = changeLogString.substring(matcher.start(), matcher.end() - 1);
-                String xsdPatternString = "([dbchangelog|liquibase-pro])-3.[0-9]?[0-9]?.xsd";
-                Pattern xsdPattern = Pattern.compile(xsdPatternString);
-                Matcher xsdMatcher = xsdPattern.matcher(header);
-                String editedString = xsdMatcher.replaceAll("$1-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
+        InputStreamList list = null;
+        try {
+            list = resourceAccessor.openStreams("", changeLogFile);
+            List<URI> uris = list.getURIs();
+            InputStream is = list.iterator().next();
+            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String changeLogString = StreamUtil.readStreamAsString(is, encoding);
+            if (changeLogFile.toLowerCase().endsWith(".xml")) {
+                String patternString = "(?ms).*<databaseChangeLog[^>]*>";
+                Pattern pattern = Pattern.compile(patternString);
+                Matcher matcher = pattern.matcher(changeLogString);
+                if (matcher.find()) {
+                    //
+                    // Update the XSD versions
+                    //
+                    String header = changeLogString.substring(matcher.start(), matcher.end() - 1);
+                    String xsdPatternString = "([dbchangelog|liquibase-pro])-3.[0-9]?[0-9]?.xsd";
+                    Pattern xsdPattern = Pattern.compile(xsdPatternString);
+                    Matcher xsdMatcher = xsdPattern.matcher(header);
+                    String editedString = xsdMatcher.replaceAll("$1-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
 
-                //
-                // Add the changeLogId attribute
-                //
+                    //
+                    // Add the changeLogId attribute
+                    //
                 final String outputChangeLogString = " changeLogId=\"" + hubChangeLog.getId().toString() + "\"";
                 if (changeLogString.trim().endsWith("/>")) {
                     changeLogString = changeLogString.replaceFirst("/>", outputChangeLogString + "/>");
@@ -203,16 +205,16 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                     changeLogString = changeLogString.replaceFirst(patternString, outputHeader);
                 }
             }
-        } else if (changeLogFile.toLowerCase().endsWith(".sql")) {
-            //
-            // Formatted SQL changelog
-            //
-            String newChangeLogString = changeLogString.replaceFirst("--(\\s*)liquibase formatted sql",
-                    "-- liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
-            if (newChangeLogString.equals(changeLogString)) {
-                return new CommandResult("Unable to update changeLogId in changelog file '" + changeLogFile + "'", false);
-            }
-            changeLogString = newChangeLogString;
+            } else if (changeLogFile.toLowerCase().endsWith(".sql")) {
+                //
+                // Formatted SQL changelog
+                //
+                String newChangeLogString = changeLogString.replaceFirst("--(\\s*)liquibase formatted sql",
+                        "-- liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
+                if (newChangeLogString.equals(changeLogString)) {
+                    return new CommandResult("Unable to update changeLogId in changelog file '" + changeLogFile + "'", false);
+                }
+                changeLogString = newChangeLogString;
 
         } else if (changeLogFile.toLowerCase().endsWith(".json")) {
             changeLogString = changeLogString.replaceFirst("\\[", "\\[\n" +
@@ -220,21 +222,26 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         } else if (changeLogFile.toLowerCase().endsWith(".yml") || changeLogFile.toLowerCase().endsWith(".yaml")) {
             changeLogString = changeLogString.replaceFirst("^databaseChangeLog:\n", "databaseChangeLog:\n" +
                     "- changeLogId: " + hubChangeLog.getId().toString() + "\n");
-        } else {
-            return new CommandResult("Changelog file '" + changeLogFile + "' is not a supported format", false);
-        }
+            } else {
+                return new CommandResult("Changelog file '" + changeLogFile + "' is not a supported format", false);
+            }
 
-        //
-        // Close the InputStream and write out the file again
-        //
-        is.close();
-        File f = new File(uris.get(0).getPath());
-        RandomAccessFile randomAccessFile = new RandomAccessFile(f, "rw");
-        randomAccessFile.write(changeLogString.getBytes(encoding));
-        randomAccessFile.close();
-        return new CommandResult("Changelog file '" + changeLogFile +
-                "' registered with changelog ID '" + hubChangeLog.getId() + "' " +
-                "to project '" + project.getName()+ "'\n", true);
+            //
+            // Close the InputStream and write out the file again
+            //
+            File f = new File(uris.get(0).getPath());
+            try (RandomAccessFile randomAccessFile = new RandomAccessFile(f, "rw")) {
+                randomAccessFile.write(changeLogString.getBytes(encoding));
+            }
+            return new CommandResult("Changelog file '" + changeLogFile +
+                    "' registered with changelog ID '" + hubChangeLog.getId() + "' " +
+                    "to project '" + project.getName() + "'\n", true);
+        }
+        finally {
+            if (list != null) {
+                list.close();
+            }
+        }
     }
 
     //

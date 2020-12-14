@@ -904,8 +904,7 @@ public class Liquibase implements AutoCloseable {
     protected void executeRollbackScript(String rollbackScript, List<ChangeSet> changeSets, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         final Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String rollbackScriptContents;
-        try {
-            InputStreamList streams = resourceAccessor.openStreams(null, rollbackScript);
+        try (InputStreamList streams = resourceAccessor.openStreams(null, rollbackScript)) {
             if ((streams == null) || streams.isEmpty()) {
                 throw new LiquibaseException("WARNING: The rollback script '" + rollbackScript + "' was not located.  Please check your parameters. No rollback was performed");
             } else if (streams.size() > 1) {
@@ -2285,7 +2284,7 @@ public class Liquibase implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws LiquibaseException {
         if (database != null) {
             database.close();
         }

@@ -45,8 +45,10 @@ public class StartH2Main {
                     "  Integration Web URL: " + intUrl + System.lineSeparator());
 
 
+            long seconds = 60;
+            long millis = 1000;
             while (true) {
-                Thread.sleep(60 * 1000);
+                Thread.sleep(seconds * millis);
             }
 
         } catch (Throwable e) {

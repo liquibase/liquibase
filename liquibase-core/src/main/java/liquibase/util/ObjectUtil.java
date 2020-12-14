@@ -138,8 +138,12 @@ public class ObjectUtil {
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call " + method.toString()
-                + " with value of type " + finalValue.getClass().getName());
+            if (finalValue != null) {
+                throw new UnexpectedLiquibaseException("Cannot call " + method.toString()
+                        + " with value of type " + finalValue.getClass().getName());
+            } else {
+                throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with a null argument");
+            }
         }
     }
 
