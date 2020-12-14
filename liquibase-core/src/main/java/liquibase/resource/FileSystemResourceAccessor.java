@@ -71,6 +71,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         streamPath = streamPath.replace("\\", "/");
         streamPath = streamPath.replaceFirst("^[\\\\/]([a-zA-Z]:)", "$1");

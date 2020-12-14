@@ -157,6 +157,7 @@ public class CDILiquibase implements Extension {
         }
     }
 
+    @java.lang.SuppressWarnings("squid:S2095")
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         Liquibase liquibase = new Liquibase(config.getChangeLog(), resourceAccessor, createDatabase(c));
         if (config.getParameters() != null) {
