@@ -196,9 +196,15 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
                     //
                     // Add the changeLogId attribute
                     //
-                    String outputHeader = editedString + " changeLogId=\"" + hubChangeLog.getId().toString() + "\">";
+                final String outputChangeLogString = " changeLogId=\"" + hubChangeLog.getId().toString() + "\"";
+                if (changeLogString.trim().endsWith("/>")) {
+                    changeLogString = changeLogString.replaceFirst("/>", outputChangeLogString + "/>");
+                }
+                else {
+                    String outputHeader = editedString + outputChangeLogString + ">";
                     changeLogString = changeLogString.replaceFirst(patternString, outputHeader);
                 }
+            }
             } else if (changeLogFile.toLowerCase().endsWith(".sql")) {
                 //
                 // Formatted SQL changelog
@@ -212,7 +218,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
 
         } else if (changeLogFile.toLowerCase().endsWith(".json")) {
             changeLogString = changeLogString.replaceFirst("\\[", "\\[\n" +
-                    "\"changeLogId\"" + ":" + "\"" + hubChangeLog.getId().toString() + "\",\n");
+                    "\"    changeLogId\"" + ":" + "\"" + hubChangeLog.getId().toString() + "\",\n");
         } else if (changeLogFile.toLowerCase().endsWith(".yml") || changeLogFile.toLowerCase().endsWith(".yaml")) {
             changeLogString = changeLogString.replaceFirst("^databaseChangeLog:\n", "databaseChangeLog:\n" +
                     "- changeLogId: " + hubChangeLog.getId().toString() + "\n");
