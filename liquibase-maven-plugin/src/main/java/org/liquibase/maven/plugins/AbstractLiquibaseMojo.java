@@ -10,8 +10,8 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.IntegrationDetails;
 import liquibase.integration.commandline.CommandLineUtils;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceWriter;
 import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
@@ -331,6 +331,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
                 Map<String, Object> scopeValues = new HashMap<>();
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));
+                scopeValues.put(Scope.Attr.resourceWriter.name(), getResourceWriter());
                 scopeValues.put(Scope.Attr.classLoader.name(), getClassLoaderIncludingProjectClasspath());
 
             IntegrationDetails integrationDetails = new IntegrationDetails();
@@ -599,6 +600,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected ResourceAccessor getResourceAccessor(ClassLoader cl) {
         return new MavenResourceAccessor(cl, project, null);
     }
+
+    protected ResourceWriter getResourceWriter() throws IOException {
+        return new MavenResourceWriter(project);
+    }
+
 
     /**
      * Performs some validation after the properties file has been loaded checking that all

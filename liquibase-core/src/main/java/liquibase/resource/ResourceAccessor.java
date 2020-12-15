@@ -2,7 +2,6 @@ package liquibase.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.SortedSet;
 
 /**
@@ -59,8 +58,4 @@ public interface ResourceAccessor {
      * Returns a description of the places this classloader will look for paths. Used in error messages and other troubleshooting cases.
      */
     SortedSet<String> describeLocations();
-
-    OutputStream openOutputStream(String relativeTo, String path, boolean append) throws IOException;
-
-    boolean exists(String relativeTo, String path);
 }

@@ -9,7 +9,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -159,11 +158,4 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
 
         return searchPath;
     }
-
-    @Override
-    protected File getOutputFile(String relativeTo, String path) {
-        return null;
-    }
-
-
 }

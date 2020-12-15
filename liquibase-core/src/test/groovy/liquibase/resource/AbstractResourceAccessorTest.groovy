@@ -22,12 +22,6 @@ class AbstractResourceAccessorTest extends Specification {
             SortedSet<String> describeLocations() {
                 return null
             }
-
-            @Override
-            protected File getOutputFile(String relativeTo, String path) {
-                return null;
-            }
-
         }
     }
 }

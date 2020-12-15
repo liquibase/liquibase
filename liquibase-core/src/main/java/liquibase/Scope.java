@@ -11,7 +11,9 @@ import liquibase.logging.Logger;
 import liquibase.logging.core.JavaLogService;
 import liquibase.logging.core.LogServiceFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.FileSystemResouceWriter;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceWriter;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.servicelocator.StandardServiceLocator;
 import liquibase.ui.ConsoleUIService;
@@ -39,6 +41,7 @@ public class Scope {
         logService,
         ui,
         resourceAccessor,
+        resourceWriter,
         classLoader,
         database,
         quotingStrategy,
@@ -111,6 +114,7 @@ public class Scope {
     private Scope() {
         values.put(Attr.logService.name(), new JavaLogService());
         values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+        values.put(Attr.resourceWriter.name(), new FileSystemResouceWriter());
         values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
         values.put(Attr.ui.name(), new ConsoleUIService());
     }
@@ -343,6 +347,10 @@ public class Scope {
 
     public ResourceAccessor getResourceAccessor() {
         return get(Attr.resourceAccessor, ResourceAccessor.class);
+    }
+
+    public ResourceWriter getResourceWriter() {
+        return get(Attr.resourceWriter, ResourceWriter.class);
     }
 
     public String getLineSeparator() {

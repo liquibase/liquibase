@@ -6,6 +6,7 @@ import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.net.URI;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
@@ -310,8 +311,4 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
     }
 
-    @Override
-    protected File getOutputFile(String relativeTo, String path) {
-        return new File(rootPaths.iterator().next().toFile(), path);
-    }
 }

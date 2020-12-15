@@ -5,24 +5,28 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class ChangeLogWriter {
-    protected File outputDir;
+    protected Path outputDir;
     private ResourceAccessor resourceAccessor;
     
-    public ChangeLogWriter(ResourceAccessor resourceAccessor, File rootOutputDir) {
-        this.outputDir = new File(rootOutputDir, "changelogs");
+    public ChangeLogWriter(ResourceAccessor resourceAccessor, Path rootOutputDir) {
+        this.outputDir = rootOutputDir.resolve("changelogs");
         this.resourceAccessor = resourceAccessor;
     }
     
     public void writeChangeLog(String changeLog, String physicalFilePath) throws IOException {
         String changeLogOutFile = changeLog.replace(":", "_");
-        File xmlFile = new File(outputDir, changeLogOutFile.toLowerCase() + ".html");
-        xmlFile.getParentFile().mkdirs();
+        Path xmlFile = outputDir.resolve(changeLogOutFile.toLowerCase() + ".html");
+        xmlFile.getParent().toFile().mkdirs();
         
-        BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile,
-        false), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+        BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(xmlFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
         try (InputStream stylesheet = resourceAccessor.openStream(null, physicalFilePath)) {
             if (stylesheet == null) {
                 throw new IOException("Can not find " + changeLog);

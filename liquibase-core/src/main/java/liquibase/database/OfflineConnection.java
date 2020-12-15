@@ -162,7 +162,7 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     protected ChangeLogHistoryService createChangeLogHistoryService(Database database) {
-        return new OfflineChangeLogHistoryService(database, new File(changeLogFile),
+        return new OfflineChangeLogHistoryService(database, changeLogFile,
                 outputLiquibaseSql != OutputLiquibaseSql.NONE, // Output DML
                 outputLiquibaseSql == OutputLiquibaseSql.ALL   // Output DDL
         );

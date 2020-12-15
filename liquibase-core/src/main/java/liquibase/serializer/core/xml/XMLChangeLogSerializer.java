@@ -13,6 +13,7 @@ import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceWriter;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable.SerializationType;
@@ -31,6 +32,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -155,13 +158,14 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public void append(ChangeSet changeSet, String changeLogFilePath) throws IOException {
         String existingChangeLog;
-        final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        final ResourceWriter resourceWriter = Scope.getCurrentScope().getResourceWriter();
+        final Path filePath = resourceWriter.getPath(changeLogFilePath);
 
-        try (InputStream in = resourceAccessor.openStream(null, changeLogFilePath)) {
+        try (InputStream in = Files.newInputStream(filePath)) {
             existingChangeLog = StreamUtil.readStreamAsString(in);
         }
 
-        try (OutputStream out = resourceAccessor.openOutputStream(null, changeLogFilePath, false)) {
+        try (OutputStream out = Files.newOutputStream(filePath)) {
             if (!existingChangeLog.contains("</databaseChangeLog>")) {
                 write(Arrays.asList(changeSet), out);
             } else {

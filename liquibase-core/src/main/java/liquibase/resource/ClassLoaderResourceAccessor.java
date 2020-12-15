@@ -2,7 +2,6 @@ package liquibase.resource;
 
 import liquibase.Scope;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.logging.Logger;
 import liquibase.util.StreamUtil;
 
 import java.io.File;
@@ -289,23 +288,5 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         init();
 
         return description;
-    }
-
-    @Override
-    protected File getOutputFile(String relativeTo, String path) {
-        final Logger log = Scope.getCurrentScope().getLog(getClass());
-        for (FileSystem root : rootPaths) {
-            if (root.isReadOnly()) {
-                log.fine("Cannot write to "+root +": is read-only");
-                continue;
-            }
-
-            try {
-                return root.getPath(path).toFile();
-            } catch (Exception e) {
-                log.fine("Cannot write to "+root +": "+e.getMessage());
-            }
-        }
-        return null;
     }
 }

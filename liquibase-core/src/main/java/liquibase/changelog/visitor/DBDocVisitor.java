@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -16,10 +17,11 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class DBDocVisitor implements ChangeSetVisitor {
@@ -109,24 +111,25 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException,
-        LiquibaseException {
-        ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
-        HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
-        HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
-        HTMLWriter columnWriter = new ColumnWriter(rootOutputDir, database);
-        HTMLWriter pendingChangesWriter = new PendingChangesWriter(rootOutputDir, database);
-        HTMLWriter recentChangesWriter = new RecentChangesWriter(rootOutputDir, database);
-        HTMLWriter pendingSQLWriter = new PendingSQLWriter(rootOutputDir, database, rootChangeLog);
+    public void writeHTML(String rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, LiquibaseException {
+        final Path rootOutputPath = Scope.getCurrentScope().getResourceWriter().getPath(rootOutputDir);
 
-        copyFile("liquibase/dbdoc/stylesheet.css", rootOutputDir);
-        copyFile("liquibase/dbdoc/index.html", rootOutputDir);
-        copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
-        copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
+        ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputPath);
+        HTMLWriter authorWriter = new AuthorWriter(rootOutputPath, database);
+        HTMLWriter tableWriter = new TableWriter(rootOutputPath, database);
+        HTMLWriter columnWriter = new ColumnWriter(rootOutputPath, database);
+        HTMLWriter pendingChangesWriter = new PendingChangesWriter(rootOutputPath, database);
+        HTMLWriter recentChangesWriter = new RecentChangesWriter(rootOutputPath, database);
+        HTMLWriter pendingSQLWriter = new PendingSQLWriter(rootOutputPath, database, rootChangeLog);
+
+        copyFile("liquibase/dbdoc/stylesheet.css", rootOutputPath);
+        copyFile("liquibase/dbdoc/index.html", rootOutputPath);
+        copyFile("liquibase/dbdoc/globalnav.html", rootOutputPath);
+        copyFile("liquibase/dbdoc/overview-summary.html", rootOutputPath);
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
-        new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
+        new ChangeLogListWriter(rootOutputPath).writeHTML(changeLogs);
         SortedSet<Table> tables = new TreeSet<>(snapshot.get(Table.class));
         Iterator<Table> tableIterator = tables.iterator();
         while (tableIterator.hasNext()) {
@@ -136,8 +139,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
         }
 
-        new TableListWriter(rootOutputDir).writeHTML(tables);
-        new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
+        new TableListWriter(rootOutputPath).writeHTML(tables);
+        new AuthorListWriter(rootOutputPath).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
         for (String author : changesByAuthor.keySet()) {
             authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
@@ -171,14 +174,14 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     }
 
-    private void copyFile(String fileToCopy, File rootOutputDir) throws IOException {
+    private void copyFile(String fileToCopy, Path rootOutputDir) throws IOException {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileToCopy);
-        FileOutputStream outputStream = null;
+        OutputStream outputStream = null;
         try {
             if (inputStream == null) {
                 throw new IOException("Can not find " + fileToCopy);
             }
-            outputStream = new FileOutputStream(new File(rootOutputDir, fileToCopy.replaceFirst(".*\\/", "")), false);
+            outputStream = Files.newOutputStream(rootOutputDir.resolve(fileToCopy.replaceFirst(".*\\/", "")));
             StreamUtil.copy(inputStream, outputStream);
         } finally {
             if (outputStream != null) {

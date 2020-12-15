@@ -2,6 +2,9 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.ResourceWriter;
+
+import java.io.IOException;
 
 /**
  * <p>Generates dbDocs against the database.</p>
@@ -31,4 +34,8 @@ public class LiquibaseDBDocMojo extends AbstractLiquibaseChangeLogMojo {
         return outputDirectory;
     }
 
+    @Override
+    protected ResourceWriter getResourceWriter() throws IOException {
+        return new MavenResourceWriter(project, getOutputDirectory());
+    }
 }

@@ -17,6 +17,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ResourceWriter;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -32,6 +33,8 @@ import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -93,6 +96,7 @@ public class DiffToChangeLog {
 
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+        final ResourceWriter resourceWriter = Scope.getCurrentScope().getResourceWriter();
 
         changeLogFile = changeLogFile.replace("\\", "/");
         this.changeSetPath = changeLogFile;
@@ -110,7 +114,7 @@ public class DiffToChangeLog {
         }
 
         if (objectsDir != null) {
-            if (resourceAccessor.exists(null, objectsDir)) {
+            if (Files.exists(resourceWriter.getPath(objectsDir))) {
                 throw new UnexpectedLiquibaseException("The generatechangelog command would overwrite your existing stored logic files. To run this command please remove or rename the '" + objectsDir + "' dir in your local project directory");
             }
             newScopeObjects.put(EXTERNAL_FILE_DIR_SCOPE_KEY, objectsDir);
@@ -133,7 +137,7 @@ public class DiffToChangeLog {
                 @Override
                 public void run() {
                     try {
-                        if (!resourceAccessor.exists(null, changeSetPath)) {
+                        if (!Files.exists(resourceWriter.getPath(changeSetPath))) {
                             //print changeLog only if there are available changeSets to print instead of printing it always
                             printNew(changeLogSerializer, changeSetPath);
                         } else {
@@ -152,7 +156,7 @@ public class DiffToChangeLog {
                             }
 
                             try (InputStream existingFileContent = resourceAccessor.openStream(null, changeSetPath);
-                                 OutputStream outputStream = resourceAccessor.openOutputStream(null, changeSetPath, false)) {
+                                 OutputStream outputStream = Files.newOutputStream(resourceWriter.getPath(changeSetPath))) {
                                 if (outputStream == null) {
                                     throw new UnexpectedLiquibaseException("Unable to find a location to write " + changeSetPath);
                                 }
@@ -227,7 +231,7 @@ public class DiffToChangeLog {
             Scope.getCurrentScope().getLog(getClass()).info(filePath + " does not exist, creating and adding " + changeSets.size() + " changesets.");
         }
 
-        try (OutputStream stream = Scope.getCurrentScope().getResourceAccessor().openOutputStream(null, filePath, false);
+        try (OutputStream stream = Files.newOutputStream(Scope.getCurrentScope().getResourceWriter().getPath(filePath));
              PrintStream out = new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())) {
             changeLogSerializer.write(changeSets, out);
         }

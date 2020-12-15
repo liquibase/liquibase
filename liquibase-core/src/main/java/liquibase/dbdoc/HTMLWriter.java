@@ -10,27 +10,31 @@ import liquibase.exception.DatabaseHistoryException;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtil;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
 public abstract class HTMLWriter {
-    protected File outputDir;
+    protected Path outputDir;
     protected Database database;
 
-    public HTMLWriter(File outputDir, Database database) {
+    public HTMLWriter(Path outputDir, Database database) {
         this.outputDir = outputDir;
         this.database = database;
-        if (!outputDir.exists()) {
-            outputDir.mkdirs();
+        if (!Files.exists(outputDir)) {
+            outputDir.toFile().mkdirs();
         }
     }
 
     protected abstract void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException;
 
     private Writer createFileWriter(Object object) throws IOException {
-        return new OutputStreamWriter(new FileOutputStream(new File(outputDir, DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html")), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+        return new OutputStreamWriter(Files.newOutputStream(outputDir.resolve(DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html")), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {
