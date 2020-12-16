@@ -52,6 +52,6 @@ public class MockResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public SortedSet<String> describeLocations() {
-        return new TreeSet<String>(Collections.singletonList("MockResouceAccessor.java"));
+        return new TreeSet<String>(Collections.singletonList("MockResourceAccessor.java"));
     }
 }

@@ -5,15 +5,15 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Path;
 import java.util.List;
 
 public class PendingChangesWriter extends HTMLWriter {
 
-    public PendingChangesWriter(File rootOutputDir, Database database) {
-        super(new File(rootOutputDir, "pending"), database);
+    public PendingChangesWriter(Path rootOutputDir, Database database) {
+        super(rootOutputDir.resolve("pending"), database);
     }
 
     @Override

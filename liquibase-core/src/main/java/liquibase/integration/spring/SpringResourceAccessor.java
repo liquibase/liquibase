@@ -158,5 +158,4 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
 
         return searchPath;
     }
-
 }

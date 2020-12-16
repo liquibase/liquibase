@@ -13,7 +13,7 @@ public class CompositeResourceAccessor extends AbstractResourceAccessor {
     private List<ResourceAccessor> resourceAccessors;
 
     public CompositeResourceAccessor(ResourceAccessor... resourceAccessors) {
-        this.resourceAccessors = Arrays.asList(CollectionUtil.createIfNull(resourceAccessors));
+        this.resourceAccessors = new ArrayList<>(Arrays.asList(CollectionUtil.createIfNull(resourceAccessors)));
     }
 
     public CompositeResourceAccessor(Collection<ResourceAccessor> resourceAccessors) {

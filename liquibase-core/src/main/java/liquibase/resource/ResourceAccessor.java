@@ -58,5 +58,4 @@ public interface ResourceAccessor {
      * Returns a description of the places this classloader will look for paths. Used in error messages and other troubleshooting cases.
      */
     SortedSet<String> describeLocations();
-
 }

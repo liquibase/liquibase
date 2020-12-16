@@ -7,6 +7,7 @@ import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.HubService
 import liquibase.hub.HubServiceFactory
 import liquibase.hub.core.MockHubService
+import liquibase.resource.FileSystemResouceWriter
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.FileUtil
 import spock.lang.Specification
@@ -54,6 +55,7 @@ class RegisterChangeLogCommandTest extends Specification {
         Map<String, Object> scopeMap = new HashMap<>()
         scopeMap.put(Scope.Attr.resourceAccessor.name(), testResourceAccessor)
         scopeMap.put("liquibase.plugin." + HubService.name, MockHubService)
+        scopeMap.put(Scope.Attr.resourceWriter.name(), new FileSystemResouceWriter(new File("target/test-classes").toPath()))
         scopeId = Scope.enter(scopeMap)
     }
 

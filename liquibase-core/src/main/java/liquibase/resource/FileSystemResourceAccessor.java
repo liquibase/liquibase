@@ -6,6 +6,7 @@ import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.net.URI;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;

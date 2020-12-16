@@ -13,27 +13,28 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.resource.ResourceWriter;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
-import liquibase.structure.core.Column;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.csv.CSVReader;
 import liquibase.util.csv.CSVWriter;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 @LiquibaseService(skip = true)
 public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
-    private final File changeLogFile;
+    private final String changeLogFile;
     private boolean executeDmlAgainstDatabase = true;
     /**
      * Output CREATE TABLE LIQUIBASECHANGELOG or not
@@ -41,6 +42,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     private boolean executeDdlAgainstDatabase = true;
 
     private Integer lastChangeSetSequenceValue;
+
     private enum Columns {
         ID,
         AUTHOR,
@@ -58,12 +60,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         DEPLOYMENT_ID,
     }
 
-    public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeDmlAgainstDatabase, boolean executeDdlAgainstDatabase) {
+    public OfflineChangeLogHistoryService(Database database, String changeLogFile, boolean executeDmlAgainstDatabase, boolean executeDdlAgainstDatabase) {
         setDatabase(database);
         this.executeDmlAgainstDatabase = executeDmlAgainstDatabase;
         this.executeDdlAgainstDatabase = executeDdlAgainstDatabase;
 
-        changeLogFile = changeLogFile.getAbsoluteFile();
         this.changeLogFile = changeLogFile;
     }
 
@@ -101,26 +102,25 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public void init() throws DatabaseException {
-        if (!changeLogFile.exists()) {
-            changeLogFile.getParentFile().mkdirs();
-            try {
-                changeLogFile.createNewFile();
-                writeHeader(changeLogFile);
+        try {
+            final Path filePath = Scope.getCurrentScope().getResourceWriter().getPath(changeLogFile);
+            if (!Files.exists(filePath)) {
+                filePath.getParent().toFile().mkdirs();
+                Files.createFile(filePath);
+                writeHeader(filePath);
 
                 if (isExecuteDdlAgainstDatabase()) {
                     Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
                 }
 
-
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
             }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-
     }
 
-    protected void writeHeader(File file) throws IOException {
-        try (FileOutputStream outputStream = new FileOutputStream(file);
+    protected void writeHeader(Path file) throws IOException {
+        try (OutputStream outputStream = Files.newOutputStream(file);
              Writer writer = new OutputStreamWriter(outputStream,
                      LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())
         ) {
@@ -145,133 +145,139 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 line[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
                 return line;
             }
-            });
+        });
     }
 
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
-        try (
-                    Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-        )
-        {
-            CSVReader csvReader = new CSVReader(reader);
-            String[] line = csvReader.readNext();
+        try {
+            final Path filePath = Scope.getCurrentScope().getResourceWriter().getPath(this.changeLogFile);
+            try (
+                    Reader reader = new InputStreamReader(Files.newInputStream(filePath), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            ) {
+                CSVReader csvReader = new CSVReader(reader);
+                String[] line = csvReader.readNext();
 
-            if (line == null) { //empty file
-                writeHeader(this.changeLogFile);
-                return new ArrayList<>();
-            }
-            if (!"ID".equals(line[Columns.ID.ordinal()])) {
-                throw new DatabaseException("Missing header in file "+this.changeLogFile.getAbsolutePath());
-            }
-
-            List<RanChangeSet> returnList = new ArrayList<>();
-            while ((line = csvReader.readNext()) != null) {
-                ContextExpression contexts = new ContextExpression();
-                if (line.length > Columns.CONTEXTS.ordinal()) {
-                    contexts = new ContextExpression(line[Columns.CONTEXTS.ordinal()]);
+                if (line == null) { //empty file
+                    writeHeader(filePath);
+                    return new ArrayList<>();
                 }
-                Labels labels = new Labels();
-                if (line.length > Columns.LABELS.ordinal()) {
-                    labels = new Labels(line[Columns.LABELS.ordinal()]);
+                if (!"ID".equals(line[Columns.ID.ordinal()])) {
+                    throw new DatabaseException("Missing header in file " + filePath.toAbsolutePath().toString());
                 }
 
-                String deploymentId = null;
-                if (line.length > Columns.DEPLOYMENT_ID.ordinal()) {
-                    deploymentId = line[Columns.DEPLOYMENT_ID.ordinal()];
+                List<RanChangeSet> returnList = new ArrayList<>();
+                while ((line = csvReader.readNext()) != null) {
+                    ContextExpression contexts = new ContextExpression();
+                    if (line.length > Columns.CONTEXTS.ordinal()) {
+                        contexts = new ContextExpression(line[Columns.CONTEXTS.ordinal()]);
+                    }
+                    Labels labels = new Labels();
+                    if (line.length > Columns.LABELS.ordinal()) {
+                        labels = new Labels(line[Columns.LABELS.ordinal()]);
+                    }
+
+                    String deploymentId = null;
+                    if (line.length > Columns.DEPLOYMENT_ID.ordinal()) {
+                        deploymentId = line[Columns.DEPLOYMENT_ID.ordinal()];
+                    }
+
+                    returnList.add(new RanChangeSet(
+                            line[Columns.FILENAME.ordinal()],
+                            line[Columns.ID.ordinal()],
+                            line[Columns.AUTHOR.ordinal()],
+                            CheckSum.parse(line[Columns.MD5SUM.ordinal()]),
+                            new ISODateFormat().parse(line[Columns.DATEEXECUTED.ordinal()]),
+                            line[Columns.TAG.ordinal()],
+                            ChangeSet.ExecType.valueOf(line[Columns.EXECTYPE.ordinal()]),
+                            line[Columns.DESCRIPTION.ordinal()],
+                            line[Columns.COMMENTS.ordinal()],
+                            contexts,
+                            labels,
+                            deploymentId));
                 }
 
-                returnList.add(new RanChangeSet(
-                        line[Columns.FILENAME.ordinal()],
-                        line[Columns.ID.ordinal()],
-                        line[Columns.AUTHOR.ordinal()],
-                        CheckSum.parse(line[Columns.MD5SUM.ordinal()]),
-                        new ISODateFormat().parse(line[Columns.DATEEXECUTED.ordinal()]),
-                        line[Columns.TAG.ordinal()],
-                        ChangeSet.ExecType.valueOf(line[Columns.EXECTYPE.ordinal()]),
-                        line[Columns.DESCRIPTION.ordinal()],
-                        line[Columns.COMMENTS.ordinal()],
-                        contexts,
-                        labels,
-                        deploymentId));
+                return returnList;
             }
-
-            return returnList;
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
     }
 
     protected void replaceChangeSet(ChangeSet changeSet, ReplaceChangeSetLogic replaceLogic) throws DatabaseException {
-        File oldFile = this.changeLogFile;
-        File newFile = new File(oldFile.getParentFile(), oldFile.getName()+".new");
+        try {
+            Path oldFile = Scope.getCurrentScope().getResourceWriter().getPath(this.changeLogFile);
+            Path newFile = oldFile.getParent().resolve(oldFile.getFileName().toString() + ".new");
 
-        try (
-            Reader reader = new InputStreamReader(new FileInputStream(oldFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-            Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-            CSVReader csvReader = new CSVReader(reader);
-            CSVWriter csvWriter = new CSVWriter(writer);
-        )
-        {
-            String[] line;
-            while ((line = csvReader.readNext()) != null) {
-                if ((changeSet == null) || (line[Columns.ID.ordinal()].equals(changeSet.getId()) && line[Columns.AUTHOR.ordinal()].equals
-                    (changeSet.getAuthor()) && line[Columns.FILENAME.ordinal()].equals(changeSet.getFilePath()))) {
-                    line = replaceLogic.execute(line);
-                }
-                if (line != null) {
-                    csvWriter.writeNext(line);
+            try (
+                    Reader reader = new InputStreamReader(Files.newInputStream(oldFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+                    Writer writer = new OutputStreamWriter(Files.newOutputStream(newFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+                    CSVReader csvReader = new CSVReader(reader);
+                    CSVWriter csvWriter = new CSVWriter(writer);
+            ) {
+                String[] line;
+                while ((line = csvReader.readNext()) != null) {
+                    if ((changeSet == null) || (line[Columns.ID.ordinal()].equals(changeSet.getId()) && line[Columns.AUTHOR.ordinal()].equals
+                            (changeSet.getAuthor()) && line[Columns.FILENAME.ordinal()].equals(changeSet.getFilePath()))) {
+                        line = replaceLogic.execute(line);
+                    }
+                    if (line != null) {
+                        csvWriter.writeNext(line);
+                    }
                 }
             }
+            Files.delete(oldFile);
+            Files.move(newFile, oldFile);
+
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
-        oldFile.delete();
-        newFile.renameTo(oldFile);
+
     }
 
     protected void appendChangeSet(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
-        File oldFile = this.changeLogFile;
-        File newFile = new File(oldFile.getParentFile(), oldFile.getName()+".new");
+        try {
+            final ResourceWriter resourceWriter = Scope.getCurrentScope().getResourceWriter();
+            Path oldFile = resourceWriter.getPath(this.changeLogFile);
+            Path newFile = oldFile.getParent().resolve(oldFile.getFileName().toString() + ".new");
 
-        try (
-            Reader reader = new InputStreamReader(new FileInputStream(oldFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-            Writer writer = new OutputStreamWriter(new FileOutputStream(newFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-            CSVReader csvReader = new CSVReader(reader);
-            CSVWriter csvWriter = new CSVWriter(writer);
-        )
-        {
-            String[] line;
-            while ((line = csvReader.readNext()) != null) {
-                csvWriter.writeNext(line);
+            try (
+                    Reader reader = new InputStreamReader(Files.newInputStream(oldFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+                    Writer writer = new OutputStreamWriter(Files.newOutputStream(newFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+                    CSVReader csvReader = new CSVReader(reader);
+                    CSVWriter csvWriter = new CSVWriter(writer);
+            ) {
+                String[] line;
+                while ((line = csvReader.readNext()) != null) {
+                    csvWriter.writeNext(line);
+                }
+
+                String[] newLine = new String[Columns.values().length];
+                newLine[Columns.ID.ordinal()] = changeSet.getId();
+                newLine[Columns.AUTHOR.ordinal()] = changeSet.getAuthor();
+                newLine[Columns.FILENAME.ordinal()] = changeSet.getFilePath();
+                newLine[Columns.DATEEXECUTED.ordinal()] = new ISODateFormat().format(new java.sql.Timestamp(new Date().getTime()));
+                newLine[Columns.ORDEREXECUTED.ordinal()] = String.valueOf(getNextSequenceValue());
+                newLine[Columns.EXECTYPE.ordinal()] = execType.value;
+                newLine[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
+                newLine[Columns.DESCRIPTION.ordinal()] = changeSet.getDescription();
+                newLine[Columns.COMMENTS.ordinal()] = changeSet.getComments();
+                newLine[Columns.TAG.ordinal()] = "";
+                newLine[Columns.LIQUIBASE.ordinal()] = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
+
+                newLine[Columns.CONTEXTS.ordinal()] = (changeSet.getContexts() == null) ? null : changeSet.getContexts().toString();
+                newLine[Columns.LABELS.ordinal()] = (changeSet.getLabels() == null) ? null : changeSet.getLabels().toString();
+
+                newLine[Columns.DEPLOYMENT_ID.ordinal()] = getDeploymentId();
+
+                csvWriter.writeNext(newLine);
+
             }
-
-            String[] newLine = new String[Columns.values().length];
-            newLine[Columns.ID.ordinal()] = changeSet.getId();
-            newLine[Columns.AUTHOR.ordinal()] = changeSet.getAuthor();
-            newLine[Columns.FILENAME.ordinal()] =  changeSet.getFilePath();
-            newLine[Columns.DATEEXECUTED.ordinal()] = new ISODateFormat().format(new java.sql.Timestamp(new Date().getTime()));
-            newLine[Columns.ORDEREXECUTED.ordinal()] = String.valueOf(getNextSequenceValue());
-            newLine[Columns.EXECTYPE.ordinal()] = execType.value;
-            newLine[Columns.MD5SUM.ordinal()] = changeSet.generateCheckSum().toString();
-            newLine[Columns.DESCRIPTION.ordinal()] = changeSet.getDescription();
-            newLine[Columns.COMMENTS.ordinal()] = changeSet.getComments();
-            newLine[Columns.TAG.ordinal()] = "";
-            newLine[Columns.LIQUIBASE.ordinal()] = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
-
-            newLine[Columns.CONTEXTS.ordinal()] = (changeSet.getContexts() == null) ? null : changeSet.getContexts().toString();
-            newLine[Columns.LABELS.ordinal()] = (changeSet.getLabels() == null) ? null : changeSet.getLabels().toString();
-
-            newLine[Columns.DEPLOYMENT_ID.ordinal()] = getDeploymentId();
-
-            csvWriter.writeNext(newLine);
-
+            Files.delete(oldFile);
+            Files.move(newFile, oldFile);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
-
-        oldFile.delete();
-        newFile.renameTo(oldFile);
     }
 
     @Override
@@ -283,7 +289,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
         if (execType.equals(ChangeSet.ExecType.FAILED) || execType.equals(ChangeSet.ExecType.SKIPPED)) {
             return; //do nothing
-        } else  if (execType.ranBefore) {
+        } else if (execType.ranBefore) {
             replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
                 @Override
                 public String[] execute(String[] line) {
@@ -319,10 +325,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             lastChangeSetSequenceValue = 0;
 
             try (
-                Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-            )
-            {
-                
+                    Reader reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            ) {
+
                 CSVReader csvReader = new CSVReader(reader);
                 String[] line = csvReader.readNext(); //skip header line
 
@@ -393,8 +398,14 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public void destroy() throws DatabaseException {
-        if (changeLogFile.exists() && !changeLogFile.delete()) {
-            throw new DatabaseException("Could not delete changelog history file "+changeLogFile.getAbsolutePath());
+        try {
+            final Path path = Scope.getCurrentScope().getResourceWriter().getPath(changeLogFile);
+            if (Files.exists(path)) {
+                Files.delete(path);
+            }
+        } catch (IOException e) {
+            throw new DatabaseException("Could not delete changelog history file " + changeLogFile, e);
         }
+
     }
 }

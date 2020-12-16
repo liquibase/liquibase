@@ -37,7 +37,7 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
 
 
     @Override
-    public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
+    public void append(ChangeSet changeSet, String changeLogFilePath) throws IOException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

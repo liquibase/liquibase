@@ -4,27 +4,32 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.util.StringUtil;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.SortedSet;
 
 public class HTMLListWriter {
-    private File outputDir;
+    private Path outputDir;
     private String directory;
     private String filename;
     private String title;
 
-    public HTMLListWriter(String title, String filename, String subdir, File outputDir) {
+    public HTMLListWriter(String title, String filename, String subdir, Path outputDir) {
         this.title = title;
         this.outputDir = outputDir;
         this.filename = filename;
-        if (!outputDir.exists()) {
-            outputDir.mkdir();
+
+        if (!Files.exists(outputDir)) {
+            outputDir.toFile().mkdirs();
         }
         this.directory = subdir;
     }
 
     public void writeHTML(SortedSet objects) throws IOException {
-        Writer fileWriter = new OutputStreamWriter(new FileOutputStream(new File(outputDir, filename)), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+        Writer fileWriter = new OutputStreamWriter(Files.newOutputStream(outputDir.resolve(filename)), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
         try {
             fileWriter.append("<HTML>\n" + "<HEAD><meta charset=\"utf-8\"/>\n" + "<TITLE>\n");

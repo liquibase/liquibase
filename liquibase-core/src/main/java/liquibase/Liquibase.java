@@ -2125,7 +2125,7 @@ public class Liquibase implements AutoCloseable {
                     DBDocVisitor visitor = new DBDocVisitor(database);
                     logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-                    visitor.writeHTML(new File(outputDirectory), resourceAccessor);
+                    visitor.writeHTML(outputDirectory, resourceAccessor);
                 } catch (IOException e) {
                     throw new LiquibaseException(e);
                 } finally {

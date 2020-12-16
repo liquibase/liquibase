@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
@@ -18,7 +19,12 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtils;
 import liquibase.util.csv.CSVWriter;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -76,18 +82,18 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 if (dataDir != null) {
                     fileName = dataDir + "/" + fileName;
 
-                    File parentDir = new File(dataDir);
-                    if (!parentDir.exists()) {
-                        parentDir.mkdirs();
+                    Path parentDir = Scope.getCurrentScope().getResourceWriter().getPath(dataDir);
+                    if (!Files.exists(parentDir)) {
+                        parentDir.toFile().mkdirs();
                     }
-                    if (!parentDir.isDirectory()) {
-                        throw new IOException(parentDir.getAbsolutePath() + " is not a valid directory");
+                    if (!Files.isDirectory(parentDir)) {
+                        throw new IOException(parentDir.toAbsolutePath().toString() + " is not a valid directory");
                     }
                 }
 
                 String[] dataTypes = new String[0];
                 try (
-                        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+                        OutputStream fileOutputStream = Files.newOutputStream(Scope.getCurrentScope().getResourceWriter().getPath(fileName));
                         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
                                 fileOutputStream,
                                 LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)

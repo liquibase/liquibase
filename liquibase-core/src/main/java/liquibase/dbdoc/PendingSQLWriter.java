@@ -13,17 +13,17 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Path;
 import java.util.List;
 
 public class PendingSQLWriter extends HTMLWriter {
 
     private DatabaseChangeLog databaseChangeLog;
 
-    public PendingSQLWriter(File rootOutputDir, Database database, DatabaseChangeLog databaseChangeLog) {
-        super(new File(rootOutputDir, "pending"), database);
+    public PendingSQLWriter(Path rootOutputDir, Database database, DatabaseChangeLog databaseChangeLog) {
+        super(rootOutputDir.resolve("pending"), database);
         this.databaseChangeLog = databaseChangeLog;
     }
 

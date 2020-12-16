@@ -21,8 +21,8 @@ public abstract class AbstractResourceAccessor extends AbstractExtensibleObject 
             return null;
         } else if (streamList.size() > 1) {
             streamList.close();
-            Scope.getCurrentScope().getLog(getClass()).warning("ResourceAccessor roots: "+Scope.getCurrentScope().getResourceAccessor().getClass().getName());
-            throw new IOException("Found " + streamList.size() + " files that match " + streamPath+": "+ StringUtil.join(streamList.getURIs(), ", ", new StringUtil.ToStringFormatter()));
+            Scope.getCurrentScope().getLog(getClass()).warning("ResourceAccessor roots: " + Scope.getCurrentScope().getResourceAccessor().getClass().getName());
+            throw new IOException("Found " + streamList.size() + " files that match " + streamPath + ": " + StringUtil.join(streamList.getURIs(), ", ", new StringUtil.ToStringFormatter()));
         } else {
             return streamList.iterator().next();
         }
