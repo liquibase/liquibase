@@ -261,12 +261,12 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     private String readProjectFromConsole(List<Project> projects) throws CommandLineParsingException {
         final UIService ui = Scope.getCurrentScope().getUI();
 
-        ui.sendMessage("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting. ");
-        ui.sendMessage("Register changelog " + changeLogFile + " to an existing Project, or create a new one.");
+        StringBuilder prompt = new StringBuilder("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting.\n");
+        prompt.append("Register changelog " + changeLogFile + " to an existing Project, or create a new one.\n");
 
-        ui.sendMessage("Please make a selection:");
+        prompt.append("Please make a selection:\n");
 
-        ui.sendMessage("[c] Create new Project");
+        prompt.append("[c] Create new Project\n");
         String projFormat = "[%d]";
         if (projects.size() >= 10 && projects.size() < 100) {
             projFormat = "[%2d]";
@@ -283,12 +283,12 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         }
         for (int i = 0; i < projects.size(); i++) {
             Project project = projects.get(i);
-            ui.sendMessage(String.format(projFormat + " %-" + maxLen + "s (Project ID:%s) %s", i + 1, project.getName(), projects.get(i).getId(), projects.get(i).getCreateDate()));
+            prompt.append(String.format(projFormat + " %-" + maxLen + "s (Project ID:%s) %s\n", i + 1, project.getName(), projects.get(i).getId(), projects.get(i).getCreateDate()));
         }
-        ui.sendMessage("[N] to not register this changelog right now.\n" +
+        prompt.append("[N] to not register this changelog right now.\n" +
                 "You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.\n" +
-                " Learn more at https://hub.liquibase.com.");
+                " Learn more at https://hub.liquibase.com.\n?");
 
-        return StringUtil.trimToEmpty(ui.prompt("?", "N", null, String.class));
+        return StringUtil.trimToEmpty(ui.prompt(prompt.toString(), "N", null, String.class));
     }
 }
