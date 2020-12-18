@@ -274,6 +274,10 @@ public class Liquibase implements AutoCloseable {
                 Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
                     runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                 });
+
+                //
+                // Update Hub with the operation information
+                //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
             } catch (Throwable e) {
                 if (hubUpdater != null) {
