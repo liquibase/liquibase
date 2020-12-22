@@ -292,6 +292,27 @@ public class OnlineHubService implements HubService {
     }
 
     /**
+     *
+     * Request to shorten a URL to create a more user-friendly link to the user
+     *
+     * @param   connection                           The Connection for this operation
+     * @param   operation                            The operation that we are sending for
+     * @return  HubLink
+     * @throws  LiquibaseHubException                If the PUT fails
+     *
+     */
+    @Override
+    public HubLink shortenReportLink(Connection connection, Operation operation) throws LiquibaseHubException {
+        String reportURL =
+            "/organizations/" + getOrganization().getId().toString() +
+            "/projects/" + connection.getProject().getId() +
+            "/operations/" + operation.getId().toString();
+        HubLink reportHubLink = new HubLink();
+        reportHubLink.setUrl(reportURL);
+        return http.doPut("/api/v1/links", reportHubLink, HubLink.class);
+    }
+
+    /**
      * Query for a changelog ID.  If no result we return null
      * We cache this result and a map
      *

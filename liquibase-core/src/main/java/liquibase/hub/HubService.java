@@ -43,6 +43,8 @@ public interface HubService extends Plugin, PrioritizedService {
 
     OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException;
 
+    HubLink shortenReportLink(Connection connection, Operation operation) throws LiquibaseException;
+
     void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException;
 
     void sendOperationChanges(OperationChange operationChange) throws LiquibaseHubException;

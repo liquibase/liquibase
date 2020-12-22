@@ -95,4 +95,9 @@ public class OfflineHubService implements HubService {
     public void sendOperationChanges(OperationChange operationChange) throws LiquibaseHubException {
 
     }
+
+    @Override
+    public HubLink shortenReportLink(Connection connection, Operation operation) {
+        return null;
+    }
 }

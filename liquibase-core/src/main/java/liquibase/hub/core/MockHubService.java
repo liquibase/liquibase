@@ -135,6 +135,11 @@ public class MockHubService implements HubService {
 
     }
 
+    @Override
+    public HubLink shortenReportLink(Connection connection, Operation operation) {
+        return null;
+    }
+
     public void reset() {
         randomUUID = UUID.randomUUID();
 

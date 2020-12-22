@@ -12,6 +12,8 @@ import liquibase.changelog.visitor.RollbackListVisitor;
 import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.SyncHubCommand;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -20,6 +22,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.hub.model.*;
 import liquibase.integration.IntegrationDetails;
 import liquibase.logging.core.BufferedLogService;
+import sun.net.www.http.HttpClient;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -157,10 +160,19 @@ public class HubUpdater {
             //
             // Send the operation report link to Hub for shortening
             //
-            
+            Connection connection = updateOperation.getConnection();
+            HubLink hubLink = hubService.shortenReportLink(connection, updateOperation);
+            String reportLink = getHubUrl() + "/links/r/" + hubLink.getKey();
+            Scope.getCurrentScope().getUI().sendMessage(reportLink);
+            Scope.getCurrentScope().getUI().sendMessage(hubLink.getUrl());
         } catch (LiquibaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
         }
+    }
+
+    private String getHubUrl() {
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        return hubConfiguration.getLiquibaseHubUrl();
     }
 
     /**
