@@ -21,6 +21,15 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private PrintStream errorStream = System.out;
     private boolean outputStackTraces = false;
 
+    private ConsoleWrapper console;
+
+    public ConsoleUIService() {
+    }
+
+    protected ConsoleUIService(ConsoleWrapper console) {
+        this.console = console;
+    }
+
     /**
      * Returns {@link liquibase.plugin.Plugin#PRIORITY_NOT_APPLICABLE} because it must be manually configured as needed
      */
@@ -50,21 +59,9 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     @Override
     public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
         Logger log = Scope.getCurrentScope().getLog(getClass());
+        final ConsoleWrapper console = getConsole();
 
-        ConsoleWrapper console = getConsole();
-
-        final ConfigurationProperty headless = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.HEADLESS);
-        if (headless.getWasOverridden()) {
-            if (headless.getValue(Boolean.class)) {
-                console = null;
-            } else {
-                if (console == null) {
-                    throw new UnexpectedLiquibaseException("liquibase.headless was set to true, but Liquibase was run in a headless environment");
-                }
-            }
-        }
-
-        if (console == null) {
+        if (!console.supportsInput()) {
             log.fine("No console attached so cannot prompt '" + prompt + "'. Using default value '" + defaultValue + "'");
             return defaultValue;
         }
@@ -93,12 +90,39 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         }
     }
 
+    /**
+     * Creates the {@link ConsoleWrapper} to use.
+     */
     protected ConsoleWrapper getConsole() {
-        final Console console = System.console();
         if (console == null) {
-            return null;
+            final ConfigurationProperty headless = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.HEADLESS);
+            boolean headlessConfigValue = headless.getValue(Boolean.class);
+            boolean wasHeadlessOverridden = headless.getWasOverridden();
+
+            final Logger log = Scope.getCurrentScope().getLog(getClass());
+
+            if (headlessConfigValue) {
+                log.fine("Not prompting for user input because liquibase.headless=true");
+                console = new ConsoleWrapper(null);
+            } else {
+                final Console systemConsole = System.console();
+
+                this.console = new ConsoleWrapper(systemConsole);
+
+                if (systemConsole == null) {
+                    log.fine("No system console detected for user input");
+                    if (wasHeadlessOverridden) {
+                        throw new UnexpectedLiquibaseException("liquibase.headless was set to false, but Liquibase was run in an environment with no system console");
+                    }
+                } else {
+                    log.fine("A system console was detected for user input");
+                }
+            }
+            if (!wasHeadlessOverridden) {
+                log.fine("To override or validate the auto-detected environment for user input, set the liquibase.headless property");
+            }
         }
-        return new ConsoleWrapper(console);
+        return console;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -135,18 +159,26 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     }
 
     /**
-     * Wrapper around {@link Console} to allow replacements as needed. Primarily used for testing.
+     * Wrapper around {@link Console} to allow replacements as needed.
+     * If the passed {@link Console} is null, {@link #supportsInput()} will return false, and {@link #readLine()} will return null.
      */
     public static class ConsoleWrapper {
 
-        private Console console;
+        private final Console console;
 
         public ConsoleWrapper(Console console) {
             this.console = console;
         }
 
         public String readLine() {
+            if (console == null) {
+                return "";
+            }
             return console.readLine();
+        }
+
+        public boolean supportsInput() {
+            return console != null;
         }
     }
 }

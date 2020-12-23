@@ -12,6 +12,11 @@ public class MockConsoleWrapper extends ConsoleUIService.ConsoleWrapper {
     }
 
     @Override
+    public boolean supportsInput() {
+        return true;
+    }
+
+    @Override
     public String readLine() {
         return responses.remove(0);
     }

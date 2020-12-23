@@ -11,12 +11,7 @@ class ConsoleUIServiceTest extends Specification {
     def "prompt"() {
         when:
         def passedInput = input
-        ConsoleUIService uiService = new ConsoleUIService() {
-            @Override
-            protected ConsoleUIService.ConsoleWrapper getConsole() {
-                return new MockConsoleWrapper(passedInput)
-            }
-        }
+        def uiService = new ConsoleUIService(new MockConsoleWrapper(passedInput))
         def outputStream = new ByteArrayOutputStream()
         uiService.setOutputStream(new PrintStream(outputStream))
 
