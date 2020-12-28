@@ -247,7 +247,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
      * @param timeoutInMillis waits for specified timeoutInMillis before destroying the process.
      *                        It will wait indefinitely if timeoutInMillis is 0.
      */
-    private int waitForOrKill(final Process process, final long timeoutInMillis) throws ExecutionException, TimeoutException {
+    @java.lang.SuppressWarnings("squid:S2142")
+    private int waitForOrKill(final Process process, final long timeoutInMillis) throws TimeoutException {
         int ret = -1;
         final AtomicBoolean timedOut = new AtomicBoolean(false);
         Timer timer = new Timer();

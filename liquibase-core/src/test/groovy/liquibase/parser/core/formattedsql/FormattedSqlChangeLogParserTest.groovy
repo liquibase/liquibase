@@ -24,7 +24,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
     private static final String VALID_CHANGELOG = """
 --liquibase formatted sql
 
---changeset nvoxland:1
+ --changeset nvoxland:1
 select * from table1;
 
 --changeset nvoxland:2 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)

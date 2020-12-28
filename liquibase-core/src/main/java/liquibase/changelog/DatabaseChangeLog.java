@@ -197,13 +197,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath().compareTo(o.getFilePath());
     }
 
-
     public ChangeSet getChangeSet(String path, String author, String id) {
         for (ChangeSet changeSet : changeSets) {
-            if (normalizePath(changeSet.getFilePath()).equalsIgnoreCase(normalizePath(path))
-                    && changeSet.getAuthor().equalsIgnoreCase(author)
-                    && changeSet.getId().equalsIgnoreCase(id)
-                    && isDbmsMatch(changeSet.getDbmsSet())) {
+            final String normalizedPath = normalizePath(changeSet.getFilePath());
+            if (normalizedPath != null &&
+                normalizedPath.equalsIgnoreCase(normalizePath(path)) &&
+                changeSet.getAuthor().equalsIgnoreCase(author) &&
+                changeSet.getId().equalsIgnoreCase(id) &&
+                isDbmsMatch(changeSet.getDbmsSet())) {
                 return changeSet;
             }
         }
@@ -404,9 +405,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
                 LabelExpression labelExpression = new LabelExpression(node.getChildValue(null, "labels", String.class));
-                if (labelExpression == null) {
-                    labelExpression = new LabelExpression();
-                }
                 Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
                 if (ignore == null) {
                     ignore = false;
@@ -451,22 +449,23 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     } else {
                         // read properties from the file
                         Properties props = new Properties();
-                        InputStream propertiesStream = resourceAccessor.openStream(null, file);
-                        if (propertiesStream == null) {
-                            Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
-                        } else {
-                            props.load(propertiesStream);
+                        try (InputStream propertiesStream = resourceAccessor.openStream(null, file)) {
+                            if (propertiesStream != null) {
+                                props.load(propertiesStream);
 
-                            for (Map.Entry entry : props.entrySet()) {
-                                this.changeLogParameters.set(
-                                        entry.getKey().toString(),
-                                        entry.getValue().toString(),
-                                        context,
-                                        labels,
-                                        dbms,
-                                        global,
-                                        this
-                                );
+                                for (Map.Entry<Object, Object> entry : props.entrySet()) {
+                                    this.changeLogParameters.set(
+                                            entry.getKey().toString(),
+                                            entry.getValue().toString(),
+                                            context,
+                                            labels,
+                                            dbms,
+                                            global,
+                                            this
+                                    );
+                                }
+                            } else {
+                                Scope.getCurrentScope().getLog(getClass()).info("Could not open properties file " + file);
                             }
                         }
                     }

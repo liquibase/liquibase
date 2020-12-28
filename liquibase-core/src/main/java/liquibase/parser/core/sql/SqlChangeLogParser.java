@@ -36,11 +36,13 @@ public class SqlChangeLogParser implements ChangeLogParser {
 
         try {
             InputStream sqlStream = resourceAccessor.openStream(null, physicalChangeLogLocation);
-            if (sqlStream == null) {
+            if (sqlStream != null) {
+                String sql = StreamUtil.readStreamAsString(sqlStream);
+                change.setSql(sql);
+            }
+            else {
                 throw new ChangeLogParseException(FileUtil.getFileNotFoundMessage(physicalChangeLogLocation));
             }
-            String sql = StreamUtil.readStreamAsString(sqlStream);
-            change.setSql(sql);
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
         }
