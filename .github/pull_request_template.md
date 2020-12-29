@@ -66,6 +66,7 @@ Add any other context about the problem here.
 - [ ] Build is successful and all new and existing tests pass
 - [ ] Added [Unit Test(s)](https://liquibase.jira.com/wiki/spaces/LB/pages/1274937609/How+to+Write+Liquibase+Core+Unit+Tests)
 - [ ] Added [Integration Test(s)](https://liquibase.jira.com/wiki/spaces/LB/pages/1276608569/How+to+Write+Liquibase+Core+Integration+Tests)
+- [ ] Added [Test Harness Test(s)](https://github.com/liquibase/liquibase-test-harness/pulls)
 - [ ] Documentation Updated
 
 ## Need Help?
