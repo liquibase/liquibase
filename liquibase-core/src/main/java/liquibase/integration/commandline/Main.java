@@ -766,12 +766,6 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
-//            } else if(arg.equals("-p")) {
-//            	//Prompt for password
-//            	password = new String(System.console().readPassword("DB Password:"));
-//            } else if(arg.equals("-rp")) {
-//            	//Prompt for reference password
-//            	referencePassword = new String(System.console().readPassword("Reference DB Password:"));
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }
@@ -815,6 +809,7 @@ public class Main {
 
     protected void configureClassLoader() throws CommandLineParsingException {
         final List<URL> urls = new ArrayList<URL>();
+        JarFile earZip = null;
         if (this.classpath != null) {
             String[] classpath;
             if (isWindows()) {
@@ -833,7 +828,7 @@ public class Main {
                     if (classpathEntry.endsWith(".war")) {
                         addWarFileClasspathEntries(classPathFile, urls);
                     } else if (classpathEntry.endsWith(".ear")) {
-                        JarFile earZip = new JarFile(classPathFile);
+                        earZip = new JarFile(classPathFile);
 
                         Enumeration<? extends JarEntry> entries = earZip.entries();
                         while (entries.hasMoreElements()) {
@@ -857,6 +852,14 @@ public class Main {
                     }
                 } catch (Exception e) {
                     throw new CommandLineParsingException(e);
+                } finally {
+                    if(earZip != null){
+                        try {
+                            earZip.close();
+                        }catch (IOException e){
+                            LogFactory.getInstance().getLog().debug("Cannot close zip file ",e);
+                        }
+                    }
                 }
             }
         }
@@ -886,20 +889,27 @@ public class Main {
         URL url = new URL("jar:" + classPathFile.toURI().toURL() + "!/WEB-INF/classes/");
         logger.info("adding '" + url + "' to classpath");
         urls.add(url);
-        JarFile warZip = new JarFile(classPathFile);
-        Enumeration<? extends JarEntry> entries = warZip.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            if (entry.getName().startsWith("WEB-INF/lib")
-                    && entry.getName().toLowerCase().endsWith(".jar")) {
-                File jar = extract(warZip, entry);
-                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
-                logger.info("adding '" + newUrl + "' to classpath");
-                urls.add(newUrl);
-                jar.deleteOnExit();
+        JarFile warZip = null;
+        try {
+            warZip = new JarFile(classPathFile);
+            Enumeration<? extends JarEntry> entries = warZip.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (entry.getName().startsWith("WEB-INF/lib")
+                        && entry.getName().toLowerCase().endsWith(".jar")) {
+                    File jar = extract(warZip, entry);
+                    URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                    logger.info("adding '" + newUrl + "' to classpath");
+                    urls.add(newUrl);
+                    jar.deleteOnExit();
+                }
+            }
+        }finally {
+            if(warZip != null) {
+                warZip.close();
             }
         }
-    }
+        }
 
 
     private File extract(JarFile jar, JarEntry entry) throws IOException {
@@ -1315,14 +1325,19 @@ public class Main {
 
     private Writer getOutputWriter() throws UnsupportedEncodingException, IOException {
         String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
-
+        FileOutputStream fileOut = null;
         if (outputFile != null) {
             try {
-                FileOutputStream fileOut = new FileOutputStream(outputFile, false);
+                fileOut = new FileOutputStream(outputFile, false);
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
                 System.err.printf("Could not create output file %s\n", outputFile);
                 throw e;
+            }
+            finally {
+                if(fileOut != null) {
+                    fileOut.close();
+                }
             }
         } else {
             return new OutputStreamWriter(System.out, charsetName);

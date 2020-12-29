@@ -102,15 +102,13 @@ public class SQLFileChange extends AbstractSQLChange {
             return null;
         }
 
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
             inputStream = StreamUtil.openStream(path, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
         } catch (IOException e) {
             throw new IOException("Unable to read file '" + path + "'", e);
         }
-        if (inputStream == null) {
-            throw new IOException("File does not exist: '" + path + "'");
-        }
+
         return inputStream;
     }
 

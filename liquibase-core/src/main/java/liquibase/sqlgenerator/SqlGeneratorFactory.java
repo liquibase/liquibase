@@ -161,7 +161,7 @@ public class SqlGeneratorFactory {
 
     private boolean isTypeEqual(Type aType, Class aClass) {
         if (aType instanceof Class) {
-            return ((Class) aType).getName().equals(aClass.getName());
+            return true;
         }
         return aType.equals(aClass);
     }
@@ -262,7 +262,11 @@ public class SqlGeneratorFactory {
 
     public Warnings warn(SqlStatement statement, Database database) {
         //noinspection unchecked
-        return createGeneratorChain(statement, database).warn(statement, database);
+        SqlGeneratorChain sqlGeneratorChain = createGeneratorChain(statement, database);
+        if(sqlGeneratorChain !=null) {
+            sqlGeneratorChain.warn(statement, database);
+        }
+         return new Warnings();
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {

@@ -60,7 +60,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
             Database database) {
         String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
 
-        alterTable += getDefaultClause(statement, database);
+        alterTable += getDefaultColumnClause(statement, database);
 
         if (primaryKeyBeforeNotNull(database)) {
             if (statement.isPrimaryKey()) {
@@ -87,7 +87,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         return alterTable;
     }
 
-    private String getDefaultClause(AddColumnStatement statement, Database database) {
+    private String getDefaultColumnClause(AddColumnStatement statement, Database database) {
         String clause = "";
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {

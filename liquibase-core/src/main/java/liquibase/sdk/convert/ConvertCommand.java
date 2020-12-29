@@ -84,7 +84,6 @@ public class ConvertCommand extends AbstractCommand {
         try {
             outSerializer.write(changeLog.getChangeSets(), outputStream);
         } finally {
-            outputStream.flush();
             outputStream.close();
         }
 

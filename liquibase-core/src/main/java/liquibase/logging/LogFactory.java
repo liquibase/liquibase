@@ -28,7 +28,7 @@ public class LogFactory {
     /**
      * Set the instance used by this singleton. Used primarily for testing.
      */
-    public static void setInstance(LogFactory instance) {
+    public synchronized static void setInstance(LogFactory instance) {
         LogFactory.instance = instance;
     }
 

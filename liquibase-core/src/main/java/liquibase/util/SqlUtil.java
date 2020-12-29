@@ -56,6 +56,7 @@ public class SqlUtil {
     }
 
     public static Object parseValue(Database database, Object val, DataType type) {
+        Scanner scanner = null;
         if (!(val instanceof String)) {
             return val;
         }
@@ -114,7 +115,8 @@ public class SqlUtil {
             return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
         }
 
-        Scanner scanner = new Scanner(stringVal.trim());
+        try {
+        scanner = new Scanner(stringVal.trim());
         if (typeId == Types.ARRAY) {
             return new DatabaseFunction(stringVal);
         } else if ((liquibaseDataType instanceof BigIntType || typeId == Types.BIGINT)) {
@@ -140,32 +142,31 @@ public class SqlUtil {
 
             // Make sure we handle BooleanType values which are not Boolean
             if (database instanceof MSSQLDatabase) {
-              if (value instanceof Boolean) {
-                  if ((Boolean) value) {
-                      return new DatabaseFunction("'true'");
-                  } else {
-                      return new DatabaseFunction("'false'");
-                  }
-              } else if (value instanceof Integer) {
-                  if (((Integer) value) != 0) {
-                      return new DatabaseFunction("'true'");
-                  }
-                  else {
-                      return new DatabaseFunction("'false'");
-                  }
-              } else {
-                  // you can declare in MsSQL: `col_name bit default 'nonsense'`
-                  return new DatabaseFunction(String.format("'%s'", value));
-              }
+                if (value instanceof Boolean) {
+                    if ((Boolean) value) {
+                        return new DatabaseFunction("'true'");
+                    } else {
+                        return new DatabaseFunction("'false'");
+                    }
+                } else if (value instanceof Integer) {
+                    if (((Integer) value) != 0) {
+                        return new DatabaseFunction("'true'");
+                    } else {
+                        return new DatabaseFunction("'false'");
+                    }
+                } else {
+                    // you can declare in MsSQL: `col_name bit default 'nonsense'`
+                    return new DatabaseFunction(String.format("'%s'", value));
+                }
             }
             return value;
-        } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
+        } else if (liquibaseDataType instanceof BlobType || typeId == Types.BLOB) {
             if (strippedSingleQuotes) {
                 return stringVal;
             } else {
                 return new DatabaseFunction(stringVal);
             }
-        } else if ((liquibaseDataType instanceof BooleanType || typeId == Types.BOOLEAN )) {
+        } else if ((liquibaseDataType instanceof BooleanType || typeId == Types.BOOLEAN)) {
             if (scanner.hasNextBoolean()) {
                 return scanner.nextBoolean();
             } else {
@@ -280,11 +281,16 @@ public class SqlUtil {
             }
             LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
             if (strippedSingleQuotes) { //put quotes back
-                return new DatabaseFunction("'"+stringVal+"'");
+                return new DatabaseFunction("'" + stringVal + "'");
             }
             return new DatabaseFunction(stringVal);
         }
+    } finally {
+            if(scanner !=null) {
+                scanner.close();
+            }
     }
+   }
 
     public static String replacePredicatePlaceholders(Database database, String predicate, List<String> columnNames, List<Object> parameters) {
         Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(predicate.trim());

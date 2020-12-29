@@ -41,7 +41,7 @@ public class LiquibaseConfiguration {
      * Overrides the standard singleton instance created by getInstance().
      * Useful for alternate implementations with more complex AbstractConfigurationContainer lookup logic such as different configurations per thread.
      */
-    public static void setInstance(LiquibaseConfiguration instance) {
+    public synchronized static void setInstance(LiquibaseConfiguration instance) {
         LiquibaseConfiguration.instance = instance;
     }
 

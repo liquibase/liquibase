@@ -318,7 +318,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         this.filePath = StringUtils.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
-        if (filePath == null) {
+        if (filePath == null && changeLog != null) {
             filePath = changeLog.getFilePath();
         }
 
@@ -646,7 +646,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
-                    throw new MigrationFailedException(this, "Could not resetInternalState autocommit", e);
+                    log.debug( "Could not resetInternalState autocommit", e);
                 }
             }
         }
@@ -723,7 +723,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
-                    throw new RollbackFailedException("Could not resetInternalState autocommit", e);
+                    log.debug("Could not resetInternalState autocommit", new RollbackFailedException(e));
                 }
             }
         }

@@ -207,7 +207,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
             outputGobbler.finish();
 
         } catch (InterruptedException e) {
-            ;
+            // Restore interrupted state...
+            Thread.currentThread().interrupt();
         }
 
         String errorStreamOut = errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
@@ -268,6 +269,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 }
             } catch (InterruptedException ignore) {
                 // check again
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -383,6 +386,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignore) {
+                        // Restore interrupted state...
+                        Thread.currentThread().interrupt();
                     }
                 }
             } catch (IOException ioe) {
