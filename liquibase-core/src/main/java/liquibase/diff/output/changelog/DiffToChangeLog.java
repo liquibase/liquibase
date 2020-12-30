@@ -115,9 +115,8 @@ public class DiffToChangeLog {
                 return;
             }
 
-            RandomAccessFile randomAccessFile = null;
-            try {
-                randomAccessFile = new RandomAccessFile(file, "rw");
+            try ( RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");){
+
                 String line;
                 long offset = 0;
                 boolean foundEndTag = false;
@@ -143,14 +142,7 @@ public class DiffToChangeLog {
                     randomAccessFile.seek(0);
                     randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                 }
-                randomAccessFile.close();
-            }finally {
-                if(randomAccessFile !=null){
-                    randomAccessFile.close();
-                }
             }
-
-
         }
     }
 

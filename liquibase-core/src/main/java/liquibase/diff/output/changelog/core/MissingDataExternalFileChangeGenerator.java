@@ -82,10 +82,8 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                             + " is not a directory");
                 }
             }
-            CSVWriter outputFile =  null;
             String[] dataTypes = new String[columnNames.size()];
-            try {
-                outputFile = new CSVWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())));
+            try (CSVWriter  outputFile = new CSVWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())))){
                 String[] line = new String[columnNames.size()];
                 for (int i = 0; i < columnNames.size(); i++) {
                     line[i] = columnNames.get(i);
@@ -124,10 +122,6 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                     if (rowNum % 5000 == 0) {
                         outputFile.flush();
                     }
-                }
-            }finally {
-                if(outputFile != null) {
-                    outputFile.close();
                 }
             }
 

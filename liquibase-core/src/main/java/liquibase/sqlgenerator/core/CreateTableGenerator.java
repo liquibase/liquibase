@@ -278,14 +278,14 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
 
         for (UniqueConstraint uniqueConstraint : statement.getUniqueConstraints()) {
-            if (uniqueConstraint.getConstraintName() != null && !isInformixDatabase(database)) {
+            if (uniqueConstraint.getConstraintName() != null && !constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
-            if (uniqueConstraint.getConstraintName() != null && isInformixDatabase(database)) {
+            if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
@@ -340,7 +340,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         return new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
     }
 
-    private boolean isInformixDatabase(Database database) {
+    protected boolean constraintNameAfterUnique(Database database) {
         return database instanceof InformixDatabase;
     }
 

@@ -113,32 +113,24 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     }
 
     protected void writeHeader(File file) throws IOException {
-        Writer writer = null;
-        CSVWriter csvWriter = null;
-        try {
-            writer = new OutputStreamWriter(new FileOutputStream(file), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
-            csvWriter = new CSVWriter(writer);
-            csvWriter.writeNext(new String[]{
-                    "ID",
-                    "AUTHOR",
-                    "FILENAME",
-                    "DATEEXECUTED",
-                    "ORDEREXECUTED",
-                    "EXECTYPE",
-                    "MD5SUM",
-                    "DESCRIPTION",
-                    "COMMENTS",
-                    "TAG",
-                    "LIQUIBASE",
-                    "CONTEXTS",
-                    "LABELS"                    
-            });
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
-            if(csvWriter !=null){
-                csvWriter.close();
+        try( Writer writer = new OutputStreamWriter(new FileOutputStream(file),
+                LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())) {
+            try (CSVWriter csvWriter =new CSVWriter(writer)){
+                csvWriter.writeNext(new String[]{
+                        "ID",
+                        "AUTHOR",
+                        "FILENAME",
+                        "DATEEXECUTED",
+                        "ORDEREXECUTED",
+                        "EXECTYPE",
+                        "MD5SUM",
+                        "DESCRIPTION",
+                        "COMMENTS",
+                        "TAG",
+                        "LIQUIBASE",
+                        "CONTEXTS",
+                        "LABELS"
+                });
             }
         }
     }

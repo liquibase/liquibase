@@ -144,11 +144,8 @@ public class Main {
             File localPropertiesFile = new File(localDefaultsPathName);
 
             if (localPropertiesFile.exists()) {
-                FileInputStream stream = new FileInputStream(localPropertiesFile);
-                try {
+                try(FileInputStream stream = new FileInputStream(localPropertiesFile)){
                     main.parsePropertiesFile(stream);
-                } finally {
-                    stream.close();
                 }
             } else {
                 InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream(localDefaultsPathName);
@@ -161,11 +158,8 @@ public class Main {
                 }
             }
             if (propertiesFile.exists()) {
-                FileInputStream stream = new FileInputStream(propertiesFile);
-                try {
+               try( FileInputStream stream = new FileInputStream(propertiesFile)){
                     main.parsePropertiesFile(stream);
-                } finally {
-                    stream.close();
                 }
             } else {
                 InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream(main.defaultsFile);
@@ -809,7 +803,6 @@ public class Main {
 
     protected void configureClassLoader() throws CommandLineParsingException {
         final List<URL> urls = new ArrayList<URL>();
-        JarFile earZip = null;
         if (this.classpath != null) {
             String[] classpath;
             if (isWindows()) {
@@ -828,8 +821,7 @@ public class Main {
                     if (classpathEntry.endsWith(".war")) {
                         addWarFileClasspathEntries(classPathFile, urls);
                     } else if (classpathEntry.endsWith(".ear")) {
-                        earZip = new JarFile(classPathFile);
-
+                        try(JarFile earZip = new JarFile(classPathFile)) {
                         Enumeration<? extends JarEntry> entries = earZip.entries();
                         while (entries.hasMoreElements()) {
                             JarEntry entry = entries.nextElement();
@@ -844,7 +836,7 @@ public class Main {
                                 addWarFileClasspathEntries(warFile, urls);
                             }
                         }
-
+                    }
                     } else {
                         URL newUrl = new File(classpathEntry).toURI().toURL();
                         logger.debug("Adding '" + newUrl + "' to classpath");
@@ -852,14 +844,6 @@ public class Main {
                     }
                 } catch (Exception e) {
                     throw new CommandLineParsingException(e);
-                } finally {
-                    if(earZip != null){
-                        try {
-                            earZip.close();
-                        }catch (IOException e){
-                            LogFactory.getInstance().getLog().debug("Cannot close zip file ",e);
-                        }
-                    }
                 }
             }
         }
@@ -1325,19 +1309,12 @@ public class Main {
 
     private Writer getOutputWriter() throws UnsupportedEncodingException, IOException {
         String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
-        FileOutputStream fileOut = null;
         if (outputFile != null) {
-            try {
-                fileOut = new FileOutputStream(outputFile, false);
+            try (FileOutputStream fileOut = new FileOutputStream(outputFile, false)) {
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
                 System.err.printf("Could not create output file %s\n", outputFile);
                 throw e;
-            }
-            finally {
-                if(fileOut != null) {
-                    fileOut.close();
-                }
             }
         } else {
             return new OutputStreamWriter(System.out, charsetName);

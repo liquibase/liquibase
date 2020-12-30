@@ -161,7 +161,7 @@ public class SqlGeneratorFactory {
 
     private boolean isTypeEqual(Type aType, Class aClass) {
         if (aType instanceof Class) {
-            return true;
+            return ((Class<?>) aType).isAssignableFrom(aClass);
         }
         return aType.equals(aClass);
     }
