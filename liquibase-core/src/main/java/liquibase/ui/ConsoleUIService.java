@@ -62,7 +62,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
         final ConsoleWrapper console = getConsole();
 
         if (!console.supportsInput()) {
-            log.fine("No console attached so cannot prompt '" + prompt + "'. Using default value '" + defaultValue + "'");
+            log.fine("No console attached. Skipping interactive prompt: '" + prompt + "'. Using default value '" + defaultValue + "'");
             return defaultValue;
         }
 
@@ -102,7 +102,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
             final Logger log = Scope.getCurrentScope().getLog(getClass());
 
             if (headlessConfigValue) {
-                log.fine("Not prompting for user input because liquibase.headless=true");
+                log.fine("Not prompting for user input because liquibase.headless=true. Set to 'false' in liquibase.properties to change this behavior.");
                 console = new ConsoleWrapper(null);
             } else {
                 final Console systemConsole = System.console();
@@ -119,7 +119,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
                 }
             }
             if (!wasHeadlessOverridden) {
-                log.fine("To override or validate the auto-detected environment for user input, set the liquibase.headless property");
+                log.fine("To override or validate the auto-detected environment for user input, set the liquibase.headless property in liquibase.properties file.");
             }
         }
         return console;
