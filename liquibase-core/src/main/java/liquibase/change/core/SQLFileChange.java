@@ -124,10 +124,10 @@ public class SQLFileChange extends AbstractSQLChange {
         } catch (IOException e) {
             throw new IOException("Unable to read file '" + path + "'", e);
         }
-        if (inputStream == null) {
-            throw new IOException(FileUtil.getFileNotFoundMessage(path));
+        if (inputStream != null) {
+            return inputStream;
         }
-        return inputStream;
+        throw new IOException(FileUtil.getFileNotFoundMessage(path));
     }
 
     @Override

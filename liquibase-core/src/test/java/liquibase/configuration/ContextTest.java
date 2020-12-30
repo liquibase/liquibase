@@ -30,9 +30,9 @@ public class ContextTest {
 
     }
 
-    @Test(expected = UnexpectedLiquibaseException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void setValue_wrongType() {
-        exampleConfiguration.getContainer().setValue("propertyBooleanDefaultFalse", 124);
+        exampleConfiguration.getContainer().setValue("propertyIntegerDefaultOne", "a");
     }
 
     @Test
@@ -55,6 +55,7 @@ public class ContextTest {
             getContainer().addProperty("propertyBooleanNoDefault", Boolean.class).setDescription("An example boolean property with no default");
             getContainer().addProperty("propertyBooleanDefaultTrue", Boolean.class).setDefaultValue(true).addAlias("property.default.true");
             getContainer().addProperty("propertyBooleanDefaultFalse", Boolean.class).setDefaultValue(false);
+            getContainer().addProperty("propertyIntegerDefaultOne", Integer.class).setDefaultValue(1);
         }
     }
 

@@ -326,7 +326,22 @@
                 <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
               </configuration>
             </plugin>
+
+            <plugin>
+                <!-- by default don't run snyk on all modules. On  ones that "ship", mark them as skip=false -->
+                <groupId>io.snyk</groupId>
+                <artifactId>snyk-maven-plugin</artifactId>
+                <version>1.2.9</version>
+                <configuration>
+                    <skip>true</skip>
+                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
+                    <failOnSeverity>high</failOnSeverity>
+                    <org>${env.SNYK_ORG}</org>
+                    <includeProvidedDependencies>false</includeProvidedDependencies>
+                </configuration>
+            </plugin>
         </plugins>
+
 
         <pluginManagement>
             <plugins>

@@ -92,6 +92,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         init();
 
