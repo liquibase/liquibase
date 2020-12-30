@@ -16,6 +16,7 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
         super(loader);
     }
 
+    @java.lang.SuppressWarnings("squid:S2095")
     @Override
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList resourcesAsStream = super.openStreams(relativeTo, streamPath);
