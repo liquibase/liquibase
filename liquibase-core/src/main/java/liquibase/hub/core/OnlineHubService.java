@@ -297,7 +297,7 @@ public class OnlineHubService implements HubService {
         HubLinkRequest reportHubLink = new HubLinkRequest();
         reportHubLink.url = url;
 
-        return http.getHubUrl()+"/r/" + http.doPut("/api/v1/links", reportHubLink, HubLink.class).getKey();
+        return http.getHubUrl()+ http.doPut("/api/v1/links", reportHubLink, HubLink.class).getShortUrl();
     }
 
     /**
