@@ -136,7 +136,7 @@ public class MockHubService implements HubService {
     }
 
     @Override
-    public HubLink shortenReportLink(Connection connection, Operation operation) {
+    public String shortenLink(String url) throws LiquibaseException {
         return null;
     }
 

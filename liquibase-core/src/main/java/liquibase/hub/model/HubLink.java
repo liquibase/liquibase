@@ -14,7 +14,7 @@ public class HubLink implements HubModel {
 
     @Override
     public UUID getId() {
-        return null;
+        return id;
     }
 
     public void setUrl(String url) {
