@@ -125,7 +125,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }
-            if (doSyncHub || hubConnectionId != null) {
+            if (hubUpdater != null && (doSyncHub || hubConnectionId != null)) {
                 hubUpdater.syncHub(changeLogFile, database, changeLog, hubConnectionId);
             }
         } catch (DatabaseException e) {
