@@ -217,7 +217,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
 
             if (isCompressedFile(rootPath)) {
-                try (FileSystem fs = FileSystems.newFileSystem(rootPath, null)) {
+                try (FileSystem fs = FileSystems.newFileSystem(rootPath, (ClassLoader) null)) {
                     Path basePath = fs.getRootDirectories().iterator().next();
 
                     if (relativeTo != null) {
