@@ -357,7 +357,10 @@ public class Main {
                     }
 
                     main.applyDefaults();
-                    Scope.child(Scope.Attr.resourceAccessor, new ClassLoaderResourceAccessor(main.configureClassLoader()), () -> {
+                    Map<String, Object> innerScopeObjects = new HashMap<>();
+                    innerScopeObjects.put("defaultsFile", main.getDefaultsFile());
+                    innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
+                    Scope.child(innerScopeObjects, () -> {
                         main.doMigration();
 
                         if (COMMANDS.UPDATE.equals(main.command)) {
@@ -2073,6 +2076,10 @@ public class Main {
                 .getOutputEncoding();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
+    }
+
+    public String getDefaultsFile() {
+        return this.defaultsFile;
     }
 
     /**

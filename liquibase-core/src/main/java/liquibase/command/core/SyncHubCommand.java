@@ -5,6 +5,8 @@ import liquibase.changelog.*;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
@@ -88,7 +90,8 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     @Override
     protected CommandResult run() throws Exception {
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        if (! hubServiceFactory.isOnline()) {
+        boolean isOff = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF");
+        if (! hubServiceFactory.isOnline() || isOff) {
             if (failIfOnline) {
                 return new CommandResult("The command syncHub requires access to Liquibase Hub: " +
                         hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com", false);
