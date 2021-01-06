@@ -46,7 +46,7 @@ public class StandardHubService implements HubService {
 
     @Override
     public boolean isOnline() {
-        return true;
+        return !LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF");
     }
 
     public boolean isHubAvailable() {
@@ -173,16 +173,20 @@ public class StandardHubService implements HubService {
     }
 
     @Override
-    public HubRegisterResponse register(String email) throws LiquibaseHubException {
+    public HubRegisterResponse register(String email) throws LiquibaseException {
         HubRegister hubRegister = new HubRegister();
         hubRegister.setEmail(email);
-        HubRegisterResponse response = http.doPost("/api/v1/register", hubRegister, HubRegisterResponse.class);
-        if (response.getApiKey() != null) {
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            hubConfiguration.setLiquibaseHubApiKey(response.getApiKey());
-            if (isHubAvailable()) {
-                return response;
+        try {
+            HubRegisterResponse response = http.doPost("/api/v1/register", hubRegister, HubRegisterResponse.class);
+            if (response.getApiKey() != null) {
+                HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+                hubConfiguration.setLiquibaseHubApiKey(response.getApiKey());
+                if (isHubAvailable()) {
+                    return response;
+                }
             }
+        } catch (LiquibaseHubException e) {
+            throw new LiquibaseException(e.getMessage(), e);
         }
         return null;
     }

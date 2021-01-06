@@ -79,16 +79,10 @@ public class HubConfiguration extends AbstractConfigurationContainer {
     public String getLiquibaseHubMode() {
         final String value = getContainer().getValue(LIQUIBASE_HUB_MODE, String.class);
 
-        final List<String> validValues = Arrays.asList("off", "meta", "all", "notset");
+        final List<String> validValues = Arrays.asList("off", "meta", "all");
         if (!validValues.contains(value.toLowerCase())) {
             throw new RuntimeException(" An invalid liquibase.hub.mode value of "+value+" detected. Acceptable values are "+StringUtil.join(validValues, ", "));
         }
         return value;
-    }
-
-    public boolean getWasOverridden(String propertyName) {
-        final String value = getContainer().getValue(propertyName, String.class);
-        ConfigurationProperty hubProperty = getContainer().getProperty(propertyName);
-        return ! value.equals(hubProperty.getDefaultValue()) || hubProperty.getWasOverridden();
     }
 }

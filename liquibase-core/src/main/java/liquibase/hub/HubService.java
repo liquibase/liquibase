@@ -33,7 +33,7 @@ public interface HubService extends Plugin, PrioritizedService {
 
     List<Connection> getConnections(Connection exampleConnection) throws LiquibaseHubException;
 
-    HubRegisterResponse register(String email) throws LiquibaseHubException;
+    HubRegisterResponse register(String email) throws LiquibaseException;
 
     Connection createConnection(Connection connection) throws LiquibaseHubException;
 
