@@ -147,7 +147,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
             addColumnStatement.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
 
-            if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
+            if (((database instanceof MySQLDatabase) || (database instanceof OracleDatabase))
+                    && (column.getAfterColumn() != null)) {
                 addColumnStatement.setAddAfterColumn(column.getAfterColumn());
             } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
                        && (column.getBeforeColumn() != null)) {
