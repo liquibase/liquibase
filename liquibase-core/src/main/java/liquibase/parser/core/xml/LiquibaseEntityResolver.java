@@ -2,14 +2,12 @@ package liquibase.parser.core.xml;
 
 import liquibase.Scope;
 import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.InputStreamList;
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -35,7 +33,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/")
                 .replaceFirst("https?://", "");
 
-        ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
+
+        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(new FileSystemResourceAccessor(new File("/tmp")), new ClassLoaderResourceAccessor());
         InputStreamList streams = resourceAccessor.openStreams(null, path);
         if (streams.isEmpty()) {
             log.fine("Unable to resolve XML entity locally. Will load from network.");
