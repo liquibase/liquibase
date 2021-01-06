@@ -7,7 +7,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -34,7 +33,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replaceFirst("https?://", "");
 
 
-        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(new FileSystemResourceAccessor(new File("/tmp")), new ClassLoaderResourceAccessor());
+        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new ClassLoaderResourceAccessor());
         InputStreamList streams = resourceAccessor.openStreams(null, path);
         if (streams.isEmpty()) {
             log.fine("Unable to resolve XML entity locally. Will load from network.");
