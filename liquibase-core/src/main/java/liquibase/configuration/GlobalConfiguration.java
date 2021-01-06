@@ -24,6 +24,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
     public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
     public static final String FILTER_LOG_MESSAGES = "filterLogMessages";
+    public static final String USE_DB_LOCK = "useDbLock";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -105,6 +106,11 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(FILTER_LOG_MESSAGES, Boolean.class)
                 .setDescription("Should Liquibase filter log messages for potentially insecure data?")
                 .setDefaultValue(true);
+
+        getContainer().addProperty(USE_DB_LOCK, Boolean.class)
+            .setDescription(
+                "Should Liquibase use db locks, like Postgres transaction-level advisory locks, when applying the changeSets")
+            .setDefaultValue(false);
     }
 
     /**
@@ -276,6 +282,15 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setGeneratedChangeSetIdsContainDescription(boolean containDescription) {
         getContainer().setValue(GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION, containDescription);
+        return this;
+    }
+
+    public Boolean getUseDbLock() {
+        return getContainer().getValue(USE_DB_LOCK, Boolean.class);
+    }
+
+    public GlobalConfiguration setUseDbLock(boolean useDbLock) {
+        getContainer().setValue(USE_DB_LOCK, useDbLock);
         return this;
     }
 }
