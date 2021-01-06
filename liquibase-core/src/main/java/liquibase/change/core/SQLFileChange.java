@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;

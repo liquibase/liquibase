@@ -35,7 +35,7 @@ public class ChangeLogParameters {
     	// Next add system properties; they have higher precedence than / overwrite environment variables
     	externalParameters.putAll((Properties) System.getProperties().clone());
         
-    	for (Map.Entry entry : externalParameters.entrySet()) {
+    	for (Map.Entry<Object, Object> entry : externalParameters.entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
 

@@ -404,9 +404,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
                 ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
                 LabelExpression labelExpression = new LabelExpression(node.getChildValue(null, "labels", String.class));
-                if (labelExpression == null) {
-                    labelExpression = new LabelExpression();
-                }
                 Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
                 if (ignore == null) {
                     ignore = false;
@@ -457,7 +454,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         } else {
                             props.load(propertiesStream);
 
-                            for (Map.Entry entry : props.entrySet()) {
+                            for (Map.Entry<Object, Object> entry : props.entrySet()) {
                                 this.changeLogParameters.set(
                                         entry.getKey().toString(),
                                         entry.getValue().toString(),
