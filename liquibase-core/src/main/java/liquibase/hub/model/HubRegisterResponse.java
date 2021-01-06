@@ -6,7 +6,6 @@ public class HubRegisterResponse {
     private UUID organizationId;
     private UUID projectId;
     private String apiKey;
-    private boolean emailValidated;
 
     public UUID getOrganizationId() {
         return organizationId;
@@ -39,11 +38,4 @@ public class HubRegisterResponse {
         this.apiKey = apiKey;
     }
 
-    public boolean isEmailValidated() {
-        return emailValidated;
-    }
-
-    public void setEmailValidated(boolean emailValidated) {
-        this.emailValidated = emailValidated;
-    }
 }

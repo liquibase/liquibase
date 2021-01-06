@@ -90,8 +90,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     @Override
     protected CommandResult run() throws Exception {
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        boolean isOff = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF");
-        if (! hubServiceFactory.isOnline() || isOff) {
+        if (! hubServiceFactory.isOnline()) {
             if (failIfOnline) {
                 return new CommandResult("The command syncHub requires access to Liquibase Hub: " +
                         hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com", false);

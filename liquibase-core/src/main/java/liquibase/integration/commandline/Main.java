@@ -358,7 +358,7 @@ public class Main {
 
                     main.applyDefaults();
                     Map<String, Object> innerScopeObjects = new HashMap<>();
-                    innerScopeObjects.put("defaultsFile", main.getDefaultsFile());
+                    innerScopeObjects.put("defaultsFile", main.defaultsFile);
                     innerScopeObjects.put(Scope.Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor(main.configureClassLoader()));
                     Scope.child(innerScopeObjects, () -> {
                         main.doMigration();
@@ -2076,10 +2076,6 @@ public class Main {
                 .getOutputEncoding();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
-    }
-
-    public String getDefaultsFile() {
-        return this.defaultsFile;
     }
 
     /**

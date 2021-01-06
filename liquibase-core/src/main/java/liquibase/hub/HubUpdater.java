@@ -247,15 +247,12 @@ public class HubUpdater {
     public void register(String changeLogFile)
         throws LiquibaseException, CommandExecutionException {
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        String hubMode = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubMode());
-        if (hubMode.equals("off")) {
-            final String message =
-                "liquibase.hub.mode=off.  This operation will not be tracked in Hub.  To enable this feature, run liquibase hubsetup.";
-            Scope.getCurrentScope().getUI().sendMessage(message);
-            Scope.getCurrentScope().getLog(getClass()).info(message);
+        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+
+        if (!hubService.isOnline()) {
             return;
         }
-        if (hubConfiguration.getWasOverridden(HubConfiguration.LIQUIBASE_HUB_MODE) || changeLog.getChangeLogId() != null) {
+        if (!StringUtil.isEmpty(hubConfiguration.getLiquibaseHubApiKey()) || changeLog.getChangeLogId() != null) {
             return;
         }
 
@@ -264,20 +261,16 @@ public class HubUpdater {
         //
         String promptString =
             "Do you want to see this operation's report in Liquibase Hub, which improves team collaboration? \n" +
-                "If so, enter your email. If not, enter [N] to no longer be prompted, or [S] to skip for now, but ask again next time-";
-        String input = null;
-        String toLower = null;
-        while (input == null) {
-            input = Scope.getCurrentScope()
-                .getUI()
-                .prompt(promptString, "S", null, String.class);
-            toLower = input.trim().toLowerCase();
-            if (!(toLower.equals("s") || toLower.equals("n") || toLower.contains("@"))) {
-                Scope.getCurrentScope().getUI().sendMessage("Invalid input '" + input + "'");
-                input = null;
+                "If so, enter your email. If not, enter [N] to no longer be prompted, or [S] to skip for now, but ask again next time";
+        String input = Scope.getCurrentScope().getUI().prompt(promptString, "S", (input1, returnType) -> {
+            input1 = input1.trim().toLowerCase();
+            if (!(input1.equals("s") || input1.equals("n") || input1.contains("@"))) {
+                throw new IllegalArgumentException("Invalid input '" + input1 + "'");
             }
-        }
-        if (toLower.equals("n")) {
+            return input1;
+        }, String.class);
+
+        if (input.equals("n")) {
             //
             // Write hub.mode=off to a properties file
             //
@@ -295,12 +288,16 @@ public class HubUpdater {
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
             }
-        } else if (toLower.contains("@")) {
+        } else if (input.equals("s")) {
+            String message = "Skipping auto-registration";
+            Scope.getCurrentScope().getUI().sendMessage(message);
+            Scope.getCurrentScope().getLog(getClass()).warning(message);
+
+        } else  {
             //
             // Consider this an email
             // Call the Hub API to create a new user
             //
-            final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             HubRegisterResponse registerResponse = hubService.register(input);
             if (registerResponse == null) {
                 Scope.getCurrentScope().getUI().sendMessage("Unable to perform auto-registration for email address " +
@@ -317,14 +314,12 @@ public class HubUpdater {
                 try {
                     String defaultsFile = Scope.getCurrentScope().get("defaultsFile", String.class);
                     writeToPropertiesFile(defaultsFile, "liquibase.hub.apiKey=" + registerResponse.getApiKey() + "\n");
-                    writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=all\n");
 
                     message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
 
-                    message =
-                        "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
+                    message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
                     hubConfiguration.setLiquibaseHubApiKey(registerResponse.getApiKey());
@@ -334,10 +329,6 @@ public class HubUpdater {
                     Scope.getCurrentScope().getLog(getClass()).warning(message);
                 }
             }
-        } else {
-            String message = "Skipping auto-registration";
-            Scope.getCurrentScope().getUI().sendMessage(message);
-            Scope.getCurrentScope().getLog(getClass()).warning(message);
         }
     }
 
