@@ -22,7 +22,7 @@ public class BooleanType extends LiquibaseDataType {
             return new DatabaseDataType("BOOLEAN");
         }
 
-        if ((database instanceof AbstractDb2Database) || (database instanceof FirebirdDatabase)) {
+        if ((database instanceof Db2zDatabase) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
