@@ -3,34 +3,23 @@ package liquibase.hub.model;
 import java.util.Date;
 import java.util.UUID;
 
-public class HubLink implements HubModel {
-    private UUID id;
-
-    private String key;
+public class HubLink {
+    private String shortUrl;
 
     private String url;
 
     private Date createDate;
 
-    @Override
-    public UUID getId() {
-        return null;
+    public String getShortUrl() {
+        return shortUrl;
+    }
+
+    public void setShortUrl(String shortUrl) {
+        this.shortUrl = shortUrl;
     }
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
     }
 
     public String getUrl() {
