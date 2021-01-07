@@ -1,9 +1,12 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MariaDBDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
@@ -84,7 +87,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                     // remove strange zero-termination seen on some Oracle view definitions
                     int length = definition.length();
-                    if (definition.charAt(length-1) == 0) {
+                    if (length > 0 && definition.charAt(length-1) == 0) {
                       definition = definition.substring(0, length-1);
                     }
 
@@ -96,6 +99,29 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         // Strip the schema definition because it can optionally be included in the tag attribute
                         definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
+                    }
+
+                    definition = StringUtil.trimToNull(definition);
+                    if (definition == null) {
+                        definition = "[CANNOT READ VIEW DEFINITION]";
+                        String warningMessage = null;
+                        if (database instanceof MariaDBDatabase) {
+                            warningMessage =
+                                    "\nThe current MariaDB user does not have permissions to access view definitions needed for this Liquibase command.\n" +
+                                            "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. " +
+                                            "Learn more about altering permissions with suggested MariaDB GRANTs at https://docs.liquibase.com/workflows/liquibase-pro/mariadbgrants.html\n";
+
+                        } else if (database instanceof MySQLDatabase) {
+                            warningMessage =
+                                    "\nThe current MySQL user does not have permissions to access view definitions needed for this Liquibase command.\n" +
+                                    "Please search the changelog for '[CANNOT READ VIEW DEFINITION]' to locate inaccessible objects. This is\n" +
+                                    "potentially due to a known MySQL bug https://bugs.mysql.com/bug.php?id=22763. Learn more about altering\n" +
+                                    "permissions with suggested MySQL GRANTs at https://docs.liquibase.com/workflows/liquibase-pro/mysqlgrants.html\n";
+                        }
+                        if (warningMessage != null) {
+                            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + warningMessage);
+                            Scope.getCurrentScope().getLog(getClass()).warning(warningMessage);
+                        }
                     }
 
                     view.setDefinition(definition);

@@ -20,6 +20,7 @@ import java.io.InputStream;
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
 

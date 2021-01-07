@@ -3,10 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
-import liquibase.database.core.AbstractDb2Database;
-import liquibase.database.core.Db2zDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.sql.Sql;
@@ -28,7 +25,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureText", statement.getProcedureText());
         if (statement.getReplaceIfExists() != null) {
-            if (database instanceof MSSQLDatabase) {
+            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
                 if (statement.getReplaceIfExists() && (statement.getProcedureName() == null)) {
                     validationErrors.addError("procedureName is required if replaceIfExists = true");
                 }
@@ -53,28 +50,37 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         String procedureText = addSchemaToText(statement.getProcedureText(), schemaName, "PROCEDURE", database);
 
         if ((statement.getReplaceIfExists() != null) && statement.getReplaceIfExists()) {
-            String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
-            if (schemaName != null) {
-                fullyQualifiedName = database.escapeObjectName(schemaName, Schema.class) + "." + fullyQualifiedName;
-            }
-            sql.add(new UnparsedSql("if object_id('" + fullyQualifiedName + "', 'p') is null exec ('create procedure " + fullyQualifiedName + " as select 1 a')"));
+            if (database instanceof MSSQLDatabase) {
+                String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
+                if (schemaName != null) {
+                    fullyQualifiedName = database.escapeObjectName(schemaName, Schema.class) + "." + fullyQualifiedName;
+                }
+                sql.add(new UnparsedSql("if object_id('" + fullyQualifiedName + "', 'p') is null exec ('create procedure " + fullyQualifiedName + " as select 1 a')"));
 
-            StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
-            StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
-            Object next = "START";
-            while ((next != null) && !("create".equalsIgnoreCase(next.toString()) || "alter".equalsIgnoreCase(next
-                .toString())) && clauseIterator.hasNext()) {
-                next = clauseIterator.nextNonWhitespace();
+                StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
+                StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
+                Object next = "START";
+                while ((next != null) && !("create".equalsIgnoreCase(next.toString()) || "alter".equalsIgnoreCase(next
+                        .toString())) && clauseIterator.hasNext()) {
+                    next = clauseIterator.nextNonWhitespace();
+                }
+                clauseIterator.replace("ALTER");
+                procedureText = parsedSql.toString();
             }
-            clauseIterator.replace("ALTER");
-
-            procedureText = parsedSql.toString();
+            else {
+                String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
+                sql.add(new UnparsedSql("DROP PROCEDURE IF EXISTS " + fullyQualifiedName));
+            }
         }
 
         procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
+        if (procedureText == null) {
+            return sql.toArray(new Sql[0]);
+        }
 
-        if ((database instanceof MSSQLDatabase) && procedureText.toLowerCase().contains("merge") && !procedureText
-            .endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
+        if ((database instanceof MSSQLDatabase) &&
+            procedureText.toLowerCase().contains("merge") &&
+                !procedureText.endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
             StringClauses parsed = SqlParser.parse(procedureText);
             StringClauses.ClauseIterator clauseIterator = parsed.getClauseIterator();
             boolean reallyMerge = false;
@@ -88,7 +94,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 procedureText = procedureText + ";";
             }
         }
-        if (database instanceof Db2zDatabase & procedureText.toLowerCase().contains("replace")) {
+        if (database instanceof Db2zDatabase  && procedureText.toLowerCase().contains("replace")) {
             procedureText = procedureText.replace("OR REPLACE", "");
             procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }

@@ -25,6 +25,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String INCLUDE_CATALOG_IN_SPECIFICATION = "includeCatalogInSpecification";
     public static final String SHOULD_SNAPSHOT_DATA = "shouldSnapshotData";
     public static final String FILTER_LOG_MESSAGES = "filterLogMessages";
+    public static final String HEADLESS = "headless";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -110,6 +111,11 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(FILTER_LOG_MESSAGES, Boolean.class)
                 .setDescription("Should Liquibase filter log messages for potentially insecure data?")
                 .setDefaultValue(true);
+
+        getContainer().addProperty(HEADLESS, Boolean.class)
+                .setDescription("Force liquibase think it has no access to a keyboard?")
+                .setDefaultValue(false);
+
     }
 
     /**
@@ -216,6 +222,15 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setShouldFilterLogMessages(boolean filter) {
         getContainer().setValue(FILTER_LOG_MESSAGES, filter);
+        return this;
+    }
+
+    public boolean getHeadless() {
+        return getContainer().getValue(HEADLESS, Boolean.class);
+    }
+
+    public GlobalConfiguration setHeadless(boolean headless) {
+        getContainer().setValue(HEADLESS, headless);
         return this;
     }
 

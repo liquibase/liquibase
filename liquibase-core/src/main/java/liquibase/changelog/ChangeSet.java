@@ -333,10 +333,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         this.filePath = StringUtil.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
         if (filePath == null) {
-            filePath = changeLog.getFilePath();
+            if (changeLog != null) {
+                filePath = changeLog.getFilePath();
+            }
         } else {
             filePath = filePath.replaceAll("\\\\", "/")
-                    .replaceFirst("^/", "");
+                               .replaceFirst("^/", "");
 
         }
 
@@ -678,7 +680,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
-                    throw new MigrationFailedException(this, "Could not resetInternalState autocommit", e);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Could not resetInternalState autocommit", e);
                 }
             }
         }
@@ -780,7 +782,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
-                    throw new RollbackFailedException("Could not resetInternalState autocommit", e);
+                    Scope.getCurrentScope().getLog(getClass()).warning("Could not resetInternalState autocommit", e);
                 }
             }
         }
@@ -1143,7 +1145,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
         if ("dbms".equals(field)) {
             if ((this.getDbmsSet() != null) && !this.getDbmsSet().isEmpty()) {
-                return StringUtil.join(getDbmsSet(), ",xxx");
+                return StringUtil.join(getDbmsSet(), ",");
             } else {
                 return null;
             }

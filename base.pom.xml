@@ -50,7 +50,7 @@
     </scm>
 
     <properties>
-        <liquibase.base.version>4.1.1</liquibase.base.version>
+        <liquibase.base.version>4.3.0</liquibase.base.version>
         <liquibase.version.qualifier>-local</liquibase.version.qualifier>
         <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
         <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}</liquibase.version>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.24</version>
+            <version>1.27</version>
             <optional>true</optional>
         </dependency>
 
@@ -326,7 +326,22 @@
                 <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
               </configuration>
             </plugin>
+
+            <plugin>
+                <!-- by default don't run snyk on all modules. On  ones that "ship", mark them as skip=false -->
+                <groupId>io.snyk</groupId>
+                <artifactId>snyk-maven-plugin</artifactId>
+                <version>1.2.9</version>
+                <configuration>
+                    <skip>true</skip>
+                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
+                    <failOnSeverity>high</failOnSeverity>
+                    <org>${env.SNYK_ORG}</org>
+                    <includeProvidedDependencies>false</includeProvidedDependencies>
+                </configuration>
+            </plugin>
         </plugins>
+
 
         <pluginManagement>
             <plugins>

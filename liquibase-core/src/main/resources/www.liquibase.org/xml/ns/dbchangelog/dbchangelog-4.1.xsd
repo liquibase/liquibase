@@ -253,7 +253,7 @@
         <xsd:attribute name="driverName" type="xsd:string"/>
     </xsd:attributeGroup>
 
-    <!-- Attributes for databaseChangeLog -->
+    <!-- Attributes for changeSet -->
     <xsd:attributeGroup name="changeLogAttributes">
         <xsd:attribute name="logicalFilePath" type="xsd:string"/>
         <xsd:attribute name="context" type="xsd:string"/>
@@ -308,7 +308,7 @@
         <xsd:attribute name="validateNullable" type="booleanExp"/>
         <xsd:attribute name="validateUnique" type="booleanExp"/>
         <xsd:attribute name="validatePrimaryKey" type="booleanExp"/>
-        <xsd:attribute name="validateForeignKey " type="booleanExp"/>
+        <xsd:attribute name="validateForeignKey" type="booleanExp"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="column">

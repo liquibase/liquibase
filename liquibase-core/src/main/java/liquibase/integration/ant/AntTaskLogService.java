@@ -1,12 +1,9 @@
 package liquibase.integration.ant;
 
-import liquibase.integration.ant.AntTaskLogger;
 import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.core.AbstractLogService;
 import org.apache.tools.ant.Task;
-
-import java.util.logging.Level;
 
 /**
  * An implementation of the Liquibase LogService that logs all messages to the given Ant task. This should only be used
@@ -14,7 +11,7 @@ import java.util.logging.Level;
  */
 public final class AntTaskLogService extends AbstractLogService {
 
-    private AntTaskLogger logger;
+    private final AntTaskLogger logger;
 
     public AntTaskLogService(Task task) {
         logger = new AntTaskLogger(task, this.filter);

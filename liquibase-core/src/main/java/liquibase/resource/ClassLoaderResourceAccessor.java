@@ -67,6 +67,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                         } else {
                             Scope.getCurrentScope().getLog(getClass()).info("No filesystem provider for URL " + url.toExternalForm() + ". Will rely on classloader logic for listing files.");
                         }
+                    } catch (FileSystemNotFoundException fsnfe) {
+                        Scope.getCurrentScope().getLog(getClass()).info("Configured classpath location " + url.toString() + " does not exist");
                     } catch (Throwable e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Cannot create filesystem for url " + url.toExternalForm() + ": " + e.getMessage(), e);
                     }
@@ -90,6 +92,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         init();
 

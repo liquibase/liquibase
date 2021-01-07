@@ -25,6 +25,13 @@ services:
     volumes:
       - "./postgres-init.sh:/docker-entrypoint-initdb.d/postgres-init.sh"
 
+#  cockroachdb:
+#    image: cockroachdb/cockroach-unstable:v20.2.0-rc.3
+#    command: start-single-node --logtostderr --insecure
+#    ports:
+#      - "26257:26257"
+#      - "8080:8080"
+
   mssql:
     image: mcr.microsoft.com/mssql/server:2017-latest
     ports:
@@ -37,3 +44,4 @@ services:
       - "./mssql-init.sh:/docker-entrypoint-initdb.d/mssql-init.sh"
       - "./mssql-init.sql:/docker-entrypoint-initdb.d/mssql-init.sql"
     entrypoint: /bin/bash /docker-entrypoint-initdb.d/mssql-init.sh
+

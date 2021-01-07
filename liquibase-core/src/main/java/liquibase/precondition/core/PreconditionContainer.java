@@ -224,7 +224,9 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 message = new StringBuilder(getOnFailMessage());
             }
             if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                Scope.getCurrentScope().getLog(getClass()).info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
+                final String exceptionMessage = "Executing " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message;
+                Scope.getCurrentScope().getUI().sendMessage("WARNING: " + exceptionMessage);
+                Scope.getCurrentScope().getLog(getClass()).warning(exceptionMessage);
                 if (changeExecListener != null) {
                     changeExecListener.preconditionFailed(e, FailOption.WARN);
                 }

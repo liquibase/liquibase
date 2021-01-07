@@ -35,7 +35,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private List<ColumnConfig> columns;
+    private List<? extends ColumnConfig> columns;
     private ChangeSet changeSet;
 
     private Set<Closeable> closeables;
@@ -43,7 +43,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private ResourceAccessor resourceAccessor;
 
     protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String
-            tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
+            tableName, List<? extends ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
         this.database = database;
         this.changeSet = changeSet;
         this.catalogName = catalogName;
@@ -102,7 +102,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
      * @throws SQLException if JDBC objects to a setting (non-existent bind number, wrong column type etc.)
      * @throws DatabaseException if an I/O error occurs during the read of LOB values
      */
-    protected void attachParams(List<ColumnConfig> cols, PreparedStatement stmt)
+    protected void attachParams(List<? extends ColumnConfig> cols, PreparedStatement stmt)
             throws SQLException, DatabaseException {
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
@@ -330,6 +330,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
+    @java.lang.SuppressWarnings("squid:S2095")
     private InputStream getResourceAsStream(String valueLobFile) throws IOException, LiquibaseException {
         String fileName = getFileName(valueLobFile);
         InputStreamList streams = this.resourceAccessor.openStreams(null, fileName);
@@ -396,7 +397,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return tableName;
     }
 
-    public List<ColumnConfig> getColumns() {
+    public List<? extends ColumnConfig> getColumns() {
         return columns;
     }
 

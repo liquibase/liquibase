@@ -26,32 +26,30 @@ public class LockServiceFactory extends AbstractPluginFactory<LockService> {
 		final Database database = (Database) args[0];
 		if (obj.supports(database)) {
 			return obj.getPriority();
-		}
+        }
 		return Plugin.PRIORITY_NOT_APPLICABLE;
-	}
+	  }
 
 	public LockService getLockService(Database database) throws DatabaseException {
-		if (!openLockServices.containsKey(database)) {
+        if (!openLockServices.containsKey(database)) {
 			LockService lockService = getPlugin(database);
 
 			if (lockService == null) {
-				throw new UnexpectedLiquibaseException("Cannot find LockService for " + database.getShortName());
-			}
+                throw new UnexpectedLiquibaseException("Cannot find LockService for " + database.getShortName());
+			      }
 
 			lockService = (LockService) lockService.clone();
 			lockService.setDatabase(database);
 			lockService.init();
 
 			openLockServices.put(database, lockService);
-		}
-		return openLockServices.get(database);
+        }
+        return openLockServices.get(database);
+    }
 
-	}
-
-	public synchronized void resetAll() {
+    public synchronized void resetAll() {
 		for (LockService lockService : openLockServices.values()) {
-			lockService.reset();
-		}
-	}
-
+            lockService.reset();
+        }
+    }
 }
