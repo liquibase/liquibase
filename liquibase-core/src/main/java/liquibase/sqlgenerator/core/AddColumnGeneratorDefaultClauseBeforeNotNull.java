@@ -79,15 +79,6 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
                 alterTable += " PRIMARY KEY";
             }
         }
-
-        if ((statement.getAddAfterColumn() != null) && !statement.getAddAfterColumn().isEmpty()) {
-            alterTable += " AFTER " + statement.getAddAfterColumn() + " ";
-        }
-
-        if (statement.getAddAtPosition() != null) {
-            alterTable += " POSITION " + statement.getAddAtPosition().toString() + " ";
-        }
-
         return alterTable;
     }
 
