@@ -14,6 +14,7 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.RegisterChangeLogCommand;
 import liquibase.command.core.SyncHubCommand;
+import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -249,10 +250,20 @@ public class HubUpdater {
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
+        //
+        // Just return if Hub is off
+        //
         if (!hubService.isOnline()) {
             return;
         }
-        if (!StringUtil.isEmpty(hubConfiguration.getLiquibaseHubApiKey()) || changeLog.getChangeLogId() != null) {
+
+        //
+        // Do not try to register if
+        //   1.  We have a key already OR
+        //   2.  We have a changeLogId already
+        //
+        if (!StringUtil.isEmpty(hubConfiguration.getLiquibaseHubApiKey()) ||
+            changeLog.getChangeLogId() != null) {
             return;
         }
 
@@ -270,6 +281,7 @@ public class HubUpdater {
             return input1;
         }, String.class);
 
+        input = input.toLowerCase();
         if (input.equals("n")) {
             //
             // Write hub.mode=off to a properties file
