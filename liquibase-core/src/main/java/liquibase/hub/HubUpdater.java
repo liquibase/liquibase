@@ -304,8 +304,7 @@ public class HubUpdater {
                     input + ". Continuing.");
             } else {
                 //
-                // register the changelog and
-                // write to a properties file
+                // register the changelog and write to a properties file
                 //
                 String message = "Registering changelog file " + changeLogFile + " with Hub";
                 Scope.getCurrentScope().getUI().sendMessage(message);
@@ -314,6 +313,7 @@ public class HubUpdater {
                 try {
                     String defaultsFile = Scope.getCurrentScope().get("defaultsFile", String.class);
                     writeToPropertiesFile(defaultsFile, "liquibase.hub.apiKey=" + registerResponse.getApiKey() + "\n");
+                    writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=all\n");
 
                     message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);
