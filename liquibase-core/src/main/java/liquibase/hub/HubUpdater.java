@@ -23,6 +23,9 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.hub.model.*;
 import liquibase.integration.IntegrationDetails;
 import liquibase.logging.core.BufferedLogService;
@@ -43,24 +46,26 @@ import java.util.logging.Level;
 public class HubUpdater {
     private final Date startTime;
     private final DatabaseChangeLog changeLog;
+    private final Database database;
 
-    public HubUpdater(Date startTime, DatabaseChangeLog changeLog) {
+    public HubUpdater(Date startTime, DatabaseChangeLog changeLog, Database database) {
         this.startTime = startTime;
         this.changeLog = changeLog;
+        this.database = database;
     }
 
     /**
      * This method performs a syncHub and returns a new Operation instance
      * If there is an error or the Hub is not available it returns null
      *
-     * @param operationType     Operation type (UPDATE or ROLLBACK)
-     * @param database          Database object for connection
-     * @param connection        Connection for this operation
-     * @param changeLogFile     Path to DatabaseChangelog for this operatoin
-     * @param contexts          Contexts to use for filtering
-     * @param labelExpression   Labels to use for filtering
-     * @param changeLogIterator Iterator to use for going through change sets
-     * @return Operation                  Valid Operation object or null
+     * @param  operationType         Operation type (UPDATE or ROLLBACK)
+     * @param  database              Database object for connection
+     * @param  connection            Connection for this operation
+     * @param  changeLogFile         Path to DatabaseChangelog for this operatoin
+     * @param  contexts              Contexts to use for filtering
+     * @param  abelExpression        Labels to use for filtering
+     * @param  changeLogIterator     Iterator to use for going through change sets
+     * @return Operation             Valid Operation object or null
      * @throws LiquibaseHubException Thrown by HubService
      * @throws DatabaseException     Thrown by Liquibase core
      * @throws LiquibaseException    Thrown by Liquibase core
@@ -73,6 +78,13 @@ public class HubUpdater {
                                   LabelExpression labelExpression,
                                   ChangeLogIterator changeLogIterator)
         throws LiquibaseHubException, DatabaseException, LiquibaseException, SQLException {
+        //
+        // If our current Executor is a LoggingExecutor then just return since we will not update Hub
+        //
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        if (executor instanceof LoggingExecutor) {
+            return null;
+        }
         if (hubIsNotAvailable(changeLog.getChangeLogId())) {
             return null;
         }
@@ -142,6 +154,13 @@ public class HubUpdater {
      */
     public void postUpdateHub(Operation updateOperation, BufferedLogService bufferLog) {
         try {
+            //
+            // If our current Executor is a LoggingExecutor then just return since we will not update Hub
+            //
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+            if (executor instanceof LoggingExecutor) {
+                return;
+            }
             if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
                 return;
             }
@@ -181,6 +200,14 @@ public class HubUpdater {
                                                BufferedLogService bufferLog,
                                                String originalExceptionMessage) {
         try {
+            //
+            // If our current Executor is a LoggingExecutor then just return since we will not update Hub
+            //
+            Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+            if (executor instanceof LoggingExecutor) {
+                return;
+            }
+
             //
             // Not a valid Hub connection
             // Just go back
@@ -247,12 +274,19 @@ public class HubUpdater {
      */
     public void register(String changeLogFile)
         throws LiquibaseException, CommandExecutionException {
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+        //
+        // If our current Executor is a LoggingExecutor then just return since we will not update Hub
+        //
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        if (executor instanceof LoggingExecutor) {
+          return;
+        }
 
         //
         // Just return if Hub is off
         //
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         if (!hubService.isOnline()) {
             return;
         }

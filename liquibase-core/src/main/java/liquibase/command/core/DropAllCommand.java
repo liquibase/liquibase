@@ -115,7 +115,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
                 // Let the user know they can register for Hub
                 //
                 changeLog = liquibase.getDatabaseChangeLog();
-                hubUpdater = new HubUpdater(new Date(), changeLog);
+                hubUpdater = new HubUpdater(new Date(), changeLog, database);
                 hubUpdater.register(changeLogFile);
                 doSyncHub = checkForRegisteredChangeLog(changeLog);
             }
