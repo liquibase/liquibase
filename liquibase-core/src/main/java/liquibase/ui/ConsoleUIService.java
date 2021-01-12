@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtil;
@@ -20,6 +21,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private PrintStream outputStream = System.out;
     private PrintStream errorStream = System.out;
     private boolean outputStackTraces = false;
+    private boolean allowPrompt=true;
 
     private ConsoleWrapper console;
 
@@ -57,8 +59,25 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     }
 
     @Override
+    public void setAllowPrompt(boolean allowPrompt) throws IllegalArgumentException {
+        this.allowPrompt = allowPrompt;
+    }
+
+    @Override
+    public boolean getAllowPrompt() {
+        return allowPrompt;
+    }
+
+    @Override
     public <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type) {
+        //
+        // Check the allowPrompt flag
+        //
         Logger log = Scope.getCurrentScope().getLog(getClass());
+        if (! allowPrompt) {
+            log.fine("No prompt for input is allowed at this time");
+            return defaultValue;
+        }
         final ConsoleWrapper console = getConsole();
 
         if (!console.supportsInput()) {

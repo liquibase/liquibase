@@ -3,6 +3,8 @@ package liquibase
 
 import liquibase.changelog.ChangeLogIterator
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.configuration.HubConfiguration
+import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.exception.LiquibaseException
@@ -182,6 +184,7 @@ class LiquibaseTest extends Specification {
     def "update communicates with hub"() {
         given:
         Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
+        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey("API_KEY")
 
         when:
         liquibase.update("")
@@ -190,7 +193,7 @@ class LiquibaseTest extends Specification {
         mockHubService.sentObjects.toString() ==
             "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
 
-    }
+   }
 
 //    @Test(expected = LockException.class)
 //    public void testUpdateExceptionGettingLock() throws LiquibaseException {
