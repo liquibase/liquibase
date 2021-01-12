@@ -186,9 +186,10 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
       for (ColumnConfig column : getColumns()) {
           String columnRemarks = StringUtil.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
-              SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks, column.getType(), column.getDefaultValueObject());
+              SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks, column.getType());
               if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                   if (!(database instanceof MySQLDatabase)) {
+                      //don't re-add the comments with mysql because mysql messes with the column definition
                       sql.add(remarksStatement);
                   }
               }
