@@ -265,6 +265,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if (getConnection() instanceof OfflineConnection) {
             return getConnection().getCatalog();
         }
+
+        if (!(getConnection() instanceof JdbcConnection)) {
+            return defaultCatalogName;
+        }
+
         try {
             //noinspection HardCodedStringLiteral
             return Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);

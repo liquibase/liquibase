@@ -7,15 +7,10 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtil;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
     @Override
@@ -51,23 +46,12 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         String remarksEscaped = database.escapeStringForDatabase(StringUtil.trimToEmpty(statement.getRemarks()));
 
         if (database instanceof MySQLDatabase) {
-            Object defaultValue = statement.getDefaultValue();
-            String defaultSql = "";
-            if (null != defaultValue) {
-                if (defaultValue instanceof DatabaseFunction) {
-                    defaultSql = " DEFAULT " +
-                            DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
-                } else {
-                    defaultSql = " DEFAULT " +
-                            DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).objectToSql(defaultValue, database);
-                }
-            }
             // generate mysql sql  ALTER TABLE cat.user MODIFY COLUMN id int DEFAULT 1001  COMMENT 'A String'
             return new Sql[]{new UnparsedSql("ALTER TABLE " + database.escapeTableName(
                     statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY COLUMN "
                     + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " "
                     + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database)
-                    + defaultSql + " COMMENT '" + remarksEscaped + "'", getAffectedColumn(statement))};
+                    + " COMMENT '" + remarksEscaped + "'", getAffectedColumn(statement))};
         } else if (database instanceof MSSQLDatabase) {
             String schemaName = statement.getSchemaName();
             if (schemaName == null) {
