@@ -71,6 +71,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         streamPath = streamPath.replace("\\", "/");
         streamPath = streamPath.replaceFirst("^[\\\\/]([a-zA-Z]:)", "$1");
@@ -216,7 +217,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
 
             if (isCompressedFile(rootPath)) {
-                try (FileSystem fs = FileSystems.newFileSystem(rootPath, null)) {
+                try (FileSystem fs = FileSystems.newFileSystem(rootPath, (ClassLoader) null)) {
                     Path basePath = fs.getRootDirectories().iterator().next();
 
                     if (relativeTo != null) {

@@ -686,7 +686,7 @@ public class StringUtil {
             // since line comments could be inside block comments, we want to
             // remove them first.
             String lastBlockComment = getLastBlockComment(str.toString());
-            if (isNotEmpty(lastBlockComment)) {
+            if (lastBlockComment != null && ! lastBlockComment.isEmpty()) {
                 str.setLength(str.length() - lastBlockComment.length());
                 // we just modified the end of the string,
                 // do another loop to check for next block or line comments
@@ -694,7 +694,7 @@ public class StringUtil {
             }
             // now check for the line comments
             String lastLineComment = getLastLineComment(str.toString());
-            if (isNotEmpty(lastLineComment)) {
+            if (lastLineComment != null && ! lastLineComment.isEmpty()) {
                 str.setLength(str.length() - lastLineComment.length());
                 // we just modified the end of the string,
                 // do another loop to check for next block or line comments
