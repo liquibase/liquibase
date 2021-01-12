@@ -76,7 +76,7 @@ public class Liquibase implements AutoCloseable {
     protected static final int CHANGESET_ID_CHANGESET_PART = 1;
     protected static final int CHANGESET_ID_CHANGELOG_PART = 0;
     private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    protected static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
+    public static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
 
     protected Database database;
     private DatabaseChangeLog databaseChangeLog;

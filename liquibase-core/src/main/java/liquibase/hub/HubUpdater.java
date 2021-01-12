@@ -1,9 +1,6 @@
 package liquibase.hub;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.RuntimeEnvironment;
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -23,11 +20,14 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.hub.model.*;
 import liquibase.integration.IntegrationDetails;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.core.BufferedLogService;
 import liquibase.util.StringUtil;
 
@@ -314,6 +314,12 @@ public class HubUpdater {
         //
         // Prompt user to connect with Hub
         //
+        try {
+            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            lockService.releaseLock();
+        } catch (LockException e) {
+            Scope.getCurrentScope().getLog(HubUpdater.class).warning(Liquibase.MSG_COULD_NOT_RELEASE_LOCK);
+        }
         String promptString =
             "Do you want to see this operation's report in Liquibase Hub, which improves team collaboration? \n" +
                 "If so, enter your email. If not, enter [N] to no longer be prompted, or [S] to skip for now, but ask again next time";
