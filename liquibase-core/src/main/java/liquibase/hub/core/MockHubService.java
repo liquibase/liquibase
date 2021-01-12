@@ -78,6 +78,11 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public HubRegisterResponse register(String email) throws LiquibaseHubException {
+        return null;
+    }
+
+    @Override
     public void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         sentObjects.computeIfAbsent("setRanChangeSets/" + connectionId, k -> new ArrayList<>()).addAll(ranChangeSets);
     }

@@ -5,6 +5,8 @@ import liquibase.changelog.*;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;

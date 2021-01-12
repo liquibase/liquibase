@@ -21,7 +21,7 @@ import java.net.InetAddress;
 import java.text.ParseException;
 import java.util.*;
 
-public class OnlineHubService implements HubService {
+public class StandardHubService implements HubService {
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     private Boolean available;
     private UUID organizationId;
@@ -31,7 +31,7 @@ public class OnlineHubService implements HubService {
 
     private HttpClient http;
 
-    public OnlineHubService() {
+    public StandardHubService() {
         this.http = createHttpClient();
     }
 
@@ -41,16 +41,12 @@ public class OnlineHubService implements HubService {
 
     @Override
     public int getPriority() {
-        if (isHubAvailable()) {
-            return Plugin.PRIORITY_DEFAULT + 100;
-        } else {
-            return PRIORITY_NOT_APPLICABLE;
-        }
+        return Plugin.PRIORITY_DEFAULT + 100;
     }
 
     @Override
     public boolean isOnline() {
-        return true;
+        return !LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF");
     }
 
     public boolean isHubAvailable() {
@@ -174,6 +170,25 @@ public class OnlineHubService implements HubService {
         }
 
         return returnList;
+    }
+
+    @Override
+    public HubRegisterResponse register(String email) throws LiquibaseException {
+        HubRegister hubRegister = new HubRegister();
+        hubRegister.setEmail(email);
+        try {
+            HubRegisterResponse response = http.doPost("/api/v1/register", hubRegister, HubRegisterResponse.class);
+            if (response.getApiKey() != null) {
+                HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+                hubConfiguration.setLiquibaseHubApiKey(response.getApiKey());
+                if (isHubAvailable()) {
+                    return response;
+                }
+            }
+        } catch (LiquibaseHubException e) {
+            throw new LiquibaseException(e.getMessage(), e);
+        }
+        return null;
     }
 
     @Override
