@@ -873,9 +873,7 @@ public class Main {
         URL url = new URL("jar:" + classPathFile.toURI().toURL() + "!/WEB-INF/classes/");
         logger.info("adding '" + url + "' to classpath");
         urls.add(url);
-        JarFile warZip = null;
-        try {
-            warZip = new JarFile(classPathFile);
+        try (JarFile warZip = new JarFile(classPathFile)) {
             Enumeration<? extends JarEntry> entries = warZip.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
@@ -888,12 +886,8 @@ public class Main {
                     jar.deleteOnExit();
                 }
             }
-        }finally {
-            if(warZip != null) {
-                warZip.close();
-            }
         }
-        }
+    }
 
 
     private File extract(JarFile jar, JarEntry entry) throws IOException {

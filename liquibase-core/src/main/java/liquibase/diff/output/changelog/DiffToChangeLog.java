@@ -115,8 +115,7 @@ public class DiffToChangeLog {
                 return;
             }
 
-            try ( RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");){
-
+            try ( RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")){
                 String line;
                 long offset = 0;
                 boolean foundEndTag = false;
