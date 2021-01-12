@@ -34,9 +34,6 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         if (database instanceof MySQLDatabase) {
             validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(setColumnRemarksStatement.getColumnDataType()));
         }
-        if (database instanceof MySQLDatabase) {
-            validationErrors.checkRequiredField("columnDataType", StringUtil.trimToNull(setColumnRemarksStatement.getColumnDataType()));
-        }
         return validationErrors;
     }
 
