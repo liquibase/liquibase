@@ -140,6 +140,11 @@ public class MockHubService implements HubService {
 
     }
 
+    @Override
+    public String shortenLink(String url) throws LiquibaseException {
+        return null;
+    }
+
     public void reset() {
         randomUUID = UUID.randomUUID();
 

@@ -39,9 +39,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 /**
- *
  * This class handles updating Hub during Liquibase operations
- *
  */
 public class HubUpdater {
     private final Date startTime;
@@ -184,6 +182,12 @@ public class HubUpdater {
                         .setTimestampLog(startTime)
                 )
             );
+
+            //
+            // Show the report link
+            //
+            showOperationReportLink(updateOperation, hubService);
+
         } catch (LiquibaseException e) {
             Scope.getCurrentScope().getLog(getClass()).warning(e.getMessage(), e);
         }
@@ -230,6 +234,12 @@ public class HubUpdater {
                         .setLogMessage(bufferLog.getLogAsString(Level.INFO))
                 )
             );
+
+            //
+            // Show the report link
+            //
+            showOperationReportLink(updateOperation, hubService);
+
         } catch (LiquibaseException serviceException) {
             Scope.getCurrentScope().getLog(getClass()).warning(originalExceptionMessage, serviceException);
         }
@@ -423,6 +433,28 @@ public class HubUpdater {
         } else {
             throw new RuntimeException(result.print());
         }
+    }
+
+    //
+    // Show a link to the user
+    //
+    private void showOperationReportLink(Operation updateOperation, HubService hubService) throws LiquibaseException {
+        //
+        // Send the operation report link to Hub for shortening
+        //
+        Connection connection = updateOperation.getConnection();
+
+        String reportURL =
+            "/organizations/" + hubService.getOrganization().getId().toString() +
+                "/projects/" + connection.getProject().getId() +
+                "/operations/" + updateOperation.getId().toString();
+
+
+        String hubLink = hubService.shortenLink(reportURL);
+
+        String message = "View a report of this operation at " + hubLink;
+        Scope.getCurrentScope().getUI().sendMessage(message);
+        Scope.getCurrentScope().getLog(getClass()).info(message);
     }
 
     //

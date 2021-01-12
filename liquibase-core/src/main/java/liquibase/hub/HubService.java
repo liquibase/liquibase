@@ -45,6 +45,15 @@ public interface HubService extends Plugin, PrioritizedService {
 
     OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException;
 
+    /**
+     * Request to shorten a URL to create a more user-friendly link to the user
+     *
+     * @param url The link to shorten
+     * @return New url
+     * @throws LiquibaseHubException If shortening fails
+     */
+    String shortenLink(String url) throws LiquibaseException;
+
     void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException;
 
     void sendOperationChanges(OperationChange operationChange) throws LiquibaseHubException;
