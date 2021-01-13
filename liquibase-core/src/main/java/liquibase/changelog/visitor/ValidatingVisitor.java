@@ -72,15 +72,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         RanChangeSet result = ranIndex.get(changeSet.toString(false));
         if (result == null) {
             for (RanChangeSet ranChangeSet : ranIndex.values()) {
-                if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())) {
-                    if (ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())) {
-                        String changeSetPath = DatabaseChangeLog.normalizePath(changeSet.getFilePath());
-                        String ranChangeSetPath = DatabaseChangeLog.normalizePath(ranChangeSet.getChangeLog());
-                        if (ranChangeSetPath.equalsIgnoreCase(changeSetPath)
-                            || ranChangeSetPath.endsWith(changeSetPath) || changeSetPath.endsWith(ranChangeSetPath)) {
-                            result = ranChangeSet;
-                        }
-                    }
+                if (ranChangeSet.isSameAs(changeSet)) {
+                    result = ranChangeSet;
+                    break;
                 }
             }
         }
