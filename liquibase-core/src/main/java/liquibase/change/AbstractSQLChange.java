@@ -193,7 +193,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         String checkSumSql = StringUtils.trimToNull(getSql());
         if (checkSumSql == null) {
-            return new SqlStatement[0];
+          throw new UnexpectedLiquibaseException("sqFile not found");
         }
 
         String processedSQL = normalizeLineEndings(checkSumSql);
