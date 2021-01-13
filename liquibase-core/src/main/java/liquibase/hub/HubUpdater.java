@@ -11,7 +11,6 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.RegisterChangeLogCommand;
 import liquibase.command.core.SyncHubCommand;
-import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -59,9 +58,9 @@ public class HubUpdater {
      * @param  operationType         Operation type (UPDATE or ROLLBACK)
      * @param  database              Database object for connection
      * @param  connection            Connection for this operation
-     * @param  changeLogFile         Path to DatabaseChangelog for this operatoin
+     * @param  changeLogFile         Path to DatabaseChangelog for this operation
      * @param  contexts              Contexts to use for filtering
-     * @param  abelExpression        Labels to use for filtering
+     * @param  labelExpression        Labels to use for filtering
      * @param  changeLogIterator     Iterator to use for going through change sets
      * @return Operation             Valid Operation object or null
      * @throws LiquibaseHubException Thrown by HubService
@@ -122,7 +121,7 @@ public class HubUpdater {
         // If the operation type is DROPALL then we send no changes
         //
         ListVisitor listVisitor;
-        if (operationType.toUpperCase().equals("ROLLBACK")) {
+        if (operationType.equalsIgnoreCase("ROLLBACK")) {
             listVisitor = new RollbackListVisitor();
         } else {
             listVisitor = new ListVisitor();
@@ -375,11 +374,25 @@ public class HubUpdater {
                 try {
                     String defaultsFile = Scope.getCurrentScope().get("defaultsFile", String.class);
                     writeToPropertiesFile(defaultsFile, "liquibase.hub.apiKey=" + registerResponse.getApiKey() + "\n");
-                    writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=all\n");
 
-                    message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
-                    Scope.getCurrentScope().getUI().sendMessage(message);
-                    Scope.getCurrentScope().getLog(getClass()).info(message);
+                    //
+                    // If there is no liquibase.hub.mode setting then add one with value 'all'
+                    // Do not update liquibase.hub.mode if it is already set
+                    //
+                    if (StringUtil.isEmpty(hubConfiguration.getLiquibaseHubMode())) {
+                        writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=all\n");
+                        message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
+                        Scope.getCurrentScope().getUI().sendMessage(message);
+                        Scope.getCurrentScope().getLog(getClass()).info(message);
+                    } else {
+                        message = "Updated the liquibase.hub.apiKey property.";
+                        String message2 = "The liquibase.hub.mode is already set to " + hubConfiguration.getLiquibaseHubMode() + ". It will not be updated.";
+                        Scope.getCurrentScope().getUI().sendMessage(message);
+                        Scope.getCurrentScope().getUI().sendMessage(message2);
+                        Scope.getCurrentScope().getLog(getClass()).warning(message);
+                        Scope.getCurrentScope().getLog(getClass()).warning(message2);
+                    }
+
 
                     message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
                     Scope.getCurrentScope().getUI().sendMessage(message);
@@ -486,8 +499,8 @@ public class HubUpdater {
             int driverMajorVersion = conn.getMetaData().getDriverMajorVersion();
             int driverMinorVersion = conn.getMetaData().getDriverMinorVersion();
             Scope.getCurrentScope().getLog(getClass()).fine("Database driver version       " +
-                Integer.toString(driverMajorVersion) + "." + Integer.toString(driverMinorVersion));
-            integrationDetails.setParameter("db__driverVersion", Integer.toString(driverMajorVersion) + "." + Integer.toString(driverMinorVersion));
+                driverMajorVersion + "." + driverMinorVersion);
+            integrationDetails.setParameter("db__driverVersion", driverMajorVersion + "." + driverMinorVersion);
         } else {
             integrationDetails.setParameter("db__driverVersion", "Unable to determine");
         }
