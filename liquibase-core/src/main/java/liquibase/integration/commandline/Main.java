@@ -144,8 +144,11 @@ public class Main {
             File localPropertiesFile = new File(localDefaultsPathName);
 
             if (localPropertiesFile.exists()) {
-                try(FileInputStream stream = new FileInputStream(localPropertiesFile)){
+                FileInputStream stream = new FileInputStream(localPropertiesFile);
+                try {
                     main.parsePropertiesFile(stream);
+                } finally {
+                    stream.close();
                 }
             } else {
                 InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream(localDefaultsPathName);
@@ -158,8 +161,11 @@ public class Main {
                 }
             }
             if (propertiesFile.exists()) {
-               try( FileInputStream stream = new FileInputStream(propertiesFile)){
+                FileInputStream stream = new FileInputStream(propertiesFile);
+                try {
                     main.parsePropertiesFile(stream);
+                } finally {
+                    stream.close();
                 }
             } else {
                 InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream(main.defaultsFile);
@@ -760,6 +766,12 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
+//            } else if(arg.equals("-p")) {
+//            	//Prompt for password
+//            	password = new String(System.console().readPassword("DB Password:"));
+//            } else if(arg.equals("-rp")) {
+//            	//Prompt for reference password
+//            	referencePassword = new String(System.console().readPassword("Reference DB Password:"));
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }
@@ -821,7 +833,8 @@ public class Main {
                     if (classpathEntry.endsWith(".war")) {
                         addWarFileClasspathEntries(classPathFile, urls);
                     } else if (classpathEntry.endsWith(".ear")) {
-                        try(JarFile earZip = new JarFile(classPathFile)) {
+                        JarFile earZip = new JarFile(classPathFile);
+
                         Enumeration<? extends JarEntry> entries = earZip.entries();
                         while (entries.hasMoreElements()) {
                             JarEntry entry = entries.nextElement();
@@ -836,7 +849,7 @@ public class Main {
                                 addWarFileClasspathEntries(warFile, urls);
                             }
                         }
-                    }
+
                     } else {
                         URL newUrl = new File(classpathEntry).toURI().toURL();
                         logger.debug("Adding '" + newUrl + "' to classpath");
@@ -873,18 +886,17 @@ public class Main {
         URL url = new URL("jar:" + classPathFile.toURI().toURL() + "!/WEB-INF/classes/");
         logger.info("adding '" + url + "' to classpath");
         urls.add(url);
-        try (JarFile warZip = new JarFile(classPathFile)) {
-            Enumeration<? extends JarEntry> entries = warZip.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                if (entry.getName().startsWith("WEB-INF/lib")
-                        && entry.getName().toLowerCase().endsWith(".jar")) {
-                    File jar = extract(warZip, entry);
-                    URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
-                    logger.info("adding '" + newUrl + "' to classpath");
-                    urls.add(newUrl);
-                    jar.deleteOnExit();
-                }
+        JarFile warZip = new JarFile(classPathFile);
+        Enumeration<? extends JarEntry> entries = warZip.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry entry = entries.nextElement();
+            if (entry.getName().startsWith("WEB-INF/lib")
+                    && entry.getName().toLowerCase().endsWith(".jar")) {
+                File jar = extract(warZip, entry);
+                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                logger.info("adding '" + newUrl + "' to classpath");
+                urls.add(newUrl);
+                jar.deleteOnExit();
             }
         }
     }
@@ -1303,8 +1315,10 @@ public class Main {
 
     private Writer getOutputWriter() throws UnsupportedEncodingException, IOException {
         String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+
         if (outputFile != null) {
-            try (FileOutputStream fileOut = new FileOutputStream(outputFile, false)) {
+            try {
+                FileOutputStream fileOut = new FileOutputStream(outputFile, false);
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
                 System.err.printf("Could not create output file %s\n", outputFile);
