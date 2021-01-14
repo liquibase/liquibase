@@ -16,8 +16,9 @@ import java.util.*;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
- * <p>
+ *
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
+ *
  */
 public abstract class AbstractSQLChange extends AbstractChange implements DbmsTargetedChange {
 
@@ -52,7 +53,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     /**
      * {@inheritDoc}
-     *
      * @param database
      * @return
      */
@@ -149,7 +149,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     /**
      * Set the end delimiter for splitting SQL statements. Set to null to use the default delimiter.
-     *
      * @param endDelimiter
      */
     public void setEndDelimiter(String endDelimiter) {
@@ -163,17 +162,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public CheckSum generateCheckSum() {
-        try {
-            String checkSumSql = this.sql;
-            if (checkSumSql == null) {
-                checkSumSql = "";
+            String statementSql = this.sql;
+            if (statementSql == null) {
+                statementSql = "";
             }
-            try (InputStream stream = new ByteArrayInputStream(checkSumSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()))) {
-                return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        } catch (Exception e) {
+            try (InputStream  stream = new ByteArrayInputStream(statementSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()))){
+            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
+        } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
@@ -191,12 +186,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 
-        String checkSumSql = StringUtils.trimToNull(getSql());
-        if (checkSumSql == null) {
-          throw new UnexpectedLiquibaseException("sqFile not found");
+        String statementSql = StringUtils.trimToNull(getSql());
+        if (statementSql == null) {
+            return new SqlStatement[0];
         }
 
-        String processedSQL = normalizeLineEndings(checkSumSql);
+        String processedSQL = normalizeLineEndings(statementSql);
         if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
             return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
@@ -254,7 +249,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {
             this.stream = new PushbackInputStream(stream, 2048);
             try {
-                this.headerStream = new ByteArrayInputStream((endDelimiter + ":" + splitStatements + ":" + stripComments + ":").getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -332,7 +327,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                         if (resizingBuffer.size() > 0) {
 
                             byte[] buf = new byte[resizingBuffer.size()];
-                            for (int i = 0; i < resizingBuffer.size(); i++) {
+                            for (int i=0; i< resizingBuffer.size(); i++) {
                                 buf[i] = resizingBuffer.get(i);
                             }
 
