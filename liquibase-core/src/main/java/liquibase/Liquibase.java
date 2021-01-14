@@ -421,14 +421,9 @@ public class Liquibase implements AutoCloseable {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
-                try {
+                update(contexts, labelExpression, checkLiquibaseTables);
 
-                    update(contexts, labelExpression, checkLiquibaseTables);
-
-                    output.flush();
-                } catch (IOException e) {
-                    throw new LiquibaseException(e);
-                }
+                flushOutputWriter(output);
 
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
             }
@@ -1389,6 +1384,10 @@ public class Liquibase implements AutoCloseable {
     }
 
     private void flushOutputWriter(Writer output) throws LiquibaseException {
+        if (output == null) {
+            return;
+        }
+
         try {
             output.flush();
         } catch (IOException e) {
