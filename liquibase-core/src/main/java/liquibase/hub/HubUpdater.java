@@ -11,6 +11,7 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.RegisterChangeLogCommand;
 import liquibase.command.core.SyncHubCommand;
+import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -312,6 +313,7 @@ public class HubUpdater {
 
         //
         // Prompt user to connect with Hub
+        // Release the lock before prompting
         //
         try {
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -329,6 +331,12 @@ public class HubUpdater {
             }
             return input1;
         }, String.class);
+
+        //
+        // Re-lock before proceeding
+        //
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        lockService.waitForLock();
 
         input = input.toLowerCase();
         if (input.equals("n")) {
@@ -353,7 +361,6 @@ public class HubUpdater {
             String message = "Skipping auto-registration";
             Scope.getCurrentScope().getUI().sendMessage(message);
             Scope.getCurrentScope().getLog(getClass()).warning(message);
-
         } else  {
             //
             // Consider this an email
@@ -379,7 +386,8 @@ public class HubUpdater {
                     // If there is no liquibase.hub.mode setting then add one with value 'all'
                     // Do not update liquibase.hub.mode if it is already set
                     //
-                    if (StringUtil.isEmpty(hubConfiguration.getLiquibaseHubMode())) {
+                    ConfigurationProperty hubModeProperty = hubConfiguration.getProperty(HubConfiguration.LIQUIBASE_HUB_MODE);
+                    if (! hubModeProperty.getWasOverridden()) {
                         writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=all\n");
                         message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                         Scope.getCurrentScope().getUI().sendMessage(message);
@@ -392,8 +400,6 @@ public class HubUpdater {
                         Scope.getCurrentScope().getLog(getClass()).warning(message);
                         Scope.getCurrentScope().getLog(getClass()).warning(message2);
                     }
-
-
                     message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);

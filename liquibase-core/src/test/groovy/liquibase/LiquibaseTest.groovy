@@ -11,12 +11,15 @@ import liquibase.exception.LiquibaseException
 import liquibase.hub.HubService
 import liquibase.hub.HubServiceFactory
 import liquibase.hub.core.MockHubService
+import liquibase.hub.model.Connection
 import liquibase.lockservice.LockService
 import liquibase.lockservice.LockServiceFactory
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserFactory
 import liquibase.parser.MockChangeLogParser
 import liquibase.sdk.resource.MockResourceAccessor
+import liquibase.ui.ConsoleUIService
+import liquibase.ui.ConsoleUIServiceTest
 import spock.lang.Specification
 
 import static org.junit.Assert.*
@@ -193,7 +196,58 @@ class LiquibaseTest extends Specification {
         mockHubService.sentObjects.toString() ==
             "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
 
-   }
+    }
+
+    def "getConnection returns warning message if API key does not exist and the changelog is registered"() {
+        given:
+        Map<String, Object> scopedObjects = new HashMap<>()
+        TestConsoleUIService uiService = new TestConsoleUIService()
+        scopedObjects.put(Scope.Attr.ui.name(), uiService)
+        def scopeId = Scope.enter(null, scopedObjects)
+
+        when:
+        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
+        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey(null)
+        DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+        def changeLogId = UUID.randomUUID().toString()
+        changeLog.setChangeLogId(changeLogId)
+        Connection connection = liquibase.getConnection(changeLog)
+        List<String> messages = uiService.getMessages()
+        String message = messages.get(0)
+        Scope.exit(scopeId)
+
+        then:
+        connection == null
+        message ==
+                "WARNING: The changelog ID '" + changeLogId + "' was found, but no API Key exists.\n" +
+                "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports.\n" +
+                "Learn more at https://hub.liquibase.com."
+    }
+
+    def "getConnection returns warning message if API key exists but the changelog is not registered"() {
+        given:
+        Map<String, Object> scopedObjects = new HashMap<>()
+        TestConsoleUIService uiService = new TestConsoleUIService()
+        scopedObjects.put(Scope.Attr.ui.name(), uiService)
+        def scopeId = Scope.enter(null, scopedObjects)
+
+        when:
+        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
+        LiquibaseConfiguration.instance.getConfiguration(HubConfiguration.class).setLiquibaseHubApiKey("API_KEY")
+        DatabaseChangeLog changeLog = liquibase.getDatabaseChangeLog()
+        changeLog.setChangeLogId(null)
+        Connection connection = liquibase.getConnection(changeLog)
+        List<String> messages = uiService.getMessages()
+        String message = messages.get(0)
+        Scope.exit(scopeId)
+
+        then:
+        connection == null
+        message ==
+          "WARNING: The API key 'API_KEY' was found, but no changelog ID exists.\n" +
+          "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
+          "Learn more at https://hub.liquibase.com."
+    }
 
 //    @Test(expected = LockException.class)
 //    public void testUpdateExceptionGettingLock() throws LiquibaseException {
@@ -254,6 +308,18 @@ class LiquibaseTest extends Specification {
 //            }
 //        });
 //    }
+
+    public static class TestConsoleUIService extends ConsoleUIService {
+        private List<String> messages = new ArrayList<>()
+        @Override
+        void sendMessage(String message) {
+            messages.add(message)
+        }
+
+        List<String> getMessages() {
+            return messages
+        }
+    }
 
     /**
      * Convenience helper class for testing Liquibase methods that simply delegate to another.

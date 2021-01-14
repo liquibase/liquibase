@@ -323,8 +323,8 @@ public class Liquibase implements AutoCloseable {
                 String message =
                     "The API key '" + hubConfiguration.getLiquibaseHubApiKey() + "' was found, but no changelog ID exists.\n" +
                     "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
-                    "Learn more at https://hub.liquibase.com";
-                Scope.getCurrentScope().getUI().sendMessage("WARN: " + message);
+                    "Learn more at https://hub.liquibase.com.";
+                Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
             }
             return null;
@@ -334,10 +334,10 @@ public class Liquibase implements AutoCloseable {
         // Warn about the situation where there is a changeLog ID, but no API key
         //
         if (StringUtil.isEmpty(hubConfiguration.getLiquibaseHubApiKey()) && changeLogId != null) {
-            String message = "The ID '" + changeLogId + "' was found, but no API Key exists.\n" +
+            String message = "The changelog ID '" + changeLogId + "' was found, but no API Key exists.\n" +
                              "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports.\n" +
-                             "Learn more at https://hub.liquibase.com";
-            Scope.getCurrentScope().getUI().sendMessage("WARN: " + message);
+                             "Learn more at https://hub.liquibase.com.";
+            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
             Scope.getCurrentScope().getLog(getClass()).warning(message);
             return null;
         }

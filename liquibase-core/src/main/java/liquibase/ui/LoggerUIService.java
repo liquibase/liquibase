@@ -13,7 +13,6 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
 
     private Level standardLogLevel = Level.INFO;
     private Level errorLogLevel = Level.SEVERE;
-    private boolean allowPrompt=false;
 
     @Override
     public int getPriority() {
@@ -45,7 +44,7 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
 
     @Override
     public boolean getAllowPrompt() {
-        return allowPrompt;
+        return false;
     }
 
     /**
