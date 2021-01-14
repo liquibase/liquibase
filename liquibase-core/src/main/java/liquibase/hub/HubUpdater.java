@@ -338,6 +338,8 @@ public class HubUpdater {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
+        String defaultsFilePath = Scope.getCurrentScope().get("defaultsFile", String.class);
+        File defaultsFile = new File(defaultsFilePath);
         input = input.toLowerCase();
         if (input.equals("n")) {
             //
@@ -347,7 +349,6 @@ public class HubUpdater {
                 String message = "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports. Learn more at https://hub.liquibase.com";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
-                String defaultsFile = Scope.getCurrentScope().get("defaultsFile", String.class);
                 writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=off\n");
                 message = "Updated properties file " + defaultsFile + " to set liquibase.hub.mode=off";
                 Scope.getCurrentScope().getUI().sendMessage(message);
@@ -366,49 +367,73 @@ public class HubUpdater {
             // Consider this an email
             // Call the Hub API to create a new user
             //
-            HubRegisterResponse registerResponse = hubService.register(input);
+            HubRegisterResponse registerResponse = null;
+            try {
+                registerResponse = hubService.register(input);
+            }
+            catch (LiquibaseException lhe) {
+                String message = "Unable to perform auto-registration for email address " + input + ": " + lhe.getMessage() + ".\n" +
+                    "No operation report will be generated.";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
+                return;
+            }
             if (registerResponse == null) {
-                Scope.getCurrentScope().getUI().sendMessage("Unable to perform auto-registration for email address " +
-                    input + ". Continuing.");
-            } else {
+                String message = "Unable to perform auto-registration for email address " + input + "\n." +
+                    "No operation report will be generated.";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
+                return;
+            }
+            String message = null;
+            try {
                 //
-                // register the changelog and write to a properties file
+                // Update the properties file
                 //
-                String message = "Registering changelog file " + changeLogFile + " with Hub";
+                writeToPropertiesFile(defaultsFile, "liquibase.hub.apiKey=" + registerResponse.getApiKey() + "\n");
+
+                //
+                // If there is no liquibase.hub.mode setting then add one with value 'all'
+                // Do not update liquibase.hub.mode if it is already set
+                //
+                ConfigurationProperty hubModeProperty = hubConfiguration.getProperty(HubConfiguration.LIQUIBASE_HUB_MODE);
+                if (! hubModeProperty.getWasOverridden()) {
+                    writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=all\n");
+                    message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
+                    Scope.getCurrentScope().getUI().sendMessage(message);
+                    Scope.getCurrentScope().getLog(getClass()).info(message);
+                } else {
+                    message = "Updated the liquibase.hub.apiKey property.";
+                    String message2 = "The liquibase.hub.mode is already set to " + hubConfiguration.getLiquibaseHubMode() + ". It will not be updated.";
+                    Scope.getCurrentScope().getUI().sendMessage(message);
+                    Scope.getCurrentScope().getUI().sendMessage(message2);
+                    Scope.getCurrentScope().getLog(getClass()).warning(message);
+                    Scope.getCurrentScope().getLog(getClass()).warning(message2);
+                }
+
+                //
+                // register the changelog
+                // Update the API key in HubConfiguration
+                //
+                message = "Registering changelog file " + changeLogFile + " with Hub";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
                 registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
-                try {
-                    String defaultsFile = Scope.getCurrentScope().get("defaultsFile", String.class);
-                    writeToPropertiesFile(defaultsFile, "liquibase.hub.apiKey=" + registerResponse.getApiKey() + "\n");
+                hubConfiguration.setLiquibaseHubApiKey(registerResponse.getApiKey());
 
-                    //
-                    // If there is no liquibase.hub.mode setting then add one with value 'all'
-                    // Do not update liquibase.hub.mode if it is already set
-                    //
-                    ConfigurationProperty hubModeProperty = hubConfiguration.getProperty(HubConfiguration.LIQUIBASE_HUB_MODE);
-                    if (! hubModeProperty.getWasOverridden()) {
-                        writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=all\n");
-                        message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
-                        Scope.getCurrentScope().getUI().sendMessage(message);
-                        Scope.getCurrentScope().getLog(getClass()).info(message);
-                    } else {
-                        message = "Updated the liquibase.hub.apiKey property.";
-                        String message2 = "The liquibase.hub.mode is already set to " + hubConfiguration.getLiquibaseHubMode() + ". It will not be updated.";
-                        Scope.getCurrentScope().getUI().sendMessage(message);
-                        Scope.getCurrentScope().getUI().sendMessage(message2);
-                        Scope.getCurrentScope().getLog(getClass()).warning(message);
-                        Scope.getCurrentScope().getLog(getClass()).warning(message2);
-                    }
-                    message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
-                    Scope.getCurrentScope().getUI().sendMessage(message);
-                    Scope.getCurrentScope().getLog(getClass()).info(message);
-                    hubConfiguration.setLiquibaseHubApiKey(registerResponse.getApiKey());
-                } catch (IOException ioe) {
-                    message = "Unable to write information to liquibase.properties: " + ioe.getMessage();
-                    Scope.getCurrentScope().getUI().sendMessage(message);
-                    Scope.getCurrentScope().getLog(getClass()).warning(message);
-                }
+                message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                Scope.getCurrentScope().getLog(getClass()).info(message);
+            } catch (IOException ioe) {
+                message = "Unable to write information to liquibase.properties: " + ioe.getMessage() + "\n" +
+                    "Please check your permissions.  No operations will be reported.";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                Scope.getCurrentScope().getLog(getClass()).warning(message);
+            } catch (CommandExecutionException cee) {
+                message = "Unable to register changelog: " + cee.getMessage() + "\n" +
+                    "No operations will be reported.";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                Scope.getCurrentScope().getLog(getClass()).warning(message);
             }
         }
     }
@@ -416,11 +441,10 @@ public class HubUpdater {
     //
     // Write the string to a properties file
     //
-    private void writeToPropertiesFile(String defaultsFile, String stringToWrite) throws IOException {
-        File f = new File(defaultsFile);
+    private void writeToPropertiesFile(File defaultsFile, String stringToWrite) throws IOException {
         String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
-        try (RandomAccessFile randomAccessFile = new RandomAccessFile(f, "rw")) {
-            randomAccessFile.seek(f.length());
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(defaultsFile, "rw")) {
+            randomAccessFile.seek(defaultsFile.length());
             randomAccessFile.write(stringToWrite.getBytes(encoding));
         }
     }
@@ -453,11 +477,7 @@ public class HubUpdater {
         // Execute registerChangeLog
         //
         CommandResult result = registerChangeLogCommand.execute();
-        if (result.succeeded) {
-            Scope.getCurrentScope().getUI().sendMessage(result.print());
-        } else {
-            throw new RuntimeException(result.print());
-        }
+        Scope.getCurrentScope().getUI().sendMessage(result.print());
     }
 
     //

@@ -179,11 +179,7 @@ public class StandardHubService implements HubService {
         try {
             HubRegisterResponse response = http.doPost("/api/v1/register", hubRegister, HubRegisterResponse.class);
             if (response.getApiKey() != null) {
-                HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-                hubConfiguration.setLiquibaseHubApiKey(response.getApiKey());
-                if (isHubAvailable()) {
-                    return response;
-                }
+                return response;
             }
         } catch (LiquibaseHubException e) {
             throw new LiquibaseException(e.getMessage(), e);
