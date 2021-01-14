@@ -16,6 +16,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     private String tableName;
     private String columnName;
     private String remarks;
+    private String columnDataType;
 
     @Override
     public ValidationErrors validate(Database database) {
@@ -28,7 +29,7 @@ public class SetColumnRemarksChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
-                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks)
+                new SetColumnRemarksStatement(catalogName, schemaName, tableName, columnName, remarks, columnDataType)
         };
     }
 
@@ -80,5 +81,13 @@ public class SetColumnRemarksChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    public String getColumnDataType() {
+        return columnDataType;
+    }
+
+    public void setColumnDataType(String columnDataType) {
+        this.columnDataType = columnDataType;
     }
 }
