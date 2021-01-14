@@ -339,7 +339,10 @@ public class HubUpdater {
         lockService.waitForLock();
 
         String defaultsFilePath = Scope.getCurrentScope().get("defaultsFile", String.class);
-        File defaultsFile = new File(defaultsFilePath);
+        File defaultsFile = null;
+        if (defaultsFilePath != null) {
+            defaultsFile = new File(defaultsFilePath);
+        }
         input = input.toLowerCase();
         if (input.equals("n")) {
             //
