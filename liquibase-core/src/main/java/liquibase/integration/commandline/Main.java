@@ -833,20 +833,21 @@ public class Main {
                     if (classpathEntry.endsWith(".war")) {
                         addWarFileClasspathEntries(classPathFile, urls);
                     } else if (classpathEntry.endsWith(".ear")) {
-                        JarFile earZip = new JarFile(classPathFile);
+                        try (JarFile earZip = new JarFile(classPathFile)) {
 
-                        Enumeration<? extends JarEntry> entries = earZip.entries();
-                        while (entries.hasMoreElements()) {
-                            JarEntry entry = entries.nextElement();
-                            if (entry.getName().toLowerCase().endsWith(".jar")) {
-                                File jar = extract(earZip, entry);
-                                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
-                                urls.add(newUrl);
-                                logger.debug("Adding '" + newUrl + "' to classpath");
-                                jar.deleteOnExit();
-                            } else if (entry.getName().toLowerCase().endsWith("war")) {
-                                File warFile = extract(earZip, entry);
-                                addWarFileClasspathEntries(warFile, urls);
+                            Enumeration<? extends JarEntry> entries = earZip.entries();
+                            while (entries.hasMoreElements()) {
+                                JarEntry entry = entries.nextElement();
+                                if (entry.getName().toLowerCase().endsWith(".jar")) {
+                                    File jar = extract(earZip, entry);
+                                    URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                                    urls.add(newUrl);
+                                    logger.debug("Adding '" + newUrl + "' to classpath");
+                                    jar.deleteOnExit();
+                                } else if (entry.getName().toLowerCase().endsWith("war")) {
+                                    File warFile = extract(earZip, entry);
+                                    addWarFileClasspathEntries(warFile, urls);
+                                }
                             }
                         }
 
@@ -886,17 +887,18 @@ public class Main {
         URL url = new URL("jar:" + classPathFile.toURI().toURL() + "!/WEB-INF/classes/");
         logger.info("adding '" + url + "' to classpath");
         urls.add(url);
-        JarFile warZip = new JarFile(classPathFile);
-        Enumeration<? extends JarEntry> entries = warZip.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            if (entry.getName().startsWith("WEB-INF/lib")
-                    && entry.getName().toLowerCase().endsWith(".jar")) {
-                File jar = extract(warZip, entry);
-                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
-                logger.info("adding '" + newUrl + "' to classpath");
-                urls.add(newUrl);
-                jar.deleteOnExit();
+        try (JarFile warZip = new JarFile(classPathFile)) {
+            Enumeration<? extends JarEntry> entries = warZip.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (entry.getName().startsWith("WEB-INF/lib")
+                        && entry.getName().toLowerCase().endsWith(".jar")) {
+                    File jar = extract(warZip, entry);
+                    URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                    logger.info("adding '" + newUrl + "' to classpath");
+                    urls.add(newUrl);
+                    jar.deleteOnExit();
+                }
             }
         }
     }
@@ -1286,40 +1288,15 @@ public class Main {
         }
 
         return CommandLineUtils.createDatabaseObject(resourceAccessor, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName, this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
-//        Driver driverObject;
-//        try {
-//            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
-//        } catch (Exception e) {
-//            throw new RuntimeException("Cannot find database driver: " + e.getMessage());
-//        }
-//
-//        Properties info = new Properties();
-//        info.put("user", username);
-//        info.put("password", password);
-//
-//        Connection connection;
-//        try {
-//            connection = driverObject.connect(url, info);
-//        } catch (SQLException e) {
-//            throw new DatabaseException("Connection could not be created to " + url + ": " + e.getMessage(), e);
-//        }
-//        if (connection == null) {
-//            throw new DatabaseException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-//        }
-//
-//        Database database = DatabaseFactory.getWriteExecutor().findCorrectDatabaseImplementation(connection);
-//        database.setDefaultSchemaName(defaultSchemaName);
-//
-//        return database;
     }
-
     private Writer getOutputWriter() throws UnsupportedEncodingException, IOException {
         String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
 
         if (outputFile != null) {
             try {
-                FileOutputStream fileOut = new FileOutputStream(outputFile, false);
-                return new OutputStreamWriter(fileOut, charsetName);
+                try (FileOutputStream fileOut = new FileOutputStream(outputFile, false)) {
+                    return new OutputStreamWriter(fileOut, charsetName);
+                }
             } catch (IOException e) {
                 System.err.printf("Could not create output file %s\n", outputFile);
                 throw e;
