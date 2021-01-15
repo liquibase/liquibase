@@ -375,14 +375,14 @@ public class HubUpdater {
                 registerResponse = hubService.register(input);
             }
             catch (LiquibaseException lhe) {
-                String message = "Unable to perform auto-registration for email address " + input + ": " + lhe.getMessage() + ".\n" +
+                String message = "Account creation failed for email address '" + input + "': " + lhe.getMessage() + ".\n" +
                     "No operation report will be generated.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
                 return;
             }
             if (registerResponse == null) {
-                String message = "Unable to perform auto-registration for email address " + input + "\n." +
+                String message = "Account creation failed for email address '" + input + "'.\n" +
                     "No operation report will be generated.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
