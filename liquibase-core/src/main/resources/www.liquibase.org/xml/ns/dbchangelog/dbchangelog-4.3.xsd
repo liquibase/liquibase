@@ -484,6 +484,7 @@
             <xsd:attributeGroup ref="changeAttributes"/>
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="constraintName" type="xsd:string"/>
+            <xsd:attribute name="dropIndex" type="booleanExp"/>
         </xsd:complexType>
     </xsd:element>
 
