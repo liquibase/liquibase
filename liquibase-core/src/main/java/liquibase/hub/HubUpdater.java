@@ -352,7 +352,7 @@ public class HubUpdater {
                 String message = "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports. Learn more at https://hub.liquibase.com";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
-                writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=off\n");
+                writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=off\n");
                 message = "Updated properties file " + defaultsFile + " to set liquibase.hub.mode=off";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
@@ -393,7 +393,7 @@ public class HubUpdater {
                 //
                 // Update the properties file
                 //
-                writeToPropertiesFile(defaultsFile, "liquibase.hub.apiKey=" + registerResponse.getApiKey() + "\n");
+                writeToPropertiesFile(defaultsFile, "\nliquibase.hub.apiKey=" + registerResponse.getApiKey() + "\n");
 
                 //
                 // If there is no liquibase.hub.mode setting then add one with value 'all'
@@ -401,7 +401,7 @@ public class HubUpdater {
                 //
                 ConfigurationProperty hubModeProperty = hubConfiguration.getProperty(HubConfiguration.LIQUIBASE_HUB_MODE);
                 if (! hubModeProperty.getWasOverridden()) {
-                    writeToPropertiesFile(defaultsFile, "liquibase.hub.mode=all\n");
+                    writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=all\n");
                     message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
@@ -421,8 +421,8 @@ public class HubUpdater {
                 message = "Registering changelog file " + changeLogFile + " with Hub";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
-                registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
                 hubConfiguration.setLiquibaseHubApiKey(registerResponse.getApiKey());
+                registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
 
                 message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
@@ -437,6 +437,7 @@ public class HubUpdater {
                     "No operations will be reported.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
+                hubConfiguration.setLiquibaseHubApiKey(null);
             }
         }
     }
