@@ -346,12 +346,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         @Override
-        public void mark(int readlimit) {
-            stream.mark(readlimit);
+        public synchronized void mark(int readLimit) {
+            stream.mark(readLimit);
         }
 
         @Override
-        public void reset() throws IOException {
+        public synchronized void reset() throws IOException {
             stream.reset();
         }
 

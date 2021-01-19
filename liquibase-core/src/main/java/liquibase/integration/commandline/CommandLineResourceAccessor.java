@@ -16,18 +16,20 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
         super(loader);
     }
 
+    @java.lang.SuppressWarnings("squid:S2095")
     @Override
     public InputStreamList openStreams(String relativeTo, String streamPath) throws IOException {
         InputStreamList resourcesAsStream = super.openStreams(relativeTo, streamPath);
-        if (resourcesAsStream == null) {
-            for (String altPath : getAlternatePaths(streamPath)) {
-                resourcesAsStream = super.openStreams(relativeTo, altPath);
-                if (resourcesAsStream != null) {
-                    return resourcesAsStream;
-                }
+        if (resourcesAsStream != null) {
+            return resourcesAsStream;
+        }
+        for (String altPath : getAlternatePaths(streamPath)) {
+            InputStreamList altResourcesAsStream = super.openStreams(relativeTo, altPath);
+            if (altResourcesAsStream != null) {
+                return altResourcesAsStream;
             }
         }
-        return resourcesAsStream;
+        return null;
     }
 
 

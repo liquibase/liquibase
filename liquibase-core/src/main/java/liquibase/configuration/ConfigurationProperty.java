@@ -1,6 +1,7 @@
 package liquibase.configuration;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtil;
 
 import java.math.BigDecimal;
@@ -132,11 +133,13 @@ public class ConfigurationProperty {
      * Overwrites the value currently stored in this property. It he passed type is not compatible with the defined type, an exception is thrown.
      */
     public void setValue(Object value) {
-        if (valueHandler != null) {
+        if (valueHandler == null) {
+            value = ObjectUtil.convert(value, type);
+        } else {
             value = valueHandler.convert(value);
         }
         if ((value != null) && !type.isAssignableFrom(value.getClass())) {
-            throw new UnexpectedLiquibaseException("Property "+name+" on is of type "+type.getSimpleName()+", not "+value.getClass().getSimpleName());
+            throw new UnexpectedLiquibaseException("Property "+name+" is of type "+type.getSimpleName()+", not "+value.getClass().getSimpleName());
         }
 
         this.value = value;

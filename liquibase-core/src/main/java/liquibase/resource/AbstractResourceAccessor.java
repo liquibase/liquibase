@@ -13,6 +13,7 @@ import java.io.InputStream;
 public abstract class AbstractResourceAccessor extends AbstractExtensibleObject implements ResourceAccessor {
 
     @Override
+    @java.lang.SuppressWarnings("squid:S2095")
     public InputStream openStream(String relativeTo, String streamPath) throws IOException {
         InputStreamList streamList = this.openStreams(relativeTo, streamPath);
 

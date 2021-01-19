@@ -98,8 +98,11 @@ public class DependencyUtil {
                             nodeToRemoveLinks = links.size();
                         }
                     }
-                    Scope.getCurrentScope().getLog(getClass()).fine("Potential StackOverflowException. Pro-actively removing "+nodeToRemove.value+" with "+nodeToRemoveLinks+" incoming nodes");
-                    nextNodesToDisplay.remove(nodeToRemove);
+                    if (nodeToRemove != null) {
+                        Scope.getCurrentScope().getLog(getClass()).fine("Potential StackOverflowException. Pro-actively removing " +
+                                nodeToRemove.value + " with " + nodeToRemoveLinks + " incoming nodes");
+                        nextNodesToDisplay.remove(nodeToRemove);
+                    }
                 }
 
                 if (recursiveSizeDepth >= 0) {

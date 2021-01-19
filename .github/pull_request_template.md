@@ -1,12 +1,3 @@
----
-name: Pull Request
-about: Create a report to help us improve
-title: ''
-labels: Status:Discovery
-assignees: ''
-
----
-
 <!--- This environment context section helps us quickly review your PR. 
       Please take a minute to fill-out this information. -->
 ## Environment
