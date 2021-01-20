@@ -46,6 +46,8 @@ public class HubUpdater {
     private final DatabaseChangeLog changeLog;
     private final Database database;
 
+    private static final String SEPARATOR_LINE = "\n----------------------------------------------------------------------\n";
+
     public HubUpdater(Date startTime, DatabaseChangeLog changeLog, Database database) {
         this.startTime = startTime;
         this.changeLog = changeLog;
@@ -145,10 +147,12 @@ public class HubUpdater {
     }
 
     /**
+     *
      * Update the Hub after the operation
      *
      * @param updateOperation Operation object used in the update
      * @param bufferLog       Log output
+     *
      */
     public void postUpdateHub(Operation updateOperation, BufferedLogService bufferLog) {
         try {
@@ -276,11 +280,13 @@ public class HubUpdater {
     }
 
     /**
+     *
      * Automatically register the current user with Hub
      *
-     * @param changeLogFile ChangeLog path for this operation
+     * @param  changeLogFile             ChangeLog path for this operation
      * @throws LiquibaseException        Thrown if registration fails
      * @throws CommandExecutionException Thrown if registerChangeLog fails
+     *
      */
     public void register(String changeLogFile)
         throws LiquibaseException, CommandExecutionException {
@@ -487,7 +493,8 @@ public class HubUpdater {
     //
     // Show a link to the user
     //
-    private void showOperationReportLink(Operation updateOperation, HubService hubService) throws LiquibaseException {
+    private void showOperationReportLink(Operation updateOperation, HubService hubService)
+        throws LiquibaseException {
         //
         // Send the operation report link to Hub for shortening
         //
@@ -495,13 +502,20 @@ public class HubUpdater {
 
         String reportURL =
             "/organizations/" + hubService.getOrganization().getId().toString() +
-                "/projects/" + connection.getProject().getId() +
-                "/operations/" + updateOperation.getId().toString();
+            "/projects/" + connection.getProject().getId() +
+            "/operations/" + updateOperation.getId().toString();
 
 
         String hubLink = hubService.shortenLink(reportURL);
-
-        String message = "View a report of this operation at " + hubLink;
+        // View a report of this operation at http://localhost:8888/r/8SqckqSvKm
+        // * IMPORTANT: New users of Hub first need to Sign In to their account
+        // "with the one-time password, using <email> as their username.
+        String message = SEPARATOR_LINE;
+        message += "View a report of this operation at " + hubLink + "\n";
+        message += "* IMPORTANT: New users of Hub first need to Sign In to your account\n";
+        message += "with the one-time password sent to your email, which also serves as\n";
+        message += "your username.";
+        message += SEPARATOR_LINE;
         Scope.getCurrentScope().getUI().sendMessage(message);
         Scope.getCurrentScope().getLog(getClass()).info(message);
     }
