@@ -221,8 +221,8 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             changeLogString = changeLogString.replaceFirst("\\[", "\\[\n" +
                     "\"changeLogId\"" + ":" + "\"" + hubChangeLog.getId().toString() + "\",\n");
         } else if (changeLogFile.toLowerCase().endsWith(".yml") || changeLogFile.toLowerCase().endsWith(".yaml")) {
-            changeLogString = changeLogString.replaceFirst("^databaseChangeLog:\n", "databaseChangeLog:\n" +
-                    "- changeLogId: " + hubChangeLog.getId().toString() + "\n");
+            changeLogString = changeLogString.replaceFirst("^databaseChangeLog:(\\s*)\n", "databaseChangeLog:$1\n" +
+                    "- changeLogId: " + hubChangeLog.getId().toString() + "$1\n");
             } else {
                 return new CommandResult("Changelog file '" + changeLogFile + "' is not a supported format", false);
             }
