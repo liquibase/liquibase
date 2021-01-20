@@ -13,13 +13,16 @@ import spock.lang.Unroll
 
 class HistoryCommandTest extends Specification {
     @Shared
-    def dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+    def locale = Locale.US
+
+    @Shared
+    def dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale)
 
     def lastDefaultLocale;
 
     def setup() {
         lastDefaultLocale = Locale.getDefault()
-        Locale.setDefault(Locale.US)
+        Locale.setDefault(locale)
     }
 
     def cleanup() {
