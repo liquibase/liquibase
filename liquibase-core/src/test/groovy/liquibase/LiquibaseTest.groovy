@@ -184,7 +184,7 @@ class LiquibaseTest extends Specification {
         Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
 
         when:
-        liquibase.update("")
+        liquibase.update()
 
         then:
         mockHubService.sentObjects.toString() ==
