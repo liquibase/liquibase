@@ -359,7 +359,7 @@ public class HubUpdater {
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
                 writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=off\n");
-                message = "Updated properties file " + defaultsFile + " to set liquibase.hub.mode=off";
+                message = "* Updated properties file " + defaultsFile + " to set liquibase.hub.mode=off";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
             } catch (IOException ioe) {
@@ -408,11 +408,11 @@ public class HubUpdater {
                 ConfigurationProperty hubModeProperty = hubConfiguration.getProperty(HubConfiguration.LIQUIBASE_HUB_MODE);
                 if (! hubModeProperty.getWasOverridden()) {
                     writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=all\n");
-                    message = "Updated properties file " + defaultsFile + " to set liquibase.hub properties";
+                    message = "* Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
                 } else {
-                    message = "Updated the liquibase.hub.apiKey property.";
+                    message = "* Updated the liquibase.hub.apiKey property.";
                     String message2 = "The liquibase.hub.mode is already set to " + hubConfiguration.getLiquibaseHubMode() + ". It will not be updated.";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getUI().sendMessage(message2);
@@ -424,7 +424,7 @@ public class HubUpdater {
                 // register the changelog
                 // Update the API key in HubConfiguration
                 //
-                message = "Registering changelog file " + changeLogFile + " with Hub";
+                message = "* Registering changelog file " + changeLogFile + " with Hub";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
                 hubConfiguration.setLiquibaseHubApiKey(registerResponse.getApiKey());

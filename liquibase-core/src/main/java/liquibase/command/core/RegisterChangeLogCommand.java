@@ -238,7 +238,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             // Update the current DatabaseChangeLog with its id
             //
             databaseChangeLog.setChangeLogId(hubChangeLog.getId().toString());
-            return new CommandResult("Changelog file '" + changeLogFile +
+            return new CommandResult("* Changelog file '" + changeLogFile +
                     "' registered with changelog ID '" + hubChangeLog.getId() + "' " +
                     "to project '" + project.getName() + "'\n", true);
         }
