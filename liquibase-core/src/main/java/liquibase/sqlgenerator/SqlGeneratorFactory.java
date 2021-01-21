@@ -161,7 +161,7 @@ public class SqlGeneratorFactory {
 
     private boolean isTypeEqual(Type aType, Class aClass) {
         if (aType instanceof Class) {
-            return ((Class<?>) aType).isAssignableFrom(aClass);
+            return ((Class) aType).getName().equals(aClass.getName());
         }
         return aType.equals(aClass);
     }
@@ -209,8 +209,8 @@ public class SqlGeneratorFactory {
         for (SqlStatement statement : statements) {
             Sql[] sqlArray = factory.generateSql(statement, database);
             if (sqlArray != null && sqlArray.length > 0) {
-              List<Sql> sqlList = Arrays.asList(sqlArray);
-              returnList.addAll(sqlList);
+                List<Sql> sqlList = Arrays.asList(sqlArray);
+                returnList.addAll(sqlList);
             }
         }
 
@@ -262,11 +262,7 @@ public class SqlGeneratorFactory {
 
     public Warnings warn(SqlStatement statement, Database database) {
         //noinspection unchecked
-        SqlGeneratorChain sqlGeneratorChain = createGeneratorChain(statement, database);
-        if(sqlGeneratorChain !=null) {
-            sqlGeneratorChain.warn(statement, database);
-        }
-         return new Warnings();
+        return createGeneratorChain(statement, database).warn(statement, database);
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {
