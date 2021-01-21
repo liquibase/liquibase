@@ -102,7 +102,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         } catch (IOException e) {
             //the path gets stored in the databasechangelog table, so if it gets returned incorrectly it will cause future problems.
             //so throw a breaking error now rather than wait for bigger problems down the line
-            throw new UnexpectedLiquibaseException("Cannot determine resource path for "+resource.getDescription());
+            throw new UnexpectedLiquibaseException("Cannot determine resource path for " + resource.getDescription());
         }
     }
 
@@ -150,12 +150,13 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
      * Default implementation adds "classpath:" and removes duplicated /'s and classpath:'s
      */
     protected String finalizeSearchPath(String searchPath) {
-        searchPath = "classpath:"+searchPath;
-        searchPath = searchPath
-                .replace("\\", "/")
-                .replaceAll("//+", "/")
-                .replace("classpath:classpath:", "classpath:");
-
+        if (!searchPath.startsWith("file:")) {
+            searchPath = "classpath:" + searchPath;
+            searchPath = searchPath
+                    .replace("\\", "/")
+                    .replaceAll("//+", "/")
+                    .replace("classpath:classpath:", "classpath:");
+        }
         return searchPath;
     }
 
