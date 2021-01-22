@@ -18,26 +18,26 @@ import static org.junit.Assert.*;
 
 
 /**
- * Tests for {@link Main}
+ * Tests for {@link OldMain}
  */
-public class MainTest {
+public class OldMainTest {
 
     @Test
     public void testCodePointCheck() {
       char badChar = 8192;
       char anotherBadChar = 160;
-      Main.CodePointCheck codePointCheck = Main.checkArg("test");
+      OldMain.CodePointCheck codePointCheck = OldMain.checkArg("test");
       Assert.assertTrue("This should be a valid string", codePointCheck == null);
 
       StringBuilder builder = new StringBuilder();
       builder.append(badChar);
-      codePointCheck = Main.checkArg(builder.toString());
+      codePointCheck = OldMain.checkArg(builder.toString());
       Assert.assertTrue("The first character should be invalid",codePointCheck.position == 0);
 
       builder = new StringBuilder();
       builder.append("A");
       builder.append(badChar);
-      codePointCheck = Main.checkArg(builder.toString());
+      codePointCheck = OldMain.checkArg(builder.toString());
       Assert.assertTrue("The last character should be invalid",codePointCheck.position == builder.length()-1);
 
       builder = new StringBuilder();
@@ -45,14 +45,14 @@ public class MainTest {
       builder.append(anotherBadChar);
       builder.append("DEF");
       int pos = builder.toString().indexOf(anotherBadChar);
-      codePointCheck = Main.checkArg(builder.toString());
+      codePointCheck = OldMain.checkArg(builder.toString());
       Assert.assertTrue("The character in position " + pos + " should be invalid",codePointCheck.position == pos);
     }
 
 
     @Test
     public void checkSetup2() {
-        Main main = new Main();
+        OldMain main = new OldMain();
         main.command = "snapshot";
         main.url = "jdbc:oracle://localhost:1521/ORCL";
         main.commandParams.add("--outputSchemasAs");
@@ -77,7 +77,7 @@ public class MainTest {
 //    @Mock
 //    private SnapshotCommand.SnapshotCommandResult snapshotCommandResult;
 
-    public MainTest() throws Exception {
+    public OldMainTest() throws Exception {
 //        PowerMockito.mockStatic(CommandFactory.class);
 //
 //        commandFactory = PowerMockito.mock(CommandFactory.class);
@@ -113,7 +113,7 @@ public class MainTest {
                 "snapshot"
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertTrue("Read context from liquibase.local.properties", ((cli.contexts != null) && cli.contexts.contains
@@ -125,7 +125,7 @@ public class MainTest {
     @Test
     public void startWithoutParameters() throws Exception {
 //        exit.expectSystemExitWithStatus(1);
-        Main.run(new String[0]);
+        OldMain.run(new String[0]);
         assertTrue("We just want to survive until this point", true);
     }
 
@@ -133,7 +133,7 @@ public class MainTest {
     public void globalConfigurationSaysDoNotRun() throws Exception {
         LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
                 .setValue("shouldRun", false);
-        int errorLevel = Main.run(new String[0]);
+        int errorLevel = OldMain.run(new String[0]);
         LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
                 .setValue("shouldRun", true);
         assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
@@ -189,7 +189,7 @@ public class MainTest {
                 "update",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals("Option --driver was parsed correctly", "DRIVER", cli.driver);
@@ -215,7 +215,7 @@ public class MainTest {
                 "update",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals("Option --promptForNonLocalDatabase=false was parsed correctly", Boolean.FALSE, cli
@@ -230,7 +230,7 @@ public class MainTest {
                 "migrate",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals("Option --promptForNonLocalDatabase was parsed correctly",
@@ -245,7 +245,7 @@ public class MainTest {
                 "update",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals("Option --promptForNonLocalDatabase=true was parsed correctly",
@@ -261,7 +261,7 @@ public class MainTest {
                 "update",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
     }
 
@@ -273,7 +273,7 @@ public class MainTest {
                 "update",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
         List<String> errMsgs = cli.checkSetup();
         assertEquals("specifying an empty URL should return 1 error message.", 1, errMsgs.size());
@@ -288,7 +288,7 @@ public class MainTest {
                 "--diffTypes=data"
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
         List<String> errMsgs = cli.checkSetup();
         assertEquals("the combination of --diffTypes=data and diffChangeLog must not be accepted.", 1, errMsgs.size());
@@ -304,7 +304,7 @@ public class MainTest {
                 "migrate",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
     }
 
@@ -317,7 +317,7 @@ public class MainTest {
                 "--verbose",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
@@ -335,7 +335,7 @@ public class MainTest {
                 "--verbose=true",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
@@ -354,7 +354,7 @@ public class MainTest {
                 "status",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals("Main command 'status' was not correctly parsed", "status", cli.command);
@@ -366,14 +366,14 @@ public class MainTest {
 
     @Test(expected = CommandLineParsingException.class)
     public void configureNonExistantClassloaderLocation() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.classpath = "badClasspathLocation";
         cli.configureClassLoader();
     }
 
     @Test
     public void windowsConfigureClassLoaderLocation() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
 
         if (cli.isWindows())
         {
@@ -391,7 +391,7 @@ public class MainTest {
 
     @Test
     public void unixConfigureClassLoaderLocation() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
 
         if (!cli.isWindows())
         {
@@ -410,7 +410,7 @@ public class MainTest {
 
     @Test
     public void propertiesFileWithNoOtherArgs() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
 
         Properties props = new Properties();
         props.setProperty("driver", "DRIVER");
@@ -440,7 +440,7 @@ public class MainTest {
 
     @Test
     public void propertiesFileWithOtherArgs() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.username = "PASSED USERNAME";
         cli.password = "PASSED PASSWD";
 
@@ -473,7 +473,7 @@ public class MainTest {
 
     @Test
     public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictFalseIsInFile() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
 
         Properties props = new Properties();
         props.setProperty("driver", "DRIVER");
@@ -491,7 +491,7 @@ public class MainTest {
 
     @Test
     public void propertiesFileChangeLogParameters() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
 
         Properties props = new Properties();
         props.setProperty("driver", "DRIVER");
@@ -509,7 +509,7 @@ public class MainTest {
 
     @Test
     public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictModeIsFalse() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         String[] args = new String[]{"--strict=false"};
 
         cli.parseOptions(args);
@@ -528,7 +528,7 @@ public class MainTest {
 
     @Test(expected = CommandLineParsingException.class)
     public void propertiesFileParsingShouldFailOnUnknownArgumentsIfStrictMode() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
 
         Properties props = new Properties();
         props.setProperty("driver", "DRIVER");
@@ -544,7 +544,7 @@ public class MainTest {
 
     @Test
     public void applyDefaults() {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
 
         cli.promptForNonLocalDatabase = Boolean.TRUE;
         cli.applyDefaults();
@@ -562,7 +562,7 @@ public class MainTest {
 
     @Test(expected = CommandLineParsingException.class)
     public void propertiesFileWithBadArgs() throws Exception {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
 
         Properties props = new Properties();
         props.setProperty("driver", "DRIVER");
@@ -577,7 +577,7 @@ public class MainTest {
 
     @Test
     public void checkSetup() {
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         assertTrue(!cli.checkSetup().isEmpty());
 
         cli.driver = "driver";
@@ -685,7 +685,7 @@ public class MainTest {
         final int MAXIMUM_LENGTH = 80;
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.printHelp(new PrintStream(stream));
 
         BufferedReader reader = new BufferedReader(new StringReader(new String(stream.toByteArray())));
@@ -711,7 +711,7 @@ public class MainTest {
                 "tag", "TagHere"
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals("Command line option --driver is parsed correctly", "DRIVER", cli.driver);
@@ -734,7 +734,7 @@ public class MainTest {
                 "migrate",
         };
 
-        Main cli = new Main();
+        OldMain cli = new OldMain();
         cli.parseOptions(args);
 
         assertEquals(url, cli.url);
@@ -742,7 +742,7 @@ public class MainTest {
 
     @Test
     public void fixArgs() {
-        Main liquibase = new Main();
+        OldMain liquibase = new OldMain();
         String[] fixedArgs = liquibase.fixupArgs(new String[]{"--defaultsFile", "liquibase.properties", "migrate"});
         assertEquals("--defaultsFile=liquibase.properties migrate",
                 StringUtil.join(Arrays.asList(fixedArgs), " "));
@@ -768,7 +768,7 @@ public class MainTest {
 
     @Test
     public void testVersionArg() throws Exception {
-        Main.run(new String[] {"--version"});
+        OldMain.run(new String[] {"--version"});
         assertTrue(true); // Just want to test if the call goes through
     }
 
@@ -776,7 +776,7 @@ public class MainTest {
 	public void testSplitArgWithValueEndingByEqualSing() throws CommandLineParsingException {
 		final String argName = "password";
 		final String argValue = "s3-cr3t=";
-		Main tested = new Main();
+		OldMain tested = new OldMain();
 
 		tested.parseOptions(new String[] { "--" + argName + "=" + argValue });
 
@@ -785,7 +785,7 @@ public class MainTest {
 
     @Test
     public void testDatabaseChangeLogTableName_Properties() throws IOException, CommandLineParsingException {
-        Main main = new Main();
+        OldMain main = new OldMain();
         Properties props = new Properties();
         props.setProperty("databaseChangeLogTableName", "PROPSCHANGELOG");
         props.setProperty("databaseChangeLogLockTableName", "PROPSCHANGELOGLOCK");
@@ -800,7 +800,7 @@ public class MainTest {
 
     @Test
     public void testDatabaseChangeLogTableName_Options() throws CommandLineParsingException {
-        Main main = new Main();
+        OldMain main = new OldMain();
         String[] opts = {
                 "--databaseChangeLogTableName=OPTSCHANGELOG",
                 "--databaseChangeLogLockTableName=OPTSCHANGELOGLOCK"};

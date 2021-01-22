@@ -15,7 +15,6 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.LiquibaseUtil;
@@ -36,7 +35,7 @@ import static java.util.ResourceBundle.getBundle;
 
 /**
  * Common Utility methods used in the CommandLine application and the Maven plugin.
- * These methods were originally moved from {@link Main} so they could be shared.
+ * These methods were originally moved from {@link OldMain} so they could be shared.
  *
  * @author Peter Murray
  */
