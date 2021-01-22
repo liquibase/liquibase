@@ -219,7 +219,7 @@ public class HubUpdater {
   }
 
   public void syncHub(String changeLogFile, Database database, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) {
-    final SyncHubCommand syncHub = (SyncHubCommand) CommandFactory.getInstance().getCommand("syncHub");
+    final SyncHubCommand syncHub = (SyncHubCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("syncHub");
     syncHub.setChangeLogFile(changeLogFile);
     syncHub.setUrl(database.getConnection().getURL());
     syncHub.setHubConnectionId(hubConnectionId != null ? Objects.toString(hubConnectionId) : null);

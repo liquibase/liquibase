@@ -1690,7 +1690,7 @@ public class Liquibase implements AutoCloseable {
                 @Override
                 public void run() throws Exception {
 
-                    DropAllCommand dropAll = (DropAllCommand) CommandFactory.getInstance().getCommand("dropAll");
+                    DropAllCommand dropAll = (DropAllCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("dropAll");
                     dropAll.setDatabase(Liquibase.this.getDatabase());
                     dropAll.setSchemas(finalSchemas);
                     dropAll.setLiquibase(Liquibase.this);

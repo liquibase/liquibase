@@ -1466,7 +1466,7 @@ public class OldMain {
                     System.exit(0);
                 }
                 if (isFormattedDiff()) {
-                    LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(COMMANDS.FORMATTED_DIFF);
+                    LiquibaseCommand liquibaseCommand = Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand(COMMANDS.FORMATTED_DIFF);
                     DiffCommand diffCommand = CommandLineUtils.createDiffCommand(
                             createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
                             database,
@@ -1522,7 +1522,7 @@ public class OldMain {
                         diffOutputControl);
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
-                SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
+                SnapshotCommand snapshotCommand = (SnapshotCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class)
                         .getCommand(COMMANDS.SNAPSHOT);
                 snapshotCommand.setDatabase(database);
                 snapshotCommand.setSchemas(getSchemaParams(database));
@@ -1534,8 +1534,7 @@ public class OldMain {
                 outputWriter.close();
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
-                ExecuteSqlCommand executeSqlCommand = (ExecuteSqlCommand) CommandFactory.getInstance().getCommand(
-                        COMMANDS.EXECUTE_SQL);
+                ExecuteSqlCommand executeSqlCommand = (ExecuteSqlCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand(COMMANDS.EXECUTE_SQL);
                 executeSqlCommand.setDatabase(database);
                 executeSqlCommand.setSql(getCommandParam("sql", null));
                 executeSqlCommand.setSqlFile(getCommandParam("sqlFile", null));
@@ -1546,7 +1545,7 @@ public class OldMain {
                 outputWriter.close();
                 return;
             } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
-                SnapshotCommand snapshotCommand = (SnapshotCommand) CommandFactory.getInstance()
+                SnapshotCommand snapshotCommand = (SnapshotCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class)
                         .getCommand(COMMANDS.SNAPSHOT);
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 snapshotCommand.setDatabase(referenceDatabase);
@@ -1701,7 +1700,7 @@ public class OldMain {
                     }
                 }
                 DropAllCommand dropAllCommand =
-                        (DropAllCommand) CommandFactory.getInstance().getCommand(COMMANDS.DROP_ALL);
+                        (DropAllCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand(COMMANDS.DROP_ALL);
                 if (hubConnectionId != null) {
                     dropAllCommand.setHubConnectionId(hubConnectionId);
                 }
@@ -1865,7 +1864,7 @@ public class OldMain {
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
-                    HistoryCommand historyCommand = (HistoryCommand) CommandFactory.getInstance().getCommand("history");
+                    HistoryCommand historyCommand = (HistoryCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("history");
                     historyCommand.setDatabase(database);
                     historyCommand.setOutputStream(new PrintStream(getOutputStream()));
                     historyCommand.execute();
@@ -1958,7 +1957,7 @@ public class OldMain {
         if (this.commandParams.contains("--help")) {
             argsMap.put("help", true);
         }
-        LiquibaseCommand liquibaseCommand = CommandFactory.getInstance().getCommand(commandName);
+        LiquibaseCommand liquibaseCommand = Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand(commandName);
         AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand) liquibaseCommand;
         configuratingCommand.configure(argsMap);
         return liquibaseCommand;

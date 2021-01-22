@@ -85,7 +85,7 @@ public class OldMainTest {
 //        snapshotCommandResult = PowerMockito.mock(SnapshotCommand.SnapshotCommandResult.class);
 //
 //        // Do not do actual database snapshots.
-//        when(CommandFactory.getInstance()).thenReturn(commandFactory);
+//        when(Scope.getCurrentScope().getSingleton(CommandFactory.class)).thenReturn(commandFactory);
 //        when(commandFactory.getCommand("snapshot")).thenReturn(snapshotCommand);
 //        when(snapshotCommand.execute()).thenReturn(snapshotCommandResult);
 //        when(snapshotCommandResult.print()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>...");

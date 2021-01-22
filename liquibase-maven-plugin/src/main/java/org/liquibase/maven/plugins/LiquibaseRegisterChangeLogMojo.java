@@ -47,7 +47,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
         RegisterChangeLogCommand registerChangeLog =
-            (RegisterChangeLogCommand) CommandFactory.getInstance().getCommand("registerChangeLog");
+            (RegisterChangeLogCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("registerChangeLog");
         registerChangeLog.setChangeLogFile(changeLogFile);
         registerChangeLog.setHubProjectId(UUID.fromString(hubProjectId));
         Map<String, Object> argsMap = new HashMap<>();
