@@ -971,6 +971,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryMssql(catalogAndSchema, table);
                     } else if (database instanceof Db2zDatabase) {
                         return queryDb2Zos(catalogAndSchema, table);
+                    } else if ( database instanceof PostgresDatabase) {
+                        return queryPostgres(catalogAndSchema, table);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -989,6 +991,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryMssql(catalogAndSchema, null);
                     } else if (database instanceof Db2zDatabase) {
                         return queryDb2Zos(catalogAndSchema, null);
+                    } else if ( database instanceof PostgresDatabase) {
+                        return queryPostgres(catalogAndSchema, table);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -1072,6 +1076,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
 
                     return executeAndExtract(sql, database);
+                }
+                private List<CachedRow> queryPostgres(CatalogAndSchema catalogAndSchema, String tableName) throws SQLException {
+                    String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                    String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return extract(databaseMetaData.getTables(catalog, schema, ((tableName == null) ?
+                            SQL_FILTER_MATCH_ALL : tableName), new String[]{"TABLE", "PARTITIONED TABLE"}));
+
                 }
             });
         }
