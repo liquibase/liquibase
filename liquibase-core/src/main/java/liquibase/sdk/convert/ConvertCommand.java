@@ -55,7 +55,7 @@ public class ConvertCommand extends AbstractCommand {
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         List<ResourceAccessor> openers = new ArrayList<>();
         openers.add(new FileSystemResourceAccessor());
         openers.add(new ClassLoaderResourceAccessor());

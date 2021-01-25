@@ -259,7 +259,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 argsMap.put("diffCommand", diffCommand);
                 ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
                 try {
-                    CommandResult result = liquibaseCommand.execute();
+                    CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
                     if (!result.succeeded) {
                         throw new LiquibaseException(result.message);
                     }

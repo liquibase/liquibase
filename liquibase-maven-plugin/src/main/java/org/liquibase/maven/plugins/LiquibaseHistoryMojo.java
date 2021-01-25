@@ -22,7 +22,7 @@ public class LiquibaseHistoryMojo extends AbstractLiquibaseMojo {
 
       historyCommand.setDatabase(getLiquibase().getDatabase());
       try {
-          CommandResult result = historyCommand.execute();
+          CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(historyCommand);
           if (!result.succeeded) {
               throw new LiquibaseException(result.message);
           }

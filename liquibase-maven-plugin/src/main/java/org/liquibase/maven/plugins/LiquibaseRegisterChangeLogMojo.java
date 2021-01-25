@@ -57,7 +57,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         registerChangeLog.configure(argsMap);
         try {
-            CommandResult result = registerChangeLog.execute();
+            CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(registerChangeLog);
             if (result.succeeded) {
                 Scope.getCurrentScope().getUI().sendMessage(result.print());
             } else {

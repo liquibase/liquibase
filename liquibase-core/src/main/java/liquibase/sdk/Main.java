@@ -1,5 +1,7 @@
 package liquibase.sdk;
 
+import liquibase.Scope;
+import liquibase.command.CommandFactory;
 import liquibase.command.LiquibaseCommand;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.convert.ConvertCommand;
@@ -59,7 +61,7 @@ public class Main {
                 throw new UserError("Unknown command: "+main.command);
             }
 
-            command.execute();
+            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(command);
 
             main.divider();
             main.out("Command executed successfully");

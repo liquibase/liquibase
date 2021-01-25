@@ -167,7 +167,7 @@ public class CommandLineUtils {
         Scope.getCurrentScope().getUI().sendMessage("");
         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
         try {
-            diffCommand.execute();
+            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(diffCommand);
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }
@@ -204,7 +204,7 @@ public class CommandLineUtils {
                 .setDiffOutputControl(diffOutputControl);
 
         try {
-            command.execute();
+            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(command);
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }
@@ -243,7 +243,7 @@ public class CommandLineUtils {
                 .setContext(context);
 
         try {
-            command.execute();
+            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(command);
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }

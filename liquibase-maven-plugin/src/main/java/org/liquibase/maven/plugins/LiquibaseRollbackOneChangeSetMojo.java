@@ -110,7 +110,7 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         argsMap.put("liquibase", liquibase);
         configuratingCommand.configure(argsMap);
         try {
-            final CommandResult execute = liquibaseCommand.execute();
+            final CommandResult execute = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
             if (!execute.succeeded) {
                 throw new LiquibaseException(execute.message);
             }

@@ -52,7 +52,7 @@ public class HistoryCommand extends AbstractCommand {
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
 
         outputStream.println("Liquibase History for " + database.getConnection().getURL());

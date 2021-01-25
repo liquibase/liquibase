@@ -228,7 +228,7 @@ public class HubUpdater {
 
     try {
       syncHub.configure(Collections.singletonMap("changeLog", databaseChangeLog));
-      final CommandResult commandResult = syncHub.execute();
+      final CommandResult commandResult = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(syncHub);
       if (!commandResult.succeeded) {
         Scope.getCurrentScope().getLog(getClass()).warning("Liquibase Hub sync failed: " + commandResult.message);
       }

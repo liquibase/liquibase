@@ -1689,15 +1689,16 @@ public class Liquibase implements AutoCloseable {
             runInScope(new Scope.ScopedRunner() {
                 @Override
                 public void run() throws Exception {
+                    final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
 
-                    DropAllCommand dropAll = (DropAllCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("dropAll");
+                    DropAllCommand dropAll = (DropAllCommand) commandFactory.getCommand("dropAll");
                     dropAll.setDatabase(Liquibase.this.getDatabase());
                     dropAll.setSchemas(finalSchemas);
                     dropAll.setLiquibase(Liquibase.this);
                     dropAll.setChangeLogFile(changeLogFile);
 
                     try {
-                        dropAll.execute();
+                        commandFactory.execute(dropAll);
                     } catch (CommandExecutionException e) {
                         throw new DatabaseException(e);
                     }

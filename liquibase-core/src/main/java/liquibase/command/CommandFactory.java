@@ -20,4 +20,20 @@ public class CommandFactory extends AbstractPluginFactory<LiquibaseCommand> {
     public LiquibaseCommand getCommand(String commandName) {
         return getPlugin(commandName);
     }
+
+    public <T extends CommandResult> T execute(LiquibaseCommand<T> command) throws CommandExecutionException {
+        command.validate();
+        try {
+            return command.run();
+        } catch (Exception e) {
+            if (e instanceof CommandExecutionException) {
+                throw (CommandExecutionException) e;
+            } else {
+                throw new CommandExecutionException(e);
+            }
+        }
+
+    }
+
+
 }

@@ -13,14 +13,11 @@ public interface LiquibaseCommand<T extends CommandResult> extends Plugin {
 
     String getName();
 
-    CommandValidationErrors validate();
-
-    /**
-     * Executes the command. Should call {@link #validate()} as part of this method and throw {@link CommandExecutionException} if validation fails or there are any errors executing the command.
-     */
-    T execute() throws CommandExecutionException;
-
     int getPriority(String commandName);
 
     SortedSet<CommandArgument> getArguments();
+
+    CommandValidationErrors validate();
+
+    T run() throws Exception;
 }

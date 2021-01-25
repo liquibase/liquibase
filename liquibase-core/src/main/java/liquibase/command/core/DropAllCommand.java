@@ -105,7 +105,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         Logger log = Scope.getCurrentScope().getLog(getClass());
         HubUpdater hubUpdater = null;

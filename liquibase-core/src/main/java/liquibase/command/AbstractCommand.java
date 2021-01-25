@@ -16,21 +16,6 @@ public abstract class AbstractCommand<T extends CommandResult> implements Liquib
         }
     }
 
-    public final T execute() throws CommandExecutionException {
-        this.validate();
-        try {
-            return this.run();
-        } catch (Exception e) {
-            if (e instanceof CommandExecutionException) {
-                throw (CommandExecutionException) e;
-            } else {
-                throw new CommandExecutionException(e);
-            }
-        }
-    }
-
-    protected abstract T run() throws Exception;
-
     @Override
     public SortedSet<CommandArgument> getArguments() {
         return new TreeSet<>();

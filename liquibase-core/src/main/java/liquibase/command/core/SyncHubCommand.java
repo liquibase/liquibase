@@ -86,7 +86,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (! hubServiceFactory.isOnline()) {
             if (failIfOnline) {
