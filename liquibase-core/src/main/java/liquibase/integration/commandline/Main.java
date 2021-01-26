@@ -833,20 +833,21 @@ public class Main {
                     if (classpathEntry.endsWith(".war")) {
                         addWarFileClasspathEntries(classPathFile, urls);
                     } else if (classpathEntry.endsWith(".ear")) {
-                        JarFile earZip = new JarFile(classPathFile);
+                        try (JarFile earZip = new JarFile(classPathFile)) {
 
-                        Enumeration<? extends JarEntry> entries = earZip.entries();
-                        while (entries.hasMoreElements()) {
-                            JarEntry entry = entries.nextElement();
-                            if (entry.getName().toLowerCase().endsWith(".jar")) {
-                                File jar = extract(earZip, entry);
-                                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
-                                urls.add(newUrl);
-                                logger.debug("Adding '" + newUrl + "' to classpath");
-                                jar.deleteOnExit();
-                            } else if (entry.getName().toLowerCase().endsWith("war")) {
-                                File warFile = extract(earZip, entry);
-                                addWarFileClasspathEntries(warFile, urls);
+                            Enumeration<? extends JarEntry> entries = earZip.entries();
+                            while (entries.hasMoreElements()) {
+                                JarEntry entry = entries.nextElement();
+                                if (entry.getName().toLowerCase().endsWith(".jar")) {
+                                    File jar = extract(earZip, entry);
+                                    URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                                    urls.add(newUrl);
+                                    logger.debug("Adding '" + newUrl + "' to classpath");
+                                    jar.deleteOnExit();
+                                } else if (entry.getName().toLowerCase().endsWith("war")) {
+                                    File warFile = extract(earZip, entry);
+                                    addWarFileClasspathEntries(warFile, urls);
+                                }
                             }
                         }
 
@@ -886,17 +887,18 @@ public class Main {
         URL url = new URL("jar:" + classPathFile.toURI().toURL() + "!/WEB-INF/classes/");
         logger.info("adding '" + url + "' to classpath");
         urls.add(url);
-        JarFile warZip = new JarFile(classPathFile);
-        Enumeration<? extends JarEntry> entries = warZip.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            if (entry.getName().startsWith("WEB-INF/lib")
-                    && entry.getName().toLowerCase().endsWith(".jar")) {
-                File jar = extract(warZip, entry);
-                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
-                logger.info("adding '" + newUrl + "' to classpath");
-                urls.add(newUrl);
-                jar.deleteOnExit();
+        try (JarFile warZip = new JarFile(classPathFile)) {
+            Enumeration<? extends JarEntry> entries = warZip.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (entry.getName().startsWith("WEB-INF/lib")
+                        && entry.getName().toLowerCase().endsWith(".jar")) {
+                    File jar = extract(warZip, entry);
+                    URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                    logger.info("adding '" + newUrl + "' to classpath");
+                    urls.add(newUrl);
+                    jar.deleteOnExit();
+                }
             }
         }
     }
@@ -1318,8 +1320,9 @@ public class Main {
 
         if (outputFile != null) {
             try {
-                FileOutputStream fileOut = new FileOutputStream(outputFile, false);
-                return new OutputStreamWriter(fileOut, charsetName);
+                try (FileOutputStream fileOut = new FileOutputStream(outputFile, false)) {
+                    return new OutputStreamWriter(fileOut, charsetName);
+                }
             } catch (IOException e) {
                 System.err.printf("Could not create output file %s\n", outputFile);
                 throw e;

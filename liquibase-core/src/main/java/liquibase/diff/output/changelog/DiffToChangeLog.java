@@ -115,38 +115,33 @@ public class DiffToChangeLog {
                 return;
             }
 
-            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-            String line;
-            long offset = 0;
-            boolean foundEndTag = false;
-            while ((line = randomAccessFile.readLine()) != null) {
-                int index = line.indexOf("</databaseChangeLog>");
-                if (index >= 0) {
-                    foundEndTag = true;
-                    break;
+            try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
+                String line;
+                long offset = 0;
+                boolean foundEndTag = false;
+                while ((line = randomAccessFile.readLine()) != null) {
+                    int index = line.indexOf("</databaseChangeLog>");
+                    if (index >= 0) {
+                        foundEndTag = true;
+                        break;
+                    } else {
+                        offset = randomAccessFile.getFilePointer();
+                    }
+                }
+
+                String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
+
+                if (foundEndTag) {
+                    randomAccessFile.seek(offset);
+                    randomAccessFile.writeBytes("    ");
+                    randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+                    randomAccessFile.writeBytes(lineSeparator);
+                    randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
                 } else {
-                    offset = randomAccessFile.getFilePointer();
+                    randomAccessFile.seek(0);
+                    randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                 }
             }
-
-            String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
-
-            if (foundEndTag) {
-                randomAccessFile.seek(offset);
-                randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-                randomAccessFile.writeBytes(lineSeparator);
-                randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
-            } else {
-                randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-            }
-            randomAccessFile.close();
-
-            // BufferedWriter fileWriter = new BufferedWriter(new
-            // FileWriter(file));
-            // fileWriter.append(xml);
-            // fileWriter.close();
         }
     }
 
