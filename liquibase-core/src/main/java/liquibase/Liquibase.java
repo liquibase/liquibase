@@ -259,10 +259,7 @@ public class Liquibase implements AutoCloseable {
                 // Make sure we don't already have a listener
                 //
                 if (! (executor instanceof LoggingExecutor)) {
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("ChangeExecListener already defined");
-                    }
-                    changeExecListener = new HubChangeExecListener(updateOperation);
+                    changeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
                 }
 
                 //
@@ -463,10 +460,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
-                    }
-                    changeExecListener = new HubChangeExecListener(updateOperation);
+                    changeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
 
                     //
                     // Create another iterator to run
@@ -578,10 +572,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("ChangeExecListener already defined");
-                    }
-                    changeExecListener = new HubChangeExecListener(updateOperation);
+                    changeExecListener = new HubChangeExecListener(updateOperation, changeExecListener);
 
                     //
                     // Create another iterator to run
@@ -819,10 +810,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
-                    }
-                    changeExecListener = new HubChangeExecListener(rollbackOperation);
+                    changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
 
                     //
                     // Create another iterator to run
@@ -1081,10 +1069,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
-                    }
-                    changeExecListener = new HubChangeExecListener(rollbackOperation);
+                    changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
 
                     //
                     // Create another iterator to run
@@ -1236,10 +1221,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
-                    }
-                    changeExecListener = new HubChangeExecListener(rollbackOperation);
+                    changeExecListener = new HubChangeExecListener(rollbackOperation, changeExecListener);
 
                     //
                     // Create another iterator to run
@@ -1394,10 +1376,7 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
-                    }
-                    changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation);
+                    changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation, changeExecListener);
 
                     ChangeLogIterator runChangeLogSyncIterator = new ChangeLogIterator(changeLog,
                             new NotRanChangeSetFilter(database.getRanChangeSetList()),
