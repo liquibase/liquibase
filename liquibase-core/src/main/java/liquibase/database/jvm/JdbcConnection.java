@@ -10,6 +10,7 @@ import java.sql.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * A ConnectionWrapper implementation which delegates completely to an
@@ -17,6 +18,8 @@ import java.util.Properties;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
+
+    public static final Pattern PATTERN_JDBC_URL_PASSWORD_PROPERTY = Pattern.compile("(?i);password=[^;]*");
 
     public JdbcConnection() {
 
@@ -94,7 +97,11 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public String getURL() {
         try {
-            return con.getMetaData().getURL();
+            String url = con.getMetaData().getURL();
+            if (url != null) {
+                url = PATTERN_JDBC_URL_PASSWORD_PROPERTY.matcher(url).replaceAll("$1");
+            }
+            return url;
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);
         }
