@@ -33,6 +33,8 @@ public interface HubService extends Plugin, PrioritizedService {
 
     List<Connection> getConnections(Connection exampleConnection) throws LiquibaseHubException;
 
+    HubRegisterResponse register(String email) throws LiquibaseException;
+
     Connection createConnection(Connection connection) throws LiquibaseHubException;
 
     HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException;
@@ -42,6 +44,15 @@ public interface HubService extends Plugin, PrioritizedService {
     Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException;
 
     OperationEvent sendOperationEvent(Operation operation, OperationEvent operationEvent) throws LiquibaseException;
+
+    /**
+     * Request to shorten a URL to create a more user-friendly link to the user
+     *
+     * @param url The link to shorten
+     * @return New url
+     * @throws LiquibaseHubException If shortening fails
+     */
+    String shortenLink(String url) throws LiquibaseException;
 
     void sendOperationChangeEvent(OperationChangeEvent operationChangeEvent) throws LiquibaseException;
 
