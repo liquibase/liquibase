@@ -114,9 +114,7 @@ public class HubUpdater {
     changeLogIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
     List<ChangeSet> operationChangeSets = listVisitor.getSeenChangeSets();
     OperationChange operationChange = new OperationChange();
-    for (ChangeSet operationChangeSet : operationChangeSets) {
-        operationChange.getChangeSets().add(operationChangeSet);
-    }
+    operationChange.getChangeSets().addAll(operationChangeSets);
     operationChange.setProject(hubChangeLog.getProject());
     operationChange.setOperation(updateOperation);
     try {

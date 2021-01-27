@@ -38,9 +38,7 @@ public class MockHttpClient extends HttpClient {
     public static Map<String, ?> createListResponse(Map<String, ?>... objects) {
         Map<String, Object> returnMap = new LinkedHashMap<>();
         List<Map<String, ?>> content = new ArrayList<>();
-        for (Map<String, ?> object : objects) {
-            content.add(object);
-        }
+        Collections.addAll(content, objects);
 
         returnMap.put("content", content);
 

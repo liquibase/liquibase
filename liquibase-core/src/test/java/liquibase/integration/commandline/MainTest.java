@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.util.Properties;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.io.*;
 import java.net.URL;
@@ -670,9 +671,7 @@ public class MainTest {
         String[] cmdParms = { "--referenceUsername=USERNAME", "--referencePassword=PASSWORD",
                 "--referenceUrl=URL", "--referenceDriver=DRIVER"};
         // load all parms
-        for (String param : cmdParms) {
-            cli.commandParams.add(param);
-        }
+        Collections.addAll(cli.commandParams, cmdParms);
         assertEquals(0, cli.checkSetup().size());
 
         // now add an unexpected parm
