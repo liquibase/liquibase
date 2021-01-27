@@ -450,9 +450,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (changeSet == null) {
                 throw new ParsedNodeException("Change set " + new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false) + " does not exist");
             }
-            for (Change change : changeSet.getChanges()) {
-                rollback.getChanges().add(change);
-            }
+            rollback.getChanges().addAll(changeSet.getChanges());
             return;
         }
 
