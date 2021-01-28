@@ -97,14 +97,18 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public String getURL() {
         try {
-            String url = con.getMetaData().getURL();
+            String url = getConnectionUrl();
             if (url != null) {
-                url = PATTERN_JDBC_URL_PASSWORD_PROPERTY.matcher(url).replaceAll("$1");
+                url = PATTERN_JDBC_URL_PASSWORD_PROPERTY.matcher(url).replaceAll("");
             }
             return url;
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    protected String getConnectionUrl() throws SQLException {
+        return con.getMetaData().getURL();
     }
 
     @Override
