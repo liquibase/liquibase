@@ -202,7 +202,7 @@ Optional Parameters:
  --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost
                                             databases (default: false)
  --logLevel=<level>                         Execution log level
-                                            (debug, sql, info, warning, severe
+                                            (debug, fine, info, warning, severe
                                              or off
  --logFile=<file>                           Log file
  --currentDateTimeFunction=<value>          Overrides current date time function

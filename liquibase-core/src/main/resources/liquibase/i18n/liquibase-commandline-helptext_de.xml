@@ -179,7 +179,7 @@ Optionale Parameter:
                                             (Standardwert: false)
  --logLevel=<level>                         Gibt an, wie ausführlich das
                                             Protokoll sein soll. Mögliche
-                                            Level sind: (debug, sql, info,
+                                            Level sind: (debug, fine, info,
                                             warning, severe oder off)
  --logFile=<file>                           Gibt an, wohin das Protokoll
                                             geschrieben werden soll (falls
