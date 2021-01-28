@@ -3,8 +3,7 @@ package liquibase.change.core;
 import liquibase.Scope;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -199,7 +198,7 @@ public class CreateViewChange extends AbstractChange {
                 selectQuery = "";
             }
 
-            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+            String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
             if (selectQuery != null) {
                 try {
                     stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));

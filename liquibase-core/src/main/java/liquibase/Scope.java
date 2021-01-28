@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -38,6 +39,7 @@ public class Scope {
     public enum Attr {
         logService,
         ui,
+        configuration,
         resourceAccessor,
         classLoader,
         database,
@@ -65,6 +67,14 @@ public class Scope {
             scopeManager = new SingletonScopeManager();
             Scope rootScope = new Scope();
             scopeManager.setCurrentScope(rootScope);
+
+            rootScope.values.put(LiquibaseConfiguration.class.getName(), new LiquibaseConfiguration());
+            rootScope.values.put(Attr.logService.name(), new JavaLogService());
+            rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
+            rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
+
+            rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
+            rootScope.get(LiquibaseConfiguration.class.getName(), LiquibaseConfiguration.class).init(rootScope);
 
             LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
             if (overrideLogService == null) {
@@ -109,10 +119,6 @@ public class Scope {
      * Defaults serviceLocator to {@link StandardServiceLocator}
      */
     private Scope() {
-        values.put(Attr.logService.name(), new JavaLogService());
-        values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
-        values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
-        values.put(Attr.ui.name(), new ConsoleUIService());
     }
 
     protected Scope(Scope parent, Map<String, Object> scopeValues) {

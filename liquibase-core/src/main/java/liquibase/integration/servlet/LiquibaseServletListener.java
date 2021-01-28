@@ -4,10 +4,8 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.Scope;
-import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DerbyDatabase;
@@ -115,7 +113,7 @@ public class LiquibaseServletListener implements ServletContextListener {
             ic = new InitialContext();
 
             servletValueContainer = new ServletValueContainer(servletContext, ic);
-            LiquibaseConfiguration.getInstance().init(servletValueContainer);
+            //TODO: LiquibaseConfiguration.getInstance().init(servletValueContainer);
 
             failOnError = (String) servletValueContainer.getValue(LIQUIBASE_ONERROR_FAIL);
             if (checkPreconditions(servletContext, ic)) {
@@ -147,10 +145,9 @@ public class LiquibaseServletListener implements ServletContextListener {
      * </ol>
      */
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
-        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
-        if (!globalConfiguration.getShouldRun()) {
+        if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
-                    + " because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
+                    + " because "+ GlobalConfiguration.SHOULD_RUN.getProperty()
                             + " was set to false");
             return false;
         }
@@ -178,10 +175,10 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
         }
 
-        if (globalConfiguration.getShouldRun() && globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN).getWasOverridden()) {
+        if (GlobalConfiguration.SHOULD_RUN.getCurrentValue() && GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails().getWasOverridden()) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
-                    + LIQUIBASE_HOST_EXCLUDES + ", since " + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
+                    + LIQUIBASE_HOST_EXCLUDES + ", since " + GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails().getSourceDescription()
                     + "=true");
         }
         if (!shouldRun) {
@@ -260,6 +257,11 @@ public class LiquibaseServletListener implements ServletContextListener {
 
     protected class ServletValueContainer implements ConfigurationValueProvider {
 
+        @Override
+        public int getPrecedence() {
+            return 0;
+        }
+
         private ServletContext servletContext;
         private InitialContext initialContext;
 
@@ -269,13 +271,8 @@ public class LiquibaseServletListener implements ServletContextListener {
         }
 
         @Override
-        public String describeValueLookupLogic(ConfigurationProperty property) {
-            return "JNDI, servlet container init parameter, and system property '"+property.getNamespace()+"."+property.getName()+"'";
-        }
-
-        @Override
-        public Object getValue(String namespace, String property) {
-            return getValue(namespace +"."+property);
+        public String describeValueLookupLogic(String property) {
+            return "JNDI, servlet container init parameter, and system property '"+property+"'";
         }
 
         /**
@@ -286,6 +283,7 @@ public class LiquibaseServletListener implements ServletContextListener {
          * <li>system properties</li>
          * </ul>
          */
+        @Override
         public Object getValue(String prefixAndProperty) {
             // Try to get value from JNDI
             try {

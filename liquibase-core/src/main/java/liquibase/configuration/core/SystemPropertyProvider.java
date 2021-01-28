@@ -1,5 +1,6 @@
-package liquibase.configuration;
+package liquibase.configuration.core;
 
+import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.util.StringUtil;
 
 import java.util.Map;
@@ -12,8 +13,13 @@ import java.util.Properties;
 public class SystemPropertyProvider implements ConfigurationValueProvider {
 
     @Override
-    public Object getValue(String namespace, String property) {
-        String propValue = System.getProperty(namespace +"."+property);
+    public int getPrecedence() {
+        return 20;
+    }
+
+    @Override
+    public Object getValue(String property) {
+        String propValue = System.getProperty(property);
         if (StringUtil.isNotEmpty(propValue)) {
             return propValue;
         }
@@ -23,8 +29,8 @@ public class SystemPropertyProvider implements ConfigurationValueProvider {
         //
         Properties properties = System.getProperties();
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            String key = (String)entry.getKey();
-            if (key.equalsIgnoreCase(namespace + "." + property)) {
+            String key = (String) entry.getKey();
+            if (key.equalsIgnoreCase(property)) {
                 return entry.getValue();
             }
         }
@@ -32,7 +38,7 @@ public class SystemPropertyProvider implements ConfigurationValueProvider {
     }
 
     @Override
-    public String describeValueLookupLogic(ConfigurationProperty property) {
-        return "System property '"+property.getNamespace()+"."+property.getName()+"'";
+    public String describeValueLookupLogic(String property) {
+        return "System property '" + property + "'";
     }
 }

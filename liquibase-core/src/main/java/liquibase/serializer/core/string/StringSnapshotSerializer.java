@@ -1,7 +1,6 @@
 package liquibase.serializer.core.string;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
@@ -149,7 +148,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
-        out.write(serialize(snapshot, true).getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+        out.write(serialize(snapshot, true).getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
     }
 
     @Override

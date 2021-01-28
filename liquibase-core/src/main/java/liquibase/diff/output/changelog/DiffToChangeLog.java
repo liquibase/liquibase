@@ -4,8 +4,7 @@ import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.diff.DiffResult;
@@ -134,9 +133,9 @@ public class DiffToChangeLog {
                         } else {
             Scope.getCurrentScope().getLog(getClass()).info(file + " exists, appending");
                             ByteArrayOutputStream out = new ByteArrayOutputStream();
-                            print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
+                            print(new PrintStream(out, true, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()), changeLogSerializer);
 
-                            String xml = new String(out.toByteArray(), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+                            String xml = new String(out.toByteArray(), GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
                             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
                             innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
@@ -161,23 +160,19 @@ public class DiffToChangeLog {
                                     }
                                 }
 
-                                String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration
-                                        .class).getOutputLineSeparator();
+                                String lineSeparator = GlobalConfiguration.OUTPUT_LINE_SEPARATOR.getCurrentValue();
 
                                 if (foundEndTag) {
                                     randomAccessFile.seek(offset);
                                     randomAccessFile.writeBytes("    ");
-                                    randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
-                                            (GlobalConfiguration.class).getOutputEncoding()));
+                                    randomAccessFile.write(innerXml.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
                                     randomAccessFile.writeBytes(lineSeparator);
                                     randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
                                 } else {
                                     randomAccessFile.seek(0);
                                     long length = randomAccessFile.length();
                                     randomAccessFile.seek(length);
-                                    randomAccessFile.write(
-                                            xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
-                                            (GlobalConfiguration.class).getOutputEncoding()));
+                                    randomAccessFile.write(xml.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
                                 }
                             }
 
@@ -233,7 +228,7 @@ public class DiffToChangeLog {
         }
 
         try (FileOutputStream stream = new FileOutputStream(file);
-             PrintStream out = new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())) {
+             PrintStream out = new PrintStream(stream, true, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())) {
             changeLogSerializer.write(changeSets, out);
         }
     }
@@ -255,7 +250,7 @@ public class DiffToChangeLog {
         DatabaseObjectComparator comparator = new DatabaseObjectComparator();
 
         String created = null;
-        if (LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.GENERATE_CHANGESET_CREATED_VALUES).getValue(Boolean.class)) {
+        if (GlobalConfiguration.GENERATE_CHANGESET_CREATED_VALUES.getCurrentValue()) {
             created = new SimpleDateFormat("yyyy-MM-dd HH:mmZ").format(new Date());
         }
 
@@ -858,7 +853,7 @@ public class DiffToChangeLog {
     protected String generateId(Change[] changes) {
         String desc = "";
 
-        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getGeneratedChangeSetIdsContainDescription()) {
+        if (GlobalConfiguration.GENERATED_CHANGESET_IDS_INCLUDE_DESCRIPTION.getCurrentValue()) {
             if (!overriddenIdRoot) { //switch timestamp to a shorter string (last 4 digits in base 36 format). Still mostly unique, but shorter since we also now have mostly-unique descriptions of the changes
                 this.idRoot = Long.toString(Long.decode(idRoot), 36);
                 idRoot = idRoot.substring(idRoot.length() - 4);

@@ -1,7 +1,8 @@
 package liquibase.datatype;
 
-import liquibase.configuration.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.core.ClobType;
 import org.junit.After;
@@ -22,80 +23,62 @@ public class ClobTypeTest {
     }
 
     @Test
-    public void mssqlTextToVarcharTest() {
-        LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class)
-                .getProperty(GlobalConfiguration.CONVERT_DATA_TYPES)
-                .setValue(Boolean.TRUE);
-
-        ClobType ct = new ClobType();
-        ct.finishInitialization("Text");
-        DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-        assertEquals("varchar (max)", dbType.getType());
+    public void mssqlTextToVarcharTest() throws Exception {
+        Scope.child(GlobalConfiguration.CONVERT_DATA_TYPES.getProperty(), true, () -> {
+            ClobType ct = new ClobType();
+            ct.finishInitialization("Text");
+            DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
+            assertEquals("varchar (max)", dbType.getType());
+        });
     }
 
     @Test
-    public void mssqlEscapedTextToVarcharTest() {
-        LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class)
-                .getProperty(GlobalConfiguration.CONVERT_DATA_TYPES)
-                .setValue(Boolean.TRUE);
-
-        ClobType ct = new ClobType();
-        ct.finishInitialization("[Text]");
-        DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-        assertEquals("varchar (max)", dbType.getType());
+    public void mssqlEscapedTextToVarcharTest() throws Exception {
+        Scope.child(GlobalConfiguration.CONVERT_DATA_TYPES.getProperty(), true, () -> {
+            ClobType ct = new ClobType();
+            ct.finishInitialization("[Text]");
+            DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
+            assertEquals("varchar (max)", dbType.getType());
+        });
     }
 
     @Test
-    public void mssqlTextToVarcharNoConvertTest() {
-        LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class)
-                .getProperty(GlobalConfiguration.CONVERT_DATA_TYPES)
-                .setValue(Boolean.FALSE);
-
-        ClobType ct = new ClobType();
-        ct.finishInitialization("Text");
-        DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-        assertEquals("varchar (max)", dbType.getType());
+    public void mssqlTextToVarcharNoConvertTest() throws Exception {
+        Scope.child(GlobalConfiguration.CONVERT_DATA_TYPES.getProperty(), false, () -> {
+            ClobType ct = new ClobType();
+            ct.finishInitialization("Text");
+            DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
+            assertEquals("varchar (max)", dbType.getType());
+        });
     }
 
     @Test
-    public void mssqlNTextToNVarcharNoConvertTest() {
-        LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class)
-                .getProperty(GlobalConfiguration.CONVERT_DATA_TYPES)
-                .setValue(Boolean.FALSE);
-
-        ClobType ct = new ClobType();
-        ct.finishInitialization("NText");
-        DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-        assertEquals("nvarchar (max)", dbType.getType());
+    public void mssqlNTextToNVarcharNoConvertTest() throws Exception {
+        Scope.child(GlobalConfiguration.CONVERT_DATA_TYPES.getProperty(), false, () -> {
+            ClobType ct = new ClobType();
+            ct.finishInitialization("NText");
+            DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
+            assertEquals("nvarchar (max)", dbType.getType());
+        });
     }
 
     @Test
-    public void mssqlEscapedTextToVarcharNoConvertTest() {
-        LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class)
-                .getProperty(GlobalConfiguration.CONVERT_DATA_TYPES)
-                .setValue(Boolean.FALSE);
-
-        ClobType ct = new ClobType();
-        ct.finishInitialization("[Text]");
-        DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-        assertEquals("varchar (max)", dbType.getType());
+    public void mssqlEscapedTextToVarcharNoConvertTest() throws Exception {
+        Scope.child(GlobalConfiguration.CONVERT_DATA_TYPES.getProperty(), false, () -> {
+            ClobType ct = new ClobType();
+            ct.finishInitialization("[Text]");
+            DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
+            assertEquals("varchar (max)", dbType.getType());
+        });
     }
 
     @Test
-    public void mssqlEscapedNTextToNVarcharNoConvertTest() {
-        LiquibaseConfiguration.getInstance()
-                .getConfiguration(GlobalConfiguration.class)
-                .getProperty(GlobalConfiguration.CONVERT_DATA_TYPES)
-                .setValue(Boolean.FALSE);
-
-        ClobType ct = new ClobType();
-        ct.finishInitialization("[NText]");
-        DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
-        assertEquals("nvarchar (max)", dbType.getType());
+    public void mssqlEscapedNTextToNVarcharNoConvertTest() throws Exception {
+        Scope.child(GlobalConfiguration.CONVERT_DATA_TYPES.getProperty(), false, () -> {
+            ClobType ct = new ClobType();
+            ct.finishInitialization("[NText]");
+            DatabaseDataType dbType = ct.toDatabaseDataType(new MSSQLDatabase());
+            assertEquals("nvarchar (max)", dbType.getType());
+        });
     }
 }

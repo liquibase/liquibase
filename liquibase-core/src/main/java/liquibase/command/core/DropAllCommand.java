@@ -7,8 +7,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -17,14 +16,10 @@ import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.HubUpdater;
 import liquibase.hub.LiquibaseHubException;
-import liquibase.hub.model.Connection;
 import liquibase.hub.model.HubChangeLog;
-import liquibase.hub.model.Operation;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.Logger;
-import liquibase.logging.core.BufferedLogService;
-import liquibase.logging.core.CompositeLogService;
 import liquibase.util.StringUtil;
 
 import java.util.ArrayList;
@@ -143,9 +138,8 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
     private boolean checkForRegisteredChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
         Logger log = Scope.getCurrentScope().getLog(getClass());
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
-        String hubMode = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubMode());
+        String apiKey = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue());
+        String hubMode = StringUtil.trimToNull(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
         String changeLogId = changeLog.getChangeLogId();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (apiKey == null || hubMode.equals("off") || ! hubServiceFactory.isOnline()) {

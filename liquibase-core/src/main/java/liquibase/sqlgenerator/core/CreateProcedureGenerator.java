@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.ChangeLogParserCofiguration;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -42,8 +41,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         List<Sql> sql = new ArrayList<>();
 
         String schemaName = statement.getSchemaName();
-        if ((schemaName == null) && LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-            .getAlwaysOverrideStoredLogicSchema()) {
+        if ((schemaName == null) && GlobalConfiguration.ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA.getCurrentValue()) {
             schemaName = database.getDefaultSchemaName();
         }
 
@@ -129,7 +127,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
      */
     public static void surroundWithSchemaSets(List<Sql> sql, String schemaName, Database database) {
         if ((StringUtil.trimToNull(schemaName) != null) &&
-                !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
+                !ChangeLogParserConfiguration.USE_PROCEDURE_SCHEMA.getCurrentValue()) {
             String defaultSchema = database.getDefaultSchemaName();
             if (database instanceof OracleDatabase) {
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
@@ -149,7 +147,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         if (schemaName == null) {
             return procedureText;
         }
-        if ((StringUtil.trimToNull(schemaName) != null) && LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
+        if ((StringUtil.trimToNull(schemaName) != null) && ChangeLogParserConfiguration.USE_PROCEDURE_SCHEMA.getCurrentValue()) {
             StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";

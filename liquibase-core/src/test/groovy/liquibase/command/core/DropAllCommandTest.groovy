@@ -2,7 +2,7 @@ package liquibase.command.core
 
 import liquibase.Liquibase
 import liquibase.Scope
-import liquibase.configuration.HubConfiguration
+import liquibase.hub.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.core.MockDatabase
 import liquibase.hub.HubService

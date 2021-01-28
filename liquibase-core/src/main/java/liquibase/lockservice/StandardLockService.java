@@ -2,8 +2,7 @@ package liquibase.lockservice;
 
 import liquibase.Scope;
 import liquibase.change.Change;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DB2Database;
@@ -68,8 +67,7 @@ public class StandardLockService implements LockService {
         if (changeLogLockPollRate != null) {
             return changeLogLockPollRate;
         }
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getDatabaseChangeLogLockWaitTime();
+        return GlobalConfiguration.CHANGELOGLOCK_WAIT_TIME.getCurrentValue();
     }
 
     @Override
@@ -81,8 +79,7 @@ public class StandardLockService implements LockService {
         if (changeLogLockRecheckTime != null) {
             return changeLogLockRecheckTime;
         }
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getDatabaseChangeLogLockPollRate();
+        return GlobalConfiguration.CHANGELOGLOCK_POLL_RATE.getCurrentValue();
     }
 
     @Override

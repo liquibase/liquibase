@@ -1,8 +1,7 @@
 package liquibase.serializer.core.json;
 
 import liquibase.changelog.ChangeLogChild;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import liquibase.util.StringUtil;
 
@@ -16,7 +15,7 @@ public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
 
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
         writer.write("{ \"databaseChangeLog\": [\n");
         int i = 0;
         for (T child : children) {

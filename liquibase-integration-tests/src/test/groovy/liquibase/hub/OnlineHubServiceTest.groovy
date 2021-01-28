@@ -1,7 +1,6 @@
 package liquibase.hub
 
 
-import liquibase.configuration.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.core.OnlineHubService
 import liquibase.hub.model.Connection

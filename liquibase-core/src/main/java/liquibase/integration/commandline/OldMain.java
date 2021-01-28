@@ -9,9 +9,8 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.*;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
+import liquibase.hub.HubConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -196,17 +195,12 @@ public class OldMain {
                 OldMain main = new OldMain();
 
                 try {
-                    GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration
-                            (GlobalConfiguration.class);
-
-                    if (!globalConfiguration.getShouldRun()) {
+                    if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
                         Scope.getCurrentScope().getUI().sendErrorMessage((
                                 String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        LiquibaseConfiguration.getInstance().describeValueLookupLogic(
-                                                globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)))));
+                                        GlobalConfiguration.SHOULD_RUN.getProperty())));
                         return 0;
                     }
-                    HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
 
                     if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                         main.printHelp(System.out);
@@ -346,14 +340,16 @@ public class OldMain {
                     // Store the Hub API key for later use
                     //
                     if (StringUtil.isNotEmpty(main.liquibaseHubApiKey)) {
-                        hubConfiguration.setLiquibaseHubApiKey(main.liquibaseHubApiKey);
+                        //TODO:
+//                        hubConfiguration.setLiquibaseHubApiKey(main.liquibaseHubApiKey);
                     }
 
                     //
                     // Store the Hub URL for later use
                     //
                     if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
-                        hubConfiguration.setLiquibaseHubUrl(main.liquibaseHubUrl);
+                        //TODO:
+//                        hubConfiguration.setLiquibaseHubUrl(main.liquibaseHubUrl);
                     }
 
                     main.applyDefaults();
@@ -399,7 +395,7 @@ public class OldMain {
                 }
 
                 if (isHubEnabled(main.command) &&
-                    LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubApiKey() != null &&
+                    HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue() != null &&
                     !Scope.getCurrentScope().getSingleton(HubServiceFactory.class).isOnline()) {
                     ui.sendMessage("WARNING: The command "+main.command+" operations were not synced with your Liquibase Hub account because: " + StringUtil.lowerCaseFirst(Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getOfflineReason()));
                 }
@@ -1022,7 +1018,7 @@ public class OldMain {
                     }
                     String valueKey = splitKey[splitKey.length-1];
                     try {
-                        LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
+                        //TODO: LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
                     }
                     catch (Exception e) {
                         if (strict) {
@@ -1355,15 +1351,14 @@ public class OldMain {
         //
         // Log setting for Hub properties
         //
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubApiKey())) {
-            LOG.fine("Liquibase Hub API Key:  " + hubConfiguration.getLiquibaseHubApiKeySecureDescription());
+        if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue())) {
+            LOG.fine("Liquibase Hub API Key:  " + HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValueObfuscated());
         }
-        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubUrl())) {
-            LOG.fine("Liquibase Hub URL:      " + hubConfiguration.getLiquibaseHubUrl());
+        if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue())) {
+            LOG.fine("Liquibase Hub URL:      " + HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue());
         }
-        if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubMode())) {
-            LOG.fine("Liquibase Hub Mode:     " + hubConfiguration.getLiquibaseHubMode());
+        if (StringUtil.isNotEmpty(HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue())) {
+            LOG.fine("Liquibase Hub Mode:     " + HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue());
         }
 
         //
@@ -1426,7 +1421,8 @@ public class OldMain {
             // Set the global configuration option based on presence of the dataOutputDirectory
             //
             boolean b = dataOutputDirectory != null;
-            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
+            //TODO:
+//            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
 
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
@@ -1685,8 +1681,8 @@ public class OldMain {
                 executeSyncHub(database, liquibase);
                 return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
-                String liquibaseHubApiKey = hubConfiguration.getLiquibaseHubApiKey();
-                String hubMode = hubConfiguration.getLiquibaseHubMode();
+                String liquibaseHubApiKey = HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue();
+                String hubMode = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue();
                 if (liquibaseHubApiKey != null && ! hubMode.toLowerCase().equals("off")) {
                     if (hubConnectionId == null && changeLogFile == null) {
                         String warningMessage =
@@ -2068,8 +2064,7 @@ public class OldMain {
     }
 
     private Writer getOutputWriter() throws IOException {
-        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .getOutputEncoding();
+        String charsetName = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
 
         return new OutputStreamWriter(getOutputStream(), charsetName);
     }

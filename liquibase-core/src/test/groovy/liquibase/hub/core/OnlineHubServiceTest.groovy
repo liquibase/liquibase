@@ -1,6 +1,6 @@
 package liquibase.hub.core
 
-import liquibase.configuration.HubConfiguration
+import liquibase.hub.HubConfiguration
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.hub.model.Connection
 import liquibase.hub.model.OperationChangeEvent

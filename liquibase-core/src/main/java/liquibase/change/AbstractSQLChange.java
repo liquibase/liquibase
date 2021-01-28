@@ -2,8 +2,7 @@ package liquibase.change;
 
 import liquibase.change.core.RawSQLChange;
 import liquibase.Scope;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -194,11 +193,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                stream = new ByteArrayInputStream(
-                    sql.getBytes(
-                        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                        .getOutputEncoding()
-                    )
+                stream = new ByteArrayInputStream(sql.getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue())
                 );
             }
 
@@ -295,7 +290,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {
             this.stream = new PushbackInputStream(stream, 2048);
             try {
-                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+                this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes(GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue()));
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

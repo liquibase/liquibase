@@ -1,7 +1,6 @@
 package liquibase.util.xml;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.OutputKeys;
@@ -29,10 +28,10 @@ public class DefaultXmlWriter implements XmlWriter {
             Transformer transformer = factory.newTransformer();
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.ENCODING, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            transformer.setOutputProperty(OutputKeys.ENCODING, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
 
             //need to nest outputStreamWriter to get around JDK 5 bug.  See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6296446
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            OutputStreamWriter writer = new OutputStreamWriter(outputStream, GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue());
             transformer.transform(new DOMSource(doc), new StreamResult(writer));
             writer.flush();
             writer.close();

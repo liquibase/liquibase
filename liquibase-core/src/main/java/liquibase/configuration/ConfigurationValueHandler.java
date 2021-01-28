@@ -1,9 +1,6 @@
 package liquibase.configuration;
 
-/**
- * Implementations can convert specified {@link ConfigurationProperty} values
- */
-public interface ConfigurationValueHandler {
+public interface ConfigurationValueHandler<DataType> {
 
-    Object convert(Object value);
+    DataType convert(Object value) throws IllegalArgumentException;
 }

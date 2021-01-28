@@ -1,6 +1,6 @@
 package liquibase.configuration
 
-
+import liquibase.hub.HubConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 

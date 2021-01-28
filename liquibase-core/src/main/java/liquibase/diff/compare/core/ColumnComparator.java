@@ -1,7 +1,6 @@
 package liquibase.diff.compare.core;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -77,7 +76,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         exclude.add("type");
         exclude.add("autoIncrementInformation");
 
-        if (!LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDiffColumnOrder()) {
+        if (!GlobalConfiguration.DIFF_COLUMN_ORDER.getCurrentValue()) {
             exclude.add("order");
         }
 
