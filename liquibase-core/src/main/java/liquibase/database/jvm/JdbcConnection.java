@@ -98,13 +98,21 @@ public class JdbcConnection implements DatabaseConnection {
     public String getURL() {
         try {
             String url = getConnectionUrl();
-            if (url != null) {
-                url = PATTERN_JDBC_URL_PASSWORD_PROPERTY.matcher(url).replaceAll("");
-            }
+            url = sanitizeUrl(url);
             return url;
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    /**
+     * Remove any secure information from the URL. Used for logging purposes
+     */
+    public static String sanitizeUrl(String url) {
+        if (url != null) {
+            url = PATTERN_JDBC_URL_PASSWORD_PROPERTY.matcher(url).replaceAll("");
+        }
+        return url;
     }
 
     protected String getConnectionUrl() throws SQLException {
