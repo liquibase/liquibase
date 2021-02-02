@@ -63,8 +63,7 @@ class DropAllCommandTest extends Specification {
         BufferedLogService bufferLog = new BufferedLogService()
 
         Scope.getCurrentScope().getUI()
-        def hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
-        hubConfiguration.setLiquibaseHubApiKey(UUID.randomUUID().toString())
+        HubConfiguration.LIQUIBASE_HUB_API_KEY.setLiquibaseHubApiKey(UUID.randomUUID().toString())
         def command = new DropAllCommand()
         JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
         Liquibase liquibase = new Liquibase(outputFile.getName(), testResourceAccessor, new MockDatabase())

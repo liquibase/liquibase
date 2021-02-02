@@ -672,7 +672,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseCatalogName;
         }
 
-        if (GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValueDetails().getWasOverridden()) {
+        if (GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValueDetails() == null) {
             return GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
         }
 
@@ -690,7 +690,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseSchemaName;
         }
 
-        if (GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValueDetails().getWasOverridden()) {
+        if (!GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValueDetails().getDefaultValueUsed()) {
             return GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue();
         }
 

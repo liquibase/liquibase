@@ -1,8 +1,9 @@
 package liquibase.configuration.core;
 
 import liquibase.configuration.ConfigurationValueProvider;
+import liquibase.configuration.CurrentValueDetails;
+import liquibase.configuration.CurrentValueSourceDetails;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,9 +18,8 @@ import java.util.Set;
  * <li>FOO_BAR - with underscores and upper case</li>
  * </ul>
  * Any hyphen variant of the above would work as well, or even mix dot/hyphen variants.
- *
  */
-public class EnvironmentVariableProvider implements ConfigurationValueProvider {
+public class SystemEnvironmentValueProvider implements ConfigurationValueProvider {
 
     @Override
     public int getPrecedence() {
@@ -27,14 +27,14 @@ public class EnvironmentVariableProvider implements ConfigurationValueProvider {
     }
 
     @Override
-    public Object getValue(String property) {
-        if (property == null) {
+    public CurrentValueSourceDetails getValue(String key) {
+        if (key == null) {
             return null;
         }
 
         Set<String> checked = new HashSet<>();
 
-        for (String name : new String[]{property, property.toUpperCase(), property.toLowerCase()}) {
+        for (String name : new String[]{key, key.toUpperCase(), key.toLowerCase()}) {
             for (String variation : new String[] {
                     name,
 
@@ -50,7 +50,7 @@ public class EnvironmentVariableProvider implements ConfigurationValueProvider {
                 if (checked.add(variation)) {
                     final String foundValue = getEnvironmentVariable(variation);
                     if (foundValue != null) {
-                        return foundValue;
+                        return new CurrentValueSourceDetails(foundValue, "Environment variable", variation);
                     }
 
                 }
@@ -65,8 +65,4 @@ public class EnvironmentVariableProvider implements ConfigurationValueProvider {
         return System.getenv(name);
     }
 
-    @Override
-    public String describeValueLookupLogic(String property) {
-        return "Environment variable '" + property + "'";
-    }
 }

@@ -1,11 +1,8 @@
 package liquibase.integration.servlet;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
-import liquibase.Scope;
+import liquibase.*;
 import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.GlobalConfiguration;
+import liquibase.configuration.CurrentValueSourceDetails;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DerbyDatabase;
@@ -101,8 +98,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         ServletContext servletContext = servletContextEvent.getServletContext();
         try {
             this.hostName = NetUtil.getLocalHostName();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             servletContext.log("Cannot find hostname: " + e.getMessage());
             return;
         }
@@ -115,7 +111,7 @@ public class LiquibaseServletListener implements ServletContextListener {
             servletValueContainer = new ServletValueContainer(servletContext, ic);
             //TODO: LiquibaseConfiguration.getInstance().init(servletValueContainer);
 
-            failOnError = (String) servletValueContainer.getValue(LIQUIBASE_ONERROR_FAIL);
+            failOnError = (String) servletValueContainer.getValue(LIQUIBASE_ONERROR_FAIL).getValue();
             if (checkPreconditions(servletContext, ic)) {
                 executeUpdate(servletContext, ic);
             }
@@ -128,8 +124,7 @@ public class LiquibaseServletListener implements ServletContextListener {
             if (ic != null) {
                 try {
                     ic.close();
-                }
-                catch (NamingException e) {
+                } catch (NamingException e) {
                     // ignore
                 }
             }
@@ -147,13 +142,13 @@ public class LiquibaseServletListener implements ServletContextListener {
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
         if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
-                    + " because "+ GlobalConfiguration.SHOULD_RUN.getProperty()
-                            + " was set to false");
+                    + " because " + GlobalConfiguration.SHOULD_RUN.getKey()
+                    + " was set to false");
             return false;
         }
 
-        String machineIncludes = (String) servletValueContainer.getValue(LIQUIBASE_HOST_INCLUDES);
-        String machineExcludes = (String) servletValueContainer.getValue(LIQUIBASE_HOST_EXCLUDES);
+        String machineIncludes = (String) servletValueContainer.getValue(LIQUIBASE_HOST_INCLUDES).getValue();
+        String machineExcludes = (String) servletValueContainer.getValue(LIQUIBASE_HOST_EXCLUDES).getValue();
 
         boolean shouldRun = false;
         if ((machineIncludes == null) && (machineExcludes == null)) {
@@ -175,10 +170,10 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
         }
 
-        if (GlobalConfiguration.SHOULD_RUN.getCurrentValue() && GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails().getWasOverridden()) {
+        if (GlobalConfiguration.SHOULD_RUN.getCurrentValue() && !GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails().getDefaultValueUsed()) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
-                    + LIQUIBASE_HOST_EXCLUDES + ", since " + GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails().getSourceDescription()
+                    + LIQUIBASE_HOST_EXCLUDES + ", since " + GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails().getSource()
                     + "=true");
         }
         if (!shouldRun) {
@@ -194,19 +189,19 @@ public class LiquibaseServletListener implements ServletContextListener {
      */
     @java.lang.SuppressWarnings("squid:S2095")
     private void executeUpdate(ServletContext servletContext, InitialContext ic) throws NamingException, SQLException, LiquibaseException {
-        setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE));
+        setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE).getValue());
         if (getDataSource() == null) {
             throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_DATASOURCE + " is not set");
         }
 
-        setChangeLogFile((String) servletValueContainer.getValue(LIQUIBASE_CHANGELOG));
+        setChangeLogFile((String) servletValueContainer.getValue(LIQUIBASE_CHANGELOG).getValue());
         if (getChangeLogFile() == null) {
             throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_CHANGELOG + " is not set");
         }
 
-        setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS));
-        setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS));
-        this.defaultSchema = StringUtil.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
+        setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS).getValue());
+        setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS).getValue());
+        this.defaultSchema = StringUtil.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT).getValue());
 
         Connection connection = null;
         Database database = null;
@@ -241,8 +236,7 @@ public class LiquibaseServletListener implements ServletContextListener {
             if (database instanceof DerbyDatabase) {
                 ((DerbyDatabase) database).setShutdownEmbeddedDerby(false);
             }
-        }
-        finally {
+        } finally {
             if (liquibase != null) {
                 liquibase.close();
             } else if (connection != null) {
@@ -270,11 +264,6 @@ public class LiquibaseServletListener implements ServletContextListener {
             this.initialContext = initialContext;
         }
 
-        @Override
-        public String describeValueLookupLogic(String property) {
-            return "JNDI, servlet container init parameter, and system property '"+property+"'";
-        }
-
         /**
          * Try to read the value that is stored by the given key from
          * <ul>
@@ -284,25 +273,25 @@ public class LiquibaseServletListener implements ServletContextListener {
          * </ul>
          */
         @Override
-        public Object getValue(String prefixAndProperty) {
+        public CurrentValueSourceDetails getValue(String key) {
             // Try to get value from JNDI
             try {
                 Context envCtx = (Context) initialContext.lookup(JAVA_COMP_ENV);
-                String valueFromJndi = (String) envCtx.lookup(prefixAndProperty);
-                return valueFromJndi;
-            }
-            catch (NamingException e) {
+                String valueFromJndi = (String) envCtx.lookup(key);
+
+                return new CurrentValueSourceDetails(valueFromJndi, "JNDI", key);
+            } catch (NamingException e) {
                 // Ignore
             }
 
             // Return the value from the servlet context
-            String valueFromServletContext = servletContext.getInitParameter(prefixAndProperty);
+            String valueFromServletContext = servletContext.getInitParameter(key);
             if (valueFromServletContext != null) {
-                return valueFromServletContext;
+                return new CurrentValueSourceDetails(valueFromServletContext, "Servlet context value", key);
             }
 
             // Otherwise: Return system property
-            return System.getProperty(prefixAndProperty);
+            return new CurrentValueSourceDetails(System.getProperty(key), "System property", key);
         }
     }
 }

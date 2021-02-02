@@ -15,7 +15,6 @@ public class ExpressionExpanderTest {
 
     @Before
     public void setup() {
-        LiquibaseConfiguration.getInstance().reset();
         changeLogParameters = new ChangeLogParameters();
         this.handler = new ChangeLogParameters.ExpressionExpander(changeLogParameters);
     }

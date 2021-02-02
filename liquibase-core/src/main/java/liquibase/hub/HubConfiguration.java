@@ -1,12 +1,12 @@
 package liquibase.hub;
 
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationDefinitionHolder;
 
 /**
  * Configuration container for global properties.
  */
-public class HubConfiguration implements AutoloadedConfigurations {
+public class HubConfiguration implements ConfigurationDefinitionHolder {
 
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_API_KEY;
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_URL;

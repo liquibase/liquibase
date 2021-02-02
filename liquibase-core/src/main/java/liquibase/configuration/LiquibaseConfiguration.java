@@ -4,20 +4,21 @@ import liquibase.Scope;
 import liquibase.SingletonObject;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Provides unified management of configuration properties within Liquibase core and in extensions.
  * <p>
- * This class is the top level container used to access {@link AutoloadedConfigurations} implementations which contain
- * the actual configuration properties.
- * Normal use is to call
- * LiquibaseConfiguration.getInstance().getConfiguration(NEEDED_CONFIGURATION.class).getYOUR_PROPERTY()
+ * Because this class focuses on raw/untyped access to what is actually configured, it is usually best to interact with {@link ConfigurationDefinition} instances
+ * which provide type safety, standardized key naming, default values, and more.
  * <p>
- * This class is implemented as a singleton with a single global set of configuration objects, but the
- * {@link #setInstance(LiquibaseConfiguration)} method can be used to replace
- * the singleton with an alternate implementation that uses ThreadLocal objects or any other way of managing
- * configurations.
+ * "Registered" configuration definitions will be available for generated help.
+ * <p>
+ * This class will search through the configured {@link ConfigurationValueProvider}s. Standard value providers are auto-loaded on startup, but more can be added/removed at runtime.
+ * <p>
  */
 public class LiquibaseConfiguration implements SingletonObject {
 
@@ -28,14 +29,11 @@ public class LiquibaseConfiguration implements SingletonObject {
         return Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
     }
 
-    /**
-     * Constructor protected to prevent construction outside getInstance()
-     */
     public LiquibaseConfiguration() {
         configurationValueProviders = new TreeSet<>((o1, o2) -> {
-            if (o1.getPrecedence() < o1.getPrecedence()) {
+            if (o1.getPrecedence() < o2.getPrecedence()) {
                 return -1;
-            } else if (o1.getPrecedence() > o1.getPrecedence()) {
+            } else if (o1.getPrecedence() > o2.getPrecedence()) {
                 return 1;
             }
 
@@ -44,50 +42,60 @@ public class LiquibaseConfiguration implements SingletonObject {
 
     }
 
-
     /**
-     * Re-initialize the configuration with the given ConfigurationProviders. Any existing
-     * AbstractConfigurationContainer instances are reset to defaults.
+     * Finishes configuration of this service. Called as the root scope is set up, should not be called elsewhere.
      */
     public void init(Scope scope) {
+        configurationValueProviders.clear();
         ServiceLocator serviceLocator = scope.getServiceLocator();
-        final List<AutoloadedConfigurations> containers = serviceLocator.findInstances(AutoloadedConfigurations.class);
-        for (AutoloadedConfigurations container : containers) {
-            Scope.getCurrentScope().getLog(getClass()).fine("Found ConfigurationDefinitions in "+container.getClass().getName());
+        final List<ConfigurationDefinitionHolder> containers = serviceLocator.findInstances(ConfigurationDefinitionHolder.class);
+        for (ConfigurationDefinitionHolder container : containers) {
+            Scope.getCurrentScope().getLog(getClass()).fine("Found ConfigurationDefinitions in " + container.getClass().getName());
         }
 
         configurationValueProviders.addAll(serviceLocator.findInstances(ConfigurationValueProvider.class));
     }
 
-    //TODO: remove
-    public void reset() {
+    /**
+     * Adds a new {@link ConfigurationValueProvider} to the active collection of providers.
+     */
+    public void addProvider(ConfigurationValueProvider valueProvider) {
+        this.configurationValueProviders.add(valueProvider);
     }
 
-    public ConfigurationDefinition getDefinition(String property) {
-        for (ConfigurationDefinition definition : definitions) {
-            if (definition.getProperty().equals(property)) {
-                return definition;
-            }
-        }
-        return null;
-    }
-
-    public Object getCurrentValue(String property) {
+    /**
+     * Searches for the given key in the current providers.
+     *
+     * @return the value for the key, or null if not configured.
+     */
+    public CurrentValueDetails getCurrentValue(String key) {
+        CurrentValueDetails details = null;
         for (ConfigurationValueProvider provider : configurationValueProviders) {
-            final Object value = provider.getValue(property);
-            if (value != null) {
-                return value;
+            final CurrentValueSourceDetails providerValue = provider.getValue(key);
+
+            if (providerValue != null) {
+                if (details == null) {
+                    details = new CurrentValueDetails();
+                }
+
+                details.override(providerValue);
             }
         }
 
-        return null;
+        return details;
     }
 
-    public void addDefinition(ConfigurationDefinition definition) {
+    /**
+     * Registers a {@link ConfigurationDefinition} so it will be returned by {@link #getRegisteredDefinitions()}
+     */
+    public void registerDefinition(ConfigurationDefinition definition) {
         this.definitions.add(definition);
     }
 
-    public SortedSet<ConfigurationDefinition> getDefinitions() {
+    /**
+     * Returns all registered {@link ConfigurationDefinition}s. Registered definitions are used for generated help documentation.
+     */
+    public SortedSet<ConfigurationDefinition> getRegisteredDefinitions() {
         return Collections.unmodifiableSortedSet(this.definitions);
     }
 }

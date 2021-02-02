@@ -1,12 +1,12 @@
 package liquibase;
 
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationDefinitionHolder;
 
 /**
  * Configuration container for global properties.
  */
-public class GlobalConfiguration implements AutoloadedConfigurations {
+public class GlobalConfiguration implements ConfigurationDefinitionHolder {
 
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<String> DATABASECHANGELOG_TABLE_NAME;
@@ -35,7 +35,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         SHOULD_RUN = builder.define("shouldRun", Boolean.class)
                 .setDescription("Should Liquibase commands execute")
                 .setDefaultValue(true)
-                .addAlias("should.run")
+                .addAliasKey("should.run")
                 .build();
 
         DATABASECHANGELOG_TABLE_NAME = builder.define("databaseChangeLogTableName", String.class)
@@ -78,7 +78,7 @@ public class GlobalConfiguration implements AutoloadedConfigurations {
         OUTPUT_ENCODING = builder.define("outputFileEncoding", String.class)
                 .setDescription("Encoding to output text in. Defaults to file.encoding system property or UTF-8")
                 .setDefaultValue("UTF-8")
-                .addAlias("file.encoding")
+                .addAliasKey("file.encoding")
                 .setCommonlyUsed(true)
                 .build();
 

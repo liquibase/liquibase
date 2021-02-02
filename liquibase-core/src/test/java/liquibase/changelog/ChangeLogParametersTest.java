@@ -14,11 +14,6 @@ import static org.junit.Assert.assertNull;
 
 public class  ChangeLogParametersTest {
 
-    @Before
-    public void before() {
-        LiquibaseConfiguration.getInstance().reset();
-    }
-
     @Test
     public void setParameterValue_doubleSet() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters();

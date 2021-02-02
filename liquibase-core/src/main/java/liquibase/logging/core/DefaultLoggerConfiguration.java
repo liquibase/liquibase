@@ -1,12 +1,12 @@
 package liquibase.logging.core;
 
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationDefinitionHolder;
 
 /**
  * Configuration container for {@link liquibase.logging.LogService} properties
  */
-public class DefaultLoggerConfiguration implements AutoloadedConfigurations {
+public class DefaultLoggerConfiguration implements ConfigurationDefinitionHolder {
 
     public static ConfigurationDefinition<String> LOG_LEVEL;
 

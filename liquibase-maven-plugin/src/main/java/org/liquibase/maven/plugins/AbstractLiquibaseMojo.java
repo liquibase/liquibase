@@ -3,7 +3,6 @@ package org.liquibase.maven.plugins;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -317,10 +316,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
                 processSystemProperties();
 
-                LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-
                 if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
-                    getLog().info("Liquibase did not run because " + GlobalConfiguration.SHOULD_RUN.getProperty() + " was set to false");
+                    getLog().info("Liquibase did not run because " + GlobalConfiguration.SHOULD_RUN.getKey() + " was set to false");
                     return;
                 }
                 if (skip) {

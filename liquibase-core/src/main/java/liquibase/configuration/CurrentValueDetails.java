@@ -1,19 +1,35 @@
 package liquibase.configuration;
 
-public class CurrentValueDetails<DataType> {
-    DataType value;
-    boolean wasOverridden;
-    String sourceDescription;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Stack;
 
-    public DataType getValue() {
-        return value;
+/**
+ * Detailed information about the current configuration value.
+ */
+public class CurrentValueDetails {
+
+    private final List<CurrentValueSourceDetails> sourceHistory = new ArrayList<>();
+
+    public CurrentValueDetails() {
     }
 
-    public boolean getWasOverridden() {
-        return wasOverridden;
+    public Object getValue() {
+        if (sourceHistory.size() == 0) {
+             return null;
+        }
+        return sourceHistory.get(0).getValue();
     }
 
-    public String getSourceDescription() {
-        return sourceDescription;
+    public void override(CurrentValueSourceDetails details) {
+        this.sourceHistory.add(0, details);
+    }
+
+    /**
+     * @return a full list of how the value was set and overridden.
+     */
+    public List<CurrentValueSourceDetails> getSourceHistory() {
+        return Collections.unmodifiableList(sourceHistory);
     }
 }

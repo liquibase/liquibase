@@ -94,7 +94,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     protected ConsoleWrapper getConsole() {
         if (console == null) {
             boolean headlessConfigValue = GlobalConfiguration.HEADLESS.getCurrentValue();
-            boolean wasHeadlessOverridden = GlobalConfiguration.HEADLESS.getCurrentValueDetails().getWasOverridden();
+            boolean wasHeadlessOverridden = !GlobalConfiguration.HEADLESS.getCurrentValueDetails().getDefaultValueUsed();
 
             final Logger log = Scope.getCurrentScope().getLog(getClass());
 

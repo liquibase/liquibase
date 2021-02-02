@@ -1,6 +1,6 @@
-package liquibase.configuration
+package liquibase.hub
 
-import liquibase.hub.HubConfiguration
+import liquibase.Scope
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -9,10 +9,15 @@ class HubConfigurationTest extends Specification {
     @Unroll
     def "setHubUrl cleans up input"() {
         when:
-        def config = new HubConfiguration().setLiquibaseHubUrl(input)
+        def output = Scope.child([(HubConfiguration.LIQUIBASE_HUB_URL.key): input], new Scope.ScopedRunnerWithReturn<String>() {
+            @Override
+            String run() throws Exception {
+                return HubConfiguration.LIQUIBASE_HUB_URL.getCurrentValue()
+            }
+        })
 
         then:
-        config.getLiquibaseHubUrl() == expected
+        output == expected
 
         where:
         input                              | expected
@@ -27,14 +32,6 @@ class HubConfigurationTest extends Specification {
         "https://test.com:8888/other/path" | "https://test.com:8888"
         "http://localhost"                 | "http://localhost"
         "http://localhost:8080"            | "http://localhost:8080"
-    }
-
-    def setGetHubApiKey() {
-        when:
-        def config = new HubConfiguration().setLiquibaseHubApiKey("this_is_a_hub_key")
-
-        then:
-        config.getLiquibaseHubApiKey() == "this_is_a_hub_key"
     }
 
 }

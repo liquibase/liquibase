@@ -198,7 +198,7 @@ public class OldMain {
                     if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
                         Scope.getCurrentScope().getUI().sendErrorMessage((
                                 String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        GlobalConfiguration.SHOULD_RUN.getProperty())));
+                                        GlobalConfiguration.SHOULD_RUN.getKey())));
                         return 0;
                     }
 

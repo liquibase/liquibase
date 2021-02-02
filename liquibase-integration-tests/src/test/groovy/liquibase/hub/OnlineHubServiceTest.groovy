@@ -29,9 +29,8 @@ class OnlineHubServiceTest extends Specification {
 
             def hubApiKey = integrationTestProperties.get("integration.test.hub.apikey")
             def hubUrl = integrationTestProperties.get("integration.test.hub.url")
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
-            hubConfiguration.setLiquibaseHubApiKey(hubApiKey)
-            hubConfiguration.setLiquibaseHubUrl(hubUrl)
+            //TODO: hubConfiguration.setLiquibaseHubApiKey(hubApiKey)
+            //TODO: hubConfiguration.setLiquibaseHubUrl(hubUrl)
 
         }
 

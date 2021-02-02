@@ -1,12 +1,12 @@
 package liquibase.parser;
 
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.AutoloadedConfigurations;
+import liquibase.configuration.ConfigurationDefinitionHolder;
 
 /**
  * Configuration container for properties applicable to most {@link liquibase.parser.ChangeLogParser} implementations
  */
-public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
+public class ChangeLogParserConfiguration implements ConfigurationDefinitionHolder {
 
     public static final ConfigurationDefinition<Boolean> SUPPORT_PROPERTY_ESCAPING;
     public static final ConfigurationDefinition<Boolean> USE_PROCEDURE_SCHEMA;
@@ -17,7 +17,7 @@ public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
         SUPPORT_PROPERTY_ESCAPING = builder.define("supportPropertyEscaping", Boolean.class)
                 .setDescription("Support escaping changelog parameters using a colon. Example: ${:user.name}")
                 .setDefaultValue(false)
-                .addAlias("enableEscaping")
+                .addAliasKey("enableEscaping")
                 .build();
 
         USE_PROCEDURE_SCHEMA = builder.define("useProcedureSchema", Boolean.class)

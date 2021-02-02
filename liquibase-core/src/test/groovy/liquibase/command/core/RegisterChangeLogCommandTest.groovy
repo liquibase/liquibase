@@ -180,7 +180,6 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class)
         def command = new RegisterChangeLogCommand()
         command.setChangeLogFile("changelog.xml")
         DatabaseChangeLog changeLog = new DatabaseChangeLog(".")
