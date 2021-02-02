@@ -57,6 +57,7 @@
         <sonar.projectName>datical-liquibase</sonar.projectName>
         <sonar.organization>datical</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
     </properties>
 
     <modules>
