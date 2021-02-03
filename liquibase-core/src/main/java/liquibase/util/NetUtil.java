@@ -49,12 +49,16 @@ public class NetUtil {
      * @throws SocketException
      */
     public static String getLocalHostAddress() throws UnknownHostException, SocketException {
+        InetAddress localHost = getLocalHost();
         try {
-            return getLocalHost().getHostAddress();
+            if( localHost != null) {
+                return localHost.getHostAddress();
+            }
         } catch (Throwable e) {
             LogFactory.getInstance().getLog().debug("Error getting hostname", e);
             return "unknown";
         }
+        return "";
     }
 
     /**
@@ -64,12 +68,16 @@ public class NetUtil {
      * @throws SocketException
      */
     public static String getLocalHostName() throws UnknownHostException, SocketException {
+        InetAddress localHost = getLocalHost();
         try {
-            return getLocalHost().getHostName();
+            if( localHost != null) {
+                return localHost.getHostName();
+            }
         } catch (Throwable e) {
             LogFactory.getInstance().getLog().debug("Error getting hostname", e);
             return "unknown";
         }
+        return "";
     }
 
 

@@ -16,7 +16,7 @@ import java.util.*;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
- * 
+ *
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
@@ -134,7 +134,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * Set the raw SQL managed by this Change. The passed sql is trimmed and set to null if an empty string is passed.
      */
     public void setSql(String sql) {
-       this.sql = StringUtils.trimToNull(sql);
+        this.sql = StringUtils.trimToNull(sql);
     }
 
     /**
@@ -162,30 +162,14 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public CheckSum generateCheckSum() {
-        InputStream stream = null;
-        try {
-            stream = openSqlStream();
-
-            String sql = this.sql;
-            if (stream == null && sql == null) {
-                sql = "";
+            String statementSql = this.sql;
+            if (statementSql == null) {
+                statementSql = "";
             }
-
-            if (sql != null) {
-                stream = new ByteArrayInputStream(sql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-            }
-
+            try (InputStream  stream = new ByteArrayInputStream(statementSql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()))){
             return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    LogFactory.getLogger().debug("Error closing stream", e);
-                }
-            }
         }
     }
 
@@ -202,20 +186,20 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 
-        String sql = StringUtils.trimToNull(getSql());
-        if (sql == null) {
+        String statementSql = StringUtils.trimToNull(getSql());
+        if (statementSql == null) {
             return new SqlStatement[0];
         }
 
-        String processedSQL = normalizeLineEndings(sql);
+        String processedSQL = normalizeLineEndings(statementSql);
         if (this instanceof RawSQLChange && ((RawSQLChange) this).isRerunnable()) {
             returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
             return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
         }
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
-                 statement = statement.replaceAll("\\n", "\r\n");
-             }
+                statement = statement.replaceAll("\\n", "\r\n");
+            }
 
             String escapedStatement = statement;
             try {
@@ -223,8 +207,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                     escapedStatement = database.getConnection().nativeSQL(statement);
                 }
             } catch (DatabaseException e) {
-				escapedStatement = statement;
-			}
+                escapedStatement = statement;
+            }
 
             returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
         }
@@ -250,21 +234,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     protected String normalizeLineEndings(String string) {
         return string.replace("\r", "");
     }
-
-//    @Override
-//    public Set<String> getSerializableFields() {
-//        Set<String> fieldsToSerialize = new HashSet<String>(super.getSerializableFields());
-//        fieldsToSerialize.add("splitStatements");
-//        fieldsToSerialize.add("stripComments");
-//        return Collections.unmodifiableSet(fieldsToSerialize);
-//    }
-//
-//    @Override
-//    public Object getSerializableFieldValue(String field) {
-//        if (field.equals("splitStatements")) {
-//            return isSplitStatements();
-//        }
-//    }
 
     public static class NormalizingStream extends InputStream {
         private ByteArrayInputStream headerStream;
@@ -331,12 +300,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         @Override
-        public void mark(int readlimit) {
+        public synchronized void mark(int readlimit) {
             stream.mark(readlimit);
         }
 
         @Override
-        public void reset() throws IOException {
+        public synchronized void reset() throws IOException {
             stream.reset();
         }
 

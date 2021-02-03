@@ -340,7 +340,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         return new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
     }
 
-    private boolean constraintNameAfterUnique(Database database) {
+    protected boolean constraintNameAfterUnique(Database database) {
         return database instanceof InformixDatabase;
     }
 

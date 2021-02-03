@@ -76,7 +76,7 @@ public class ServiceLocator {
         setResourceAccessor(accessor);
     }
 
-    public static ServiceLocator getInstance() {
+    public synchronized static ServiceLocator getInstance() {
         return instance;
     }
 

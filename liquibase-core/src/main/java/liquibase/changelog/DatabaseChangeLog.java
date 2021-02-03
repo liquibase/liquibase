@@ -361,12 +361,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
-            LabelExpression labelExpression = new LabelExpression(node.getChildValue(null, "labels", String.class));
-            if (labelExpression == null) {
-                labelExpression = new LabelExpression();
-            }
-            Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
+             ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
+             LabelExpression labelExpression = new LabelExpression(node.getChildValue(null, "labels", String.class));
+             Boolean ignore = node.getChildValue(null, "ignore", Boolean.class);
             if (ignore == null) {
                 ignore = false;
             }

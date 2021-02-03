@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import liquibase.logging.LogFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -34,8 +36,7 @@ public class LiquibaseUtil {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    // TODO Log this error and remove the RuntimeException.
-                    throw new RuntimeException("Failed to close InputStream in LiquibaseUtil.", e);
+                    LogFactory.getInstance().getLog().debug("Failed to close InputStream in LiquibaseUtil.", e);
                 }
             }
         }

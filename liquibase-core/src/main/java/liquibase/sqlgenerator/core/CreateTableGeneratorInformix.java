@@ -170,7 +170,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         return new Sql[] { new UnparsedSql(sql, new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))) };
 	}
 
-	private boolean constraintNameAfterUnique(Database database) {
+	protected boolean constraintNameAfterUnique(Database database) {
 		return true;
 	}
 }

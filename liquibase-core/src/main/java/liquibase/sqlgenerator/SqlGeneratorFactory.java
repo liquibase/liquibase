@@ -209,8 +209,8 @@ public class SqlGeneratorFactory {
         for (SqlStatement statement : statements) {
             Sql[] sqlArray = factory.generateSql(statement, database);
             if (sqlArray != null && sqlArray.length > 0) {
-              List<Sql> sqlList = Arrays.asList(sqlArray);
-              returnList.addAll(sqlList);
+                List<Sql> sqlList = Arrays.asList(sqlArray);
+                returnList.addAll(sqlList);
             }
         }
 
