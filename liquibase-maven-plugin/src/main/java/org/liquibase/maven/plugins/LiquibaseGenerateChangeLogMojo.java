@@ -1,11 +1,15 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.GlobalConfiguration;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -110,15 +114,12 @@ public class LiquibaseGenerateChangeLogMojo extends
             // Set the global configuration option based on presence of the dataOutputDirectory
             //
             boolean b = dataDir != null;
-            //todo
-            throw new RuntimeException("TODO");
-//            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
-
-//            CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtil.trimToNull(diffTypes),
-//                    StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl);
-//            getLog().info("Output written to Change Log file, " + outputChangeLogFile);
-        }
-        catch (Throwable e) {
+            Scope.child(GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getKey(), b, () -> {
+                CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtil.trimToNull(diffTypes),
+                        StringUtil.trimToNull(changeSetAuthor), StringUtil.trimToNull(changeSetContext), StringUtil.trimToNull(dataDir), diffOutputControl);
+                getLog().info("Output written to Change Log file, " + outputChangeLogFile);
+            });
+        }  catch (Exception e) {
             throw new LiquibaseException(e);
         }
     }

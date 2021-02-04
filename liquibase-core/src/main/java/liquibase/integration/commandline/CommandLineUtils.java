@@ -35,7 +35,7 @@ import static java.util.ResourceBundle.getBundle;
 
 /**
  * Common Utility methods used in the CommandLine application and the Maven plugin.
- * These methods were originally moved from {@link OldMain} so they could be shared.
+ * These methods were originally moved from {@link Main} so they could be shared.
  *
  * @author Peter Murray
  */

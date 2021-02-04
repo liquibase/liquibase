@@ -6,10 +6,12 @@ import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.hub.HubConfiguration;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -105,18 +107,15 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
         //
         // Store the Hub API key and URL for later use
         //
-        //TODO:
-        throw new RuntimeException("TODO");
-//        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-//        if (StringUtil.isNotEmpty(hubApiKey)) {
-//            hubConfiguration.setLiquibaseHubApiKey(hubApiKey);
-//        }
-//        if (StringUtil.isNotEmpty(hubUrl)) {
-//            hubConfiguration.setLiquibaseHubUrl(hubUrl);
-//        }
-//        if (StringUtil.isNotEmpty(hubMode)) {
-//            hubConfiguration.setLiquibaseHubMode(hubMode);
-//        }
+        if (StringUtil.isNotEmpty(hubApiKey)) {
+            System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), hubApiKey);
+        }
+        if (StringUtil.isNotEmpty(hubUrl)) {
+            System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), hubUrl);
+        }
+        if (StringUtil.isNotEmpty(hubMode)) {
+            System.setProperty(HubConfiguration.LIQUIBASE_HUB_MODE.getKey(), hubMode);
+        }
     }
 
     @Override

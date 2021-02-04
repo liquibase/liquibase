@@ -57,9 +57,9 @@ import static java.util.ResourceBundle.getBundle;
 /**
  * Class for executing Liquibase via the command line.
  */
-public class OldMain {
+public class Main {
     private static final String ERRORMSG_UNEXPECTED_PARAMETERS = "unexpected.command.parameters";
-    private static final Logger LOG = Scope.getCurrentScope().getLog(OldMain.class);
+    private static final Logger LOG = Scope.getCurrentScope().getLog(Main.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     private static XMLResourceBundle commandLineHelpBundle = ((XMLResourceBundle) getBundle
             ("liquibase/i18n/liquibase-commandline-helptext", new XmlResourceBundleControl()));
@@ -192,7 +192,7 @@ public class OldMain {
         return Scope.child(scopeObjects, new Scope.ScopedRunnerWithReturn<Integer>() {
             @Override
             public Integer run() throws Exception {
-                OldMain main = new OldMain();
+                Main main = new Main();
 
                 try {
                     if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
@@ -405,7 +405,7 @@ public class OldMain {
         });
     }
 
-    private static boolean setupNeeded(OldMain main) throws CommandLineParsingException {
+    private static boolean setupNeeded(Main main) throws CommandLineParsingException {
         if (main.command.toLowerCase().startsWith(COMMANDS.REGISTER_CHANGELOG.toLowerCase())) {
             return false;
         }
