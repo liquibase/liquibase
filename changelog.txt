@@ -1,6 +1,25 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.3.0 (2021.02.06)
+
+- MariaDB is now fully certified for Liquibase Pro users
+- Added ability to register for Hub during update operations
+- Receive Liquibase Hub report links in the CLI after running commands
+- Fixed NPE when an output writer is null #1625
+- Fixed filename + Id + author to be treated as unique in ValidatingVisitor.findChangeSet method #1622
+- Fixed EntityResolver to check the classpath even if the standard ResourceAccessor does not include it #1621
+- Fixed the CVE-2017-18640 issue on snakeyaml-1.2.4 #1608
+- Fixed HistoryCommandTest to run on systems having a non-US default locale #1078
+- Added quotes around ${JAVA_PATH} in Liquibase shell script to avoid spaces in path issues #1062
+- Fixed the issue with automatic dropping of default values on MS SQL #1003
+- Allow --changeset to have a space after -- in formatted sql files
+- Modified SetColumnRemarks support for MySQL #942
+- Implemented boolean data type support for DB2 LUW #966
+- Added deprecated LogFactory.getInstance() to smooth the upgrade to 4.x #1642 and #1641
+- Included the existing dropPrimaryKey.dropIndex attribute in XSD #1629
+- Implemented auto-registration and operation report capabilities for Liquibase Hub
+
 Changes in version 4.2.2 (2020.12.09)
 
 - Handle null statement objects coming from JdbcConnection objects #1576
@@ -174,7 +193,7 @@ Changes in version 4.0.0 Beta1 (2020.4.20)
 - fix nullPointerException when migrating RedShift https://github.com/liquibase/liquibase/pull/823
 - Prints the SQL error code on Exception https://github.com/liquibase/liquibase/pull/833
 - Fixed SetColumnRemarks for mysql https://github.com/liquibase/liquibase/pull/835
-- Allow "NOW" and "Toda" literal capabilities in CSV filese https://github.com/liquibase/liquibase/pull/808
+- Allow "NOW" and "Today" literal capabilities in CSV filese https://github.com/liquibase/liquibase/pull/808
 - Add ability to disable running of Liquibase via CDILiquibaseConfig https://github.com/liquibase/liquibase/pull/804
 
 Changes in version 3.8.9 (2020.4.06)
@@ -314,7 +333,7 @@ Changes in version 3.6.0 (2018.04.5)
 - [CORE-2797] - Determine the DB2 data server type correctly
 - [CORE-2820] - Unsupported ReorganizeTable for DB2 z/OS causes changelog validation to fail
 - [CORE-2821] - AddForeignKey statement generates incorrect SQL for DB2 z/OS
-- [CORE-2826] - indexExists precondition fails on AS400 + JDBCDatabaseSnapshot/Snapshot generator code is not coded generically?
+- [CORE-2826] - indexExists precondition fails on AS400 + JDBCDatabaseSnapshot/Snapshot generator code is not coded generically
 - [CORE-2843] - Sql wrong lexical analysis for string literals - escaped single quotes are misparsed
 - [CORE-2875] - UTF-8 character not understood
 - [CORE-2894] - Oracle snapshot not detecting custom datatypes in different schemas

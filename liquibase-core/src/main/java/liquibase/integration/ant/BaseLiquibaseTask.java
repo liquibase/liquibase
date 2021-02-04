@@ -68,6 +68,7 @@ public abstract class BaseLiquibaseTask extends Task {
             scopeValues.put(Scope.Attr.classLoader.name(), classLoader);
 
             Scope.child(scopeValues, () -> {
+                Scope.getCurrentScope().getUI().setAllowPrompt(false);
                 database[0] = createDatabaseFromType(databaseType, resourceAccessor);
                 liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database[0]);
                 if (changeLogParameters != null) {

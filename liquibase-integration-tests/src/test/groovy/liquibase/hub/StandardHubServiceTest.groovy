@@ -1,16 +1,15 @@
 package liquibase.hub
 
-
 import liquibase.configuration.LiquibaseConfiguration
-import liquibase.hub.core.OnlineHubService
+import liquibase.hub.core.StandardHubService
 import liquibase.hub.model.Connection
 import spock.lang.Specification
 
 import static org.junit.Assume.assumeTrue
 
-class OnlineHubServiceTest extends Specification {
+class StandardHubServiceTest extends Specification {
 
-    private OnlineHubService hubService
+    private StandardHubService hubService
 
     private Properties integrationTestProperties
 
@@ -34,7 +33,7 @@ class OnlineHubServiceTest extends Specification {
 
         }
 
-        hubService = new OnlineHubService()
+        hubService = new StandardHubService()
         assumeTrue("Liquibase Hub is not available for testing", hubService.isHubAvailable())
     }
 

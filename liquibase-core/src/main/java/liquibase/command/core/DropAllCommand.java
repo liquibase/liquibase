@@ -110,17 +110,21 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             boolean doSyncHub = true;
             DatabaseChangeLog changeLog = null;
             if (StringUtil.isNotEmpty(changeLogFile)) {
+                //
+                // Let the user know they can register for Hub
+                //
                 changeLog = liquibase.getDatabaseChangeLog();
+                hubUpdater = new HubUpdater(new Date(), changeLog, database);
+                hubUpdater.register(changeLogFile);
                 doSyncHub = checkForRegisteredChangeLog(changeLog);
             }
 
-            hubUpdater = new HubUpdater(new Date(), changeLog);
             for (CatalogAndSchema schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + schema);
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }
-            if (doSyncHub || hubConnectionId != null) {
+            if (hubUpdater != null && (doSyncHub || hubConnectionId != null)) {
                 hubUpdater.syncHub(changeLogFile, database, changeLog, hubConnectionId);
             }
         } catch (DatabaseException e) {

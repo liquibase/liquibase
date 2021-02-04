@@ -8,7 +8,7 @@ import liquibase.hub.model.Project
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class OnlineHubServiceTest extends Specification {
+class StandardHubServiceTest extends Specification {
 
     private static testUuid = UUID.fromString("3b8b6f80-1194-4a70-8cf2-30f33fd0433e")
 
@@ -19,7 +19,7 @@ class OnlineHubServiceTest extends Specification {
     @Unroll
     def "toSearchString"() {
         expect:
-        new OnlineHubService().toSearchString(setup) == expected
+        new StandardHubService().toSearchString(setup) == expected
 
         where:
         setup                                                                                         | expected
@@ -35,7 +35,7 @@ class OnlineHubServiceTest extends Specification {
     @Unroll
     def "parseDate"() {
         expect:
-        String.valueOf(new OnlineHubService().parseDate(date)) == expected
+        String.valueOf(new StandardHubService().parseDate(date)) == expected
 
         where:
         date                  | expected
@@ -61,7 +61,7 @@ class OnlineHubServiceTest extends Specification {
                 ("POST /api/v1/organizations/$orgId/projects/$projectId/operations/$operationId/change-events" as String): null,
         ])
 
-        def service = new OnlineHubService(
+        def service = new StandardHubService(
                 http: mockHttpClient
         )
 

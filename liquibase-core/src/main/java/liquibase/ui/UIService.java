@@ -1,6 +1,7 @@
 package liquibase.ui;
 
 import liquibase.ExtensibleObject;
+import liquibase.exception.LiquibaseException;
 import liquibase.plugin.Plugin;
 
 /**
@@ -34,4 +35,22 @@ public interface UIService extends ExtensibleObject, Plugin {
      */
     <T> T prompt(String prompt, T defaultValue, InputHandler<T> inputHandler, Class<T> type);
 
+    /**
+     *
+     * Method to set flag indicating whether prompting is allowed
+     *
+     * @param   allowPrompt                 New flag value
+     * @throws  IllegalArgumentException    If parameter is not allowed
+     *
+     */
+    void setAllowPrompt(boolean allowPrompt) throws IllegalArgumentException;
+
+    /**
+     *
+     * Return current setting of allow prompt flag
+     *
+     * @return   boolean
+     *
+     */
+    boolean getAllowPrompt();
 }
