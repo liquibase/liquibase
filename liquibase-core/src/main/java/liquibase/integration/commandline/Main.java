@@ -10,6 +10,7 @@ import liquibase.command.CommandResult;
 import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.*;
 import liquibase.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.hub.HubConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
@@ -340,16 +341,14 @@ public class Main {
                     // Store the Hub API key for later use
                     //
                     if (StringUtil.isNotEmpty(main.liquibaseHubApiKey)) {
-                        //TODO:
-//                        hubConfiguration.setLiquibaseHubApiKey(main.liquibaseHubApiKey);
+                        System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), main.liquibaseHubApiKey);
                     }
 
                     //
                     // Store the Hub URL for later use
                     //
                     if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
-                        //TODO:
-//                        hubConfiguration.setLiquibaseHubUrl(main.liquibaseHubUrl);
+                        System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), main.liquibaseHubUrl);
                     }
 
                     main.applyDefaults();
@@ -1007,23 +1006,7 @@ public class Main {
                 if (((String) entry.getKey()).startsWith("parameter.")) {
                     changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue());
                 } else if (((String) entry.getKey()).contains(".")) {
-                    //
-                    // Determine the namespace and value keys
-                    // then set the property value
-                    //
-                    final String[] splitKey = ((String) entry.getKey()).split("\\.", 3);
-                    String namespace="";
-                    for (int i=0; i < splitKey.length-1; i++) {
-                        if (! namespace.equals("")) {
-                            namespace += ".";
-                        }
-                        namespace += splitKey[i];
-                    }
-                    String valueKey = splitKey[splitKey.length-1];
-                    try {
-                        //TODO: LiquibaseConfiguration.getInstance().getConfiguration(namespace).setValue(valueKey, entry.getValue());
-                    }
-                    catch (Exception e) {
+                    if (Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).getRegisteredDefinition((String) entry.getKey()) == null) {
                         if (strict) {
                             throw new CommandLineParsingException(
                                     String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
@@ -1033,6 +1016,9 @@ public class Main {
                                     String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
                             );
                         }
+                    }
+                    if (System.getProperty((String) entry.getKey()) == null) {
+                        System.setProperty((String) entry.getKey(), (String) entry.getValue());
                     }
                 } else {
                     Field field = getDeclaredField((String)entry.getKey());
@@ -1424,8 +1410,7 @@ public class Main {
             // Set the global configuration option based on presence of the dataOutputDirectory
             //
             boolean b = dataOutputDirectory != null;
-            //TODO:
-//            LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).setShouldSnapshotData(b);
+            System.setProperty(GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getKey(), String.valueOf(b));
 
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(

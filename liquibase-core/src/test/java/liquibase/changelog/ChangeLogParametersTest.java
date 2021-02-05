@@ -3,9 +3,7 @@ package liquibase.changelog;
 import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.Labels;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.H2Database;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

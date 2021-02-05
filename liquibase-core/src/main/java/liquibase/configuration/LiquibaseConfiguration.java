@@ -2,12 +2,10 @@ package liquibase.configuration;
 
 import liquibase.Scope;
 import liquibase.SingletonObject;
+import liquibase.integration.servlet.LiquibaseServletListener;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Provides unified management of configuration properties within Liquibase core and in extensions.
@@ -25,11 +23,7 @@ public class LiquibaseConfiguration implements SingletonObject {
     private final SortedSet<ConfigurationValueProvider> configurationValueProviders;
     private final SortedSet<ConfigurationDefinition> definitions = new TreeSet<>();
 
-    public static LiquibaseConfiguration getInstance() {
-        return Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
-    }
-
-    public LiquibaseConfiguration() {
+    protected LiquibaseConfiguration() {
         configurationValueProviders = new TreeSet<>((o1, o2) -> {
             if (o1.getPrecedence() < o2.getPrecedence()) {
                 return -1;
@@ -62,6 +56,16 @@ public class LiquibaseConfiguration implements SingletonObject {
     public void addProvider(ConfigurationValueProvider valueProvider) {
         this.configurationValueProviders.add(valueProvider);
     }
+
+    /**
+     * Removes a specific {@link ConfigurationValueProvider} from the active collection of providers.
+     *
+     * @return true if the provider was removed.
+     */
+    public boolean removeProvider(ConfigurationValueProvider provider) {
+        return this.configurationValueProviders.remove(provider);
+    }
+
 
     /**
      * Searches for the given key in the current providers.
@@ -97,5 +101,22 @@ public class LiquibaseConfiguration implements SingletonObject {
      */
     public SortedSet<ConfigurationDefinition> getRegisteredDefinitions() {
         return Collections.unmodifiableSortedSet(this.definitions);
+    }
+
+    /**
+     * @return the registered {@link ConfigurationDefinition} asssociated with this key. Null if none match.
+     */
+    public ConfigurationDefinition getRegisteredDefinition(String key) {
+        for (ConfigurationDefinition def : getRegisteredDefinitions()) {
+            if (def.getKey().equalsIgnoreCase(key)) {
+                return def;
+            }
+            final Set aliasKeys = def.getAliasKeys();
+            if (aliasKeys != null && aliasKeys.contains(def.getKey())) {
+                return def;
+            }
+        }
+
+        return null;
     }
 }

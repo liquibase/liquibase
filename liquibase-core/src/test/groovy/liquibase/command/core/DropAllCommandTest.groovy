@@ -2,9 +2,9 @@ package liquibase.command.core
 
 import liquibase.Liquibase
 import liquibase.Scope
-import liquibase.hub.HubConfiguration
-import liquibase.configuration.LiquibaseConfiguration
+import liquibase.command.CommandResult
 import liquibase.database.core.MockDatabase
+import liquibase.hub.HubConfiguration
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
 import liquibase.logging.core.BufferedLogService
@@ -63,22 +63,22 @@ class DropAllCommandTest extends Specification {
         BufferedLogService bufferLog = new BufferedLogService()
 
         Scope.getCurrentScope().getUI()
-        HubConfiguration.LIQUIBASE_HUB_API_KEY.setLiquibaseHubApiKey(UUID.randomUUID().toString())
-        def command = new DropAllCommand()
-        JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
-        Liquibase liquibase = new Liquibase(outputFile.getName(), testResourceAccessor, new MockDatabase())
-        command.setLiquibase(liquibase)
-        command.setChangeLogFile(outputFile.getName())
-        command.setDatabase(new MockDatabase())
-        command.setSchemas("")
 
-        def result
-        CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
-        Scope.child(Scope.Attr.logService.name(), compositeLogService, new Scope.ScopedRunner() {
-            public void run() {
+        CommandResult result = null
+        Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), UUID.randomUUID().toString(), {
+            def command = new DropAllCommand()
+            JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
+            Liquibase liquibase = new Liquibase(outputFile.getName(), testResourceAccessor, new MockDatabase())
+            command.setLiquibase(liquibase)
+            command.setChangeLogFile(outputFile.getName())
+            command.setDatabase(new MockDatabase())
+            command.setSchemas("")
+
+            CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
+            Scope.child(Scope.Attr.logService.name(), compositeLogService, {
                 result = command.run()
-            }
-        });
+            })
+        })
 
         then:
         result.succeeded

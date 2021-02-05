@@ -1,7 +1,6 @@
 package liquibase.configuration.core;
 
 import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.CurrentValueDetails;
 import liquibase.configuration.CurrentValueSourceDetails;
 import liquibase.util.StringUtil;
 

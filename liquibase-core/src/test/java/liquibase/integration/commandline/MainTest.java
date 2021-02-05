@@ -1,10 +1,14 @@
 package liquibase.integration.commandline;
 
+import liquibase.GlobalConfiguration;
+import liquibase.Scope;
 import liquibase.exception.CommandLineParsingException;
+import liquibase.parser.ChangeLogParserConfiguration;
 import liquibase.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.Properties;
 import java.util.Arrays;
 import java.util.List;
@@ -127,15 +131,14 @@ public class MainTest {
         assertTrue("We just want to survive until this point", true);
     }
 
-//    @Test
-//    public void globalConfigurationSaysDoNotRun() throws Exception {
-//        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-//                .setValue("shouldRun", false);
-//        int errorLevel = OldMain.run(new String[0]);
-//        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-//                .setValue("shouldRun", true);
-//        assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
-//    }
+    @Test
+    public void globalConfigurationSaysDoNotRun() throws Exception {
+        Scope.child(Collections.singletonMap(GlobalConfiguration.SHOULD_RUN.getKey(), false), () -> {
+
+            int errorLevel = Main.run(new String[0]);
+            assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
+        });
+    }
 
 //    @Test
 //    public void mockedSnapshotRun() throws Exception {

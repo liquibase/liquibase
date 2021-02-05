@@ -3,6 +3,7 @@ package liquibase.integration.servlet;
 import liquibase.*;
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.CurrentValueSourceDetails;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DerbyDatabase;
@@ -96,6 +97,8 @@ public class LiquibaseServletListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
+        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
         try {
             this.hostName = NetUtil.getLocalHostName();
         } catch (Exception e) {
@@ -110,7 +113,7 @@ public class LiquibaseServletListener implements ServletContextListener {
 
             Scope.getCurrentScope().getUI().setAllowPrompt(false);
             servletValueContainer = new ServletValueContainer(servletContext, ic);
-            //TODO: LiquibaseConfiguration.getInstance().init(servletValueContainer);
+            liquibaseConfiguration.addProvider(servletValueContainer);
 
             failOnError = (String) servletValueContainer.getValue(LIQUIBASE_ONERROR_FAIL).getValue();
             if (checkPreconditions(servletContext, ic)) {
@@ -129,6 +132,9 @@ public class LiquibaseServletListener implements ServletContextListener {
                     // ignore
                 }
             }
+            liquibaseConfiguration.removeProvider(servletValueContainer);
+
+
         }
     }
 
@@ -254,7 +260,7 @@ public class LiquibaseServletListener implements ServletContextListener {
 
         @Override
         public int getPrecedence() {
-            return 0;
+            return 30;
         }
 
         private ServletContext servletContext;
@@ -291,7 +297,6 @@ public class LiquibaseServletListener implements ServletContextListener {
                 return new CurrentValueSourceDetails(valueFromServletContext, "Servlet context value", key);
             }
 
-            // Otherwise: Return system property
             return new CurrentValueSourceDetails(System.getProperty(key), "System property", key);
         }
     }

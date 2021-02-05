@@ -7,6 +7,9 @@ import liquibase.plugin.AbstractPluginFactory;
  */
 public class CommandFactory extends AbstractPluginFactory<LiquibaseCommand> {
 
+    protected CommandFactory() {
+    }
+
     @Override
     protected Class<LiquibaseCommand> getPluginClass() {
         return LiquibaseCommand.class;

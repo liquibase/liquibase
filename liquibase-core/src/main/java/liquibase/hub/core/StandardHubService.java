@@ -45,7 +45,7 @@ public class StandardHubService implements HubService {
 
     @Override
     public boolean isOnline() {
-        return !LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF");
+        return !HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValue().equalsIgnoreCase("OFF");
     }
 
     public boolean isHubAvailable() {

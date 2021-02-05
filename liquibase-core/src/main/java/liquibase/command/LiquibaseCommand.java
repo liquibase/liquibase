@@ -19,5 +19,9 @@ public interface LiquibaseCommand<T extends CommandResult> extends Plugin {
 
     CommandValidationErrors validate();
 
+    /**
+     * Function that performs the actual logic. This should not be called directly by any code,
+     * only by {@link CommandFactory#execute(LiquibaseCommand)}
+     */
     T run() throws Exception;
 }

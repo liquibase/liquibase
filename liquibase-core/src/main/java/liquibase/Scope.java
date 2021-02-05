@@ -39,7 +39,6 @@ public class Scope {
     public enum Attr {
         logService,
         ui,
-        configuration,
         resourceAccessor,
         classLoader,
         database,
@@ -68,13 +67,12 @@ public class Scope {
             Scope rootScope = new Scope();
             scopeManager.setCurrentScope(rootScope);
 
-            rootScope.values.put(LiquibaseConfiguration.class.getName(), new LiquibaseConfiguration());
             rootScope.values.put(Attr.logService.name(), new JavaLogService());
             rootScope.values.put(Attr.resourceAccessor.name(), new ClassLoaderResourceAccessor());
             rootScope.values.put(Attr.serviceLocator.name(), new StandardServiceLocator());
 
             rootScope.values.put(Attr.ui.name(), new ConsoleUIService());
-            rootScope.get(LiquibaseConfiguration.class.getName(), LiquibaseConfiguration.class).init(rootScope);
+            rootScope.getSingleton(LiquibaseConfiguration.class).init(rootScope);
 
             LogService overrideLogService = rootScope.getSingleton(LogServiceFactory.class).getDefaultLogService();
             if (overrideLogService == null) {

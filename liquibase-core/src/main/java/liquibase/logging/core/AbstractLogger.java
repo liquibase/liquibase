@@ -82,7 +82,7 @@ public abstract class AbstractLogger extends AbstractExtensibleObject implements
 
     protected String filterMessage(String message) {
         try {
-            if (filter == null || !GlobalConfiguration.FILTER_LOG_MESSAGES.getCurrentValue()) {
+            if (filter == null || GlobalConfiguration.FILTER_LOG_MESSAGES == null || !GlobalConfiguration.FILTER_LOG_MESSAGES.getCurrentValue()) {
                 return message;
             }
         } catch (UnknownConfigurationType unknownConfigurationType) {

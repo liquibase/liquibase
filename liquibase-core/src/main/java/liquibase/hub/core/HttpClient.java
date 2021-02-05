@@ -181,11 +181,8 @@ class HttpClient {
                         newHubUrl = newHubUrl.replaceAll(url, "");
                         Scope.getCurrentScope().getLog(getClass()).info("Redirecting to URL: " + newHubUrl);
 
-                        //TODO
-                        throw new RuntimeException("TODO: ");
-//                        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-//                        hubConfiguration.setLiquibaseHubUrl(newHubUrl);
-//                        throw new LiquibaseHubRedirectException();
+                        System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), newHubUrl);
+                        throw new LiquibaseHubRedirectException();
                     }
                 }
 

@@ -11,9 +11,7 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.RegisterChangeLogCommand;
 import liquibase.command.core.SyncHubCommand;
-import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.CurrentValue;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -301,7 +299,6 @@ public class HubUpdater {
         //
         // Just return if Hub is off
         //
-        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         if (!hubService.isOnline()) {
             return;
@@ -312,7 +309,7 @@ public class HubUpdater {
         //   1.  We have a key already OR
         //   2.  We have a changeLogId already
         //
-        if (!StringUtil.isEmpty(hubConfiguration.getLiquibaseHubApiKey()) ||
+        if (!StringUtil.isEmpty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getCurrentValue()) ||
             changeLog.getChangeLogId() != null) {
             return;
         }
@@ -405,15 +402,15 @@ public class HubUpdater {
                 // If there is no liquibase.hub.mode setting then add one with value 'all'
                 // Do not update liquibase.hub.mode if it is already set
                 //
-                ConfigurationProperty hubModeProperty = hubConfiguration.getProperty(HubConfiguration.LIQUIBASE_HUB_MODE);
-                if (! hubModeProperty.getWasOverridden()) {
+                CurrentValue<String> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValueDetails();
+                if (hubModeProperty.getDefaultValueUsed()) {
                     writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=all\n");
                     message = "* Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getLog(getClass()).info(message);
                 } else {
                     message = "* Updated the liquibase.hub.apiKey property.";
-                    String message2 = "The liquibase.hub.mode is already set to " + hubConfiguration.getLiquibaseHubMode() + ". It will not be updated.";
+                    String message2 = "The liquibase.hub.mode is already set to " + hubModeProperty.getValue() + ". It will not be updated.";
                     Scope.getCurrentScope().getUI().sendMessage(message);
                     Scope.getCurrentScope().getUI().sendMessage(message2);
                     Scope.getCurrentScope().getLog(getClass()).warning(message);
@@ -427,7 +424,7 @@ public class HubUpdater {
                 message = "* Registering changelog file " + changeLogFile + " with Hub";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
-                hubConfiguration.setLiquibaseHubApiKey(registerResponse.getApiKey());
+                System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), registerResponse.getApiKey());
                 registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
 
                 message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
@@ -443,7 +440,8 @@ public class HubUpdater {
                     "No operations will be reported.";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).warning(message);
-                hubConfiguration.setLiquibaseHubApiKey(null);
+
+                System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), null);
             }
         }
     }
@@ -452,7 +450,7 @@ public class HubUpdater {
     // Write the string to a properties file
     //
     private void writeToPropertiesFile(File defaultsFile, String stringToWrite) throws IOException {
-        String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+        String encoding = GlobalConfiguration.OUTPUT_ENCODING.getCurrentValue();
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(defaultsFile, "rw")) {
             randomAccessFile.seek(defaultsFile.length());
             randomAccessFile.write(stringToWrite.getBytes(encoding));
@@ -486,7 +484,7 @@ public class HubUpdater {
         //
         // Execute registerChangeLog
         //
-        CommandResult result = registerChangeLogCommand.execute();
+        CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(registerChangeLogCommand);
         Scope.getCurrentScope().getUI().sendMessage(result.print());
     }
 

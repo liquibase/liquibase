@@ -3,7 +3,6 @@ package liquibase.configuration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * Detailed information about the current configuration value.
