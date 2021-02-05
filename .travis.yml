@@ -1,5 +1,5 @@
 language: java
-jdk: openjdk8
+jdk: openjdk11
 env:
   global:
     #SONATYPE_USERNAME
