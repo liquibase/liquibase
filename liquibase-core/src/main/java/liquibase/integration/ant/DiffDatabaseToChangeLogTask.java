@@ -12,7 +12,6 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.json.JsonChangeLogSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.apache.tools.ant.util.FileUtils;
 

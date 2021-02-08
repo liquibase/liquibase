@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import junit.framework.TestCase;
-import liquibase.database.Database;
 
 public class AbstractDb2DatabaseTest extends TestCase {
     public void testGetDateLiteral() {

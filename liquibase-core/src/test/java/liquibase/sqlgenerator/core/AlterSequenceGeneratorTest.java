@@ -1,13 +1,11 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.core.OracleDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.test.TestContext;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;

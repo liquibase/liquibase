@@ -2,8 +2,6 @@ package liquibase.license;
 
 import liquibase.plugin.Plugin;
 
-import java.util.List;
-
 public interface LicenseService extends Plugin {
 
   /**

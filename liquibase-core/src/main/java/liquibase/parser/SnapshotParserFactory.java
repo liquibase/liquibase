@@ -5,7 +5,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownFormatException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.util.ArrayList;
 import java.util.Collections;

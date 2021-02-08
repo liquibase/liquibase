@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.sql.Driver;
 import java.util.*;

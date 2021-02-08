@@ -1,20 +1,9 @@
 package liquibase.statement;
 
-import liquibase.change.ColumnConfig;
-import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ResourceAccessor;
-import liquibase.structure.core.Column;
 import org.junit.Before;
-import org.junit.Test;
-
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-
-import static java.util.Arrays.asList;
 
 public class UpdateExecutablePreparedStatementTest {
 //    @Mock

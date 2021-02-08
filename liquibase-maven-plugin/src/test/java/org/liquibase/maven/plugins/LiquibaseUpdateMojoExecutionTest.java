@@ -1,6 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
 

@@ -6,8 +6,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.logging.LogService;
-import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 
 import java.io.PrintStream;

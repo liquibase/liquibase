@@ -1,6 +1,5 @@
 package liquibase.dbtest.pgsql;
 
-import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.CreateTableChange;
@@ -13,9 +12,6 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import org.junit.Assert;
 import org.junit.Test;

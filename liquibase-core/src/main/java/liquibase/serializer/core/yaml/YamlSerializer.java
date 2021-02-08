@@ -21,7 +21,6 @@ import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
 
-import java.beans.IntrospectionException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.*;

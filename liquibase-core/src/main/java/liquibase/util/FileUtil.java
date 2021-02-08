@@ -3,7 +3,6 @@ package liquibase.util;
 import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.resource.ResourceAccessor;
 
 import java.io.*;
 

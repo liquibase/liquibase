@@ -1,6 +1,5 @@
 package liquibase.logging.core;
 
-import liquibase.Scope;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogMessageFilter;

@@ -2,10 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.datatype.DatabaseDataType;
 import liquibase.statement.NotNullConstraint;
-import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.core.Schema;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;

@@ -1,7 +1,6 @@
 package liquibase.logging.core;
 
 import liquibase.logging.LogMessageFilter;
-import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 
 import java.util.List;

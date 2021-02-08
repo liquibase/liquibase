@@ -16,9 +16,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.test.JUnitResourceAccessor;
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.ResourceBundle;
