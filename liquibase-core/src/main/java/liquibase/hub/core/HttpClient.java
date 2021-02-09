@@ -96,7 +96,9 @@ class HttpClient {
         try {
             final URLConnection connection = new URL(getHubUrl() + url).openConnection();
             connection.setRequestProperty("User-Agent", "Liquibase " + LiquibaseUtil.getBuildVersion());
-            connection.setRequestProperty("Authorization", "Bearer " + apiKey);
+            if (StringUtil.isNotEmpty(apiKey)) {
+                connection.setRequestProperty("Authorization", "Bearer " + apiKey);
+            }
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Content-Type", "application/json");
             return connection;

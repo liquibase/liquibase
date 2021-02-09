@@ -21,7 +21,7 @@ import java.net.InetAddress;
 import java.text.ParseException;
 import java.util.*;
 
-public class OnlineHubService implements HubService {
+public class StandardHubService implements HubService {
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     private Boolean available;
     private UUID organizationId;
@@ -31,7 +31,7 @@ public class OnlineHubService implements HubService {
 
     private HttpClient http;
 
-    public OnlineHubService() {
+    public StandardHubService() {
         this.http = createHttpClient();
     }
 
@@ -41,16 +41,12 @@ public class OnlineHubService implements HubService {
 
     @Override
     public int getPriority() {
-        if (isHubAvailable()) {
-            return Plugin.PRIORITY_DEFAULT + 100;
-        } else {
-            return PRIORITY_NOT_APPLICABLE;
-        }
+        return Plugin.PRIORITY_DEFAULT + 100;
     }
 
     @Override
     public boolean isOnline() {
-        return true;
+        return !LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class).getLiquibaseHubMode().equalsIgnoreCase("OFF");
     }
 
     public boolean isHubAvailable() {
@@ -89,10 +85,10 @@ public class OnlineHubService implements HubService {
             }
             String apiKey = getApiKey();
             if (!this.available && apiKey != null) {
-              String message = "Hub communication failure: " + hubServiceFactory.getOfflineReason() + ".\n" +
-                      "The data for your operations will not be recorded in your Liquibase Hub project";
-              Scope.getCurrentScope().getUI().sendMessage(message);
-              log.info(message);
+                String message = "Hub communication failure: " + hubServiceFactory.getOfflineReason() + ".\n" +
+                        "The data for your operations will not be recorded in your Liquibase Hub project";
+                Scope.getCurrentScope().getUI().sendMessage(message);
+                log.info(message);
             }
         }
 
@@ -142,7 +138,7 @@ public class OnlineHubService implements HubService {
         final UUID organizationId = getOrganization().getId();
 
         try {
-            return http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects/"+projectId, Project.class);
+            return http.doGet("/api/v1/organizations/" + organizationId.toString() + "/projects/" + projectId, Project.class);
         } catch (LiquibaseHubObjectNotFoundException lbe) {
             Scope.getCurrentScope().getLog(getClass()).severe(lbe.getMessage(), lbe);
             return null;
@@ -174,6 +170,21 @@ public class OnlineHubService implements HubService {
         }
 
         return returnList;
+    }
+
+    @Override
+    public HubRegisterResponse register(String email) throws LiquibaseException {
+        HubRegister hubRegister = new HubRegister();
+        hubRegister.setEmail(email);
+        try {
+            HubRegisterResponse response = http.doPost("/api/v1/register", hubRegister, HubRegisterResponse.class);
+            if (response.getApiKey() != null) {
+                return response;
+            }
+        } catch (LiquibaseHubException e) {
+            throw new LiquibaseException(e.getMessage(), e);
+        }
+        return null;
     }
 
     @Override
@@ -289,6 +300,15 @@ public class OnlineHubService implements HubService {
         }
 
         return http.doPost("/api/v1/organizations/" + getOrganization().getId() + "/projects/" + connection.getProject().getId() + "/connections", sendConnection, Connection.class);
+    }
+
+
+    @Override
+    public String shortenLink(String url) throws LiquibaseException {
+        HubLinkRequest reportHubLink = new HubLinkRequest();
+        reportHubLink.url = url;
+
+        return http.getHubUrl()+ http.doPut("/api/v1/links", reportHubLink, HubLink.class).getShortUrl();
     }
 
     /**
@@ -435,20 +455,20 @@ public class OnlineHubService implements HubService {
 
 
         OperationChangeEvent sendOperationChangeEvent =
-           new OperationChangeEvent()
-              .setEventType(operationChangeEvent.getEventType())
-              .setChangesetId(operationChangeEvent.getChangesetId())
-              .setChangesetAuthor(operationChangeEvent.getChangesetAuthor())
-              .setChangesetFilename(operationChangeEvent.getChangesetFilename())
-              .setStartDate(operationChangeEvent.getStartDate())
-              .setEndDate(operationChangeEvent.getEndDate())
-              .setDateExecuted(operationChangeEvent.getDateExecuted())
-              .setOperationStatusType(operationChangeEvent.getOperationStatusType())
-              .setChangesetBody(changesetBody)
-              .setGeneratedSql(generatedSql)
-              .setLogs(logs)
-              .setStatusMessage(operationChangeEvent.getStatusMessage())
-              .setLogsTimestamp(logsTimestamp);
+                new OperationChangeEvent()
+                        .setEventType(operationChangeEvent.getEventType())
+                        .setChangesetId(operationChangeEvent.getChangesetId())
+                        .setChangesetAuthor(operationChangeEvent.getChangesetAuthor())
+                        .setChangesetFilename(operationChangeEvent.getChangesetFilename())
+                        .setStartDate(operationChangeEvent.getStartDate())
+                        .setEndDate(operationChangeEvent.getEndDate())
+                        .setDateExecuted(operationChangeEvent.getDateExecuted())
+                        .setOperationStatusType(operationChangeEvent.getOperationStatusType())
+                        .setChangesetBody(changesetBody)
+                        .setGeneratedSql(generatedSql)
+                        .setLogs(logs)
+                        .setStatusMessage(operationChangeEvent.getStatusMessage())
+                        .setLogsTimestamp(logsTimestamp);
         http.doPost("/api/v1" +
                         "/organizations/" + getOrganization().getId().toString() +
                         "/projects/" + operationChangeEvent.getProject().getId().toString() +
@@ -518,6 +538,10 @@ public class OnlineHubService implements HubService {
         }
 
 
+    }
+
+    protected static class HubLinkRequest {
+        protected String url;
     }
 
 }

@@ -2,6 +2,7 @@ package liquibase.ui;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.Scope;
+import liquibase.exception.LiquibaseException;
 
 import java.util.logging.Level;
 
@@ -32,6 +33,18 @@ public class LoggerUIService extends AbstractExtensibleObject implements UIServi
     public void sendErrorMessage(String message, Throwable exception) {
         Scope.getCurrentScope().getLog(getClass()).log(errorLogLevel, message, exception);
 
+    }
+
+    @Override
+    public void setAllowPrompt(boolean allowPrompt) throws IllegalArgumentException {
+        if (allowPrompt) {
+            throw new IllegalArgumentException("allowPrompt=true not allowed in LoggerUIService");
+        }
+    }
+
+    @Override
+    public boolean getAllowPrompt() {
+        return false;
     }
 
     /**

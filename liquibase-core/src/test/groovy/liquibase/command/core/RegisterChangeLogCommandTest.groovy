@@ -25,8 +25,14 @@ class RegisterChangeLogCommandTest extends Specification {
 
     def setup() {
         URL url = Thread.currentThread().getContextClassLoader().getResource("liquibase/test-changelog.xml")
+        URL jsonUrl = Thread.currentThread().getContextClassLoader().getResource("liquibase/simple.json")
+        URL yamlUrl = Thread.currentThread().getContextClassLoader().getResource("liquibase/simple.yml")
         File changelogFile = new File(url.toURI())
+        File jsonChangeLogFile = new File(jsonUrl.toURI())
+        File yamlChangeLogFile = new File(yamlUrl.toURI())
         String contents = FileUtil.getContents(changelogFile)
+        String jsonContents = FileUtil.getContents(jsonChangeLogFile)
+        String yamlContents = FileUtil.getContents(yamlChangeLogFile)
         outputFile = File.createTempFile("registerChangelog-", ".xml", new File("target/test-classes"))
         outputFile.deleteOnExit()
         FileUtil.write(contents, outputFile)
@@ -40,11 +46,11 @@ class RegisterChangeLogCommandTest extends Specification {
 
         outputFileJSON = File.createTempFile("registerChangelog-", ".json", new File("target/test-classes"))
         outputFileJSON.deleteOnExit()
-        FileUtil.write(contents, outputFileJSON)
+        FileUtil.write(jsonContents, outputFileJSON)
 
         outputFileYaml = File.createTempFile("registerChangelog-", ".yaml", new File("target/test-classes"))
         outputFileYaml.deleteOnExit()
-        FileUtil.write(contents, outputFileYaml)
+        FileUtil.write(yamlContents, outputFileYaml)
 
         outputFileYml = File.createTempFile("registerChangelog-", ".yml", new File("target/test-classes"))
         outputFileYml.deleteOnExit()
@@ -147,12 +153,14 @@ class RegisterChangeLogCommandTest extends Specification {
         def result = command.run()
 
         def hubChangeLog = command.getHubChangeLog()
+        def contents = outputFileYaml.getText()
 
         then:
         result.succeeded
         hubChangeLog.id != null
         hubChangeLog.fileName == "com/example/test.yaml"
         hubChangeLog.name == "com/example/test.yaml"
+        contents.contains("- changeLogId: ")
     }
 
     def "happyPathYml"() {

@@ -8,6 +8,8 @@ import liquibase.changelog.visitor.*;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.core.DropAllCommand;
+import liquibase.configuration.HubConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -29,7 +31,9 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.hub.HubUpdater;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.listener.HubChangeExecListener;
-import liquibase.hub.model.*;
+import liquibase.hub.model.Connection;
+import liquibase.hub.model.HubChangeLog;
+import liquibase.hub.model.Operation;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -54,10 +58,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
 
@@ -74,14 +75,14 @@ public class Liquibase implements AutoCloseable {
     protected static final int CHANGESET_ID_AUTHOR_PART = 2;
     protected static final int CHANGESET_ID_CHANGESET_PART = 1;
     protected static final int CHANGESET_ID_CHANGELOG_PART = 0;
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
-    protected static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
+    private static final ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+    public static final String MSG_COULD_NOT_RELEASE_LOCK = coreBundle.getString("could.not.release.lock");
 
     protected Database database;
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
-    private ResourceAccessor resourceAccessor;
-    private ChangeLogParameters changeLogParameters;
+    private final ResourceAccessor resourceAccessor;
+    private final ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
     private ChangeLogSyncListener changeLogSyncListener;
 
@@ -225,9 +226,7 @@ public class Liquibase implements AutoCloseable {
             DatabaseChangeLog changeLog = null;
             HubUpdater hubUpdater = null;
             try {
-
                 changeLog = getDatabaseChangeLog();
-
                 if (checkLiquibaseTables) {
                     checkLiquibaseTables(true, changeLog, contexts, labelExpression);
                 }
@@ -236,29 +235,31 @@ public class Liquibase implements AutoCloseable {
 
                 changeLog.validate(database, contexts, labelExpression);
 
-                hubUpdater = new HubUpdater(new Date(), changeLog);
-
-                ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
+                //
+                // Let the user know that they can register for Hub
+                //
+                hubUpdater = new HubUpdater(new Date(), changeLog, database);
+                hubUpdater.register(changeLogFile);
 
                 //
                 // Create or retrieve the Connection if this is not SQL generation
                 // Make sure the Hub is available here by checking the return
                 // We do not need a connection if we are using a LoggingExecutor
                 //
+                ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
+
                 Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
-                if (! (executor instanceof LoggingExecutor)) {
-                    Connection connection = getConnection(changeLog);
-                    if (connection != null) {
-                        updateOperation =
-                            hubUpdater.preUpdateHub("UPDATE", database, connection, changeLogFile, contexts, labelExpression, changeLogIterator);
-                    }
+                Connection connection = getConnection(changeLog);
+                if (connection != null) {
+                    updateOperation =
+                        hubUpdater.preUpdateHub("UPDATE", database, connection, changeLogFile, contexts, labelExpression, changeLogIterator);
                 }
 
                 //
                 // Only set up the listener if we are not generating SQL
                 // Make sure we don't already have a listener
                 //
-                if (! (executor instanceof LoggingExecutor)) {
+                if (connection != null) {
                     if (changeExecListener != null) {
                         throw new RuntimeException("ChangeExecListener already defined");
                     }
@@ -267,13 +268,17 @@ public class Liquibase implements AutoCloseable {
 
                 //
                 // Create another iterator to run
+                // We set the databaseChangeLog variable to null
                 //
                 ChangeLogIterator runChangeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
-
                 CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                 Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
                     runChangeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
                 });
+
+                //
+                // Update Hub with the operation information
+                //
                 hubUpdater.postUpdateHub(updateOperation, bufferLog);
             } catch (Throwable e) {
                 if (hubUpdater != null) {
@@ -303,19 +308,46 @@ public class Liquibase implements AutoCloseable {
      *
      */
     public Connection getConnection(DatabaseChangeLog changeLog) throws LiquibaseHubException {
+        //
+        // If our current Executor is a LoggingExecutor then just return since we will not update Hub
+        //
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
+        if (executor instanceof LoggingExecutor) {
+            return null;
+        }
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         String changeLogId = changeLog.getChangeLogId();
-        HubUpdater hubUpdater = new HubUpdater(new Date(), changeLog);
+        HubUpdater hubUpdater = new HubUpdater(new Date(), changeLog, database);
         if (hubUpdater.hubIsNotAvailable(changeLogId)) {
-          return null;
+            if (StringUtil.isNotEmpty(hubConfiguration.getLiquibaseHubApiKey()) && changeLogId == null) {
+                String message =
+                    "The API key '" + hubConfiguration.getLiquibaseHubApiKey() + "' was found, but no changelog ID exists.\n" +
+                    "No operations will be reported. Register this changelog with Liquibase Hub to generate free deployment reports.\n" +
+                    "Learn more at https://hub.liquibase.com.";
+                Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+                Scope.getCurrentScope().getLog(getClass()).warning(message);
+            }
+            return null;
         }
 
+        //
+        // Warn about the situation where there is a changeLog ID, but no API key
+        //
+        if (StringUtil.isEmpty(hubConfiguration.getLiquibaseHubApiKey()) && changeLogId != null) {
+            String message = "The changelog ID '" + changeLogId + "' was found, but no API Key exists.\n" +
+                             "No operations will be reported. Simply add a liquibase.hub.apiKey setting to generate free deployment reports.\n" +
+                             "Learn more at https://hub.liquibase.com.";
+            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+            Scope.getCurrentScope().getLog(getClass()).warning(message);
+            return null;
+        }
         Connection connection;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         if (getHubConnectionId() == null) {
             HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId));
             if (hubChangeLog == null) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
-                        "Retrieving Hub Change Log failed for Changelog ID: " + changeLogId);
+                    "Retrieving Hub Change Log failed for Changelog ID: " + changeLogId);
                 return null;
             }
             Connection exampleConnection = new Connection();
@@ -389,14 +421,9 @@ public class Liquibase implements AutoCloseable {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.waitForLock();
 
-                try {
+                update(contexts, labelExpression, checkLiquibaseTables);
 
-                    update(contexts, labelExpression, checkLiquibaseTables);
-
-                    output.flush();
-                } catch (IOException e) {
-                    throw new LiquibaseException(e);
-                }
+                flushOutputWriter(output);
 
                 Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
             }
@@ -441,7 +468,11 @@ public class Liquibase implements AutoCloseable {
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    hubUpdater = new HubUpdater(new Date(), changeLog);
+                    //
+                    // Let the user know that they can register for Hub
+                    //
+                    hubUpdater = new HubUpdater(new Date(), changeLog, database);
+                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -468,10 +499,12 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
+                    if (connection != null) {
+                        if (changeExecListener != null) {
+                            throw new RuntimeException("HubChangeExecListener already defined");
+                        }
+                        changeExecListener = new HubChangeExecListener(updateOperation);
                     }
-                    changeExecListener = new HubChangeExecListener(updateOperation);
 
                     //
                     // Create another iterator to run
@@ -555,7 +588,11 @@ public class Liquibase implements AutoCloseable {
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    hubUpdater = new HubUpdater(new Date(), changeLog);
+                    //
+                    // Let the user know that they can register for Hub
+                    //
+                    hubUpdater = new HubUpdater(new Date(), changeLog, database);
+                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -583,10 +620,12 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("ChangeExecListener already defined");
+                    if (connection != null) {
+                        if (changeExecListener != null) {
+                            throw new RuntimeException("ChangeExecListener already defined");
+                        }
+                        changeExecListener = new HubChangeExecListener(updateOperation);
                     }
-                    changeExecListener = new HubChangeExecListener(updateOperation);
 
                     //
                     // Create another iterator to run
@@ -798,7 +837,11 @@ public class Liquibase implements AutoCloseable {
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    hubUpdater = new HubUpdater(startTime, changeLog);
+                    //
+                    // Let the user know that they can register for Hub
+                    //
+                    hubUpdater = new HubUpdater(startTime, changeLog, database);
+                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -824,10 +867,12 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
+                    if (connection != null) {
+                        if (changeExecListener != null) {
+                            throw new RuntimeException("HubChangeExecListener already defined");
+                        }
+                        changeExecListener = new HubChangeExecListener(rollbackOperation);
                     }
-                    changeExecListener = new HubChangeExecListener(rollbackOperation);
 
                     //
                     // Create another iterator to run
@@ -873,8 +918,8 @@ public class Liquibase implements AutoCloseable {
                 }
             }
         });
-
     }
+
     private List<ChangeSet> determineRollbacks(ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression)
             throws LiquibaseException {
         List<ChangeSet> changeSetsToRollback = new ArrayList<>();
@@ -1059,7 +1104,11 @@ public class Liquibase implements AutoCloseable {
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    hubUpdater = new HubUpdater(startTime, changeLog);
+                    //
+                    // Let the user know that they can register for Hub
+                    //
+                    hubUpdater = new HubUpdater(startTime, changeLog, database);
+                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1086,10 +1135,12 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
+                    if (connection != null) {
+                        if (changeExecListener != null) {
+                            throw new RuntimeException("HubChangeExecListener already defined");
+                        }
+                        changeExecListener = new HubChangeExecListener(rollbackOperation);
                     }
-                    changeExecListener = new HubChangeExecListener(rollbackOperation);
 
                     //
                     // Create another iterator to run
@@ -1214,7 +1265,11 @@ public class Liquibase implements AutoCloseable {
                     checkLiquibaseTables(false, changeLog, contexts, labelExpression);
                     changeLog.validate(database, contexts, labelExpression);
 
-                    hubUpdater = new HubUpdater(startTime, changeLog);
+                    //
+                    // Let the user know that they can register for Hub
+                    //
+                    hubUpdater = new HubUpdater(startTime, changeLog, database);
+                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1241,10 +1296,12 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
+                    if (connection != null) {
+                        if (changeExecListener != null) {
+                            throw new RuntimeException("HubChangeExecListener already defined");
+                        }
+                        changeExecListener = new HubChangeExecListener(rollbackOperation);
                     }
-                    changeExecListener = new HubChangeExecListener(rollbackOperation);
 
                     //
                     // Create another iterator to run
@@ -1327,6 +1384,10 @@ public class Liquibase implements AutoCloseable {
     }
 
     private void flushOutputWriter(Writer output) throws LiquibaseException {
+        if (output == null) {
+            return;
+        }
+
         try {
             output.flush();
         } catch (IOException e) {
@@ -1369,7 +1430,11 @@ public class Liquibase implements AutoCloseable {
 
                     changeLog.validate(database, contexts, labelExpression);
 
-                    hubUpdater = new HubUpdater(new Date(), changeLog);
+                    //
+                    // Let the user know that they can register for Hub
+                    //
+                    hubUpdater = new HubUpdater(new Date(), changeLog, database);
+                    hubUpdater.register(changeLogFile);
 
                     //
                     // Create an iterator which will be used with a ListVisitor
@@ -1395,10 +1460,12 @@ public class Liquibase implements AutoCloseable {
                     //
                     // Check for an already existing Listener
                     //
-                    if (changeExecListener != null) {
-                        throw new RuntimeException("HubChangeExecListener already defined");
+                    if (connection != null) {
+                        if (changeExecListener != null) {
+                            throw new RuntimeException("HubChangeExecListener already defined");
+                        }
+                        changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation);
                     }
-                    changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation);
 
                     ChangeLogIterator runChangeLogSyncIterator = new ChangeLogIterator(changeLog,
                             new NotRanChangeSetFilter(database.getRanChangeSetList()),
