@@ -1,7 +1,6 @@
 package liquibase.ui;
 
 import liquibase.util.ObjectUtil;
-import sun.reflect.generics.tree.ReturnType;
 
 /**
  * Default input handler simply calls {@link liquibase.util.ObjectUtil#convert(Object, Class)}
