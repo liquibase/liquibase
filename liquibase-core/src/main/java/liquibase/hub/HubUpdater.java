@@ -257,6 +257,9 @@ public class HubUpdater {
      */
     public boolean hubIsNotAvailable(String changeLogId) {
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+        if (hubService == null) {
+            return false;
+        }
         return !hubService.isOnline() || changeLogId == null;
     }
 
@@ -300,9 +303,14 @@ public class HubUpdater {
 
         //
         // Just return if Hub is off
+        // If we can't get the HubService, then we show a warning message
         //
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+        if (hubService == null) {
+            Scope.getCurrentScope().getLog(HubUpdater.class).info("The HubService is not available");
+            return;
+        }
         if (!hubService.isOnline()) {
             return;
         }

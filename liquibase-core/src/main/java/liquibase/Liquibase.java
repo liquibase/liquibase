@@ -312,6 +312,15 @@ public class Liquibase implements AutoCloseable {
         if (executor instanceof LoggingExecutor) {
             return null;
         }
+
+        //
+        // If we do not have a Hub service then return
+        //
+        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
+        if (hubService == null) {
+            return null;
+        }
+
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         String changeLogId = changeLog.getChangeLogId();
         HubUpdater hubUpdater = new HubUpdater(new Date(), changeLog, database);
@@ -339,7 +348,6 @@ public class Liquibase implements AutoCloseable {
             return null;
         }
         Connection connection;
-        final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         if (getHubConnectionId() == null) {
             HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId));
             if (hubChangeLog == null) {
