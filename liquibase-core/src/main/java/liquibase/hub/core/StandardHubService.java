@@ -202,6 +202,13 @@ public class StandardHubService implements HubService {
     }
 
     @Override
+    public HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException {
+        return http.doPut("/api/v1/organizations/" + getOrganization().getId() +
+                             "/projects/" + hubChangeLog.getProject().getId().toString() +
+                             "/changelogs/" +  hubChangeLog.getId().toString(), hubChangeLog, HubChangeLog.class);
+    }
+
+    @Override
     public void setRanChangeSets(Connection connection, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         List<HubChange> hubChangeList = new ArrayList<>();
         for (RanChangeSet ranChangeSet : ranChangeSets) {

@@ -1,11 +1,11 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
+import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
-import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.HubConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandLineParsingException;
@@ -15,18 +15,11 @@ import liquibase.hub.HubServiceFactory;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
-import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.resource.InputStreamList;
-import liquibase.resource.ResourceAccessor;
 import liquibase.ui.UIService;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 
-import java.io.*;
-import java.net.URI;
+import java.io.PrintStream;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<CommandResult> {
 
@@ -87,7 +80,7 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
         //
-        // CHeck for existing changeLog file
+        // Check for existing changeLog file
         //
         DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) argsMap.get("changeLog");
         final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
@@ -95,67 +88,29 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             hubChangeLog = service.getHubChangeLog(UUID.fromString(changeLogId));
             if (hubChangeLog != null) {
                 return new CommandResult("Changelog '" + changeLogFile +
-                        "' is already registered with changeLogId '" + changeLogId + "' to project '" +
-                        hubChangeLog.getProject().getName() + "' with project ID '" + hubChangeLog.getProject().getId().toString() + "'.\n" +
-                        "For more information visit https://docs.liquibase.com.", false);
+                    "' is already registered with changeLogId '" + changeLogId + "' to project '" +
+                    hubChangeLog.getProject().getName() + "' with project ID '" + hubChangeLog.getProject().getId().toString() + "'.\n" +
+                    "For more information visit https://docs.liquibase.com.", false);
             } else {
                 return new CommandResult("Changelog '" + changeLogFile +
-                        "' is already registered with changeLogId '" + changeLogId + "'.\n" +
-                        "For more information visit https://docs.liquibase.com.", false);
+                    "' is already registered with changeLogId '" + changeLogId + "'.\n" +
+                    "For more information visit https://docs.liquibase.com.", false);
             }
         }
 
         //
         // Retrieve the projects
         //
-        Project project = null;
-
+        Project project;
         if (hubProjectId != null) {
             project = service.getProject(hubProjectId);
-
             if (project == null) {
                 return new CommandResult("Project Id '" + hubProjectId + "' does not exist or you do not have access to it", false);
             }
-
         } else {
-            List<Project> projects = getProjectsFromHub();
-            boolean done = false;
-            String input = null;
-            while (!done) {
-                input = readProjectFromConsole(projects);
-                try {
-                    if (input.equalsIgnoreCase("C")) {
-                        String projectName = readProjectNameFromConsole();
-                        if (StringUtil.isEmpty(projectName)) {
-                            outputStream.print("\nNo project created\n\n");
-                            continue;
-                        } else if (projectName.length() > 255) {
-                            outputStream.print("\nThe project name you entered is longer than 255 characters\n\n");
-                            continue;
-                        }
-                        project = service.createProject(new Project().setName(projectName));
-                        if (project == null) {
-                            return new CommandResult("\nUnable to create project '" + projectName + "'.\n\n", false);
-                        }
-                        outputStream.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
-                        projects = getProjectsFromHub();
-                        done = true;
-                        continue;
-                    } else if (input.equalsIgnoreCase("N")) {
-                        return new CommandResult("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.", false);
-                    }
-                    int projectIdx = Integer.parseInt(input);
-                    if (projectIdx > 0 && projectIdx <= projects.size()) {
-                        project = projects.get(projectIdx - 1);
-                        if (project != null) {
-                            done = true;
-                        }
-                    } else {
-                        outputStream.printf("\nInvalid project '%d' selected\n\n", projectIdx);
-                    }
-                } catch (NumberFormatException nfe) {
-                    outputStream.printf("\nInvalid selection '" + input + "'\n\n");
-                }
+            project = retrieveOrCreateProject(service);
+            if (project == null) {
+                return new CommandResult("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.", false);
             }
         }
 
@@ -169,84 +124,57 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
 
         hubChangeLog = service.createChangeLog(newChangeLog);
 
-        //
-        // Make changes to the changelog file
-        //
-        final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-        InputStreamList list = null;
-        try {
-            list = resourceAccessor.openStreams("", changeLogFile);
-            List<URI> uris = list.getURIs();
-            InputStream is = list.iterator().next();
-            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
-            String changeLogString = StreamUtil.readStreamAsString(is, encoding);
-            if (changeLogFile.toLowerCase().endsWith(".xml")) {
-                String patternString = "(?ms).*<databaseChangeLog[^>]*>";
-                Pattern pattern = Pattern.compile(patternString);
-                Matcher matcher = pattern.matcher(changeLogString);
-                if (matcher.find()) {
-                    //
-                    // Update the XSD versions
-                    //
-                    String header = changeLogString.substring(matcher.start(), matcher.end() - 1);
-                    String xsdPatternString = "([dbchangelog|liquibase-pro])-3.[0-9]?[0-9]?.xsd";
-                    Pattern xsdPattern = Pattern.compile(xsdPatternString);
-                    Matcher xsdMatcher = xsdPattern.matcher(header);
-                    String editedString = xsdMatcher.replaceAll("$1-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
+        ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult =
+            ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
+        return new CommandResult(changeLogRewriterResult.message, changeLogRewriterResult.success);
+    }
 
-                    //
-                    // Add the changeLogId attribute
-                    //
-                    final String outputChangeLogString = " changeLogId=\"" + hubChangeLog.getId().toString() + "\"";
-                    if (changeLogString.trim().endsWith("/>")) {
-                        changeLogString = changeLogString.replaceFirst("/>", outputChangeLogString + "/>");
+    private Project retrieveOrCreateProject(HubService service)
+        throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {
+        Project project = null;
+        List<Project> projects = getProjectsFromHub();
+        boolean done = false;
+        String input = null;
+        while (!done) {
+            input = readProjectFromConsole(projects);
+            try {
+                if (input.equalsIgnoreCase("C")) {
+                    String projectName = readProjectNameFromConsole();
+                    if (StringUtil.isEmpty(projectName)) {
+                        outputStream.print("\nNo project created\n\n");
+                        continue;
+                    } else if (projectName.length() > 255) {
+                        outputStream.print("\nThe project name you entered is longer than 255 characters\n\n");
+                        continue;
                     }
-                    else {
-                        String outputHeader = editedString + outputChangeLogString + ">";
-                        changeLogString = changeLogString.replaceFirst(patternString, outputHeader);
+                    project = service.createProject(new Project().setName(projectName));
+                    if (project == null) {
+                        String message = "Unable to create project '" + projectName + "'";
+                        Scope.getCurrentScope().getUI().sendMessage(message);
+                        Scope.getCurrentScope().getLog(RegisterChangeLogCommand.class).warning(message);
+                        return null;
                     }
+                    outputStream.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
+                    projects = getProjectsFromHub();
+                    done = true;
+                    continue;
+                } else if (input.equalsIgnoreCase("N")) {
+                    return null;
                 }
-            } else if (changeLogFile.toLowerCase().endsWith(".sql")) {
-                //
-                // Formatted SQL changelog
-                //
-                String newChangeLogString = changeLogString.replaceFirst("--(\\s*)liquibase formatted sql",
-                        "-- liquibase formatted sql changeLogId:" + hubChangeLog.getId().toString());
-                if (newChangeLogString.equals(changeLogString)) {
-                    return new CommandResult("Unable to update changeLogId in changelog file '" + changeLogFile + "'", false);
+                int projectIdx = Integer.parseInt(input);
+                if (projectIdx > 0 && projectIdx <= projects.size()) {
+                    project = projects.get(projectIdx - 1);
+                    if (project != null) {
+                        done = true;
+                    }
+                } else {
+                    outputStream.printf("\nInvalid project '%d' selected\n\n", projectIdx);
                 }
-                changeLogString = newChangeLogString;
-
-        } else if (changeLogFile.toLowerCase().endsWith(".json")) {
-            changeLogString = changeLogString.replaceFirst("\\[", "\\[\n" +
-                    "\"changeLogId\"" + ":" + "\"" + hubChangeLog.getId().toString() + "\",\n");
-        } else if (changeLogFile.toLowerCase().endsWith(".yml") || changeLogFile.toLowerCase().endsWith(".yaml")) {
-            changeLogString = changeLogString.replaceFirst("^databaseChangeLog:(\\s*)\n", "databaseChangeLog:$1\n" +
-                    "- changeLogId: " + hubChangeLog.getId().toString() + "$1\n");
-            } else {
-                return new CommandResult("Changelog file '" + changeLogFile + "' is not a supported format", false);
-            }
-
-            //
-            // Close the InputStream and write out the file again
-            //
-            File f = new File(uris.get(0).getPath());
-            try (RandomAccessFile randomAccessFile = new RandomAccessFile(f, "rw")) {
-                randomAccessFile.write(changeLogString.getBytes(encoding));
-            }
-            //
-            // Update the current DatabaseChangeLog with its id
-            //
-            databaseChangeLog.setChangeLogId(hubChangeLog.getId().toString());
-            return new CommandResult("* Changelog file '" + changeLogFile +
-                    "' registered with changelog ID '" + hubChangeLog.getId() + "' " +
-                    "to project '" + project.getName() + "'\n", true);
-        }
-        finally {
-            if (list != null) {
-                list.close();
+            } catch (NumberFormatException nfe) {
+                outputStream.printf("\nInvalid selection '" + input + "'\n\n");
             }
         }
+        return project;
     }
 
     //

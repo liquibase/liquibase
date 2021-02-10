@@ -8,6 +8,7 @@ public class HubChangeLog implements HubModel {
     private String fileName;
     private String name;
     private Project project;
+    private String status;
 
     @Override
     public UUID getId() {
@@ -35,6 +36,14 @@ public class HubChangeLog implements HubModel {
     public HubChangeLog setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override

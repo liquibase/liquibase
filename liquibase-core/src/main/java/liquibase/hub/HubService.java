@@ -29,6 +29,8 @@ public interface HubService extends Plugin, PrioritizedService {
 
     void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException;
 
+    HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException;
+
     Connection getConnection(Connection exampleConnection, boolean createIfNotExists) throws LiquibaseHubException;
 
     List<Connection> getConnections(Connection exampleConnection) throws LiquibaseHubException;
