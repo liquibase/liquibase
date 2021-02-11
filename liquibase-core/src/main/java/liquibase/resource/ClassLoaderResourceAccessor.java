@@ -121,11 +121,11 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
     protected String getFinalPath(String relativeTo, String streamPath) {
         streamPath = streamPath.replace("\\", "/");
-        streamPath = streamPath.replaceFirst("^classpath:", "");
+        streamPath = streamPath.replaceFirst("^classpath\\*?:", "");
 
         if (relativeTo != null) {
             relativeTo = relativeTo.replace("\\", "/");
-            relativeTo = relativeTo.replaceFirst("^classpath:", "");
+            relativeTo = relativeTo.replaceFirst("^classpath\\*?:", "");
             relativeTo = relativeTo.replaceAll("//+", "/");
 
             if (!relativeTo.endsWith("/")) {
