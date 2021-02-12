@@ -46,8 +46,11 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     private int postCount;
     private int failedToPostCount;
 
-    public HubChangeExecListener(Operation operation) {
+    private ChangeExecListener changeExecListener;
+
+    public HubChangeExecListener(Operation operation, ChangeExecListener changeExecListener) {
         this.operation = operation;
+        this.changeExecListener = changeExecListener;
     }
 
     public void setRollbackScriptContents(String rollbackScriptContents) {
@@ -65,11 +68,17 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     @Override
     public void willRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ChangeSet.RunStatus runStatus) {
         startDateMap.put(changeSet, new Date());
+        if (changeExecListener != null) {
+            changeExecListener.willRun(changeSet, databaseChangeLog, database, runStatus);
+        }
     }
 
     @Override
     public void willRun(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
         startDateMap.put(changeSet, new Date());
+        if (changeExecListener != null) {
+            changeExecListener.willRun(change, changeSet, changeLog, database);
+        }
     }
 
     @Override
@@ -79,6 +88,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                     ChangeSet.ExecType execType) {
         String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
         updateHub(changeSet, databaseChangeLog, database, "UPDATE", "PASS", message);
+        if (changeExecListener != null) {
+            changeExecListener.ran(changeSet, databaseChangeLog, database, execType);
+        }
     }
 
     /**
@@ -91,6 +103,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     @Override
     public void willRollback(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
         startDateMap.put(changeSet, new Date());
+        if (changeExecListener != null) {
+            changeExecListener.willRollback(changeSet, databaseChangeLog, database);
+        }
     }
 
     /**
@@ -106,6 +121,9 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     @Override
     public void rollbackFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception e) {
         updateHubForRollback(changeSet, databaseChangeLog, database, "FAIL", e.getMessage());
+        if (changeExecListener != null) {
+            changeExecListener.rollbackFailed(changeSet, databaseChangeLog, database, e);
+        }
     }
 
     /**
@@ -123,24 +141,38 @@ public class HubChangeExecListener extends AbstractChangeExecListener
                            Database database) {
         String message = "PASSED::" + changeSet.getId() + "::" + changeSet.getAuthor();
         updateHubForRollback(changeSet, databaseChangeLog, database, "PASS", message);
+        if (changeExecListener != null) {
+            changeExecListener.rolledBack(changeSet, databaseChangeLog, database);
+        }
     }
 
     @Override
     public void preconditionFailed(PreconditionFailedException error, PreconditionContainer.FailOption onFail) {
+        if (changeExecListener != null) {
+            changeExecListener.preconditionFailed(error, onFail);
+        }
     }
 
     @Override
     public void preconditionErrored(PreconditionErrorException error, PreconditionContainer.ErrorOption onError) {
+        if (changeExecListener != null) {
+            changeExecListener.preconditionErrored(error, onError);
+        }
     }
 
     @Override
     public void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database) {
-
+        if (changeExecListener != null) {
+            changeExecListener.ran(change, changeSet, changeLog, database);
+        }
     }
 
     @Override
     public void runFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Exception exception) {
         updateHub(changeSet, databaseChangeLog, database, "UPDATE", "FAIL", exception.getMessage());
+        if (changeExecListener != null) {
+            changeExecListener.runFailed(changeSet, databaseChangeLog, database, exception);
+        }
     }
 
     @Override
