@@ -98,7 +98,20 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
 
         //have to fall back to figuring out the path as best we can
         try {
-            return resource.getURL().toExternalForm().replaceFirst(".*!", "");
+            String url = resource.getURL().toExternalForm();
+            if (url.contains("!")) {
+                return url.replaceFirst(".*!", "");
+            } else {
+                while (!resourceLoader.getResource("classpath:"+url).exists()) {
+                    String newUrl = url.replaceFirst("^/?.*?/", "");
+                    if (newUrl.equals(url)) {
+                        throw new UnexpectedLiquibaseException("Could determine path for "+resource.getURL().toExternalForm());
+                    }
+                    url = newUrl;
+                }
+
+                return url;
+            }
         } catch (IOException e) {
             //the path gets stored in the databasechangelog table, so if it gets returned incorrectly it will cause future problems.
             //so throw a breaking error now rather than wait for bigger problems down the line
@@ -152,6 +165,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
     protected String finalizeSearchPath(String searchPath) {
         searchPath = "classpath:"+searchPath;
         searchPath = searchPath
+                .replaceAll("classpath\\*:", "classpath:")
                 .replace("\\", "/")
                 .replaceAll("//+", "/")
                 .replace("classpath:classpath:", "classpath:");
