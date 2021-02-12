@@ -1,6 +1,13 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.3.1 (2021.02.12)
+- Fixed handling of `classpath*:` in includeAll #1595
+- ClassCastException on moving to mysql-connector-java 8.0.23 #1639
+- Passwords sent to Hub when using jTDS driver
+- ChangeExecListener cannot be used to to HubChangeExecListener #1651
+- RelativePathError when using includeAll tag and Spring Boot #1657
+
 Changes in version 4.3.0 (2021.02.06)
 
 - MariaDB is now fully certified for Liquibase Pro users
