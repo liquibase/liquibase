@@ -301,6 +301,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
             boolean isCommentingEnabled = StringUtil.isNotEmpty(commentLineStartsWith);
 
+            boolean isParameterSubstitutionEnabled = false;
+            if (getChangeSet() != null && getChangeSet().getChangeLogParameters() != null) {
+                Object value = getChangeSet().getChangeLogParameters().getValue("enableCsvParameterSubstitution", getChangeSet().getChangeLog());
+                if (value != null && "true".equalsIgnoreCase(value.toString())) {
+                    isParameterSubstitutionEnabled = true;
+                }
+            }
+
             List<SqlStatement> statements = new ArrayList<>();
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
@@ -329,7 +337,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                 List<LoadDataColumnConfig> columnsFromCsv = new ArrayList<>();
                 for (int i = 0; i < headers.length; i++) {
-                    Object value = line[i];
+                    Object value;
+                    if (isParameterSubstitutionEnabled) {
+                        value = getChangeSet().getChangeLogParameters().expandExpressions(line[i], getChangeSet().getChangeLog());
+                    } else {
+                        value = line[i];
+                    }
                     String columnName = headers[i].trim();
 
                     LoadDataColumnConfig valueConfig = new LoadDataColumnConfig();
