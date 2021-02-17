@@ -9,19 +9,20 @@ import java.util.SortedSet;
  * Commands are different from Actions in that they implement end-user functionality rather than small pieces of logic.
  * We package functionaly as commands so that the command line interface as well as other integrations can all use the same business logic.
  */
-public interface LiquibaseCommand<T extends CommandResult> extends Plugin {
+public interface LiquibaseCommand extends Plugin {
 
-    String getName();
+    String[] getName();
 
-    int getPriority(String commandName);
+    int getOrder(CommandScope commandName);
 
-    SortedSet<CommandArgument> getArguments();
+    SortedSet<CommandArgumentDefinition> getArguments();
 
     CommandValidationErrors validate();
 
     /**
      * Function that performs the actual logic. This should not be called directly by any code,
      * only by {@link CommandFactory#execute(LiquibaseCommand)}
+     * @param commandScope
      */
-    T run() throws Exception;
+    void run(CommandScope commandScope) throws Exception;
 }

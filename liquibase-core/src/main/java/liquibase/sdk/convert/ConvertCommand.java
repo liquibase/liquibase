@@ -1,10 +1,9 @@
 package liquibase.sdk.convert;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.command.AbstractCommand;
-import liquibase.command.CommandResult;
-import liquibase.command.CommandValidationErrors;
+import liquibase.command.*;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -21,41 +20,28 @@ import java.util.List;
 
 public class ConvertCommand extends AbstractCommand {
 
-    private String src;
-    private String out;
-    private String classpath;
+    public static final CommandArgumentDefinition<String> SRC_ARG;
+    public static final CommandArgumentDefinition<String> OUT_ARG;
+    public static final CommandArgumentDefinition<String> CLASSPATH_ARG;
 
-    @Override
-    public String getName() {
-        return "convert";
-    }
-
-    public String getSrc() {
-        return src;
-    }
-
-    public void setSrc(String src) {
-        this.src = src;
-    }
-
-    public String getOut() {
-        return out;
-    }
-
-    public void setOut(String out) {
-        this.out = out;
-    }
-
-    public String getClasspath() {
-        return classpath;
-    }
-
-    public void setClasspath(String classpath) {
-        this.classpath = classpath;
+    static {
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        SRC_ARG = builder.define("src", String.class).required().build();
+        OUT_ARG = builder.define("out", String.class).required().build();
+        CLASSPATH_ARG = builder.define("classpath", String.class).required().build();
     }
 
     @Override
-    public CommandResult run() throws Exception {
+    public String[] getName() {
+        return new String[]{"convert"};
+    }
+
+    @Override
+    public void run(CommandScope commandScope) throws Exception {
+        String src = SRC_ARG.getValue(commandScope);
+        String out = OUT_ARG.getValue(commandScope);
+        String classpath = CLASSPATH_ARG.getValue(commandScope);
+
         List<ResourceAccessor> openers = new ArrayList<>();
         openers.add(new FileSystemResourceAccessor());
         openers.add(new ClassLoaderResourceAccessor());
@@ -78,7 +64,7 @@ public class ConvertCommand extends AbstractCommand {
             outSerializer.write(changeLog.getChangeSets(), outputStream);
         }
 
-        return new CommandResult("Converted successfully");
+        Scope.getCurrentScope().getUI().sendMessage("Converted successfully");
     }
 
     @Override

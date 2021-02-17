@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.RanChangeSet
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
+import liquibase.exception.CommandExecutionException
 
 import java.text.*
 import spock.lang.Shared
@@ -51,7 +52,13 @@ class HistoryCommandTest extends Specification {
         ChangeLogHistoryServiceFactory.setInstance(historyFactory)
 
 
-        historyCommand.run()
+        try {
+            historyCommand.run()
+        } catch (CommandExecutionException e) {
+            e.printStackTrace()
+        } catch (Exception e1) {
+            e1.printStackTrace()
+        }
 
         then:
         new String(output.toByteArray()).replaceAll("\r\n", "\n").trim() == expectedOut.replaceAll("\r\n", "\n").trim()

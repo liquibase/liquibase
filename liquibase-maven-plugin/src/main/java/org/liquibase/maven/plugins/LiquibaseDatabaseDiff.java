@@ -12,6 +12,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
@@ -250,22 +251,14 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         } else {
             PrintStream printStream = createPrintStream();
             if (isFormattedDiff()) {
-                LiquibaseCommand liquibaseCommand = Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("formattedDiff");
-                DiffCommand diffCommand =
+                CommandScope liquibaseCommand = new CommandScope("formattedDiff");
+                CommandScope diffCommand =
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
                                 schemaComparisons, objectChangeFilter, printStream);
-                Map<String, Object> argsMap = new HashMap<>();
-                argsMap.put("format", format);
-                argsMap.put("diffCommand", diffCommand);
-                ((AbstractSelfConfiguratingCommand) liquibaseCommand).configure(argsMap);
-                try {
-                    CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
-                    if (!result.succeeded) {
-                        throw new LiquibaseException(result.message);
-                    }
-                } catch (CommandExecutionException cee) {
-                    throw new LiquibaseException(cee);
-                }
+
+                liquibaseCommand.addArgument("format", format);
+                liquibaseCommand.addArgument("diffCommand", diffCommand);
+                Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
             } else {
                 CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
             }

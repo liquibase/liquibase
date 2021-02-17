@@ -3,13 +3,10 @@ package liquibase.command.core;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.RanChangeSet;
-import liquibase.command.AbstractCommand;
-import liquibase.command.CommandResult;
-import liquibase.command.CommandValidationErrors;
+import liquibase.command.*;
 import liquibase.database.Database;
 
 import java.io.PrintStream;
-import java.io.Writer;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,42 +14,27 @@ import java.util.Objects;
 
 public class HistoryCommand extends AbstractCommand {
 
-    private Database database;
-    private DateFormat dateFormat;
-    private PrintStream outputStream = System.out;
+    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
+    public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
+    public static final CommandArgumentDefinition<PrintStream> OUTPUT_ARG;
 
-    public HistoryCommand() {
-        dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+    static {
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        DATABASE_ARG = builder.define("database", Database.class).required().build();
+        DATE_FORMAT_ARG = builder.define("dateFormat", DateFormat.class).defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)).build();
+        OUTPUT_ARG = builder.define("output", PrintStream.class).defaultValue(System.out).build();
     }
 
     @Override
-    public String getName() {
-        return "history";
+    public String[] getName() {
+        return new String[]{"history"};
     }
 
     @Override
-    public CommandValidationErrors validate() {
-        return new CommandValidationErrors(this);
-    }
+    public void run(CommandScope commandScope) throws Exception {
+        Database database = DATABASE_ARG.getValue(commandScope);
+        PrintStream outputStream = OUTPUT_ARG.getValue(commandScope);
 
-    public Database getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public PrintStream getOutputStream() {
-        return outputStream;
-    }
-
-    public void setOutputStream(PrintStream outputStream) {
-        this.outputStream = outputStream;
-    }
-
-    @Override
-    public CommandResult run() throws Exception {
         ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
 
         outputStream.println("Liquibase History for " + database.getConnection().getURL());
@@ -65,7 +47,7 @@ public class HistoryCommand extends AbstractCommand {
                 if (deployment != null) {
                     deployment.printReport();
                 }
-                deployment = new DeploymentDetails();
+                deployment = new DeploymentDetails(commandScope);
             }
             deployment.changeSets.add(ranChangeSet);
         }
@@ -75,14 +57,20 @@ public class HistoryCommand extends AbstractCommand {
         } else {
             deployment.printReport();
         }
-
-        return new CommandResult("OK");
     }
 
     private class DeploymentDetails {
+        private final CommandScope commandScope;
         List<RanChangeSet> changeSets = new ArrayList<>();
 
+        public DeploymentDetails(CommandScope commandScope) {
+            this.commandScope = commandScope;
+        }
+
         void printReport() {
+            DateFormat dateFormat = DATE_FORMAT_ARG.getValue(commandScope);
+            PrintStream outputStream = OUTPUT_ARG.getValue(commandScope);
+
             String executionTime = null;
             RanChangeSet firstChangeSet = changeSets.get(0);
             if (changeSets.size() > 1) {

@@ -5,10 +5,10 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
-import liquibase.command.CommandExecutionException;
+import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandFactory;
+import liquibase.command.CommandScope;
 import liquibase.command.core.DropAllCommand;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -1728,24 +1728,19 @@ public class Liquibase implements AutoCloseable {
 
         CatalogAndSchema[] finalSchemas = schemas;
         try {
-            runInScope(new Scope.ScopedRunner() {
-                @Override
-                public void run() throws Exception {
-                    final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
+            final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
 
-                    DropAllCommand dropAll = (DropAllCommand) commandFactory.getCommand("dropAll");
-                    dropAll.setDatabase(Liquibase.this.getDatabase());
-                    dropAll.setSchemas(finalSchemas);
-                    dropAll.setLiquibase(Liquibase.this);
-                    dropAll.setChangeLogFile(changeLogFile);
+            CommandScope dropAll = new CommandScope("dropAll").addArguments(
+                    DropAllCommand.DATABASE_ARG.of(Liquibase.this.getDatabase()),
+                    DropAllCommand.SCHEMAS_ARG.of(finalSchemas),
+                    DropAllCommand.CHANGELOG_ARG.of(Liquibase.this.getDatabaseChangeLog())
+            );
 
-                    try {
-                        commandFactory.execute(dropAll);
-                    } catch (CommandExecutionException e) {
-                        throw new DatabaseException(e);
-                    }
-                }
-            });
+            try {
+                commandFactory.execute(dropAll);
+            } catch (CommandExecutionException e) {
+                throw new DatabaseException(e);
+            }
         } catch (LiquibaseException e) {
             if (e instanceof DatabaseException) {
                 throw (DatabaseException) e;

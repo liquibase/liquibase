@@ -2,8 +2,7 @@ package liquibase.command.core
 
 import liquibase.Scope
 import liquibase.changelog.DatabaseChangeLog
-import liquibase.hub.HubConfiguration
-import liquibase.configuration.LiquibaseConfiguration
+import liquibase.exception.CommandExecutionException
 import liquibase.hub.HubService
 import liquibase.hub.HubServiceFactory
 import liquibase.hub.core.MockHubService
@@ -77,7 +76,7 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(outputFile.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.xml")])
 
-        def result = command.run()
+        command.run()
 
         def hubChangeLog = command.getHubChangeLog()
         String contents = FileUtil.getContents(outputFile.getAbsoluteFile())
@@ -86,7 +85,7 @@ class RegisterChangeLogCommandTest extends Specification {
         Matcher matcher = pattern.matcher(contents)
 
         then:
-        result.succeeded
+        notThrown(CommandExecutionException)
         hubChangeLog.id != null
         hubChangeLog.fileName == "com/example/test.xml"
         hubChangeLog.name == "com/example/test.xml"
@@ -103,7 +102,7 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(emptyOutputFile.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.xml")])
 
-        def result = command.run()
+        command.run()
 
         def hubChangeLog = command.getHubChangeLog()
         String contents = FileUtil.getContents(emptyOutputFile.getAbsoluteFile())
@@ -112,7 +111,7 @@ class RegisterChangeLogCommandTest extends Specification {
         Matcher matcher = pattern.matcher(contents)
 
         then:
-        result.succeeded
+        notThrown(CommandExecutionException)
         hubChangeLog.id != null
         hubChangeLog.fileName == "com/example/test.xml"
         hubChangeLog.name == "com/example/test.xml"
@@ -129,12 +128,12 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(outputFileJSON.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.json")])
 
-        def result = command.run()
+        command.run()
 
         def hubChangeLog = command.getHubChangeLog()
 
         then:
-        result.succeeded
+        notThrown(CommandExecutionException)
         hubChangeLog.id != null
         hubChangeLog.fileName == "com/example/test.json"
         hubChangeLog.name == "com/example/test.json"
@@ -150,13 +149,13 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(outputFileYaml.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.yaml")])
 
-        def result = command.run()
+        command.run()
 
         def hubChangeLog = command.getHubChangeLog()
         def contents = outputFileYaml.getText()
 
         then:
-        result.succeeded
+        notThrown(CommandExecutionException)
         hubChangeLog.id != null
         hubChangeLog.fileName == "com/example/test.yaml"
         hubChangeLog.name == "com/example/test.yaml"
@@ -173,12 +172,12 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(outputFileYml.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.yml")])
 
-        def result = command.run()
+        command.run()
 
         def hubChangeLog = command.getHubChangeLog()
 
         then:
-        result.succeeded
+        notThrown(CommandExecutionException)
         hubChangeLog.id != null
         hubChangeLog.fileName == "com/example/test.yml"
         hubChangeLog.name == "com/example/test.yml"
@@ -198,10 +197,10 @@ class RegisterChangeLogCommandTest extends Specification {
         command.configure(argsMap)
         command.setOutputStream(new PrintStream(outputStream))
 
-        def result = command.run()
+        command.run()
 
         then:
-        ! result.succeeded
-        result.message.contains("is already registered with changeLogId '" + uuid.toString() + "'")
+        def e = thrown(CommandExecutionException)
+        e.message.contains("is already registered with changeLogId '" + uuid.toString() + "'")
     }
 }

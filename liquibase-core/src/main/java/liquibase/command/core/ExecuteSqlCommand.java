@@ -1,9 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
-import liquibase.command.AbstractCommand;
-import liquibase.command.CommandResult;
-import liquibase.command.CommandValidationErrors;
+import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
@@ -20,52 +18,29 @@ import java.util.TreeSet;
 
 public class ExecuteSqlCommand extends AbstractCommand {
 
-    private Database database;
-    private String sql;
-    private String sqlFile;
-    private String delimiter = ";";
+    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
+    public static final CommandArgumentDefinition<String> SQL_ARG;
+    public static final CommandArgumentDefinition<String> SQLFILE_ARG;
+    public static final CommandArgumentDefinition<String> DELIMTER_ARG;
 
-    @Override
-    public String getName() {
-        return "executeSql";
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public String getSql() {
-        return sql;
-    }
-
-    public void setSql(String sql) {
-        this.sql = sql;
-    }
-
-    public String getSqlFile() {
-        return sqlFile;
-    }
-
-    public void setSqlFile(String sqlFile) {
-        this.sqlFile = sqlFile;
-    }
-
-    public void setDelimiter(String delimiter) {
-      this.delimiter = delimiter;
-    }
-    
-    @Override
-    public CommandValidationErrors validate() {
-        CommandValidationErrors commandValidationErrors = new CommandValidationErrors(this);
-        return commandValidationErrors;
+    static {
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        DATABASE_ARG = builder.define("database", Database.class).required().build();
+        SQL_ARG = builder.define("sql", String.class).build();
+        SQLFILE_ARG = builder.define("sqlFile", String.class).build();
+        DELIMTER_ARG = builder.define("delimiter", String.class).defaultValue(";").build();
     }
 
     @Override
-    public CommandResult run() throws Exception {
+    public String[] getName() {
+        return new String[]{"executeSql"};
+    }
+    @Override
+    public void run(CommandScope commandScope) throws Exception {
+        Database database = DATABASE_ARG.getValue(commandScope);
+        String sql = SQL_ARG.getValue(commandScope);
+        String sqlFile = SQLFILE_ARG.getValue(commandScope);
+
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String sqlText;
         if (sqlFile == null) {
@@ -79,11 +54,11 @@ public class ExecuteSqlCommand extends AbstractCommand {
         }
 
         String out = "";
-        String[] sqlStrings = StringUtil.processMutliLineSQL(sqlText, true, true, delimiter);
-        for (String sql : sqlStrings) {
-            if (sql.toLowerCase().matches("\\s*select .*")) {
-                List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sql));
-                out += "Output of "+sql+":\n";
+        String[] sqlStrings = StringUtil.processMutliLineSQL(sqlText, true, true, DELIMTER_ARG.getValue(commandScope));
+        for (String sqlString : sqlStrings) {
+            if (sqlString.toLowerCase().matches("\\s*select .*")) {
+                List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));
+                out += "Output of "+sqlString+":\n";
                 if (rows.isEmpty()) {
                     out += "-- Empty Resultset --\n";
                 } else {
@@ -101,13 +76,14 @@ public class ExecuteSqlCommand extends AbstractCommand {
                     }
                 }
             } else {
-                executor.execute(new RawSqlStatement(sql));
-                out += "Successfully Executed: "+ sql+"\n";
+                executor.execute(new RawSqlStatement(sqlString));
+                out += "Successfully Executed: "+ sqlString+"\n";
             }
             out += "\n";
         }
         database.commit();
-        return new CommandResult(out.trim());
+
+        Scope.getCurrentScope().getUI().sendMessage(out.trim());
     }
 
 }

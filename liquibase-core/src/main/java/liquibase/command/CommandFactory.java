@@ -1,33 +1,50 @@
 package liquibase.command;
 
-import liquibase.plugin.AbstractPluginFactory;
+import com.sun.deploy.util.StringUtils;
+import liquibase.Scope;
+import liquibase.SingletonObject;
+import liquibase.exception.CommandExecutionException;
+
+import java.util.*;
 
 /**
  * Manages {@link LiquibaseCommand} implementations.
  */
-public class CommandFactory extends AbstractPluginFactory<LiquibaseCommand> {
+public class CommandFactory implements SingletonObject {
 
     protected CommandFactory() {
     }
 
-    @Override
-    protected Class<LiquibaseCommand> getPluginClass() {
-        return LiquibaseCommand.class;
-    }
+    public void execute(CommandScope commandScope) throws CommandExecutionException {
+        SortedSet<LiquibaseCommand> commands = new TreeSet<>();
 
-    @Override
-    protected int getPriority(LiquibaseCommand obj, Object... args) {
-        return obj.getPriority((String) args[0]);
-    }
+        for (LiquibaseCommand command : Scope.getCurrentScope().getServiceLocator().findInstances(LiquibaseCommand.class)) {
+            if (command.getOrder(commandScope) > 0) {
+                commands.add(command);
+            }
+        }
 
-    public LiquibaseCommand getCommand(String commandName) {
-        return getPlugin(commandName);
-    }
+        if (commands.size() == 0) {
+            throw new IllegalArgumentException("Unknown command: "+ StringUtils.join(Arrays.asList(commandScope.getCommand()), " "));
+        }
 
-    public <T extends CommandResult> T execute(LiquibaseCommand<T> command) throws CommandExecutionException {
-        command.validate();
+        List<CommandArgumentDefinition> finalArgumentDefinitions = new ArrayList<>();
+        for (LiquibaseCommand command : commands) {
+            finalArgumentDefinitions.addAll(command.getArguments());
+        }
+
+        for (CommandArgumentDefinition definition : finalArgumentDefinitions) {
+            CommandValidationErrors errors = definition.validate(commandScope);
+
+            if (errors != null) {
+                throw new IllegalArgumentException(errors.getError());
+            }
+        }
+
         try {
-            return command.run();
+            for (LiquibaseCommand command : commands) {
+                command.run(commandScope);
+            }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
                 throw (CommandExecutionException) e;
@@ -35,8 +52,5 @@ public class CommandFactory extends AbstractPluginFactory<LiquibaseCommand> {
                 throw new CommandExecutionException(e);
             }
         }
-
     }
-
-
 }

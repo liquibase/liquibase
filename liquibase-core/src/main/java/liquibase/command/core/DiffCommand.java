@@ -2,8 +2,8 @@ package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.command.AbstractCommand;
-import liquibase.command.CommandResult;
-import liquibase.command.CommandValidationErrors;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandScope;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
@@ -20,130 +20,68 @@ import liquibase.util.StringUtil;
 import java.io.PrintStream;
 import java.util.Set;
 
-public class DiffCommand extends AbstractCommand<CommandResult> {
+public class DiffCommand extends AbstractCommand {
 
-    private Database referenceDatabase;
-    private Database targetDatabase;
-    private Class<? extends DatabaseObject>[] snapshotTypes;
-    private PrintStream outputStream;
-    private SnapshotListener snapshotListener;
-    private SnapshotControl referenceSnapshotControl;
-    private SnapshotControl targetSnapshotControl;
-    private ObjectChangeFilter objectChangeFilter;
-    private CompareControl compareControl;
+    public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
+    public static final CommandArgumentDefinition<Database> TARGET_DATABASE_ARG;
+    public static final CommandArgumentDefinition<Class[]> SNAPSHOT_TYPES_ARG;
+    public static final CommandArgumentDefinition<SnapshotListener> SNAPSHOT_LISTENER_ARG;
+    public static final CommandArgumentDefinition<SnapshotControl> REFERENCE_SNAPSHOT_CONTROL_ARG;
+    public static final CommandArgumentDefinition<SnapshotControl> TARGET_SNAPSHOT_CONTROL_ARG;
+    public static final CommandArgumentDefinition<ObjectChangeFilter> OBJECT_CHANGE_FILTER_ARG;
+    public static final CommandArgumentDefinition<CompareControl> COMPARE_CONTROL_ARG;
+    public static final CommandArgumentDefinition<PrintStream> OUTPUT_STREAM_ARG;
+
+    static {
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        REFERENCE_DATABASE_ARG = builder.define("referenceDatabase", Database.class).required().build();
+        TARGET_DATABASE_ARG = builder.define("targetDatabase", Database.class).required().build();
+        SNAPSHOT_TYPES_ARG = builder.define("snapshotTypes", Class[].class).required().build();
+        SNAPSHOT_LISTENER_ARG = builder.define("snapshotListener", SnapshotListener.class).required().build();
+        REFERENCE_SNAPSHOT_CONTROL_ARG = builder.define("referenceSnapshotControl", SnapshotControl.class).required().build();
+        TARGET_SNAPSHOT_CONTROL_ARG = builder.define("targetSnapshotControl", SnapshotControl.class).required().build();
+        OBJECT_CHANGE_FILTER_ARG = builder.define("objectChangeFilter", ObjectChangeFilter.class).required().build();
+        COMPARE_CONTROL_ARG = builder.define("compareControl", CompareControl.class).required().build();
+        OUTPUT_STREAM_ARG = builder.define("outputStream", PrintStream.class).required().build();
+    }
+
 
     @Override
-    public String getName() {
-        return "diff";
+    public String[] getName() {
+        return new String[]{"diff"};
     }
 
-    @Override
-    public CommandValidationErrors validate() {
-        return new CommandValidationErrors(this);
-    }
-
-    public Database getReferenceDatabase() {
-        return referenceDatabase;
-    }
-
-    public DiffCommand setReferenceDatabase(Database referenceDatabase) {
-        this.referenceDatabase = referenceDatabase;
-        return this;
-    }
-
-    public Database getTargetDatabase() {
-        return targetDatabase;
-    }
-
-    public DiffCommand setTargetDatabase(Database targetDatabase) {
-        this.targetDatabase = targetDatabase;
-        return this;
-    }
-
-    public Class<? extends DatabaseObject>[] getSnapshotTypes() {
-        return snapshotTypes;
-    }
-
-    public DiffCommand setSnapshotTypes(String... snapshotTypes) {
+    public static Class<? extends DatabaseObject>[] parseSnapshotTypes(String... snapshotTypes) {
         if ((snapshotTypes == null) || (snapshotTypes.length == 0) || (snapshotTypes[0] == null)) {
-            this.snapshotTypes = null;
-            return this;
+            return new Class[0];
         }
 
         Set<Class<? extends DatabaseObject>> types = DatabaseObjectFactory.getInstance().parseTypes(StringUtil.join(snapshotTypes, ","));
-        this.snapshotTypes = new Class[types.size()];
+
+        Class<? extends DatabaseObject>[] returnTypes = new Class[types.size()];
         int i = 0;
         for (Class<? extends DatabaseObject> type : types) {
-            this.snapshotTypes[i++] = type;
+            returnTypes[i++] = type;
         }
-        return this;
+
+        return returnTypes;
     }
 
-    public DiffCommand setSnapshotTypes(Class<? extends DatabaseObject>... snapshotTypes) {
-        this.snapshotTypes = snapshotTypes;
-        return this;
-    }
-
-    public PrintStream getOutputStream() {
-        return outputStream;
-    }
-
-    public DiffCommand setOutputStream(PrintStream outputStream) {
-        this.outputStream = outputStream;
-        return this;
-    }
-
-    public SnapshotControl getReferenceSnapshotControl() {
-        return referenceSnapshotControl;
-    }
-
-    public DiffCommand setReferenceSnapshotControl(SnapshotControl referenceSnapshotControl) {
-        this.referenceSnapshotControl = referenceSnapshotControl;
-        return this;
-    }
-
-    public SnapshotControl getTargetSnapshotControl() {
-        return targetSnapshotControl;
-    }
-
-    public DiffCommand setTargetSnapshotControl(SnapshotControl targetSnapshotControl) {
-        this.targetSnapshotControl = targetSnapshotControl;
-        return this;
-    }
-
-    public SnapshotListener getSnapshotListener() {
-        return snapshotListener;
-    }
-
-    public DiffCommand setSnapshotListener(SnapshotListener snapshotListener) {
-        this.snapshotListener = snapshotListener;
-        return this;
-    }
-
-    public CompareControl getCompareControl() {
-        return compareControl;
-    }
-
-    public DiffCommand setCompareControl(CompareControl compareControl) {
-        this.compareControl = compareControl;
-        return this;
-    }
 
     @Override
-    public CommandResult run() throws Exception {
-        SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
+    public void run(CommandScope commandScope) throws Exception {
+        SnapshotCommand.logUnsupportedDatabase(REFERENCE_DATABASE_ARG.getValue(commandScope), this.getClass());
 
-        DiffResult diffResult = createDiffResult();
+        DiffResult diffResult = createDiffResult(commandScope);
 
-        new DiffToReport(diffResult, outputStream).print();
-
-        return new CommandResult("OK");
+        new DiffToReport(diffResult, OUTPUT_STREAM_ARG.getValue(commandScope)).print();
     }
 
-    public DiffResult createDiffResult() throws DatabaseException, InvalidExampleException {
-        DatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
-        DatabaseSnapshot targetSnapshot = createTargetSnapshot();
+    public DiffResult createDiffResult(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
+        DatabaseSnapshot referenceSnapshot = createReferenceSnapshot(commandScope);
+        DatabaseSnapshot targetSnapshot = createTargetSnapshot(commandScope);
 
+        final CompareControl compareControl = COMPARE_CONTROL_ARG.getValue(commandScope);
         referenceSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
         if (targetSnapshot != null) {
             targetSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
@@ -152,13 +90,18 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
     }
 
-    protected DatabaseSnapshot createTargetSnapshot() throws DatabaseException, InvalidExampleException {
+    protected DatabaseSnapshot createTargetSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
+        CompareControl compareControl = COMPARE_CONTROL_ARG.getValue(commandScope);
+        Database targetDatabase = TARGET_DATABASE_ARG.getValue(commandScope);
+        SnapshotControl snapshotControl = TARGET_SNAPSHOT_CONTROL_ARG.getValue(commandScope);
+        Class<? extends DatabaseObject>[] snapshotTypes = SNAPSHOT_TYPES_ARG.getValue(commandScope);
+        SnapshotListener snapshotListener = SNAPSHOT_LISTENER_ARG.getValue(commandScope);
 
         if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
             schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
         } else {
-            schemas =new CatalogAndSchema[compareControl.getSchemaComparisons().length];
+            schemas = new CatalogAndSchema[compareControl.getSchemaComparisons().length];
 
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
@@ -172,12 +115,12 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
                 schemas[i++] = schema;
             }
         }
-        SnapshotControl snapshotControl = getTargetSnapshotControl();
+
         if (snapshotControl == null) {
             snapshotControl = new SnapshotControl(targetDatabase, snapshotTypes);
         }
-        if (getSnapshotListener() != null) {
-            snapshotControl.setSnapshotListener(getSnapshotListener());
+        if (snapshotListener != null) {
+            snapshotControl.setSnapshotListener(snapshotListener);
         }
         ObjectQuotingStrategy originalStrategy = targetDatabase.getObjectQuotingStrategy();
         try {
@@ -188,13 +131,20 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         }
     }
 
-    protected DatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
+    protected DatabaseSnapshot createReferenceSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
+        CompareControl compareControl = COMPARE_CONTROL_ARG.getValue(commandScope);
+        Database targetDatabase = TARGET_DATABASE_ARG.getValue(commandScope);
+        Database referenceDatabase = REFERENCE_DATABASE_ARG.getValue(commandScope);
+        SnapshotControl snapshotControl = REFERENCE_SNAPSHOT_CONTROL_ARG.getValue(commandScope);
+        Class<? extends DatabaseObject>[] snapshotTypes = SNAPSHOT_TYPES_ARG.getValue(commandScope);
+        ObjectChangeFilter objectChangeFilter = OBJECT_CHANGE_FILTER_ARG.getValue(commandScope);
+        SnapshotListener snapshotListener = SNAPSHOT_LISTENER_ARG.getValue(commandScope);
 
         if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
             schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
         } else {
-            schemas =new CatalogAndSchema[compareControl.getSchemaComparisons().length];
+            schemas = new CatalogAndSchema[compareControl.getSchemaComparisons().length];
 
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
@@ -208,12 +158,11 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
             }
         }
 
-        SnapshotControl snapshotControl = getReferenceSnapshotControl();
         if (snapshotControl == null) {
             snapshotControl = new SnapshotControl(referenceDatabase, objectChangeFilter, snapshotTypes);
         }
-        if (getSnapshotListener() != null) {
-            snapshotControl.setSnapshotListener(getSnapshotListener());
+        if (snapshotListener != null) {
+            snapshotControl.setSnapshotListener(snapshotListener);
         }
 
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
@@ -223,11 +172,6 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
         }
-    }
-
-    public DiffCommand setObjectChangeFilter(ObjectChangeFilter objectChangeFilter) {
-        this.objectChangeFilter = objectChangeFilter;
-        return this;
     }
 }
 

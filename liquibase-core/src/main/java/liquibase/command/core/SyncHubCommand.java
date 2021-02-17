@@ -2,10 +2,9 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.changelog.*;
-import liquibase.command.AbstractSelfConfiguratingCommand;
-import liquibase.command.CommandResult;
-import liquibase.command.CommandValidationErrors;
+import liquibase.command.*;
 import liquibase.database.Database;
+import liquibase.exception.CommandExecutionException;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
 import liquibase.hub.model.Connection;
@@ -18,66 +17,28 @@ import liquibase.util.StringUtil;
 import java.util.List;
 import java.util.UUID;
 
-public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResult> {
+public class SyncHubCommand extends AbstractCommand {
 
-    private String url;
-    private String changeLogFile;
-    private String hubConnectionId;
-    private String hubProjectId;
-    private Database database;
-    private boolean failIfOnline = true;
+    public static final CommandArgumentDefinition<String> URL_ARG;
+    public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
+    public static final CommandArgumentDefinition<String> HUB_CONNECTION_ID_ARG;
+    public static final CommandArgumentDefinition<String> HUB_PROJECT_ID_ARG;
+    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
+    public static final CommandArgumentDefinition<Boolean> FAIL_IF_ONLINE_ARG;
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getChangeLogFile() {
-        return changeLogFile;
-    }
-
-    public void setChangeLogFile(String changeLogFile) {
-        this.changeLogFile = changeLogFile;
-    }
-
-    public String getHubConnectionId() {
-        return hubConnectionId;
-    }
-
-    public void setHubConnectionId(String hubConnectionId) {
-        this.hubConnectionId = hubConnectionId;
-    }
-
-    public String getHubProjectId() {
-        return hubProjectId;
-    }
-
-    public void setHubProjectId(String hubProjectId) {
-        this.hubProjectId = hubProjectId;
-    }
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public boolean isFailIfOnline() {
-        return failIfOnline;
-    }
-
-    public void setFailIfOnline(boolean failIfOnline) {
-        this.failIfOnline = failIfOnline;
+    static {
+        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        URL_ARG = builder.define("url", String.class).build();
+        CHANGELOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
+        HUB_CONNECTION_ID_ARG = builder.define("hubConnectionId", String.class).build();
+        HUB_PROJECT_ID_ARG = builder.define("hubProjectId", String.class).build();
+        DATABASE_ARG = builder.define("hubProjectId", Database.class).build();
+        FAIL_IF_ONLINE_ARG = builder.define("failIfOnline", Boolean.class).defaultValue(true).build();
     }
 
     @Override
-    public String getName() {
-        return "syncHub";
+    public String[] getName() {
+        return new String[]{"syncHub"};
     }
 
     @Override
@@ -86,54 +47,58 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
     }
 
     @Override
-    public CommandResult run() throws Exception {
+    public void run(CommandScope commandScope) throws Exception {
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (! hubServiceFactory.isOnline()) {
-            if (failIfOnline) {
-                return new CommandResult("The command syncHub requires access to Liquibase Hub: " +
-                        hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com", false);
+            if (FAIL_IF_ONLINE_ARG.getValue(commandScope)) {
+                throw new CommandExecutionException("The command syncHub requires access to Liquibase Hub: " +
+                        hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com");
             } else {
-                return new CommandResult("Sync skipped, offline", true);
+                Scope.getCurrentScope().getUI().sendMessage("Sync skipped, offline");
+                return;
             }
         }
 
         //
         // Check for both connection and project specified
         //
-        if (hubConnectionId != null && hubProjectId != null) {
+        final String hubConnectionId = HUB_CONNECTION_ID_ARG.getValue(commandScope);
+        if (hubConnectionId != null && HUB_PROJECT_ID_ARG.getValue(commandScope) != null) {
             String message = "The syncHub command requires only one valid hubConnectionId or hubProjectId or unique URL. Please remove extra values.";
             Scope.getCurrentScope().getLog(getClass()).severe(message);
-            return new CommandResult(message, false);
+            throw new CommandExecutionException(message);
         }
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         Connection connectionToSync;
         if (hubConnectionId == null) {
             Project project = null;
-            if (StringUtil.isNotEmpty(changeLogFile)) {
+            if (StringUtil.isNotEmpty(CHANGELOG_FILE_ARG.getValue(commandScope))) {
                 final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-                final DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, new ChangeLogParameters(), resourceAccessor);
+                final String changelogFile = CHANGELOG_FILE_ARG.getValue(commandScope);
+                final DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance().getParser(changelogFile, resourceAccessor).parse(changelogFile, new ChangeLogParameters(), resourceAccessor);
                 final String changeLogId = databaseChangeLog.getChangeLogId();
 
                 if (changeLogId == null) {
-                    Scope.getCurrentScope().getLog(getClass()).info("Changelog " + changeLogFile + " has not been registered with Liquibase Hub. Cannot use it to help determine project.");
+                    Scope.getCurrentScope().getLog(getClass()).info("Changelog " + changelogFile + " has not been registered with Liquibase Hub. Cannot use it to help determine project.");
                 } else {
                     final HubChangeLog changeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId));
                     if (changeLog == null) {
-                        return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
+                        throw new CommandExecutionException("Changelog " + changelogFile + " has an unrecognized changeLogId.");
                     }
                     project = changeLog.getProject();
                 }
             }
-            else if (hubProjectId != null) {
-                project = hubService.getProject(UUID.fromString(hubProjectId));
+            else if (HUB_PROJECT_ID_ARG.getValue(commandScope) != null) {
+                project = hubService.getProject(UUID.fromString(HUB_PROJECT_ID_ARG.getValue(commandScope)));
                 if (project == null) {
-                    return new CommandResult("Project Id '" + hubProjectId + "' does not exist or you do not have access to it", false);
+                    throw new CommandExecutionException("Project Id '" + HUB_PROJECT_ID_ARG.getValue(commandScope) + "' does not exist or you do not have access to it");
                 }
             }
             else {
                 Scope.getCurrentScope().getLog(getClass()).info("No project, connection, or changeLogFile specified. Searching for jdbcUrl across the entire organization.");
             }
 
+            final String url = URL_ARG.getValue(commandScope);
             final Connection searchConnection = new Connection()
                     .setJdbcUrl(url)
                     .setProject(project);
@@ -142,7 +107,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
             if (connections.size() == 0) {
 
                 if (project == null) {
-                    return new CommandResult("The url " + url + " does not match any defined connections. To auto-create a connection, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId.", false);
+                    throw new CommandExecutionException("The url " + url + " does not match any defined connections. To auto-create a connection, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId.");
                 }
 
                 Connection inputConnection = new Connection();
@@ -153,17 +118,18 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
             } else if (connections.size() == 1) {
                 connectionToSync = connections.get(0);
             } else {
-                return new CommandResult("The url " + url + " is used by more than one connection. Please specify 'hubConnectionId=<hubConnectionId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.", false);
+                throw new CommandExecutionException("The url " + url + " is used by more than one connection. Please specify 'hubConnectionId=<hubConnectionId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line.");
             }
         } else {
             final List<Connection> connections = hubService.getConnections(new Connection().setId(UUID.fromString(hubConnectionId)));
             if (connections.size() == 0) {
-                return new CommandResult("Hub connection Id "+ hubConnectionId + " was either not found, or you do not have access", false);
+                throw new CommandExecutionException("Hub connection Id "+ hubConnectionId + " was either not found, or you do not have access");
             } else {
                 connectionToSync = connections.get(0);
             }
         }
 
+        final Database database = DATABASE_ARG.getValue(commandScope);
         Scope.child(Scope.Attr.database, database, () -> {
             final ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();
@@ -171,8 +137,6 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
             hubService.setRanChangeSets(connectionToSync, ranChangeSets);
 
         });
-
-        return new CommandResult();
     }
 
 }

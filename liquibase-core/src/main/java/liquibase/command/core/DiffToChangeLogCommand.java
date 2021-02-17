@@ -1,85 +1,67 @@
 package liquibase.command.core;
 
 import liquibase.Scope;
-import liquibase.command.CommandResult;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandScope;
+import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.logging.LogService;
-import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
 public class DiffToChangeLogCommand extends DiffCommand {
 
-    private String changeLogFile;
-    private PrintStream outputStream;
-    private DiffOutputControl diffOutputControl;
+    public static final CommandArgumentDefinition<String> CHANGELOG_FILENAME_ARG;
+    public static final CommandArgumentDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL_ARG;
+
+    static {
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+
+        CHANGELOG_FILENAME_ARG = builder.define("changeLogFile", String.class).required().build();
+        DIFF_OUTPUT_CONTROL_ARG = builder.define("diffOutputControl", DiffOutputControl.class).required().build();
+    }
+
 
     @Override
-    public String getName() {
-        return "diffChangeLog";
-    }
-
-    public String getChangeLogFile() {
-        return changeLogFile;
-    }
-
-    public DiffToChangeLogCommand setChangeLogFile(String changeLogFile) {
-        this.changeLogFile = changeLogFile;
-        return this;
-    }
-
-    public PrintStream getOutputStream() {
-        return outputStream;
-    }
-
-    public DiffToChangeLogCommand setOutputStream(PrintStream outputStream) {
-        this.outputStream = outputStream;
-        return this;
-    }
-
-    public DiffOutputControl getDiffOutputControl() {
-        return diffOutputControl;
-    }
-
-    public DiffToChangeLogCommand setDiffOutputControl(DiffOutputControl diffOutputControl) {
-        this.diffOutputControl = diffOutputControl;
-        return this;
+    public String[] getName() {
+        return new String[]{"diffChangeLog"};
     }
 
     @Override
-    public CommandResult run() throws Exception {
-        SnapshotCommand.logUnsupportedDatabase(this.getReferenceDatabase(), this.getClass());
+    public void run(CommandScope commandScope) throws Exception {
+        Database referenceDatabase = REFERENCE_DATABASE_ARG.getValue(commandScope);
+        String changeLogFile = CHANGELOG_FILENAME_ARG.getValue(commandScope);
 
-        DiffResult diffResult = createDiffResult();
+        SnapshotCommand.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
-        PrintStream outputStream = this.getOutputStream();
+        DiffResult diffResult = createDiffResult(commandScope);
+
+        PrintStream outputStream = OUTPUT_STREAM_ARG.getValue(commandScope);
         if (outputStream == null) {
             outputStream = System.out;
         }
 
         outputBestPracticeMessage();
 
-        ObjectQuotingStrategy originalStrategy = getReferenceDatabase().getObjectQuotingStrategy();
+        ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
         try {
-            getReferenceDatabase().setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
             if (StringUtil.trimToNull(changeLogFile) == null) {
-                createDiffToChangeLogObject(diffResult).print(outputStream);
+                createDiffToChangeLogObject(diffResult, commandScope).print(outputStream);
             } else {
-                createDiffToChangeLogObject(diffResult).print(changeLogFile);
+                createDiffToChangeLogObject(diffResult, commandScope).print(changeLogFile);
             }
         }
         finally {
-            getReferenceDatabase().setObjectQuotingStrategy(originalStrategy);
+            referenceDatabase.setObjectQuotingStrategy(originalStrategy);
         }
-        return new CommandResult("OK");
     }
 
-    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult) {
-        return new DiffToChangeLog(diffResult, diffOutputControl);
+    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, CommandScope commandScope) {
+        return new DiffToChangeLog(diffResult, DIFF_OUTPUT_CONTROL_ARG.getValue(commandScope));
     }
 
 

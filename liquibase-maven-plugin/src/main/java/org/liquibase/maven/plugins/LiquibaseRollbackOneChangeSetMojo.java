@@ -5,6 +5,7 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
 import liquibase.database.Database;
+import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -98,8 +99,8 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
                     "The command 'rollbackOneChangeSet' requires a Liquibase Pro License, available at http://www.liquibase.org/download or sales@liquibase.com.");
         }
         Database database = liquibase.getDatabase();
-        LiquibaseCommand liquibaseCommand = (Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("rollbackOneChangeSet"));
-        AbstractSelfConfiguratingCommand configuratingCommand = (AbstractSelfConfiguratingCommand)liquibaseCommand;
+        CommandScope liquibaseCommand = new CommandScope("rollbackOneChangeSet");
+
         Map<String, Object> argsMap = getCommandArgsObjectMap(liquibase);
         ChangeLogParameters clp = new ChangeLogParameters(database);
         argsMap.put("changeLogParameters", clp);
@@ -108,16 +109,12 @@ public class LiquibaseRollbackOneChangeSetMojo extends AbstractLiquibaseChangeLo
         }
         argsMap.put("force", Boolean.TRUE);
         argsMap.put("liquibase", liquibase);
-        configuratingCommand.configure(argsMap);
-        try {
-            final CommandResult execute = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
-            if (!execute.succeeded) {
-                throw new LiquibaseException(execute.message);
-            }
+
+        for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
+            liquibaseCommand.addArgument(entry.getKey(), entry.getValue());
         }
-        catch (CommandExecutionException cee) {
-            throw new LiquibaseException("Error executing rollbackOneChangeSet", cee);
-        }
+
+        Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
     }
 
     private Map<String, Object> getCommandArgsObjectMap(Liquibase liquibase) throws LiquibaseException {

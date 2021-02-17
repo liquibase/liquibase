@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.changelog.MockChangeLogHistoryService
 import liquibase.database.core.MockDatabase
+import liquibase.exception.CommandExecutionException
 import liquibase.hub.HubService
 import liquibase.hub.HubServiceFactory
 import liquibase.hub.core.MockHubService
@@ -52,10 +53,10 @@ class SyncHubCommandTest extends Specification {
         command.url = "jdbc://test"
         command.database = new MockDatabase()
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert result.succeeded: result.message
+        notThrown(CommandExecutionException)
         assert mockHubService.sentObjects.toString() == "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
     }
 
@@ -80,10 +81,10 @@ class SyncHubCommandTest extends Specification {
         command.hubConnectionId = randomUUID
         command.database = new MockDatabase()
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert result.succeeded: result.message
+        notThrown(CommandExecutionException)
         assert mockHubService.sentObjects.toString() == "[setRanChangeSets/Connection jdbc://test ($randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
     }
 
@@ -105,10 +106,10 @@ class SyncHubCommandTest extends Specification {
         command.hubProjectId = MockHubService.randomUUID
         command.database = new MockDatabase()
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert result.succeeded: result.message
+        notThrown(CommandExecutionException)
         assert mockHubService.sentObjects.toString() ==
             "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author]]"
     }
@@ -132,10 +133,10 @@ class SyncHubCommandTest extends Specification {
         command.database = new MockDatabase()
         command.changeLogFile = "com/example/registered.mock"
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert result.succeeded: result.message
+        notThrown(CommandExecutionException)
         assert mockHubService.sentObjects["createConnection/$MockHubService.randomUUID" as String].toString() == ("[Connection jdbc://test2 (null)]")
 
     }
@@ -150,11 +151,11 @@ class SyncHubCommandTest extends Specification {
         command.hubConnectionId = MockHubService.randomUUID
         command.hubProjectId = MockHubService.randomUUID
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert !result.succeeded
-        assert result.message == "The syncHub command requires only one valid hubConnectionId or hubProjectId or unique URL. Please remove extra values."
+        def e = thrown(CommandExecutionException)
+        assert e.message == "The syncHub command requires only one valid hubConnectionId or hubProjectId or unique URL. Please remove extra values."
     }
 
     def "Fails with invalid hubConnectionId"() {
@@ -166,11 +167,11 @@ class SyncHubCommandTest extends Specification {
         command.url = "jdbc://test2"
         command.hubConnectionId = MockHubService.randomUUID
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert !result.succeeded
-        assert result.message == "Hub connection Id " + command.hubConnectionId + " was either not found, or you do not have access"
+        def e = thrown(CommandExecutionException)
+        assert e.message == "Hub connection Id " + command.hubConnectionId + " was either not found, or you do not have access"
     }
 
     def "Fails with multiple matching connections"() {
@@ -184,11 +185,11 @@ class SyncHubCommandTest extends Specification {
         def command = new SyncHubCommand()
         command.url = "jdbc://test2"
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert !result.succeeded
-        assert result.message == "The url " + command.url + " is used by more than one connection. Please specify 'hubConnectionId=<hubConnectionId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line."
+        def e = thrown(CommandExecutionException)
+        assert e.message == "The url " + command.url + " is used by more than one connection. Please specify 'hubConnectionId=<hubConnectionId>' or 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line."
     }
 
     def "Fails with no connections and with no changeLogFile passed"() {
@@ -199,11 +200,11 @@ class SyncHubCommandTest extends Specification {
         def command = new SyncHubCommand()
         command.url = "jdbc://test2"
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert !result.succeeded
-        assert result.message == "The url " + command.url + " does not match any defined connections. To auto-create a connection, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId."
+        def e = thrown(CommandExecutionException)
+        assert e.message == "The url " + command.url + " does not match any defined connections. To auto-create a connection, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId."
 
     }
 
@@ -216,11 +217,11 @@ class SyncHubCommandTest extends Specification {
         command.url = "jdbc://test2"
         command.changeLogFile = "com/example/unregistered.mock"
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert !result.succeeded
-        assert result.message == "The url jdbc://test2 does not match any defined connections. To auto-create a connection, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId."
+        def e = thrown(CommandExecutionException)
+        assert e.message == "The url jdbc://test2 does not match any defined connections. To auto-create a connection, please specify a 'changeLogFile=<changeLogFileName>' in liquibase.properties or the command line which contains a registered changeLogId."
 
     }
 
@@ -234,11 +235,11 @@ class SyncHubCommandTest extends Specification {
         command.url = "jdbc://test2"
         command.changeLogFile = "com/example/registered.mock"
 
-        def result = command.run()
+        command.run()
 
         then:
-        assert !result.succeeded
-        assert result.message == "Changelog com/example/registered.mock has an unrecognized changeLogId."
+        def e = thrown(CommandExecutionException)
+        assert e.message == "Changelog com/example/registered.mock has an unrecognized changeLogId."
 
     }
 

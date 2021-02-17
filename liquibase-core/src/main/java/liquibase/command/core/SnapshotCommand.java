@@ -3,7 +3,8 @@ package liquibase.command.core;
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.command.AbstractCommand;
-import liquibase.command.CommandResult;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandScope;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
@@ -22,37 +23,33 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
+public class SnapshotCommand extends AbstractCommand {
 
-    private Database database;
-    private CatalogAndSchema[] schemas;
-    private String serializerFormat;
-    private SnapshotListener snapshotListener;
+    public static final CommandArgumentDefinition<Database> DATABASE_ARG;
+    public static final CommandArgumentDefinition<CatalogAndSchema[]> SCHEMAS_ARG;
+    public static final CommandArgumentDefinition<String> SERIALIZER_FORMAT_ARG;
+    public static final CommandArgumentDefinition<SnapshotListener> SNAPSHOT_LISTENER_ARG;
+
     private Map<String, Object> snapshotMetadata;
 
+    static {
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+
+        DATABASE_ARG = builder.define("database", Database.class).required().build();
+        SCHEMAS_ARG = builder.define("schemas", CatalogAndSchema[].class).required().build();
+        SERIALIZER_FORMAT_ARG = builder.define("serializerFormat", String.class).required().build();
+        SNAPSHOT_LISTENER_ARG = builder.define("snapshotListener", SnapshotListener.class).required().build();
+    }
+
     @Override
-    public String getName() {
-        return "snapshot";
+    public String[] getName() {
+        return new String[]{"snapshot"};
     }
 
 
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public SnapshotCommand setSchemas(CatalogAndSchema... catalogAndSchema) {
-        schemas = catalogAndSchema;
-        return this;
-    }
-
-    public SnapshotCommand setSchemas(String... schemas) {
+    public static CatalogAndSchema[] parseSchemas(Database database, String... schemas) {
         if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
-            this.schemas = null;
-            return this;
+            return null;
         }
 
         schemas = StringUtil.join(schemas, ",").split("\\s*,\\s*");
@@ -61,28 +58,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }
 
-        this.schemas = finalList.toArray(new CatalogAndSchema[finalList.size()]);
-
-
-        return this;
-    }
-
-
-    public String getSerializerFormat() {
-        return serializerFormat;
-    }
-
-    public SnapshotCommand setSerializerFormat(String serializerFormat) {
-        this.serializerFormat = serializerFormat;
-        return this;
-    }
-
-    public SnapshotListener getSnapshotListener() {
-        return snapshotListener;
-    }
-
-    public void setSnapshotListener(SnapshotListener snapshotListener) {
-        this.snapshotListener = snapshotListener;
+        return finalList.toArray(new CatalogAndSchema[finalList.size()]);
     }
 
     public Map<String, Object> getSnapshotMetadata() {
@@ -94,12 +70,15 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     }
 
     @Override
-    public SnapshotCommandResult run() throws Exception {
+    public void run(CommandScope commandScope) throws Exception {
+        Database database = DATABASE_ARG.getValue(commandScope);
+        SnapshotListener snapshotListener = SNAPSHOT_LISTENER_ARG.getValue(commandScope);
+        CatalogAndSchema[] schemas = SCHEMAS_ARG.getValue(commandScope);
+
         SnapshotCommand.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl = new SnapshotControl(database);
         snapshotControl.setSnapshotListener(snapshotListener);
 
-        CatalogAndSchema[] schemas = this.schemas;
         if (schemas == null) {
             schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
         }
@@ -116,7 +95,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
 
         snapshot.setMetadata(this.getSnapshotMetadata());
 
-        return new SnapshotCommandResult(snapshot);
+        commandScope.addResult("snapshot", snapshot);
     }
 
     @Override
@@ -124,40 +103,27 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
         return new CommandValidationErrors(this);
     }
 
-    public class SnapshotCommandResult extends CommandResult {
-
-        public DatabaseSnapshot snapshot;
-
-
-        public SnapshotCommandResult() {
+    public static String printSnapshot(CommandScope commandScope) throws LiquibaseException {
+        String format = SnapshotCommand.SERIALIZER_FORMAT_ARG.getValue(commandScope);
+        if (format == null) {
+            format = "txt";
         }
 
-        public SnapshotCommandResult(DatabaseSnapshot snapshot) {
-            this.snapshot = snapshot;
-        }
-
-        @Override
-        public String print() throws LiquibaseException {
-            String format = getSerializerFormat();
-            if (format == null) {
-                format = "txt";
-            }
-
-            return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize(snapshot, true);
-        }
-
-        public void merge(SnapshotCommandResult resultToMerge) {
-            this.snapshot.merge(resultToMerge.snapshot);
-        }
+        return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize((DatabaseSnapshot) commandScope.getResult("snapshot"), true);
     }
+//
+//        public void merge(SnapshotCommandResult resultToMerge) {
+//            this.snapshot.merge(resultToMerge.snapshot);
+//        }
+//    }
 
     public static void logUnsupportedDatabase(Database database, Class callingClass) {
         if (LicenseServiceUtils.checkForValidLicense("Liquibase Pro")) {
             if (!(database instanceof MSSQLDatabase
-               || database instanceof OracleDatabase
-               || database instanceof MySQLDatabase
-               || database instanceof DB2Database
-               || database instanceof PostgresDatabase)) {
+                    || database instanceof OracleDatabase
+                    || database instanceof MySQLDatabase
+                    || database instanceof DB2Database
+                    || database instanceof PostgresDatabase)) {
                 Scope.getCurrentScope().getUI().sendMessage("INFO This command might not yet capture Liquibase Pro additional object types on " + database.getShortName());
             }
         }

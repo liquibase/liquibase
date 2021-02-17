@@ -2,8 +2,9 @@ package liquibase.command.core
 
 import liquibase.Liquibase
 import liquibase.Scope
-import liquibase.command.CommandResult
+
 import liquibase.database.core.MockDatabase
+import liquibase.exception.CommandExecutionException
 import liquibase.hub.HubConfiguration
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
@@ -51,10 +52,10 @@ class DropAllCommandTest extends Specification {
         command.setDatabase(new MockDatabase())
         command.setSchemas("")
 
-        def result = command.run()
+        command.run()
 
         then:
-        result.succeeded
+        notThrown(CommandExecutionException)
     }
 
     def "unregisteredChangeLog"() {
@@ -64,7 +65,6 @@ class DropAllCommandTest extends Specification {
 
         Scope.getCurrentScope().getUI()
 
-        CommandResult result = null
         Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), UUID.randomUUID().toString(), {
             def command = new DropAllCommand()
             JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
@@ -76,12 +76,13 @@ class DropAllCommandTest extends Specification {
 
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             Scope.child(Scope.Attr.logService.name(), compositeLogService, {
-                result = command.run()
+                command.run()
             })
         })
 
         then:
-        result.succeeded
+        notThrown(CommandExecutionException)
+
         bufferLog.getLogAsString(Level.INFO).contains("WARNING The changelog file specified is not registered with any Liquibase Hub project")
 
     }
