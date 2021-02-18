@@ -11,6 +11,9 @@ import liquibase.exception.CommandExecutionException;
 import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtil;
 
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -30,6 +33,8 @@ public class NewMain {
         passedArgs.put("username", "lbuser");
         passedArgs.put("password", "LiquibasePass1");
 
+        passedArgs.put("output", "/tmp/out.txt");
+
 
         try {
             CommandScope commandScope = new CommandScope("history");
@@ -42,7 +47,18 @@ public class NewMain {
                 commandScope.addArgumentValues(argument.of(database));
             }
 
+            FileOutputStream outputStream = null;
+            if (passedArgs.containsKey("output")) {
+                outputStream = new FileOutputStream(passedArgs.get("output"));
+                commandScope.setOutput(outputStream);
+            }
+
             commandScope.execute();
+
+            if (outputStream != null) {
+                outputStream.close();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1850,9 +1850,9 @@ public class Main {
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
                     CommandScope historyCommand = new CommandScope("history");
                     historyCommand.addArgumentValues(
-                            HistoryCommand.DATABASE_ARG.of(database),
-                            HistoryCommand.OUTPUT_ARG.of(new PrintStream(getOutputStream()))
+                            HistoryCommand.DATABASE_ARG.of(database)
                     );
+                    historyCommand.setOutput(getOutputStream());
 
                     historyCommand.execute();
                 } else {

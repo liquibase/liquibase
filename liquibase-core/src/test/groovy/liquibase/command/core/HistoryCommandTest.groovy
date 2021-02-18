@@ -38,7 +38,7 @@ class HistoryCommandTest extends Specification {
 
         where:
         passedCommand | expected
-        ["diff"]   | -1
+        ["diff"]      | -1
         ["history"]   | 1000
     }
 
@@ -47,7 +47,6 @@ class HistoryCommandTest extends Specification {
         Scope.currentScope.getSingleton(CommandFactory).getArguments(new HistoryCommand())*.toString() == [
                 "database (required)",
                 "dateFormat",
-                "output",
         ]
     }
 
@@ -66,8 +65,8 @@ class HistoryCommandTest extends Specification {
         def commandScope = new CommandScope("history")
                 .addArgumentValues(
                         HistoryCommand.DATABASE_ARG.of(database),
-                        HistoryCommand.OUTPUT_ARG.of(new PrintStream(output))
                 )
+                .setOutput(output)
 
         def historyService = Mock(ChangeLogHistoryService)
         historyService.getRanChangeSets() >> changeSets
@@ -78,6 +77,7 @@ class HistoryCommandTest extends Specification {
         ChangeLogHistoryServiceFactory.setInstance(historyFactory)
 
         historyCommand.run(commandScope)
+        commandScope.getOutput().flush()
 
         then:
         new String(output.toByteArray()).replaceAll("\r\n", "\n").trim() == expectedOut.replaceAll("\r\n", "\n").trim()

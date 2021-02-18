@@ -4,6 +4,8 @@ import liquibase.ExtensibleObject;
 import liquibase.exception.LiquibaseException;
 import liquibase.plugin.Plugin;
 
+import java.io.PrintWriter;
+
 /**
  * Service for interacting with the user.
  */

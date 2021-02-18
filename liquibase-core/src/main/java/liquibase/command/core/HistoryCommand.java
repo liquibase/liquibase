@@ -1,5 +1,6 @@
 package liquibase.command.core;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.RanChangeSet;
@@ -7,8 +8,9 @@ import liquibase.command.AbstractCommand;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
+import liquibase.ui.UIService;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +20,11 @@ public class HistoryCommand extends AbstractCommand {
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
-    public static final CommandArgumentDefinition<PrintStream> OUTPUT_ARG;
 
     static {
         final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(HistoryCommand.class);
         DATABASE_ARG = builder.define("database", Database.class).required().build();
         DATE_FORMAT_ARG = builder.define("dateFormat", DateFormat.class).defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)).build();
-        OUTPUT_ARG = builder.define("output", PrintStream.class).defaultValue(System.out).build();
     }
 
     @Override
@@ -35,19 +35,18 @@ public class HistoryCommand extends AbstractCommand {
     @Override
     public void run(CommandScope commandScope) throws Exception {
         Database database = DATABASE_ARG.getValue(commandScope);
-        PrintStream outputStream = OUTPUT_ARG.getValue(commandScope);
 
         ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
 
-        outputStream.println("Liquibase History for " + database.getConnection().getURL());
-        outputStream.println("");
+        commandScope.getOutput().println("Liquibase History for " + database.getConnection().getURL());
+        commandScope.getOutput().println("");
 
         DeploymentDetails deployment = null;
         for (RanChangeSet ranChangeSet : historyService.getRanChangeSets()) {
             final String thisDeploymentId = ranChangeSet.getDeploymentId();
             if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
                 if (deployment != null) {
-                    deployment.printReport();
+                    deployment.printReport(commandScope.getOutput());
                 }
                 deployment = new DeploymentDetails(commandScope);
             }
@@ -55,9 +54,9 @@ public class HistoryCommand extends AbstractCommand {
         }
 
         if (deployment == null) {
-            outputStream.println("No changeSets deployed");
+            commandScope.getOutput().println("No changeSets deployed");
         } else {
-            deployment.printReport();
+            deployment.printReport(commandScope.getOutput());
         }
     }
 
@@ -69,9 +68,8 @@ public class HistoryCommand extends AbstractCommand {
             this.commandScope = commandScope;
         }
 
-        void printReport() {
+        void printReport(PrintWriter output) {
             DateFormat dateFormat = DATE_FORMAT_ARG.getValue(commandScope);
-            PrintStream outputStream = OUTPUT_ARG.getValue(commandScope);
 
             String executionTime = null;
             RanChangeSet firstChangeSet = changeSets.get(0);
@@ -89,13 +87,13 @@ public class HistoryCommand extends AbstractCommand {
 
             message += ", DeploymentId: " + firstChangeSet.getDeploymentId();
 
-            outputStream.println(message);
+            output.println(message);
 
             for (RanChangeSet changeSet : changeSets) {
-                outputStream.println("  " + changeSet.toString());
+                output.println("  " + changeSet.toString());
             }
 
-            outputStream.println("");
+            output.println("");
         }
 
         String getDeploymentId() {

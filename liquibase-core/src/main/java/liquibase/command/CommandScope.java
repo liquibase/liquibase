@@ -2,9 +2,9 @@ package liquibase.command;
 
 import com.sun.deploy.util.StringUtils;
 import liquibase.Scope;
-import liquibase.database.Database;
 import liquibase.exception.CommandExecutionException;
 
+import java.io.*;
 import java.util.*;
 
 public class CommandScope {
@@ -15,7 +15,12 @@ public class CommandScope {
 
     private final Map<String, Object> argumentValues = new HashMap<>();
 
+    private PrintWriter output;
+    private OutputStream outputStream;
+
     public CommandScope(String... command) throws CommandExecutionException {
+        setOutput(System.out);
+
         final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
 
         this.command = command;
@@ -74,6 +79,37 @@ public class CommandScope {
         return this.argumentValues.get(argument);
     }
 
+    /**
+     * Returns a {@link PrintWriter} for output for the command.
+     * The command output should not include status/progress type output, only the actual output itself.
+     * Think "what would be piped out", not "what goes to stderr during a pipe".
+     *
+     * @see #getOutputStream() for binary output
+     */
+    public PrintWriter getOutput() {
+        return output;
+    }
+
+    /**
+     * Returns an {@link OutputStream} for output for the command.
+     *
+     * @see #getOutput() for text-based output.
+     */
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
+
+    /**
+     * Sets the output stream for this command. Creates a convenience {@link PrintWriter} around the stream that can be accessed with
+     * {@link #getOutput()}, or this stream can be used directly with {@link #getOutputStream()}
+     */
+    public CommandScope setOutput(OutputStream outputStream) {
+        this.outputStream = outputStream;
+        this.output = new PrintWriter(outputStream);
+
+        return this;
+    }
+
     public void addResult(String key, Object value) {
         //TODO: save
     }
@@ -103,6 +139,8 @@ public class CommandScope {
             } else {
                 throw new CommandExecutionException(e);
             }
+        } finally {
+            this.output.flush();
         }
     }
 }
