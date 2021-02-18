@@ -18,7 +18,7 @@ public class DiffToChangeLogCommand extends DiffCommand {
     public static final CommandArgumentDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(DiffToChangeLogCommand.class);
 
         CHANGELOG_FILENAME_ARG = builder.define("changeLogFile", String.class).required().build();
         DIFF_OUTPUT_CONTROL_ARG = builder.define("diffOutputControl", DiffOutputControl.class).required().build();

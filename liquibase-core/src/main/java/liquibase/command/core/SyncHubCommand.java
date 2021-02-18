@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.changelog.*;
 import liquibase.command.*;
 import liquibase.database.Database;
+import liquibase.exception.CommandArgumentValidationException;
 import liquibase.exception.CommandExecutionException;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
@@ -27,7 +28,7 @@ public class SyncHubCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<Boolean> FAIL_IF_ONLINE_ARG;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(SyncHubCommand.class);
         URL_ARG = builder.define("url", String.class).build();
         CHANGELOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
         HUB_CONNECTION_ID_ARG = builder.define("hubConnectionId", String.class).build();
@@ -39,11 +40,6 @@ public class SyncHubCommand extends AbstractCommand {
     @Override
     public String[] getName() {
         return new String[]{"syncHub"};
-    }
-
-    @Override
-    public CommandValidationErrors validate() {
-        return null;
     }
 
     @Override

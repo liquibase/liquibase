@@ -1,5 +1,8 @@
 package liquibase.command;
 
+import liquibase.Scope;
+import liquibase.exception.CommandArgumentValidationException;
+
 import java.util.Objects;
 
 public class CommandArgumentDefinition<DataType> implements Comparable {
@@ -11,6 +14,8 @@ public class CommandArgumentDefinition<DataType> implements Comparable {
     private DataType defaultValue;
 
     protected CommandArgumentDefinition(String name, Class<DataType> type) {
+        this.name = name;
+        this.dataType = type;
     }
 
     public String getName() {
@@ -47,30 +52,50 @@ public class CommandArgumentDefinition<DataType> implements Comparable {
         return Objects.hash(name);
     }
 
+    @Override
+    public String toString() {
+        String returnString = getName();
+
+        if (required) {
+            returnString += " (required)";
+        }
+
+        return returnString;
+    }
+
     public CommandArgument<DataType> of(DataType value) {
         return new CommandArgument<>(this, value);
     }
 
     public DataType getValue(CommandScope commandScope) {
-        return (DataType) commandScope.getValue(getName());
-    }
-
-    public CommandValidationErrors validate(CommandScope commandScope) {
-        final DataType currentValue = getValue(commandScope);
-        if (this.isRequired() && currentValue == null) {
-            return new CommandValidationErrors("Missing required argument "+this.getName());
+        final DataType value = (DataType) commandScope.getValue(getName());
+        if (value != null) {
+            return value;
         }
 
-        return null;
+        return defaultValue;
+    }
+
+    public void validate(CommandScope commandScope) throws CommandArgumentValidationException {
+        final DataType currentValue = getValue(commandScope);
+        if (this.isRequired() && currentValue == null) {
+            throw new CommandArgumentValidationException(this.getName(), "missing required argument");
+        }
     }
 
     public static class Builder {
+
+        private final Class<? extends LiquibaseCommand> commandClass;
+
+        public Builder(Class<? extends LiquibaseCommand> commandClass) {
+            this.commandClass = commandClass;
+        }
 
         public <DataType> NewCommandArgument<DataType> define(String name, Class<DataType> type) {
             return new NewCommandArgument<>(new CommandArgumentDefinition<>(name, type));
         }
 
-        public static class NewCommandArgument<DataType> {
+        public class NewCommandArgument<DataType> {
             private final CommandArgumentDefinition<DataType> newCommandArgument;
 
             public NewCommandArgument(CommandArgumentDefinition<DataType> newCommandArgument) {
@@ -90,6 +115,8 @@ public class CommandArgumentDefinition<DataType> implements Comparable {
             }
 
             public CommandArgumentDefinition<DataType> build() {
+                Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandClass, newCommandArgument);
+
                 return newCommandArgument;
             }
 

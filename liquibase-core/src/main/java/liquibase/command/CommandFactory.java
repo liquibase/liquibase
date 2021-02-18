@@ -12,35 +12,27 @@ import java.util.*;
  */
 public class CommandFactory implements SingletonObject {
 
+    private Map<Class<? extends LiquibaseCommand>, SortedSet<CommandArgumentDefinition>> commandArgumentDefinitions = new HashMap<>();
+
     protected CommandFactory() {
     }
 
     public void execute(CommandScope commandScope) throws CommandExecutionException {
-        SortedSet<LiquibaseCommand> commands = new TreeSet<>();
-
-        for (LiquibaseCommand command : Scope.getCurrentScope().getServiceLocator().findInstances(LiquibaseCommand.class)) {
-            if (command.getOrder(commandScope) > 0) {
-                commands.add(command);
-            }
-        }
+        SortedSet<LiquibaseCommand> commands = getCommands(commandScope);
 
         if (commands.size() == 0) {
-            throw new IllegalArgumentException("Unknown command: "+ StringUtils.join(Arrays.asList(commandScope.getCommand()), " "));
+            throw new CommandExecutionException("Unknown command: "+ StringUtils.join(Arrays.asList(commandScope.getCommand()), " "));
         }
 
-        List<CommandArgumentDefinition> finalArgumentDefinitions = new ArrayList<>();
-        for (LiquibaseCommand command : commands) {
-            finalArgumentDefinitions.addAll(command.getArguments());
-        }
+        Set<CommandArgumentDefinition> finalArgumentDefinitions = getArguments(commands);
 
         for (CommandArgumentDefinition definition : finalArgumentDefinitions) {
-            CommandValidationErrors errors = definition.validate(commandScope);
-
-            if (errors != null) {
-                throw new IllegalArgumentException(errors.getError());
-            }
+            definition.validate(commandScope);
         }
 
+        for (LiquibaseCommand command : commands) {
+            command.validate(commandScope);
+        }
         try {
             for (LiquibaseCommand command : commands) {
                 command.run(commandScope);
@@ -52,5 +44,47 @@ public class CommandFactory implements SingletonObject {
                 throw new CommandExecutionException(e);
             }
         }
+    }
+
+    private SortedSet<LiquibaseCommand> getCommands(CommandScope commandScope) {
+        SortedSet<LiquibaseCommand> commands = new TreeSet<>((o1, o2) -> {
+            final int order = Integer.compare(o1.getOrder(commandScope), o2.getOrder(commandScope));
+            if (order == 0) {
+                return o1.getClass().getName().compareTo(o2.getClass().getName());
+            }
+
+            return order;
+        });
+
+        for (LiquibaseCommand command : Scope.getCurrentScope().getServiceLocator().findInstances(LiquibaseCommand.class)) {
+            if (command.getOrder(commandScope) > 0) {
+                commands.add(command);
+            }
+        }
+        return commands;
+    }
+
+    private SortedSet<CommandArgumentDefinition> getArguments(SortedSet<LiquibaseCommand> commands) {
+        SortedSet<CommandArgumentDefinition> finalArgumentDefinitions = new TreeSet<>();
+        for (LiquibaseCommand command : commands) {
+            finalArgumentDefinitions.addAll(getArguments(command));
+        }
+        return finalArgumentDefinitions;
+    }
+
+    public void register(Class<? extends LiquibaseCommand> commandClass, CommandArgumentDefinition definition) {
+        if (!commandArgumentDefinitions.containsKey(commandClass)) {
+            commandArgumentDefinitions.put(commandClass, new TreeSet<>());
+        }
+
+        this.commandArgumentDefinitions.get(commandClass).add(definition);
+    }
+
+    public SortedSet<CommandArgumentDefinition> getArguments(LiquibaseCommand command) {
+        final SortedSet<CommandArgumentDefinition> definitions = commandArgumentDefinitions.get(command.getClass());
+        if (definitions == null) {
+            return null;
+        }
+        return Collections.unmodifiableSortedSet(definitions);
     }
 }

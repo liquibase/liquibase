@@ -27,7 +27,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(GenerateChangeLogCommand.class);
 
         AUTHOR_ARG = builder.define("author", String.class).build();
         CONTEXT_ARG = builder.define("context", String.class).build();

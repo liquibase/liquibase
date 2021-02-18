@@ -33,7 +33,7 @@ public class DiffCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<PrintStream> OUTPUT_STREAM_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(DiffCommand.class);
         REFERENCE_DATABASE_ARG = builder.define("referenceDatabase", Database.class).required().build();
         TARGET_DATABASE_ARG = builder.define("targetDatabase", Database.class).required().build();
         SNAPSHOT_TYPES_ARG = builder.define("snapshotTypes", Class[].class).required().build();

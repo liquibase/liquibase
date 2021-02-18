@@ -24,7 +24,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<String> DELIMTER_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(ExecuteSqlCommand.class);
         DATABASE_ARG = builder.define("database", Database.class).required().build();
         SQL_ARG = builder.define("sql", String.class).build();
         SQLFILE_ARG = builder.define("sqlFile", String.class).build();

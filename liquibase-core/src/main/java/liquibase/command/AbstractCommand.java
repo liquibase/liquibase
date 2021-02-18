@@ -1,6 +1,7 @@
 package liquibase.command;
 
 import com.sun.deploy.util.StringUtils;
+import liquibase.exception.CommandArgumentValidationException;
 
 import java.util.Arrays;
 import java.util.SortedSet;
@@ -9,21 +10,17 @@ import java.util.TreeSet;
 public abstract class AbstractCommand implements LiquibaseCommand {
 
     @Override
-    public int getOrder(CommandScope commandName) {
-        if ((commandName != null) && StringUtils.join(Arrays.asList(commandName), " ").equalsIgnoreCase(StringUtils.join(Arrays.asList(getName()), " "))) {
-            return PRIORITY_DEFAULT;
+    public int getOrder(CommandScope commandScope) {
+        final String[] thisCommandName = getName();
+
+        if ((thisCommandName != null) && StringUtils.join(Arrays.asList(thisCommandName), " ").equalsIgnoreCase(StringUtils.join(Arrays.asList(commandScope.getCommand()), " "))) {
+            return ORDER_DEFAULT;
         } else {
-            return PRIORITY_NOT_APPLICABLE;
+            return ORDER_NOT_APPLICABLE;
         }
     }
 
     @Override
-    public CommandValidationErrors validate() {
-        return null;
-    }
-
-    @Override
-    public SortedSet<CommandArgumentDefinition> getArguments() {
-        return new TreeSet<>();
+    public void validate(CommandScope commandScope) throws CommandArgumentValidationException {
     }
 }

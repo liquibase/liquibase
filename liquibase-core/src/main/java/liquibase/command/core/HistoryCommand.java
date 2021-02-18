@@ -3,7 +3,9 @@ package liquibase.command.core;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.RanChangeSet;
-import liquibase.command.*;
+import liquibase.command.AbstractCommand;
+import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandScope;
 import liquibase.database.Database;
 
 import java.io.PrintStream;
@@ -19,7 +21,7 @@ public class HistoryCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<PrintStream> OUTPUT_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(HistoryCommand.class);
         DATABASE_ARG = builder.define("database", Database.class).required().build();
         DATE_FORMAT_ARG = builder.define("dateFormat", DateFormat.class).defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)).build();
         OUTPUT_ARG = builder.define("output", PrintStream.class).defaultValue(System.out).build();

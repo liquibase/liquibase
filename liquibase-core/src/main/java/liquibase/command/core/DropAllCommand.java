@@ -32,7 +32,7 @@ public class DropAllCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(DropAllCommand.class);
 
         DATABASE_ARG = builder.define("database", Database.class)
                 .required().build();

@@ -4,6 +4,7 @@ import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
+import liquibase.exception.CommandArgumentValidationException;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.hub.HubConfiguration;
@@ -35,7 +36,7 @@ public class RegisterChangeLogCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(RegisterChangeLogCommand.class);
         HUB_CHANGELOG_ARG = builder.define("hubChangeLog", HubChangeLog.class).required().build();
         CHANGELOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
         CHANGELOG_ARG = builder.define("changeLog", DatabaseChangeLog.class).required().build();
@@ -45,11 +46,6 @@ public class RegisterChangeLogCommand extends AbstractCommand {
     @Override
     public String[] getName() {
         return new String[]{"registerChangeLog"};
-    }
-
-    @Override
-    public CommandValidationErrors validate() {
-        return null;
     }
 
     @Override

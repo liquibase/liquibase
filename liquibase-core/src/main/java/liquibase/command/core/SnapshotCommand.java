@@ -5,7 +5,6 @@ import liquibase.Scope;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
-import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
@@ -33,7 +32,7 @@ public class SnapshotCommand extends AbstractCommand {
     private Map<String, Object> snapshotMetadata;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(SnapshotCommand.class);
 
         DATABASE_ARG = builder.define("database", Database.class).required().build();
         SCHEMAS_ARG = builder.define("schemas", CatalogAndSchema[].class).required().build();
@@ -96,11 +95,6 @@ public class SnapshotCommand extends AbstractCommand {
         snapshot.setMetadata(this.getSnapshotMetadata());
 
         commandScope.addResult("snapshot", snapshot);
-    }
-
-    @Override
-    public CommandValidationErrors validate() {
-        return new CommandValidationErrors(this);
     }
 
     public static String printSnapshot(CommandScope commandScope) throws LiquibaseException {

@@ -1,18 +1,21 @@
 package liquibase.command.core
 
+import liquibase.Scope
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.changelog.RanChangeSet
+import liquibase.command.CommandFactory
+import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseConnection
-import liquibase.exception.CommandExecutionException
-
-import java.text.*
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.text.DateFormat
+
 class HistoryCommandTest extends Specification {
+
     @Shared
     def dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
 
@@ -29,6 +32,26 @@ class HistoryCommandTest extends Specification {
     }
 
     @Unroll
+    def getOrder() {
+        expect:
+        new HistoryCommand().getOrder(new CommandScope(passedCommand as String[])) == expected
+
+        where:
+        passedCommand | expected
+        ["invalid"]   | -1
+        ["history"]   | 1000
+    }
+
+    def checkArguments() {
+        expect:
+        Scope.currentScope.getSingleton(CommandFactory).getArguments(new HistoryCommand())*.toString() == [
+                "database (required)",
+                "dateFormat",
+                "output",
+        ]
+    }
+
+    @Unroll
     def "run"() {
         when:
         def conn = Mock(DatabaseConnection)
@@ -40,8 +63,11 @@ class HistoryCommandTest extends Specification {
         def output = new ByteArrayOutputStream()
 
         def historyCommand = new HistoryCommand()
-        historyCommand.database = database
-        historyCommand.outputStream = new PrintStream(output)
+        def commandScope = new CommandScope()
+                .addArguments(
+                        HistoryCommand.DATABASE_ARG.of(database),
+                        HistoryCommand.OUTPUT_ARG.of(new PrintStream(output))
+                )
 
         def historyService = Mock(ChangeLogHistoryService)
         historyService.getRanChangeSets() >> changeSets
@@ -51,14 +77,7 @@ class HistoryCommandTest extends Specification {
 
         ChangeLogHistoryServiceFactory.setInstance(historyFactory)
 
-
-        try {
-            historyCommand.run()
-        } catch (CommandExecutionException e) {
-            e.printStackTrace()
-        } catch (Exception e1) {
-            e1.printStackTrace()
-        }
+        historyCommand.run(commandScope)
 
         then:
         new String(output.toByteArray()).replaceAll("\r\n", "\n").trim() == expectedOut.replaceAll("\r\n", "\n").trim()
@@ -79,10 +98,10 @@ No changeSets deployed
                 [
                         [
                                 new RanChangeSet("com/example/test.xml", "13",
-                                    "test-user", null,
-                                    new Date().parse('yyyy/MM/dd HH:mm:ss.S', '2019/07/09 12:15:32.31'),
-                                    null, null, null,
-                                    null, null, null, "1"),
+                                        "test-user", null,
+                                        new Date().parse('yyyy/MM/dd HH:mm:ss.S', '2019/07/09 12:15:32.31'),
+                                        null, null, null,
+                                        null, null, null, "1"),
                         ],
                         """
 Liquibase History for jdbc:test://url

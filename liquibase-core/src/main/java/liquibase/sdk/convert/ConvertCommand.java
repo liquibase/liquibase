@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
+import liquibase.exception.CommandArgumentValidationException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -25,7 +26,7 @@ public class ConvertCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<String> CLASSPATH_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder();
+        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(ConvertCommand.class);
         SRC_ARG = builder.define("src", String.class).required().build();
         OUT_ARG = builder.define("out", String.class).required().build();
         CLASSPATH_ARG = builder.define("classpath", String.class).required().build();
@@ -65,10 +66,5 @@ public class ConvertCommand extends AbstractCommand {
         }
 
         Scope.getCurrentScope().getUI().sendMessage("Converted successfully");
-    }
-
-    @Override
-    public CommandValidationErrors validate() {
-        return new CommandValidationErrors(this);
     }
 }
