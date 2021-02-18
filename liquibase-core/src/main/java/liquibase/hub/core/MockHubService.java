@@ -123,6 +123,11 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
+        return null;
+    }
+
+    @Override
     public Operation createOperation(String operationType, HubChangeLog changeLog, Connection connection) throws LiquibaseHubException {
         operationCreateDate = new Date();
         sentObjects.computeIfAbsent("startOperation/" + connection.getId(), k -> new ArrayList<>()).add(operationCreateDate);
