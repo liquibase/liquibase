@@ -18,8 +18,8 @@ public class LiquibaseHistoryMojo extends AbstractLiquibaseMojo {
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
       CommandScope historyCommand = new CommandScope("history");
 
-      historyCommand.addArguments(HistoryCommand.DATABASE_ARG.of(getLiquibase().getDatabase()));
+      historyCommand.addArgumentValues(HistoryCommand.DATABASE_ARG.of(getLiquibase().getDatabase()));
 
-      Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(historyCommand);
+      historyCommand.execute();
     }
 }

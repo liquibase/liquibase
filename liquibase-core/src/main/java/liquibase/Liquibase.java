@@ -1730,14 +1730,14 @@ public class Liquibase implements AutoCloseable {
         try {
             final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
 
-            CommandScope dropAll = new CommandScope("dropAll").addArguments(
+            CommandScope dropAll = new CommandScope("dropAll").addArgumentValues(
                     DropAllCommand.DATABASE_ARG.of(Liquibase.this.getDatabase()),
                     DropAllCommand.SCHEMAS_ARG.of(finalSchemas),
                     DropAllCommand.CHANGELOG_ARG.of(Liquibase.this.getDatabaseChangeLog())
             );
 
             try {
-                commandFactory.execute(dropAll);
+                dropAll.execute();
             } catch (CommandExecutionException e) {
                 throw new DatabaseException(e);
             }

@@ -6,13 +6,11 @@ import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.command.*;
-import liquibase.command.core.DiffCommand;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
-import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
@@ -27,8 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * <p>Generates a diff between the specified database and the reference database.
@@ -256,9 +252,9 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                         CommandLineUtils.createDiffCommand(referenceDatabase, db, StringUtil.trimToNull(diffTypes),
                                 schemaComparisons, objectChangeFilter, printStream);
 
-                liquibaseCommand.addArgument("format", format);
-                liquibaseCommand.addArgument("diffCommand", diffCommand);
-                Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
+                liquibaseCommand.addArgumentValue("format", format);
+                liquibaseCommand.addArgumentValue("diffCommand", diffCommand);
+                liquibaseCommand.execute();
             } else {
                 CommandLineUtils.doDiff(referenceDatabase, db, StringUtil.trimToNull(diffTypes), schemaComparisons, objectChangeFilter, printStream);
             }

@@ -39,16 +39,16 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
         CommandScope registerChangeLog = new CommandScope("registerChangeLog");
-        registerChangeLog.addArguments(
+        registerChangeLog.addArgumentValues(
                 RegisterChangeLogCommand.CHANGELOG_FILE_ARG.of(changeLogFile),
                 RegisterChangeLogCommand.HUB_PROJECT_ID_ARG.of(UUID.fromString(hubProjectId))
         );
 
-        registerChangeLog.addArgument("changeLogFile", changeLogFile);
-        registerChangeLog.addArgument("database", database);
-        registerChangeLog.addArgument("liquibase", liquibase);
-        registerChangeLog.addArgument("changeLog", liquibase.getDatabaseChangeLog());
+        registerChangeLog.addArgumentValue("changeLogFile", changeLogFile);
+        registerChangeLog.addArgumentValue("database", database);
+        registerChangeLog.addArgumentValue("liquibase", liquibase);
+        registerChangeLog.addArgumentValue("changeLog", liquibase.getDatabaseChangeLog());
 
-        Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(registerChangeLog);
+        registerChangeLog.execute();
     }
 }

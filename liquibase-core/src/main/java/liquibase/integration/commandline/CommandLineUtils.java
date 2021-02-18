@@ -143,10 +143,10 @@ public class CommandLineUtils {
     }
 
     public static CommandScope createDiffCommand(Database referenceDatabase, Database targetDatabase, String snapshotTypes,
-                                                CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) {
+                                                CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws CommandExecutionException {
         CommandScope diffCommand = new CommandScope("diff");
 
-        diffCommand.addArguments(
+        diffCommand.addArgumentValues(
                 DiffCommand.REFERENCE_DATABASE_ARG.of(referenceDatabase),
                 DiffCommand.TARGET_DATABASE_ARG.of(targetDatabase),
                 DiffCommand.COMPARE_CONTROL_ARG.of(new CompareControl(schemaComparisons, snapshotTypes)),
@@ -165,7 +165,7 @@ public class CommandLineUtils {
         Scope.getCurrentScope().getUI().sendMessage("");
         Scope.getCurrentScope().getUI().sendMessage(coreBundle.getString("diff.results"));
         try {
-            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(diffCommand);
+            diffCommand.execute();
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }
@@ -192,7 +192,7 @@ public class CommandLineUtils {
             throws LiquibaseException, IOException, ParserConfigurationException {
 
         CommandScope command = new CommandScope("diffChangeLog");
-        command.addArguments(
+        command.addArgumentValues(
                 DiffToChangeLogCommand.REFERENCE_DATABASE_ARG.of(referenceDatabase),
                 DiffToChangeLogCommand.REFERENCE_DATABASE_ARG.of(targetDatabase),
                 DiffToChangeLogCommand.SNAPSHOT_TYPES_ARG.of(DiffToChangeLogCommand.parseSnapshotTypes(snapshotTypes)),
@@ -204,7 +204,7 @@ public class CommandLineUtils {
         );
 
         try {
-            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(command);
+            command.execute();
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }
@@ -232,7 +232,7 @@ public class CommandLineUtils {
         diffOutputControl.setDataDir(dataDir);
 
         CommandScope command = new CommandScope("generateChangeLog");
-        command.addArguments(
+        command.addArgumentValues(
                 GenerateChangeLogCommand.REFERENCE_DATABASE_ARG.of(originalDatabase),
                 GenerateChangeLogCommand.SNAPSHOT_TYPES_ARG.of(GenerateChangeLogCommand.parseSnapshotTypes(snapshotTypes)),
                 GenerateChangeLogCommand.OUTPUT_STREAM_ARG.of(System.out),
@@ -244,7 +244,7 @@ public class CommandLineUtils {
         );
 
         try {
-            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(command);
+            command.execute();
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }

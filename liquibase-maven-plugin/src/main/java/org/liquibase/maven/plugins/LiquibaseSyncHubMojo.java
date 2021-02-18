@@ -44,7 +44,7 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
         super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
         CommandScope syncHub = new CommandScope("syncHub");
-        syncHub.addArguments(
+        syncHub.addArgumentValues(
                 SyncHubCommand.CHANGELOG_FILE_ARG.of(changeLogFile),
                 SyncHubCommand.URL_ARG.of(database.getConnection().getURL()),
                 SyncHubCommand.HUB_CONNECTION_ID_ARG.of(hubConnectionId),
@@ -53,6 +53,6 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
                 SyncHubCommand.FAIL_IF_ONLINE_ARG.of(false)
         );
 
-        Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(syncHub);
+        syncHub.execute();
     }
 }

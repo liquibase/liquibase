@@ -52,7 +52,7 @@ public class Main {
                 options.addOption(OptionBuilder.hasArg().withDescription("Classpath").create("classpath"));
 
                 CommandLine commandArguments = commandParser.parse(options, main.commandArgs.toArray(new String[main.commandArgs.size()]));
-                command.addArguments(
+                command.addArgumentValues(
                         ConvertCommand.SRC_ARG.of(commandArguments.getOptionValue("src")),
                         ConvertCommand.OUT_ARG.of(commandArguments.getOptionValue("out")),
                         ConvertCommand.CLASSPATH_ARG.of(commandArguments.getOptionValue("classpath"))
@@ -62,7 +62,7 @@ public class Main {
                 throw new UserError("Unknown command: " + main.command);
             }
 
-            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(command);
+            command.execute();
 
             main.divider();
             main.out("Command executed successfully");

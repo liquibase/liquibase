@@ -6,7 +6,6 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.command.*;
 import liquibase.GlobalConfiguration;
 import liquibase.database.Database;
-import liquibase.exception.CommandExecutionException;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -122,10 +121,10 @@ public class LiquibaseRollbackOneChangeSetSQL extends AbstractLiquibaseChangeLog
         argsMap.put("liquibase", liquibase);
 
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
-            liquibaseCommand.addArgument(entry.getKey(), entry.getValue());
+            liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
         }
 
-        Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
+        liquibaseCommand.execute();
     }
 
     private OutputStream getOutputStream() throws IOException {

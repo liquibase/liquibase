@@ -255,8 +255,8 @@ public class HubUpdater {
         return !hubService.isOnline() || changeLogId == null;
     }
 
-    public void syncHub(String changeLogFile, Database database, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) {
-        final CommandScope syncHub = new CommandScope("syncHub").addArguments(
+    public void syncHub(String changeLogFile, Database database, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) throws CommandExecutionException {
+        final CommandScope syncHub = new CommandScope("syncHub").addArgumentValues(
                 SyncHubCommand.CHANGELOG_FILE_ARG.of(changeLogFile),
                 SyncHubCommand.URL_ARG.of(database.getConnection().getURL()),
                 SyncHubCommand.HUB_CONNECTION_ID_ARG.of(hubConnectionId != null ? Objects.toString(hubConnectionId) : null),
@@ -265,7 +265,7 @@ public class HubUpdater {
         );
 
         try {
-            Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(syncHub);
+            syncHub.execute();
         } catch (Exception e) {
             Scope.getCurrentScope().getLog(getClass()).warning("Liquibase Hub sync failed: " + e.getMessage(), e);
         }
@@ -455,7 +455,7 @@ public class HubUpdater {
             throws LiquibaseException, CommandExecutionException {
 
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
-        registerChangeLogCommand.addArguments(
+        registerChangeLogCommand.addArgumentValues(
                 RegisterChangeLogCommand.CHANGELOG_ARG.of(changeLog),
                 RegisterChangeLogCommand.CHANGELOG_FILE_ARG.of(changeLogFile)
         );
@@ -463,7 +463,7 @@ public class HubUpdater {
         try {
             if (hubProjectId != null) {
                 try {
-                    registerChangeLogCommand.addArguments(RegisterChangeLogCommand.HUB_PROJECT_ID_ARG.of(hubProjectId));
+                    registerChangeLogCommand.addArgumentValues(RegisterChangeLogCommand.HUB_PROJECT_ID_ARG.of(hubProjectId));
                 } catch (IllegalArgumentException e) {
                     throw new LiquibaseException("The command 'RegisterChangeLog' " +
                             " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +
@@ -477,7 +477,7 @@ public class HubUpdater {
         //
         // Execute registerChangeLog
         //
-        Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(registerChangeLogCommand);
+        registerChangeLogCommand.execute();
     }
 
     //

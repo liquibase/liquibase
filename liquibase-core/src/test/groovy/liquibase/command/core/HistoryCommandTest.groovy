@@ -38,7 +38,7 @@ class HistoryCommandTest extends Specification {
 
         where:
         passedCommand | expected
-        ["invalid"]   | -1
+        ["diff"]   | -1
         ["history"]   | 1000
     }
 
@@ -63,8 +63,8 @@ class HistoryCommandTest extends Specification {
         def output = new ByteArrayOutputStream()
 
         def historyCommand = new HistoryCommand()
-        def commandScope = new CommandScope()
-                .addArguments(
+        def commandScope = new CommandScope("history")
+                .addArgumentValues(
                         HistoryCommand.DATABASE_ARG.of(database),
                         HistoryCommand.OUTPUT_ARG.of(new PrintStream(output))
                 )

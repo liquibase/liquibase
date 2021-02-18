@@ -68,7 +68,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable {
     }
 
     public DataType getValue(CommandScope commandScope) {
-        final DataType value = (DataType) commandScope.getValue(getName());
+        final DataType value = (DataType) commandScope.getArgumentValue(getName());
         if (value != null) {
             return value;
         }

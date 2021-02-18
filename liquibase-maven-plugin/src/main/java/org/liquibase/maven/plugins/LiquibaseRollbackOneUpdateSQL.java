@@ -85,10 +85,10 @@ public class LiquibaseRollbackOneUpdateSQL extends AbstractLiquibaseChangeLogMoj
         argsMap.put("liquibase", liquibase);
 
         for (Map.Entry<String, Object> entry : argsMap.entrySet()) {
-            liquibaseCommand.addArgument(entry.getKey(), entry.getValue());
+            liquibaseCommand.addArgumentValue(entry.getKey(), entry.getValue());
         }
 
-        Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
+        liquibaseCommand.execute();
     }
 
     private void closeOutputWriter(Writer outputWriter) throws IOException {
