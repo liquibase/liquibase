@@ -265,7 +265,7 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getLineComment() {
-        return null;
+        return "--";
     }
 
     @Override
