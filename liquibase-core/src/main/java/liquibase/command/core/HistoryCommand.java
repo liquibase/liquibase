@@ -1,14 +1,13 @@
 package liquibase.command.core;
 
-import liquibase.Scope;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.RanChangeSet;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandResultDefinition;
 import liquibase.command.CommandScope;
 import liquibase.database.Database;
-import liquibase.ui.UIService;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
@@ -21,10 +20,14 @@ public class HistoryCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
 
+    public static final CommandResultDefinition<DeploymentHistory> DEPLOYMENTS_RESULT;
+
     static {
         final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(HistoryCommand.class);
         DATABASE_ARG = builder.define("database", Database.class).required().build();
         DATE_FORMAT_ARG = builder.define("dateFormat", DateFormat.class).defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)).build();
+
+        DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
     }
 
     @Override
@@ -34,6 +37,9 @@ public class HistoryCommand extends AbstractCommand {
 
     @Override
     public void run(CommandScope commandScope) throws Exception {
+
+        DeploymentHistory deploymentHistory = new DeploymentHistory();
+
         Database database = DATABASE_ARG.getValue(commandScope);
 
         ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
@@ -49,6 +55,7 @@ public class HistoryCommand extends AbstractCommand {
                     deployment.printReport(commandScope.getOutput());
                 }
                 deployment = new DeploymentDetails(commandScope);
+                deploymentHistory.deployments.add(deployment);
             }
             deployment.changeSets.add(ranChangeSet);
         }
@@ -58,9 +65,19 @@ public class HistoryCommand extends AbstractCommand {
         } else {
             deployment.printReport(commandScope.getOutput());
         }
+
+        commandScope.addResults(DEPLOYMENTS_RESULT.of(deploymentHistory));
     }
 
-    private class DeploymentDetails {
+    public static class DeploymentHistory {
+        private List<DeploymentDetails> deployments = new ArrayList<>();
+
+        public List<DeploymentDetails> getDeployments() {
+            return deployments;
+        }
+    }
+
+    public static class DeploymentDetails {
         private final CommandScope commandScope;
         List<RanChangeSet> changeSets = new ArrayList<>();
 

@@ -82,11 +82,14 @@ class HistoryCommandTest extends Specification {
         then:
         new String(output.toByteArray()).replaceAll("\r\n", "\n").trim() == expectedOut.replaceAll("\r\n", "\n").trim()
 
+        commandScope.getResult(HistoryCommand.DEPLOYMENTS_RESULT).getDeployments().size() == expectedHistoryLength
+
         where:
-        [changeSets, expectedOut] << [
+        [changeSets, expectedHistoryLength, expectedOut] << [
                 //no history
                 [
                         [],
+                        0,
                         """
 Liquibase History for jdbc:test://url
 
@@ -103,6 +106,7 @@ No changeSets deployed
                                         null, null, null,
                                         null, null, null, "1"),
                         ],
+                        1,
                         """
 Liquibase History for jdbc:test://url
 
@@ -118,6 +122,7 @@ Liquibase History for jdbc:test://url
                                 new RanChangeSet("com/example/test.xml", "14", "other-user", null, new Date().parse('yyyy/MM/dd HH:mm:ss.S', '2019/07/09 12:15:32.91'), null, null, null, null, null, null, "1"),
                                 new RanChangeSet("com/example/test.xml", "15", "test-user", null, new Date().parse('yyyy/MM/dd HH:mm:ss.S', '2019/07/09 12:15:34.13'), null, null, null, null, null, null, "1"),
                         ],
+                        1,
                         """
 Liquibase History for jdbc:test://url
 
@@ -142,6 +147,7 @@ Liquibase History for jdbc:test://url
                                 new RanChangeSet("com/example/test.xml3", "2", "other-user", null, new Date().parse('yyyy/MM/dd HH:mm:ss.S', '2019/07/09 18:23:16.91'), null, null, null, null, null, null, "3"),
                                 new RanChangeSet("com/example/test.xml", "3", "test-user", null, new Date().parse('yyyy/MM/dd HH:mm:ss.S', '2019/07/09 18:26:34.13'), null, null, null, null, null, null, "3"),
                         ],
+                        3,
                         """
 Liquibase History for jdbc:test://url
 

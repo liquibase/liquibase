@@ -14,6 +14,7 @@ public class CommandScope {
     private final SortedMap<String, CommandArgumentDefinition> arguments = new TreeMap<>();
 
     private final Map<String, Object> argumentValues = new HashMap<>();
+    private final Map<String, Object> resultValues = new HashMap<>();
 
     private PrintWriter output;
     private OutputStream outputStream;
@@ -110,14 +111,28 @@ public class CommandScope {
         return this;
     }
 
-    public void addResult(String key, Object value) {
-        //TODO: save
+    public CommandScope addResults(CommandResult... results) {
+        if (results != null) {
+            for (CommandResult result : results) {
+                addResult(result.getDefinition().getName(), result.getValue());
+            }
+        }
+
+        return this;
+    }
+
+    public CommandScope addResult(String key, Object value) {
+        this.resultValues.put(key, value);
+
+        return this;
+    }
+
+    public <DataType> DataType getResult(CommandResultDefinition<DataType> definition) {
+        return (DataType) resultValues.get(definition.getName());
     }
 
     public Object getResult(String key) {
-        //TODO: return
-
-        return null;
+        return resultValues.get(key);
     }
 
     public void execute() throws CommandExecutionException {

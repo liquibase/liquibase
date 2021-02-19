@@ -95,6 +95,10 @@ public class CommandArgumentDefinition<DataType> implements Comparable {
             return new NewCommandArgument<>(new CommandArgumentDefinition<>(name, type));
         }
 
+        public <DataType> NewCommandResult<DataType> result(String name, Class<DataType> type) {
+            return new NewCommandResult<>(new CommandResultDefinition<>(name, type));
+        }
+
         public class NewCommandArgument<DataType> {
             private final CommandArgumentDefinition<DataType> newCommandArgument;
 
@@ -125,6 +129,19 @@ public class CommandArgumentDefinition<DataType> implements Comparable {
 
                 return this;
             }
+        }
+
+        public class NewCommandResult<DataType> {
+            private final CommandResultDefinition<DataType> newCommandResult;
+
+            public NewCommandResult(CommandResultDefinition<DataType> newCommandResult) {
+                this.newCommandResult = newCommandResult;
+            }
+
+            public CommandResultDefinition<DataType> build() {
+                return newCommandResult;
+            }
+
         }
     }
 }
