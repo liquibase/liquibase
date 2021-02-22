@@ -356,7 +356,6 @@ public class Liquibase implements AutoCloseable {
                         "The operation did not complete and will not be reported to Hub because the\n" +  "" +
                         "registered changelog has been deleted by someone in your organization.\n" +
                         "Learn more at http://hub.liquibase.com.";
-                Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
                 throw new LiquibaseHubException(message);
             }
 
