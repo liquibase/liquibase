@@ -108,7 +108,6 @@ public class StandardLockService implements LockService {
             }
             this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
-            hasDatabaseChangeLogLockTable = true;
         }
 
         if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
@@ -177,7 +176,7 @@ public class StandardLockService implements LockService {
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
-                    ;
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -334,12 +333,6 @@ public class StandardLockService implements LockService {
     public void forceReleaseLock() throws LockException, DatabaseException {
         this.init();
         releaseLock();
-        /*try {
-            releaseLock();
-        } catch (LockException e) {
-            // ignore ?
-            LogFactory.getLogger().info("Ignored exception in forceReleaseLock: " + e.getMessage());
-        }*/
     }
 
     @Override

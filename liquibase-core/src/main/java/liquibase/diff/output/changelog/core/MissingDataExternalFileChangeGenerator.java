@@ -82,50 +82,48 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                             + " is not a directory");
                 }
             }
-
-            CSVWriter outputFile = new CSVWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())));
             String[] dataTypes = new String[columnNames.size()];
-            String[] line = new String[columnNames.size()];
-            for (int i = 0; i < columnNames.size(); i++) {
-                line[i] = columnNames.get(i);
-            }
-            outputFile.writeNext(line);
-
-            int rowNum = 0;
-            while (rs.next()) {
-                line = new String[columnNames.size()];
-
+            try (CSVWriter  outputFile = new CSVWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())))){
+                String[] line = new String[columnNames.size()];
                 for (int i = 0; i < columnNames.size(); i++) {
-                    Object value = JdbcUtils.getResultSetValue(rs, i + 1);
-                    if (dataTypes[i] == null && value != null) {
-                        if (value instanceof Number) {
-                            dataTypes[i] = "NUMERIC";
-                        } else if (value instanceof Boolean) {
-                            dataTypes[i] = "BOOLEAN";
-                        } else if (value instanceof Date) {
-                            dataTypes[i] = "DATE";
-                        } else {
-                            dataTypes[i] = "STRING";
-                        }
-                    }
-                    if (value == null) {
-                        line[i] = "NULL";
-                    } else {
-                        if (value instanceof Date) {
-                            line[i] = new ISODateFormat().format(((Date) value));
-                        } else {
-                            line[i] = value.toString();
-                        }
-                    }
+                    line[i] = columnNames.get(i);
                 }
                 outputFile.writeNext(line);
-                rowNum++;
-                if (rowNum % 5000 == 0) {
-                    outputFile.flush();
+
+                int rowNum = 0;
+                while (rs.next()) {
+                    line = new String[columnNames.size()];
+
+                    for (int i = 0; i < columnNames.size(); i++) {
+                        Object value = JdbcUtils.getResultSetValue(rs, i + 1);
+                        if (dataTypes[i] == null && value != null) {
+                            if (value instanceof Number) {
+                                dataTypes[i] = "NUMERIC";
+                            } else if (value instanceof Boolean) {
+                                dataTypes[i] = "BOOLEAN";
+                            } else if (value instanceof Date) {
+                                dataTypes[i] = "DATE";
+                            } else {
+                                dataTypes[i] = "STRING";
+                            }
+                        }
+                        if (value == null) {
+                            line[i] = "NULL";
+                        } else {
+                            if (value instanceof Date) {
+                                line[i] = new ISODateFormat().format(((Date) value));
+                            } else {
+                                line[i] = value.toString();
+                            }
+                        }
+                    }
+                    outputFile.writeNext(line);
+                    rowNum++;
+                    if (rowNum % 5000 == 0) {
+                        outputFile.flush();
+                    }
                 }
             }
-            outputFile.flush();
-            outputFile.close();
 
             LoadDataChange change = new LoadDataChange();
             change.setFile(fileName);

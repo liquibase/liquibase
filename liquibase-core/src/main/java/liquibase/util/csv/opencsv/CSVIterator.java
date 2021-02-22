@@ -2,6 +2,7 @@ package liquibase.util.csv.opencsv;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Provides an Iterator over the data found in opencsv.
@@ -37,6 +38,9 @@ public class CSVIterator implements Iterator<String[]> {
     */
    public String[] next() {
       String[] temp = nextLine;
+      if(!hasNext()){
+         throw new NoSuchElementException();
+      }
       try {
          nextLine = reader.readNext();
       } catch (IOException e) {

@@ -478,9 +478,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         InputStream stream = null;
         try {
             stream = StreamUtil.openStream(file, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
-            if (stream == null) {
-                throw new UnexpectedLiquibaseException(getFile() + " could not be found");
-            }
             stream = new EmptyLineAndCommentSkippingInputStream(stream, commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));
         } catch (IOException e) {

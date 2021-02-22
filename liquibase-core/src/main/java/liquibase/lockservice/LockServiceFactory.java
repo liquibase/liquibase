@@ -33,7 +33,7 @@ public class LockServiceFactory {
     /**
      * Set the instance used by this singleton. Used primarily for testing.
      */
-    public static void setInstance(LockServiceFactory lockServiceFactory) {
+    public synchronized static void setInstance(LockServiceFactory lockServiceFactory) {
         LockServiceFactory.instance = lockServiceFactory;
     }
 

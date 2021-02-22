@@ -130,7 +130,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                     "TAG",
                     "LIQUIBASE",
                     "CONTEXTS",
-                    "LABELS"                    
+                    "LABELS"
             });
         } finally {
             if (writer != null) {
@@ -151,7 +151,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 line[COLUMN_MD5SUM] = changeSet.generateCheckSum().toString();
                 return line;
             }
-            });
+        });
     }
 
     @Override

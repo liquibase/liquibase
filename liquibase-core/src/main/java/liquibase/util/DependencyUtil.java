@@ -87,6 +87,7 @@ public class DependencyUtil {
                     //Recursion is not making progress, heading to a stack overflow exception.
                     //Probably some cycles in there somewhere, so pull out a node and re-try
                     GraphNode<T> nodeToRemove = null;
+                    T value = null;
                     int nodeToRemoveLinks = Integer.MAX_VALUE;
                     for (GraphNode<T> node : nextNodesToDisplay) {
                         List<GraphNode<T>> links = node.getComingInNodes();
@@ -95,7 +96,10 @@ public class DependencyUtil {
                             nodeToRemoveLinks = links.size();
                         }
                     }
-                    LogFactory.getInstance().getLog().debug("Potential StackOverflowException. Pro-actively removing "+nodeToRemove.value+" with "+nodeToRemoveLinks+" incoming nodes");
+                    if(nodeToRemove != null) {
+                        value = nodeToRemove.value;
+                    }
+                    LogFactory.getInstance().getLog().debug("Potential StackOverflowException. Pro-actively removing "+value+" with "+nodeToRemoveLinks+" incoming nodes");
                     nextNodesToDisplay.remove(nodeToRemove);
                 }
 

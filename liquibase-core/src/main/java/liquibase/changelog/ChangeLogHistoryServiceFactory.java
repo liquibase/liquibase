@@ -25,7 +25,7 @@ public class ChangeLogHistoryServiceFactory {
     /**
      * Set the instance used by this singleton. Used primarily for testing.
      */
-    public static void setInstance(ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory) {
+    public synchronized static void setInstance(ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory) {
         ChangeLogHistoryServiceFactory.instance = changeLogHistoryServiceFactory;
     }
 

@@ -163,11 +163,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public LiquibaseSerializable.SerializationType getSerializableFieldType(String field) {
-        if (getSerializableFieldValue(field) instanceof DatabaseObject) {
             return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        } else {
-            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
-        }
     }
 
     @Override
