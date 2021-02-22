@@ -126,7 +126,9 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
 
         ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult =
             ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
-        return new CommandResult(changeLogRewriterResult.message, changeLogRewriterResult.success);
+        Scope.getCurrentScope().getLog(RegisterChangeLogCommand.class).info(changeLogRewriterResult.message);
+        String message = "* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered";
+        return new CommandResult(message, changeLogRewriterResult.success);
     }
 
     private Project retrieveOrCreateProject(HubService service)
