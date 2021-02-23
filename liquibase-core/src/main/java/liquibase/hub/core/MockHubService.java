@@ -113,17 +113,16 @@ public class MockHubService implements HubService {
 
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
+        return getHubChangeLog(changeLogId, "*");
+    }
+
+    @Override
+    public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
         for (HubChangeLog changeLog : returnChangeLogs) {
             if (String.valueOf(changeLog.getId()).equals(String.valueOf(changeLogId))) {
                 return changeLog;
             }
         }
-
-        return null;
-    }
-
-    @Override
-    public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
         return null;
     }
 

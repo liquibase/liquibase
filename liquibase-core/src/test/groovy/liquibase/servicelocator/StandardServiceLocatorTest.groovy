@@ -39,7 +39,7 @@ class StandardServiceLocatorTest extends Specification {
                 })
         def subclassText = new TreeSet(subclasses.collect({ it.name })).join("\n")
 
-        Assume.assumeTrue("No "+type.name+" classes found", subclasses.size() > 0)
+        Assume.assumeFalse("No "+type.name+" classes found", subclasses.size() == 0)
 
         def loaderFile = new File("src/main/resources/META-INF/services/" + type.getName())
 
