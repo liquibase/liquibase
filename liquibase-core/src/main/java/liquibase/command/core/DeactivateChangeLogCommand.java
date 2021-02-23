@@ -105,7 +105,6 @@ public class DeactivateChangeLogCommand extends AbstractSelfConfiguratingCommand
                 "Note: If this is a shared changelog, please check it into Source Control.\n" +
                 "Operation data sent to the now inactive changelogID will be accepted at Hub,\n" +
                 "but is it unavailable for reports until an Organization Admin reactivates it at https://hub.liquibase.com.";
-            Scope.getCurrentScope().getUI().sendMessage(message);
             Scope.getCurrentScope().getLog(DeactivateChangeLogCommand.class).info(message);
             return new CommandResult(message, true);
         }

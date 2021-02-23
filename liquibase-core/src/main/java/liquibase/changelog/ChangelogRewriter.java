@@ -74,11 +74,7 @@ public class ChangelogRewriter {
             if (databaseChangeLog != null) {
                 databaseChangeLog.setChangeLogId(null);
             }
-            String message =
-                "The changelog '" + changeLogFile + "' was deactivated.\n" +
-                "Note: If this is a shared changelog, please check it into Source Control.\n" +
-                "Operation data sent to the now inactive changelogID will be accepted at Hub,\n" +
-                "but is it unavailable for reports until an Organization Admin reactivates it at https://hub.liquibase.com";
+            String message = "The changeLogId has been removed from changelog '" + changeLogFile + "'.";
             Scope.getCurrentScope().getLog(ChangelogRewriter.class).info(message);
             return new ChangeLogRewriterResult(message, true);
         }
@@ -188,7 +184,7 @@ public class ChangelogRewriter {
             }
         }
         return new ChangeLogRewriterResult("* Changelog file '" + changeLogFile +
-            "' with changelog ID '" + changeLogId + "' has been registered", true);
+            "' has been updated with changelog ID '" + changeLogId + "'.", true);
     }
 
     public static class ChangeLogRewriterResult {
