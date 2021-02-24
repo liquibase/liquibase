@@ -70,6 +70,8 @@
         <sonar.organization>liquibase-core</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.moduleKey>${artifactId}</sonar.moduleKey>
+
+        <gpg.passphrase>${ENV.GPG_PASSPHRASE}</gpg.passphrase>
     </properties>
 
     <dependencies>
@@ -186,6 +188,19 @@
                 <version>3.0.2</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <configuration>
+                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                    <gpgArguments>
+                        <arg>--batch</arg>
+                        <!-- This is necessary for gpg to not try to use the pinentry programs -->
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -314,6 +329,20 @@
               <configuration>
                 <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
               </configuration>
+            </plugin>
+
+            <plugin>
+                <!-- by default don't run snyk on all modules. On  ones that "ship", mark them as skip=false -->
+                <groupId>io.snyk</groupId>
+                <artifactId>snyk-maven-plugin</artifactId>
+                <version>1.2.9</version>
+                <configuration>
+                    <skip>true</skip>
+                    <apiToken>${env.SNYK_API_TOKEN}</apiToken>
+                    <failOnSeverity>high</failOnSeverity>
+                    <org>${env.SNYK_ORG}</org>
+                    <includeProvidedDependencies>false</includeProvidedDependencies>
+                </configuration>
             </plugin>
 
             <plugin>
