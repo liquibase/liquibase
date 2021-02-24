@@ -18,6 +18,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChangelogRewriter {
+    /**
+     *
+     * Remove the changelog ID from the changelog file
+     *
+     * @param   changeLogFile            The changelog file we are updating
+     * @param   changeLogId              The changelog ID we are removing
+     * @param   databaseChangeLog        The DatabaseChangeLog object to reset the ID in
+     * @return  ChangeLogRewriterResult  A result object with a message and a success flag
+     *
+     */
     public static ChangeLogRewriterResult removeChangeLogId(String changeLogFile, String changeLogId, DatabaseChangeLog databaseChangeLog) {
         //
         // Make changes to the changelog file
@@ -52,15 +62,22 @@ public class ChangelogRewriter {
                 changeLogString = newChangeLogString;
 
             } else if (changeLogFile.toLowerCase().endsWith(".json")) {
+                //
+                // JSON changelog
+                //
                 changeLogString = changeLogString.replaceFirst("\"changeLogId\"" + ":" + "\"" + changeLogId + "\",", "\n");
             } else if (changeLogFile.toLowerCase().endsWith(".yml") || changeLogFile.toLowerCase().endsWith(".yaml")) {
+                //
+                // YAML changelog
+                //
                 changeLogString = changeLogString.replaceFirst("- changeLogId: " + changeLogId, "");
             } else {
                 return new ChangeLogRewriterResult("Changelog file '" + changeLogFile + "' is not a supported format", false);
             }
 
             //
-            // Write out the file again
+            // Write out the file again.  We reset the length before writing
+            // because the length will not shorten otherwise
             //
             File f = new File(uris.get(0).getPath());
             try (RandomAccessFile randomAccessFile = new RandomAccessFile(f, "rw")) {
@@ -96,6 +113,16 @@ public class ChangelogRewriter {
         }
     }
 
+    /**
+     *
+     * Add the changelog ID from the changelog file and update the XSD version
+     *
+     * @param   changeLogFile            The changelog file we are updating
+     * @param   changeLogId              The changelog ID we are adding
+     * @param   databaseChangeLog        The DatabaseChangeLog object to set the ID in
+     * @return  ChangeLogRewriterResult  A result object with a message and a success flag
+     *
+     */
     public static ChangeLogRewriterResult addChangeLogId(String changeLogFile, String changeLogId, DatabaseChangeLog databaseChangeLog) {
         //
         // Make changes to the changelog file
@@ -145,9 +172,15 @@ public class ChangelogRewriter {
                 changeLogString = newChangeLogString;
 
             } else if (changeLogFile.toLowerCase().endsWith(".json")) {
+                //
+                // JSON changelog
+                //
                 changeLogString = changeLogString.replaceFirst("\\[", "\\[\n" +
                     "\"changeLogId\"" + ":" + "\"" + changeLogId + "\",\n");
             } else if (changeLogFile.toLowerCase().endsWith(".yml") || changeLogFile.toLowerCase().endsWith(".yaml")) {
+                //
+                // YAML changelog
+                //
                 changeLogString = changeLogString.replaceFirst("^databaseChangeLog:(\\s*)\n", "databaseChangeLog:$1\n" +
                     "- changeLogId: " + changeLogId + "$1\n");
             } else {
