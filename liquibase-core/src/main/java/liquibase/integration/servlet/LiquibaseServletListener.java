@@ -114,7 +114,6 @@ public class LiquibaseServletListener implements ServletContextListener {
         try {
             ic = new InitialContext();
 
-            Scope.getCurrentScope().getUI().setAllowPrompt(false);
             servletValueContainer = new ServletValueContainer(servletContext, ic);
             LiquibaseConfiguration.getInstance().init(servletValueContainer);
 

@@ -304,7 +304,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-	    Scope.getCurrentScope().getUI().setAllowPrompt(false);
         if (isClearCheckSums()) {
             liquibase.clearCheckSums();
         }
