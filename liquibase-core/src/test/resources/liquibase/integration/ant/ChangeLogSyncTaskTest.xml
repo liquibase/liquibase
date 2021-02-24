@@ -173,20 +173,6 @@
                             tag="version_1.0"/>
     </target>
 
-    <target name="testChangeLogSyncToTagChangeLegacyLogDirectory">
-        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                   table="DATABASECHANGELOG"/>
-        <lb:changeLogSync driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                          changelogdirectory="${liquibase.test.ant.basedir}/changelog" changelogfile="simple-changelog.xml"
-                          toTag="version_1.0"/>
-        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                              table="DATABASECHANGELOG"/>
-        <db:assertTagExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                            tag="version_1.0"/>
-        <db:assertTagNotExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                               tag="version_2.0"/>
-    </target>
-
     <target name="testChangeLogSyncToTagChangeLogDirectory">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>

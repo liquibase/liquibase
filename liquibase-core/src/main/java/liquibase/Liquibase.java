@@ -1366,6 +1366,18 @@ public class Liquibase implements AutoCloseable {
             () -> "SQL to add all changesets to database history table");
     }
 
+    private void flushOutputWriter(Writer output) throws LiquibaseException {
+        if (output == null) {
+            return;
+        }
+
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
+        }
+    }
+
     public void changeLogSync(String contexts) throws LiquibaseException {
         changeLogSync(new Contexts(contexts), new LabelExpression());
     }
@@ -1438,16 +1450,9 @@ public class Liquibase implements AutoCloseable {
                         changeLogSyncListener = new HubChangeExecListener(changeLogSyncOperation, changeExecListener);
                     }
 
-                    ChangeLogIterator runChangeLogSyncIterator = new ChangeLogIterator(changeLog,
-                            new NotRanChangeSetFilter(database.getRanChangeSetList()),
-                            new ContextChangeSetFilter(contexts),
-                            new LabelChangeSetFilter(labelExpression),
-                            new IgnoreChangeSetFilter(),
-                            new DbmsChangeSetFilter(database));
-
                     CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
                     Scope.child(Scope.Attr.logService.name(), compositeLogService, () -> {
-                        runChangeLogSyncIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
+                        listLogIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener),
                                 new RuntimeEnvironment(database, contexts, labelExpression));
                     });
                     hubUpdater.postUpdateHub(changeLogSyncOperation, bufferLog);
@@ -1491,25 +1496,20 @@ public class Liquibase implements AutoCloseable {
         runInScope(() -> {
 
             LoggingExecutor outputTemplate = new LoggingExecutor(
-                ExecutorService.getInstance().getExecutor(database), output, database
+                    Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor(database), output, database
             );
 
-            /* We have no other choice than to save the current Executor here. */
-            @SuppressWarnings("squid:S1941")
-            Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-            ExecutorService.getInstance().setExecutor(database, outputTemplate);
+                /* We have no other choice than to save the current Executer here. */
+                @SuppressWarnings("squid:S1941")
+                Executor oldTemplate = getAndReplaceJdbcExecutor(output);
 
-            outputHeader(header.get());
+                outputHeader("SQL to add all changesets to database history table");
 
             changeLogSync(tag, contexts, labelExpression);
 
-            try {
-                output.flush();
-            } catch (IOException e) {
-                throw new LiquibaseException(e);
-            }
+            flushOutputWriter(output);
 
-            ExecutorService.getInstance().setExecutor(database, oldTemplate);
+            Scope.getCurrentScope().getSingleton(ExecutorService.class).setExecutor("jdbc", database, oldTemplate);
             resetServices();
         });
 
