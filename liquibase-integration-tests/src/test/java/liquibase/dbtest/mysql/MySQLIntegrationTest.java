@@ -26,7 +26,7 @@ import static org.junit.Assume.assumeTrue;
  * Create the necessary databases with:
  *
  * <pre>
-     CREATE user lbuser@localhost identified by 'lbuser';
+     CREATE user lbuser@localhost identified by 'LiquibasePass1';
 
      DROP DATABASE IF EXISTS lbcat;
      CREATE DATABASE lbcat;

@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -184,6 +185,12 @@ public abstract class AbstractIntegrationTest {
         org.junit.Assume.assumeTrue(database != null);
 
         if (database != null) {
+            // Print the database driver name and version
+            if(database.getConnection() instanceof JdbcConnection) {
+                JdbcConnection jdbcConnection = (JdbcConnection)database.getConnection();
+                DatabaseMetaData metaData = jdbcConnection.getUnderlyingConnection().getMetaData();
+                logger.info("Database JDBC driver : " + metaData.getDriverName() + " -- " + metaData.getDriverVersion());
+            }
             if (database.supportsTablespaces()) {
                 // Use the opportunity to test if the DATABASECHANGELOG table is placed in the correct tablespace
                 database.setLiquibaseTablespaceName(DatabaseTestContext.ALT_TABLESPACE);
@@ -1031,10 +1038,10 @@ public abstract class AbstractIntegrationTest {
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
         SnapshotGeneratorFactory tableSnapshotGenerator = SnapshotGeneratorFactory.getInstance();
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
+        assertTrue(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
     }
 
     @Test

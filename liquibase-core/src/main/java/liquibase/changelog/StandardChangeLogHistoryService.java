@@ -35,6 +35,8 @@ import liquibase.structure.core.Table;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
@@ -322,6 +324,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     Date dateExecuted = null;
                     if (tmpDateExecuted instanceof Date) {
                         dateExecuted = (Date) tmpDateExecuted;
+                    } else if (tmpDateExecuted instanceof LocalDateTime) {
+                        dateExecuted = Date.from(((LocalDateTime) tmpDateExecuted).atZone(ZoneId.systemDefault()).toInstant());
                     } else {
                         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         try {
