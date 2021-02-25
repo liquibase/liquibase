@@ -8,21 +8,15 @@ import liquibase.exception.LiquibaseException;
 /**
  * <p>Marks all unapplied changes to the database as applied in the change log.</p>
  * 
- * @author JAmes Atwill
- * @goal changelogSync
+ * @author James Atwill
+ * @goal   changelogSync
  */
 public class LiquibaseChangeLogSyncMojo extends AbstractLiquibaseChangeLogMojo {
 
-	/**
-	 * Update to the changeSet with the given tag command.
-	 * @parameter property="liquibase.toTag"
-	 */
-	protected String toTag;
-
-  	@Override
-  	protected void performLiquibaseTask(Liquibase liquibase)
+    @Override
+    protected void performLiquibaseTask(Liquibase liquibase)
   			throws LiquibaseException {
-    		super.performLiquibaseTask(liquibase);
-	    	liquibase.changeLogSync(toTag, new Contexts(contexts), new LabelExpression(labels));
-	  }
+        super.performLiquibaseTask(liquibase);
+        liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels));
+    }
 }
