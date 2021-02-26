@@ -53,7 +53,8 @@
         <liquibase.base.version>4.3.2</liquibase.base.version>
         <liquibase.version.qualifier>-local</liquibase.version.qualifier>
         <liquibase.version.snapshot>-SNAPSHOT</liquibase.version.snapshot>
-        <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}</liquibase.version>
+        <liquibase.version>${liquibase.base.version}${liquibase.version.qualifier}${liquibase.version.snapshot}
+        </liquibase.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.enforcer.requireMavenVersion>3.6</maven.enforcer.requireMavenVersion>
@@ -164,7 +165,7 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>6.0.6</version>
             <scope>test</scope>
-    	</dependency>
+        </dependency>
 
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
@@ -174,11 +175,11 @@
         </dependency>
 
         <dependency>
-    	    <groupId>org.postgresql</groupId>
+            <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.12</version>
-	    <scope>test</scope>
-	</dependency>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -188,19 +189,6 @@
                 <version>3.0.2</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
-                <configuration>
-                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                    <gpgArguments>
-                        <arg>--batch</arg>
-                        <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -330,12 +318,12 @@
                  include_relative instruction to include the generated pages in our markdown
                  pages. -->
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-site-plugin</artifactId>
-              <version>3.8.2</version>
-              <configuration>
-                <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
-              </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
+                <configuration>
+                    <templateFile>${maven.multiModuleProjectDirectory}/maven-site.vm</templateFile>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -386,4 +374,32 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>gpg-sign</id>
+            <activation>
+                <property>
+                    <name>env.GPG_PASSPHRASE</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <configuration>
+                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                            <gpgArguments>
+                                <arg>--batch</arg>
+                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

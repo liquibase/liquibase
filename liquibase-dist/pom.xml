@@ -157,7 +157,8 @@
                         <descriptor>src/main/assembly/assembly-bin.xml</descriptor>
                     </descriptors>
                     <archive>
-                      <manifestFile>${project.basedir}/../liquibase-core/target/classes/META-INF/MANIFEST.MF</manifestFile>
+                        <manifestFile>${project.basedir}/../liquibase-core/target/classes/META-INF/MANIFEST.MF
+                        </manifestFile>
                     </archive>
                 </configuration>
                 <executions>
@@ -235,50 +236,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
-                <configuration>
-                    <passphrase>${env.GPG_PASSPHRASE}</passphrase>
-                    <gpgArguments>
-                        <arg>--batch</arg>
-                        <arg>--no-tty</arg>
-                        <!-- This is necessary for gpg to not try to use the pinentry programs -->
-                        <arg>--pinentry-mode</arg>
-                        <arg>loopback</arg>
-                    </gpgArguments>
-
-                    <skip>false</skip>
-                    <repositoryId>${deploy.repositoryId}</repositoryId>
-                    <artifactId>liquibase-core</artifactId>
-                    <version>${liquibase.version}</version>
-                    <url>${deploy.url}</url>
-                    <file>${project.build.directory}/liquibase-${liquibase.version}.jar</file>
-                    <files>
-                        target/liquibase-${liquibase.version}.tar.gz,target/liquibase-${liquibase.version}.zip
-                    </files>
-                    <types>
-                        tar.gz,zip
-                    </types>
-                    <classifiers>
-                        <!-- need empty classifier so deployed zip/tar files do not have appended "-bin" etc. suffixes -->
-                        ,
-                    </classifiers>
-                    <sources>${project.basedir}/../target/liquibase-${version}-sources.jar</sources>
-                    <javadoc>${project.basedir}/../target/liquibase-${version}-javadoc.jar</javadoc>
-                    <pomFile>${project.build.directory}/release.pom.xml</pomFile>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>custom-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>sign-and-deploy-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -446,6 +403,62 @@
                                         <liquibaseVersion>${liquibase.version}</liquibaseVersion>
                                     </variables>
                                 </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>gpg-sign</id>
+            <activation>
+                <property>
+                    <name>env.GPG_PASSPHRASE</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <configuration>
+                            <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+                            <gpgArguments>
+                                <arg>--batch</arg>
+                                <arg>--no-tty</arg>
+                                <!-- This is necessary for gpg to not try to use the pinentry programs -->
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+
+                            <skip>false</skip>
+                            <repositoryId>${deploy.repositoryId}</repositoryId>
+                            <artifactId>liquibase-core</artifactId>
+                            <version>${liquibase.version}</version>
+                            <url>${deploy.url}</url>
+                            <file>${project.build.directory}/liquibase-${liquibase.version}.jar</file>
+                            <files>
+                                target/liquibase-${liquibase.version}.tar.gz,target/liquibase-${liquibase.version}.zip
+                            </files>
+                            <types>
+                                tar.gz,zip
+                            </types>
+                            <classifiers>
+                                <!-- need empty classifier so deployed zip/tar files do not have appended "-bin" etc. suffixes -->
+                                ,
+                            </classifiers>
+                            <sources>${project.basedir}/../target/liquibase-${version}-sources.jar</sources>
+                            <javadoc>${project.basedir}/../target/liquibase-${version}-javadoc.jar</javadoc>
+                            <pomFile>${project.build.directory}/release.pom.xml</pomFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>custom-deploy</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>sign-and-deploy-file</goal>
+                                </goals>
                             </execution>
                         </executions>
                     </plugin>
