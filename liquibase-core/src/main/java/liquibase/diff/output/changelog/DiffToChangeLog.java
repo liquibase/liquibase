@@ -25,6 +25,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.StoredDatabaseLogic;
+import liquibase.structure.core.Table;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtil;
 
@@ -437,7 +438,48 @@ public class DiffToChangeLog {
                         }
                     });
 
-                    toSort.addAll(toNotSort);
+                    for (DatabaseObject notSort : toNotSort) {
+                        final String objName = notSort.toString();
+                        String matchedAttribute = null;
+                        for (DatabaseObject obj : objects) {
+                            if (obj instanceof Table) {
+                                continue;
+                            }
+                            Set<String> attributes = obj.getAttributes();
+                            matchedAttribute =
+                                attributes.stream()
+                                          .filter(sa -> {
+                                                if (sa.toLowerCase().contains("columns")) {
+                                                    Object attrValueObj = obj.getAttribute(sa, Object.class);
+                                                    if (attrValueObj instanceof ArrayList) {
+                                                        ArrayList<Column> values = (ArrayList<Column>) attrValueObj;
+                                                        Column matchColumn =
+                                                          values.stream()
+                                                                .filter(col -> {
+                                                                    return col == notSort;
+                                                                })
+                                                                .findFirst()
+                                                                .orElse(null);
+                                                        return matchColumn != null;
+                                                    } else {
+                                                        String attrValue = (String)attrValueObj;
+                                                        return attrValue.contains(objName);
+                                                    }
+                                                }
+                                                return false;
+                                            })
+                                          .findFirst()
+                                          .orElse(null);
+                            if (matchedAttribute != null) {
+                                toSort.add(0, notSort);
+                                break;
+                            }
+                        }
+                        if (matchedAttribute == null) {
+                            toSort.add(notSort);
+                        }
+                    }
+
                     return toSort;
                 }
             } catch (DatabaseException e) {
