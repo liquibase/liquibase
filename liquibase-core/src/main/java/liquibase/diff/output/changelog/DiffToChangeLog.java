@@ -33,6 +33,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class DiffToChangeLog {
 
@@ -438,9 +440,27 @@ public class DiffToChangeLog {
                         }
                     });
 
+                    //
+                    // Find the last Table position
+                    // If there are no tables then the
+                    // insertion position is 0
+                    //
+                    AtomicInteger i = new AtomicInteger(); // any mutable integer wrapper
+                    int lastTableIndex = toSort.stream()
+                                      .peek(v -> i.incrementAndGet())
+                                      .anyMatch(item -> item instanceof Table) ? i.get() - 1 : -1;
+                    if (lastTableIndex == -1) {
+                        lastTableIndex = 0;
+                    }
+
+                    //
+                    // Iterate the list of objects which were not sorted
+                    // If there are dependencies on the Columns where were not sorted
+                    // then we will insert these columns in the list after the last Table
+                    // otherwise they just get inserted at the end
+                    //
                     for (DatabaseObject notSort : toNotSort) {
-                        final String notSortName = notSort.toString();
-                        DatabaseObject matchedObject =
+                        DatabaseObject objectWithDependency =
                           objects.stream()
                                  .filter(obj -> ! (obj instanceof Table))
                                  .filter(obj -> {
@@ -448,7 +468,7 @@ public class DiffToChangeLog {
                                      String matched =
                                          attributes.stream()
                                                    .filter(sa -> {
-                                                       return handleColumnDependency(notSort, notSortName, obj, sa);
+                                                       return columnDependencyExists(notSort, obj, sa);
                                                    })
                                                    .findFirst()
                                                    .orElse(null);
@@ -456,8 +476,8 @@ public class DiffToChangeLog {
                                  })
                                  .findFirst()
                                  .orElse(null);
-                        if (matchedObject != null) {
-                            toSort.add(0, notSort);
+                        if (objectWithDependency != null) {
+                            toSort.add(lastTableIndex, notSort);
                         } else {
                             toSort.add(notSort);
                         }
@@ -473,16 +493,20 @@ public class DiffToChangeLog {
         return new ArrayList<>(objects);
     }
 
-    private boolean handleColumnDependency(final DatabaseObject notSort, String objName, DatabaseObject obj, String sa) {
+    //
+    // Check each attribute to see if it contains a reference to the Column
+    // Return true if there if the reference exists and false if not
+    //
+    private boolean columnDependencyExists(final DatabaseObject column, DatabaseObject obj, String sa) {
         Object attrValueObj = obj.getAttribute(sa, Object.class);
         if (attrValueObj instanceof ArrayList) {
             List<Object> values = (List<Object>) attrValueObj;
             return
                 values.stream()
                       .filter(item -> item instanceof Column)
-                      .anyMatch(item -> item == notSort);
+                      .anyMatch(item -> item == column);
         } else if (attrValueObj instanceof Column) {
-            return attrValueObj == notSort;
+            return attrValueObj == column;
         }
         return false;
     }
