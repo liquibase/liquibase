@@ -439,43 +439,26 @@ public class DiffToChangeLog {
                     });
 
                     for (DatabaseObject notSort : toNotSort) {
-                        final String objName = notSort.toString();
-                        String matchedAttribute = null;
-                        for (DatabaseObject obj : objects) {
-                            if (obj instanceof Table) {
-                                continue;
-                            }
-                            Set<String> attributes = obj.getAttributes();
-                            matchedAttribute =
-                                attributes.stream()
-                                          .filter(sa -> {
-                                                if (sa.toLowerCase().contains("columns")) {
-                                                    Object attrValueObj = obj.getAttribute(sa, Object.class);
-                                                    if (attrValueObj instanceof ArrayList) {
-                                                        ArrayList<Column> values = (ArrayList<Column>) attrValueObj;
-                                                        Column matchColumn =
-                                                          values.stream()
-                                                                .filter(col -> {
-                                                                    return col == notSort;
-                                                                })
-                                                                .findFirst()
-                                                                .orElse(null);
-                                                        return matchColumn != null;
-                                                    } else {
-                                                        String attrValue = (String)attrValueObj;
-                                                        return attrValue.contains(objName);
-                                                    }
-                                                }
-                                                return false;
-                                            })
-                                          .findFirst()
-                                          .orElse(null);
-                            if (matchedAttribute != null) {
-                                toSort.add(0, notSort);
-                                break;
-                            }
-                        }
-                        if (matchedAttribute == null) {
+                        final String notSortName = notSort.toString();
+                        DatabaseObject matchedObject =
+                          objects.stream()
+                                 .filter(obj -> ! (obj instanceof Table))
+                                 .filter(obj -> {
+                                     Set<String> attributes = obj.getAttributes();
+                                     String matched =
+                                         attributes.stream()
+                                                   .filter(sa -> {
+                                                       return handleColumnDependency(notSort, notSortName, obj, sa);
+                                                   })
+                                                   .findFirst()
+                                                   .orElse(null);
+                                     return matched != null;
+                                 })
+                                 .findFirst()
+                                 .orElse(null);
+                        if (matchedObject != null) {
+                            toSort.add(0, notSort);
+                        } else {
                             toSort.add(notSort);
                         }
                     }
@@ -488,6 +471,20 @@ public class DiffToChangeLog {
         }
 
         return new ArrayList<>(objects);
+    }
+
+    private boolean handleColumnDependency(final DatabaseObject notSort, String objName, DatabaseObject obj, String sa) {
+        Object attrValueObj = obj.getAttribute(sa, Object.class);
+        if (attrValueObj instanceof ArrayList) {
+            List<Object> values = (List<Object>) attrValueObj;
+            return
+                values.stream()
+                      .filter(item -> item instanceof Column)
+                      .anyMatch(item -> item == notSort);
+        } else if (attrValueObj instanceof Column) {
+            return attrValueObj == notSort;
+        }
+        return false;
     }
 
     private List<Map<String, ?>> queryForDependenciesOracle(Executor executor, List<String> schemas)
