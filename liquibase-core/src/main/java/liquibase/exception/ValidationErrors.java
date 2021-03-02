@@ -57,7 +57,7 @@ public class ValidationErrors {
             }
         }
 
-        if (isDisallowed && (value != null && value instanceof Boolean && ((Boolean) value).booleanValue())) {
+        if (isDisallowed && (value instanceof Boolean && (Boolean)value)) {
             addError(disallowedFieldName + " is not allowed on "+(database == null?"unknown":database.getShortName()));
         }
     }
