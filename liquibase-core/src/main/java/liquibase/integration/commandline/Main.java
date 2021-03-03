@@ -437,6 +437,13 @@ public class Main {
             handler.setLevel(level);
             handler.setFilter(new SecureLogFilter(logService.getFilter()));
         }
+        //
+        // Set the Liquibase Hub log level if logging is not OFF
+        //
+        if (level != Level.OFF) {
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            hubConfiguration.setLiquibaseHubLogLevel(level.toString());
+        }
     }
 
     private static Level parseLogLevel(String logLevelName, ConsoleUIService ui) {

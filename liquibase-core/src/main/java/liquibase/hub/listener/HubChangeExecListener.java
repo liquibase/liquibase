@@ -316,8 +316,8 @@ public class HubChangeExecListener extends AbstractChangeExecListener
         //
         // Capture the current log level to use for filtering
         //
-        java.util.logging.Logger liquibaseLogger = java.util.logging.Logger.getLogger("liquibase");
-        Level currentLevel = liquibaseLogger.getLevel();
+        HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+        Level currentLevel = Level.parse(hubConfiguration.getLiquibaseHubLogLevel());
 
         BufferedLogService bufferedLogService =
            Scope.getCurrentScope().get(BufferedLogService.class.getName(), BufferedLogService.class);
