@@ -23,6 +23,11 @@
         <module>liquibase-extension-examples</module>
     </modules>
 
+    <ciManagement>
+        <system>Travis</system>
+        <url>https://travis-ci.com/github/liquibase/liquibase</url>
+    </ciManagement>
+
     <build>
         <plugins>
             <plugin>

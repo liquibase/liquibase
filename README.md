@@ -9,7 +9,7 @@ see [the main project website](https://www.liquibase.org/).
 
 ## Quickstart
 
-[Get started in 5 minutes](https://www.liquibase.org/get_started/index.html).
+[Get started in 5 minutes](https://www.liquibase.org/get-started/first-steps).
 
 ## Changelog
 
