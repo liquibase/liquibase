@@ -6,6 +6,7 @@ import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.net.URI;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
@@ -51,7 +52,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     protected void addRootPath(Path path) {
-        Scope.getCurrentScope().getLog(getClass()).fine("Adding path "+path+" to resourceAccessor "+getClass().getName());
+        Scope.getCurrentScope().getLog(getClass()).fine("Adding path " + path + " to resourceAccessor " + getClass().getName());
         rootPaths.add(path);
     }
 
@@ -144,6 +145,9 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                     if (Paths.get(streamPath).startsWith(finalRootPath) || Paths.get(streamPath).startsWith("/" + finalRootPath)) {
                         streamPath = finalRootPath.relativize(Paths.get(streamPath)).toString();
                     }
+                    if (Paths.get("/" + streamPath).startsWith(finalRootPath)) {
+                        streamPath = finalRootPath.relativize(Paths.get("/" + streamPath)).toString();
+                    }
                 } catch (InvalidPathException ignored) {
                     //that is ok
                 }
@@ -223,7 +227,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                     if (relativeTo != null) {
                         basePath = basePath.resolve(relativeTo);
                         if (!Files.exists(basePath)) {
-                            Scope.getCurrentScope().getLog(getClass()).info("Relative path "+relativeTo+" in "+rootPath+" does not exist");
+                            Scope.getCurrentScope().getLog(getClass()).info("Relative path " + relativeTo + " in " + rootPath + " does not exist");
                             continue;
                         } else if (Files.isRegularFile(basePath)) {
                             basePath = basePath.getParent();
@@ -244,7 +248,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                 if (relativeTo != null) {
                     basePath = basePath.resolve(relativeTo);
                     if (!Files.exists(basePath)) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Relative path "+relativeTo+" in "+rootPath+" does not exist");
+                        Scope.getCurrentScope().getLog(getClass()).info("Relative path " + relativeTo + " in " + rootPath + " does not exist");
                         continue;
                     } else if (Files.isRegularFile(basePath)) {
                         basePath = basePath.getParent();
