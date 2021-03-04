@@ -279,7 +279,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     protected boolean isDatabaseChecksumsCompatible() throws DatabaseException {
-        List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(getDatabase()).queryForList(new
+        Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", getDatabase());
+        List<Map<String, ?>> md5sumRS = executor.queryForList(new
                 SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
                 new ColumnConfig().setName("MD5SUM")).setLimit(1));
 
