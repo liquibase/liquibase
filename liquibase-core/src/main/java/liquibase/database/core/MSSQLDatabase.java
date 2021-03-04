@@ -1,31 +1,33 @@
 package liquibase.database.core;
 
-import java.math.BigInteger;
-
 import liquibase.CatalogAndSchema;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.JdbcUtils;
 
+import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import liquibase.logging.LogFactory;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -521,19 +523,40 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return sendsStringParametersAsUnicode == null ? true : sendsStringParametersAsUnicode;
     }
 
+    /**
+     * Method determines if database engine edition is Azure SQL Database
+     * @return true if Azure SQL Database engine, otherwise false.
+     */
     public boolean isAzureDb() {
         return "Azure".equalsIgnoreCase(getEngineEdition());
     }
 
+    /**
+     * Method determines if database engine edition is Azure SQL Managed Instance
+     * @return true if Azure SQL Managed Instance engine, otherwise false.
+     */
+    public boolean isAzureManagedInstance() {
+        return "Azure SQL Managed Instance".equalsIgnoreCase(getEngineEdition());
+    }
+
+    /**
+     * Method returns database engine of MSSQL database
+     * @return database engine
+     */
     public String getEngineEdition() {
         try {
             if (getConnection() instanceof JdbcConnection) {
+                // SERVERPROPERTY - https://docs.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql?view=sql-server-ver15
                 String sql = "SELECT CASE ServerProperty('EngineEdition')\n" +
                         "         WHEN 1 THEN 'Personal'\n" +
                         "         WHEN 2 THEN 'Standard'\n" +
                         "         WHEN 3 THEN 'Enterprise'\n" +
                         "         WHEN 4 THEN 'Express'\n" +
-                        "         WHEN 5 THEN 'Azure'\n" +
+                        "         WHEN 5 THEN 'Azure'\n" + //Azure SQL Database
+                        "         WHEN 6 THEN 'Microsoft Azure Synapse Analytics'\n" +
+                        "         WHEN 8 THEN 'Azure SQL Managed Instance'\n" +
+                        "         WHEN 9 THEN 'Azure SQL Edge'\n" +
+                        "         WHEN 11 THEN 'Azure Synapse serverless SQL poo'\n" +
                         "         ELSE 'Unknown'\n" +
                         "       END";
                 return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
