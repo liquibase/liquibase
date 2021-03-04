@@ -242,22 +242,12 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 }
             }
 
-            List<Map<String, ?>> md5sumRS = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database).queryForList(new
-                SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
-                new ColumnConfig().setName("MD5SUM")).setLimit(1));
-            if (!md5sumRS.isEmpty()) {
-                String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
-                if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
-                    executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null " +
+            if (!isDatabaseChecksumsCompatible()) {
+                executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null " +
                         "so they will be updated on next database update");
-                    databaseChecksumsCompatible = false;
-                    statementsToExecute.add(new RawSqlStatement(
-                        "UPDATE " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName()
-                            , getDatabaseChangeLogTableName()) + " " +
-                            "SET " +  getDatabase().escapeObjectName("MD5SUM", Column.class) + " = NULL"));
-                }
+                databaseChecksumsCompatible = false;
+                statementsToExecute.add(createResetDatabaseChecksumsSqlStatement());
             }
-
 
         } else if (!changeLogCreateAttempted) {
             executor.comment("Create Database Change Log Table");
@@ -286,6 +276,21 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
         }
         serviceInitialized = true;
+    }
+
+    protected boolean isDatabaseChecksumsCompatible() throws DatabaseException {
+        List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(getDatabase()).queryForList(new
+                SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(),
+                new ColumnConfig().setName("MD5SUM")).setLimit(1));
+
+        return md5sumRS.isEmpty() || String.valueOf(md5sumRS.get(0).get("MD5SUM")).startsWith(CheckSum.getCurrentVersion() + ":");
+    }
+
+    protected SqlStatement createResetDatabaseChecksumsSqlStatement() {
+        return new RawSqlStatement(
+                "UPDATE " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName()
+                        , getDatabaseChangeLogTableName()) + " " +
+                        "SET " +  getDatabase().escapeObjectName("MD5SUM", Column.class) + " = NULL");
     }
 
     @Override
