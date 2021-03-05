@@ -4,6 +4,7 @@ package liquibase.statement;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.resource.ResourceAccessor;
 
 import java.util.List;
@@ -26,9 +27,15 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
 
     @Override
     protected String generateSql(List<ColumnConfig> cols) {
-        StringBuilder sql = new StringBuilder("INSERT INTO ");
+        StringBuilder sql = new StringBuilder();
+        String tableName = database.escapeTableName(getCatalogName(), getSchemaName(), getTableName());
+        if (database instanceof MSSQLDatabase) {
+            String enableIdentityInsert = "SET IDENTITY_INSERT " + tableName + " ON; ";
+            sql.append(enableIdentityInsert);
+        }
+        sql.append("INSERT INTO ");
         StringBuilder params = new StringBuilder("VALUES(");
-        sql.append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
+        sql.append(tableName);
         sql.append("(");
         for(ColumnConfig column : getColumns()) {
             if(database.supportsAutoIncrement()
@@ -47,6 +54,10 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
         params.append(")");
         sql.append(") ");
         sql.append(params);
+        if (database instanceof MSSQLDatabase) {
+            String disableIdentityInsert = "; SET IDENTITY_INSERT " + tableName + " OFF";
+            sql.append(disableIdentityInsert);
+        }
         return sql.toString();
     }
 }

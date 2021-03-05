@@ -5,19 +5,26 @@ import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.database.DatabaseConnection
 import liquibase.database.DatabaseFactory
+import liquibase.database.PreparedStatementFactory
 import liquibase.database.core.MSSQLDatabase
 import liquibase.database.core.MockDatabase
+import liquibase.database.jvm.JdbcConnection
+import liquibase.exception.DatabaseException
 import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.ExecutablePreparedStatement
 import liquibase.statement.ExecutablePreparedStatementBase
+import liquibase.statement.ExecutablePreparedStatementBaseTest
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
 import liquibase.test.TestContext
 import spock.lang.Unroll
+
+import java.sql.PreparedStatement
+import java.sql.SQLException
 
 public class LoadDataChangeTest extends StandardChangeTest {
 
@@ -465,6 +472,23 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         when:
         SqlStatement[] sqlStatements = ((ExecutablePreparedStatement) sqlStatement[0]).getIndividualStatements();
+        def conn = new JdbcConnection() {
+            def passedInput = "localhost"
+
+            @Override
+            protected String getConnectionUrl() throws SQLException {
+                return passedInput
+            }
+
+            @Override
+            PreparedStatement prepareStatement(String sql) throws DatabaseException {
+                ExecutablePreparedStatementBaseTest.DummyPreparedStatement stmt = new ExecutablePreparedStatementBaseTest.DummyPreparedStatement()
+                return stmt
+            }
+        }
+
+        def factory = new PreparedStatementFactory(conn)
+        ((ExecutablePreparedStatementBase)sqlStatements[0]).execute(factory)
 
         then:
         sqlStatements.length == 2
@@ -543,5 +567,4 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
         "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
     }
-
 }

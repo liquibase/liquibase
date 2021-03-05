@@ -81,7 +81,7 @@ public class ExecutablePreparedStatementBaseTest {
         assertEquals(java.sql.Types.NULL, stmt.getParamTypes().get(1).intValue());
     }
 
-    private static class DummyPreparedStatement implements PreparedStatement {
+    public static class DummyPreparedStatement implements PreparedStatement {
         private Map<Integer, Integer> paramTypes = new HashMap<>();
 
         public Map<Integer, Integer> getParamTypes() {
