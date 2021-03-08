@@ -138,16 +138,6 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             //
             if (hubUpdater != null && (doSyncHub || hubConnectionId != null)) {
                 hubUpdater.syncHub(changeLogFile, database, changeLog, hubConnectionId);
-                if (hubChangeLog != null && hubChangeLog.isInactive()) {
-                    String message =
-                        "\n" +
-                        "The command completed and reported to Hub, but the changelog has been deactivated by someone in your organization.\n" +
-                        "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
-                        "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n"  +
-                        "Learn more at http://hub.liquibase.com";
-                    Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
-                    Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
-                }
             }
         } catch (DatabaseException e) {
             throw e;
