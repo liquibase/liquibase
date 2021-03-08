@@ -191,7 +191,7 @@ public class HubUpdater {
             if (hubChangeLog.isInactive()) {
                 String message =
                     "\n" +
-                        "The command completed and reported to Hub, but the changelog has been deactivated by someone in your organization.\n" +
+                        "The command completed and reported to Hub, but changelog '" + hubChangeLog.getName() + "' has been deactivated by someone in your organization.\n" +
                         "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
                         "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n"  +
                         "Learn more at http://hub.liquibase.com";
@@ -265,7 +265,7 @@ public class HubUpdater {
             if (hubChangeLog.isInactive()) {
                 String message =
                     "\n" +
-                        "The command completed and reported to Hub, but the changelog has been deactivated by someone in your organization.\n" +
+                        "The command completed and reported to Hub, but changelog '" + hubChangeLog.getName() + "' has been deactivated by someone in your organization.\n" +
                         "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
                         "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n"  +
                         "Learn more at http://hub.liquibase.com";
