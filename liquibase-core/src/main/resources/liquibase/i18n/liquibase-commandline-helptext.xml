@@ -89,9 +89,9 @@ Hub Commands
                                  already created. Learn more about free
                                  Liquibase Hub at https://hub.liquibase.com.
  deactivateChangeLog             This command will deactivate the specified
-                                 changelog in in your Liquibase Hub organization.
-                                 Learn more about free Liquibase Hub at
-                                 https://hub.liquibase.com.
+                                 changelog in in your Liquibase Hub
+                                 organization.  Learn more about free
+                                 Liquibase Hub at https://hub.liquibase.com.
  syncHub                         Synchronizes your local DATABASECHANGELOG
                                  table with its Liquibase Hub counterpart.
                                  Learn more about free Liquibase Hub at
