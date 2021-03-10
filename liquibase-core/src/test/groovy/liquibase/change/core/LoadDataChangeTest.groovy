@@ -11,6 +11,8 @@ import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.statement.ExecutablePreparedStatement
+import liquibase.statement.ExecutablePreparedStatementBase
 import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
@@ -414,4 +416,132 @@ public class LoadDataChangeTest extends StandardChangeTest {
         then:
         assert md5sum1.equals(md5sum2)
     }
+
+    def "usePreparedStatements set to false produces InsertSetStatement"() throws Exception {
+        when:
+        LoadDataChange loadDataChange = new LoadDataChange();
+        loadDataChange.setSchemaName("SCHEMA_NAME");
+        loadDataChange.setTableName("TABLE_NAME");
+        loadDataChange.setUsePreparedStatements(Boolean.FALSE);
+        loadDataChange.setFile("liquibase/change/core/sample.data1.csv");
+
+        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase());
+
+        then:
+        sqlStatement.length == 1
+        assert sqlStatement[0] instanceof InsertSetStatement
+
+        when:
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+
+        then:
+        sqlStatements.length == 2
+        assert sqlStatements[0] instanceof InsertStatement
+        assert sqlStatements[1] instanceof InsertStatement
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
+        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
+        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
+    }
+    def "usePreparedStatements set to true produces PreparedStatement"() throws Exception {
+        when:
+        LoadDataChange loadDataChange = new LoadDataChange();
+        loadDataChange.setSchemaName("SCHEMA_NAME");
+        loadDataChange.setTableName("TABLE_NAME");
+        loadDataChange.setUsePreparedStatements(Boolean.TRUE);
+        loadDataChange.setFile("liquibase/change/core/sample.data1.csv");
+
+        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase() { public boolean supportsBatchUpdates() { return true; } });
+
+        then:
+        sqlStatement.length == 1
+        assert sqlStatement[0] instanceof ExecutablePreparedStatement
+
+        when:
+        SqlStatement[] sqlStatements = ((ExecutablePreparedStatement) sqlStatement[0]).getIndividualStatements();
+
+        then:
+        sqlStatements.length == 2
+        assert sqlStatements[0] instanceof ExecutablePreparedStatement
+        assert sqlStatements[1] instanceof ExecutablePreparedStatement
+
+        "SCHEMA_NAME" == ((ExecutablePreparedStatementBase) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((ExecutablePreparedStatementBase) sqlStatements[0]).getTableName()
+
+
+        "SCHEMA_NAME" == ((ExecutablePreparedStatementBase) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((ExecutablePreparedStatementBase) sqlStatements[1]).getTableName()
+
+    }
+    def "DB NO Batch Update Support usePrepared True produces InsertSetStatement"() throws Exception {
+        when:
+        LoadDataChange loadDataChange = new LoadDataChange();
+        loadDataChange.setSchemaName("SCHEMA_NAME");
+        loadDataChange.setTableName("TABLE_NAME");
+        loadDataChange.setUsePreparedStatements(Boolean.TRUE);
+        loadDataChange.setFile("liquibase/change/core/sample.data1.csv");
+
+        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase());
+
+        then:
+        sqlStatement.length == 1
+        assert sqlStatement[0] instanceof InsertSetStatement
+
+        when:
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+
+        then:
+        sqlStatements.length == 2
+        assert sqlStatements[0] instanceof InsertStatement
+        assert sqlStatements[1] instanceof InsertStatement
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
+        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
+        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
+    }
+    def "DB Batch Update Support usePrepared False produces InsertSetStatement"() throws Exception {
+        when:
+        LoadDataChange loadDataChange = new LoadDataChange();
+        loadDataChange.setSchemaName("SCHEMA_NAME");
+        loadDataChange.setTableName("TABLE_NAME");
+        loadDataChange.setUsePreparedStatements(Boolean.FALSE);
+        loadDataChange.setFile("liquibase/change/core/sample.data1.csv");
+
+        SqlStatement[] sqlStatement = loadDataChange.generateStatements(new MSSQLDatabase() { public boolean supportsBatchUpdates() { return true; } });
+
+        then:
+        sqlStatement.length == 1
+        assert sqlStatement[0] instanceof InsertSetStatement
+
+        when:
+        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+
+        then:
+        sqlStatements.length == 2
+        assert sqlStatements[0] instanceof InsertStatement
+        assert sqlStatements[1] instanceof InsertStatement
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
+        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
+
+        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
+        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
+    }
+
 }
