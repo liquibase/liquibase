@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.liquibase.ext</groupId>
-    <artifactId>liquibase-extension-template</artifactId>
+    <artifactId>liquibase-bigquery</artifactId>
     <version>4.3.2-SNAPSHOT</version>
     <name>Liquibase Extension: Extension Template Database Support</name>
     <description>Adds support for Extension Template database</description>
-    <url>https://github.com/liquibase/liquibase-extension-template</url>
+    <url>https://github.com/liquibase/liquibase-bigquery</url>
     <organization>
         <name>Liquibase</name>
         <url>http://www.liquibase.org</url>
@@ -18,11 +18,11 @@
         </license>
     </licenses>
     <issueManagement>
-        <url>https://github.com/liquibase/liquibase-extension-template/issues</url>
+        <url>https://github.com/liquibase/liquibase-bigquery/issues</url>
     </issueManagement>
     <scm>
-        <connection>scm:git:http://github.com/liquibase/liquibase-extension-template.git</connection>
-        <url>https://github.com/liquibase/liquibase-extension-template</url>
+        <connection>scm:git:http://github.com/liquibase/liquibase-bigquery.git</connection>
+        <url>https://github.com/liquibase/liquibase-bigquery</url>
         <tag>HEAD</tag>
     </scm>
     <developers>
@@ -76,7 +76,13 @@
             <version>1.0.0</version>
             <scope>test</scope>
         </dependency>
-        <!-- TODO: add your database jdbc drivers here -->
+        <dependency>
+            <groupId>com.simba.googlebigquery.jdbc</groupId>
+            <artifactId>GoogleBigQueryJDBC42</artifactId>
+            <version>4.2</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/GoogleBigQueryJDBC42.jar</systemPath>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

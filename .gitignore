@@ -1,2 +1,3 @@
-/liquibase-cassandra.iml
+/liquibase-biqquery.iml
 /.idea/
+/target/
