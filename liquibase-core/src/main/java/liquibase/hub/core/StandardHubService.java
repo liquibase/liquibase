@@ -334,7 +334,14 @@ public class StandardHubService implements HubService {
             Scope.getCurrentScope().getUI().sendMessage(uiMessage + ": " + message);
             Scope.getCurrentScope().getLog(getClass()).severe(message, lbe);
             return null;
+        } catch (LiquibaseHubException lbhe) {
+            final String message = lbhe.getMessage();
+            String uiMessage = "Retrieving Hub Change Log failed for Changelog ID " + changeLogId.toString();
+            Scope.getCurrentScope().getUI().sendMessage(uiMessage + ": " + message);
+            Scope.getCurrentScope().getLog(getClass()).warning(message, lbhe);
+            return null;
         }
+
     }
 
     @Override

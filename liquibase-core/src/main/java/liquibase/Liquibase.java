@@ -345,6 +345,7 @@ public class Liquibase implements AutoCloseable {
             if (hubChangeLog == null) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                     "Retrieving Hub Change Log failed for Changelog ID: " + changeLogId);
+                Scope.getCurrentScope().getLog(getClass()).warning("The operation will continue but no report will be sent to Hub.");
                 return null;
             }
             Connection exampleConnection = new Connection();

@@ -112,7 +112,7 @@ public class HubUpdater {
                 .setOperationEventStatus(
                     new OperationEvent.OperationEventStatus()
                         .setOperationEventStatusType("PASS")
-                        .setStatusMessage("Update operation started successfully")
+                        .setStatusMessage("Operation started successfully")
                 )
             );
         } catch (LiquibaseException e) {
@@ -178,7 +178,7 @@ public class HubUpdater {
                 .setOperationEventStatus(
                     new OperationEvent.OperationEventStatus()
                         .setOperationEventStatusType("PASS")
-                        .setStatusMessage("Update operation completed successfully")
+                        .setStatusMessage("Operation completed successfully")
                 )
                 .setOperationEventLog(
                     new OperationEvent.OperationEventLog()
@@ -231,7 +231,7 @@ public class HubUpdater {
                 .setOperationEventStatus(
                     new OperationEvent.OperationEventStatus()
                         .setOperationEventStatusType("FAIL")
-                        .setStatusMessage("Update operation completed with errors")
+                        .setStatusMessage("Operation completed with errors")
                 )
                 .setOperationEventLog(
                     new OperationEvent.OperationEventLog()
