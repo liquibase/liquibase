@@ -49,7 +49,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
             throw new MojoFailureException("\nThe Hub project ID must be specified.");
         }
         if (hubProjectId != null && hubProjectName != null) {
-            throw new MojoFailureException("\nToo many parameters provided for registerChangeLog.  You may only provide one of project ID and project name.\n");
+            throw new MojoFailureException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects project ID or new projectname, but not both.\n");
         }
     }
 
