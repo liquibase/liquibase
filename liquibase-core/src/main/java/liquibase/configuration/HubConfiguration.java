@@ -1,9 +1,11 @@
 package liquibase.configuration;
 
+import liquibase.Scope;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Configuration container for global properties.
@@ -13,6 +15,7 @@ public class HubConfiguration extends AbstractConfigurationContainer {
     public static final String LIQUIBASE_HUB_API_KEY = "apiKey";
     public static final String LIQUIBASE_HUB_URL = "url";
     public static final String LIQUIBASE_HUB_MODE = "mode";
+    public static final String LIQUIBASE_HUB_LOGLEVEL = "logLevel";
 
     public HubConfiguration() {
         super("liquibase.hub");
@@ -30,6 +33,9 @@ public class HubConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(LIQUIBASE_HUB_MODE, String.class)
                 .setDescription("Content to send to Liquibase Hub during operations. Values can be 'all', 'meta', or 'off'")
                 .setDefaultValue("all");
+        getContainer().addProperty(LIQUIBASE_HUB_LOGLEVEL, String.class)
+            .setDescription("Log level for filtering log messages to send to Liquibase Hub during operations. Values can be any acceptable log level.")
+            .setDefaultValue("INFO");
     }
 
     @Override
@@ -85,4 +91,27 @@ public class HubConfiguration extends AbstractConfigurationContainer {
         }
         return value;
     }
+
+    public HubConfiguration setLiquibaseHubLogLevel(String liquibaseHubLogLevel) {
+        getContainer().setValue(LIQUIBASE_HUB_LOGLEVEL, liquibaseHubLogLevel);
+        return this;
+    }
+
+    public String getLiquibaseHubLogLevel() {
+        String value = getContainer().getValue(LIQUIBASE_HUB_LOGLEVEL, String.class);
+
+        final List<String> validValues = Arrays.asList("OFF", "FINE", "WARN", "ERROR", "INFO");
+        if (!validValues.contains(value.toUpperCase())) {
+            Level logLevel = Level.INFO;
+            try {
+                logLevel = Level.parse(value.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                String message = "An invalid liquibase.hub.logLevel value of " + value + " detected. Acceptable values are " + StringUtil.join(validValues, ",");
+                Scope.getCurrentScope().getLog(HubConfiguration.class).warning(message);
+            }
+            value = logLevel.toString();
+        }
+        return value;
+    }
+
 }
