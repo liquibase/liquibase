@@ -72,7 +72,7 @@ public class Main {
     protected String url;
     protected String hubConnectionId;
     protected String hubProjectId;
-    protected String projectName;
+    protected String hubProjectName;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -1682,8 +1682,8 @@ public class Main {
                 RegisterChangeLogCommand liquibaseCommand =
                     (RegisterChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
-                if (hubProjectId != null && projectName != null) {
-                    throw new LiquibaseException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects project ID or new projectname, but not both.\n");
+                if (hubProjectId != null && hubProjectName != null) {
+                    throw new LiquibaseException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects a Hub project ID or new Hub project name, but not both.\n");
                 }
                 try {
                     if (hubProjectId != null) {
@@ -1697,8 +1697,8 @@ public class Main {
                 } catch (IllegalArgumentException  e) {
                     throw new LiquibaseException("Unexpected hubProjectId format: "+hubProjectId, e);
                 }
-                if (projectName != null) {
-                    liquibaseCommand.setProjectName(projectName);
+                if (hubProjectName != null) {
+                    liquibaseCommand.setProjectName(hubProjectName);
                 }
                 CommandResult result = liquibaseCommand.execute();
 
