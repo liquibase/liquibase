@@ -361,7 +361,7 @@
                                 </goals>
                                 <configuration>
                                     <url>
-                                        ${install4j.jre.root}/adopt-openjdk-windows-amd64-13.0.1.tar.gz
+                                        ${install4j.jre.root}/adopt-openjdk-windows-amd64-jre-11.0.10.9.tar.gz
                                     </url>
                                     <unpack>false</unpack>
                                     <outputDirectory>${project.build.directory}/downloaded</outputDirectory>
@@ -375,7 +375,7 @@
                                 </goals>
                                 <configuration>
                                     <url>
-                                        ${install4j.jre.root}/adopt-openjdk-macos-amd64-13.0.1.tar.gz
+                                        ${install4j.jre.root}/adopt-openjdk-macos-amd64-jre-11.0.10.9.tar.gz
                                     </url>
                                     <unpack>false</unpack>
                                     <outputDirectory>${project.build.directory}/downloaded</outputDirectory>
