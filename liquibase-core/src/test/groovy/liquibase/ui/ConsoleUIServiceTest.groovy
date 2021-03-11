@@ -1,7 +1,6 @@
 package liquibase.ui
 
 
-import liquibase.ui.ConsoleUIService
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -12,6 +11,8 @@ class ConsoleUIServiceTest extends Specification {
         when:
         def passedInput = input
         def uiService = new ConsoleUIService(new MockConsoleWrapper(passedInput))
+        uiService.allowPrompt = true
+
         def outputStream = new ByteArrayOutputStream()
         uiService.setOutputStream(new PrintStream(outputStream))
 

@@ -171,6 +171,7 @@ public class Main {
      */
     public static int run(String[] args) throws Exception {
         ConsoleUIService ui = new ConsoleUIService();
+        ui.setAllowPrompt(true);
 
         Map<String, Object> scopeObjects = new HashMap<>();
         final IntegrationDetails integrationDetails = new IntegrationDetails();
