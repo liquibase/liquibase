@@ -1,8 +1,8 @@
 package liquibase.command;
 
-import com.sun.deploy.util.StringUtils;
 import liquibase.Scope;
 import liquibase.exception.CommandExecutionException;
+import liquibase.util.StringUtil;
 
 import java.io.*;
 import java.util.*;
@@ -28,7 +28,7 @@ public class CommandScope {
         this.commandPipeline = commandFactory.getCommandPipeline(this);
 
         if (commandPipeline.size() == 0) {
-            throw new CommandExecutionException("Unknown command: "+ StringUtils.join(Arrays.asList(this.getCommand()), " "));
+            throw new CommandExecutionException("Unknown command: "+ StringUtil.join(Arrays.asList(this.getCommand()), " "));
         }
 
 
