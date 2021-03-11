@@ -527,6 +527,7 @@ public class Main {
         return COMMANDS.SNAPSHOT.equalsIgnoreCase(command)
                 || COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
+                || COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL.equalsIgnoreCase(command)
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(command)
                 || COMMANDS.UPDATE_COUNT_SQL.equalsIgnoreCase(command)
                 || COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)
@@ -556,6 +557,8 @@ public class Main {
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(command)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)
+                || COMMANDS.CHANGELOG_SYNC_TO_TAG.equalsIgnoreCase(command)
+                || COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL.equalsIgnoreCase(command)
                 || COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)
                 || COMMANDS.UNEXPECTED_CHANGESETS.equalsIgnoreCase(command)
                 || COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
@@ -611,6 +614,8 @@ public class Main {
                 || COMMANDS.DB_DOC.equalsIgnoreCase(arg)
                 || COMMANDS.CHANGELOG_SYNC.equalsIgnoreCase(arg)
                 || COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(arg)
+                || COMMANDS.CHANGELOG_SYNC_TO_TAG.equalsIgnoreCase(arg)
+                || COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(arg)
                 || COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.ROLLBACK_ONE_CHANGE_SET.equalsIgnoreCase(arg)
@@ -821,7 +826,9 @@ public class Main {
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.DB_DOC.equalsIgnoreCase(command)
                 || COMMANDS.TAG.equalsIgnoreCase(command)
-                || COMMANDS.TAG_EXISTS.equalsIgnoreCase(command)) {
+                || COMMANDS.TAG_EXISTS.equalsIgnoreCase(command)
+                || COMMANDS.CHANGELOG_SYNC_TO_TAG.equalsIgnoreCase(command)
+                || COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL.equalsIgnoreCase(command)) {
 
             if ((!commandParams.isEmpty()) && commandParams.iterator().next().startsWith("-")) {
                 messages.add(coreBundle.getString(ERRORMSG_UNEXPECTED_PARAMETERS) + commandParams);
@@ -1766,6 +1773,24 @@ public class Main {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.CHANGELOG_SYNC_SQL.equalsIgnoreCase(command)) {
                     liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                } else if (COMMANDS.CHANGELOG_SYNC_TO_TAG.equalsIgnoreCase(command)) {
+                    if ((commandParams == null) || commandParams.isEmpty()) {
+                        throw new CommandLineParsingException(
+                            String.format(coreBundle.getString("command.requires.tag"),
+                                COMMANDS.CHANGELOG_SYNC_TO_TAG));
+                    }
+
+                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts),
+                        new LabelExpression(labels));
+                } else if (COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL.equalsIgnoreCase(command)) {
+                    if ((commandParams == null) || commandParams.isEmpty()) {
+                        throw new CommandLineParsingException(
+                            String.format(coreBundle.getString("command.requires.tag"),
+                                COMMANDS.CHANGELOG_SYNC_TO_TAG_SQL));
+                    }
+
+                    liquibase.changeLogSync(commandParams.iterator().next(), new Contexts(contexts),
+                        new LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.MARK_NEXT_CHANGESET_RAN.equalsIgnoreCase(command)) {
                     liquibase.markNextChangeSetRan(new Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.MARK_NEXT_CHANGESET_RAN_SQL.equalsIgnoreCase(command)) {
@@ -2117,6 +2142,8 @@ public class Main {
         private static final String CALCULATE_CHECKSUM = "calculateCheckSum";
         private static final String CHANGELOG_SYNC = "changelogSync";
         private static final String CHANGELOG_SYNC_SQL = "changelogSyncSQL";
+        private static final String CHANGELOG_SYNC_TO_TAG = "changelogSyncToTag";
+        private static final String CHANGELOG_SYNC_TO_TAG_SQL = "changelogSyncToTagSQL";
         private static final String CLEAR_CHECKSUMS = "clearCheckSums";
         private static final String DB_DOC = "dbDoc";
         private static final String DIFF = "diff";
