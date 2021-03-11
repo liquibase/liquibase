@@ -75,6 +75,11 @@ public class HistoryCommand extends AbstractCommand {
         public List<DeploymentDetails> getDeployments() {
             return deployments;
         }
+
+        @Override
+        public String toString() {
+            return deployments.size() + " past deployments";
+        }
     }
 
     public static class DeploymentDetails {

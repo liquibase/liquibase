@@ -13,8 +13,8 @@ public class CommandScope {
     private final SortedSet<LiquibaseCommand> commandPipeline;
     private final SortedMap<String, CommandArgumentDefinition> arguments = new TreeMap<>();
 
-    private final Map<String, Object> argumentValues = new HashMap<>();
-    private final Map<String, Object> resultValues = new HashMap<>();
+    private final SortedMap<String, Object> argumentValues = new TreeMap<>();
+    private final SortedMap<String, Object> resultValues = new TreeMap<>();
 
     private PrintWriter output;
     private OutputStream outputStream;
@@ -133,6 +133,10 @@ public class CommandScope {
 
     public Object getResult(String key) {
         return resultValues.get(key);
+    }
+
+    public SortedMap<String, Object> getResults() {
+        return Collections.unmodifiableSortedMap(resultValues);
     }
 
     public void execute() throws CommandExecutionException {
