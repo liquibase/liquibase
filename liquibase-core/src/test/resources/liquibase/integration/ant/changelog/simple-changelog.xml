@@ -8,4 +8,20 @@
             <column name="last_name" value="name"/>
         </insert>
     </changeSet>
+    
+    <changeSet id="2" author="testuser">
+        <tagDatabase tag="version_1.0"/>
+    </changeSet>
+
+    <changeSet id="3" author="testuser">
+        <createTable tableName="groups">
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="testuser">
+        <tagDatabase tag="version_2.0"/>
+    </changeSet>
 </databaseChangeLog>
