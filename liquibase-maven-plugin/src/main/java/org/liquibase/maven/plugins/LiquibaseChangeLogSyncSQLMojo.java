@@ -30,13 +30,19 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	 */
 	protected File migrationSqlOutputFile;
 
+	/**
+	 * Update to the changeSet with the given tag command.
+	 * @parameter property="liquibase.toTag"
+	 */
+	protected String toTag;
+
 	/** The writer for writing the migration SQL. */
 	private Writer outputWriter;
 
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-        liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels), outputWriter);
+		liquibase.changeLogSync(toTag, new Contexts(contexts), new LabelExpression(labels), outputWriter);
 	}
 
 	@Override
