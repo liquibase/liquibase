@@ -31,4 +31,4 @@ if "%JAVA_HOME%"=="" (
     set JAVA_PATH=%JAVA_HOME%\bin\java
 )
 
-"%JAVA_PATH%" -cp "%LIQUIBASE_HOME%\lib\h2-1.4.200.jar;%LIQUIBASE_HOME%\liquibase.jar" liquibase.example.StartH2Main
+"%JAVA_PATH%" -cp "%LIQUIBASE_HOME%\lib\h2-1.4.200.jar;%LIQUIBASE_HOME%\liquibase.jar" liquibase.example.StartH2Main --username=dbuser --password=letmein

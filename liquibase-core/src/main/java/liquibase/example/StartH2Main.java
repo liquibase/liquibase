@@ -1,6 +1,11 @@
 package liquibase.example;
 
-import java.lang.reflect.InvocationTargetException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -11,13 +16,15 @@ public class StartH2Main {
 
     private static final String dbPort = "9090";
     private static final String webPort = "8090";
-    private static final String username = "dbuser";
-    private static final String password = "letmein";
+    private static String username;
+    private static String password;
 
     public static void main(String[] args) throws Exception {
         System.out.println("Starting Example H2 Database...");
         System.out.println("NOTE: The database does not persist data, so stopping and restarting this process will reset it back to a blank database");
         System.out.println();
+
+        parseUsernameAndPassword(args);
 
         Class.forName("org.h2.Driver");
 
@@ -100,4 +107,19 @@ public class StartH2Main {
         return url;
     }
 
+    private static void parseUsernameAndPassword(String[] args) throws Exception {
+        Options options = new Options();
+        Option argUsername = new Option("u", "username", true, "Database username");
+        argUsername.setRequired(true);
+        options.addOption(argUsername);
+
+        Option argPassword = new Option("p", "password", true, "Database password");
+        argPassword.setRequired(true);
+        options.addOption(argPassword);
+
+        CommandLineParser parser = new DefaultParser();
+        CommandLine commandLine = parser.parse(options, args);
+        username = commandLine.getOptionValue("username");
+        password = commandLine.getOptionValue("password");
+    }
 }
