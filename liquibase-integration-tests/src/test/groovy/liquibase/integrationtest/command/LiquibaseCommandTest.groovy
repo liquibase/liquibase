@@ -1,12 +1,12 @@
 package liquibase.integrationtest.command
 
-
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
+import liquibase.database.core.HsqlDatabase
 import liquibase.database.jvm.JdbcConnection
-import liquibase.integration.commandline.CommandLineUtils
 import liquibase.integrationtest.TestDatabaseConnections
+import liquibase.integrationtest.TestSetup
 import liquibase.util.StringUtil
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -32,6 +32,12 @@ class LiquibaseCommandTest extends Specification {
             expectedOutputChecks.add(spec.expectedOutput)
         }
 
+        if (spec.setup != null) {
+            for (def setup : spec.setup) {
+                setup.setup(specPermutation.connectionStatus)
+            }
+        }
+
         when:
         def commandScope = new CommandScope(spec.command as String[])
 
@@ -47,7 +53,7 @@ class LiquibaseCommandTest extends Specification {
         def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
 
         then:
-        def e = thrown(spec.expectedException)
+//        def e = thrown(spec.expectedException)
 
         if (spec.expectedException != null) {
             assert e.toString() == spec.expectedException.toString()
@@ -56,9 +62,27 @@ class LiquibaseCommandTest extends Specification {
 
         for (def expectedOutputCheck : expectedOutputChecks) {
             if (expectedOutputCheck instanceof String) {
-                assert fullOutput.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck))): "command output did not contain expectedOutput"
+                assert fullOutput.contains(StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(expectedOutputCheck))): """
+Command output:
+-----------------------------------------
+${fullOutput}
+-----------------------------------------
+Did not contain:
+-----------------------------------------
+${expectedOutputCheck}
+-----------------------------------------
+""".trim()
             } else if (expectedOutputCheck instanceof Pattern) {
-                assert expectedOutputCheck.matcher(fullOutput).find();
+                assert expectedOutputCheck.matcher(fullOutput.replace("\r", "").trim()).find() : """
+Command output:
+-----------------------------------------
+${fullOutput}
+-----------------------------------------
+Did not match regexp:
+-----------------------------------------
+${expectedOutputCheck.toString()}
+-----------------------------------------
+""".trim()
             } else {
                 fail "Unknown expectedOutput check: ${expectedOutputCheck.class.name}"
             }
@@ -91,7 +115,6 @@ class LiquibaseCommandTest extends Specification {
 
     static List<Spec> collectSpecs() {
         def loader = new GroovyClassLoader()
-
         def returnList = new ArrayList<Spec>()
 
         for (def specFile : collectSpecFiles()) {
@@ -118,6 +141,10 @@ class LiquibaseCommandTest extends Specification {
         def allSpecs = collectSpecs()
 
         for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+            if (!(database instanceof HsqlDatabase)) {
+                continue
+            }
+
             for (Spec spec : allSpecs)
                 returnList.add(new SpecPermutation(
                         spec: spec,
@@ -143,13 +170,15 @@ class LiquibaseCommandTest extends Specification {
          */
         List<String> command
 
+        List<TestSetup> setup
+
+
         /**
-         * Check(s) for the command output.
+         * Checks for the command output.
          * <li>If a string, assert that the output CONTAINS the string.
          * <li>If a regexp, assert that the regexp FINDs the string.
-         * <li>Can be an array of strings or regex's for multiple checks.
          */
-        Object expectedOutput
+        List<Object> expectedOutput
 
         Map<String, Object> expectedResults = new HashMap<>()
 
