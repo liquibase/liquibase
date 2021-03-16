@@ -92,7 +92,7 @@ public class DropAllCommand extends AbstractCommand {
                 DATABASE_ARG.getValue(commandScope).dropDatabaseObjects(schema);
             }
             if (hubUpdater != null && (doSyncHub || HUB_CONNECTION_ID.getValue(commandScope) != null)) {
-                hubUpdater.syncHub(CHANGELOG_FILE_ARG.getValue(commandScope), DATABASE_ARG.getValue(commandScope), changeLog, HUB_CONNECTION_ID.getValue(commandScope));
+                hubUpdater.syncHub(CHANGELOG_FILE_ARG.getValue(commandScope), changeLog, HUB_CONNECTION_ID.getValue(commandScope));
             }
         } catch (DatabaseException e) {
             throw e;
