@@ -17,7 +17,7 @@ public class HubConfiguration implements ConfigurationDefinitionHolder {
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_API_KEY;
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_URL;
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_MODE;
-    public static final ConfigurationDefinition<String> LIQUIBASE_HUB_LOGLEVEL;
+    public static final ConfigurationDefinition<Level> LIQUIBASE_HUB_LOGLEVEL;
 
     static {
         ConfigurationDefinition.Builder builder = new ConfigurationDefinition.Builder("liquibase.hub");
@@ -48,9 +48,9 @@ public class HubConfiguration implements ConfigurationDefinitionHolder {
                 .setDefaultValue("all")
                 .build();
 
-        LIQUIBASE_HUB_LOGLEVEL = builder.define("logLevel", String.class)
+        LIQUIBASE_HUB_LOGLEVEL = builder.define("logLevel", Level.class)
                 .setDescription("Log level for filtering log messages to send to Liquibase Hub during operations. Values can be any acceptable log level.")
-                .setDefaultValue("INFO")
+                .setDefaultValue(Level.INFO)
                 .setValueHandler(value -> {
                     if (value == null) {
                         return null;
@@ -64,14 +64,14 @@ public class HubConfiguration implements ConfigurationDefinitionHolder {
                                 logLevel = Level.parse(((String) value).toUpperCase());
                             } catch (IllegalArgumentException e) {
                                 String message = "An invalid liquibase.hub.logLevel value of " + value + " detected. Acceptable values are " + StringUtil.join(validValues, ",");
-                                Scope.getCurrentScope().getLog(liquibase.configuration.HubConfiguration.class).warning(message);
+                                Scope.getCurrentScope().getLog(liquibase.hub.HubConfiguration.class).warning(message);
                             }
                             value = logLevel.toString();
                         }
 
                     }
 
-                    return value.toString();
+                    return Level.parse(value.toString());
                 })
                 .build();
     }

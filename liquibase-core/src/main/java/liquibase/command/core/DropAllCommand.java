@@ -125,7 +125,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
                 database.dropDatabaseObjects(schema);
             }
             if (hubUpdater != null && (doSyncHub || hubConnectionId != null)) {
-                hubUpdater.syncHub(changeLogFile, database, changeLog, hubConnectionId);
+                hubUpdater.syncHub(changeLogFile, changeLog, hubConnectionId);
             }
         } catch (DatabaseException e) {
             throw e;

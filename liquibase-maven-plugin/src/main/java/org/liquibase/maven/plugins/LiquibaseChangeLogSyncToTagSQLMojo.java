@@ -6,18 +6,22 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 
 /**
- * <p>Generates SQL that marks all unapplied changes as applied.</p>
+ *
+ * <p>Generates SQL that marks all unapplied changes up to and including a specified tag
+ * as applied.</p>
  * 
- * @author JAmes Atwill
- * @goal changelogSyncSQL
+ * @author   James Atwill
+ * @goal     changelogSyncToTagSQL
+ *
  */
-public class LiquibaseChangeLogSyncSQLMojo extends
+public class LiquibaseChangeLogSyncToTagSQLMojo extends
 		AbstractLiquibaseChangeLogMojo {
 
 	/**
@@ -38,6 +42,13 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 
 	/** The writer for writing the migration SQL. */
 	private Writer outputWriter;
+
+	@Override
+	protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
+		if (toTag == null || toTag.isEmpty()) {
+			throw new MojoFailureException("\nYou must specify a changelog tag.");
+		}
+	}
 
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)

@@ -167,8 +167,7 @@ public class HubUpdater {
             // Send the COMPLETE operation event
             // Capture the Liquibase Hub log level to use for filtering
             //
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            Level currentLevel = Level.parse(hubConfiguration.getLiquibaseHubLogLevel());
+            Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
 
             final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             hubService.sendOperationEvent(updateOperation, new OperationEvent()
@@ -227,8 +226,7 @@ public class HubUpdater {
             //
             // Capture the current log level to use for filtering
             //
-            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
-            Level currentLevel = Level.parse(hubConfiguration.getLiquibaseHubLogLevel());
+            Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
 
             final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             hubService.sendOperationEvent(updateOperation, new OperationEvent()

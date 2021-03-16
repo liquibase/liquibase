@@ -16,6 +16,8 @@ import java.io.InputStream;
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
+    final ClassLoaderResourceAccessor fallbackResourceAccessor = new ClassLoaderResourceAccessor();
+
     @Override
     @java.lang.SuppressWarnings("squid:S2095")
     public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
@@ -33,7 +35,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 .replaceFirst("https?://", "");
 
 
-        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), new ClassLoaderResourceAccessor());
+        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Scope.getCurrentScope().getResourceAccessor(), fallbackResourceAccessor);
         InputStreamList streams = resourceAccessor.openStreams(null, path);
         if (streams.isEmpty()) {
             log.fine("Unable to resolve XML entity locally. Will load from network.");
