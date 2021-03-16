@@ -310,10 +310,15 @@ public class HubChangeExecListener extends AbstractChangeExecListener
     }
 
     private String getCurrentLog() {
+        //
+        // Capture the current log level to use for filtering
+        //
+        Level currentLevel = HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getCurrentValue();
+
         BufferedLogService bufferedLogService =
            Scope.getCurrentScope().get(BufferedLogService.class.getName(), BufferedLogService.class);
         if (bufferedLogService != null) {
-            return bufferedLogService.getLogAsString(Level.INFO);
+            return bufferedLogService.getLogAsString(currentLevel);
         }
         return null;
     }

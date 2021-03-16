@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
-public class ChangeLogSyncTask extends AbstractChangeLogBasedTask {
+public class ChangeLogSyncToTagTask extends AbstractChangeLogBasedTask {
     private String toTag;
 
     @Override
