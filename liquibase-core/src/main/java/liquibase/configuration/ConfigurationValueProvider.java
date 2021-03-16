@@ -1,7 +1,5 @@
 package liquibase.configuration;
 
-import liquibase.configuration.core.SystemEnvironmentValueProvider;
-
 /**
  * Defines a way for {@link LiquibaseConfiguration} to find configured values.
  */
@@ -15,7 +13,7 @@ public interface ConfigurationValueProvider {
     /**
      * Lookup the given key in this source.
      * It is up to the implementation to provide any "smoothing" or translation of key names.
-     * For example, {@link SystemEnvironmentValueProvider} will look check environment variables containing _'s rather than .'s.
+     * For example, a SystemEnvironmentValueProvider will look check environment variables containing _'s rather than .'s.
      *
      * @return null if the key is not defined in this provider.
      */
