@@ -1,5 +1,6 @@
 package liquibase.integrationtest.command
 
+import liquibase.CatalogAndSchema
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
@@ -32,9 +33,13 @@ class LiquibaseCommandTest extends Specification {
             expectedOutputChecks.add(spec.expectedOutput)
         }
 
+        String changeLogFile = null
         if (spec.setup != null) {
             for (def setup : spec.setup) {
                 setup.setup(specPermutation.connectionStatus)
+                if (setup.getChangeLogFile() != null) {
+                    changeLogFile = setup.getChangeLogFile()
+                }
             }
         }
 
@@ -45,8 +50,16 @@ class LiquibaseCommandTest extends Specification {
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(specPermutation.connectionStatus.connection))
 
+        String defaultSchemaName = database.getDefaultSchemaName()
+        CatalogAndSchema[] catalogAndSchemas = new CatalogAndSchema[1]
+        catalogAndSchemas[0] = new CatalogAndSchema(null, defaultSchemaName)
+
         commandScope.addArgumentValue("database", database)
+        commandScope.addArgumentValue("schemas", catalogAndSchemas)
         commandScope.setOutput(outputStream)
+        if (changeLogFile != null) {
+            commandScope.addArgumentValue("changeLogFile", changeLogFile)
+        }
 
         commandScope.execute()
 
@@ -189,5 +202,6 @@ ${expectedOutputCheck.toString()}
         Spec spec
         String databaseName
         TestDatabaseConnections.ConnectionStatus connectionStatus
+        String changeLogFile
     }
 }
