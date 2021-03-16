@@ -57,7 +57,6 @@ public class HubUpdater {
      * If there is an error or the Hub is not available it returns null
      *
      * @param  operationType         Operation type (UPDATE or ROLLBACK)
-     * @param  database              Database object for connection
      * @param  connection            Connection for this operation
      * @param  changeLogFile         Path to DatabaseChangelog for this operation
      * @param  contexts              Contexts to use for filtering
@@ -69,7 +68,6 @@ public class HubUpdater {
      * @throws LiquibaseException    Thrown by Liquibase core
      */
     public Operation preUpdateHub(String operationType,
-                                  Database database,
                                   Connection connection,
                                   String changeLogFile,
                                   Contexts contexts,
@@ -90,12 +88,12 @@ public class HubUpdater {
         //
         // Perform syncHub
         //
-        syncHub(changeLogFile, database, changeLog, connection.getId());
+        syncHub(changeLogFile, changeLog, connection.getId());
 
         //
         // Load up metadata for database/driver version
         //
-        loadDatabaseMetadata(database);
+        loadDatabaseMetadata();
 
         //
         // Send the START operation event
@@ -167,7 +165,11 @@ public class HubUpdater {
 
             //
             // Send the COMPLETE operation event
+            // Capture the Liquibase Hub log level to use for filtering
             //
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            Level currentLevel = Level.parse(hubConfiguration.getLiquibaseHubLogLevel());
+
             final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             hubService.sendOperationEvent(updateOperation, new OperationEvent()
                 .setEventType("COMPLETE")
@@ -180,7 +182,7 @@ public class HubUpdater {
                 )
                 .setOperationEventLog(
                     new OperationEvent.OperationEventLog()
-                        .setLogMessage(bufferLog.getLogAsString(Level.INFO))
+                        .setLogMessage(bufferLog.getLogAsString(currentLevel))
                         .setTimestampLog(startTime)
                 )
             );
@@ -221,6 +223,13 @@ public class HubUpdater {
             if (updateOperation == null || hubIsNotAvailable(changeLog.getChangeLogId())) {
                 return;
             }
+
+            //
+            // Capture the current log level to use for filtering
+            //
+            HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
+            Level currentLevel = Level.parse(hubConfiguration.getLiquibaseHubLogLevel());
+
             final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             hubService.sendOperationEvent(updateOperation, new OperationEvent()
                 .setEventType("COMPLETE")
@@ -233,7 +242,7 @@ public class HubUpdater {
                 )
                 .setOperationEventLog(
                     new OperationEvent.OperationEventLog()
-                        .setLogMessage(bufferLog.getLogAsString(Level.INFO))
+                        .setLogMessage(bufferLog.getLogAsString(currentLevel))
                 )
             );
 
@@ -258,7 +267,7 @@ public class HubUpdater {
         return !hubService.isOnline() || changeLogId == null;
     }
 
-    public void syncHub(String changeLogFile, Database database, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) {
+    public void syncHub(String changeLogFile, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) {
     final SyncHubCommand syncHub = (SyncHubCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("syncHub");
         syncHub.setChangeLogFile(changeLogFile);
         syncHub.setUrl(database.getConnection().getURL());
@@ -521,7 +530,7 @@ public class HubUpdater {
     //
     // Put database/driver version information in the details map
     //
-    private void loadDatabaseMetadata(Database database) throws DatabaseException, SQLException {
+    private void loadDatabaseMetadata() throws DatabaseException, SQLException {
         if (database.getConnection() == null) {
             return;
         }
