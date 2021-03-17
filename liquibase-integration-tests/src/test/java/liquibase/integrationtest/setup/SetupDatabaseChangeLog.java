@@ -38,12 +38,6 @@ public class SetupDatabaseChangeLog extends TestSetup {
 
     @Override
     public String getChangeLogFile() {
-        try {
-            URL url = Thread.currentThread().getContextClassLoader().getResource(changeLog);
-            return url.getFile();
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return changeLog;
     }
 }

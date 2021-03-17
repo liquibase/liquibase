@@ -7,4 +7,5 @@ liquibase.command.core.HistoryCommand
 liquibase.command.core.RegisterChangeLogCommand
 liquibase.command.core.SnapshotCommand
 liquibase.command.core.SyncHubCommand
+liquibase.command.core.UpdateCommand
 liquibase.sdk.convert.ConvertCommand

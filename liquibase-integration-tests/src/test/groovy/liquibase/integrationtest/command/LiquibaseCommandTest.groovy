@@ -55,6 +55,7 @@ class LiquibaseCommandTest extends Specification {
         catalogAndSchemas[0] = new CatalogAndSchema(null, defaultSchemaName)
 
         commandScope.addArgumentValue("database", database)
+        commandScope.addArgumentValue("url", database.getConnection().getURL());
         commandScope.addArgumentValue("schemas", catalogAndSchemas)
         commandScope.setOutput(outputStream)
         if (changeLogFile != null) {
