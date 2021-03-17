@@ -10,9 +10,13 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * An implementation of {@link FileSystemResourceAccessor} that builds up the file roots based on the passed {@link ClassLoader}.
@@ -68,7 +72,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                             Scope.getCurrentScope().getLog(getClass()).info("No filesystem provider for URL " + url.toExternalForm() + ". Will rely on classloader logic for listing files.");
                         }
                     } catch (FileSystemNotFoundException fsnfe) {
-                        Scope.getCurrentScope().getLog(getClass()).info("Configured classpath location " + url.toString() + " does not exist");
+                        if (url.toExternalForm().matches(".*!.*!.*")) {
+                            //spring sometimes sets up urls with nested urls like jar:file:/path/to/demo-0.0.1-SNAPSHOT.jar!/BOOT-INF/lib/mssql-jdbc-8.2.2.jre8.jar!/ which are not readable.
+                            //That is expected, and will be handled by the SpringResourceAccessor
+                        } else {
+                            Scope.getCurrentScope().getLog(getClass()).info("Configured classpath location " + url.toString() + " does not exist");
+                        }
                     } catch (Throwable e) {
                         Scope.getCurrentScope().getLog(getClass()).warning("Cannot create filesystem for url " + url.toExternalForm() + ": " + e.getMessage(), e);
                     }
@@ -139,7 +148,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             // If this is a simple file name then set the
             // relativeTo value as if it is a root path
             //
-            if (! relativeTo.contains("/") && relativeTo.contains(".")) {
+            if (!relativeTo.contains("/") && relativeTo.contains(".")) {
                 relativeTo = "/";
             }
             streamPath = relativeTo + "/" + streamPath;
@@ -230,31 +239,67 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         while (resources.hasMoreElements()) {
             final URL url = resources.nextElement();
+            final String urlExternalForm = url.toExternalForm();
 
             try {
-                final InputStream inputStream = url.openStream();
+                if (urlExternalForm.startsWith("jar:file:") && urlExternalForm.contains("!")) {
+                    //We can search the jar directly
+                    String jarPath = url.getPath();
+                    jarPath = jarPath.substring(5, jarPath.indexOf("!"));
+                    try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name()))) {
+                        String comparePath = path;
+                        if (comparePath.startsWith("/")) {
+                            comparePath = "/"+comparePath;
+                        }
+                        Enumeration<JarEntry> entries = jar.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            String name = entry.getName();
+                            if (name.startsWith(comparePath) && !comparePath.equals(name)) {
+                                if (entry.isDirectory()) {
+                                    if (!includeDirectories) {
+                                        continue;
+                                    }
 
-                final String fileList = StreamUtil.readStreamAsString(inputStream);
-                if (!fileList.isEmpty()) {
-                    for (String childName : fileList.split("\n")) {
-                        String childPath = (path + "/" + childName).replaceAll("//+", "/");
+                                    if (recursive || !name.substring(comparePath.length()).contains("/")) {
+                                        returnSet.add(name);
+                                    }
+                                } else {
+                                    if (includeFiles) {
+                                        if (recursive || !name.substring(comparePath.length()).contains("/")) {
+                                            returnSet.add(name);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    //fall back to seeing if the stream lists sub-directories
+                    final InputStream inputStream = url.openStream();
 
-                        if (isDirectory(childPath)) {
-                            if (includeDirectories) {
-                                returnSet.add(childPath);
-                            }
-                            if (recursive) {
-                                returnSet.addAll(listFromClassLoader(childPath, recursive, includeFiles, includeDirectories));
-                            }
-                        } else {
-                            if (includeFiles) {
-                                returnSet.add(childPath);
+                    final String fileList = StreamUtil.readStreamAsString(inputStream);
+                    if (!fileList.isEmpty()) {
+                        for (String childName : fileList.split("\n")) {
+                            String childPath = (path + "/" + childName).replaceAll("//+", "/");
+
+                            if (isDirectory(childPath)) {
+                                if (includeDirectories) {
+                                    returnSet.add(childPath);
+                                }
+                                if (recursive) {
+                                    returnSet.addAll(listFromClassLoader(childPath, recursive, includeFiles, includeDirectories));
+                                }
+                            } else {
+                                if (includeFiles) {
+                                    returnSet.add(childPath);
+                                }
                             }
                         }
                     }
                 }
             } catch (IOException e) {
-                Scope.getCurrentScope().getLog(getClass()).severe("Cannot list resources in " + url.toExternalForm() + ": " + e.getMessage(), e);
+                Scope.getCurrentScope().getLog(getClass()).severe("Cannot list resources in " + urlExternalForm + ": " + e.getMessage(), e);
             }
         }
         return returnSet;

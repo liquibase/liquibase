@@ -102,10 +102,10 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
             if (url.contains("!")) {
                 return url.replaceFirst(".*!", "");
             } else {
-                while (!resourceLoader.getResource("classpath:"+url).exists()) {
+                while (!resourceLoader.getResource("classpath:" + url).exists()) {
                     String newUrl = url.replaceFirst("^/?.*?/", "");
                     if (newUrl.equals(url)) {
-                        throw new UnexpectedLiquibaseException("Could determine path for "+resource.getURL().toExternalForm());
+                        throw new UnexpectedLiquibaseException("Could determine path for " + resource.getURL().toExternalForm());
                     }
                     url = newUrl;
                 }
@@ -115,7 +115,7 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
         } catch (IOException e) {
             //the path gets stored in the databasechangelog table, so if it gets returned incorrectly it will cause future problems.
             //so throw a breaking error now rather than wait for bigger problems down the line
-            throw new UnexpectedLiquibaseException("Cannot determine resource path for "+resource.getDescription());
+            throw new UnexpectedLiquibaseException("Cannot determine resource path for " + resource.getDescription());
         }
     }
 
@@ -163,12 +163,12 @@ public class SpringResourceAccessor extends AbstractResourceAccessor {
      * Default implementation adds "classpath:" and removes duplicated /'s and classpath:'s
      */
     protected String finalizeSearchPath(String searchPath) {
-        searchPath = "classpath:"+searchPath;
-        searchPath = searchPath
-                .replaceAll("classpath\\*:", "classpath:")
-                .replace("\\", "/")
-                .replaceAll("//+", "/")
-                .replace("classpath:classpath:", "classpath:");
+        searchPath = searchPath.replace("\\", "/");
+        searchPath = searchPath.replaceAll("classpath\\*?:", "");
+        searchPath = "/" + searchPath;
+        searchPath = searchPath.replaceAll("//+", "/");
+
+        searchPath = "classpath*:" + searchPath;
 
         return searchPath;
     }

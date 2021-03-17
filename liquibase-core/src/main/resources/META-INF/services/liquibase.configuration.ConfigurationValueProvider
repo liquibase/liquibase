@@ -1,3 +1,2 @@
-liquibase.configuration.core.SystemEnvironmentValueProvider
 liquibase.configuration.core.SystemPropertyValueProvider
 liquibase.configuration.core.ScopeValueProvider
