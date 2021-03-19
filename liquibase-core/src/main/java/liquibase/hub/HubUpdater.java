@@ -11,8 +11,8 @@ import liquibase.command.CommandFactory;
 import liquibase.command.CommandResult;
 import liquibase.command.core.RegisterChangeLogCommand;
 import liquibase.command.core.SyncHubCommand;
-import liquibase.configuration.CurrentValue;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -409,8 +409,8 @@ public class HubUpdater {
                 // If there is no liquibase.hub.mode setting then add one with value 'all'
                 // Do not update liquibase.hub.mode if it is already set
                 //
-                CurrentValue<String> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentValueDetails();
-                if (hubModeProperty.getDefaultValueUsed()) {
+                ConfiguredValue<String> hubModeProperty = HubConfiguration.LIQUIBASE_HUB_MODE.getCurrentConfiguredValue();
+                if (ConfigurationDefinition.wasDefaultValueUsed(hubModeProperty)) {
                     writeToPropertiesFile(defaultsFile, "\nliquibase.hub.mode=all\n");
                     message = "* Updated properties file " + defaultsFile + " to set liquibase.hub properties";
                     Scope.getCurrentScope().getUI().sendMessage(message);

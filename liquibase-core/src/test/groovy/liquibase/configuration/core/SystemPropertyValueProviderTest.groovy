@@ -24,7 +24,7 @@ class SystemPropertyValueProviderTest extends Specification {
             }
         }
 
-        def value = provider.getValue(key)
+        def value = provider.getProvidedValue(key)
 
         then:
         if (value == null) {

@@ -1,11 +1,7 @@
 package liquibase.integration.spring;
 
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Liquibase;
-import liquibase.Scope;
-import liquibase.configuration.CurrentValue;
-import liquibase.GlobalConfiguration;
+import liquibase.*;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -251,10 +247,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-		final CurrentValue<Boolean> shouldRunProperty = GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails();
+		final ConfiguredValue<Boolean> shouldRunProperty = GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
 
-		if (!shouldRunProperty.getValue()) {
-            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " +shouldRunProperty.getSource() + " was set to false");
+		if (!(Boolean) shouldRunProperty.getValue()) {
+            Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run because " +shouldRunProperty.getProvidedValue().describe() + " was set to false");
             return;
 		}
 		if (!shouldRun) {

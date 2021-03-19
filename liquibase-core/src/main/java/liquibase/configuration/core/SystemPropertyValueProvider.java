@@ -1,7 +1,8 @@
 package liquibase.configuration.core;
 
+import liquibase.configuration.AbstractConfigurationValueProvider;
 import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.CurrentValueSourceDetails;
+import liquibase.configuration.ProvidedValue;
 import liquibase.util.StringUtil;
 
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Properties;
  * <p>
  * To improve usability, it will search for the given key case insensitively.
  */
-public class SystemPropertyValueProvider implements ConfigurationValueProvider {
+public class SystemPropertyValueProvider extends AbstractConfigurationValueProvider {
 
     @Override
     public int getPrecedence() {
@@ -20,7 +21,7 @@ public class SystemPropertyValueProvider implements ConfigurationValueProvider {
     }
 
     @Override
-    public CurrentValueSourceDetails getValue(String key) {
+    public ProvidedValue getProvidedValue(String key) {
         if (key == null) {
             return null;
         }
@@ -29,7 +30,7 @@ public class SystemPropertyValueProvider implements ConfigurationValueProvider {
 
         String propValue = systemProperties.getProperty(key);
         if (StringUtil.isNotEmpty(propValue)) {
-            return new CurrentValueSourceDetails(propValue, "System property", key);
+            return new ProvidedValue(key, key, propValue, "System property", this);
         }
 
         //
@@ -38,7 +39,7 @@ public class SystemPropertyValueProvider implements ConfigurationValueProvider {
         for (Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
             String foundKey = (String) entry.getKey();
             if (foundKey.equalsIgnoreCase(key)) {
-                return new CurrentValueSourceDetails(entry.getValue(),"System property", foundKey);
+                return new ProvidedValue(key, foundKey, entry.getValue(),"System property", this);
             }
         }
         return null;

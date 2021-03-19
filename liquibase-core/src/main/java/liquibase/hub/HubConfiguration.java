@@ -2,7 +2,7 @@ package liquibase.hub;
 
 import liquibase.Scope;
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.ConfigurationDefinitionHolder;
+import liquibase.configuration.AutoloadedConfigurations;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import java.util.logging.Level;
 /**
  * Configuration container for global properties.
  */
-public class HubConfiguration implements ConfigurationDefinitionHolder {
+public class HubConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_API_KEY;
     public static final ConfigurationDefinition<String> LIQUIBASE_HUB_URL;

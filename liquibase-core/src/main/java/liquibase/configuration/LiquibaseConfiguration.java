@@ -2,7 +2,6 @@ package liquibase.configuration;
 
 import liquibase.Scope;
 import liquibase.SingletonObject;
-import liquibase.integration.servlet.LiquibaseServletListener;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
@@ -42,8 +41,8 @@ public class LiquibaseConfiguration implements SingletonObject {
     public void init(Scope scope) {
         configurationValueProviders.clear();
         ServiceLocator serviceLocator = scope.getServiceLocator();
-        final List<ConfigurationDefinitionHolder> containers = serviceLocator.findInstances(ConfigurationDefinitionHolder.class);
-        for (ConfigurationDefinitionHolder container : containers) {
+        final List<AutoloadedConfigurations> containers = serviceLocator.findInstances(AutoloadedConfigurations.class);
+        for (AutoloadedConfigurations container : containers) {
             Scope.getCurrentScope().getLog(getClass()).fine("Found ConfigurationDefinitions in " + container.getClass().getName());
         }
 
@@ -53,7 +52,7 @@ public class LiquibaseConfiguration implements SingletonObject {
     /**
      * Adds a new {@link ConfigurationValueProvider} to the active collection of providers.
      */
-    public void addProvider(ConfigurationValueProvider valueProvider) {
+    public void registerProvider(ConfigurationValueProvider valueProvider) {
         this.configurationValueProviders.add(valueProvider);
     }
 
@@ -72,16 +71,13 @@ public class LiquibaseConfiguration implements SingletonObject {
      *
      * @return the value for the key, or null if not configured.
      */
-    public CurrentValueDetails getCurrentValue(String key) {
-        CurrentValueDetails details = null;
+    public ConfiguredValue getCurrentConfiguredValue(String key) {
+        ConfiguredValue details = new ConfiguredValue(key);
+
         for (ConfigurationValueProvider provider : configurationValueProviders) {
-            final CurrentValueSourceDetails providerValue = provider.getValue(key);
+            final ProvidedValue providerValue = provider.getProvidedValue(key);
 
             if (providerValue != null) {
-                if (details == null) {
-                    details = new CurrentValueDetails();
-                }
-
                 details.override(providerValue);
             }
         }

@@ -1,7 +1,7 @@
 package liquibase.configuration.core
 
 import liquibase.Scope
-import liquibase.configuration.CurrentValueSourceDetails
+import liquibase.configuration.ProvidedValue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -23,10 +23,10 @@ class ScopeValueProviderTest extends Specification {
         ]
 
         def passedKey = key
-        CurrentValueSourceDetails foundValue = Scope.child(env, new Scope.ScopedRunnerWithReturn() {
+        ProvidedValue foundValue = Scope.child(env, new Scope.ScopedRunnerWithReturn<ProvidedValue>() {
             @Override
-            Object run() throws Exception {
-                new ScopeValueProvider().getValue(passedKey)
+            ProvidedValue run() throws Exception {
+                new ScopeValueProvider().getProvidedValue(passedKey)
             }
         })
 

@@ -6,17 +6,34 @@ import spock.lang.Unroll
 
 class ConfigurationDefinitionTest extends Specification {
 
+    @Unroll
+    def "does not allow invalid keys"() {
+        when:
+        new ConfigurationDefinition.Builder(prefix).define(property, String).addAliasKey(alias)
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == expectedMessage
+
+        where:
+        prefix           | property      | alias           | expectedMessage
+        "test"           | "invalid-key" | "valid"         | "Invalid key format: test.invalid-key"
+        "invalid-prefix" | "invalid-key" | "valid"         | "Invalid prefix format: invalid-prefix"
+        "invalid-prefix" | "validValue"  | "valid"         | "Invalid prefix format: invalid-prefix"
+        "validPrefix"     | "validValue"  | "invalid-alias" | "Invalid alias format: invalid-alias"
+    }
+
     def "Can build and register"() {
         when:
-        def definition = new ConfigurationDefinition.Builder("test.can-build")
-                .define("test-property", String)
+        def definition = new ConfigurationDefinition.Builder("test.canBuild")
+                .define("testProperty", String)
                 .setDefaultValue("Default Value")
                 .setDescription("A description here")
                 .build()
 
         then:
         assert Scope.currentScope.getSingleton(LiquibaseConfiguration).getRegisteredDefinitions().contains(definition)
-        definition.key == "test.can-build.test-property"
+        definition.key == "test.canBuild.testProperty"
         definition.defaultValue == "Default Value"
         definition.description == "A description here"
     }
@@ -30,25 +47,25 @@ class ConfigurationDefinitionTest extends Specification {
                 .setDefaultValue(defaultValue)
                 .buildTemporary()
 
-        System.setProperty("test.current-value", "From from system")
+        System.setProperty("test.currentValue", "From from system")
         System.setProperty("test.other", "Alias set in system")
-        def currentValue = Scope.child(["test.current-value": "From scope"], new Scope.ScopedRunnerWithReturn<CurrentValue>() {
+        def currentValue = Scope.child(["test.currentValue": "From scope"], new Scope.ScopedRunnerWithReturn<ConfiguredValue>() {
             @Override
-            CurrentValue run() throws Exception {
-                return definition.getCurrentValueDetails()
+            ConfiguredValue run() throws Exception {
+                return definition.getCurrentConfiguredValue()
             }
         })
 
         then:
         currentValue.value == expectedValue
-        currentValue.source.describe() == expectedSource
-        currentValue.getDefaultValueUsed() == defaultValueUsed
+        currentValue.getProvidedValue().describe() == expectedSource
+        ConfigurationDefinition.wasDefaultValueUsed(currentValue) == defaultValueUsed
 
         where:
         key             | defaultValue         | expectedValue        | expectedSource                                                   | defaultValueUsed
-        "current-value" | "Default Value"      | "From scope"         | "Scoped value 'test.current-value'"                              | false
-        "unset-value"   | "Configured Default" | "Configured Default" | "Default value for 'test.unset-value'"                           | true
-        "unset-value"   | null                 | null                 | "No configuration or default value found for 'test.unset-value'" | false
+        "currentValue" | "Default Value"      | "From scope"         | "Scoped value 'test.currentValue'"                              | false
+        "unsetValue"   | "Configured Default" | "Configured Default" | "Default value 'test.unsetValue'"                           | true
+        "unsetValue"   | null                 | null                 | "No configuration or default value found 'test.unsetValue'" | false
 
     }
 
@@ -61,10 +78,10 @@ class ConfigurationDefinitionTest extends Specification {
                 .addAliasKey("other")
                 .buildTemporary()
 
-        def currentValue = Scope.child([(key): "From Scope"], new Scope.ScopedRunnerWithReturn<CurrentValue>() {
+        def currentValue = Scope.child([(key): "From Scope"], new Scope.ScopedRunnerWithReturn<ConfiguredValue>() {
             @Override
-            CurrentValue run() throws Exception {
-                return definition.getCurrentValueDetails()
+            ConfiguredValue run() throws Exception {
+                return definition.getCurrentConfiguredValue()
             }
         })
 
@@ -117,6 +134,44 @@ class ConfigurationDefinitionTest extends Specification {
         input   | expected           | expectedPlain
         "value" | "OBFUSCATED value" | "value"
         null    | "OBFUSCATED null"  | null
+    }
+
+    def convertValues() {
+        when:
+        def definition = new ConfigurationDefinition.Builder("test")
+                .define("property", Boolean)
+                .buildTemporary()
+
+        System.setProperty("test.property", "true")
+
+        then:
+        definition.getCurrentConfiguredValue().getValue() == Boolean.TRUE
+
+    }
+
+    def equalsAndHash() {
+        when:
+        def definition1 = new ConfigurationDefinition.Builder("test")
+                .define("property1", Boolean)
+                .buildTemporary()
+
+        def definition2 = new ConfigurationDefinition.Builder("test")
+                .define("property2", Boolean)
+                .buildTemporary()
+
+        def dupeDefinition1 = new ConfigurationDefinition.Builder("test")
+                .define("property1", Boolean)
+                .buildTemporary()
+
+        then:
+        definition1.equals(definition1)
+        definition1.hashCode() == definition1.hashCode()
+
+        !definition1.equals(definition2)
+        definition1.hashCode() != definition2.hashCode()
+
+        definition1.equals(dupeDefinition1)
+        definition1.hashCode() == dupeDefinition1.hashCode()
 
     }
 }
