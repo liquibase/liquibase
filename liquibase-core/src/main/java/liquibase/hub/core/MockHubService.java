@@ -83,6 +83,11 @@ public class MockHubService implements HubService {
     }
 
     @Override
+    public HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException {
+        return null;
+    }
+
+    @Override
     public void setRanChangeSets(Connection connectionId, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         sentObjects.computeIfAbsent("setRanChangeSets/" + connectionId, k -> new ArrayList<>()).addAll(ranChangeSets);
     }
@@ -108,12 +113,16 @@ public class MockHubService implements HubService {
 
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
+        return getHubChangeLog(changeLogId, "*");
+    }
+
+    @Override
+    public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
         for (HubChangeLog changeLog : returnChangeLogs) {
             if (String.valueOf(changeLog.getId()).equals(String.valueOf(changeLogId))) {
                 return changeLog;
             }
         }
-
         return null;
     }
 
