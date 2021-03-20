@@ -196,13 +196,6 @@ public class Main {
                 Main main = new Main();
 
                 try {
-                    if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
-                        Scope.getCurrentScope().getUI().sendErrorMessage((
-                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        GlobalConfiguration.SHOULD_RUN.getKey())));
-                        return 0;
-                    }
-
                     if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                         main.printHelp(System.out);
                         return 0;
@@ -328,6 +321,12 @@ public class Main {
 
                     Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
+                    if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+                        Scope.getCurrentScope().getUI().sendErrorMessage((
+                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
+                                        GlobalConfiguration.SHOULD_RUN.getKey())));
+                        return 0;
+                    }
 
                     if (setupNeeded(main)) {
                         List<String> setupMessages = main.checkSetup();
