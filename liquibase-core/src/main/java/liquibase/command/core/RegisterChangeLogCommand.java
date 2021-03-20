@@ -33,7 +33,11 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
     private String changeLogFile;
     private Map<String, Object> argsMap = new HashMap<>();
     private UUID hubProjectId;
+    private String hubProjectName;
 
+    public void setProjectName(String hubProjectName) {
+        this.hubProjectName = hubProjectName;
+    }
 
     public void setHubProjectId(UUID hubProjectId) {
         this.hubProjectId = hubProjectId;
@@ -77,11 +81,10 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             return new CommandResult("The command registerChangeLog requires access to Liquibase Hub: " + hubServiceFactory.getOfflineReason() + ".  Learn more at https://hub.liquibase.com", false);
         }
 
-        final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-
         //
         // Check for existing changeLog file
         //
+        final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         DatabaseChangeLog databaseChangeLog = (DatabaseChangeLog) argsMap.get("changeLog");
         final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
         if (changeLogId != null) {
@@ -107,6 +110,16 @@ public class RegisterChangeLogCommand extends AbstractSelfConfiguratingCommand<C
             if (project == null) {
                 return new CommandResult("Project Id '" + hubProjectId + "' does not exist or you do not have access to it", false);
             }
+        } else if (hubProjectName != null) {
+            if (hubProjectName.length() > 255) {
+                return new CommandResult("\nThe project name you gave is longer than 255 characters\n\n");
+            }
+            project = service.createProject(new Project().setName(hubProjectName));
+            if (project == null) {
+                return new CommandResult("Unable to create project '" + hubProjectName + "'.\n" +
+                    "Learn more at https://hub.liquibase.com.", false);
+            }
+            outputStream.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
         } else {
             project = retrieveOrCreateProject(service);
             if (project == null) {

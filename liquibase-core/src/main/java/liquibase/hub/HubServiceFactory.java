@@ -73,6 +73,16 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         }
 
         @Override
+        public HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException {
+            return null;
+        }
+
+        @Override
+        public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
+            return null;
+        }
+
+        @Override
         public Organization getOrganization() throws LiquibaseHubException {
             return null;
         }

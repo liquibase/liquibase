@@ -33,11 +33,23 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
      */
     protected String hubProjectId;
 
+    /**
+     *
+     * Specifies the <i>Liquibase Hub Project</i> for Liquibase to create and use.
+     *
+     * @parameter property="liquibase.hubProjectName"
+     *
+     */
+    protected String hubProjectName;
+
     @Override
   	protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
-        if (hubProjectId == null) {
+        if (hubProjectId == null && hubProjectName == null) {
             throw new MojoFailureException("\nThe Hub project ID must be specified.");
+        }
+        if (hubProjectId != null && hubProjectName != null) {
+            throw new MojoFailureException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects project ID or new projectname, but not both.\n");
         }
     }
 
@@ -49,7 +61,10 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         RegisterChangeLogCommand registerChangeLog =
             (RegisterChangeLogCommand) CommandFactory.getInstance().getCommand("registerChangeLog");
         registerChangeLog.setChangeLogFile(changeLogFile);
-        registerChangeLog.setHubProjectId(UUID.fromString(hubProjectId));
+        if (hubProjectId != null) {
+            registerChangeLog.setHubProjectId(UUID.fromString(hubProjectId));
+        }
+        registerChangeLog.setProjectName(hubProjectName);
         Map<String, Object> argsMap = new HashMap<>();
         argsMap.put("changeLogFile", changeLogFile);
         argsMap.put("database", database);
