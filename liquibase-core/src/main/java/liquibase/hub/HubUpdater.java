@@ -2,7 +2,6 @@ package liquibase.hub;
 
 import liquibase.*;
 import liquibase.changelog.ChangeLogIterator;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ListVisitor;
@@ -30,8 +29,6 @@ import liquibase.integration.IntegrationDetails;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.core.BufferedLogService;
-import liquibase.parser.ChangeLogParserFactory;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtil;
 
 import java.io.File;

@@ -199,7 +199,7 @@ public class ChangelogRewriter {
             // Update the current DatabaseChangeLog with its id
             //
             if (databaseChangeLog != null) {
-                databaseChangeLog.setChangeLogId(null);
+                databaseChangeLog.setChangeLogId(changeLogId);
             }
         }
         catch (IOException ioe) {

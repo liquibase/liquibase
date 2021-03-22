@@ -45,13 +45,14 @@ class ChangeLogRewriterTest extends Specification {
         //
         ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(Paths.get("target/test-classes").toAbsolutePath().toFile())
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(outputFile.getName(), resourceAccessor)
-        changeLog = parser.parse(outputFile.getName(), new ChangeLogParameters(), resourceAccessor)
+        DatabaseChangeLog newChangeLog = parser.parse(outputFile.getName(), new ChangeLogParameters(), resourceAccessor)
 
         then:
         result.success
         matcher.matches()
         idMatcher.matches()
         changeLog.getChangeLogId() != null
+        newChangeLog.getChangeLogId() != null
 
         where:
         file                        | extension   | patternString
