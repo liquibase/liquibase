@@ -16,7 +16,7 @@ import java.util.UUID;
 
 /**
  *
- * <p>Syncs all changes in change log with Hub.</p>
+ * <p>Registers a change log with Hub.</p>
  * 
  * @author Wesley Willard
  * @goal   registerChangeLog
@@ -26,18 +26,30 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
 
     /**
      *
-     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
+     * Specifies the <i>Liquibase Hub Project ID</i> for Liquibase to use.
      *
      * @parameter property="liquibase.hubProjectId"
      *
      */
     protected String hubProjectId;
 
-	  @Override
+    /**
+     *
+     * Specifies the <i>Liquibase Hub Project</i> for Liquibase to create and use.
+     *
+     * @parameter property="liquibase.hubProjectName"
+     *
+     */
+    protected String hubProjectName;
+
+    @Override
   	protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
-        if (hubProjectId == null) {
+        if (hubProjectId == null && hubProjectName == null) {
             throw new MojoFailureException("\nThe Hub project ID must be specified.");
+        }
+        if (hubProjectId != null && hubProjectName != null) {
+            throw new MojoFailureException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects project ID or new projectname, but not both.\n");
         }
     }
 
@@ -49,7 +61,10 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         RegisterChangeLogCommand registerChangeLog =
             (RegisterChangeLogCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("registerChangeLog");
         registerChangeLog.setChangeLogFile(changeLogFile);
-        registerChangeLog.setHubProjectId(UUID.fromString(hubProjectId));
+        if (hubProjectId != null) {
+            registerChangeLog.setHubProjectId(UUID.fromString(hubProjectId));
+        }
+        registerChangeLog.setProjectName(hubProjectName);
         Map<String, Object> argsMap = new HashMap<>();
         argsMap.put("changeLogFile", changeLogFile);
         argsMap.put("database", database);

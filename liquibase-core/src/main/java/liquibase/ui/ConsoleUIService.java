@@ -20,7 +20,7 @@ public class ConsoleUIService extends AbstractExtensibleObject implements UIServ
     private PrintStream outputStream = System.out;
     private PrintStream errorStream = System.out;
     private boolean outputStackTraces = false;
-    private boolean allowPrompt=true;
+    private boolean allowPrompt = false;
 
     private ConsoleWrapper console;
 

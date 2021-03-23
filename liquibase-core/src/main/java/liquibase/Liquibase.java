@@ -337,12 +337,24 @@ public class Liquibase implements AutoCloseable {
         Connection connection;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         if (getHubConnectionId() == null) {
-            HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId));
+            HubChangeLog hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId), "*");
             if (hubChangeLog == null) {
                 Scope.getCurrentScope().getLog(getClass()).warning(
                     "Retrieving Hub Change Log failed for Changelog ID: " + changeLogId);
                 return null;
             }
+            if (hubChangeLog.isDeleted()) {
+                //
+                // Complain and stop the operation
+                //
+                String message =
+                    "\n" +
+                        "The operation did not complete and will not be reported to Hub because the\n" +  "" +
+                        "registered changelog has been deleted by someone in your organization.\n" +
+                        "Learn more at http://hub.liquibase.com.";
+                throw new LiquibaseHubException(message);
+            }
+
             Connection exampleConnection = new Connection();
             exampleConnection.setProject(hubChangeLog.getProject());
             exampleConnection.setJdbcUrl(Liquibase.this.database.getConnection().getURL());
