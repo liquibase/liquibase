@@ -31,6 +31,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.ui.ConsoleUIService;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtil;
 import liquibase.util.xml.XMLResourceBundle;
 import liquibase.util.xml.XmlResourceBundleControl;
@@ -1665,16 +1666,12 @@ public class Main {
                 return;
             } else if (COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
-                DeactivateChangeLogCommand liquibaseCommand =
-                    (DeactivateChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.DEACTIVATE_CHANGELOG, argsMap);
-                liquibaseCommand.setChangeLogFile(changeLogFile);
-                CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
+                CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.DEACTIVATE_CHANGELOG, argsMap);
 
-                if (result.succeeded) {
-                    Scope.getCurrentScope().getUI().sendMessage(result.print());
-                } else {
-                    throw new RuntimeException(result.print());
-                }
+                liquibaseCommand.addArgumentValues(DeactivateChangeLogCommand.CHANGE_LOG_FILE_ARG.of(changeLogFile));
+
+                liquibaseCommand.execute();
+
                 return;
             } else if (COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
@@ -1696,9 +1693,9 @@ public class Main {
                     throw new LiquibaseException("Unexpected hubProjectId format: " + hubProjectId, e);
                 }
                 if (hubProjectName != null) {
-                    liquibaseCommand.setProjectName(hubProjectName);
+                    liquibaseCommand.addArgumentValue(RegisterChangeLogCommand.HUB_PROJECT_NAME_ARG.getName(), hubProjectName);
                 }
-                CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
+                liquibaseCommand.execute();
 
                 return;
             } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {

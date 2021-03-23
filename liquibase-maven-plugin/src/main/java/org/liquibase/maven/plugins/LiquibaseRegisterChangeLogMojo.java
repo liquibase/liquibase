@@ -53,8 +53,8 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         CommandScope registerChangeLog = new CommandScope("registerChangeLog");
         registerChangeLog.addArgumentValues(
                 RegisterChangeLogCommand.CHANGELOG_FILE_ARG.of(changeLogFile),
-                RegisterChangeLogCommand.HUB_PROJECT_ID_ARG.of(UUID.fromString(hubProjectId))
-                RegisterChangeLogCommand.HUB_PROJECT_Name_ARG.of(hubProjectName)
+                RegisterChangeLogCommand.HUB_PROJECT_ID_ARG.of(UUID.fromString(hubProjectId)),
+                RegisterChangeLogCommand.HUB_PROJECT_NAME_ARG.of(hubProjectName)
         );
 
         registerChangeLog.addArgumentValue("changeLogFile", changeLogFile);

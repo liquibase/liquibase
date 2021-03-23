@@ -8,6 +8,7 @@ import liquibase.command.*;
 import liquibase.exception.CommandArgumentValidationException;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandLineParsingException;
+import liquibase.exception.LiquibaseException;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
@@ -30,7 +31,7 @@ public class RegisterChangeLogCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
-    public static final CommandArgumentDefinition<String> HUB_PROJECT_NAME;
+    public static final CommandArgumentDefinition<String> HUB_PROJECT_NAME_ARG;
 
     static {
         CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(RegisterChangeLogCommand.class);
@@ -66,6 +67,7 @@ public class RegisterChangeLogCommand extends AbstractCommand {
         HubChangeLog hubChangeLog;
         String changeLogFile = CHANGELOG_FILE_ARG.getValue(commandScope);
         UUID hubProjectId = HUB_PROJECT_ID_ARG.getValue(commandScope);
+        String hubProjectName = HUB_PROJECT_NAME_ARG.getValue(commandScope);
 
         //
         // CHeck for existing changeLog file
@@ -97,18 +99,18 @@ public class RegisterChangeLogCommand extends AbstractCommand {
             }
         } else if (hubProjectName != null) {
             if (hubProjectName.length() > 255) {
-                return new CommandResult("\nThe project name you gave is longer than 255 characters\n\n");
+                throw new CommandExecutionException("\nThe project name you gave is longer than 255 characters\n\n");
             }
             project = service.createProject(new Project().setName(hubProjectName));
             if (project == null) {
-                return new CommandResult("Unable to create project '" + hubProjectName + "'.\n" +
-                    "Learn more at https://hub.liquibase.com.", false);
+                throw new CommandExecutionException("Unable to create project '" + hubProjectName + "'.\n" +
+                    "Learn more at https://hub.liquibase.com.");
             }
-            outputStream.print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
+            commandScope.getOutput().print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
         } else {
-            project = retrieveOrCreateProject(service);
+            project = retrieveOrCreateProject(service, commandScope);
             if (project == null) {
-                return new CommandResult("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.", false);
+                throw new CommandExecutionException("Your changelog " + changeLogFile + " was not registered to any Liquibase Hub project. You can still run Liquibase commands, but no data will be saved in your Liquibase Hub account for monitoring or reports.  Learn more at https://hub.liquibase.com.");
             }
         }
 
@@ -125,12 +127,13 @@ public class RegisterChangeLogCommand extends AbstractCommand {
         ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult =
             ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
         Scope.getCurrentScope().getLog(RegisterChangeLogCommand.class).info(changeLogRewriterResult.message);
-        String message = "* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered";
-        return new CommandResult(message, changeLogRewriterResult.success);
+        commandScope.getOutput().println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
     }
 
-    private Project retrieveOrCreateProject(HubService service)
-        throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {
+    private Project retrieveOrCreateProject(HubService service, CommandScope commandScope) throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {
+        final UIService ui = Scope.getCurrentScope().getUI();
+        String changeLogFile = CHANGELOG_FILE_ARG.getValue(commandScope);
+
         Project project = null;
         List<Project> projects = getProjectsFromHub();
         boolean done = false;

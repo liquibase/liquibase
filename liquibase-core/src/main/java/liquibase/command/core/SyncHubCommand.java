@@ -161,7 +161,6 @@ public class SyncHubCommand extends AbstractCommand {
             Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
             Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
         }
-        return new CommandResult();
     }
 
 }
