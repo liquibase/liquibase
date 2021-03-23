@@ -11,6 +11,7 @@ import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.*;
 import liquibase.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.hub.HubConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
@@ -343,14 +344,14 @@ public class Main {
                     // Store the Hub API key for later use
                     //
                     if (StringUtil.isNotEmpty(main.liquibaseHubApiKey)) {
-                        System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), main.liquibaseHubApiKey);
+                        DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, main.liquibaseHubApiKey);
                     }
 
                     //
                     // Store the Hub URL for later use
                     //
                     if (StringUtil.isNotEmpty(main.liquibaseHubUrl)) {
-                        System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), main.liquibaseHubUrl);
+                        DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_URL, main.liquibaseHubUrl);
                     }
 
                     main.applyDefaults();
@@ -439,7 +440,7 @@ public class Main {
         // Set the Liquibase Hub log level if logging is not OFF
         //
         if (level != Level.OFF) {
-            System.setProperty(HubConfiguration.LIQUIBASE_HUB_LOGLEVEL.getKey(), level.toString());
+            DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_LOGLEVEL, level);
         }
     }
 
@@ -1036,7 +1037,7 @@ public class Main {
                         }
                     }
                     if (System.getProperty((String) entry.getKey()) == null) {
-                        System.setProperty((String) entry.getKey(), (String) entry.getValue());
+                        DeprecatedConfigurationValueProvider.setData((String) entry.getKey(), entry.getValue());
                     }
                 } else {
                     Field field = getDeclaredField((String)entry.getKey());
@@ -1428,7 +1429,7 @@ public class Main {
             // Set the global configuration option based on presence of the dataOutputDirectory
             //
             boolean b = dataOutputDirectory != null;
-            System.setProperty(GlobalConfiguration.SHOULD_SNAPSHOT_DATA.getKey(), String.valueOf(b));
+            DeprecatedConfigurationValueProvider.setData(GlobalConfiguration.SHOULD_SNAPSHOT_DATA, b);
 
             ObjectChangeFilter objectChangeFilter = null;
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(

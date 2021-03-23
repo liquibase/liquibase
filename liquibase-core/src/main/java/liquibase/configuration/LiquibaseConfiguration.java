@@ -2,6 +2,7 @@ package liquibase.configuration;
 
 import liquibase.Scope;
 import liquibase.SingletonObject;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
@@ -36,6 +37,13 @@ public class LiquibaseConfiguration implements SingletonObject {
     }
 
     /**
+     * @deprecated use {@link Scope#getSingleton(Class)}
+     */
+    public static LiquibaseConfiguration getInstance() {
+        return Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+    }
+
+    /**
      * Finishes configuration of this service. Called as the root scope is set up, should not be called elsewhere.
      */
     public void init(Scope scope) {
@@ -63,6 +71,17 @@ public class LiquibaseConfiguration implements SingletonObject {
      */
     public boolean removeProvider(ConfigurationValueProvider provider) {
         return this.configurationValueProviders.remove(provider);
+    }
+
+    /**
+     * @deprecated use {@link ConfigurationDefinition} instances directly
+     */
+    public <T extends ConfigurationContainer> T getConfiguration(Class<T> type) {
+        try {
+            return type.newInstance();
+        } catch (Throwable e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
 

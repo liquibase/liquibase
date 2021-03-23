@@ -13,6 +13,7 @@ import liquibase.command.core.RegisterChangeLogCommand;
 import liquibase.command.core.SyncHubCommand;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -479,7 +480,7 @@ public class HubUpdater {
                 message = "* Registering changelog file " + changeLogFile + " with Hub";
                 Scope.getCurrentScope().getUI().sendMessage(message);
                 Scope.getCurrentScope().getLog(getClass()).info(message);
-                System.setProperty(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), registerResponse.getApiKey());
+                DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_API_KEY, registerResponse.getApiKey());
                 registerChangeLog(registerResponse.getProjectId(), changeLog, changeLogFile);
 
                 message = "Great! Your free operation and deployment reports will be available to you after your local Liquibase commands complete.";
