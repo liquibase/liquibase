@@ -1663,7 +1663,8 @@ public class Main {
                 DeactivateChangeLogCommand liquibaseCommand =
                     (DeactivateChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.DEACTIVATE_CHANGELOG, argsMap);
                 liquibaseCommand.setChangeLogFile(changeLogFile);
-                CommandResult result = liquibaseCommand.execute();
+                CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
+
                 if (result.succeeded) {
                     Scope.getCurrentScope().getUI().sendMessage(result.print());
                 } else {

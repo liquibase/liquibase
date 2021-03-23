@@ -56,7 +56,7 @@ public class DeactivateChangeLogCommand extends AbstractSelfConfiguratingCommand
     }
 
     @Override
-    protected CommandResult run() throws Exception {
+    public CommandResult run() throws Exception {
         //
         // Access the HubService
         // Stop if we do no have a key

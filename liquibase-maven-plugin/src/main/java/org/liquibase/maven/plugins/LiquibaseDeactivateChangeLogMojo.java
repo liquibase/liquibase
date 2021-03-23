@@ -30,8 +30,7 @@ public class LiquibaseDeactivateChangeLogMojo extends AbstractLiquibaseChangeLog
         throws LiquibaseException {
         super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
-        DeactivateChangeLogCommand deactivateChangeLogCommand =
-            (DeactivateChangeLogCommand) CommandFactory.getInstance().getCommand("deactivateChangeLog");
+        DeactivateChangeLogCommand deactivateChangeLogCommand = (DeactivateChangeLogCommand) Scope.getCurrentScope().getSingleton(CommandFactory.class).getCommand("deactivateChangeLog");
         deactivateChangeLogCommand.setChangeLogFile(changeLogFile);
         Map<String, Object> argsMap = new HashMap<>();
         argsMap.put("changeLogFile", changeLogFile);
@@ -40,7 +39,7 @@ public class LiquibaseDeactivateChangeLogMojo extends AbstractLiquibaseChangeLog
         argsMap.put("changeLog", liquibase.getDatabaseChangeLog());
         deactivateChangeLogCommand.configure(argsMap);
         try {
-            CommandResult result = deactivateChangeLogCommand.execute();
+            CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(deactivateChangeLogCommand);
             if (result.succeeded) {
                 Scope.getCurrentScope().getUI().sendMessage(result.print());
             } else {
