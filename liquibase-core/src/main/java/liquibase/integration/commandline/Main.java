@@ -69,6 +69,7 @@ public class Main {
     protected String url;
     protected String hubConnectionId;
     protected String hubProjectId;
+    protected String hubProjectName;
     protected String databaseClass;
     protected String defaultSchemaName;
     protected String outputDefaultSchema;
@@ -114,6 +115,7 @@ public class Main {
     protected String includeObjects;
     protected Boolean includeSchema;
     protected Boolean includeTablespace;
+    protected Boolean deactivate;
     protected String outputSchemasAs;
     protected String referenceSchemas;
     protected String schemas;
@@ -168,6 +170,7 @@ public class Main {
      */
     public static int run(String[] args) throws Exception {
         ConsoleUIService ui = new ConsoleUIService();
+        ui.setAllowPrompt(true);
 
         Map<String, Object> scopeObjects = new HashMap<>();
         final IntegrationDetails integrationDetails = new IntegrationDetails();
@@ -193,13 +196,6 @@ public class Main {
                 Main main = new Main();
 
                 try {
-                    if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
-                        Scope.getCurrentScope().getUI().sendErrorMessage((
-                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        GlobalConfiguration.SHOULD_RUN.getKey())));
-                        return 0;
-                    }
-
                     if ((args.length == 0) || ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0]))) {
                         main.printHelp(System.out);
                         return 0;
@@ -325,6 +321,12 @@ public class Main {
 
                     Scope.getCurrentScope().getUI().sendMessage(CommandLineUtils.getBanner());
 
+                    if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+                        Scope.getCurrentScope().getUI().sendErrorMessage((
+                                String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
+                                        GlobalConfiguration.SHOULD_RUN.getKey())));
+                        return 0;
+                    }
 
                     if (setupNeeded(main)) {
                         List<String> setupMessages = main.checkSetup();
@@ -405,7 +407,8 @@ public class Main {
     }
 
     private static boolean setupNeeded(Main main) throws CommandLineParsingException {
-        if (main.command.toLowerCase().startsWith(COMMANDS.REGISTER_CHANGELOG.toLowerCase())) {
+        if (main.command.toLowerCase().startsWith(COMMANDS.REGISTER_CHANGELOG.toLowerCase()) ||
+            main.command.toLowerCase().startsWith(COMMANDS.DEACTIVATE_CHANGELOG.toLowerCase())) {
             return false;
         }
         if (!main.commandParams.contains("--help")) {
@@ -547,6 +550,7 @@ public class Main {
                 (!command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_CHANGE_SET) &&
                         !command.equalsIgnoreCase(COMMANDS.ROLLBACK_ONE_UPDATE)))
                 || COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)
+                || COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command)
                 || COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)
                 || COMMANDS.STATUS.equalsIgnoreCase(command)
                 || COMMANDS.VALIDATE.equalsIgnoreCase(command)
@@ -583,6 +587,7 @@ public class Main {
                 || COMMANDS.ROLLBACK_TO_DATE_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.ROLLBACK_COUNT_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(arg)
+                || COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_COUNT_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_TO_TAG_SQL.equalsIgnoreCase(arg)
@@ -1658,10 +1663,26 @@ public class Main {
                 outputWriter.flush();
                 outputWriter.close();
                 return;
+            } else if (COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command)) {
+                Map<String, Object> argsMap = new HashMap<>();
+                DeactivateChangeLogCommand liquibaseCommand =
+                    (DeactivateChangeLogCommand)createLiquibaseCommand(database, liquibase, COMMANDS.DEACTIVATE_CHANGELOG, argsMap);
+                liquibaseCommand.setChangeLogFile(changeLogFile);
+                CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
+
+                if (result.succeeded) {
+                    Scope.getCurrentScope().getUI().sendMessage(result.print());
+                } else {
+                    throw new RuntimeException(result.print());
+                }
+                return;
             } else if (COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
                 liquibaseCommand.addArgumentValues(RegisterChangeLogCommand.CHANGELOG_FILE_ARG.of(changeLogFile));
+                if (hubProjectId != null && hubProjectName != null) {
+                    throw new LiquibaseException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects a Hub project ID or new Hub project name, but not both.\n");
+                }
                 try {
                     if (hubProjectId != null) {
                         try {
@@ -1674,7 +1695,10 @@ public class Main {
                 } catch (IllegalArgumentException e) {
                     throw new LiquibaseException("Unexpected hubProjectId format: " + hubProjectId, e);
                 }
-                liquibaseCommand.execute();
+                if (hubProjectName != null) {
+                    liquibaseCommand.setProjectName(hubProjectName);
+                }
+                CommandResult result = Scope.getCurrentScope().getSingleton(CommandFactory.class).execute(liquibaseCommand);
 
                 return;
             } else if (COMMANDS.SYNC_HUB.equalsIgnoreCase(command)) {
@@ -1923,7 +1947,8 @@ public class Main {
     }
 
     private boolean dbConnectionNeeded(String command) {
-        return !COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command);
+        return ! COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command) &&
+               ! COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(command);
     }
 
     private boolean isLicenseableCommand(String formatValue) {
@@ -2157,6 +2182,7 @@ public class Main {
         private static final String ROLLBACK_ONE_UPDATE = "rollbackOneUpdate";
         private static final String ROLLBACK_ONE_UPDATE_SQL = "rollbackOneUpdateSQL";
         private static final String REGISTER_CHANGELOG = "registerChangeLog";
+        private static final String DEACTIVATE_CHANGELOG = "deactivateChangeLog";
         private static final String FORMATTED_DIFF = "formattedDiff";
         private static final String ROLLBACK = "rollback";
         private static final String ROLLBACK_COUNT = "rollbackCount";
@@ -2202,6 +2228,7 @@ public class Main {
         private static final String INCLUDE_OBJECTS = "includeObjects";
         private static final String INCLUDE_SCHEMA = "includeSchema";
         private static final String INCLUDE_TABLESPACE = "includeTablespace";
+        private static final String DEACTIVATE = "deactivate";
         private static final String OUTPUT_SCHEMAS_AS = "outputSchemasAs";
         private static final String REFERENCE_DEFAULT_CATALOG_NAME = "referenceDefaultCatalogName";
         private static final String REFERENCE_DEFAULT_SCHEMA_NAME = "referenceDefaultSchemaName";

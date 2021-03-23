@@ -1,12 +1,12 @@
 package liquibase.parser;
 
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.ConfigurationDefinitionHolder;
+import liquibase.configuration.AutoloadedConfigurations;
 
 /**
  * Configuration container for properties applicable to most {@link liquibase.parser.ChangeLogParser} implementations
  */
-public class ChangeLogParserConfiguration implements ConfigurationDefinitionHolder {
+public class ChangeLogParserConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Boolean> SUPPORT_PROPERTY_ESCAPING;
     public static final ConfigurationDefinition<Boolean> USE_PROCEDURE_SCHEMA;

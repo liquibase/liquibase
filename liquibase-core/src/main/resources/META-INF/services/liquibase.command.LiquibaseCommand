@@ -1,3 +1,4 @@
+liquibase.command.core.DeactivateChangeLogCommand
 liquibase.command.core.DiffCommand
 liquibase.command.core.DiffToChangeLogCommand
 liquibase.command.core.DropAllCommand

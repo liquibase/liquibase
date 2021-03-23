@@ -1,12 +1,12 @@
 package liquibase;
 
 import liquibase.configuration.ConfigurationDefinition;
-import liquibase.configuration.ConfigurationDefinitionHolder;
+import liquibase.configuration.AutoloadedConfigurations;
 
 /**
  * Configuration container for global properties.
  */
-public class GlobalConfiguration implements ConfigurationDefinitionHolder {
+public class GlobalConfiguration implements AutoloadedConfigurations {
 
     public static final ConfigurationDefinition<Boolean> SHOULD_RUN;
     public static final ConfigurationDefinition<String> DATABASECHANGELOG_TABLE_NAME;

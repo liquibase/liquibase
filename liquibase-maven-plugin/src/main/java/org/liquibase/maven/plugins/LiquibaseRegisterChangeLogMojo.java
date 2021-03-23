@@ -12,7 +12,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import java.util.UUID;
 
 /**
- * <p>Syncs all changes in change log with Hub.</p>
+ * <p>Registers a change log with Hub.</p>
  *
  * @author Wesley Willard
  * @goal registerChangeLog
@@ -20,17 +20,29 @@ import java.util.UUID;
 public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMojo {
 
     /**
-     * Specifies the <i>Liquibase Hub API key</i> for Liquibase to use.
+     * Specifies the <i>Liquibase Hub Project ID</i> for Liquibase to use.
      *
      * @parameter property="liquibase.hubProjectId"
      */
     protected String hubProjectId;
 
+    /**
+     *
+     * Specifies the <i>Liquibase Hub Project</i> for Liquibase to create and use.
+     *
+     * @parameter property="liquibase.hubProjectName"
+     *
+     */
+    protected String hubProjectName;
+
     @Override
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
-        if (hubProjectId == null) {
+        if (hubProjectId == null && hubProjectName == null) {
             throw new MojoFailureException("\nThe Hub project ID must be specified.");
+        }
+        if (hubProjectId != null && hubProjectName != null) {
+            throw new MojoFailureException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects project ID or new projectname, but not both.\n");
         }
     }
 
@@ -42,6 +54,7 @@ public class LiquibaseRegisterChangeLogMojo extends AbstractLiquibaseChangeLogMo
         registerChangeLog.addArgumentValues(
                 RegisterChangeLogCommand.CHANGELOG_FILE_ARG.of(changeLogFile),
                 RegisterChangeLogCommand.HUB_PROJECT_ID_ARG.of(UUID.fromString(hubProjectId))
+                RegisterChangeLogCommand.HUB_PROJECT_Name_ARG.of(hubProjectName)
         );
 
         registerChangeLog.addArgumentValue("changeLogFile", changeLogFile);

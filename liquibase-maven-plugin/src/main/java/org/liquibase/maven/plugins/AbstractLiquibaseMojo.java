@@ -325,11 +325,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     return;
                 }
 
-                //
-                // Disallow prompting
-                //
-                Scope.getCurrentScope().getUI().setAllowPrompt(false);
-
                 ClassLoader mavenClassLoader = getClassLoaderIncludingProjectClasspath();
                 Map<String, Object> scopeValues = new HashMap<>();
                 scopeValues.put(Scope.Attr.resourceAccessor.name(), getResourceAccessor(mavenClassLoader));

@@ -73,6 +73,16 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         }
 
         @Override
+        public HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException {
+            return null;
+        }
+
+        @Override
+        public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
+            return null;
+        }
+
+        @Override
         public Organization getOrganization() throws LiquibaseHubException {
             return null;
         }
@@ -98,12 +108,17 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
         }
 
         @Override
-        public Connection getConnection(Connection exampleConnection, boolean createIfNotExists) throws LiquibaseHubException {
+        public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
             return null;
         }
 
         @Override
         public List<Connection> getConnections(Connection exampleConnection) throws LiquibaseHubException {
+            return null;
+        }
+
+        @Override
+        public Connection getConnection(Connection exampleConnection, boolean createIfNotExists) throws LiquibaseHubException {
             return null;
         }
 
@@ -119,11 +134,6 @@ public class HubServiceFactory extends AbstractPluginFactory<HubService> {
 
         @Override
         public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
-            return null;
-        }
-
-        @Override
-        public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
             return null;
         }
 
