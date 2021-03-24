@@ -47,26 +47,6 @@ public class DropAllCommand extends AbstractCommand {
         return new String[]{"dropAll"};
     }
 
-
-//    public DropAllCommand setSchemas(String... schemas) {
-//        if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
-//            this.schemas = null;
-//            return this;
-//        }
-//
-//        schemas = StringUtil.join(schemas, ",").split("\\s*,\\s*");
-//        List<CatalogAndSchema> finalList = new ArrayList<>();
-//        for (String schema : schemas) {
-//            finalList.add(new CatalogAndSchema(null, schema).customize(database));
-//        }
-//
-//        this.schemas = finalList.toArray(new CatalogAndSchema[finalList.size()]);
-//
-//
-//        return this;
-//
-//    }
-
     @Override
     public void run(CommandScope commandScope) throws Exception {
         LockService lockService = LockServiceFactory.getInstance().getLockService(DATABASE_ARG.getValue(commandScope));
@@ -105,6 +85,7 @@ public class DropAllCommand extends AbstractCommand {
         }
 
         Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + DATABASE_ARG.getValue(commandScope).getConnection().getConnectionUserName() + "@" + DATABASE_ARG.getValue(commandScope).getConnection().getURL());
+        commandScope.addResult("statusCode", 0);
     }
 
     private boolean checkForRegisteredChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {

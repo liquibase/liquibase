@@ -9,7 +9,7 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 [
     new LiquibaseCommandTest.Spec(
-        command: ["update"],
+        command: ["updateSQL"],
 
         setup: [
             new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")

@@ -8,4 +8,9 @@ liquibase.command.core.RegisterChangeLogCommand
 liquibase.command.core.SnapshotCommand
 liquibase.command.core.SyncHubCommand
 liquibase.command.core.UpdateCommand
+liquibase.command.core.UpdateSQLCommand
+liquibase.command.core.UpdateCountCommand
+liquibase.command.core.UpdateCountSQLCommand
+liquibase.command.core.UpdateToTagCommand
+liquibase.command.core.UpdateToTagSQLCommand
 liquibase.sdk.convert.ConvertCommand

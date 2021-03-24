@@ -35,6 +35,11 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
     }
 
     @Override
+    public String[] getName() {
+        return new String[]{"generateChangeLog"};
+    }
+
+    @Override
     public void run(CommandScope commandScope) throws Exception {
         outputBestPracticeMessage();
 

@@ -10,6 +10,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.integrationtest.TestDatabaseConnections;
 import liquibase.integrationtest.TestSetup;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SetupChangelogHistory extends TestSetup {
@@ -28,7 +29,11 @@ public class SetupChangelogHistory extends TestSetup {
         changeLogService.init();
         changeLogService.generateDeploymentId();
 
+        List<RanChangeSet> toRemoveList = new ArrayList<>();
         for (RanChangeSet ranChangeSet : changeLogService.getRanChangeSets()) {
+            toRemoveList.add(ranChangeSet);
+        }
+        for (RanChangeSet ranChangeSet : toRemoveList) {
             changeLogService.removeFromHistory(new ChangeSet(ranChangeSet.getId(), ranChangeSet.getAuthor(), false, false, ranChangeSet.getChangeLog(), null, null, null));
         }
         changeLogService.reset();

@@ -67,6 +67,7 @@ public class HistoryCommand extends AbstractCommand {
         }
 
         commandScope.addResults(DEPLOYMENTS_RESULT.of(deploymentHistory));
+        commandScope.addResult("statusCode", 0);
     }
 
     public static class DeploymentHistory {

@@ -20,12 +20,23 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
                         ]
                     )
                 ] as SetupDatabaseStructure.Entry,
+                [
+                    new CreateTableChange(
+                        tableName: "SecondTable",
+                        columns: [
+                            ColumnConfig.fromName("SecondColumn")
+                                        .setType("VARCHAR(255)")
+                        ]
+                    )
+                ] as SetupDatabaseStructure.Entry
             ])
         ],
         expectedOutput: [
             "",
         ],
-
+        expectedResults: [
+            statusCode: 0
+        ]
     )
 
 ] as LiquibaseCommandTest.Spec[]

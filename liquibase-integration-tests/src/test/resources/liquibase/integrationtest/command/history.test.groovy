@@ -50,7 +50,8 @@ import java.util.regex.Pattern
                 ],
 
                 expectedResults: [
-                        deployments: "1 past deployments"
+                        deployments: "1 past deployments",
+                        statusCode: 0
                 ]
         ),
 ] as LiquibaseCommandTest.Spec[]

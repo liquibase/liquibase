@@ -9,10 +9,13 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 [
     new LiquibaseCommandTest.Spec(
-        command: ["update"],
+        command: ["updateToTag"],
 
         setup: [
-            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")
+            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.tag.changelog.xml")
+        ],
+        arguments: [
+            tag: "version_2.0"
         ],
         expectedOutput: [
             "",

@@ -1,6 +1,10 @@
 package liquibase.integrationtest.command
 
 import liquibase.CatalogAndSchema
+import liquibase.changelog.ChangeLogHistoryService
+import liquibase.changelog.ChangeLogHistoryServiceFactory
+import liquibase.changelog.ChangeSet
+import liquibase.changelog.RanChangeSet
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
@@ -26,6 +30,13 @@ class LiquibaseCommandTest extends Specification {
 
         def spec = specPermutation.spec
 
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(specPermutation.connectionStatus.connection))
+
+        String defaultSchemaName = database.getDefaultSchemaName()
+        CatalogAndSchema[] catalogAndSchemas = new CatalogAndSchema[1]
+        catalogAndSchemas[0] = new CatalogAndSchema(null, defaultSchemaName)
+        database.dropDatabaseObjects(catalogAndSchemas[0])
+
         List expectedOutputChecks = new ArrayList()
         if (spec.expectedOutput instanceof List) {
             expectedOutputChecks.addAll(spec.expectedOutput)
@@ -44,35 +55,47 @@ class LiquibaseCommandTest extends Specification {
         }
 
         when:
-        def commandScope = new CommandScope(spec.command as String[])
-
+        def commandScope
+        try {
+            commandScope = new CommandScope(spec.command as String[])
+        }
+        catch (Throwable e) {
+            if (spec.expectedException != null) {
+                assert e.class == spec.expectedException
+            }
+            return
+        }
         def outputStream = new ByteArrayOutputStream()
 
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(specPermutation.connectionStatus.connection))
-
-        String defaultSchemaName = database.getDefaultSchemaName()
-        CatalogAndSchema[] catalogAndSchemas = new CatalogAndSchema[1]
-        catalogAndSchemas[0] = new CatalogAndSchema(null, defaultSchemaName)
-
         commandScope.addArgumentValue("database", database)
-        commandScope.addArgumentValue("url", database.getConnection().getURL());
+        commandScope.addArgumentValue("url", database.getConnection().getURL())
         commandScope.addArgumentValue("schemas", catalogAndSchemas)
         commandScope.setOutput(outputStream)
         if (changeLogFile != null) {
             commandScope.addArgumentValue("changeLogFile", changeLogFile)
+        }
+        if (spec.arguments != null) {
+            spec.arguments.each {name, value->
+                Object objValue = (Object)value
+                commandScope.addArgumentValue(name, objValue)
+            }
         }
 
         commandScope.execute()
 
         def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
 
-        then:
-//        def e = thrown(spec.expectedException)
+        for (def returnedResult : commandScope.getResults().entrySet()) {
+            def expectedValue = String.valueOf(spec.expectedResults.get(returnedResult.getKey()))
+            def seenValue = String.valueOf(returnedResult.getValue())
 
-        if (spec.expectedException != null) {
-            assert e.toString() == spec.expectedException.toString()
-            return
+            assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
+            assert seenValue == expectedValue
         }
+
+        then:
+
+//        def e = thrown(spec.expectedException)
 
         for (def expectedOutputCheck : expectedOutputChecks) {
             if (expectedOutputCheck instanceof String) {
@@ -102,14 +125,6 @@ ${expectedOutputCheck.toString()}
             }
         }
 
-
-        for (def returnedResult : commandScope.getResults().entrySet()) {
-            def expectedValue = String.valueOf(spec.expectedResults.get(returnedResult.getKey()))
-            def seenValue = String.valueOf(returnedResult.getValue())
-
-            assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
-            assert seenValue == expectedValue
-        }
 
         where:
         specPermutation << collectSpecPermutations()
@@ -183,6 +198,11 @@ ${expectedOutputCheck.toString()}
          * Command to execute
          */
         List<String> command
+
+        /**
+         * Arguments to command as key/value pairs
+         */
+        Map<String, Object> arguments = new HashMap<>()
 
         List<TestSetup> setup
 

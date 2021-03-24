@@ -1,5 +1,6 @@
 package liquibase.integrationtest.command
 
+import liquibase.exception.CommandExecutionException
 import liquibase.integrationtest.command.LiquibaseCommandTest
 
 [
@@ -10,7 +11,8 @@ import liquibase.integrationtest.command.LiquibaseCommandTest
                         "asdf",
                 ],
 
-                expectedResults: [:]
+                expectedResults: [:],
+                expectedException: liquibase.exception.CommandExecutionException
         )
 
 ] as LiquibaseCommandTest.Spec[]

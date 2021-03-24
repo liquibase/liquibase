@@ -1,23 +1,18 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractCommand;
 import liquibase.command.AbstractWrapperCommand;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
 import liquibase.integration.commandline.Main;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-public class UpdateCommand extends AbstractWrapperCommand {
+public class UpdateSQLCommand extends AbstractWrapperCommand {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(UpdateCommand.class);
+        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(UpdateSQLCommand.class);
         CHANGELOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
         URL_ARG = builder.define("url", String.class).required().build();
         LABELS_ARG = builder.define("labels", String.class).build();
@@ -26,7 +21,7 @@ public class UpdateCommand extends AbstractWrapperCommand {
 
     @Override
     public String[] getName() {
-        return new String[] {"update"};
+        return new String[] {"updateSQL"};
     }
 
     @Override

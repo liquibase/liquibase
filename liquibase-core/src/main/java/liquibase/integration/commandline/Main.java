@@ -4,7 +4,6 @@ import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
-import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
 import liquibase.configuration.LiquibaseConfiguration;
