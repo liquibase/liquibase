@@ -8,7 +8,7 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 [
     new LiquibaseCommandTest.Spec(
-        command: ["rollback"],
+        command: ["rollbackCount"],
 
         setup: [
             new SetupDatabaseStructure([

@@ -70,6 +70,7 @@ class LiquibaseCommandTest extends Specification {
         commandScope.addArgumentValue("database", database)
         commandScope.addArgumentValue("url", database.getConnection().getURL())
         commandScope.addArgumentValue("schemas", catalogAndSchemas)
+        commandScope.addArgumentValue("logLevel", "INFO")
         commandScope.setOutput(outputStream)
         if (changeLogFile != null) {
             commandScope.addArgumentValue("changeLogFile", changeLogFile)
