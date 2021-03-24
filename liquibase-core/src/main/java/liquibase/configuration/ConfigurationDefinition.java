@@ -3,43 +3,78 @@ package liquibase.configuration;
 import liquibase.Scope;
 import liquibase.util.ObjectUtil;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 /**
- * A higher-level definition of a configuration.
- * Provides type-safety, metadata, default values, etc. vs. what is available in the lower-level {@link LiquibaseConfiguration}.
+ * A higher-level/detailed definition to provide type-safety, metadata, default values, etc..
+ * Any code that is working with configurations should be using an instance of this class, rather than the lower-level, generic {@link LiquibaseConfiguration}
+ * <p>
  * ConfigurationDefinitions that are registered with {@link LiquibaseConfiguration#registerDefinition(ConfigurationDefinition)} will
  * be available in generated help etc.
  * <p>
  * These objects are immutable, so to construct definitions, use {@link Builder}
+ * <p>
+ * The definition keys should be dot-separated, camelCased names, using a unique "namespace" as part of it.
+ * For example: <pre>yourCorp.yourProperty</pre> or <pre>yourCorp.sub.otherProperty</pre>.
+ * Liquibase uses "liquibase" as the base namespace like <pre>liquibase.shouldRun</pre>
  *
  */
-public class ConfigurationDefinition<DataType> implements Comparable {
+public class ConfigurationDefinition<DataType> implements Comparable<ConfigurationDefinition<DataType>> {
 
-    private String key;
-    private Set<String> aliasKeys = new TreeSet<>();
-    private Class<DataType> type;
+    private final String key;
+    private final Set<String> aliasKeys = new TreeSet<>();
+    private final Class<DataType> type;
     private String description;
     private DataType defaultValue;
     private boolean commonlyUsed;
-    private ConfigurationValueHandler<DataType> valueHandler;
+    private ConfigurationValueConverter<DataType> valueHandler;
     private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
+    private static final Pattern ALLOWED_KEY_PATTERN = Pattern.compile("[a-zA-Z0-9.]+");
+
+    /**
+     * @return if the given {@link ConfiguredValue} was set by a default value
+     */
+    public static boolean wasDefaultValueUsed(ConfiguredValue<?> configuredValue) {
+        for (ProvidedValue providedValue :  configuredValue.getProvidedValues()) {
+            if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Constructor private to force {@link Builder} usage
+     */
     private ConfigurationDefinition(String key, Class<DataType> type) {
+        if (!ALLOWED_KEY_PATTERN.matcher(key).matches()) {
+            throw new IllegalArgumentException("Invalid key format: "+key);
+        }
+
         this.key = key;
         this.type = type;
         this.valueHandler = value -> ObjectUtil.convert(value, type);
     }
 
     /**
-     * Convenience method around {@link #getCurrentValueDetails()} to return the value.
+     * Convenience method around {@link #getCurrentConfiguredValue()} to return the value.
      */
     public DataType getCurrentValue() {
-        return getCurrentValueDetails().getValue();
+        final Object value = getCurrentConfiguredValue().getProvidedValue().getValue();
+        try {
+            return (DataType) value;
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("The current value of "+key+" not the expected type: "+ e.getMessage(), e);
+        }
     }
 
     /**
-     * Convenience method around {@link #getCurrentValueDetails()} to return the obfuscated version of the value.
+     * Convenience method around {@link #getCurrentConfiguredValue()} to return the obfuscated version of the value.
      * @return the obfuscated value, or the plain-text value if no obfuscator is defined for this definition.
      */
     public DataType getCurrentValueObfuscated() {
@@ -54,52 +89,51 @@ public class ConfigurationDefinition<DataType> implements Comparable {
 
     /**
      * @return Full details on the current value for this definition.
+     * Will always return a {@link ConfiguredValue},
      */
-    public CurrentValue<DataType> getCurrentValueDetails() {
+    public ConfiguredValue<DataType> getCurrentConfiguredValue() {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
 
-        CurrentValueDetails configurationValue = liquibaseConfiguration.getCurrentValue(this.getKey());
+        ConfiguredValue configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(this.getKey());
+        ConfiguredValue initialConfigurationValue = configurationValue;
+
         for (String alias : this.aliasKeys) {
-            if (configurationValue != null) {
+            if (configurationValue.found()) {
                 break;
             }
-            configurationValue = liquibaseConfiguration.getCurrentValue(alias);
+            configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(alias);
         }
 
-        DataType finalValue = null;
-        List<CurrentValueSourceDetails> sourceHistory = new ArrayList<>();
-        if (configurationValue != null) {
-            sourceHistory.addAll(configurationValue.getSourceHistory());
-
-            finalValue = valueHandler.convert(configurationValue.getValue());
+        if (!configurationValue.found()) {
+            //set back to initial version, not the alias
+            configurationValue = initialConfigurationValue;
         }
 
-
-        boolean defaultValueUsed = false;
-        if (finalValue == null) {
-            finalValue = this.getDefaultValue();
-
-            if (finalValue == null) {
-                sourceHistory.add(0, new CurrentValueSourceDetails(this.getDefaultValue(), "No configuration or default value found for", key));
-                defaultValueUsed = false;
-            } else {
-                sourceHistory.add(0, new CurrentValueSourceDetails(this.getDefaultValue(), "Default value for", key));
-                defaultValueUsed = true;
+        if (!configurationValue.found()) {
+            defaultValue = this.getDefaultValue();
+            if (defaultValue != null) {
+                configurationValue.override(new DefaultValueProvider(this.getDefaultValue()).getProvidedValue(key));
             }
         }
 
-        return new CurrentValue<>(finalValue, sourceHistory, defaultValueUsed);
+        final ProvidedValue providedValue = configurationValue.getProvidedValue();
+        final DataType finalValue = valueHandler.convert(providedValue.getValue());
+        if (providedValue != finalValue) {
+            configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
+        }
+
+        return (ConfiguredValue<DataType>) configurationValue;
     }
 
     /**
-     * The standard configuration key for this definition.
+     * The standard configuration key for this definition. See the {@link ConfigurationDefinition} class-level docs on key format.
      */
     public String getKey() {
         return key;
     }
 
     /**
-     * @return alternate configuration keys to check for values.
+     * @return alternate configuration keys to check for values. Used for backwards compatibility.
      */
     public Set<String> getAliasKeys() {
         return aliasKeys;
@@ -114,13 +148,17 @@ public class ConfigurationDefinition<DataType> implements Comparable {
 
     /**
      * A user-friendly description of this definition.
+     * This will be exposed to end-users in generated help.
      */
     public String getDescription() {
         return description;
     }
 
     /**
-     * The default value used by this definition of no value is currently configured.
+     * The default value used by this definition if no value is currently configured.
+     * <p>
+     * NOTE: this is only used if none of the {@link ConfigurationValueProvider}s have a configuration for the property.
+     * Even if some return "null", that is still considered a provided value to use rather than this default.
      */
     public DataType getDefaultValue() {
         return defaultValue;
@@ -135,8 +173,8 @@ public class ConfigurationDefinition<DataType> implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-        return this.getKey().compareTo(((ConfigurationDefinition) o).getKey());
+    public int compareTo(ConfigurationDefinition o) {
+        return this.getKey().compareTo(o.getKey());
     }
 
     @Override
@@ -162,6 +200,10 @@ public class ConfigurationDefinition<DataType> implements Comparable {
          * @param defaultKeyPrefix the prefix to add to new keys that are not fully qualified
          */
         public Builder(String defaultKeyPrefix) {
+            if (!ALLOWED_KEY_PATTERN.matcher(defaultKeyPrefix).matches()) {
+                throw new IllegalArgumentException("Invalid prefix format: "+defaultKeyPrefix);
+            }
+
             this.defaultKeyPrefix = defaultKeyPrefix;
         }
 
@@ -183,6 +225,10 @@ public class ConfigurationDefinition<DataType> implements Comparable {
             }
 
             public NewDefinition<DataType> addAliasKey(String alias) {
+                if (!ALLOWED_KEY_PATTERN.matcher(alias).matches()) {
+                    throw new IllegalArgumentException("Invalid alias format: "+alias);
+                }
+
                 definition.aliasKeys.add(alias);
 
                 return this;
@@ -198,7 +244,7 @@ public class ConfigurationDefinition<DataType> implements Comparable {
                 return this;
             }
 
-            public NewDefinition<DataType> setValueHandler(ConfigurationValueHandler<DataType> handler) {
+            public NewDefinition<DataType> setValueHandler(ConfigurationValueConverter<DataType> handler) {
                 definition.valueHandler = handler;
 
                 return this;
@@ -235,4 +281,53 @@ public class ConfigurationDefinition<DataType> implements Comparable {
             }
         }
     }
+
+    /**
+     * Used to track configuration values set by a default
+     */
+    private static final class DefaultValueProvider implements ConfigurationValueProvider {
+
+        private final Object value;
+
+        public DefaultValueProvider(Object value) {
+            this.value = value;
+        }
+
+        @Override
+        public int getPrecedence() {
+            return -1;
+        }
+
+        @Override
+        public ProvidedValue getProvidedValue(String key) {
+            return new ProvidedValue(key, key, value, "Default value", this);
+        }
+    }
+
+    /**
+     * Used to track configuration values converted by a handler
+     */
+    private static final class ConvertedValueProvider<DataType> implements ConfigurationValueProvider {
+
+        private final DataType value;
+        private final String originalSource;
+        private final String actualKey;
+
+        public ConvertedValueProvider(DataType value, ProvidedValue originalProvidedValue) {
+            this.value = value;
+            this.actualKey = originalProvidedValue.getActualKey();
+            this.originalSource = originalProvidedValue.getSourceDescription();
+        }
+
+        @Override
+        public int getPrecedence() {
+            return -1;
+        }
+
+        @Override
+        public ProvidedValue getProvidedValue(String key) {
+            return new ProvidedValue(key, actualKey, value, originalSource, this);
+        }
+    }
 }
+

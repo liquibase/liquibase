@@ -1,8 +1,8 @@
 package liquibase.configuration.core;
 
 import liquibase.Scope;
-import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.CurrentValueSourceDetails;
+import liquibase.configuration.AbstractConfigurationValueProvider;
+import liquibase.configuration.ProvidedValue;
 
 import java.util.Properties;
 
@@ -10,7 +10,7 @@ import java.util.Properties;
  * Searches the {@link liquibase.Scope} for the given key.
  * Does not perform any key smoothing/translating.
  */
-public class ScopeValueProvider implements ConfigurationValueProvider {
+public class ScopeValueProvider extends AbstractConfigurationValueProvider {
 
     @Override
     public int getPrecedence() {
@@ -18,7 +18,7 @@ public class ScopeValueProvider implements ConfigurationValueProvider {
     }
 
     @Override
-    public CurrentValueSourceDetails getValue(String key) {
+    public ProvidedValue getProvidedValue(String key) {
         if (key == null) {
             return null;
         }
@@ -28,7 +28,7 @@ public class ScopeValueProvider implements ConfigurationValueProvider {
             return null;
         }
 
-        return new CurrentValueSourceDetails(value, "Scoped value", key);
+        return new ProvidedValue(key, key, value, "Scoped value", this);
     }
 
     protected Properties getSystemProperties() {

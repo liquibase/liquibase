@@ -1,9 +1,7 @@
 package liquibase.integration.servlet;
 
 import liquibase.*;
-import liquibase.configuration.ConfigurationValueProvider;
-import liquibase.configuration.CurrentValueSourceDetails;
-import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DerbyDatabase;
@@ -16,7 +14,6 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.NetUtil;
 import liquibase.util.StringUtil;
 
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -36,7 +33,6 @@ import java.util.Enumeration;
  */
 public class LiquibaseServletListener implements ServletContextListener {
 
-    private static final String JAVA_COMP_ENV = "java:comp/env";
     private static final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
     private static final String LIQUIBASE_CONTEXTS = "liquibase.contexts";
     private static final String LIQUIBASE_LABELS = "liquibase.labels";
@@ -53,7 +49,6 @@ public class LiquibaseServletListener implements ServletContextListener {
     private String labels;
     private String defaultSchema;
     private String hostName;
-    private ServletValueContainer servletValueContainer; //temporarily saved separately until all lookup moves to liquibaseConfiguration
 
     public String getChangeLogFile() {
         return changeLogFile;
@@ -108,14 +103,13 @@ public class LiquibaseServletListener implements ServletContextListener {
 
         InitialContext ic = null;
         String failOnError = null;
+        final ServletConfigurationValueProvider servletConfigurationValueProvider = new ServletConfigurationValueProvider(servletContext, ic);
         try {
             ic = new InitialContext();
 
-            Scope.getCurrentScope().getUI().setAllowPrompt(false);
-            servletValueContainer = new ServletValueContainer(servletContext, ic);
-            liquibaseConfiguration.addProvider(servletValueContainer);
+            liquibaseConfiguration.registerProvider(servletConfigurationValueProvider);
 
-            failOnError = (String) servletValueContainer.getValue(LIQUIBASE_ONERROR_FAIL).getValue();
+            failOnError = (String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_ONERROR_FAIL).getValue();
             if (checkPreconditions(servletContext, ic)) {
                 executeUpdate(servletContext, ic);
             }
@@ -132,7 +126,7 @@ public class LiquibaseServletListener implements ServletContextListener {
                     // ignore
                 }
             }
-            liquibaseConfiguration.removeProvider(servletValueContainer);
+            liquibaseConfiguration.removeProvider(servletConfigurationValueProvider);
 
 
         }
@@ -147,15 +141,17 @@ public class LiquibaseServletListener implements ServletContextListener {
      * </ol>
      */
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
-        if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+        if (!liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
-                    + " because " + GlobalConfiguration.SHOULD_RUN.getKey()
+                    + " because " + liquibase.GlobalConfiguration.SHOULD_RUN.getKey()
                     + " was set to false");
             return false;
         }
 
-        String machineIncludes = (String) servletValueContainer.getValue(LIQUIBASE_HOST_INCLUDES).getValue();
-        String machineExcludes = (String) servletValueContainer.getValue(LIQUIBASE_HOST_EXCLUDES).getValue();
+        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
+        String machineIncludes = (String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_HOST_INCLUDES).getValue();
+        String machineExcludes = (String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_HOST_EXCLUDES).getValue();
 
         boolean shouldRun = false;
         if ((machineIncludes == null) && (machineExcludes == null)) {
@@ -177,10 +173,11 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
         }
 
-        if (GlobalConfiguration.SHOULD_RUN.getCurrentValue() && !GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails().getDefaultValueUsed()) {
+        final ConfiguredValue<Boolean> shouldRunValue = liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
+        if (liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue() && !ConfigurationDefinition.wasDefaultValueUsed(shouldRunValue)) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
-                    + LIQUIBASE_HOST_EXCLUDES + ", since " + GlobalConfiguration.SHOULD_RUN.getCurrentValueDetails().getSource()
+                    + LIQUIBASE_HOST_EXCLUDES + ", since " + shouldRunValue.getProvidedValue().describe()
                     + "=true");
         }
         if (!shouldRun) {
@@ -196,19 +193,21 @@ public class LiquibaseServletListener implements ServletContextListener {
      */
     @java.lang.SuppressWarnings("squid:S2095")
     private void executeUpdate(ServletContext servletContext, InitialContext ic) throws NamingException, SQLException, LiquibaseException {
-        setDataSource((String) servletValueContainer.getValue(LIQUIBASE_DATASOURCE).getValue());
+        final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
+
+        setDataSource((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_DATASOURCE).getValue());
         if (getDataSource() == null) {
             throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_DATASOURCE + " is not set");
         }
 
-        setChangeLogFile((String) servletValueContainer.getValue(LIQUIBASE_CHANGELOG).getValue());
+        setChangeLogFile((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_CHANGELOG).getValue());
         if (getChangeLogFile() == null) {
             throw new RuntimeException("Cannot run Liquibase, " + LIQUIBASE_CHANGELOG + " is not set");
         }
 
-        setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS).getValue());
-        setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS).getValue());
-        this.defaultSchema = StringUtil.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT).getValue());
+        setContexts((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_CONTEXTS).getValue());
+        setLabels((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_LABELS).getValue());
+        this.defaultSchema = StringUtil.trimToNull((String) liquibaseConfiguration.getCurrentConfiguredValue(LIQUIBASE_SCHEMA_DEFAULT).getValue());
 
         Connection connection = null;
         Database database = null;
@@ -235,7 +234,7 @@ public class LiquibaseServletListener implements ServletContextListener {
             while (initParameters.hasMoreElements()) {
                 String name = initParameters.nextElement().trim();
                 if (name.startsWith(LIQUIBASE_PARAMETER + ".")) {
-                    liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1), servletValueContainer.getValue(name));
+                    liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1), liquibaseConfiguration.getCurrentConfiguredValue(name));
                 }
             }
 
@@ -256,48 +255,4 @@ public class LiquibaseServletListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
     }
 
-    protected class ServletValueContainer implements ConfigurationValueProvider {
-
-        @Override
-        public int getPrecedence() {
-            return 30;
-        }
-
-        private ServletContext servletContext;
-        private InitialContext initialContext;
-
-        public ServletValueContainer(ServletContext servletContext, InitialContext initialContext) {
-            this.servletContext = servletContext;
-            this.initialContext = initialContext;
-        }
-
-        /**
-         * Try to read the value that is stored by the given key from
-         * <ul>
-         * <li>JNDI</li>
-         * <li>the servlet context's init parameters</li>
-         * <li>system properties</li>
-         * </ul>
-         */
-        @Override
-        public CurrentValueSourceDetails getValue(String key) {
-            // Try to get value from JNDI
-            try {
-                Context envCtx = (Context) initialContext.lookup(JAVA_COMP_ENV);
-                String valueFromJndi = (String) envCtx.lookup(key);
-
-                return new CurrentValueSourceDetails(valueFromJndi, "JNDI", key);
-            } catch (NamingException e) {
-                // Ignore
-            }
-
-            // Return the value from the servlet context
-            String valueFromServletContext = servletContext.getInitParameter(key);
-            if (valueFromServletContext != null) {
-                return new CurrentValueSourceDetails(valueFromServletContext, "Servlet context value", key);
-            }
-
-            return new CurrentValueSourceDetails(System.getProperty(key), "System property", key);
-        }
-    }
 }

@@ -1,7 +1,21 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 4.3.2 (2021.03.25)
+
+- Added new changelogSyncToTag command #1133
+- Support for working with deactivated changelogs in hub
+- Added ability to create hub projects with parameters instead of only via prompts
+- Only enable console prompting when explicitly enabled by the CLI #1711 #1689
+- Handle includeAll better in spring boot #1595 and #1436
+- Changed JRE bundled with installers to use the latest LTS version
+- Better handle dropAll on postgresql partitioned tables #1650
+- Fixed sample liquibase.sqlplus.conf file #1448 and #1416
+- Fixed loadData's usePreparedStatement attribute #1098
+- Send hub logs at the same log level as configured in the CLI
+
 Changes in version 4.3.1 (2021.02.12)
+
 - Fixed handling of `classpath*:` in includeAll #1595
 - ClassCastException on moving to mysql-connector-java 8.0.23 #1639
 - Passwords sent to Hub when using jTDS driver

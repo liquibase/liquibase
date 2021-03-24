@@ -17,5 +17,5 @@ public interface ConfigurationValueProvider {
      *
      * @return null if the key is not defined in this provider.
      */
-    CurrentValueSourceDetails getValue(String key);
+    ProvidedValue getProvidedValue(String key);
 }

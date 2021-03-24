@@ -5,21 +5,33 @@ import spock.lang.Specification
 
 class LiquibaseConfigurationTest extends Specification {
 
-    def "getCurrentValueDetails"() {
+    def "getCurrentConfiguredValue"() {
         when:
-
-        System.setProperty("test.current-value", "From system")
-        def currentValue = Scope.child(["test.current-value": "From scope"], new Scope.ScopedRunnerWithReturn<CurrentValueDetails>() {
+        System.setProperty("test.currentValue", "From system")
+        def currentValue = Scope.child(["test.currentValue": "From scope"], new Scope.ScopedRunnerWithReturn<ConfiguredValue>() {
             @Override
-            CurrentValueDetails run() throws Exception {
-                return Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentValue("test.current-value")
+            ConfiguredValue run() throws Exception {
+                return Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue("test.currentValue")
             }
         })
 
         then:
         currentValue.value == "From scope"
-        currentValue.sourceHistory*.describe() == ["Scoped value 'test.current-value'", "System property 'test.current-value'"]
+        currentValue.providedValues*.describe() == ["Scoped value 'test.currentValue'", "System property 'test.currentValue'"]
     }
+
+    def "getCurrentConfiguredValue with no value found"() {
+        when:
+        def currentValue = Scope.currentScope.getSingleton(LiquibaseConfiguration).getCurrentConfiguredValue("test.unknownValue")
+
+        then:
+        currentValue != null
+        currentValue.getValue() == null
+        currentValue.getProvidedValue().sourceDescription == "No configuration or default value found"
+        currentValue.getProvidedValue().requestedKey == "test.unknownValue"
+        currentValue.getProvidedValue().provider != null
+    }
+
 
     def "autoRegisters and sorts providers"() {
         expect:
@@ -29,6 +41,25 @@ class LiquibaseConfigurationTest extends Specification {
     def "autoRegisters definitions"() {
         expect:
         Scope.getCurrentScope().getSingleton(LiquibaseConfiguration).getRegisteredDefinitions().size() > 10
+    }
+
+    def "getRegisteredDefinition for a key"() {
+        when:
+        def definition = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration).getRegisteredDefinition("liquibase.shouldRun")
+
+        then:
+        definition.key == "liquibase.shouldRun"
+        definition.description == "Should Liquibase commands execute"
+
+    }
+
+    def "getRegisteredDefinition for an unknown key"() {
+        when:
+        def definition = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration).getRegisteredDefinition("test.invalid")
+
+        then:
+        definition == null
+
     }
 
 }

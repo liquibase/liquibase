@@ -8,6 +8,8 @@ import liquibase.exception.CommandArgumentValidationException;
 import liquibase.exception.CommandExecutionException;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
+import liquibase.hub.HubUpdater;
+import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.Connection;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
@@ -64,6 +66,7 @@ public class SyncHubCommand extends AbstractCommand {
             Scope.getCurrentScope().getLog(getClass()).severe(message);
             throw new CommandExecutionException(message);
         }
+        HubChangeLog hubChangeLog = null;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         Connection connectionToSync;
         if (hubConnectionId == null) {
@@ -77,11 +80,22 @@ public class SyncHubCommand extends AbstractCommand {
                 if (changeLogId == null) {
                     Scope.getCurrentScope().getLog(getClass()).info("Changelog " + changelogFile + " has not been registered with Liquibase Hub. Cannot use it to help determine project.");
                 } else {
-                    final HubChangeLog changeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId));
-                    if (changeLog == null) {
+                    hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId), "*");
+                    if (hubChangeLog == null) {
                         throw new CommandExecutionException("Changelog " + changelogFile + " has an unrecognized changeLogId.");
                     }
-                    project = changeLog.getProject();
+                    if (hubChangeLog.isDeleted()) {
+                        //
+                        // Complain and stop the operation
+                        //
+                        String message =
+                            "\n" +
+                            "The operation did not complete and will not be reported to Hub because the\n" +  "" +
+                            "registered changelog has been deleted by someone in your organization.\n" +
+                            "Learn more at http://hub.liquibase.com";
+                        throw new LiquibaseHubException(message);
+                    }
+                    project = hubChangeLog.getProject();
                 }
             }
             else if (HUB_PROJECT_ID_ARG.getValue(commandScope) != null) {
@@ -133,6 +147,20 @@ public class SyncHubCommand extends AbstractCommand {
             hubService.setRanChangeSets(connectionToSync, ranChangeSets);
 
         });
+
+        //
+        // Tell the user if the HubChangeLog is deactivated
+        //
+        if (hubChangeLog != null && hubChangeLog.isInactive()) {
+            String message =
+                "\n" +
+                "The command completed and reported to Hub, but the changelog has been deactivated by someone in your organization.\n" +
+                "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
+                "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n" +
+                "Learn more at http://hub.liquibase.com";
+            Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
+            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+        }
     }
 
 }

@@ -10,6 +10,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.GlobalConfiguration;
+import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfiguredValue;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -672,8 +674,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseCatalogName;
         }
 
-        if (GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValueDetails() == null) {
-            return GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
+        final String configuredCatalogName = GlobalConfiguration.LIQUIBASE_CATALOG_NAME.getCurrentValue();
+        if (configuredCatalogName != null) {
+            return configuredCatalogName;
         }
 
         return getDefaultCatalogName();
@@ -690,8 +693,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return liquibaseSchemaName;
         }
 
-        if (!GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValueDetails().getDefaultValueUsed()) {
-            return GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentValue();
+        final ConfiguredValue<String> configuredValue = GlobalConfiguration.LIQUIBASE_SCHEMA_NAME.getCurrentConfiguredValue();
+        if (!ConfigurationDefinition.wasDefaultValueUsed(configuredValue)) {
+            return configuredValue.getValue();
         }
 
         return getDefaultSchemaName();

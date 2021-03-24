@@ -200,6 +200,13 @@ public class StandardHubService implements HubService {
     }
 
     @Override
+    public HubChangeLog deactivateChangeLog(HubChangeLog hubChangeLog) throws LiquibaseHubException {
+        return http.doPut("/api/v1/organizations/" + getOrganization().getId() +
+                             "/projects/" + hubChangeLog.getProject().getId().toString() +
+                             "/changelogs/" +  hubChangeLog.getId().toString(), hubChangeLog, HubChangeLog.class);
+    }
+
+    @Override
     public void setRanChangeSets(Connection connection, List<RanChangeSet> ranChangeSets) throws LiquibaseHubException {
         List<HubChange> hubChangeList = new ArrayList<>();
         for (RanChangeSet ranChangeSet : ranChangeSets) {
@@ -310,20 +317,42 @@ public class StandardHubService implements HubService {
     }
 
     /**
+     *
      * Query for a changelog ID.  If no result we return null
      * We cache this result and a map
      *
-     * @param changeLogId Changelog ID for query
-     * @return HubChangeLog               Object container for result
-     * @throws LiquibaseHubException
+     * @param   changeLogId                Changelog ID for query
+     * @return  HubChangeLog               Object container for result
+     * @throws  LiquibaseHubException
+     *
      */
     @Override
     public HubChangeLog getHubChangeLog(UUID changeLogId) throws LiquibaseHubException {
-        if (hubChangeLogCache.containsKey(changeLogId)) {
+        return getHubChangeLog(changeLogId, null);
+    }
+
+    /**
+     *
+     * Query for a changelog ID.  If no result we return null
+     * We cache this result and a map
+     *
+     * @param   changeLogId                Changelog ID for query
+     * @param   includeStatus              Allowable status for returned changelog
+     * @return  HubChangeLog               Object container for result
+     * @throws  LiquibaseHubException
+     *
+     */
+    @Override
+    public HubChangeLog getHubChangeLog(UUID changeLogId, String includeStatus) throws LiquibaseHubException {
+        if (includeStatus == null && hubChangeLogCache.containsKey(changeLogId)) {
             return hubChangeLogCache.get(changeLogId);
         }
         try {
-            HubChangeLog hubChangeLog = http.doGet("/api/v1/changelogs/" + changeLogId, HubChangeLog.class);
+            Map<String, String> parameters = new HashMap<>();
+            if (includeStatus != null) {
+                parameters.put("includeStatus", includeStatus);
+            }
+            HubChangeLog hubChangeLog = http.doGet("/api/v1/changelogs/" + changeLogId, parameters, HubChangeLog.class);
             hubChangeLogCache.put(changeLogId, hubChangeLog);
             return hubChangeLog;
         } catch (LiquibaseHubObjectNotFoundException lbe) {
