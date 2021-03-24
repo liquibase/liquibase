@@ -328,7 +328,7 @@ public class Main {
                     if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
                         Scope.getCurrentScope().getUI().sendErrorMessage((
                                 String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
-                                        GlobalConfiguration.SHOULD_RUN.getKey())));
+                                        GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue().getProvidedValue().getActualKey())));
                         return 0;
                     }
 
