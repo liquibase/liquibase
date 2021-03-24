@@ -6,6 +6,10 @@ import spock.lang.Unroll
 
 class ConfigurationDefinitionTest extends Specification {
 
+    def cleanup() {
+        System.clearProperty("test.property")
+    }
+
     @Unroll
     def "does not allow invalid keys"() {
         when:

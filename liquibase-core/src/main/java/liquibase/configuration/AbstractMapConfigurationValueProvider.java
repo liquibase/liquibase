@@ -23,7 +23,10 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
 
         //try direct lookup first, for performance:
         if (sourceData.containsKey(key)) {
-            return new ProvidedValue(key, key, sourceData.get(key), getSourceDescription(), this);
+            final Object foundValue = sourceData.get(key);
+            if (isValueSet(foundValue)) {
+                return new ProvidedValue(key, key, foundValue, getSourceDescription(), this);
+            }
         }
 
 

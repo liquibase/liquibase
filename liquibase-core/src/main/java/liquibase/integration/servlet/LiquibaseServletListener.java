@@ -141,9 +141,9 @@ public class LiquibaseServletListener implements ServletContextListener {
      * </ol>
      */
     private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
-        if (!GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
+        if (!liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue()) {
             Scope.getCurrentScope().getLog(getClass()).info("Liquibase did not run on " + hostName
-                    + " because " + GlobalConfiguration.SHOULD_RUN.getKey()
+                    + " because " + liquibase.GlobalConfiguration.SHOULD_RUN.getKey()
                     + " was set to false");
             return false;
         }
@@ -173,8 +173,8 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
         }
 
-        final ConfiguredValue<Boolean> shouldRunValue = GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
-        if (GlobalConfiguration.SHOULD_RUN.getCurrentValue() && !ConfigurationDefinition.wasDefaultValueUsed(shouldRunValue)) {
+        final ConfiguredValue<Boolean> shouldRunValue = liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentConfiguredValue();
+        if (liquibase.GlobalConfiguration.SHOULD_RUN.getCurrentValue() && !ConfigurationDefinition.wasDefaultValueUsed(shouldRunValue)) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
                     + LIQUIBASE_HOST_EXCLUDES + ", since " + shouldRunValue.getProvidedValue().describe()

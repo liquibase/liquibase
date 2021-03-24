@@ -1,6 +1,7 @@
 package liquibase.hub.core;
 
 import liquibase.Scope;
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.hub.HubConfiguration;
 import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.LiquibaseHubObjectNotFoundException;
@@ -181,7 +182,7 @@ class HttpClient {
                         newHubUrl = newHubUrl.replaceAll(url, "");
                         Scope.getCurrentScope().getLog(getClass()).info("Redirecting to URL: " + newHubUrl);
 
-                        System.setProperty(HubConfiguration.LIQUIBASE_HUB_URL.getKey(), newHubUrl);
+                        DeprecatedConfigurationValueProvider.setData(HubConfiguration.LIQUIBASE_HUB_URL, newHubUrl);
                         throw new LiquibaseHubRedirectException();
                     }
                 }

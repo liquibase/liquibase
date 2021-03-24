@@ -116,10 +116,10 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
             }
         }
 
-        final Object providedValue = configurationValue.getProvidedValue().getValue();
-        final DataType finalValue = valueHandler.convert(providedValue);
+        final ProvidedValue providedValue = configurationValue.getProvidedValue();
+        final DataType finalValue = valueHandler.convert(providedValue.getValue());
         if (providedValue != finalValue) {
-            configurationValue.override(new ConvertedValueProvider<DataType>(finalValue).getProvidedValue(key));
+            configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
         }
 
         return (ConfiguredValue<DataType>) configurationValue;
@@ -310,9 +310,13 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     private static final class ConvertedValueProvider<DataType> implements ConfigurationValueProvider {
 
         private final DataType value;
+        private final String originalSource;
+        private final String actualKey;
 
-        public ConvertedValueProvider(DataType value) {
+        public ConvertedValueProvider(DataType value, ProvidedValue originalProvidedValue) {
             this.value = value;
+            this.actualKey = originalProvidedValue.getActualKey();
+            this.originalSource = originalProvidedValue.getSourceDescription();
         }
 
         @Override
@@ -322,7 +326,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
         @Override
         public ProvidedValue getProvidedValue(String key) {
-            return new ProvidedValue(key, key, value, "Parsed/processed value", this);
+            return new ProvidedValue(key, actualKey, value, originalSource, this);
         }
     }
 }

@@ -5,6 +5,7 @@ import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.GlobalConfiguration;
+import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
 import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.diff.DiffResult;
@@ -96,7 +97,7 @@ public class DiffToChangeLog {
 
         File objectsDir = null;
         if (changeLogFile.toLowerCase().endsWith("sql")) {
-            System.setProperty("liquibase.pro.sql.inline", "true");
+            DeprecatedConfigurationValueProvider.setData("liquibase.pro.sql.inline", "true");
         } else if (this.diffResult.getComparisonSnapshot() instanceof EmptyDatabaseSnapshot) {
             objectsDir = new File(file.getParentFile(), "objects");
         } else {
