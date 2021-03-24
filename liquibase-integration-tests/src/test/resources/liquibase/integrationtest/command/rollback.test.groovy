@@ -5,7 +5,6 @@ import liquibase.change.core.CreateTableChange
 import liquibase.integrationtest.command.LiquibaseCommandTest
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
-import liquibase.integrationtest.setup.SetupDatabaseStructureGenChangeLog
 
 [
     new LiquibaseCommandTest.Spec(
