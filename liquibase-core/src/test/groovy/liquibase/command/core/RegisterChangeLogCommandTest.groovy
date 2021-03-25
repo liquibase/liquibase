@@ -70,7 +70,7 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def command = new RegisterChangeLogCommand()
+        def command = new RegisterChangeLogCommandStep()
         command.setHubProjectId(((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).projects.get(0).getId())
         command.setOutputStream(new PrintStream(outputStream))
         command.setChangeLogFile(outputFile.getName())
@@ -96,7 +96,7 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def command = new RegisterChangeLogCommand()
+        def command = new RegisterChangeLogCommandStep()
         command.setHubProjectId(((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).projects.get(0).getId())
         command.setOutputStream(new PrintStream(outputStream))
         command.setChangeLogFile(emptyOutputFile.getName())
@@ -122,7 +122,7 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def command = new RegisterChangeLogCommand()
+        def command = new RegisterChangeLogCommandStep()
         command.setHubProjectId(((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).projects.get(0).getId())
         command.setOutputStream(new PrintStream(outputStream))
         command.setChangeLogFile(outputFileJSON.getName())
@@ -143,7 +143,7 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def command = new RegisterChangeLogCommand()
+        def command = new RegisterChangeLogCommandStep()
         command.setHubProjectId(((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).projects.get(0).getId())
         command.setOutputStream(new PrintStream(outputStream))
         command.setChangeLogFile(outputFileYaml.getName())
@@ -166,7 +166,7 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def command = new RegisterChangeLogCommand()
+        def command = new RegisterChangeLogCommandStep()
         command.setHubProjectId(((MockHubService) Scope.currentScope.getSingleton(HubServiceFactory).getService()).projects.get(0).getId())
         command.setOutputStream(new PrintStream(outputStream))
         command.setChangeLogFile(outputFileYml.getName())
@@ -187,7 +187,7 @@ class RegisterChangeLogCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def command = new RegisterChangeLogCommand()
+        def command = new RegisterChangeLogCommandStep()
         command.setChangeLogFile("changelog.xml")
         DatabaseChangeLog changeLog = new DatabaseChangeLog(".")
         def uuid = UUID.randomUUID().toString()

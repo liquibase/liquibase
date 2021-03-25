@@ -3,9 +3,10 @@ package liquibase.command.core;
 import liquibase.Scope;
 import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.command.AbstractCommand;
+import liquibase.command.AbstractCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
+import liquibase.command.CommandStepBuilder;
 import liquibase.exception.CommandExecutionException;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
@@ -13,15 +14,15 @@ import liquibase.hub.model.HubChangeLog;
 
 import java.util.UUID;
 
-public class DeactivateChangeLogCommand extends AbstractCommand {
+public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> CHANGE_LOG_FILE_ARG;
     public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGE_LOG_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(DiffCommand.class);
-        CHANGE_LOG_ARG = builder.define("changeLog", DatabaseChangeLog.class).required().build();
-        CHANGE_LOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
+        final CommandStepBuilder builder = new CommandStepBuilder(DiffCommandStep.class);
+        CHANGE_LOG_ARG = builder.argument("changeLog", DatabaseChangeLog.class).required().build();
+        CHANGE_LOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
     }
 
     @Override
@@ -43,11 +44,11 @@ public class DeactivateChangeLogCommand extends AbstractCommand {
 
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
 
-        String changeLogFile = CHANGE_LOG_FILE_ARG.getValue(commandScope);
+        String changeLogFile = commandScope.getArgumentValue(CHANGE_LOG_FILE_ARG);
         //
         // CHeck for existing changeLog file
         //
-        DatabaseChangeLog databaseChangeLog = CHANGE_LOG_ARG.getValue(commandScope);
+        DatabaseChangeLog databaseChangeLog = commandScope.getArgumentValue(CHANGE_LOG_ARG);
         final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
         if (changeLogId == null) {
             throw new CommandExecutionException("Changelog '" + changeLogFile + "' does not have a changelog ID and is not registered with Hub.\n" +
@@ -59,7 +60,7 @@ public class DeactivateChangeLogCommand extends AbstractCommand {
             String message = "WARNING: Changelog '" + changeLogFile + "' has a changelog ID but was not found in Hub.\n" +
                 "The changelog ID will be removed from the file, but Hub will not be updated.";
             Scope.getCurrentScope().getUI().sendMessage(message);
-            Scope.getCurrentScope().getLog(DeactivateChangeLogCommand.class).warning(message);
+            Scope.getCurrentScope().getLog(DeactivateChangeLogCommandStep.class).warning(message);
         }
         else {
             //
@@ -81,7 +82,7 @@ public class DeactivateChangeLogCommand extends AbstractCommand {
                 "Note: If this is a shared changelog, please check it into Source Control.\n" +
                 "Operation data sent to the now inactive changelogID will still be accepted at Hub.\n" +
                 "For more information visit https://docs.liquibase.com.\n";
-            Scope.getCurrentScope().getLog(DeactivateChangeLogCommand.class).info(message);
+            Scope.getCurrentScope().getLog(DeactivateChangeLogCommandStep.class).info(message);
             commandScope.getOutput().println(message);
             return;
         }

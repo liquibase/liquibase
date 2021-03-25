@@ -2,11 +2,10 @@ package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
-import liquibase.command.core.DiffCommand;
-import liquibase.command.core.DiffToChangeLogCommand;
-import liquibase.command.core.GenerateChangeLogCommand;
+import liquibase.command.core.DiffCommandStep;
+import liquibase.command.core.DiffToChangeLogCommandStep;
+import liquibase.command.core.GenerateChangeLogCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DatabaseUtils;
@@ -146,14 +145,13 @@ public class CommandLineUtils {
                                                 CompareControl.SchemaComparison[] schemaComparisons, ObjectChangeFilter objectChangeFilter, PrintStream output) throws CommandExecutionException {
         CommandScope diffCommand = new CommandScope("diff");
 
-        diffCommand.addArgumentValues(
-                DiffCommand.REFERENCE_DATABASE_ARG.of(referenceDatabase),
-                DiffCommand.TARGET_DATABASE_ARG.of(targetDatabase),
-                DiffCommand.COMPARE_CONTROL_ARG.of(new CompareControl(schemaComparisons, snapshotTypes)),
-                DiffCommand.OBJECT_CHANGE_FILTER_ARG.of(objectChangeFilter),
-                DiffCommand.SNAPSHOT_TYPES_ARG.of(DiffCommand.parseSnapshotTypes(snapshotTypes)),
-                DiffCommand.OUTPUT_STREAM_ARG.of(output)
-        );
+        diffCommand
+                .addArgumentValue(DiffCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(DiffCommandStep.TARGET_DATABASE_ARG, targetDatabase)
+                .addArgumentValue(DiffCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(DiffCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(DiffCommandStep.SNAPSHOT_TYPES_ARG, DiffCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(DiffCommandStep.OUTPUT_STREAM_ARG, output);
 
         return diffCommand;
     }
@@ -192,16 +190,15 @@ public class CommandLineUtils {
             throws LiquibaseException, IOException, ParserConfigurationException {
 
         CommandScope command = new CommandScope("diffChangeLog");
-        command.addArgumentValues(
-                DiffToChangeLogCommand.REFERENCE_DATABASE_ARG.of(referenceDatabase),
-                DiffToChangeLogCommand.REFERENCE_DATABASE_ARG.of(targetDatabase),
-                DiffToChangeLogCommand.SNAPSHOT_TYPES_ARG.of(DiffToChangeLogCommand.parseSnapshotTypes(snapshotTypes)),
-                DiffToChangeLogCommand.COMPARE_CONTROL_ARG.of(new CompareControl(schemaComparisons, snapshotTypes)),
-                DiffToChangeLogCommand.OBJECT_CHANGE_FILTER_ARG.of(objectChangeFilter),
-                DiffToChangeLogCommand.OUTPUT_STREAM_ARG.of(System.out),
-                DiffToChangeLogCommand.CHANGELOG_FILENAME_ARG.of(changeLogFile),
-                DiffToChangeLogCommand.DIFF_OUTPUT_CONTROL_ARG.of(diffOutputControl)
-        );
+        command
+                .addArgumentValue(DiffToChangeLogCommandStep.REFERENCE_DATABASE_ARG, referenceDatabase)
+                .addArgumentValue(DiffToChangeLogCommandStep.REFERENCE_DATABASE_ARG, targetDatabase)
+                .addArgumentValue(DiffToChangeLogCommandStep.SNAPSHOT_TYPES_ARG, DiffToChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(DiffToChangeLogCommandStep.COMPARE_CONTROL_ARG, new CompareControl(schemaComparisons, snapshotTypes))
+                .addArgumentValue(DiffToChangeLogCommandStep.OBJECT_CHANGE_FILTER_ARG, objectChangeFilter)
+                .addArgumentValue(DiffToChangeLogCommandStep.OUTPUT_STREAM_ARG, System.out)
+                .addArgumentValue(DiffToChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
+                .addArgumentValue(DiffToChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl);
 
         try {
             command.execute();
@@ -232,16 +229,15 @@ public class CommandLineUtils {
         diffOutputControl.setDataDir(dataDir);
 
         CommandScope command = new CommandScope("generateChangeLog");
-        command.addArgumentValues(
-                GenerateChangeLogCommand.REFERENCE_DATABASE_ARG.of(originalDatabase),
-                GenerateChangeLogCommand.SNAPSHOT_TYPES_ARG.of(GenerateChangeLogCommand.parseSnapshotTypes(snapshotTypes)),
-                GenerateChangeLogCommand.OUTPUT_STREAM_ARG.of(System.out),
-                GenerateChangeLogCommand.COMPARE_CONTROL_ARG.of(compareControl),
-                GenerateChangeLogCommand.CHANGELOG_FILENAME_ARG.of(changeLogFile),
-                GenerateChangeLogCommand.DIFF_OUTPUT_CONTROL_ARG.of(diffOutputControl),
-                GenerateChangeLogCommand.AUTHOR_ARG.of(author),
-                GenerateChangeLogCommand.CONTEXT_ARG.of(context)
-        );
+        command
+                .addArgumentValue(GenerateChangeLogCommandStep.REFERENCE_DATABASE_ARG, originalDatabase)
+                .addArgumentValue(GenerateChangeLogCommandStep.SNAPSHOT_TYPES_ARG, GenerateChangeLogCommandStep.parseSnapshotTypes(snapshotTypes))
+                .addArgumentValue(GenerateChangeLogCommandStep.OUTPUT_STREAM_ARG, System.out)
+                .addArgumentValue(GenerateChangeLogCommandStep.COMPARE_CONTROL_ARG, compareControl)
+                .addArgumentValue(GenerateChangeLogCommandStep.CHANGELOG_FILENAME_ARG, changeLogFile)
+                .addArgumentValue(GenerateChangeLogCommandStep.DIFF_OUTPUT_CONTROL_ARG, diffOutputControl)
+                .addArgumentValue(GenerateChangeLogCommandStep.AUTHOR_ARG, author)
+                .addArgumentValue(GenerateChangeLogCommandStep.CONTEXT_ARG, context);
 
         try {
             command.execute();

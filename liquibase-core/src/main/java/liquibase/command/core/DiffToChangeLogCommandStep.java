@@ -3,6 +3,7 @@ package liquibase.command.core;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
+import liquibase.command.CommandStepBuilder;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -12,16 +13,16 @@ import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
-public class DiffToChangeLogCommand extends DiffCommand {
+public class DiffToChangeLogCommandStep extends DiffCommandStep {
 
     public static final CommandArgumentDefinition<String> CHANGELOG_FILENAME_ARG;
     public static final CommandArgumentDefinition<DiffOutputControl> DIFF_OUTPUT_CONTROL_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(DiffToChangeLogCommand.class);
+        final CommandStepBuilder builder = new CommandStepBuilder(DiffToChangeLogCommandStep.class);
 
-        CHANGELOG_FILENAME_ARG = builder.define("changeLogFile", String.class).required().build();
-        DIFF_OUTPUT_CONTROL_ARG = builder.define("diffOutputControl", DiffOutputControl.class).required().build();
+        CHANGELOG_FILENAME_ARG = builder.argument("changeLogFile", String.class).required().build();
+        DIFF_OUTPUT_CONTROL_ARG = builder.argument("diffOutputControl", DiffOutputControl.class).required().build();
     }
 
 
@@ -32,14 +33,14 @@ public class DiffToChangeLogCommand extends DiffCommand {
 
     @Override
     public void run(CommandScope commandScope) throws Exception {
-        Database referenceDatabase = REFERENCE_DATABASE_ARG.getValue(commandScope);
-        String changeLogFile = CHANGELOG_FILENAME_ARG.getValue(commandScope);
+        Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILENAME_ARG);
 
-        SnapshotCommand.logUnsupportedDatabase(referenceDatabase, this.getClass());
+        SnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
 
-        PrintStream outputStream = OUTPUT_STREAM_ARG.getValue(commandScope);
+        PrintStream outputStream = commandScope.getArgumentValue(OUTPUT_STREAM_ARG);
         if (outputStream == null) {
             outputStream = System.out;
         }
@@ -61,7 +62,7 @@ public class DiffToChangeLogCommand extends DiffCommand {
     }
 
     protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, CommandScope commandScope) {
-        return new DiffToChangeLog(diffResult, DIFF_OUTPUT_CONTROL_ARG.getValue(commandScope));
+        return new DiffToChangeLog(diffResult, commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG));
     }
 
 

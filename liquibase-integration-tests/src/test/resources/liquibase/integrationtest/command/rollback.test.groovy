@@ -1,14 +1,12 @@
-package liquibase.integrationtest.command
-
+import liquibase.integrationtest.command.CommandTest
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
-import liquibase.integrationtest.command.LiquibaseCommandTest
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 [
-    new LiquibaseCommandTest.Spec(
+    new CommandTest.Spec(
         command: ["rollback"],
 
         setup: [
@@ -59,4 +57,4 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
         ]
     )
 
-] as LiquibaseCommandTest.Spec[]
+] as CommandTest.Spec[]

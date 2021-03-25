@@ -7,18 +7,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractWrapperCommand extends AbstractCommand {
+/**
+ * Convenience base class for {@link CommandStep}s that simply wrap calls to {@link liquibase.integration.commandline.Main}
+ */
+public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep {
 
     protected String[] createArgs(CommandScope commandScope) throws CommandExecutionException {
         List<String> argsList = new ArrayList<>();
-        Map<String, CommandArgumentDefinition> arguments = commandScope.getArguments();
+        Map<String, CommandArgumentDefinition<?>> arguments = commandScope.getCommand().getArguments();
         arguments.entrySet().forEach( arg -> {
-            String argValue = (arg.getValue().getValue(commandScope) != null ? arg.getValue().getValue(commandScope).toString() : null);
+            String argValue = (commandScope.getArgumentValue(arg.getValue()) != null ? commandScope.getArgumentValue(arg.getValue()).toString() : null);
             if (argValue != null) {
-                argsList.add("--" + arg.getKey() + "=" + arg.getValue().getValue(commandScope).toString());
+                argsList.add("--" + arg.getKey() + "=" + commandScope.getArgumentValue(arg.getValue()).toString());
             }
         });
-        argsList.add(commandScope.getCommand()[0]);
+        argsList.add(commandScope.getCommand().getName()[0]);
         String[] args = new String[argsList.size()];
         argsList.toArray(args);
         return args;

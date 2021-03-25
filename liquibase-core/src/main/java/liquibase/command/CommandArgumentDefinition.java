@@ -5,11 +5,20 @@ import liquibase.exception.CommandArgumentValidationException;
 
 import java.util.Objects;
 
-public class CommandArgumentDefinition<DataType> implements Comparable {
+/**
+ * Defines a known, type-safe argument for a specific {@link CommandStep}.
+ * Includes metadata about the argument such as a description, if it is required, a default value, etc.
+ * <p>
+ * Because this definition is tied to a specific step, multiple steps in a pipeline can define arguments of the same name.
+ *
+ * @see CommandStepBuilder#argument(String, Class) for constructing new instances.
+ */
+public class CommandArgumentDefinition<DataType> implements Comparable<CommandArgumentDefinition<?>> {
 
-    private String name;
+    private final String name;
+    private final Class<DataType> dataType;
+
     private String description;
-    private Class<DataType> dataType;
     private boolean required;
     private DataType defaultValue;
 
@@ -18,25 +27,50 @@ public class CommandArgumentDefinition<DataType> implements Comparable {
         this.dataType = type;
     }
 
+    /**
+     * The name of the argument. Must be camelCase alphanumeric.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * The description of the argument. Used in generated help documentation.
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * The datatype this argument will return.
+     */
     public Class<DataType> getDataType() {
         return dataType;
     }
 
+    /**
+     * Whether this argument is required. Exposed as a separate setting for help doc purposes.
+     * {@link #validate(CommandScope)} will ensure required values are set.
+     */
     public boolean isRequired() {
         return required;
     }
 
+    /**
+     * Validates that the value stored in the given {@link CommandScope} is valid.
+     *
+     * @throws CommandArgumentValidationException if the stored value is not valid.
+     */
+    public void validate(CommandScope commandScope) throws CommandArgumentValidationException {
+        final DataType currentValue = commandScope.getArgumentValue(this);
+        if (this.isRequired() && currentValue == null) {
+            throw new CommandArgumentValidationException(this.getName(), "missing required argument");
+        }
+    }
+
     @Override
-    public int compareTo(Object o) {
-        return this.getName().compareTo(((CommandArgumentDefinition) o).getName());
+    public int compareTo(CommandArgumentDefinition<?> o) {
+        return this.getName().compareTo(o.getName());
     }
 
     @Override
@@ -63,85 +97,64 @@ public class CommandArgumentDefinition<DataType> implements Comparable {
         return returnString;
     }
 
-    public CommandArgument<DataType> of(DataType value) {
-        return new CommandArgument<>(this, value);
-    }
+    /**
+     * A new {@link CommandArgumentDefinition} under construction from {@link CommandStepBuilder}
+     */
+    public static class UnderConstruction<DataType> {
+        private final Class<? extends CommandStep> commandStepClass;
+        private final CommandArgumentDefinition<DataType> newCommandArgument;
 
-    public DataType getValue(CommandScope commandScope) {
-        final DataType value = (DataType) commandScope.getArgumentValue(getName());
-        if (value != null) {
-            return value;
+        UnderConstruction(Class<? extends CommandStep> commandStepClass, CommandArgumentDefinition<DataType> newCommandArgument) {
+            this.commandStepClass = commandStepClass;
+            this.newCommandArgument = newCommandArgument;
         }
 
-        return defaultValue;
-    }
+        /**
+         * Mark argument as required.
+         * @see #optional()
+         */
+        public UnderConstruction<DataType> required() {
+            this.newCommandArgument.required = true;
 
-    public void validate(CommandScope commandScope) throws CommandArgumentValidationException {
-        final DataType currentValue = getValue(commandScope);
-        if (this.isRequired() && currentValue == null) {
-            throw new CommandArgumentValidationException(this.getName(), "missing required argument");
-        }
-    }
-
-    public static class Builder {
-
-        private final Class<? extends LiquibaseCommand> commandClass;
-
-        public Builder(Class<? extends LiquibaseCommand> commandClass) {
-            this.commandClass = commandClass;
+            return this;
         }
 
-        public <DataType> NewCommandArgument<DataType> define(String name, Class<DataType> type) {
-            return new NewCommandArgument<>(new CommandArgumentDefinition<>(name, type));
+        /**
+         * Mark argument as optional.
+         * @see #required()
+         */
+        public UnderConstruction<DataType> optional() {
+            this.newCommandArgument.required = false;
+
+            return this;
         }
 
-        public <DataType> NewCommandResult<DataType> result(String name, Class<DataType> type) {
-            return new NewCommandResult<>(new CommandResultDefinition<>(name, type));
+        /**
+         * Add a description
+         */
+        public UnderConstruction<DataType> description(String description) {
+            this.newCommandArgument.description = description;
+
+            return this;
         }
 
-        public class NewCommandArgument<DataType> {
-            private final CommandArgumentDefinition<DataType> newCommandArgument;
+        /**
+         * Set the default value for this argument.
+         */
+        public UnderConstruction<DataType> defaultValue(DataType defaultValue) {
+            newCommandArgument.defaultValue = defaultValue;
 
-            public NewCommandArgument(CommandArgumentDefinition<DataType> newCommandArgument) {
-                this.newCommandArgument = newCommandArgument;
-            }
-
-            public NewCommandArgument<DataType> required() {
-                this.newCommandArgument.required = true;
-
-                return this;
-            }
-
-            public NewCommandArgument<DataType> optional() {
-                this.newCommandArgument.required = false;
-
-                return this;
-            }
-
-            public CommandArgumentDefinition<DataType> build() {
-                Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandClass, newCommandArgument);
-
-                return newCommandArgument;
-            }
-
-            public NewCommandArgument<DataType> defaultValue(DataType defaultValue) {
-                newCommandArgument.defaultValue = defaultValue;
-
-                return this;
-            }
+            return this;
         }
 
-        public class NewCommandResult<DataType> {
-            private final CommandResultDefinition<DataType> newCommandResult;
+        /**
+         * Complete construction and register the definition with the rest of the system.
+         */
+        public CommandArgumentDefinition<DataType> build() {
+            Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandStepClass, newCommandArgument);
 
-            public NewCommandResult(CommandResultDefinition<DataType> newCommandResult) {
-                this.newCommandResult = newCommandResult;
-            }
-
-            public CommandResultDefinition<DataType> build() {
-                return newCommandResult;
-            }
-
+            return newCommandArgument;
         }
     }
+
 }

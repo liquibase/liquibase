@@ -3,6 +3,7 @@ package liquibase.command.core;
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
+import liquibase.command.CommandStepBuilder;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -17,7 +18,7 @@ import liquibase.util.StringUtil;
 
 import java.io.PrintStream;
 
-public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
+public class GenerateChangeLogCommandStep extends DiffToChangeLogCommandStep {
     private static final String INFO_MESSAGE =
             "When generating formatted SQL changelogs, it is important to decide if batched statements\n" +
                     "should be split (splitStatements:true is the default behavior) or not (splitStatements:false).\n" +
@@ -27,10 +28,10 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
     public static final CommandArgumentDefinition<String> CONTEXT_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(GenerateChangeLogCommand.class);
+        final CommandStepBuilder builder = new CommandStepBuilder(GenerateChangeLogCommandStep.class);
 
-        AUTHOR_ARG = builder.define("author", String.class).build();
-        CONTEXT_ARG = builder.define("context", String.class).build();
+        AUTHOR_ARG = builder.argument("author", String.class).build();
+        CONTEXT_ARG = builder.argument("context", String.class).build();
 
     }
 
@@ -43,22 +44,22 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
     public void run(CommandScope commandScope) throws Exception {
         outputBestPracticeMessage();
 
-        String changeLogFile = StringUtil.trimToNull(CHANGELOG_FILENAME_ARG.getValue(commandScope));
+        String changeLogFile = StringUtil.trimToNull(commandScope.getArgumentValue(CHANGELOG_FILENAME_ARG));
         if (changeLogFile.toLowerCase().endsWith(".sql")) {
             Scope.getCurrentScope().getUI().sendMessage("\n" + INFO_MESSAGE + "\n");
             Scope.getCurrentScope().getLog(getClass()).info("\n" + INFO_MESSAGE + "\n");
         }
 
-        final Database referenceDatabase = REFERENCE_DATABASE_ARG.getValue(commandScope);
+        final Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
 
-        SnapshotCommand.logUnsupportedDatabase(referenceDatabase, this.getClass());
+        SnapshotCommandStep.logUnsupportedDatabase(referenceDatabase, this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
 
-        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, DIFF_OUTPUT_CONTROL_ARG.getValue(commandScope));
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, commandScope.getArgumentValue(DIFF_OUTPUT_CONTROL_ARG));
 
-        changeLogWriter.setChangeSetAuthor(AUTHOR_ARG.getValue(commandScope));
-        changeLogWriter.setChangeSetContext(CONTEXT_ARG.getValue(commandScope));
+        changeLogWriter.setChangeSetAuthor(commandScope.getArgumentValue(AUTHOR_ARG));
+        changeLogWriter.setChangeSetContext(commandScope.getArgumentValue(CONTEXT_ARG));
         changeLogWriter.setChangeSetPath(changeLogFile);
 
         ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
@@ -67,7 +68,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
             if (StringUtil.trimToNull(changeLogFile) != null) {
                 changeLogWriter.print(changeLogFile);
             } else {
-                PrintStream outputStream = OUTPUT_STREAM_ARG.getValue(commandScope);
+                PrintStream outputStream = commandScope.getArgumentValue(OUTPUT_STREAM_ARG);
                 if (outputStream == null) {
                     outputStream = System.out;
                 }
@@ -80,7 +81,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     @Override
     protected DatabaseSnapshot createTargetSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
-        SnapshotControl snapshotControl = new SnapshotControl(REFERENCE_DATABASE_ARG.getValue(commandScope), SNAPSHOT_TYPES_ARG.getValue(commandScope));
-        return SnapshotGeneratorFactory.getInstance().createSnapshot(COMPARE_CONTROL_ARG.getValue(commandScope).getSchemas(CompareControl.DatabaseRole.REFERENCE), null, snapshotControl);
+        SnapshotControl snapshotControl = new SnapshotControl(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG));
+        return SnapshotGeneratorFactory.getInstance().createSnapshot(commandScope.getArgumentValue(COMPARE_CONTROL_ARG).getSchemas(CompareControl.DatabaseRole.REFERENCE), null, snapshotControl);
     }
 }

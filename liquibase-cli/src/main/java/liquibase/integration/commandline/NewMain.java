@@ -39,12 +39,12 @@ public class NewMain {
         try {
             CommandScope commandScope = new CommandScope("history");
 
-            for (CommandArgumentDefinition argument : commandScope.getArguments(Database.class)) {
+            for (CommandArgumentDefinition<Database> argument : commandScope.getCommand().getArguments(Database.class)) {
                 String prefix = argument.getName().replaceFirst("[dD]atabase", "");
 
                 Database database = createDatabase(passedArgs.get(prefixArg(prefix, "url")), passedArgs.get(prefixArg(prefix, "username")), passedArgs.get(prefixArg(prefix, "password")));
 
-                commandScope.addArgumentValues(argument.of(database));
+                commandScope.addArgumentValue(argument, database);
             }
 
             FileOutputStream outputStream = null;

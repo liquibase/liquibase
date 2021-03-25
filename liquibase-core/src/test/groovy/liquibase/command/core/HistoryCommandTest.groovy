@@ -34,7 +34,7 @@ class HistoryCommandTest extends Specification {
     @Unroll
     def getOrder() {
         expect:
-        new HistoryCommand().getOrder(new CommandScope(passedCommand as String[])) == expected
+        new HistoryCommandStep().getOrder(new CommandScope(passedCommand as String[])) == expected
 
         where:
         passedCommand | expected
@@ -44,7 +44,7 @@ class HistoryCommandTest extends Specification {
 
     def checkArguments() {
         expect:
-        Scope.currentScope.getSingleton(CommandFactory).getArguments(new HistoryCommand())*.toString() == [
+        Scope.currentScope.getSingleton(CommandFactory).getArguments(new HistoryCommandStep())*.toString() == [
                 "database (required)",
                 "dateFormat",
         ]
@@ -61,10 +61,10 @@ class HistoryCommandTest extends Specification {
 
         def output = new ByteArrayOutputStream()
 
-        def historyCommand = new HistoryCommand()
+        def historyCommand = new HistoryCommandStep()
         def commandScope = new CommandScope("history")
                 .addArgumentValues(
-                        HistoryCommand.DATABASE_ARG.of(database),
+                        HistoryCommandStep.DATABASE_ARG.of(database),
                 )
                 .setOutput(output)
 
@@ -82,7 +82,7 @@ class HistoryCommandTest extends Specification {
         then:
         new String(output.toByteArray()).replaceAll("\r\n", "\n").trim() == expectedOut.replaceAll("\r\n", "\n").trim()
 
-        commandScope.getResult(HistoryCommand.DEPLOYMENTS_RESULT).getDeployments().size() == expectedHistoryLength
+        commandScope.getResult(HistoryCommandStep.DEPLOYMENTS_RESULT).getDeployments().size() == expectedHistoryLength
 
         where:
         [changeSets, expectedHistoryLength, expectedOut] << [

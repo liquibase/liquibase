@@ -1,10 +1,10 @@
-import liquibase.integrationtest.command.LiquibaseCommandTest
+import liquibase.integrationtest.command.CommandTest
 import liquibase.integrationtest.setup.SetupChangelogHistory
 
 import java.util.regex.Pattern
 
 [
-        new LiquibaseCommandTest.Spec(
+        new CommandTest.Spec(
                 command: ["history"],
 
                 setup: [
@@ -54,4 +54,4 @@ import java.util.regex.Pattern
                         statusCode: 0
                 ]
         ),
-] as LiquibaseCommandTest.Spec[]
+] as CommandTest.Spec[]

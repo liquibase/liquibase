@@ -1,9 +1,10 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.command.AbstractCommand;
+import liquibase.command.AbstractCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
+import liquibase.command.CommandStepBuilder;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
@@ -20,7 +21,7 @@ import liquibase.util.StringUtil;
 import java.io.PrintStream;
 import java.util.Set;
 
-public class DiffCommand extends AbstractCommand {
+public class DiffCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<Database> REFERENCE_DATABASE_ARG;
     public static final CommandArgumentDefinition<Database> TARGET_DATABASE_ARG;
@@ -33,16 +34,16 @@ public class DiffCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<PrintStream> OUTPUT_STREAM_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(DiffCommand.class);
-        REFERENCE_DATABASE_ARG = builder.define("referenceDatabase", Database.class).required().build();
-        TARGET_DATABASE_ARG = builder.define("targetDatabase", Database.class).required().build();
-        SNAPSHOT_TYPES_ARG = builder.define("snapshotTypes", Class[].class).required().build();
-        SNAPSHOT_LISTENER_ARG = builder.define("snapshotListener", SnapshotListener.class).required().build();
-        REFERENCE_SNAPSHOT_CONTROL_ARG = builder.define("referenceSnapshotControl", SnapshotControl.class).required().build();
-        TARGET_SNAPSHOT_CONTROL_ARG = builder.define("targetSnapshotControl", SnapshotControl.class).required().build();
-        OBJECT_CHANGE_FILTER_ARG = builder.define("objectChangeFilter", ObjectChangeFilter.class).required().build();
-        COMPARE_CONTROL_ARG = builder.define("compareControl", CompareControl.class).required().build();
-        OUTPUT_STREAM_ARG = builder.define("outputStream", PrintStream.class).required().build();
+        final CommandStepBuilder builder = new CommandStepBuilder(DiffCommandStep.class);
+        REFERENCE_DATABASE_ARG = builder.argument("referenceDatabase", Database.class).required().build();
+        TARGET_DATABASE_ARG = builder.argument("targetDatabase", Database.class).required().build();
+        SNAPSHOT_TYPES_ARG = builder.argument("snapshotTypes", Class[].class).required().build();
+        SNAPSHOT_LISTENER_ARG = builder.argument("snapshotListener", SnapshotListener.class).required().build();
+        REFERENCE_SNAPSHOT_CONTROL_ARG = builder.argument("referenceSnapshotControl", SnapshotControl.class).required().build();
+        TARGET_SNAPSHOT_CONTROL_ARG = builder.argument("targetSnapshotControl", SnapshotControl.class).required().build();
+        OBJECT_CHANGE_FILTER_ARG = builder.argument("objectChangeFilter", ObjectChangeFilter.class).required().build();
+        COMPARE_CONTROL_ARG = builder.argument("compareControl", CompareControl.class).required().build();
+        OUTPUT_STREAM_ARG = builder.argument("outputStream", PrintStream.class).required().build();
     }
 
 
@@ -70,18 +71,18 @@ public class DiffCommand extends AbstractCommand {
 
     @Override
     public void run(CommandScope commandScope) throws Exception {
-        SnapshotCommand.logUnsupportedDatabase(REFERENCE_DATABASE_ARG.getValue(commandScope), this.getClass());
+        SnapshotCommandStep.logUnsupportedDatabase(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
 
-        new DiffToReport(diffResult, OUTPUT_STREAM_ARG.getValue(commandScope)).print();
+        new DiffToReport(diffResult, commandScope.getArgumentValue(OUTPUT_STREAM_ARG)).print();
     }
 
     public DiffResult createDiffResult(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot(commandScope);
         DatabaseSnapshot targetSnapshot = createTargetSnapshot(commandScope);
 
-        final CompareControl compareControl = COMPARE_CONTROL_ARG.getValue(commandScope);
+        final CompareControl compareControl = commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
         referenceSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
         if (targetSnapshot != null) {
             targetSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
@@ -92,11 +93,11 @@ public class DiffCommand extends AbstractCommand {
 
     protected DatabaseSnapshot createTargetSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
-        CompareControl compareControl = COMPARE_CONTROL_ARG.getValue(commandScope);
-        Database targetDatabase = TARGET_DATABASE_ARG.getValue(commandScope);
-        SnapshotControl snapshotControl = TARGET_SNAPSHOT_CONTROL_ARG.getValue(commandScope);
-        Class<? extends DatabaseObject>[] snapshotTypes = SNAPSHOT_TYPES_ARG.getValue(commandScope);
-        SnapshotListener snapshotListener = SNAPSHOT_LISTENER_ARG.getValue(commandScope);
+        CompareControl compareControl = commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
+        Database targetDatabase = commandScope.getArgumentValue(TARGET_DATABASE_ARG);
+        SnapshotControl snapshotControl = commandScope.getArgumentValue(TARGET_SNAPSHOT_CONTROL_ARG);
+        Class<? extends DatabaseObject>[] snapshotTypes = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
+        SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
 
         if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
             schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
@@ -133,13 +134,13 @@ public class DiffCommand extends AbstractCommand {
 
     protected DatabaseSnapshot createReferenceSnapshot(CommandScope commandScope) throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
-        CompareControl compareControl = COMPARE_CONTROL_ARG.getValue(commandScope);
-        Database targetDatabase = TARGET_DATABASE_ARG.getValue(commandScope);
-        Database referenceDatabase = REFERENCE_DATABASE_ARG.getValue(commandScope);
-        SnapshotControl snapshotControl = REFERENCE_SNAPSHOT_CONTROL_ARG.getValue(commandScope);
-        Class<? extends DatabaseObject>[] snapshotTypes = SNAPSHOT_TYPES_ARG.getValue(commandScope);
-        ObjectChangeFilter objectChangeFilter = OBJECT_CHANGE_FILTER_ARG.getValue(commandScope);
-        SnapshotListener snapshotListener = SNAPSHOT_LISTENER_ARG.getValue(commandScope);
+        CompareControl compareControl = commandScope.getArgumentValue(COMPARE_CONTROL_ARG);
+        Database targetDatabase = commandScope.getArgumentValue(TARGET_DATABASE_ARG);
+        Database referenceDatabase = commandScope.getArgumentValue(REFERENCE_DATABASE_ARG);
+        SnapshotControl snapshotControl = commandScope.getArgumentValue(REFERENCE_SNAPSHOT_CONTROL_ARG);
+        Class<? extends DatabaseObject>[] snapshotTypes = commandScope.getArgumentValue(SNAPSHOT_TYPES_ARG);
+        ObjectChangeFilter objectChangeFilter = commandScope.getArgumentValue(OBJECT_CHANGE_FILTER_ARG);
+        SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
 
         if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
             schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};

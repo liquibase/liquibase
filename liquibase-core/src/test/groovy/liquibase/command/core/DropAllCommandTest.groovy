@@ -44,7 +44,7 @@ class DropAllCommandTest extends Specification {
         when:
         def outputStream = new ByteArrayOutputStream()
 
-        def command = new DropAllCommand()
+        def command = new DropAllCommandStep()
         JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
         Liquibase liquibase = new Liquibase(outputFile.getName(), testResourceAccessor, new MockDatabase())
         command.setLiquibase(liquibase)
@@ -66,7 +66,7 @@ class DropAllCommandTest extends Specification {
         Scope.getCurrentScope().getUI()
 
         Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), UUID.randomUUID().toString(), {
-            def command = new DropAllCommand()
+            def command = new DropAllCommandStep()
             JUnitResourceAccessor testResourceAccessor = new JUnitResourceAccessor()
             Liquibase liquibase = new Liquibase(outputFile.getName(), testResourceAccessor, new MockDatabase())
             command.setLiquibase(liquibase)

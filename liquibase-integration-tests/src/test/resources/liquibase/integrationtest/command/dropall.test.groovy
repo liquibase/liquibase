@@ -1,12 +1,10 @@
-package liquibase.integrationtest.command
-
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
-import liquibase.integrationtest.command.LiquibaseCommandTest
+import liquibase.integrationtest.command.CommandTest
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 [
-    new LiquibaseCommandTest.Spec(
+    new CommandTest.Spec(
         command: ["dropAll"],
 
         setup: [
@@ -39,4 +37,4 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
         ]
     )
 
-] as LiquibaseCommandTest.Spec[]
+] as CommandTest.Spec[]

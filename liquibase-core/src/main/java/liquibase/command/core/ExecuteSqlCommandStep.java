@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class ExecuteSqlCommand extends AbstractCommand {
+public class ExecuteSqlCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<String> SQL_ARG;
@@ -24,11 +24,11 @@ public class ExecuteSqlCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<String> DELIMTER_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(ExecuteSqlCommand.class);
-        DATABASE_ARG = builder.define("database", Database.class).required().build();
-        SQL_ARG = builder.define("sql", String.class).build();
-        SQLFILE_ARG = builder.define("sqlFile", String.class).build();
-        DELIMTER_ARG = builder.define("delimiter", String.class).defaultValue(";").build();
+        final CommandStepBuilder builder = new CommandStepBuilder(ExecuteSqlCommandStep.class);
+        DATABASE_ARG = builder.argument("database", Database.class).required().build();
+        SQL_ARG = builder.argument("sql", String.class).build();
+        SQLFILE_ARG = builder.argument("sqlFile", String.class).build();
+        DELIMTER_ARG = builder.argument("delimiter", String.class).defaultValue(";").build();
     }
 
     @Override
@@ -37,9 +37,9 @@ public class ExecuteSqlCommand extends AbstractCommand {
     }
     @Override
     public void run(CommandScope commandScope) throws Exception {
-        Database database = DATABASE_ARG.getValue(commandScope);
-        String sql = SQL_ARG.getValue(commandScope);
-        String sqlFile = SQLFILE_ARG.getValue(commandScope);
+        Database database = commandScope.getArgumentValue(DATABASE_ARG);
+        String sql = commandScope.getArgumentValue(SQL_ARG);
+        String sqlFile = commandScope.getArgumentValue(SQLFILE_ARG);
 
         Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
         String sqlText;
@@ -54,7 +54,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
         }
 
         String out = "";
-        String[] sqlStrings = StringUtil.processMutliLineSQL(sqlText, true, true, DELIMTER_ARG.getValue(commandScope));
+        String[] sqlStrings = StringUtil.processMutliLineSQL(sqlText, true, true, commandScope.getArgumentValue(DELIMTER_ARG));
         for (String sqlString : sqlStrings) {
             if (sqlString.toLowerCase().matches("\\s*select .*")) {
                 List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sqlString));

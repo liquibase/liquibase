@@ -21,7 +21,7 @@ import java.util.regex.Pattern
 import static org.junit.Assume.assumeTrue
 import static org.spockframework.util.Assert.fail
 
-class LiquibaseCommandTest extends Specification {
+class CommandTest extends Specification {
 
     @Unroll("Execute on #specPermutation.databaseName: #specPermutation.spec.description")
     def "execute valid spec"() {

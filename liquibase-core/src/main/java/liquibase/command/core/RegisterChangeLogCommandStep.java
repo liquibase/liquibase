@@ -1,11 +1,9 @@
 package liquibase.command.core;
 
-import liquibase.GlobalConfiguration;
 import liquibase.Scope;
 import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
-import liquibase.exception.CommandArgumentValidationException;
 import liquibase.exception.CommandExecutionException;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.LiquibaseException;
@@ -18,14 +16,9 @@ import liquibase.hub.model.Project;
 import liquibase.ui.UIService;
 import liquibase.util.StringUtil;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.net.URI;
-import java.io.PrintStream;
 import java.util.*;
 
-public class RegisterChangeLogCommand extends AbstractCommand {
+public class RegisterChangeLogCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<HubChangeLog> HUB_CHANGELOG_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
@@ -34,12 +27,12 @@ public class RegisterChangeLogCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<String> HUB_PROJECT_NAME_ARG;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(RegisterChangeLogCommand.class);
-        HUB_CHANGELOG_ARG = builder.define("hubChangeLog", HubChangeLog.class).required().build();
-        CHANGELOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
-        CHANGELOG_ARG = builder.define("changeLog", DatabaseChangeLog.class).required().build();
-        HUB_PROJECT_ID_ARG = builder.define("hubProjectId", UUID.class).optional().build();
-        HUB_PROJECT_NAME_ARG = builder.define("hubProjectName", String.class).optional().build();
+        CommandStepBuilder builder = new CommandStepBuilder(RegisterChangeLogCommandStep.class);
+        HUB_CHANGELOG_ARG = builder.argument("hubChangeLog", HubChangeLog.class).required().build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
+        CHANGELOG_ARG = builder.argument("changeLog", DatabaseChangeLog.class).required().build();
+        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class).optional().build();
+        HUB_PROJECT_NAME_ARG = builder.argument("hubProjectName", String.class).optional().build();
     }
 
     @Override
@@ -65,14 +58,14 @@ public class RegisterChangeLogCommand extends AbstractCommand {
         //
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         HubChangeLog hubChangeLog;
-        String changeLogFile = CHANGELOG_FILE_ARG.getValue(commandScope);
-        UUID hubProjectId = HUB_PROJECT_ID_ARG.getValue(commandScope);
-        String hubProjectName = HUB_PROJECT_NAME_ARG.getValue(commandScope);
+        String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
+        UUID hubProjectId = commandScope.getArgumentValue(HUB_PROJECT_ID_ARG);
+        String hubProjectName = commandScope.getArgumentValue(HUB_PROJECT_NAME_ARG);
 
         //
         // CHeck for existing changeLog file
         //
-        DatabaseChangeLog databaseChangeLog = CHANGELOG_ARG.getValue(commandScope);
+        DatabaseChangeLog databaseChangeLog = commandScope.getArgumentValue(CHANGELOG_ARG);
         final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
         if (changeLogId != null) {
             hubChangeLog = service.getHubChangeLog(UUID.fromString(changeLogId));
@@ -126,13 +119,13 @@ public class RegisterChangeLogCommand extends AbstractCommand {
 
         ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult =
             ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
-        Scope.getCurrentScope().getLog(RegisterChangeLogCommand.class).info(changeLogRewriterResult.message);
+        Scope.getCurrentScope().getLog(RegisterChangeLogCommandStep.class).info(changeLogRewriterResult.message);
         commandScope.getOutput().println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
     }
 
     private Project retrieveOrCreateProject(HubService service, CommandScope commandScope) throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {
         final UIService ui = Scope.getCurrentScope().getUI();
-        String changeLogFile = CHANGELOG_FILE_ARG.getValue(commandScope);
+        String changeLogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
 
         Project project = null;
         List<Project> projects = getProjectsFromHub();
@@ -206,7 +199,7 @@ public class RegisterChangeLogCommand extends AbstractCommand {
         final UIService ui = Scope.getCurrentScope().getUI();
 
         StringBuilder prompt = new StringBuilder("Registering a changelog connects Liquibase operations to a Project for monitoring and reporting.\n");
-        prompt.append("Register changelog " + CHANGELOG_FILE_ARG.getValue(commandScope) + " to an existing Project, or create a new one.\n");
+        prompt.append("Register changelog " + commandScope.getArgumentValue(CHANGELOG_FILE_ARG) + " to an existing Project, or create a new one.\n");
 
         prompt.append("Please make a selection:\n");
 

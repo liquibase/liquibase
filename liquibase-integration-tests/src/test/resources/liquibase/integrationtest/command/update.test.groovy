@@ -1,14 +1,8 @@
-package liquibase.integrationtest.command
-
-import liquibase.change.ColumnConfig
-import liquibase.change.core.CreateTableChange
-import liquibase.changelog.DatabaseChangeLog
-import liquibase.integrationtest.command.LiquibaseCommandTest
+import liquibase.integrationtest.command.CommandTest
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
-import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 [
-    new LiquibaseCommandTest.Spec(
+    new CommandTest.Spec(
         command: ["update"],
 
         setup: [
@@ -22,4 +16,4 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
         ]
     )
 
-] as LiquibaseCommandTest.Spec[]
+] as CommandTest.Spec[]

@@ -49,7 +49,7 @@ class SyncHubCommandTest extends Specification {
 
     def "Sync is successful with url passed"() {
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test"
         command.database = new MockDatabase()
 
@@ -76,7 +76,7 @@ class SyncHubCommandTest extends Specification {
         ]
 
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test"
         command.hubConnectionId = randomUUID
         command.database = new MockDatabase()
@@ -101,7 +101,7 @@ class SyncHubCommandTest extends Specification {
         ]
 
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test"
         command.hubProjectId = MockHubService.randomUUID
         command.database = new MockDatabase()
@@ -128,7 +128,7 @@ class SyncHubCommandTest extends Specification {
                         )
                 )
         ]
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
         command.database = new MockDatabase()
         command.changeLogFile = "com/example/registered.mock"
@@ -146,7 +146,7 @@ class SyncHubCommandTest extends Specification {
         mockHubService.returnConnections = []
 
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
         command.hubConnectionId = MockHubService.randomUUID
         command.hubProjectId = MockHubService.randomUUID
@@ -163,7 +163,7 @@ class SyncHubCommandTest extends Specification {
         mockHubService.returnConnections = []
 
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
         command.hubConnectionId = MockHubService.randomUUID
 
@@ -182,7 +182,7 @@ class SyncHubCommandTest extends Specification {
         ]
 
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
 
         command.run()
@@ -197,7 +197,7 @@ class SyncHubCommandTest extends Specification {
         mockHubService.returnConnections = []
 
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
 
         command.run()
@@ -213,7 +213,7 @@ class SyncHubCommandTest extends Specification {
         mockHubService.returnConnections = []
 
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
         command.changeLogFile = "com/example/unregistered.mock"
 
@@ -231,7 +231,7 @@ class SyncHubCommandTest extends Specification {
         mockHubService.returnConnections = []
 
         when:
-        def command = new SyncHubCommand()
+        def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
         command.changeLogFile = "com/example/registered.mock"
 

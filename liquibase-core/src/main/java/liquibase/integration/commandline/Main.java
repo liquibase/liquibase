@@ -1520,42 +1520,37 @@ public class Main {
                 return;
             } else if (COMMANDS.SNAPSHOT.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope(COMMANDS.SNAPSHOT);
-                snapshotCommand.addArgumentValues(
-                        SnapshotCommand.DATABASE_ARG.of(database),
-                        SnapshotCommand.SCHEMAS_ARG.of(SnapshotCommand.parseSchemas(database, getSchemaParams(database))),
-                        SnapshotCommand.SERIALIZER_FORMAT_ARG.of(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null))
-                );
-
+                snapshotCommand
+                        .addArgumentValue(SnapshotCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(SnapshotCommandStep.SCHEMAS_ARG, SnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
                 snapshotCommand.execute();
 
                 Writer outputWriter = getOutputWriter();
-                String result = SnapshotCommand.printSnapshot(snapshotCommand);
+                String result = SnapshotCommandStep.printSnapshot(snapshotCommand);
                 outputWriter.write(result);
                 outputWriter.flush();
                 outputWriter.close();
                 return;
             } else if (COMMANDS.EXECUTE_SQL.equalsIgnoreCase(command)) {
                 CommandScope executeSqlCommand = new CommandScope(COMMANDS.EXECUTE_SQL)
-                        .addArgumentValues(
-                                ExecuteSqlCommand.DATABASE_ARG.of(database),
-                                ExecuteSqlCommand.SQL_ARG.of(getCommandParam("sql", null)),
-                                ExecuteSqlCommand.SQLFILE_ARG.of(getCommandParam("sqlFile", null)),
-                                ExecuteSqlCommand.DELIMTER_ARG.of(getCommandParam("delimiter", ";"))
-                        );
+                        .addArgumentValue(ExecuteSqlCommandStep.DATABASE_ARG, database)
+                        .addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, getCommandParam("sql", null))
+                        .addArgumentValue(ExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null))
+                        .addArgumentValue(ExecuteSqlCommandStep.DELIMTER_ARG, getCommandParam("delimiter", ";"));
 
                 return;
             } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope(COMMANDS.SNAPSHOT);
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
-                snapshotCommand.addArgumentValues(
-                        SnapshotCommand.DATABASE_ARG.of(referenceDatabase),
-                        SnapshotCommand.SCHEMAS_ARG.of(SnapshotCommand.parseSchemas(database, getSchemaParams(database))),
-                        SnapshotCommand.SERIALIZER_FORMAT_ARG.of(getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null))
-                );
+                snapshotCommand
+                        .addArgumentValue(SnapshotCommandStep.DATABASE_ARG, referenceDatabase)
+                        .addArgumentValue(SnapshotCommandStep.SCHEMAS_ARG, SnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(SnapshotCommand.printSnapshot(snapshotCommand));
+                outputWriter.write(SnapshotCommandStep.printSnapshot(snapshotCommand));
                 outputWriter.flush();
                 outputWriter.close();
 
@@ -1667,7 +1662,7 @@ public class Main {
                 Map<String, Object> argsMap = new HashMap<>();
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.DEACTIVATE_CHANGELOG, argsMap);
 
-                liquibaseCommand.addArgumentValues(DeactivateChangeLogCommand.CHANGE_LOG_FILE_ARG.of(changeLogFile));
+                liquibaseCommand.addArgumentValue(DeactivateChangeLogCommandStep.CHANGE_LOG_FILE_ARG, changeLogFile);
 
                 liquibaseCommand.execute();
 
@@ -1675,14 +1670,14 @@ public class Main {
             } else if (COMMANDS.REGISTER_CHANGELOG.equalsIgnoreCase(command)) {
                 Map<String, Object> argsMap = new HashMap<>();
                 CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.REGISTER_CHANGELOG, argsMap);
-                liquibaseCommand.addArgumentValues(RegisterChangeLogCommand.CHANGELOG_FILE_ARG.of(changeLogFile));
+                liquibaseCommand.addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
                 if (hubProjectId != null && hubProjectName != null) {
                     throw new LiquibaseException("\nThe 'registerchangelog' command failed because too many parameters were provided. Command expects a Hub project ID or new Hub project name, but not both.\n");
                 }
                 try {
                     if (hubProjectId != null) {
                         try {
-                            liquibaseCommand.addArgumentValues(RegisterChangeLogCommand.HUB_PROJECT_ID_ARG.of(UUID.fromString(hubProjectId)));
+                            liquibaseCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_ID_ARG, UUID.fromString(hubProjectId));
                         } catch (IllegalArgumentException e) {
                             throw new LiquibaseException("The command '" + command +
                                     "' failed because parameter 'hubProjectId' has invalid value '" + hubProjectId + "'. Learn more at https://hub.liquibase.com");
@@ -1692,7 +1687,7 @@ public class Main {
                     throw new LiquibaseException("Unexpected hubProjectId format: " + hubProjectId, e);
                 }
                 if (hubProjectName != null) {
-                    liquibaseCommand.addArgumentValue(RegisterChangeLogCommand.HUB_PROJECT_NAME_ARG.getName(), hubProjectName);
+                    liquibaseCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_NAME_ARG.getName(), hubProjectName);
                 }
                 liquibaseCommand.execute();
 
@@ -1717,13 +1712,12 @@ public class Main {
                 }
                 CommandScope dropAllCommand = new CommandScope(COMMANDS.DROP_ALL);
                 if (hubConnectionId != null) {
-                    dropAllCommand.addArgumentValues(DropAllCommand.HUB_CONNECTION_ID.of(UUID.fromString(hubConnectionId)));
+                    dropAllCommand.addArgumentValue(DropAllCommandStep.HUB_CONNECTION_ID, UUID.fromString(hubConnectionId));
                 }
-                dropAllCommand.addArgumentValues(
-                        DropAllCommand.DATABASE_ARG.of(liquibase.getDatabase()),
-                        DropAllCommand.SCHEMAS_ARG.of(SnapshotCommand.parseSchemas(database, getSchemaParams(database))),
-                        DropAllCommand.CHANGELOG_FILE_ARG.of(changeLogFile)
-                );
+                dropAllCommand
+                        .addArgumentValue(DropAllCommandStep.DATABASE_ARG, liquibase.getDatabase())
+                        .addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, SnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
+                        .addArgumentValue(DropAllCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
                 dropAllCommand.execute();
                 return;
@@ -1900,9 +1894,7 @@ public class Main {
                     liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.HISTORY.equalsIgnoreCase(command)) {
                     CommandScope historyCommand = new CommandScope("history");
-                    historyCommand.addArgumentValues(
-                            HistoryCommand.DATABASE_ARG.of(database)
-                    );
+                    historyCommand.addArgumentValue(HistoryCommandStep.DATABASE_ARG, database);
                     historyCommand.setOutput(getOutputStream());
 
                     historyCommand.execute();
@@ -1931,13 +1923,12 @@ public class Main {
         Map<String, Object> argsMap = new HashMap<>();
         CommandScope liquibaseCommand = createLiquibaseCommand(database, liquibase, COMMANDS.SYNC_HUB, argsMap);
 
-        liquibaseCommand.addArgumentValues(
-                SyncHubCommand.HUB_CONNECTION_ID_ARG.of(hubConnectionId),
-                SyncHubCommand.URL_ARG.of(url),
-                SyncHubCommand.DATABASE_ARG.of(database),
-                SyncHubCommand.CHANGELOG_FILE_ARG.of(changeLogFile),
-                SyncHubCommand.HUB_PROJECT_ID_ARG.of(hubProjectId)
-                );
+        liquibaseCommand
+                .addArgumentValue(SyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(SyncHubCommandStep.URL_ARG, url)
+                .addArgumentValue(SyncHubCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(SyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(SyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
 
         liquibaseCommand.execute();
     }

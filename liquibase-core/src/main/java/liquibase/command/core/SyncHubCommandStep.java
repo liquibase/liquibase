@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.changelog.*;
 import liquibase.command.*;
 import liquibase.database.Database;
-import liquibase.exception.CommandArgumentValidationException;
 import liquibase.exception.CommandExecutionException;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
@@ -20,7 +19,7 @@ import liquibase.util.StringUtil;
 import java.util.List;
 import java.util.UUID;
 
-public class SyncHubCommand extends AbstractCommand {
+public class SyncHubCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
@@ -30,13 +29,13 @@ public class SyncHubCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<Boolean> FAIL_IF_ONLINE_ARG;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(SyncHubCommand.class);
-        URL_ARG = builder.define("url", String.class).build();
-        CHANGELOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
-        HUB_CONNECTION_ID_ARG = builder.define("hubConnectionId", String.class).build();
-        HUB_PROJECT_ID_ARG = builder.define("hubProjectId", String.class).build();
-        DATABASE_ARG = builder.define("hubProjectId", Database.class).build();
-        FAIL_IF_ONLINE_ARG = builder.define("failIfOnline", Boolean.class).defaultValue(true).build();
+        CommandStepBuilder builder = new CommandStepBuilder(SyncHubCommandStep.class);
+        URL_ARG = builder.argument("url", String.class).build();
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
+        HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class).build();
+        HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", String.class).build();
+        DATABASE_ARG = builder.argument("hubProjectId", Database.class).build();
+        FAIL_IF_ONLINE_ARG = builder.argument("failIfOnline", Boolean.class).defaultValue(true).build();
     }
 
     @Override
@@ -48,7 +47,7 @@ public class SyncHubCommand extends AbstractCommand {
     public void run(CommandScope commandScope) throws Exception {
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (! hubServiceFactory.isOnline()) {
-            if (FAIL_IF_ONLINE_ARG.getValue(commandScope)) {
+            if (commandScope.getArgumentValue(FAIL_IF_ONLINE_ARG)) {
                 throw new CommandExecutionException("The command syncHub requires access to Liquibase Hub: " +
                         hubServiceFactory.getOfflineReason() +".  Learn more at https://hub.liquibase.com");
             } else {
@@ -60,8 +59,8 @@ public class SyncHubCommand extends AbstractCommand {
         //
         // Check for both connection and project specified
         //
-        final String hubConnectionId = HUB_CONNECTION_ID_ARG.getValue(commandScope);
-        if (hubConnectionId != null && HUB_PROJECT_ID_ARG.getValue(commandScope) != null) {
+        final String hubConnectionId = commandScope.getArgumentValue(HUB_CONNECTION_ID_ARG);
+        if (hubConnectionId != null && commandScope.getArgumentValue(HUB_PROJECT_ID_ARG) != null) {
             String message = "The syncHub command requires only one valid hubConnectionId or hubProjectId or unique URL. Please remove extra values.";
             Scope.getCurrentScope().getLog(getClass()).severe(message);
             throw new CommandExecutionException(message);
@@ -71,9 +70,9 @@ public class SyncHubCommand extends AbstractCommand {
         Connection connectionToSync;
         if (hubConnectionId == null) {
             Project project = null;
-            if (StringUtil.isNotEmpty(CHANGELOG_FILE_ARG.getValue(commandScope))) {
+            if (StringUtil.isNotEmpty(commandScope.getArgumentValue(CHANGELOG_FILE_ARG))) {
                 final ResourceAccessor resourceAccessor = Scope.getCurrentScope().getResourceAccessor();
-                final String changelogFile = CHANGELOG_FILE_ARG.getValue(commandScope);
+                final String changelogFile = commandScope.getArgumentValue(CHANGELOG_FILE_ARG);
                 final DatabaseChangeLog databaseChangeLog = ChangeLogParserFactory.getInstance().getParser(changelogFile, resourceAccessor).parse(changelogFile, new ChangeLogParameters(), resourceAccessor);
                 final String changeLogId = databaseChangeLog.getChangeLogId();
 
@@ -98,17 +97,17 @@ public class SyncHubCommand extends AbstractCommand {
                     project = hubChangeLog.getProject();
                 }
             }
-            else if (HUB_PROJECT_ID_ARG.getValue(commandScope) != null) {
-                project = hubService.getProject(UUID.fromString(HUB_PROJECT_ID_ARG.getValue(commandScope)));
+            else if (commandScope.getArgumentValue(commandScope.getArgumentValue(HUB_PROJECT_ID_ARG)) != null) {
+                project = hubService.getProject(UUID.fromString(commandScope.getArgumentValue(HUB_PROJECT_ID_ARG)));
                 if (project == null) {
-                    throw new CommandExecutionException("Project Id '" + HUB_PROJECT_ID_ARG.getValue(commandScope) + "' does not exist or you do not have access to it");
+                    throw new CommandExecutionException("Project Id '" + commandScope.getArgumentValue(HUB_PROJECT_ID_ARG) + "' does not exist or you do not have access to it");
                 }
             }
             else {
                 Scope.getCurrentScope().getLog(getClass()).info("No project, connection, or changeLogFile specified. Searching for jdbcUrl across the entire organization.");
             }
 
-            final String url = URL_ARG.getValue(commandScope);
+            final String url = commandScope.getArgumentValue(URL_ARG);
             final Connection searchConnection = new Connection()
                     .setJdbcUrl(url)
                     .setProject(project);
@@ -139,7 +138,7 @@ public class SyncHubCommand extends AbstractCommand {
             }
         }
 
-        final Database database = DATABASE_ARG.getValue(commandScope);
+        final Database database = commandScope.getArgumentValue(DATABASE_ARG);
         Scope.child(Scope.Attr.database, database, () -> {
             final ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
             final List<RanChangeSet> ranChangeSets = historyService.getRanChangeSets();

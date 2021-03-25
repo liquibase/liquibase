@@ -3,10 +3,7 @@ package liquibase.command.core;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.RanChangeSet;
-import liquibase.command.AbstractCommand;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandResultDefinition;
-import liquibase.command.CommandScope;
+import liquibase.command.*;
 import liquibase.database.Database;
 
 import java.io.PrintWriter;
@@ -15,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class HistoryCommand extends AbstractCommand {
+public class HistoryCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<DateFormat> DATE_FORMAT_ARG;
@@ -23,9 +20,9 @@ public class HistoryCommand extends AbstractCommand {
     public static final CommandResultDefinition<DeploymentHistory> DEPLOYMENTS_RESULT;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(HistoryCommand.class);
-        DATABASE_ARG = builder.define("database", Database.class).required().build();
-        DATE_FORMAT_ARG = builder.define("dateFormat", DateFormat.class).defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)).build();
+        final CommandStepBuilder builder = new CommandStepBuilder(HistoryCommandStep.class);
+        DATABASE_ARG = builder.argument("database", Database.class).required().build();
+        DATE_FORMAT_ARG = builder.argument("dateFormat", DateFormat.class).defaultValue(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)).build();
 
         DEPLOYMENTS_RESULT = builder.result("deployments", DeploymentHistory.class).build();
     }
@@ -40,7 +37,7 @@ public class HistoryCommand extends AbstractCommand {
 
         DeploymentHistory deploymentHistory = new DeploymentHistory();
 
-        Database database = DATABASE_ARG.getValue(commandScope);
+        Database database = commandScope.getArgumentValue(DATABASE_ARG);
 
         ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
 
@@ -66,7 +63,7 @@ public class HistoryCommand extends AbstractCommand {
             deployment.printReport(commandScope.getOutput());
         }
 
-        commandScope.addResults(DEPLOYMENTS_RESULT.of(deploymentHistory));
+        commandScope.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
         commandScope.addResult("statusCode", 0);
     }
 
@@ -92,7 +89,7 @@ public class HistoryCommand extends AbstractCommand {
         }
 
         void printReport(PrintWriter output) {
-            DateFormat dateFormat = DATE_FORMAT_ARG.getValue(commandScope);
+            DateFormat dateFormat = commandScope.getArgumentValue(DATE_FORMAT_ARG);
 
             String executionTime = null;
             RanChangeSet firstChangeSet = changeSets.get(0);

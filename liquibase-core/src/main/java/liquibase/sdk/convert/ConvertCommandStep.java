@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.*;
-import liquibase.exception.CommandArgumentValidationException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -19,17 +18,17 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConvertCommand extends AbstractCommand {
+public class ConvertCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> SRC_ARG;
     public static final CommandArgumentDefinition<String> OUT_ARG;
     public static final CommandArgumentDefinition<String> CLASSPATH_ARG;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(ConvertCommand.class);
-        SRC_ARG = builder.define("src", String.class).required().build();
-        OUT_ARG = builder.define("out", String.class).required().build();
-        CLASSPATH_ARG = builder.define("classpath", String.class).required().build();
+        final CommandStepBuilder builder = new CommandStepBuilder(ConvertCommandStep.class);
+        SRC_ARG = builder.argument("src", String.class).required().build();
+        OUT_ARG = builder.argument("out", String.class).required().build();
+        CLASSPATH_ARG = builder.argument("classpath", String.class).required().build();
     }
 
     @Override
@@ -39,9 +38,9 @@ public class ConvertCommand extends AbstractCommand {
 
     @Override
     public void run(CommandScope commandScope) throws Exception {
-        String src = SRC_ARG.getValue(commandScope);
-        String out = OUT_ARG.getValue(commandScope);
-        String classpath = CLASSPATH_ARG.getValue(commandScope);
+        String src = commandScope.getArgumentValue(SRC_ARG);
+        String out = commandScope.getArgumentValue(OUT_ARG);
+        String classpath = commandScope.getArgumentValue(CLASSPATH_ARG);
 
         List<ResourceAccessor> openers = new ArrayList<>();
         openers.add(new FileSystemResourceAccessor());

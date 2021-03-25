@@ -7,10 +7,9 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ListVisitor;
 import liquibase.changelog.visitor.RollbackListVisitor;
 import liquibase.exception.CommandExecutionException;
-import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
-import liquibase.command.core.RegisterChangeLogCommand;
-import liquibase.command.core.SyncHubCommand;
+import liquibase.command.core.RegisterChangeLogCommandStep;
+import liquibase.command.core.SyncHubCommandStep;
 import liquibase.configuration.ConfigurationDefinition;
 import liquibase.configuration.ConfiguredValue;
 import liquibase.configuration.core.DeprecatedConfigurationValueProvider;
@@ -313,13 +312,12 @@ public class HubUpdater {
     }
 
     public void syncHub(String changeLogFile, DatabaseChangeLog databaseChangeLog, UUID hubConnectionId) throws CommandExecutionException {
-        final CommandScope syncHub = new CommandScope("syncHub").addArgumentValues(
-                SyncHubCommand.CHANGELOG_FILE_ARG.of(changeLogFile),
-                SyncHubCommand.URL_ARG.of(database.getConnection().getURL()),
-                SyncHubCommand.HUB_CONNECTION_ID_ARG.of(hubConnectionId != null ? Objects.toString(hubConnectionId) : null),
-                SyncHubCommand.DATABASE_ARG.of(database),
-                SyncHubCommand.FAIL_IF_ONLINE_ARG.of(false)
-        );
+        final CommandScope syncHub = new CommandScope("syncHub")
+                .addArgumentValue(SyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(SyncHubCommandStep.URL_ARG, database.getConnection().getURL())
+                .addArgumentValue(SyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId != null ? Objects.toString(hubConnectionId) : null)
+                .addArgumentValue(SyncHubCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(SyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
 
         try {
             syncHub.execute();
@@ -512,15 +510,14 @@ public class HubUpdater {
             throws LiquibaseException, CommandExecutionException {
 
         CommandScope registerChangeLogCommand = new CommandScope("registerChangeLog");
-        registerChangeLogCommand.addArgumentValues(
-                RegisterChangeLogCommand.CHANGELOG_ARG.of(changeLog),
-                RegisterChangeLogCommand.CHANGELOG_FILE_ARG.of(changeLogFile)
-        );
+        registerChangeLogCommand
+                .addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_ARG, changeLog)
+                .addArgumentValue(RegisterChangeLogCommandStep.CHANGELOG_FILE_ARG, changeLogFile);
 
         try {
             if (hubProjectId != null) {
                 try {
-                    registerChangeLogCommand.addArgumentValues(RegisterChangeLogCommand.HUB_PROJECT_ID_ARG.of(hubProjectId));
+                    registerChangeLogCommand.addArgumentValue(RegisterChangeLogCommandStep.HUB_PROJECT_ID_ARG, hubProjectId);
                 } catch (IllegalArgumentException e) {
                     throw new LiquibaseException("The command 'RegisterChangeLog' " +
                             " failed because parameter 'hubProjectId' has invalid value '" + hubProjectId +

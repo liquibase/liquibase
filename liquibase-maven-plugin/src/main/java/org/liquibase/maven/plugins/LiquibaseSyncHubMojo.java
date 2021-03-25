@@ -1,10 +1,8 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
-import liquibase.Scope;
-import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
-import liquibase.command.core.SyncHubCommand;
+import liquibase.command.core.SyncHubCommandStep;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -44,14 +42,13 @@ public class LiquibaseSyncHubMojo extends AbstractLiquibaseChangeLogMojo {
         super.performLiquibaseTask(liquibase);
         Database database = liquibase.getDatabase();
         CommandScope syncHub = new CommandScope("syncHub");
-        syncHub.addArgumentValues(
-                SyncHubCommand.CHANGELOG_FILE_ARG.of(changeLogFile),
-                SyncHubCommand.URL_ARG.of(database.getConnection().getURL()),
-                SyncHubCommand.HUB_CONNECTION_ID_ARG.of(hubConnectionId),
-                SyncHubCommand.HUB_PROJECT_ID_ARG.of(hubProjectId),
-                SyncHubCommand.DATABASE_ARG.of(database),
-                SyncHubCommand.FAIL_IF_ONLINE_ARG.of(false)
-        );
+        syncHub
+                .addArgumentValue(SyncHubCommandStep.CHANGELOG_FILE_ARG, changeLogFile)
+                .addArgumentValue(SyncHubCommandStep.URL_ARG, database.getConnection().getURL())
+                .addArgumentValue(SyncHubCommandStep.HUB_CONNECTION_ID_ARG, hubConnectionId)
+                .addArgumentValue(SyncHubCommandStep.HUB_PROJECT_ID_ARG, hubProjectId)
+                .addArgumentValue(SyncHubCommandStep.DATABASE_ARG, database)
+                .addArgumentValue(SyncHubCommandStep.FAIL_IF_ONLINE_ARG, false);
 
         syncHub.execute();
     }

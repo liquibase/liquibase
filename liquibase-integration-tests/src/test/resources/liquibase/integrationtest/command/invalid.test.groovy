@@ -1,10 +1,7 @@
-package liquibase.integrationtest.command
-
-import liquibase.exception.CommandExecutionException
-import liquibase.integrationtest.command.LiquibaseCommandTest
+import liquibase.integrationtest.command.CommandTest
 
 [
-        new LiquibaseCommandTest.Spec(
+        new CommandTest.Spec(
                 command: ["invalid"],
 
                 expectedOutput: [
@@ -15,4 +12,4 @@ import liquibase.integrationtest.command.LiquibaseCommandTest
                 expectedException: liquibase.exception.CommandExecutionException
         )
 
-] as LiquibaseCommandTest.Spec[]
+] as CommandTest.Spec[]

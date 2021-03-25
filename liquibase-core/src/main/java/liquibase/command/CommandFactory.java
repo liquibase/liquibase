@@ -2,52 +2,79 @@ package liquibase.command;
 
 import liquibase.Scope;
 import liquibase.SingletonObject;
-import liquibase.exception.CommandExecutionException;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
 /**
- * Manages {@link LiquibaseCommand} implementations.
+ * Manages the command related implementations.
  */
 public class CommandFactory implements SingletonObject {
 
-    private Map<Class<? extends LiquibaseCommand>, SortedSet<CommandArgumentDefinition>> commandArgumentDefinitions = new HashMap<>();
+    private final Map<Class<? extends CommandStep>, Set<CommandArgumentDefinition<?>>> argumentDefinitions = new HashMap<>();
 
     protected CommandFactory() {
     }
 
-    protected SortedSet<LiquibaseCommand> getCommandPipeline(CommandScope commandScope) {
-        SortedSet<LiquibaseCommand> commands = new TreeSet<>((o1, o2) -> {
-            final int order = Integer.compare(o1.getOrder(commandScope), o2.getOrder(commandScope));
-            if (order == 0) {
-                return o1.getClass().getName().compareTo(o2.getClass().getName());
-            }
+    /**
+     * Returns the complete {@link CommandDefinition} for the given commandName.
+     */
+    protected CommandDefinition getCommand(String... commandName) {
+        CommandDefinition commandDefinition = new CommandDefinition(commandName);
 
-            return order;
-        });
-
-        for (LiquibaseCommand command : Scope.getCurrentScope().getServiceLocator().findInstances(LiquibaseCommand.class)) {
-            if (command.getOrder(commandScope) > 0) {
-                commands.add(command);
+        for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
+            if (step.getOrder(commandDefinition) > 0) {
+                commandDefinition.add(step);
             }
         }
 
-        return commands;
-    }
+        for (CommandStep step : commandDefinition.getPipeline()) {
+            final Set<CommandArgumentDefinition<?>> stepArguments = this.argumentDefinitions.get(step.getClass());
 
-    public void register(Class<? extends LiquibaseCommand> commandClass, CommandArgumentDefinition definition) {
-        if (!commandArgumentDefinitions.containsKey(commandClass)) {
-            commandArgumentDefinitions.put(commandClass, new TreeSet<>());
+            if (stepArguments != null) {
+                for (CommandArgumentDefinition<?> commandArg : stepArguments) {
+                    commandDefinition.add(commandArg);
+                }
+            }
         }
 
-        this.commandArgumentDefinitions.get(commandClass).add(definition);
+        for (CommandStep step : commandDefinition.getPipeline()) {
+            step.adjustCommandDefinition(commandDefinition);
+        }
+
+
+        return commandDefinition;
     }
 
-    public SortedSet<CommandArgumentDefinition> getArguments(LiquibaseCommand command) {
-        final SortedSet<CommandArgumentDefinition> definitions = commandArgumentDefinitions.get(command.getClass());
-        if (definitions == null) {
-            return Collections.emptySortedSet();
+    /**
+     * Returns all known {@link CommandDefinition}s.
+     */
+    public SortedSet<CommandDefinition> getCommands() {
+        Map<String, String[]> commandNames = new HashMap<>();
+        for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
+            final String[] name = step.getName();
+            commandNames.put(StringUtil.join(name, " "), name);
         }
-        return Collections.unmodifiableSortedSet(definitions);
+
+        SortedSet<CommandDefinition> commands = new TreeSet<>();
+        for (String[] commandName : commandNames.values()) {
+            commands.add(getCommand(commandName));
+        }
+
+        return Collections.unmodifiableSortedSet(commands);
+
     }
+
+    /**
+     * Called by {@link CommandStepBuilder.NewCommandArgument#build()} to
+     * register that a particular {@link CommandArgumentDefinition} is available for a step.
+     */
+    protected void register(Class<? extends CommandStep> commandClass, CommandArgumentDefinition<?> definition) {
+        if (!argumentDefinitions.containsKey(commandClass)) {
+            argumentDefinitions.put(commandClass, new TreeSet<>());
+        }
+
+        this.argumentDefinitions.get(commandClass).add(definition);
+    }
+
 }

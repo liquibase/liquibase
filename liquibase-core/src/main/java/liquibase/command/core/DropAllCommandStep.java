@@ -23,7 +23,7 @@ import liquibase.util.StringUtil;
 import java.util.Date;
 import java.util.UUID;
 
-public class DropAllCommand extends AbstractCommand {
+public class DropAllCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<CatalogAndSchema[]> SCHEMAS_ARG;
@@ -32,14 +32,14 @@ public class DropAllCommand extends AbstractCommand {
     public static final CommandArgumentDefinition<UUID> HUB_CONNECTION_ID;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(DropAllCommand.class);
+        CommandStepBuilder builder = new CommandStepBuilder(DropAllCommandStep.class);
 
-        DATABASE_ARG = builder.define("database", Database.class)
+        DATABASE_ARG = builder.argument("database", Database.class)
                 .required().build();
-        SCHEMAS_ARG = builder.define("schemas", CatalogAndSchema[].class).build();
-        CHANGELOG_ARG = builder.define("changelog", DatabaseChangeLog.class).build();
-        CHANGELOG_FILE_ARG = builder.define("changelogFile", String.class).build();
-        HUB_CONNECTION_ID = builder.define("hubConnectionId", UUID.class).build();
+        SCHEMAS_ARG = builder.argument("schemas", CatalogAndSchema[].class).build();
+        CHANGELOG_ARG = builder.argument("changelog", DatabaseChangeLog.class).build();
+        CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).build();
+        HUB_CONNECTION_ID = builder.argument("hubConnectionId", UUID.class).build();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class DropAllCommand extends AbstractCommand {
 
     @Override
     public void run(CommandScope commandScope) throws Exception {
-        LockService lockService = LockServiceFactory.getInstance().getLockService(DATABASE_ARG.getValue(commandScope));
+        LockService lockService = LockServiceFactory.getInstance().getLockService(commandScope.getArgumentValue(DATABASE_ARG));
         Logger log = Scope.getCurrentScope().getLog(getClass());
         HubUpdater hubUpdater = null;
         try {
@@ -58,12 +58,12 @@ public class DropAllCommand extends AbstractCommand {
             boolean doSyncHub = true;
             DatabaseChangeLog changeLog = null;
             HubChangeLog hubChangeLog = null;
-            if (StringUtil.isNotEmpty(CHANGELOG_FILE_ARG.getValue(commandScope))) {
+            if (StringUtil.isNotEmpty(commandScope.getArgumentValue(CHANGELOG_FILE_ARG))) {
                 //
                 // Let the user know they can register for Hub
                 //
-                hubUpdater = new HubUpdater(new Date(), changeLog, DATABASE_ARG.getValue(commandScope));
-                hubUpdater.register(CHANGELOG_FILE_ARG.getValue(commandScope));
+                hubUpdater = new HubUpdater(new Date(), changeLog, commandScope.getArgumentValue(DATABASE_ARG));
+                hubUpdater.register(commandScope.getArgumentValue(CHANGELOG_FILE_ARG));
 
                 //
                 // Access the HubChangeLog and check to see
@@ -73,17 +73,17 @@ public class DropAllCommand extends AbstractCommand {
                 doSyncHub = checkForRegisteredChangeLog(changeLog, hubChangeLog);
             }
 
-            for (CatalogAndSchema schema : SCHEMAS_ARG.getValue(commandScope)) {
+            for (CatalogAndSchema schema : commandScope.getArgumentValue(SCHEMAS_ARG)) {
                 log.info("Dropping Database Objects in schema: " + schema);
-                checkLiquibaseTables(false, null, new Contexts(), new LabelExpression(), DATABASE_ARG.getValue(commandScope));
-                DATABASE_ARG.getValue(commandScope).dropDatabaseObjects(schema);
+                checkLiquibaseTables(false, null, new Contexts(), new LabelExpression(), commandScope.getArgumentValue(DATABASE_ARG));
+                commandScope.getArgumentValue(DATABASE_ARG).dropDatabaseObjects(schema);
             }
 
             //
             // Tell the user if the HubChangeLog is deactivated
             //
-            if (hubUpdater != null && (doSyncHub || HUB_CONNECTION_ID.getValue(commandScope) != null)) {
-                hubUpdater.syncHub(CHANGELOG_FILE_ARG.getValue(commandScope), changeLog, HUB_CONNECTION_ID.getValue(commandScope));
+            if (hubUpdater != null && (doSyncHub || commandScope.getArgumentValue(HUB_CONNECTION_ID) != null)) {
+                hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), changeLog, commandScope.getArgumentValue(HUB_CONNECTION_ID));
             }
         } catch (DatabaseException e) {
             throw e;
@@ -95,7 +95,7 @@ public class DropAllCommand extends AbstractCommand {
             resetServices();
         }
 
-        Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + DATABASE_ARG.getValue(commandScope).getConnection().getConnectionUserName() + "@" + DATABASE_ARG.getValue(commandScope).getConnection().getURL());
+        Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getConnectionUserName() + "@" + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getURL());
         commandScope.addResult("statusCode", 0);
     }
 

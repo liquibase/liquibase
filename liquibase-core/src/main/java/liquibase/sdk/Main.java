@@ -1,10 +1,8 @@
 package liquibase.sdk;
 
-import liquibase.Scope;
-import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sdk.convert.ConvertCommand;
+import liquibase.sdk.convert.ConvertCommandStep;
 import liquibase.util.StringUtil;
 import org.apache.commons.cli.*;
 
@@ -52,12 +50,10 @@ public class Main {
                 options.addOption(OptionBuilder.hasArg().withDescription("Classpath").create("classpath"));
 
                 CommandLine commandArguments = commandParser.parse(options, main.commandArgs.toArray(new String[main.commandArgs.size()]));
-                command.addArgumentValues(
-                        ConvertCommand.SRC_ARG.of(commandArguments.getOptionValue("src")),
-                        ConvertCommand.OUT_ARG.of(commandArguments.getOptionValue("out")),
-                        ConvertCommand.CLASSPATH_ARG.of(commandArguments.getOptionValue("classpath"))
-
-                );
+                command
+                        .addArgumentValue(ConvertCommandStep.SRC_ARG, commandArguments.getOptionValue("src"))
+                        .addArgumentValue(ConvertCommandStep.OUT_ARG, commandArguments.getOptionValue("out"))
+                        .addArgumentValue(ConvertCommandStep.CLASSPATH_ARG, commandArguments.getOptionValue("classpath"));
             } else {
                 throw new UserError("Unknown command: " + main.command);
             }

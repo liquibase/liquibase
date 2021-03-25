@@ -8,7 +8,7 @@ import liquibase.changelog.visitor.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.command.CommandFactory;
 import liquibase.command.CommandScope;
-import liquibase.command.core.DropAllCommand;
+import liquibase.command.core.DropAllCommandStep;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -1778,11 +1778,10 @@ public class Liquibase implements AutoCloseable {
         try {
             final CommandFactory commandFactory = Scope.getCurrentScope().getSingleton(CommandFactory.class);
 
-            CommandScope dropAll = new CommandScope("dropAll").addArgumentValues(
-                    DropAllCommand.DATABASE_ARG.of(Liquibase.this.getDatabase()),
-                    DropAllCommand.SCHEMAS_ARG.of(finalSchemas),
-                    DropAllCommand.CHANGELOG_ARG.of(Liquibase.this.getDatabaseChangeLog())
-            );
+            CommandScope dropAll = new CommandScope("dropAll")
+                    .addArgumentValue(DropAllCommandStep.DATABASE_ARG, Liquibase.this.getDatabase())
+                    .addArgumentValue(DropAllCommandStep.SCHEMAS_ARG, finalSchemas)
+                    .addArgumentValue(DropAllCommandStep.CHANGELOG_ARG, Liquibase.this.getDatabaseChangeLog());
 
             try {
                 dropAll.execute();

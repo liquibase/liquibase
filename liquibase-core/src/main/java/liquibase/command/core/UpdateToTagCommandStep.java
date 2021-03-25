@@ -1,11 +1,12 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractWrapperCommand;
+import liquibase.command.AbstractCliWrapperCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
+import liquibase.command.CommandStepBuilder;
 import liquibase.integration.commandline.Main;
 
-public class UpdateToTagSQLCommand extends AbstractWrapperCommand {
+public class UpdateToTagCommandStep extends AbstractCliWrapperCommandStep {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
@@ -13,17 +14,17 @@ public class UpdateToTagSQLCommand extends AbstractWrapperCommand {
     public static final CommandArgumentDefinition<String> TAG_ARG;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(UpdateToTagSQLCommand.class);
-        CHANGELOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
-        URL_ARG = builder.define("url", String.class).required().build();
-        LABELS_ARG = builder.define("labels", String.class).build();
-        CONTEXTS_ARG = builder.define("contexts", String.class).build();
-        TAG_ARG = builder.define("tag", String.class).build();
+        CommandStepBuilder builder = new CommandStepBuilder(UpdateToTagCommandStep.class);
+        CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
+        URL_ARG = builder.argument("url", String.class).required().build();
+        LABELS_ARG = builder.argument("labels", String.class).build();
+        CONTEXTS_ARG = builder.argument("contexts", String.class).build();
+        TAG_ARG = builder.argument("tag", String.class).build();
     }
 
     @Override
     public String[] getName() {
-        return new String[] {"updateToTagSQL"};
+        return new String[] {"updateToTag"};
     }
 
     @Override

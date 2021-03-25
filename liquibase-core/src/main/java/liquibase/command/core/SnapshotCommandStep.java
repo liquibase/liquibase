@@ -2,9 +2,10 @@ package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.command.AbstractCommand;
+import liquibase.command.AbstractCommandStep;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
+import liquibase.command.CommandStepBuilder;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class SnapshotCommand extends AbstractCommand {
+public class SnapshotCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<Database> DATABASE_ARG;
     public static final CommandArgumentDefinition<CatalogAndSchema[]> SCHEMAS_ARG;
@@ -32,12 +33,12 @@ public class SnapshotCommand extends AbstractCommand {
     private Map<String, Object> snapshotMetadata;
 
     static {
-        final CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(SnapshotCommand.class);
+        final CommandStepBuilder builder = new CommandStepBuilder(SnapshotCommandStep.class);
 
-        DATABASE_ARG = builder.define("database", Database.class).required().build();
-        SCHEMAS_ARG = builder.define("schemas", CatalogAndSchema[].class).required().build();
-        SERIALIZER_FORMAT_ARG = builder.define("serializerFormat", String.class).required().build();
-        SNAPSHOT_LISTENER_ARG = builder.define("snapshotListener", SnapshotListener.class).required().build();
+        DATABASE_ARG = builder.argument("database", Database.class).required().build();
+        SCHEMAS_ARG = builder.argument("schemas", CatalogAndSchema[].class).required().build();
+        SERIALIZER_FORMAT_ARG = builder.argument("serializerFormat", String.class).required().build();
+        SNAPSHOT_LISTENER_ARG = builder.argument("snapshotListener", SnapshotListener.class).required().build();
     }
 
     @Override
@@ -70,11 +71,11 @@ public class SnapshotCommand extends AbstractCommand {
 
     @Override
     public void run(CommandScope commandScope) throws Exception {
-        Database database = DATABASE_ARG.getValue(commandScope);
-        SnapshotListener snapshotListener = SNAPSHOT_LISTENER_ARG.getValue(commandScope);
-        CatalogAndSchema[] schemas = SCHEMAS_ARG.getValue(commandScope);
+        Database database = commandScope.getArgumentValue(DATABASE_ARG);
+        SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
+        CatalogAndSchema[] schemas = commandScope.getArgumentValue(SCHEMAS_ARG);
 
-        SnapshotCommand.logUnsupportedDatabase(database, this.getClass());
+        SnapshotCommandStep.logUnsupportedDatabase(database, this.getClass());
         SnapshotControl snapshotControl = new SnapshotControl(database);
         snapshotControl.setSnapshotListener(snapshotListener);
 
@@ -98,7 +99,7 @@ public class SnapshotCommand extends AbstractCommand {
     }
 
     public static String printSnapshot(CommandScope commandScope) throws LiquibaseException {
-        String format = SnapshotCommand.SERIALIZER_FORMAT_ARG.getValue(commandScope);
+        String format = commandScope.getArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG);
         if (format == null) {
             format = "txt";
         }
