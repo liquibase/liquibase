@@ -14,5 +14,10 @@ liquibase.command.core.UpdateCountCommand
 liquibase.command.core.UpdateCountSQLCommand
 liquibase.command.core.UpdateToTagCommand
 liquibase.command.core.UpdateToTagSQLCommand
+liquibase.command.core.RollbackCommand
+liquibase.command.core.RollbackSQLCommand
 liquibase.command.core.RollbackCountCommand
+liquibase.command.core.RollbackCountSQLCommand
+liquibase.command.core.RollbackToDateCommand
+liquibase.command.core.RollbackToDateSQLCommand
 liquibase.sdk.convert.ConvertCommand

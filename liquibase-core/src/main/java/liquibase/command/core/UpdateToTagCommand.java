@@ -33,8 +33,7 @@ public class UpdateToTagCommand extends AbstractWrapperCommand {
 
     @Override
     public void run(CommandScope commandScope) throws Exception {
-        String[] args = createArgs(commandScope);
-        args = createParametersFromArgs(args, "tag");
+        String[] args = createParametersFromArgs(createArgs(commandScope), "tag");
         int statusCode = Main.run(args);
         commandScope.addResult("statusCode", statusCode);
     }

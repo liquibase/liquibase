@@ -1,34 +1,31 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractCommand;
 import liquibase.command.AbstractWrapperCommand;
 import liquibase.command.CommandArgumentDefinition;
 import liquibase.command.CommandScope;
 import liquibase.integration.commandline.Main;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-public class UpdateCountCommand extends AbstractWrapperCommand {
+public class RollbackCountSQLCommand extends AbstractWrapperCommand {
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> ROLLBACK_SCRIPT_ARG;
     public static final CommandArgumentDefinition<Integer> COUNT_ARG;
 
     static {
-        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(UpdateCountCommand.class);
+        CommandArgumentDefinition.Builder builder = new CommandArgumentDefinition.Builder(RollbackCountSQLCommand.class);
         CHANGELOG_FILE_ARG = builder.define("changeLogFile", String.class).required().build();
         URL_ARG = builder.define("url", String.class).required().build();
         LABELS_ARG = builder.define("labels", String.class).build();
         CONTEXTS_ARG = builder.define("contexts", String.class).build();
-        COUNT_ARG = builder.define("count", Integer.class).build();
+        ROLLBACK_SCRIPT_ARG = builder.define("rollbackScript", String.class).build();
+        COUNT_ARG = builder.define("count", Integer.class).required().build();
     }
 
     @Override
     public String[] getName() {
-        return new String[] {"updateCount"};
+        return new String[] {"rollbackCountSQL"};
     }
 
     @Override
@@ -37,5 +34,4 @@ public class UpdateCountCommand extends AbstractWrapperCommand {
         int statusCode = Main.run(args);
         commandScope.addResult("statusCode", statusCode);
     }
-
 }

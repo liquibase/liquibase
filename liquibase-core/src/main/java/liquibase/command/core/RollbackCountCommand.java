@@ -10,6 +10,7 @@ public class RollbackCountCommand extends AbstractWrapperCommand {
     public static final CommandArgumentDefinition<String> URL_ARG;
     public static final CommandArgumentDefinition<String> LABELS_ARG;
     public static final CommandArgumentDefinition<String> CONTEXTS_ARG;
+    public static final CommandArgumentDefinition<String> ROLLBACK_SCRIPT_ARG;
     public static final CommandArgumentDefinition<Integer> COUNT_ARG;
 
     static {
@@ -18,6 +19,7 @@ public class RollbackCountCommand extends AbstractWrapperCommand {
         URL_ARG = builder.define("url", String.class).required().build();
         LABELS_ARG = builder.define("labels", String.class).build();
         CONTEXTS_ARG = builder.define("contexts", String.class).build();
+        ROLLBACK_SCRIPT_ARG = builder.define("rollbackScript", String.class).build();
         COUNT_ARG = builder.define("count", Integer.class).required().build();
     }
 
@@ -28,8 +30,7 @@ public class RollbackCountCommand extends AbstractWrapperCommand {
 
     @Override
     public void run(CommandScope commandScope) throws Exception {
-        String[] args = createArgs(commandScope);
-        args = createParametersFromArgs(args, "count");
+        String[] args = createParametersFromArgs(createArgs(commandScope), "count");
         int statusCode = Main.run(args);
         commandScope.addResult("statusCode", statusCode);
     }
