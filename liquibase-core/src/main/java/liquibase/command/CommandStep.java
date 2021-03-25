@@ -48,6 +48,7 @@ public interface CommandStep {
 
     /**
      * Validates that the {@link CommandScope} is correctly set up for this step to run.
+     * Any validation in {@link CommandArgumentDefinition#validate(CommandScope)} will be checked previous to this method being called.
      * <b>This method should not be called directly. It is called by the overall pipeline logic in the {@link #getOrder(CommandDefinition)} order.</b>
      */
     void validate(CommandScope commandScope) throws CommandArgumentValidationException;
@@ -56,5 +57,5 @@ public interface CommandStep {
      * Performs the business logic.
      * <b>This method should not be called directly. It is called by the overall pipeline logic in the {@link #getOrder(CommandDefinition)} order.</b>
      */
-    void run(CommandScope commandScope) throws Exception;
+    void run(CommandResultsBuilder resultsBuilder) throws Exception;
 }

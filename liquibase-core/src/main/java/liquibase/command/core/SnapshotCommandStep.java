@@ -2,10 +2,7 @@ package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
-import liquibase.command.AbstractCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandScope;
-import liquibase.command.CommandStepBuilder;
+import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
@@ -70,7 +67,9 @@ public class SnapshotCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         Database database = commandScope.getArgumentValue(DATABASE_ARG);
         SnapshotListener snapshotListener = commandScope.getArgumentValue(SNAPSHOT_LISTENER_ARG);
         CatalogAndSchema[] schemas = commandScope.getArgumentValue(SCHEMAS_ARG);
@@ -95,16 +94,16 @@ public class SnapshotCommandStep extends AbstractCommandStep {
 
         snapshot.setMetadata(this.getSnapshotMetadata());
 
-        commandScope.addResult("snapshot", snapshot);
+        resultsBuilder.addResult("snapshot", snapshot);
     }
 
-    public static String printSnapshot(CommandScope commandScope) throws LiquibaseException {
+    public static String printSnapshot(CommandScope commandScope, CommandResults snapshotResults) throws LiquibaseException {
         String format = commandScope.getArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG);
         if (format == null) {
             format = "txt";
         }
 
-        return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize((DatabaseSnapshot) commandScope.getResult("snapshot"), true);
+        return SnapshotSerializerFactory.getInstance().getSerializer(format.toLowerCase(Locale.US)).serialize((DatabaseSnapshot) snapshotResults.getResult("snapshot"), true);
     }
 //
 //        public void merge(SnapshotCommandResult resultToMerge) {

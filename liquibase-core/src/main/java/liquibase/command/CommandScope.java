@@ -4,10 +4,9 @@ import liquibase.Scope;
 import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
 
+import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -24,9 +23,7 @@ public class CommandScope {
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
-    private final SortedMap<String, Object> resultValues = new TreeMap<>();
 
-    private PrintWriter output;
     private OutputStream outputStream;
 
     /**
@@ -82,87 +79,23 @@ public class CommandScope {
     }
 
     /**
-     * Returns a {@link PrintWriter} for output for the command.
-     * The command output should not include status/progress type output, only the actual output itself.
-     * Think "what would be piped out", not "what goes to stderr during a pipe".
-     *
-     * Defaults to {@link System#out}
-     *
-     * @see #getOutputStream() for binary output
-     * @see #setOutput(OutputStream) for setting
-     */
-    public PrintWriter getOutput() {
-        return output;
-    }
-
-    /**
-     * Returns an {@link OutputStream} for output for the command.
-     * Generally {@link #getOutput()} should be used, but this is available for commands that deal with binary data.
-     *
-     * @see #getOutput() for text-based output.
-     * @see #setOutput(OutputStream) for setting
-     */
-    public OutputStream getOutputStream() {
-        return outputStream;
-    }
-
-    /**
-     * Sets the output stream for this command. Creates a convenience {@link PrintWriter} around the stream that can be accessed with
-     * {@link #getOutput()}, or this stream can be used directly with {@link #getOutputStream()}
+     * Sets the output stream for this command.
+     * The command output sent to this stream should not include status/progress type output, only the actual output itself.
+     * Think "what would be piped out", not "what the user is told about what is happening".
      */
     public CommandScope setOutput(OutputStream outputStream) {
         this.outputStream = outputStream;
-        this.output = new PrintWriter(outputStream);
 
         return this;
     }
 
     /**
-     * Adds a key/value pair to the command results.
-     * @see #addResult(CommandResultDefinition, Object)
+     * Executes the command in this scope, and returns the results.
      */
-    public CommandScope addResult(String key, Object value) {
-        this.resultValues.put(key, value);
+    public CommandResults execute() throws CommandExecutionException {
+        CommandResultsBuilder resultsBuilder = new CommandResultsBuilder(this, outputStream);
 
-        return this;
-    }
-
-    /**
-     * Sets the value for a known {@link CommandResultDefinition} to the command results.
-     */
-    public <T> CommandScope addResult(CommandResultDefinition<T> definition, T value) {
-        this.resultValues.put(definition.getName(), value);
-
-        return this;
-    }
-
-    /**
-     * Return the value for the given {@link CommandResultDefinition}, or the default value if not set.
-     */
-    public <DataType> DataType getResult(CommandResultDefinition<DataType> definition) {
-        return (DataType) resultValues.get(definition.getName());
-    }
-
-    /**
-     * Return the result value for the given key.
-     */
-    public Object getResult(String key) {
-        return resultValues.get(key);
-    }
-
-    /**
-     * Returns all the results for this command.
-     */
-    public SortedMap<String, Object> getResults() {
-        return Collections.unmodifiableSortedMap(resultValues);
-    }
-
-    /**
-     * Executes the command in this scope, and stores the results in it.
-     */
-    public void execute() throws CommandExecutionException {
-
-        for (CommandArgumentDefinition definition : commandDefinition.getArguments().values()) {
+        for (CommandArgumentDefinition<?> definition : commandDefinition.getArguments().values()) {
             definition.validate(this);
         }
 
@@ -171,7 +104,7 @@ public class CommandScope {
         }
         try {
             for (CommandStep command : commandDefinition.getPipeline()) {
-                command.run(this);
+                command.run(resultsBuilder);
             }
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
@@ -180,7 +113,13 @@ public class CommandScope {
                 throw new CommandExecutionException(e);
             }
         } finally {
-            this.output.flush();
+            try {
+                this.outputStream.flush();
+            } catch (IOException e) {
+                Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: "+e.getMessage(), e);
+            }
         }
+
+        return resultsBuilder.build();
     }
 }

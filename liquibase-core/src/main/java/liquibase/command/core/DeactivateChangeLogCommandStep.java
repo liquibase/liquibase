@@ -3,10 +3,7 @@ package liquibase.command.core;
 import liquibase.Scope;
 import liquibase.changelog.ChangelogRewriter;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.command.AbstractCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandScope;
-import liquibase.command.CommandStepBuilder;
+import liquibase.command.*;
 import liquibase.exception.CommandExecutionException;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
@@ -32,7 +29,9 @@ public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
 
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         //
         // Access the HubService
         // Stop if we do no have a key
@@ -83,7 +82,7 @@ public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
                 "Operation data sent to the now inactive changelogID will still be accepted at Hub.\n" +
                 "For more information visit https://docs.liquibase.com.\n";
             Scope.getCurrentScope().getLog(DeactivateChangeLogCommandStep.class).info(message);
-            commandScope.getOutput().println(message);
+            resultsBuilder.getOutput().println(message);
             return;
         }
         throw new CommandExecutionException(rewriterResult.message);

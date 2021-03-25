@@ -33,7 +33,8 @@ public class HistoryCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
 
         DeploymentHistory deploymentHistory = new DeploymentHistory();
 
@@ -41,15 +42,15 @@ public class HistoryCommandStep extends AbstractCommandStep {
 
         ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
 
-        commandScope.getOutput().println("Liquibase History for " + database.getConnection().getURL());
-        commandScope.getOutput().println("");
+        resultsBuilder.getOutput().println("Liquibase History for " + database.getConnection().getURL());
+        resultsBuilder.getOutput().println("");
 
         DeploymentDetails deployment = null;
         for (RanChangeSet ranChangeSet : historyService.getRanChangeSets()) {
             final String thisDeploymentId = ranChangeSet.getDeploymentId();
             if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
                 if (deployment != null) {
-                    deployment.printReport(commandScope.getOutput());
+                    deployment.printReport(resultsBuilder.getOutput());
                 }
                 deployment = new DeploymentDetails(commandScope);
                 deploymentHistory.deployments.add(deployment);
@@ -58,13 +59,13 @@ public class HistoryCommandStep extends AbstractCommandStep {
         }
 
         if (deployment == null) {
-            commandScope.getOutput().println("No changeSets deployed");
+            resultsBuilder.getOutput().println("No changeSets deployed");
         } else {
-            deployment.printReport(commandScope.getOutput());
+            deployment.printReport(resultsBuilder.getOutput());
         }
 
-        commandScope.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
-        commandScope.addResult("statusCode", 0);
+        resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
+        resultsBuilder.addResult("statusCode", 0);
     }
 
     public static class DeploymentHistory {

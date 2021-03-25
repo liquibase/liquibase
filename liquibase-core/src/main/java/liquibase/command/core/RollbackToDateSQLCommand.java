@@ -30,9 +30,11 @@ public class RollbackToDateSQLCommand extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         String[] args = createParametersFromArgs(createArgs(commandScope), "date");
         int statusCode = Main.run(args);
-        commandScope.addResult("statusCode", statusCode);
+        resultsBuilder.addResult("statusCode", statusCode);
     }
 }

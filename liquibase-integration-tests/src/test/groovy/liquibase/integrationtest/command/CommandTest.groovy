@@ -82,11 +82,11 @@ class CommandTest extends Specification {
             }
         }
 
-        commandScope.execute()
+        def results = commandScope.execute()
 
         def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
 
-        for (def returnedResult : commandScope.getResults().entrySet()) {
+        for (def returnedResult : results.getResults().entrySet()) {
             def expectedValue = String.valueOf(spec.expectedResults.get(returnedResult.getKey()))
             def seenValue = String.valueOf(returnedResult.getValue())
 

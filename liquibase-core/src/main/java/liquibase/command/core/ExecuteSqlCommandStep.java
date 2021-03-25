@@ -36,7 +36,9 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
         return new String[]{"executeSql"};
     }
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         Database database = commandScope.getArgumentValue(DATABASE_ARG);
         String sql = commandScope.getArgumentValue(SQL_ARG);
         String sqlFile = commandScope.getArgumentValue(SQLFILE_ARG);

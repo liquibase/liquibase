@@ -41,8 +41,9 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
         final UIService ui = Scope.getCurrentScope().getUI();
+        CommandScope commandScope = resultsBuilder.getCommandScope();
 
         //
         // Access the HubService
@@ -99,7 +100,7 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
                 throw new CommandExecutionException("Unable to create project '" + hubProjectName + "'.\n" +
                     "Learn more at https://hub.liquibase.com.");
             }
-            commandScope.getOutput().print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
+            resultsBuilder.getOutput().print("\nProject '" + project.getName() + "' created with project ID '" + project.getId() + "'.\n\n");
         } else {
             project = retrieveOrCreateProject(service, commandScope);
             if (project == null) {
@@ -120,7 +121,7 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
         ChangelogRewriter.ChangeLogRewriterResult changeLogRewriterResult =
             ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
         Scope.getCurrentScope().getLog(RegisterChangeLogCommandStep.class).info(changeLogRewriterResult.message);
-        commandScope.getOutput().println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
+        resultsBuilder.getOutput().println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
     }
 
     private Project retrieveOrCreateProject(HubService service, CommandScope commandScope) throws CommandLineParsingException, LiquibaseException, LiquibaseHubException {

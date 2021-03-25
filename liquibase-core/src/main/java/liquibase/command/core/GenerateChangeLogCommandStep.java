@@ -2,6 +2,7 @@ package liquibase.command.core;
 
 import liquibase.Scope;
 import liquibase.command.CommandArgumentDefinition;
+import liquibase.command.CommandResultsBuilder;
 import liquibase.command.CommandScope;
 import liquibase.command.CommandStepBuilder;
 import liquibase.database.Database;
@@ -41,7 +42,9 @@ public class GenerateChangeLogCommandStep extends DiffToChangeLogCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         outputBestPracticeMessage();
 
         String changeLogFile = StringUtil.trimToNull(commandScope.getArgumentValue(CHANGELOG_FILENAME_ARG));

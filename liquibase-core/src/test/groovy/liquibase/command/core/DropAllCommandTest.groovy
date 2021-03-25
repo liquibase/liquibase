@@ -52,7 +52,7 @@ class DropAllCommandTest extends Specification {
         command.setDatabase(new MockDatabase())
         command.setSchemas("")
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         notThrown(CommandExecutionException)
@@ -76,7 +76,7 @@ class DropAllCommandTest extends Specification {
 
             CompositeLogService compositeLogService = new CompositeLogService(true, bufferLog);
             Scope.child(Scope.Attr.logService.name(), compositeLogService, {
-                command.run()
+                command.run(resultsBuilder)
             })
         })
 

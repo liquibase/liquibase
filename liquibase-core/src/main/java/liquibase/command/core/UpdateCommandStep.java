@@ -1,9 +1,6 @@
 package liquibase.command.core;
 
-import liquibase.command.AbstractCliWrapperCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandScope;
-import liquibase.command.CommandStepBuilder;
+import liquibase.command.*;
 import liquibase.integration.commandline.Main;
 
 public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
@@ -26,9 +23,11 @@ public class UpdateCommandStep extends AbstractCliWrapperCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         String[] args = createArgs(commandScope);
         int statusCode = Main.run(args);
-        commandScope.addResult("statusCode", statusCode);
+        resultsBuilder.addResult("statusCode", statusCode);
     }
 }

@@ -53,7 +53,7 @@ class SyncHubCommandTest extends Specification {
         command.url = "jdbc://test"
         command.database = new MockDatabase()
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         notThrown(CommandExecutionException)
@@ -81,7 +81,7 @@ class SyncHubCommandTest extends Specification {
         command.hubConnectionId = randomUUID
         command.database = new MockDatabase()
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         notThrown(CommandExecutionException)
@@ -106,7 +106,7 @@ class SyncHubCommandTest extends Specification {
         command.hubProjectId = MockHubService.randomUUID
         command.database = new MockDatabase()
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         notThrown(CommandExecutionException)
@@ -133,7 +133,7 @@ class SyncHubCommandTest extends Specification {
         command.database = new MockDatabase()
         command.changeLogFile = "com/example/registered.mock"
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         notThrown(CommandExecutionException)
@@ -151,7 +151,7 @@ class SyncHubCommandTest extends Specification {
         command.hubConnectionId = MockHubService.randomUUID
         command.hubProjectId = MockHubService.randomUUID
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         def e = thrown(CommandExecutionException)
@@ -167,7 +167,7 @@ class SyncHubCommandTest extends Specification {
         command.url = "jdbc://test2"
         command.hubConnectionId = MockHubService.randomUUID
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         def e = thrown(CommandExecutionException)
@@ -185,7 +185,7 @@ class SyncHubCommandTest extends Specification {
         def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         def e = thrown(CommandExecutionException)
@@ -200,7 +200,7 @@ class SyncHubCommandTest extends Specification {
         def command = new SyncHubCommandStep()
         command.url = "jdbc://test2"
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         def e = thrown(CommandExecutionException)
@@ -217,7 +217,7 @@ class SyncHubCommandTest extends Specification {
         command.url = "jdbc://test2"
         command.changeLogFile = "com/example/unregistered.mock"
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         def e = thrown(CommandExecutionException)
@@ -235,7 +235,7 @@ class SyncHubCommandTest extends Specification {
         command.url = "jdbc://test2"
         command.changeLogFile = "com/example/registered.mock"
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         def e = thrown(CommandExecutionException)

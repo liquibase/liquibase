@@ -44,7 +44,9 @@ public class SyncHubCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
         if (! hubServiceFactory.isOnline()) {
             if (commandScope.getArgumentValue(FAIL_IF_ONLINE_ARG)) {

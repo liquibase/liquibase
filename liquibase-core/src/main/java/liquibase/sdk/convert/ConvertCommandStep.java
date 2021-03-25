@@ -37,7 +37,9 @@ public class ConvertCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         String src = commandScope.getArgumentValue(SRC_ARG);
         String out = commandScope.getArgumentValue(OUT_ARG);
         String classpath = commandScope.getArgumentValue(CLASSPATH_ARG);

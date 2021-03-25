@@ -4,6 +4,7 @@ import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -1525,10 +1526,8 @@ public class Main {
                         .addArgumentValue(SnapshotCommandStep.SCHEMAS_ARG, SnapshotCommandStep.parseSchemas(database, getSchemaParams(database)))
                         .addArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
-                snapshotCommand.execute();
-
                 Writer outputWriter = getOutputWriter();
-                String result = SnapshotCommandStep.printSnapshot(snapshotCommand);
+                String result = SnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute());
                 outputWriter.write(result);
                 outputWriter.flush();
                 outputWriter.close();
@@ -1550,7 +1549,7 @@ public class Main {
                         .addArgumentValue(SnapshotCommandStep.SERIALIZER_FORMAT_ARG, getCommandParam(OPTIONS.SNAPSHOT_FORMAT, null));
 
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(SnapshotCommandStep.printSnapshot(snapshotCommand));
+                outputWriter.write(SnapshotCommandStep.printSnapshot(snapshotCommand, snapshotCommand.execute()));
                 outputWriter.flush();
                 outputWriter.close();
 

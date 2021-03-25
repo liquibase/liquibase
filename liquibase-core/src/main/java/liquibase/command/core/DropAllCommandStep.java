@@ -48,7 +48,9 @@ public class DropAllCommandStep extends AbstractCommandStep {
     }
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         LockService lockService = LockServiceFactory.getInstance().getLockService(commandScope.getArgumentValue(DATABASE_ARG));
         Logger log = Scope.getCurrentScope().getLog(getClass());
         HubUpdater hubUpdater = null;
@@ -96,7 +98,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
         }
 
         Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getConnectionUserName() + "@" + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getURL());
-        commandScope.addResult("statusCode", 0);
+        resultsBuilder.addResult("statusCode", 0);
     }
 
     //

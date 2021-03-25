@@ -76,7 +76,7 @@ class HistoryCommandTest extends Specification {
 
         ChangeLogHistoryServiceFactory.setInstance(historyFactory)
 
-        historyCommand.run(commandScope)
+        historyCommand.run(resultsBuilder)
         commandScope.getOutput().flush()
 
         then:

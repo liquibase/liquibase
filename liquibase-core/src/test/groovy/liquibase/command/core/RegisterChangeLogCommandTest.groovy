@@ -76,7 +76,7 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(outputFile.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.xml")])
 
-        command.run()
+        command.run(resultsBuilder)
 
         def hubChangeLog = command.getHubChangeLog()
         String contents = FileUtil.getContents(outputFile.getAbsoluteFile())
@@ -102,7 +102,7 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(emptyOutputFile.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.xml")])
 
-        command.run()
+        command.run(resultsBuilder)
 
         def hubChangeLog = command.getHubChangeLog()
         String contents = FileUtil.getContents(emptyOutputFile.getAbsoluteFile())
@@ -128,7 +128,7 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(outputFileJSON.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.json")])
 
-        command.run()
+        command.run(resultsBuilder)
 
         def hubChangeLog = command.getHubChangeLog()
 
@@ -149,7 +149,7 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(outputFileYaml.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.yaml")])
 
-        command.run()
+        command.run(resultsBuilder)
 
         def hubChangeLog = command.getHubChangeLog()
         def contents = outputFileYaml.getText()
@@ -172,7 +172,7 @@ class RegisterChangeLogCommandTest extends Specification {
         command.setChangeLogFile(outputFileYml.getName())
         command.configure([changeLog: new DatabaseChangeLog("com/example/test.yml")])
 
-        command.run()
+        command.run(resultsBuilder)
 
         def hubChangeLog = command.getHubChangeLog()
 
@@ -197,7 +197,7 @@ class RegisterChangeLogCommandTest extends Specification {
         command.configure(argsMap)
         command.setOutputStream(new PrintStream(outputStream))
 
-        command.run()
+        command.run(resultsBuilder)
 
         then:
         def e = thrown(CommandExecutionException)

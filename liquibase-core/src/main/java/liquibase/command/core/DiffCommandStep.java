@@ -1,10 +1,7 @@
 package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.command.AbstractCommandStep;
-import liquibase.command.CommandArgumentDefinition;
-import liquibase.command.CommandScope;
-import liquibase.command.CommandStepBuilder;
+import liquibase.command.*;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
@@ -70,7 +67,9 @@ public class DiffCommandStep extends AbstractCommandStep {
 
 
     @Override
-    public void run(CommandScope commandScope) throws Exception {
+    public void run(CommandResultsBuilder resultsBuilder) throws Exception {
+        CommandScope commandScope = resultsBuilder.getCommandScope();
+
         SnapshotCommandStep.logUnsupportedDatabase(commandScope.getArgumentValue(REFERENCE_DATABASE_ARG), this.getClass());
 
         DiffResult diffResult = createDiffResult(commandScope);
