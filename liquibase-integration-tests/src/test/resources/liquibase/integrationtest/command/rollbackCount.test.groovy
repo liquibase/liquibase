@@ -1,6 +1,9 @@
+package liquibase.integrationtest.command
+
 import liquibase.integrationtest.command.CommandTest
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
+import liquibase.integrationtest.setup.SetupChangeLogSync
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
@@ -29,7 +32,8 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
                 )
                 ] as SetupDatabaseStructure.Entry,
             ]),
-            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.changelog.xml")
+            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.changelog.xml"),
+            new SetupChangeLogSync("changelogs/hsqldb/complete/rollback.changelog.xml")
         ],
         arguments: [
             count: 1
@@ -38,6 +42,7 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
             "",
         ],
         expectedResults: [
+            statusMessage: "Successfully executed rollbackCount",
             statusCode: 0
         ]
     )

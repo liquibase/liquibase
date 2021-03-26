@@ -3,13 +3,13 @@ package liquibase.integrationtest.command
 import liquibase.integrationtest.command.CommandTest
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
-import liquibase.integrationtest.setup.SetupChangeLogSync
+import liquibase.change.core.TagDatabaseChange
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 [
     new CommandTest.Spec(
-        command: ["rollbackToDate"],
+        command: ["changeLogSyncToTag"],
 
         setup: [
             new SetupDatabaseStructure([
@@ -28,21 +28,34 @@ import liquibase.integrationtest.setup.SetupDatabaseStructure
                     columns: [
                         ColumnConfig.fromName("SecondColumn")
                                     .setType("VARCHAR(255)")
-                    ]
+                ]
                 )
                 ] as SetupDatabaseStructure.Entry,
+                [
+                new TagDatabaseChange(
+                    tag: "version_2.0"
+                )
+                ] as SetupDatabaseStructure.Entry,
+                [
+                new CreateTableChange(
+                    tableName: "liquibaseRunInfo",
+                    columns: [
+                        ColumnConfig.fromName("timesRan")
+                                    .setType("INT")
+                    ]
+                )
+                ] as SetupDatabaseStructure.Entry
             ]),
-            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.changelog.xml"),
-            new SetupChangeLogSync("changelogs/hsqldb/complete/rollback.changelog.xml")
-        ],
-        arguments: [
-            date: "2021-03-25T09:00:00"
+            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.tag.changelog.xml")
         ],
         expectedOutput: [
             "",
         ],
+        arguments: [
+            tag: "version_2.0"
+        ],
         expectedResults: [
-            statusMessage: "Successfully executed rollbackToDate",
+            statusMessage: "Successfully executed changeLogSyncToTag",
             statusCode: 0
         ]
     )

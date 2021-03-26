@@ -1,3 +1,5 @@
+package liquibase.integrationtest.command
+
 import liquibase.integrationtest.command.CommandTest
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
@@ -11,7 +13,9 @@ import liquibase.integrationtest.setup.SetupDatabaseChangeLog
         expectedOutput: [
             "",
         ],
+
         expectedResults: [
+            statusMessage: "Successfully executed update",
             statusCode: 0
         ]
     )

@@ -1,10 +1,6 @@
 package liquibase.integrationtest.command
 
 import liquibase.CatalogAndSchema
-import liquibase.changelog.ChangeLogHistoryService
-import liquibase.changelog.ChangeLogHistoryServiceFactory
-import liquibase.changelog.ChangeSet
-import liquibase.changelog.RanChangeSet
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
@@ -70,7 +66,7 @@ class CommandTest extends Specification {
         commandScope.addArgumentValue("database", database)
         commandScope.addArgumentValue("url", database.getConnection().getURL())
         commandScope.addArgumentValue("schemas", catalogAndSchemas)
-        commandScope.addArgumentValue("logLevel", "INFO")
+        commandScope.addArgumentValue("logLevel", "FINE")
         commandScope.setOutput(outputStream)
         if (changeLogFile != null) {
             commandScope.addArgumentValue("changeLogFile", changeLogFile)
@@ -187,7 +183,7 @@ ${expectedOutputCheck.toString()}
     }
 
 
-    static class Spec {
+    public static class Spec {
 
         /**
          * Description of this test for reporting purposes.

@@ -1,3 +1,5 @@
+package liquibase.integrationtest.command
+
 import liquibase.integrationtest.command.CommandTest
 import liquibase.integrationtest.setup.SetupChangelogHistory
 

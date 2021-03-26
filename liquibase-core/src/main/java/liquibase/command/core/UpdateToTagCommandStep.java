@@ -30,6 +30,7 @@ public class UpdateToTagCommandStep extends AbstractCliWrapperCommandStep {
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "tag");
         int statusCode = Main.run(args);
+        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

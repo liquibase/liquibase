@@ -15,3 +15,14 @@ liquibase.command.core.UpdateCountSQLCommandStep
 liquibase.command.core.UpdateToTagCommandStep
 liquibase.command.core.UpdateToTagSQLCommandStep
 liquibase.sdk.convert.ConvertCommandStep
+liquibase.command.core.ChangeLogSyncCommandStep
+liquibase.command.core.ChangeLogSyncSQLCommandStep
+liquibase.command.core.ChangeLogSyncToTagCommandStep
+liquibase.command.core.ChangeLogSyncToTagSQLCommandStep
+liquibase.command.core.CalculateCheckSumCommandStep
+liquibase.command.core.RollbackCommandStep
+liquibase.command.core.RollbackSQLCommandStep
+liquibase.command.core.RollbackCountCommandStep
+liquibase.command.core.RollbackCountSQLCommandStep
+liquibase.command.core.RollbackToDateCommandStep
+liquibase.command.core.RollbackToDateSQLCommandStep

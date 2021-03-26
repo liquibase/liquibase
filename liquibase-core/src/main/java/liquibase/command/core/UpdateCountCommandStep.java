@@ -30,6 +30,7 @@ public class UpdateCountCommandStep extends AbstractCliWrapperCommandStep {
 
         String[] args = createParametersFromArgs(createArgs(commandScope), "count");
         int statusCode = Main.run(args);
+        addStatusMessage(resultsBuilder, statusCode);
         resultsBuilder.addResult("statusCode", statusCode);
     }
 

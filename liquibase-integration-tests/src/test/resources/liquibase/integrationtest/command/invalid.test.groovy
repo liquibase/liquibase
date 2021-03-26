@@ -1,11 +1,12 @@
-import liquibase.integrationtest.command.CommandTest
+package liquibase.integrationtest.command
 
+import liquibase.integrationtest.command.CommandTest
 [
         new CommandTest.Spec(
                 command: ["invalid"],
 
                 expectedOutput: [
-                        "asdf",
+                        "",
                 ],
 
                 expectedResults: [:],

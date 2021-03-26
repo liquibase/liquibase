@@ -91,6 +91,9 @@ public class HistoryCommandStep extends AbstractCommandStep {
 
         void printReport(PrintWriter output) {
             DateFormat dateFormat = commandScope.getArgumentValue(DATE_FORMAT_ARG);
+            if (dateFormat == null) {
+                dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+            }
 
             String executionTime = null;
             RanChangeSet firstChangeSet = changeSets.get(0);

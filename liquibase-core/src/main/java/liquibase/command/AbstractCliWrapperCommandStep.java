@@ -21,23 +21,28 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
                 argsList.add("--" + arg.getKey() + "=" + commandScope.getArgumentValue(arg.getValue()).toString());
             }
         });
+        if (commandScope.getArgumentValue("logLevel") != null) {
+            argsList.add("--logLevel=" + commandScope.getArgumentValue("logLevel"));
+        }
         argsList.add(commandScope.getCommand().getName()[0]);
         String[] args = new String[argsList.size()];
         argsList.toArray(args);
         return args;
     }
 
-    protected String[] createParametersFromArgs(String[] args, String paramName) {
+    protected String[] createParametersFromArgs(String[] args, String ... params) {
         List<String> argsList = new ArrayList(Arrays.asList(args));
         List<String> toRemove = new ArrayList<>();
         String tagArg = null;
         for (String arg : argsList) {
-            if (arg.startsWith("--" + paramName)) {
-                String[] parts = arg.split("=");
-                if (parts.length == 2) {
-                    tagArg = parts[1];
+            for (String paramName : params) {
+                if (arg.startsWith("--" + paramName)) {
+                    String[] parts = arg.split("=");
+                    if (parts.length == 2) {
+                        tagArg = parts[1];
+                    }
+                    toRemove.add(arg);
                 }
-                toRemove.add(arg);
             }
         }
 
@@ -53,5 +58,14 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
             args[args.length - 1] = tagArg;
         }
         return args;
+    }
+
+    protected void addStatusMessage(CommandResultsBuilder resultsBuilder, int statusCode) {
+        if (statusCode == 0) {
+            resultsBuilder.addResult("statusMessage", "Successfully executed " + getName()[0]);
+        }
+        else {
+            resultsBuilder.addResult("statusMessage", "Unsuccessfully executed " + getName()[0]);
+        }
     }
 }

@@ -1,6 +1,6 @@
 package liquibase.command;
 
-import com.sun.deploy.util.StringUtils;
+import liquibase.util.StringUtil;
 
 import java.util.*;
 
@@ -24,7 +24,7 @@ public class CommandDefinition implements Comparable<CommandDefinition> {
 
     protected CommandDefinition(String[] name) {
         this.name = name;
-        this.concatName = StringUtils.join(Arrays.asList(name), " ");
+        this.concatName = StringUtil.join(Arrays.asList(name), " ");
 
         pipeline = new TreeSet<>((o1, o2) -> {
             final int order = Integer.compare(o1.getOrder(this), o2.getOrder(this));

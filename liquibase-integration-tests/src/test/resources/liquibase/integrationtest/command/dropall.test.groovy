@@ -1,6 +1,9 @@
+package liquibase.integrationtest.command
+
+import liquibase.integrationtest.command.CommandTest
+
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
-import liquibase.integrationtest.command.CommandTest
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 [
