@@ -1,4 +1,5 @@
 liquibase.command.core.DeactivateChangeLogCommandStep
+liquibase.command.core.DbDocCommandStep
 liquibase.command.core.DiffCommandStep
 liquibase.command.core.DiffToChangeLogCommandStep
 liquibase.command.core.DropAllCommandStep
@@ -19,6 +20,7 @@ liquibase.command.core.ChangeLogSyncCommandStep
 liquibase.command.core.ChangeLogSyncSQLCommandStep
 liquibase.command.core.ChangeLogSyncToTagCommandStep
 liquibase.command.core.ChangeLogSyncToTagSQLCommandStep
+liquibase.command.core.ClearCheckSumsCommandStep
 liquibase.command.core.CalculateCheckSumCommandStep
 liquibase.command.core.RollbackCommandStep
 liquibase.command.core.RollbackSQLCommandStep

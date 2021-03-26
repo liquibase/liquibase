@@ -33,13 +33,13 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
     protected String[] createParametersFromArgs(String[] args, String ... params) {
         List<String> argsList = new ArrayList(Arrays.asList(args));
         List<String> toRemove = new ArrayList<>();
-        String tagArg = null;
+        String matchingArg = null;
         for (String arg : argsList) {
             for (String paramName : params) {
                 if (arg.startsWith("--" + paramName)) {
                     String[] parts = arg.split("=");
                     if (parts.length == 2) {
-                        tagArg = parts[1];
+                        matchingArg = parts[1];
                     }
                     toRemove.add(arg);
                 }
@@ -49,13 +49,13 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
         //
         // Special handling for the count parameter
         //
-        if (tagArg != null) {
+        if (matchingArg != null) {
             argsList.removeAll(toRemove);
             args = new String[argsList.size() + 1];
             for (int i=0; i < argsList.size(); i++) {
                 args[i] = argsList.get(i);
             }
-            args[args.length - 1] = tagArg;
+            args[args.length - 1] = matchingArg;
         }
         return args;
     }
