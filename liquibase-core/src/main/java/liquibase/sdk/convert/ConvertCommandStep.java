@@ -12,12 +12,14 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
+import liquibase.servicelocator.LiquibaseService;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+@LiquibaseService(skip = true)
 public class ConvertCommandStep extends AbstractCommandStep {
 
     public static final CommandArgumentDefinition<String> SRC_ARG;
@@ -34,6 +36,11 @@ public class ConvertCommandStep extends AbstractCommandStep {
     @Override
     public String[] getName() {
         return new String[]{"convert"};
+    }
+
+    @Override
+    public int getOrder(CommandDefinition commandDefinition) {
+        return -1;
     }
 
     @Override

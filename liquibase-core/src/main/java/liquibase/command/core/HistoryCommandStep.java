@@ -34,38 +34,41 @@ public class HistoryCommandStep extends AbstractCommandStep {
 
     @Override
     public void run(CommandResultsBuilder resultsBuilder) throws Exception {
-        CommandScope commandScope = resultsBuilder.getCommandScope();
+        try (PrintWriter output = new PrintWriter(resultsBuilder.getOutputStream())) {
 
-        DeploymentHistory deploymentHistory = new DeploymentHistory();
+            CommandScope commandScope = resultsBuilder.getCommandScope();
 
-        Database database = commandScope.getArgumentValue(DATABASE_ARG);
+            DeploymentHistory deploymentHistory = new DeploymentHistory();
 
-        ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
+            Database database = commandScope.getArgumentValue(DATABASE_ARG);
 
-        resultsBuilder.getOutput().println("Liquibase History for " + database.getConnection().getURL());
-        resultsBuilder.getOutput().println("");
+            ChangeLogHistoryService historyService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
 
-        DeploymentDetails deployment = null;
-        for (RanChangeSet ranChangeSet : historyService.getRanChangeSets()) {
-            final String thisDeploymentId = ranChangeSet.getDeploymentId();
-            if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
-                if (deployment != null) {
-                    deployment.printReport(resultsBuilder.getOutput());
+            output.println("Liquibase History for " + database.getConnection().getURL());
+            output.println("");
+
+            DeploymentDetails deployment = null;
+            for (RanChangeSet ranChangeSet : historyService.getRanChangeSets()) {
+                final String thisDeploymentId = ranChangeSet.getDeploymentId();
+                if (deployment == null || !Objects.equals(thisDeploymentId, deployment.getDeploymentId())) {
+                    if (deployment != null) {
+                        deployment.printReport(output);
+                    }
+                    deployment = new DeploymentDetails(commandScope);
+                    deploymentHistory.deployments.add(deployment);
                 }
-                deployment = new DeploymentDetails(commandScope);
-                deploymentHistory.deployments.add(deployment);
+                deployment.changeSets.add(ranChangeSet);
             }
-            deployment.changeSets.add(ranChangeSet);
-        }
 
-        if (deployment == null) {
-            resultsBuilder.getOutput().println("No changeSets deployed");
-        } else {
-            deployment.printReport(resultsBuilder.getOutput());
-        }
+            if (deployment == null) {
+                output.println("No changeSets deployed");
+            } else {
+                deployment.printReport(output);
+            }
 
-        resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
-        resultsBuilder.addResult("statusCode", 0);
+            resultsBuilder.addResult(DEPLOYMENTS_RESULT, deploymentHistory);
+            resultsBuilder.addResult("statusCode", 0);
+        }
     }
 
     public static class DeploymentHistory {

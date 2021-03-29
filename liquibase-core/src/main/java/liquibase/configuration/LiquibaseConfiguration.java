@@ -86,15 +86,20 @@ public class LiquibaseConfiguration implements SingletonObject {
 
 
     /**
-     * Searches for the given key in the current providers.
+     * Searches for the given keys in the current providers.
+     * @param keyAndAliases The first element should be the canonical key name, with later elements being aliases. At least one element must be provided.
      *
      * @return the value for the key, or null if not configured.
      */
-    public ConfiguredValue getCurrentConfiguredValue(String key) {
-        ConfiguredValue details = new ConfiguredValue(key);
+    public ConfiguredValue getCurrentConfiguredValue(String... keyAndAliases) {
+        if (keyAndAliases == null || keyAndAliases.length == 0) {
+            throw new IllegalArgumentException("Must specify at least one key");
+        }
+
+        ConfiguredValue details = new ConfiguredValue(keyAndAliases[0]);
 
         for (ConfigurationValueProvider provider : configurationValueProviders) {
-            final ProvidedValue providerValue = provider.getProvidedValue(key);
+            final ProvidedValue providerValue = provider.getProvidedValue(keyAndAliases);
 
             if (providerValue != null) {
                 details.override(providerValue);

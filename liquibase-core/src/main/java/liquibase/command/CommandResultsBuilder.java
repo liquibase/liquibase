@@ -1,5 +1,9 @@
 package liquibase.command;
 
+import liquibase.Scope;
+import liquibase.util.StringUtil;
+
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.SortedMap;
@@ -30,19 +34,8 @@ public class CommandResultsBuilder {
     }
 
     /**
-     * Returns a {@link PrintWriter} wrapper around the stream in {@link #getOutputStream()}
+     * Returns the {@link OutputStream} for output for the command.
      *
-     * @see #getOutputStream() for binary output
-     * @see CommandScope#setOutput(OutputStream)
-     */
-    public PrintWriter getOutput() {
-        return output;
-    }
-
-    /**
-     * Returns an {@link OutputStream} for output for the command.
-     *
-     * @see #getOutput() for text-based output.
      * @see CommandScope#setOutput(OutputStream)
      */
     public OutputStream getOutputStream() {
@@ -63,12 +56,21 @@ public class CommandResultsBuilder {
      * Sets the value for a known {@link CommandResultDefinition} to the command results.
      */
     public <T> CommandResultsBuilder addResult(CommandResultDefinition<T> definition, T value) {
-        this.resultValues.put(definition.getName(), value);
-
-        return this;
+        return addResult(definition.getName(), value);
     }
 
-    public CommandResults build() {
+    /**
+     * Collects the results and flushes the output stream.
+     */
+    CommandResults build() {
+        output.flush();
+        output.close();
+        try {
+            outputStream.flush();
+        } catch (IOException e) {
+            Scope.getCurrentScope().getLog(getClass()).warning("Error flushing " + StringUtil.join(commandScope.getCommand().getName(), " ") + " output: " + e.getMessage(), e);
+        }
+
         return new CommandResults(resultValues, commandScope);
     }
 }

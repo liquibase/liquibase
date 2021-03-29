@@ -18,17 +18,20 @@ public class ScopeValueProvider extends AbstractConfigurationValueProvider {
     }
 
     @Override
-    public ProvidedValue getProvidedValue(String key) {
-        if (key == null) {
+    public ProvidedValue getProvidedValue(String... keyAndAliases) {
+        if (keyAndAliases == null || keyAndAliases.length == 0) {
             return null;
         }
 
-        final Object value = Scope.getCurrentScope().get(key, Object.class);
-        if (value == null) {
-            return null;
-        }
+        for (String key : keyAndAliases) {
+            final Object value = Scope.getCurrentScope().get(key, Object.class);
+            if (value == null) {
+                continue;
+            }
 
-        return new ProvidedValue(key, key, value, "Scoped value", this);
+            return new ProvidedValue(keyAndAliases[0], key, value, "Scoped value", this);
+        }
+        return null;
     }
 
     protected Properties getSystemProperties() {

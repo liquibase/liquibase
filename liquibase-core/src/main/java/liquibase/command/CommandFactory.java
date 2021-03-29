@@ -18,8 +18,10 @@ public class CommandFactory implements SingletonObject {
 
     /**
      * Returns the complete {@link CommandDefinition} for the given commandName.
+     *
+     * @throws IllegalArgumentException if the commandName is not known
      */
-    protected CommandDefinition getCommand(String... commandName) {
+    public CommandDefinition getCommand(String... commandName) throws IllegalArgumentException{
         CommandDefinition commandDefinition = new CommandDefinition(commandName);
 
         for (CommandStep step : Scope.getCurrentScope().getServiceLocator().findInstances(CommandStep.class)) {
@@ -28,7 +30,12 @@ public class CommandFactory implements SingletonObject {
             }
         }
 
-        for (CommandStep step : commandDefinition.getPipeline()) {
+        final List<CommandStep> pipeline = commandDefinition.getPipeline();
+        if (pipeline.size() == 0) {
+            throw new IllegalArgumentException("Unknown command '" + StringUtil.join(commandName, " ") + "'");
+        }
+
+        for (CommandStep step : pipeline) {
             final Set<CommandArgumentDefinition<?>> stepArguments = this.argumentDefinitions.get(step.getClass());
 
             if (stepArguments != null) {
@@ -38,7 +45,7 @@ public class CommandFactory implements SingletonObject {
             }
         }
 
-        for (CommandStep step : commandDefinition.getPipeline()) {
+        for (CommandStep step : pipeline) {
             step.adjustCommandDefinition(commandDefinition);
         }
 
@@ -58,7 +65,11 @@ public class CommandFactory implements SingletonObject {
 
         SortedSet<CommandDefinition> commands = new TreeSet<>();
         for (String[] commandName : commandNames.values()) {
-            commands.add(getCommand(commandName));
+            try {
+                commands.add(getCommand(commandName));
+            } catch (IllegalArgumentException e) {
+                //not a full command, like ConvertCommandStep
+            }
         }
 
         return Collections.unmodifiableSortedSet(commands);
@@ -66,7 +77,7 @@ public class CommandFactory implements SingletonObject {
     }
 
     /**
-     * Called by {@link CommandStepBuilder.NewCommandArgument#build()} to
+     * Called by {@link CommandArgumentDefinition.Building#build()} to
      * register that a particular {@link CommandArgumentDefinition} is available for a step.
      */
     protected void register(Class<? extends CommandStep> commandClass, CommandArgumentDefinition<?> definition) {

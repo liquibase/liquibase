@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * This wraps all the {@link ProvidedValue}s to return the overall value returned from the collection of {@link ConfigurationValueProvider}s.
- * Returned by {@link LiquibaseConfiguration#getCurrentConfiguredValue(String)}
+ * Returned by {@link LiquibaseConfiguration#getCurrentConfiguredValue(String...)}
  */
 public class ConfiguredValue<DataType> {
 
@@ -42,8 +42,12 @@ public class ConfiguredValue<DataType> {
 
     /**
      * Replaces the current configured value with a higher-precedence one.
+     * If a null value is passed, do nothing.
      */
-    protected void override(ProvidedValue details) {
+    public void override(ProvidedValue details) {
+        if (details == null) {
+            return;
+        }
         this.providedValues.add(0, details);
     }
 
@@ -52,7 +56,7 @@ public class ConfiguredValue<DataType> {
      */
     public List<ProvidedValue> getProvidedValues() {
         if (providedValues.size() == 0) {
-            return Collections.singletonList(NO_VALUE_PROVIDER.getProvidedValue(key));
+            return Collections.singletonList(NO_VALUE_PROVIDER.getProvidedValue(new String[] {key}));
         }
 
         return Collections.unmodifiableList(providedValues);
@@ -75,8 +79,8 @@ public class ConfiguredValue<DataType> {
         }
 
         @Override
-        public ProvidedValue getProvidedValue(String key) {
-            return new ProvidedValue(key, key, null, "No configuration or default value found", this);
+        public ProvidedValue getProvidedValue(String... keyAndAliases) {
+            return new ProvidedValue(keyAndAliases[0], keyAndAliases[0], null, "No configuration or default value found", this);
         }
     }
 }

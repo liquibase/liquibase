@@ -503,6 +503,13 @@ public class StringUtil {
         return sb.toString();
     }
 
+    /**
+     * Converts a camelCase string to a kabob-case one
+     */
+    public static String toKabobCase(String string) {
+        return string.replaceAll("([A-Z])", "-$1").toLowerCase();
+    }
+
     public interface StringUtilFormatter<Type> {
         String toString(Type obj);
     }

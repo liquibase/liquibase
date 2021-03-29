@@ -1,9 +1,13 @@
 package liquibase.command;
 
 import liquibase.Scope;
-import liquibase.exception.CommandArgumentValidationException;
+import liquibase.configuration.ConfigurationValueConverter;
+import liquibase.configuration.ConfigurationValueObfuscator;
+import liquibase.exception.CommandValidationException;
+import liquibase.util.ObjectUtil;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Defines a known, type-safe argument for a specific {@link CommandStep}.
@@ -15,16 +19,21 @@ import java.util.Objects;
  */
 public class CommandArgumentDefinition<DataType> implements Comparable<CommandArgumentDefinition<?>> {
 
+    private static final Pattern ALLOWED_ARGUMENT_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
+
     private final String name;
     private final Class<DataType> dataType;
 
     private String description;
     private boolean required;
     private DataType defaultValue;
+    private ConfigurationValueConverter<DataType> valueHandler;
+    private ConfigurationValueObfuscator<DataType> valueObfuscator;
 
     protected CommandArgumentDefinition(String name, Class<DataType> type) {
         this.name = name;
         this.dataType = type;
+        this.valueHandler = value -> ObjectUtil.convert(value, type);
     }
 
     /**
@@ -57,14 +66,36 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     }
 
     /**
+     * The default value to use for this argument
+     */
+    public DataType getDefaultValue() {
+        return defaultValue;
+    }
+
+    /**
+     * Function for converting values set in underlying {@link liquibase.configuration.ConfigurationValueProvider}s into the
+     * type needed for this command.
+     */
+    public ConfigurationValueConverter<DataType> getValueHandler() {
+        return valueHandler;
+    }
+
+    /**
+     * Used when sending the value to user output to protect secure values.
+     */
+    public ConfigurationValueObfuscator<DataType> getValueObfuscator() {
+        return valueObfuscator;
+    }
+
+    /**
      * Validates that the value stored in the given {@link CommandScope} is valid.
      *
-     * @throws CommandArgumentValidationException if the stored value is not valid.
+     * @throws CommandValidationException if the stored value is not valid.
      */
-    public void validate(CommandScope commandScope) throws CommandArgumentValidationException {
+    public void validate(CommandScope commandScope) throws CommandValidationException {
         final DataType currentValue = commandScope.getArgumentValue(this);
         if (this.isRequired() && currentValue == null) {
-            throw new CommandArgumentValidationException(this.getName(), "missing required argument");
+            throw new CommandValidationException(this.getName(), "missing required argument");
         }
     }
 
@@ -100,11 +131,11 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
     /**
      * A new {@link CommandArgumentDefinition} under construction from {@link CommandStepBuilder}
      */
-    public static class UnderConstruction<DataType> {
+    public static class Building<DataType> {
         private final Class<? extends CommandStep> commandStepClass;
         private final CommandArgumentDefinition<DataType> newCommandArgument;
 
-        UnderConstruction(Class<? extends CommandStep> commandStepClass, CommandArgumentDefinition<DataType> newCommandArgument) {
+        Building(Class<? extends CommandStep> commandStepClass, CommandArgumentDefinition<DataType> newCommandArgument) {
             this.commandStepClass = commandStepClass;
             this.newCommandArgument = newCommandArgument;
         }
@@ -113,7 +144,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          * Mark argument as required.
          * @see #optional()
          */
-        public UnderConstruction<DataType> required() {
+        public Building<DataType> required() {
             this.newCommandArgument.required = true;
 
             return this;
@@ -123,7 +154,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
          * Mark argument as optional.
          * @see #required()
          */
-        public UnderConstruction<DataType> optional() {
+        public Building<DataType> optional() {
             this.newCommandArgument.required = false;
 
             return this;
@@ -132,7 +163,7 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         /**
          * Add a description
          */
-        public UnderConstruction<DataType> description(String description) {
+        public Building<DataType> description(String description) {
             this.newCommandArgument.description = description;
 
             return this;
@@ -141,16 +172,38 @@ public class CommandArgumentDefinition<DataType> implements Comparable<CommandAr
         /**
          * Set the default value for this argument.
          */
-        public UnderConstruction<DataType> defaultValue(DataType defaultValue) {
+        public Building<DataType> defaultValue(DataType defaultValue) {
             newCommandArgument.defaultValue = defaultValue;
 
             return this;
         }
 
         /**
-         * Complete construction and register the definition with the rest of the system.
+         * Set the {@link #getValueHandler()} to use.
          */
-        public CommandArgumentDefinition<DataType> build() {
+        public Building<DataType> setValueHandler(ConfigurationValueConverter<DataType> valueHandler) {
+            newCommandArgument.valueHandler = valueHandler;
+            return this;
+        }
+
+        /**
+         * Set the {@link #getValueObfuscator()} to use.
+         */
+        public Building<DataType> setValueObfuscator(ConfigurationValueObfuscator<DataType> valueObfuscator) {
+            newCommandArgument.valueObfuscator = valueObfuscator;
+            return this;
+        }
+
+        /**
+         * Complete construction and register the definition with the rest of the system.
+         *
+         * @throws IllegalArgumentException is an invalid configuration was specified
+         */
+        public CommandArgumentDefinition<DataType> build() throws IllegalArgumentException {
+            if (!ALLOWED_ARGUMENT_PATTERN.matcher(newCommandArgument.name).matches()) {
+                throw new IllegalArgumentException("Invalid argument format: " + newCommandArgument.name);
+            }
+
             Scope.getCurrentScope().getSingleton(CommandFactory.class).register(commandStepClass, newCommandArgument);
 
             return newCommandArgument;

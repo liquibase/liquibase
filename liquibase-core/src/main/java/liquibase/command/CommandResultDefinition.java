@@ -72,17 +72,17 @@ public class CommandResultDefinition<DataType> implements Comparable<CommandResu
         return getName();
     }
 
-    public static class UnderConstruction<DataType> {
+    public static class Building<DataType> {
         private final CommandResultDefinition<DataType> newCommandResult;
 
-        UnderConstruction(CommandResultDefinition<DataType> newCommandResult) {
+        Building(CommandResultDefinition<DataType> newCommandResult) {
             this.newCommandResult = newCommandResult;
         }
 
         /**
          * Sets the description for this result.
          */
-        public CommandResultDefinition.UnderConstruction<DataType> description(String description) {
+        public Building<DataType> description(String description) {
             this.newCommandResult.description = description;
 
             return this;
@@ -91,7 +91,7 @@ public class CommandResultDefinition<DataType> implements Comparable<CommandResu
         /**
          * Set the default value for this result.
          */
-        public CommandResultDefinition.UnderConstruction<DataType> defaultValue(DataType defaultValue) {
+        public Building<DataType> defaultValue(DataType defaultValue) {
             newCommandResult.defaultValue = defaultValue;
 
             return this;

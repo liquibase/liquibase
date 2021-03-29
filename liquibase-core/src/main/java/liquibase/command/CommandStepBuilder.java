@@ -17,14 +17,14 @@ public class CommandStepBuilder {
     /**
      * Starts the building of a new {@link CommandArgumentDefinition}.
      */
-    public <DataType> CommandArgumentDefinition.UnderConstruction<DataType> argument(String name, Class<DataType> type) {
-        return new CommandArgumentDefinition.UnderConstruction<>(commandStepClass, new CommandArgumentDefinition<>(name, type));
+    public <DataType> CommandArgumentDefinition.Building<DataType> argument(String name, Class<DataType> type) {
+        return new CommandArgumentDefinition.Building<>(commandStepClass, new CommandArgumentDefinition<>(name, type));
     }
 
     /**
      * Starts the building of a new {@link CommandResultDefinition}.
      */
-    public <DataType> CommandResultDefinition.UnderConstruction<DataType> result(String name, Class<DataType> type) {
-        return new CommandResultDefinition.UnderConstruction<>(new CommandResultDefinition<>(name, type));
+    public <DataType> CommandResultDefinition.Building<DataType> result(String name, Class<DataType> type) {
+        return new CommandResultDefinition.Building<>(new CommandResultDefinition<>(name, type));
     }
 }

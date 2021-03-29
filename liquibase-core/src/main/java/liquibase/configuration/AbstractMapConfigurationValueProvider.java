@@ -14,29 +14,31 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
      * Finds the given key in the result of {@link #getMap()} using {@link #keyMatches(String, String)} to determine key equality
      */
     @Override
-    public ProvidedValue getProvidedValue(String key) {
-        if (key == null) {
+    public ProvidedValue getProvidedValue(String... keyAndAliases) {
+        if (keyAndAliases == null || keyAndAliases.length == 0) {
             return null;
         }
 
         final Map<?, ?> sourceData = getMap();
 
-        //try direct lookup first, for performance:
-        if (sourceData.containsKey(key)) {
-            final Object foundValue = sourceData.get(key);
-            if (isValueSet(foundValue)) {
-                return new ProvidedValue(key, key, foundValue, getSourceDescription(), this);
+        for (String key : keyAndAliases) {
+            //try direct lookup first, for performance:
+            if (sourceData.containsKey(key)) {
+                final Object foundValue = sourceData.get(key);
+                if (isValueSet(foundValue)) {
+                    return new ProvidedValue(keyAndAliases[0], key, foundValue, getSourceDescription(), this);
+                }
             }
-        }
 
 
-        for (Map.Entry<?, ?> entry : sourceData.entrySet()) {
-            final String actualKey = String.valueOf(entry.getKey());
+            for (Map.Entry<?, ?> entry : sourceData.entrySet()) {
+                final String actualKey = String.valueOf(entry.getKey());
 
-            if (keyMatches(key, actualKey)) {
-                final Object value = entry.getValue();
-                if (isValueSet(value)) {
-                    return new ProvidedValue(key, actualKey, value, getSourceDescription(), this);
+                if (keyMatches(key, actualKey)) {
+                    final Object value = entry.getValue();
+                    if (isValueSet(value)) {
+                        return new ProvidedValue(keyAndAliases[0], actualKey, value, getSourceDescription(), this);
+                    }
                 }
             }
         }
@@ -45,7 +47,7 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
     }
 
     /**
-     * Used by {@link #getProvidedValue(String)} to determine if the given value is a "real" value.
+     * Used by {@link ConfigurationValueProvider#getProvidedValue(String[])} to determine if the given value is a "real" value.
      * This implementation returns false if value is null or if it is an empty string
      */
     protected boolean isValueSet(Object value) {
@@ -56,11 +58,11 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
             return StringUtil.isNotEmpty((String) value);
         }
 
-        return false;
+        return true;
     }
 
     /**
-     * Used by {@link #getProvidedValue(String)} to determine of a given map entry matches the wanted key.
+     * Used by {@link ConfigurationValueProvider#getProvidedValue(String[])} to determine of a given map entry matches the wanted key.
      * This implementation compares the values case-insensitively, and will replace camelCase words with kabob-case
      * @param wantedKey the configuration key requested
      * @param storedKey the key stored in the map
@@ -70,8 +72,7 @@ public abstract class AbstractMapConfigurationValueProvider extends AbstractConf
             return true;
         }
 
-        //convert camelCase to kabob-case
-        wantedKey = wantedKey.replaceAll("([A-Z])", "-$1");
+        wantedKey = StringUtil.toKabobCase(wantedKey);
         if (storedKey.equalsIgnoreCase(wantedKey)) {
             return true;
         }

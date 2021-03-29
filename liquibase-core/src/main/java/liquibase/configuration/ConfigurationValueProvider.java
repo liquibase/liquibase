@@ -11,11 +11,13 @@ public interface ConfigurationValueProvider {
     int getPrecedence();
 
     /**
-     * Lookup the given key in this source.
+     * Lookup the given key(s) in this source.
      * It is up to the implementation to provide any "smoothing" or translation of key names.
-     * For example, a SystemEnvironmentValueProvider will look check environment variables containing _'s rather than .'s.
+     * For example, an EnvironmentValueProvider will look check environment variables containing _'s rather than .'s.
+     *
+     * @param keyAndAliases an array of keys to check, where the first element is the canonical key name, any aliases for that key as later elements.
      *
      * @return null if the key is not defined in this provider.
      */
-    ProvidedValue getProvidedValue(String key);
+    ProvidedValue getProvidedValue(String... keyAndAliases);
 }

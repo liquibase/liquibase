@@ -1,12 +1,17 @@
 package liquibase.command;
 
 import liquibase.Scope;
+import liquibase.configuration.AbstractMapConfigurationValueProvider;
+import liquibase.configuration.ConfigurationDefinition;
+import liquibase.configuration.ConfiguredValue;
+import liquibase.configuration.ProvidedValue;
 import liquibase.exception.CommandExecutionException;
 import liquibase.util.StringUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -23,6 +28,10 @@ public class CommandScope {
     private final CommandDefinition commandDefinition;
 
     private final SortedMap<String, Object> argumentValues = new TreeMap<>();
+    private final CommandScopeValueProvider commandScopeValueProvider = new CommandScopeValueProvider();
+
+    private final String completeConfigPrefix;
+    private final String shortConfigPrefix;
 
     private OutputStream outputStream;
 
@@ -36,9 +45,10 @@ public class CommandScope {
 
         this.commandDefinition = commandFactory.getCommand(commandName);
 
-        if (this.commandDefinition == null) {
-            throw new CommandExecutionException("Unknown command: "+ StringUtil.join(Arrays.asList(commandName), " "));
-        }
+        completeConfigPrefix = "liquibase.command." + StringUtil.join(Arrays.asList(this.getCommand().getName()), ".");
+        shortConfigPrefix = "liquibase.command";
+
+
     }
 
     /**
@@ -49,12 +59,20 @@ public class CommandScope {
     }
 
 
+    /**
+     * Adds the given key/value pair to the stored argument data.
+     *
+     * @see #addArgumentValue(CommandArgumentDefinition, Object) for a type-safe version
+     */
     public CommandScope addArgumentValue(String argument, Object value) {
         this.argumentValues.put(argument, value);
 
         return this;
     }
 
+    /**
+     * Adds the given key/value pair to the stored argument data.
+     */
     public <T> CommandScope addArgumentValue(CommandArgumentDefinition<T> argument, T value) {
         this.argumentValues.put(argument.getName(), value);
 
@@ -63,19 +81,26 @@ public class CommandScope {
 
 
     /**
-     * Returns the value of the given argument.
+     * Returns the detailed information about how an argument is set.
+     * <br><br>
      * Prefers values set with {@link #addArgumentValue(String, Object)}, but will also check {@link liquibase.configuration.LiquibaseConfiguration}
-     * for settings of liquibase.command.${commandName(s)}.${argumentName} and then liquibase.command.${argumentName}
+     * for settings of liquibase.command.${commandName(s)}.${argumentName} or liquibase.command.${argumentName}
      */
-    public Object getArgumentValue(String argument) {
-        return this.argumentValues.get(argument);
+    public <T> ConfiguredValue<T> getConfiguredValue(CommandArgumentDefinition<T> argument) {
+        final ConfigurationDefinition<T> configDef = createConfigurationDefinition(argument);
+
+        final ConfiguredValue<T> providedValue = configDef.getCurrentConfiguredValue();
+
+        providedValue.override(commandScopeValueProvider.getProvidedValue(configDef.getKey(), argument.getName()));
+
+        return providedValue;
     }
 
     /**
-     * Convenience method for {@link #getArgumentValue(String)} given a known {@link CommandArgumentDefinition}
+     * Convenience method for {@link #getConfiguredValue(CommandArgumentDefinition)}, returning {@link ConfiguredValue#getValue()}
      */
     public <T> T getArgumentValue(CommandArgumentDefinition<T> argument) {
-        return (T) this.getArgumentValue(argument.getName());
+        return getConfiguredValue(argument).getValue();
     }
 
     /**
@@ -116,10 +141,40 @@ public class CommandScope {
             try {
                 this.outputStream.flush();
             } catch (IOException e) {
-                Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: "+e.getMessage(), e);
+                Scope.getCurrentScope().getLog(getClass()).warning("Error flushing command output stream: " + e.getMessage(), e);
             }
         }
 
         return resultsBuilder.build();
+    }
+
+    private <T> ConfigurationDefinition<T> createConfigurationDefinition(CommandArgumentDefinition<T> argument) {
+        return new ConfigurationDefinition.Builder(completeConfigPrefix)
+                .define(argument.getName(), argument.getDataType())
+                .addAliasKey(shortConfigPrefix + "." + argument.getName())
+                .setDefaultValue(argument.getDefaultValue())
+                .setDescription(argument.getDescription())
+                .setValueHandler(argument.getValueHandler())
+                .setValueObfuscator(argument.getValueObfuscator())
+                .buildTemporary();
+    }
+
+
+    private class CommandScopeValueProvider extends AbstractMapConfigurationValueProvider {
+
+        @Override
+        public int getPrecedence() {
+            return -1;
+        }
+
+        @Override
+        protected Map<?, ?> getMap() {
+            return CommandScope.this.argumentValues;
+        }
+
+        @Override
+        protected String getSourceDescription() {
+            return "Command argument";
+        }
     }
 }

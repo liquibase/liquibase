@@ -1,6 +1,6 @@
 package liquibase.command;
 
-import liquibase.exception.CommandArgumentValidationException;
+import liquibase.exception.CommandValidationException;
 
 /**
  * Defines a particular step in a command pipeline.
@@ -51,7 +51,7 @@ public interface CommandStep {
      * Any validation in {@link CommandArgumentDefinition#validate(CommandScope)} will be checked previous to this method being called.
      * <b>This method should not be called directly. It is called by the overall pipeline logic in the {@link #getOrder(CommandDefinition)} order.</b>
      */
-    void validate(CommandScope commandScope) throws CommandArgumentValidationException;
+    void validate(CommandScope commandScope) throws CommandValidationException;
 
     /**
      * Performs the business logic.

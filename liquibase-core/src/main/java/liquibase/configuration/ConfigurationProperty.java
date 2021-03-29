@@ -12,11 +12,11 @@ import java.util.List;
  */
 public class ConfigurationProperty {
 
-    private final ConfigurationDefinition.Builder.NewDefinition definitionBuilder;
+    private final ConfigurationDefinition.Building definitionBuilder;
     private ConfigurationDefinition definition;
     private final String namespace;
 
-    public ConfigurationProperty(String namespace, ConfigurationDefinition.Builder.NewDefinition definitionBuilder) {
+    public ConfigurationProperty(String namespace, ConfigurationDefinition.Building definitionBuilder) {
         this.namespace = namespace;
         this.definitionBuilder = definitionBuilder;
         this.definition = definitionBuilder.buildTemporary();

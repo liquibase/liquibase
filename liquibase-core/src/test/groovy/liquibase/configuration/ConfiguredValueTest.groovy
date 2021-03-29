@@ -36,6 +36,7 @@ class ConfiguredValueTest extends Specification {
         when:
         def configuredValue = new ConfiguredValue()
         configuredValue.override(new ProvidedValue("requested.key", "actual.key", "value", "first override", new SystemPropertyValueProvider()))
+        configuredValue.override(null)
         configuredValue.override(new ProvidedValue("requested.key", "other.actual.key", "second value", "second override", new ScopeValueProvider()))
 
         then:

@@ -2,7 +2,6 @@ package liquibase.integration.servlet;
 
 import liquibase.configuration.ConfigurationValueProvider;
 import liquibase.configuration.ProvidedValue;
-import org.springframework.util.StringUtils;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -35,24 +34,28 @@ public class ServletConfigurationValueProvider implements ConfigurationValueProv
      * </ul>
      */
     @Override
-    public ProvidedValue getProvidedValue(String key) {
+    public ProvidedValue getProvidedValue(String... keyAndAliases) {
         if (initialContext != null) {
-            // Try to get value from JNDI
-            try {
-                Context envCtx = (Context) initialContext.lookup(JAVA_COMP_ENV);
-                String valueFromJndi = (String) envCtx.lookup(key);
+            for (String key : keyAndAliases) {
+                // Try to get value from JNDI
+                try {
+                    Context envCtx = (Context) initialContext.lookup(JAVA_COMP_ENV);
+                    String valueFromJndi = (String) envCtx.lookup(key);
 
-                return new ProvidedValue(key, JAVA_COMP_ENV + "/" + key, valueFromJndi, "JNDI", this);
-            } catch (NamingException e) {
-                // Ignore
+                    return new ProvidedValue(keyAndAliases[0], JAVA_COMP_ENV + "/" + key, valueFromJndi, "JNDI", this);
+                } catch (NamingException e) {
+                    // Ignore
+                }
             }
         }
 
         if (servletContext != null) {
-            // Return the value from the servlet context
-            String valueFromServletContext = servletContext.getInitParameter(key);
-            if (valueFromServletContext != null) {
-                return new ProvidedValue(key, key, valueFromServletContext, "Servlet context", this);
+            for (String key : keyAndAliases) {
+                // Return the value from the servlet context
+                String valueFromServletContext = servletContext.getInitParameter(key);
+                if (valueFromServletContext != null) {
+                    return new ProvidedValue(keyAndAliases[0], key, valueFromServletContext, "Servlet context", this);
+                }
             }
         }
 

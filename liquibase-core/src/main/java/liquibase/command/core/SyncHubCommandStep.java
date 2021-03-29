@@ -99,7 +99,7 @@ public class SyncHubCommandStep extends AbstractCommandStep {
                     project = hubChangeLog.getProject();
                 }
             }
-            else if (commandScope.getArgumentValue(commandScope.getArgumentValue(HUB_PROJECT_ID_ARG)) != null) {
+            else if (commandScope.getArgumentValue(HUB_PROJECT_ID_ARG) != null) {
                 project = hubService.getProject(UUID.fromString(commandScope.getArgumentValue(HUB_PROJECT_ID_ARG)));
                 if (project == null) {
                     throw new CommandExecutionException("Project Id '" + commandScope.getArgumentValue(HUB_PROJECT_ID_ARG) + "' does not exist or you do not have access to it");

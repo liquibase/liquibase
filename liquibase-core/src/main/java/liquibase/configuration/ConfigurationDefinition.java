@@ -3,9 +3,7 @@ package liquibase.configuration;
 import liquibase.Scope;
 import liquibase.util.ObjectUtil;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -20,7 +18,6 @@ import java.util.regex.Pattern;
  * The definition keys should be dot-separated, camelCased names, using a unique "namespace" as part of it.
  * For example: <pre>yourCorp.yourProperty</pre> or <pre>yourCorp.sub.otherProperty</pre>.
  * Liquibase uses "liquibase" as the base namespace like <pre>liquibase.shouldRun</pre>
- *
  */
 public class ConfigurationDefinition<DataType> implements Comparable<ConfigurationDefinition<DataType>> {
 
@@ -39,7 +36,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
      * @return if the given {@link ConfiguredValue} was set by a default value
      */
     public static boolean wasDefaultValueUsed(ConfiguredValue<?> configuredValue) {
-        for (ProvidedValue providedValue :  configuredValue.getProvidedValues()) {
+        for (ProvidedValue providedValue : configuredValue.getProvidedValues()) {
             if (providedValue.getProvider() != null && providedValue.getProvider() instanceof ConfigurationDefinition.DefaultValueProvider) {
                 return true;
             }
@@ -50,10 +47,12 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
 
     /**
      * Constructor private to force {@link Builder} usage
+     *
+     * @throws IllegalArgumentException if an invalid key is specified.
      */
-    private ConfigurationDefinition(String key, Class<DataType> type) {
+    private ConfigurationDefinition(String key, Class<DataType> type) throws IllegalArgumentException {
         if (!ALLOWED_KEY_PATTERN.matcher(key).matches()) {
-            throw new IllegalArgumentException("Invalid key format: "+key);
+            throw new IllegalArgumentException("Invalid key format: " + key);
         }
 
         this.key = key;
@@ -69,12 +68,13 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         try {
             return (DataType) value;
         } catch (ClassCastException e) {
-            throw new IllegalArgumentException("The current value of "+key+" not the expected type: "+ e.getMessage(), e);
+            throw new IllegalArgumentException("The current value of " + key + " not the expected type: " + e.getMessage(), e);
         }
     }
 
     /**
      * Convenience method around {@link #getCurrentConfiguredValue()} to return the obfuscated version of the value.
+     *
      * @return the obfuscated value, or the plain-text value if no obfuscator is defined for this definition.
      */
     public DataType getCurrentValueObfuscated() {
@@ -94,20 +94,11 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
     public ConfiguredValue<DataType> getCurrentConfiguredValue() {
         final LiquibaseConfiguration liquibaseConfiguration = Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class);
 
-        ConfiguredValue configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(this.getKey());
-        ConfiguredValue initialConfigurationValue = configurationValue;
+        List<String> keyList = new ArrayList<>();
+        keyList.add(this.getKey());
+        keyList.addAll(this.getAliasKeys());
 
-        for (String alias : this.aliasKeys) {
-            if (configurationValue.found()) {
-                break;
-            }
-            configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(alias);
-        }
-
-        if (!configurationValue.found()) {
-            //set back to initial version, not the alias
-            configurationValue = initialConfigurationValue;
-        }
+        ConfiguredValue<DataType> configurationValue = liquibaseConfiguration.getCurrentConfiguredValue(keyList.toArray(new String[0]));
 
         if (!configurationValue.found()) {
             defaultValue = this.getDefaultValue();
@@ -117,12 +108,13 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
 
         final ProvidedValue providedValue = configurationValue.getProvidedValue();
-        final DataType finalValue = valueHandler.convert(providedValue.getValue());
-        if (providedValue != finalValue) {
+        final Object originalValue = providedValue.getValue();
+        final DataType finalValue = valueHandler.convert(originalValue);
+        if (originalValue != finalValue) {
             configurationValue.override(new ConvertedValueProvider<DataType>(finalValue, providedValue).getProvidedValue(key));
         }
 
-        return (ConfiguredValue<DataType>) configurationValue;
+        return configurationValue;
     }
 
     /**
@@ -201,7 +193,7 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
          */
         public Builder(String defaultKeyPrefix) {
             if (!ALLOWED_KEY_PATTERN.matcher(defaultKeyPrefix).matches()) {
-                throw new IllegalArgumentException("Invalid prefix format: "+defaultKeyPrefix);
+                throw new IllegalArgumentException("Invalid prefix format: " + defaultKeyPrefix);
             }
 
             this.defaultKeyPrefix = defaultKeyPrefix;
@@ -210,75 +202,75 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         /**
          * Starts a new definition with the given key. Always adds the  defaultKeyPrefix.
          */
-        public <T> NewDefinition<T> define(String key, Class<T> dataType) {
+        public <T> Building<T> define(String key, Class<T> dataType) {
             final ConfigurationDefinition<T> definition = new ConfigurationDefinition<>(defaultKeyPrefix + "." + key, dataType);
 
-            return new NewDefinition<>(definition);
+            return new Building<>(definition);
+        }
+    }
+
+    public static class Building<DataType> {
+
+        private final ConfigurationDefinition<DataType> definition;
+
+        private Building(ConfigurationDefinition<DataType> definition) {
+            this.definition = definition;
         }
 
-        public static class NewDefinition<DataType> {
-
-            private final ConfigurationDefinition<DataType> definition;
-
-            private NewDefinition(ConfigurationDefinition<DataType> definition) {
-                this.definition = definition;
+        public Building<DataType> addAliasKey(String alias) {
+            if (!ALLOWED_KEY_PATTERN.matcher(alias).matches()) {
+                throw new IllegalArgumentException("Invalid alias format: " + alias);
             }
 
-            public NewDefinition<DataType> addAliasKey(String alias) {
-                if (!ALLOWED_KEY_PATTERN.matcher(alias).matches()) {
-                    throw new IllegalArgumentException("Invalid alias format: "+alias);
-                }
+            definition.aliasKeys.add(alias);
 
-                definition.aliasKeys.add(alias);
+            return this;
+        }
 
-                return this;
-            }
+        public Building<DataType> setDescription(String description) {
+            definition.description = description;
+            return this;
+        }
 
-            public NewDefinition<DataType> setDescription(String description) {
-                definition.description = description;
-                return this;
-            }
+        public Building<DataType> setDefaultValue(DataType defaultValue) {
+            definition.defaultValue = defaultValue;
+            return this;
+        }
 
-            public NewDefinition<DataType> setDefaultValue(DataType defaultValue) {
-                definition.defaultValue = defaultValue;
-                return this;
-            }
+        public Building<DataType> setValueHandler(ConfigurationValueConverter<DataType> handler) {
+            definition.valueHandler = handler;
 
-            public NewDefinition<DataType> setValueHandler(ConfigurationValueConverter<DataType> handler) {
-                definition.valueHandler = handler;
+            return this;
+        }
 
-                return this;
-            }
+        public Building<DataType> setValueObfuscator(ConfigurationValueObfuscator<DataType> handler) {
+            definition.valueObfuscator = handler;
 
-            public NewDefinition<DataType> setValueObfuscator(ConfigurationValueObfuscator<DataType> handler) {
-                definition.valueObfuscator = handler;
+            return this;
+        }
 
-                return this;
-            }
+        public Building<DataType> setCommonlyUsed(boolean commonlyUsed) {
+            definition.commonlyUsed = commonlyUsed;
 
-            public NewDefinition<DataType> setCommonlyUsed(boolean commonlyUsed) {
-                definition.commonlyUsed = commonlyUsed;
+            return this;
+        }
 
-                return this;
-            }
+        /**
+         * Finishes building this definition AND registers it with {@link LiquibaseConfiguration#registerDefinition(ConfigurationDefinition)}.
+         * To not register this definition, use {@link #buildTemporary()}
+         */
+        public ConfigurationDefinition<DataType> build() {
+            Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).registerDefinition(definition);
 
-            /**
-             * Finishes building this definition AND registers it with {@link LiquibaseConfiguration#registerDefinition(ConfigurationDefinition)}.
-             * To not register this definition, use {@link #buildTemporary()}
-             */
-            public ConfigurationDefinition<DataType> build() {
-                Scope.getCurrentScope().getSingleton(LiquibaseConfiguration.class).registerDefinition(definition);
+            return definition;
+        }
 
-                return definition;
-            }
-
-            /**
-             * Finishes building this definition WITHOUT registering it with {@link LiquibaseConfiguration#registerDefinition(ConfigurationDefinition)}.
-             * To automatically register this definition, use {@link #build()}
-             */
-            public ConfigurationDefinition<DataType> buildTemporary() {
-                return definition;
-            }
+        /**
+         * Finishes building this definition WITHOUT registering it with {@link LiquibaseConfiguration#registerDefinition(ConfigurationDefinition)}.
+         * To automatically register this definition, use {@link #build()}
+         */
+        public ConfigurationDefinition<DataType> buildTemporary() {
+            return definition;
         }
     }
 
@@ -299,8 +291,8 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
 
         @Override
-        public ProvidedValue getProvidedValue(String key) {
-            return new ProvidedValue(key, key, value, "Default value", this);
+        public ProvidedValue getProvidedValue(String... keyAndAliases) {
+            return new ProvidedValue(keyAndAliases[0], keyAndAliases[0], value, "Default value", this);
         }
     }
 
@@ -325,8 +317,8 @@ public class ConfigurationDefinition<DataType> implements Comparable<Configurati
         }
 
         @Override
-        public ProvidedValue getProvidedValue(String key) {
-            return new ProvidedValue(key, actualKey, value, originalSource, this);
+        public ProvidedValue getProvidedValue(String... keyAndAliases) {
+            return new ProvidedValue(keyAndAliases[0], actualKey, value, originalSource, this);
         }
     }
 }

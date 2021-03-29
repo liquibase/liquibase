@@ -1,6 +1,6 @@
 package liquibase.command;
 
-import liquibase.exception.CommandArgumentValidationException;
+import liquibase.exception.CommandValidationException;
 import liquibase.util.StringUtil;
 
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public abstract class AbstractCommandStep implements CommandStep {
      * Default implementation does no validation.
      */
     @Override
-    public void validate(CommandScope commandScope) throws CommandArgumentValidationException {
+    public void validate(CommandScope commandScope) throws CommandValidationException {
     }
 
     /**

@@ -12,6 +12,12 @@ import java.util.Map;
  */
 public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep {
 
+    public static final CommandArgumentDefinition<String> LOG_LEVEL;
+
+    static {
+        LOG_LEVEL = new CommandStepBuilder(AbstractCliWrapperCommandStep.class).argument("logLevel", String.class).build();
+    }
+
     protected String[] createArgs(CommandScope commandScope) throws CommandExecutionException {
         List<String> argsList = new ArrayList<>();
         Map<String, CommandArgumentDefinition<?>> arguments = commandScope.getCommand().getArguments();
@@ -21,8 +27,8 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
                 argsList.add("--" + arg.getKey() + "=" + commandScope.getArgumentValue(arg.getValue()).toString());
             }
         });
-        if (commandScope.getArgumentValue("logLevel") != null) {
-            argsList.add("--logLevel=" + commandScope.getArgumentValue("logLevel"));
+        if (commandScope.getArgumentValue(LOG_LEVEL) != null) {
+            argsList.add("--logLevel=" + commandScope.getArgumentValue(LOG_LEVEL));
         }
         argsList.add(commandScope.getCommand().getName()[0]);
         String[] args = new String[argsList.size()];
