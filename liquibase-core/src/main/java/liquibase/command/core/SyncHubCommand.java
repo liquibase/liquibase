@@ -5,11 +5,11 @@ import liquibase.changelog.*;
 import liquibase.command.AbstractSelfConfiguratingCommand;
 import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
-import liquibase.configuration.HubConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.hub.HubService;
 import liquibase.hub.HubServiceFactory;
+import liquibase.hub.HubUpdater;
+import liquibase.hub.LiquibaseHubException;
 import liquibase.hub.model.Connection;
 import liquibase.hub.model.HubChangeLog;
 import liquibase.hub.model.Project;
@@ -53,10 +53,6 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
         this.hubConnectionId = hubConnectionId;
     }
 
-    public String getHubProjectId() {
-        return hubProjectId;
-    }
-
     public void setHubProjectId(String hubProjectId) {
         this.hubProjectId = hubProjectId;
     }
@@ -67,10 +63,6 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
     public Database getDatabase() {
         return database;
-    }
-
-    public boolean isFailIfOnline() {
-        return failIfOnline;
     }
 
     public void setFailIfOnline(boolean failIfOnline) {
@@ -107,6 +99,7 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
             Scope.getCurrentScope().getLog(getClass()).severe(message);
             return new CommandResult(message, false);
         }
+        HubChangeLog hubChangeLog = null;
         final HubService hubService = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
         Connection connectionToSync;
         if (hubConnectionId == null) {
@@ -119,11 +112,22 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
                 if (changeLogId == null) {
                     Scope.getCurrentScope().getLog(getClass()).info("Changelog " + changeLogFile + " has not been registered with Liquibase Hub. Cannot use it to help determine project.");
                 } else {
-                    final HubChangeLog changeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId));
-                    if (changeLog == null) {
+                    hubChangeLog = hubService.getHubChangeLog(UUID.fromString(changeLogId), "*");
+                    if (hubChangeLog == null) {
                         return new CommandResult("Changelog " + changeLogFile + " has an unrecognized changeLogId.", false);
                     }
-                    project = changeLog.getProject();
+                    if (hubChangeLog.isDeleted()) {
+                        //
+                        // Complain and stop the operation
+                        //
+                        String message =
+                            "\n" +
+                            "The operation did not complete and will not be reported to Hub because the\n" +  "" +
+                            "registered changelog has been deleted by someone in your organization.\n" +
+                            "Learn more at http://hub.liquibase.com";
+                        throw new LiquibaseHubException(message);
+                    }
+                    project = hubChangeLog.getProject();
                 }
             }
             else if (hubProjectId != null) {
@@ -174,6 +178,19 @@ public class SyncHubCommand extends AbstractSelfConfiguratingCommand<CommandResu
 
         });
 
+        //
+        // Tell the user if the HubChangeLog is deactivated
+        //
+        if (hubChangeLog != null && hubChangeLog.isInactive()) {
+            String message =
+                "\n" +
+                "The command completed and reported to Hub, but the changelog has been deactivated by someone in your organization.\n" +
+                "To synchronize your changelog, checkout the latest from source control or run \"deactivatechangelog\".\n" +
+                "After that, commands run against this changelog will not be reported to Hub until \"registerchangelog\" is run again.\n" +
+                "Learn more at http://hub.liquibase.com";
+            Scope.getCurrentScope().getLog(HubUpdater.class).warning(message);
+            Scope.getCurrentScope().getUI().sendMessage("WARNING: " + message);
+        }
         return new CommandResult();
     }
 
