@@ -110,6 +110,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
 
             boolean doSyncHub = true;
             DatabaseChangeLog changeLog = null;
+            HubChangeLog hubChangeLog = null;
             if (StringUtil.isNotEmpty(changeLogFile)) {
                 //
                 // Let the user know they can register for Hub
@@ -117,7 +118,13 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
                 changeLog = liquibase.getDatabaseChangeLog();
                 hubUpdater = new HubUpdater(new Date(), changeLog, database);
                 hubUpdater.register(changeLogFile);
-                doSyncHub = checkForRegisteredChangeLog(changeLog);
+
+                //
+                // Access the HubChangeLog and check to see
+                // if we should run syncHub
+                //
+                hubChangeLog = getHubChangeLog(changeLog);
+                doSyncHub = checkForRegisteredChangeLog(changeLog, hubChangeLog);
             }
 
             for (CatalogAndSchema schema : schemas) {
@@ -125,8 +132,12 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }
+
+            //
+            // Tell the user if the HubChangeLog is deactivated
+            //
             if (hubUpdater != null && (doSyncHub || hubConnectionId != null)) {
-                hubUpdater.syncHub(changeLogFile, database, changeLog, hubConnectionId);
+                hubUpdater.syncHub(changeLogFile, changeLog, hubConnectionId);
             }
         } catch (DatabaseException e) {
             throw e;
@@ -141,18 +152,47 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         return new CommandResult("All objects dropped from " + database.getConnection().getConnectionUserName() + "@" + database.getConnection().getURL());
     }
 
-    private boolean checkForRegisteredChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
-        Logger log = Scope.getCurrentScope().getLog(getClass());
+    //
+    // Return a HubChangeLog object if available
+    // If not available then return null
+    // If the HubChangeLog has been deleted then throw
+    // a LiquibaseHubException
+    //
+    private HubChangeLog getHubChangeLog(DatabaseChangeLog changeLog) throws LiquibaseHubException {
         HubConfiguration hubConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(HubConfiguration.class);
         String apiKey = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubApiKey());
         String hubMode = StringUtil.trimToNull(hubConfiguration.getLiquibaseHubMode());
         String changeLogId = changeLog.getChangeLogId();
         final HubServiceFactory hubServiceFactory = Scope.getCurrentScope().getSingleton(HubServiceFactory.class);
-        if (apiKey == null || hubMode.equals("off") || ! hubServiceFactory.isOnline()) {
-            return false;
+        if (apiKey == null || hubMode.equals("off") || !hubServiceFactory.isOnline()) {
+            return null;
         }
         final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-        HubChangeLog hubChangeLog = (changeLogId != null ? service.getHubChangeLog(UUID.fromString(changeLogId)) : null);
+        HubChangeLog hubChangeLog = (changeLogId != null ? service.getHubChangeLog(UUID.fromString(changeLogId), "*") : null);
+        if (hubChangeLog == null) {
+            return null;
+        }
+
+        //
+        // Stop the operation if the HubChangeLog has been deleted
+        //
+        if (hubChangeLog.isDeleted()) {
+            //
+            // Complain and stop the operation
+            //
+            String message =
+                "\n" +
+                "The operation did not complete and will not be reported to Hub because the\n" +  "" +
+                "registered changelog has been deleted by someone in your organization.\n" +
+                "Learn more at http://hub.liquibase.com";
+            throw new LiquibaseHubException(message);
+        }
+        return hubChangeLog;
+    }
+
+    private boolean checkForRegisteredChangeLog(DatabaseChangeLog changeLog, HubChangeLog hubChangeLog) {
+        Logger log = Scope.getCurrentScope().getLog(getClass());
+        String changeLogId = changeLog.getChangeLogId();
         if (changeLogId != null && hubChangeLog != null) {
             return true;
         }
