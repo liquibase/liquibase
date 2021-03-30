@@ -19,9 +19,16 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
     }
 
     protected String[] createArgs(CommandScope commandScope) throws CommandExecutionException {
+        return createArgs(commandScope, new ArrayList<String>());
+    }
+
+    protected String[] createArgs(CommandScope commandScope, List<String> rhsArgs) throws CommandExecutionException {
         List<String> argsList = new ArrayList<>();
         Map<String, CommandArgumentDefinition<?>> arguments = commandScope.getCommand().getArguments();
         arguments.entrySet().forEach( arg -> {
+            if (rhsArgs.contains(arg.getKey())) {
+                return;
+            }
             String argValue = (commandScope.getArgumentValue(arg.getValue()) != null ? commandScope.getArgumentValue(arg.getValue()).toString() : null);
             if (argValue != null) {
                 argsList.add("--" + arg.getKey() + "=" + commandScope.getArgumentValue(arg.getValue()).toString());
@@ -31,6 +38,17 @@ public abstract class AbstractCliWrapperCommandStep extends AbstractCommandStep 
             argsList.add("--logLevel=" + commandScope.getArgumentValue(LOG_LEVEL));
         }
         argsList.add(commandScope.getCommand().getName()[0]);
+        if (! rhsArgs.isEmpty()) {
+            arguments.entrySet().forEach(arg -> {
+                if (!rhsArgs.contains(arg.getKey())) {
+                    return;
+                }
+                String argValue = (commandScope.getArgumentValue(arg.getValue()) != null ? commandScope.getArgumentValue(arg.getValue()).toString() : null);
+                if (argValue != null) {
+                    argsList.add("--" + arg.getKey() + "=" + commandScope.getArgumentValue(arg.getValue()).toString());
+                }
+            });
+        }
         String[] args = new String[argsList.size()];
         argsList.toArray(args);
         return args;

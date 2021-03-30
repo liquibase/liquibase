@@ -198,13 +198,16 @@ class LiquibaseTest extends Specification {
 //            .setCurrentDateTimeFunction(testFunction);
 //        verify(database).setCurrentDateTimeFunction(testFunction);
 //    }
-/*
+
     def "update communicates with hub"() {
         given:
-        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
+        Map<String, Object> scopedObjects = new HashMap<>()
+        TestConsoleUIService uiService = new TestConsoleUIService()
+        scopedObjects.put(Scope.Attr.ui.name(), uiService)
+        def scopeId = Scope.enter(null, scopedObjects)
 
         when:
-        def scopeId = Scope.enter(null, null)
+        Liquibase liquibase = new Liquibase("com/example/changelog.mock", mockResourceAccessor, mockDatabase)
         Scope.child(HubConfiguration.LIQUIBASE_HUB_API_KEY.getKey(), "API_KEY", {
           liquibase.update("")
         })
@@ -215,7 +218,6 @@ class LiquibaseTest extends Specification {
           "[setRanChangeSets/Connection jdbc://test ($MockHubService.randomUUID):[test/changelog.xml::1::mock-author, test/changelog.xml::2::mock-author, test/changelog.xml::3::mock-author], startOperation/$MockHubService.randomUUID:[$MockHubService.operationCreateDate]]"
 
     }
- */
 
     def "getConnection returns warning message if API key does not exist and the changelog is registered"() {
         given:
