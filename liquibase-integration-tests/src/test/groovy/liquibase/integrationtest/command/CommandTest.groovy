@@ -4,9 +4,9 @@ import liquibase.CatalogAndSchema
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
-import liquibase.database.core.HsqlDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.integrationtest.TestDatabaseConnections
+import liquibase.integrationtest.TestFilter
 import liquibase.integrationtest.TestSetup
 import liquibase.util.StringUtil
 import spock.lang.Specification
@@ -72,8 +72,8 @@ class CommandTest extends Specification {
             commandScope.addArgumentValue("changeLogFile", changeLogFile)
         }
         if (spec.arguments != null) {
-            spec.arguments.each {name, value->
-                Object objValue = (Object)value
+            spec.arguments.each { name, value ->
+                Object objValue = (Object) value
                 commandScope.addArgumentValue(name, objValue)
             }
         }
@@ -107,7 +107,7 @@ ${expectedOutputCheck}
 -----------------------------------------
 """.trim()
             } else if (expectedOutputCheck instanceof Pattern) {
-                assert expectedOutputCheck.matcher(fullOutput.replace("\r", "").trim()).find() : """
+                assert expectedOutputCheck.matcher(fullOutput.replace("\r", "").trim()).find(): """
 Command output:
 -----------------------------------------
 ${fullOutput}
@@ -167,23 +167,24 @@ ${expectedOutputCheck.toString()}
         def allSpecs = collectSpecs()
 
         for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-            if (!(database instanceof HsqlDatabase)) {
-                continue
-            }
-
-            for (Spec spec : allSpecs)
-                returnList.add(new SpecPermutation(
+            for (Spec spec : allSpecs) {
+                def permutation = new SpecPermutation(
                         spec: spec,
                         databaseName: database.shortName,
-                        connectionStatus: TestDatabaseConnections.getInstance().getConnection(database.shortName),
-                ))
+                )
+                if (!permutation.shouldRun()) {
+                    continue
+                }
+
+                permutation.connectionStatus = TestDatabaseConnections.getInstance().getConnection(database.shortName)
+                returnList.add(permutation)
+            }
         }
 
         return returnList
     }
 
-
-    public static class Spec {
+    static class Spec {
 
         /**
          * Description of this test for reporting purposes.
@@ -221,5 +222,12 @@ ${expectedOutputCheck.toString()}
         String databaseName
         TestDatabaseConnections.ConnectionStatus connectionStatus
         String changeLogFile
+
+        boolean shouldRun() {
+            def filter = TestFilter.getInstance()
+
+            return filter.shouldRun(TestFilter.DB, databaseName) &&
+                    filter.shouldRun("command", spec.command.get(0))
+        }
     }
 }
