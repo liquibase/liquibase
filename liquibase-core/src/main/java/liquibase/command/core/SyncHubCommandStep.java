@@ -34,7 +34,7 @@ public class SyncHubCommandStep extends AbstractCommandStep {
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
         HUB_CONNECTION_ID_ARG = builder.argument("hubConnectionId", String.class).build();
         HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", String.class).build();
-        DATABASE_ARG = builder.argument("hubProjectId", Database.class).build();
+        DATABASE_ARG = builder.argument("database", Database.class).build();
         FAIL_IF_ONLINE_ARG = builder.argument("failIfOnline", Boolean.class).defaultValue(true).build();
     }
 

@@ -4,6 +4,7 @@ import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.command.CommandResults;
 import liquibase.command.CommandScope;
 import liquibase.command.core.*;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -590,7 +591,7 @@ public class Main {
                 || COMMANDS.DEACTIVATE_CHANGELOG.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.FUTURE_ROLLBACK_COUNT_SQL.equalsIgnoreCase(arg)
-                || COMMANDS.FUTURE_ROLLBACK_TO_TAG_SQL.equalsIgnoreCase(arg)
+                || COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL.equalsIgnoreCase(arg)
                 || COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(arg)
                 || COMMANDS.TAG.equalsIgnoreCase(arg)
                 || COMMANDS.TAG_EXISTS.equalsIgnoreCase(arg)
@@ -1537,7 +1538,12 @@ public class Main {
                         .addArgumentValue(ExecuteSqlCommandStep.SQL_ARG, getCommandParam("sql", null))
                         .addArgumentValue(ExecuteSqlCommandStep.SQLFILE_ARG, getCommandParam("sqlFile", null))
                         .addArgumentValue(ExecuteSqlCommandStep.DELIMTER_ARG, getCommandParam("delimiter", ";"));
-
+                CommandResults results = executeSqlCommand.execute();
+                Writer outputWriter = getOutputWriter();
+                String output = (String)results.getResult("output");
+                outputWriter.write(output);
+                outputWriter.flush();
+                outputWriter.close();
                 return;
             } else if (COMMANDS.SNAPSHOT_REFERENCE.equalsIgnoreCase(command)) {
                 CommandScope snapshotCommand = new CommandScope(COMMANDS.SNAPSHOT);
@@ -2152,7 +2158,6 @@ public class Main {
         private static final String FUTURE_ROLLBACK_COUNT_SQL = "futureRollbackCountSQL";
         private static final String FUTURE_ROLLBACK_FROM_TAG_SQL = "futureRollbackFromTagSQL";
         private static final String FUTURE_ROLLBACK_SQL = "futureRollbackSQL";
-        private static final String FUTURE_ROLLBACK_TO_TAG_SQL = "futureRollbackToTagSQL";
         private static final String GENERATE_CHANGELOG = "generateChangeLog";
         private static final String HELP = OPTIONS.HELP;
         private static final String HISTORY = "history";

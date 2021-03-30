@@ -59,8 +59,9 @@ class CommandTest extends Specification {
             if (spec.expectedException != null) {
                 assert e.class == spec.expectedException
             }
-            return
+            throw new RuntimeException(e)
         }
+        assert commandScope != null
         def outputStream = new ByteArrayOutputStream()
 
         commandScope.addArgumentValue("database", database)

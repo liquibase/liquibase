@@ -245,7 +245,6 @@ public class Liquibase implements AutoCloseable {
                 //
                 ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
-                Executor executor = Scope.getCurrentScope().getSingleton(ExecutorService.class).getExecutor("jdbc", database);
                 Connection connection = getConnection(changeLog);
                 if (connection != null) {
                     updateOperation =
@@ -1744,8 +1743,7 @@ public class Liquibase implements AutoCloseable {
                     resetServices();
                 }
 
-                flushOutputWriter(
-                        output);
+                flushOutputWriter(output);
             }
         });
     }

@@ -13,6 +13,8 @@ liquibase.command.core.ExecuteSqlCommandStep
 liquibase.command.core.GenerateChangeLogCommandStep
 liquibase.command.core.HistoryCommandStep
 liquibase.command.core.RegisterChangeLogCommandStep
+liquibase.command.core.FutureRollbackCountSQLCommandStep
+liquibase.command.core.FutureRollbackFromTagSQLCommandStep
 liquibase.command.core.RollbackCommandStep
 liquibase.command.core.RollbackCountCommandStep
 liquibase.command.core.RollbackCountSQLCommandStep

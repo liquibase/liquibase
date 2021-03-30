@@ -82,7 +82,8 @@ public class DropAllCommandStep extends AbstractCommandStep {
             }
 
             //
-            // Tell the user if the HubChangeLog is deactivated
+            // Run syncHub if we are connected to Hub and either
+            // the changelog is registered, or we have a Hub connection ID
             //
             if (hubUpdater != null && (doSyncHub || commandScope.getArgumentValue(HUB_CONNECTION_ID) != null)) {
                 hubUpdater.syncHub(commandScope.getArgumentValue(CHANGELOG_FILE_ARG), changeLog, commandScope.getArgumentValue(HUB_CONNECTION_ID));

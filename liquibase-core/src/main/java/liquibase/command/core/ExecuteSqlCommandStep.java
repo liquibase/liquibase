@@ -84,8 +84,8 @@ public class ExecuteSqlCommandStep extends AbstractCommandStep {
             out += "\n";
         }
         database.commit();
-
-        Scope.getCurrentScope().getUI().sendMessage(out.trim());
+        resultsBuilder.addResult("output", out.trim());
+        // Scope.getCurrentScope().getUI().sendMessage(out.trim());
     }
 
 }
