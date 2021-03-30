@@ -19,7 +19,7 @@ import static org.spockframework.util.Assert.fail
 
 class CommandTest extends Specification {
 
-    @Unroll("Execute on #specPermutation.databaseName: #specPermutation.spec.description")
+    @Unroll("Execute on db:#specPermutation.databaseName,command:#specPermutation.spec.description")
     def "execute valid spec"() {
         setup:
         assumeTrue("Skipping test: " + specPermutation.connectionStatus.errorMessage, specPermutation.connectionStatus.connection != null)
