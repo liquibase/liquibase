@@ -14,7 +14,7 @@ public class ScopeValueProvider extends AbstractConfigurationValueProvider {
 
     @Override
     public int getPrecedence() {
-        return 50;
+        return 400;
     }
 
     @Override

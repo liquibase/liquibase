@@ -1,5 +1,6 @@
 package liquibase.configuration.core;
 
+import liquibase.configuration.AbstractMapConfigurationValueProvider;
 import liquibase.configuration.ConfigurationDefinition;
 
 import java.util.HashMap;
@@ -12,17 +13,18 @@ import java.util.Map;
  *
  * @deprecated
  */
-public class DeprecatedConfigurationValueProvider extends MapConfigurationValueProvider {
+public class DeprecatedConfigurationValueProvider extends AbstractMapConfigurationValueProvider {
 
     private static final Map<String, Object> data = new HashMap<>();
 
-    public DeprecatedConfigurationValueProvider() {
-        super(data);
+    @Override
+    protected Map<?, ?> getMap() {
+        return data;
     }
 
     @Override
     public int getPrecedence() {
-        return 40;
+        return 350;
     }
 
     /**
