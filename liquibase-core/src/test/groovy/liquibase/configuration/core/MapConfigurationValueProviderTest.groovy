@@ -1,9 +1,13 @@
 package liquibase.configuration.core
 
-import liquibase.configuration.core.MapConfigurationValueProvider
+import liquibase.configuration.AbstractMapConfigurationValueProvider
 import spock.lang.Specification
 import spock.lang.Unroll
 
+/**
+ * Tests the base {@link AbstractMapConfigurationValueProvider} logic. Can't call this
+ * AbstractMapConfigurationValueProviderTest or maven won't pick it up
+ */
 class MapConfigurationValueProviderTest extends Specification {
 
     def "empty values count as not set"() {
@@ -35,4 +39,29 @@ class MapConfigurationValueProviderTest extends Specification {
         "single"              | "invalid"              | false
         "parent.child"        | "parent"               | false
     }
+
+    static class MapConfigurationValueProvider extends AbstractMapConfigurationValueProvider {
+
+        private final Map<?, ?> map
+
+        MapConfigurationValueProvider(Map<?, ?> map) {
+            this.map = map
+        }
+
+        @Override
+        int getPrecedence() {
+            return -1
+        }
+
+        @Override
+        protected String getSourceDescription() {
+            return "Test map"
+        }
+
+        @Override
+        protected Map<?, ?> getMap() {
+            return map
+        }
+    }
+
 }

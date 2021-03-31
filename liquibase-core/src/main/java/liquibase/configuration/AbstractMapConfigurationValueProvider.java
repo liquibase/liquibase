@@ -4,6 +4,12 @@ import liquibase.util.StringUtil;
 
 import java.util.Map;
 
+/**
+ * Convenience class for {@link ConfigurationValueProvider}s that can collect the possible values into a Map.
+ * By default, it will follow standardized fuzzy-matching rules including being case insensitive, checking camelCase and kabob-case, etc.
+ *
+ * @see #keyMatches(String, String)
+ */
 public abstract class AbstractMapConfigurationValueProvider extends AbstractConfigurationValueProvider {
 
     protected abstract Map<?, ?> getMap();

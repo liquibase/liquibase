@@ -7,6 +7,18 @@ public interface ConfigurationValueProvider {
 
     /**
      * Returns the precedence of values returned by this provider. Higher a provider with higher precedence overrides values from lower precedence providers.
+     * <br><br>
+     * Standard provider precedence:
+     * <ul>
+     *     <li>400 {@link liquibase.configuration.core.ScopeValueProvider}</li>
+     *     <li>350 {@link liquibase.configuration.core.DeprecatedConfigurationValueProvider}</li>
+     *     <li>300: TODO JNDI attributes</li>
+     *     <li>250: TODO Servlet Context</li>
+     *     <li>200 {@link liquibase.configuration.core.SystemPropertyValueProvider}</li>
+     *     <li>150 EnvironmentValueProvider</li>
+     *     <li>100: TODO profile/context specific properties files</li>
+     *     <li>50: TODO default properties files</li>
+     * </ul>
      */
     int getPrecedence();
 

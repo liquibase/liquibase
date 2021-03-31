@@ -18,7 +18,7 @@ public class SystemPropertyValueProvider extends AbstractMapConfigurationValuePr
 
     @Override
     public int getPrecedence() {
-        return 20;
+        return 200;
     }
 
     @Override
