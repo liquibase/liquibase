@@ -29,7 +29,7 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(RegisterChangeLogCommandStep.class);
-        HUB_CHANGELOG_ARG = builder.argument("hubChangeLog", HubChangeLog.class).required().build();
+        HUB_CHANGELOG_ARG = builder.argument("hubChangeLog", HubChangeLog.class).optional().build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
         CHANGELOG_ARG = builder.argument("changeLog", DatabaseChangeLog.class).required().build();
         HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class).optional().build();

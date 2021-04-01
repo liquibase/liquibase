@@ -19,7 +19,7 @@ commandTests(
                                             tableName: "FirstTable",
                                             columns: [
                                                     ColumnConfig.fromName("FirstColumn")
-                                                            .setType("VARCHAR(255)")
+                                                                .setType("VARCHAR(255)")
                                             ]
                                     )
                             ] as SetupDatabaseStructure.Entry,
@@ -28,7 +28,7 @@ commandTests(
                                             tableName: "SecondTable",
                                             columns: [
                                                     ColumnConfig.fromName("SecondColumn")
-                                                            .setType("VARCHAR(255)")
+                                                                .setType("VARCHAR(255)")
                                             ]
                                     )
                             ] as SetupDatabaseStructure.Entry,
@@ -42,7 +42,7 @@ commandTests(
                                             tableName: "liquibaseRunInfo",
                                             columns: [
                                                     ColumnConfig.fromName("timesRan")
-                                                            .setType("INT")
+                                                                .setType("INT")
                                             ]
                                     )
                             ] as SetupDatabaseStructure.Entry,

@@ -1,14 +1,23 @@
 package liquibase.integrationtest.command
 
-import com.sun.javaws.exceptions.InvalidArgumentException
 import liquibase.CatalogAndSchema
+import liquibase.Scope
+import liquibase.changelog.ChangeLogParameters
+import liquibase.changelog.DatabaseChangeLog
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
+import liquibase.hub.HubService
+import liquibase.hub.core.MockHubService
+import liquibase.integrationtest.CustomTestSetup
 import liquibase.integrationtest.TestDatabaseConnections
 import liquibase.integrationtest.TestFilter
 import liquibase.integrationtest.TestSetup
+import liquibase.parser.ChangeLogParser
+import liquibase.parser.ChangeLogParserFactory
+import liquibase.test.JUnitResourceAccessor
+import liquibase.util.FileUtil
 import liquibase.util.StringUtil
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -41,16 +50,6 @@ class CommandTest extends Specification {
             expectedOutputChecks.add(spec._expectedOutput)
         }
 
-        String changeLogFile = null
-        if (spec._setup != null) {
-            for (def setup : spec._setup) {
-                setup.setup(specPermutation.connectionStatus)
-                if (setup.getChangeLogFile() != null) {
-                    changeLogFile = setup.getChangeLogFile()
-                }
-            }
-        }
-
         when:
         def commandScope
         try {
@@ -70,8 +69,27 @@ class CommandTest extends Specification {
         commandScope.addArgumentValue("schemas", catalogAndSchemas)
         commandScope.addArgumentValue("logLevel", "FINE")
         commandScope.setOutput(outputStream)
+
+        String changeLogFile = null
+        if (spec._setup != null) {
+            for (def setup : spec._setup) {
+                setup.setup(specPermutation.connectionStatus)
+                if (setup.getChangeLogFile() != null) {
+                    changeLogFile = setup.getChangeLogFile()
+                }
+            }
+        }
+        if (spec._customSetup != null) {
+            for (def customSetup : spec._customSetup) {
+                customSetup.customSetup(specPermutation.connectionStatus, commandScope)
+            }
+        }
+
         if (changeLogFile != null) {
             commandScope.addArgumentValue("changeLogFile", changeLogFile)
+            if (spec._needDatabaseChangeLog) {
+              addDatabaseChangeLogToScope(changeLogFile, commandScope)
+            }
         }
         if (spec._arguments != null) {
             spec._arguments.each { name, value ->
@@ -79,8 +97,13 @@ class CommandTest extends Specification {
                 commandScope.addArgumentValue(name, objValue)
             }
         }
+        def setupScopeId = Scope.enter([
+                ("liquibase.plugin." + HubService.name): MockHubService,
+        ])
 
         def results = commandScope.execute()
+
+        Scope.exit(setupScopeId)
 
         def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
 
@@ -127,6 +150,28 @@ ${expectedOutputCheck.toString()}
 
         where:
         specPermutation << collectSpecPermutations()
+    }
+
+    static void addDatabaseChangeLogToScope(String changeLogFile, CommandScope commandScope) {
+        //
+        // Create a temporary changelog file
+        //
+        URL url = Thread.currentThread().getContextClassLoader().getResource(changeLogFile)
+        File f = new File(url.toURI())
+        String contents = FileUtil.getContents(f)
+        File outputFile = File.createTempFile("changeLog-", ".xml", new File("target/test-classes"))
+        FileUtil.write(contents, outputFile)
+        changeLogFile = outputFile.getName()
+        commandScope.addArgumentValue("changeLogFile", changeLogFile)
+
+        //
+        // Parse the file to get the DatabaseChangeLog and add it to the CommandScope
+        //
+        JUnitResourceAccessor resourceAccessor = new JUnitResourceAccessor()
+        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor)
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters()
+        DatabaseChangeLog databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor)
+        commandScope.addArgumentValue("changeLog", databaseChangeLog)
     }
 
     static List<File> collectSpecFiles() {
@@ -214,6 +259,8 @@ ${expectedOutputCheck.toString()}
         private List<String> _command
         private Map<String, Object> _arguments = new HashMap<>()
         private List<TestSetup> _setup
+        private List <CustomTestSetup> _customSetup
+        private boolean _needDatabaseChangeLog
         private List<Object> _expectedOutput
         private Map<String, Object> _expectedResults = new HashMap<>()
         private Class<Throwable> _expectedException
@@ -243,12 +290,15 @@ ${expectedOutputCheck.toString()}
             this
         }
 
-
         Spec setup(TestSetup... setup) {
             this._setup = setup
             this
         }
 
+        Spec customSetup(CustomTestSetup... customSetup) {
+            this._customSetup = customSetup
+            this
+        }
 
         /**
          * Checks for the command output.
@@ -271,10 +321,14 @@ ${expectedOutputCheck.toString()}
             this
         }
 
+        Spec needDatabaseChangeLog(boolean needDatabaseChangeLog) {
+            this._needDatabaseChangeLog = needDatabaseChangeLog
+            this
+        }
 
         void validate() {
             if (_command == null || _command.size() == 0) {
-                throw new InvalidArgumentException("'command' is required")
+                throw new IllegalArgumentException("'command' is required")
             }
         }
     }
