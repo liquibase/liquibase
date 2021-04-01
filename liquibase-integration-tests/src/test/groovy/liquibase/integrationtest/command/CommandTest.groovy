@@ -1,5 +1,6 @@
 package liquibase.integrationtest.command
 
+import com.sun.javaws.exceptions.InvalidArgumentException
 import liquibase.CatalogAndSchema
 import liquibase.command.CommandScope
 import liquibase.database.Database
@@ -19,8 +20,8 @@ import static org.spockframework.util.Assert.fail
 
 class CommandTest extends Specification {
 
-    @Unroll("Execute on db:#specPermutation.databaseName,command:#specPermutation.spec.description")
-    def "execute valid spec"() {
+    @Unroll("Run {db:#specPermutation.databaseName,command:#specPermutation.spec._description}")
+    def "run spec"() {
         setup:
         assumeTrue("Skipping test: " + specPermutation.connectionStatus.errorMessage, specPermutation.connectionStatus.connection != null)
 
@@ -34,15 +35,15 @@ class CommandTest extends Specification {
         database.dropDatabaseObjects(catalogAndSchemas[0])
 
         List expectedOutputChecks = new ArrayList()
-        if (spec.expectedOutput instanceof List) {
-            expectedOutputChecks.addAll(spec.expectedOutput)
+        if (spec._expectedOutput instanceof List) {
+            expectedOutputChecks.addAll(spec._expectedOutput)
         } else {
-            expectedOutputChecks.add(spec.expectedOutput)
+            expectedOutputChecks.add(spec._expectedOutput)
         }
 
         String changeLogFile = null
-        if (spec.setup != null) {
-            for (def setup : spec.setup) {
+        if (spec._setup != null) {
+            for (def setup : spec._setup) {
                 setup.setup(specPermutation.connectionStatus)
                 if (setup.getChangeLogFile() != null) {
                     changeLogFile = setup.getChangeLogFile()
@@ -53,11 +54,11 @@ class CommandTest extends Specification {
         when:
         def commandScope
         try {
-            commandScope = new CommandScope(spec.command as String[])
+            commandScope = new CommandScope(spec._command as String[])
         }
         catch (Throwable e) {
-            if (spec.expectedException != null) {
-                assert e.class == spec.expectedException
+            if (spec._expectedException != null) {
+                assert e.class == spec._expectedException
             }
             throw new RuntimeException(e)
         }
@@ -72,8 +73,8 @@ class CommandTest extends Specification {
         if (changeLogFile != null) {
             commandScope.addArgumentValue("changeLogFile", changeLogFile)
         }
-        if (spec.arguments != null) {
-            spec.arguments.each { name, value ->
+        if (spec._arguments != null) {
+            spec._arguments.each { name, value ->
                 Object objValue = (Object) value
                 commandScope.addArgumentValue(name, objValue)
             }
@@ -84,7 +85,7 @@ class CommandTest extends Specification {
         def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
 
         for (def returnedResult : results.getResults().entrySet()) {
-            def expectedValue = String.valueOf(spec.expectedResults.get(returnedResult.getKey()))
+            def expectedValue = String.valueOf(spec._expectedResults.get(returnedResult.getKey()))
             def seenValue = String.valueOf(returnedResult.getValue())
 
             assert expectedValue != "null": "No expectedResult for returned result '" + returnedResult.getKey() + "' of: " + seenValue
@@ -145,18 +146,28 @@ ${expectedOutputCheck.toString()}
         def returnList = new ArrayList<Spec>()
 
         for (def specFile : collectSpecFiles()) {
-            def specClass = loader.parseClass(specFile)
-            for (def specObj : ((Script) specClass.newInstance()).run()) {
-                if (!specObj instanceof Spec) {
-                    fail "$specFile must contain an array of LiquibaseCommandTest.Spec objects"
-                }
+            Class specClass
 
-                def spec = (Spec) specObj
-                if (spec.description == null) {
-                    spec.description = StringUtil.join(spec.command, " ")
-                }
+            try {
+                specClass = loader.parseClass(specFile)
 
-                returnList.add(spec)
+                for (def specObj : ((Script) specClass.newInstance()).run()) {
+                    if (!specObj instanceof Spec) {
+                        fail "$specFile must contain an array of LiquibaseCommandTest.Spec objects"
+                    }
+
+                    def spec = (Spec) specObj
+
+                    if (spec._description == null) {
+                        spec._description = StringUtil.join((Collection) spec._command, " ")
+                    }
+
+                    spec.validate()
+
+                    returnList.add(spec)
+                }
+            } catch (Throwable e) {
+                throw new RuntimeException("Error parsing ${specFile}: ${e.message}", e)
             }
         }
 
@@ -173,6 +184,7 @@ ${expectedOutputCheck.toString()}
                         spec: spec,
                         databaseName: database.shortName,
                 )
+
                 if (!permutation.shouldRun()) {
                     continue
                 }
@@ -185,25 +197,57 @@ ${expectedOutputCheck.toString()}
         return returnList
     }
 
+    static commandTests(Spec... specs) {
+        return specs
+    }
+
+    static Spec run(@DelegatesTo(Spec) Closure cl) {
+        def spec = new Spec()
+        def code = cl.rehydrate(spec, this, this)
+        code.resolveStrategy = Closure.DELEGATE_ONLY
+        code()
+    }
+
     static class Spec {
+
+        private String _description
+        private List<String> _command
+        private Map<String, Object> _arguments = new HashMap<>()
+        private List<TestSetup> _setup
+        private List<Object> _expectedOutput
+        private Map<String, Object> _expectedResults = new HashMap<>()
+        private Class<Throwable> _expectedException
 
         /**
          * Description of this test for reporting purposes.
          * If not set, one will be generated for you.
          */
-        String description
+        Spec description(String description) {
+            this._description = description
+            this
+        }
 
         /**
          * Command to execute
          */
-        List<String> command
+        Spec command(String... command) {
+            this._command = command
+            this
+        }
 
         /**
          * Arguments to command as key/value pairs
          */
-        Map<String, Object> arguments = new HashMap<>()
+        Spec arguments(Map<String, Object> arguments) {
+            this._arguments = arguments
+            this
+        }
 
-        List<TestSetup> setup
+
+        Spec setup(TestSetup... setup) {
+            this._setup = setup
+            this
+        }
 
 
         /**
@@ -211,11 +255,28 @@ ${expectedOutputCheck.toString()}
          * <li>If a string, assert that the output CONTAINS the string.
          * <li>If a regexp, assert that the regexp FINDs the string.
          */
-        List<Object> expectedOutput
+        Spec expectedOutput(Object... output) {
+            this._expectedOutput = output
+            this
+        }
 
-        Map<String, Object> expectedResults = new HashMap<>()
 
-        Class<Throwable> expectedException
+        Spec expectedResults(Map<String, Object> results) {
+            this._expectedResults = results
+            this
+        }
+
+        Spec expectedException(Class<Throwable> exception) {
+            this._expectedException = exception
+            this
+        }
+
+
+        void validate() {
+            if (_command == null || _command.size() == 0) {
+                throw new InvalidArgumentException("'command' is required")
+            }
+        }
     }
 
     private static class SpecPermutation {
@@ -228,7 +289,7 @@ ${expectedOutputCheck.toString()}
             def filter = TestFilter.getInstance()
 
             return filter.shouldRun(TestFilter.DB, databaseName) &&
-                    filter.shouldRun("command", spec.command.get(0))
+                    filter.shouldRun("command", spec._command.get(0))
         }
     }
 }

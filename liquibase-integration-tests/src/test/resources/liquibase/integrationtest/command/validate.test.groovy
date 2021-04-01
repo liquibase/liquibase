@@ -1,23 +1,21 @@
 package liquibase.integrationtest.command
 
-import liquibase.integrationtest.command.CommandTest
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
-[
-    new CommandTest.Spec(
-        command: ["validate"],
+import static liquibase.integrationtest.command.CommandTest.commandTests
+import static liquibase.integrationtest.command.CommandTest.run
 
-        setup: [
-            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")
-        ],
-        expectedOutput: [
-            "",
-        ],
+commandTests(
+        run {
+            command "validate"
 
-        expectedResults: [
-            statusMessage: "Successfully executed validate",
-            statusCode: 0
-        ]
-    )
+            setup new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")
 
-] as CommandTest.Spec[]
+            expectedOutput ""
+
+            expectedResults([
+                    statusMessage: "Successfully executed validate",
+                    statusCode   : 0
+            ])
+        }
+)

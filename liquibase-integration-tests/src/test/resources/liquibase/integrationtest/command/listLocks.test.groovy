@@ -1,21 +1,17 @@
 package liquibase.integrationtest.command
 
-import liquibase.integrationtest.command.CommandTest
-import liquibase.integrationtest.setup.SetupDatabaseChangeLog
+import static liquibase.integrationtest.command.CommandTest.commandTests
+import static liquibase.integrationtest.command.CommandTest.run
 
-[
-    new CommandTest.Spec(
-        command: ["listLocks"],
+commandTests(
+        run {
+            command "listLocks"
 
-        setup: [
-        ],
-        expectedOutput: [
-            "",
-        ],
-        expectedResults: [
-            statusMessage: "Successfully executed listLocks",
-            statusCode: 0
-        ]
-    )
+            expectedOutput ""
 
-] as CommandTest.Spec[]
+            expectedResults([
+                    statusMessage: "Successfully executed listLocks",
+                    statusCode   : 0
+            ])
+        }
+)

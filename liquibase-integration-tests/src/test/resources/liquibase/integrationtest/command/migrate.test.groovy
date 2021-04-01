@@ -1,23 +1,22 @@
 package liquibase.integrationtest.command
 
-import liquibase.integrationtest.command.CommandTest
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
-[
-    new CommandTest.Spec(
-        command: ["migrate"],
+import static liquibase.integrationtest.command.CommandTest.commandTests
+import static liquibase.integrationtest.command.CommandTest.run
 
-        setup: [
-            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")
-        ],
-        expectedOutput: [
-            "",
-        ],
 
-        expectedResults: [
-            statusMessage: "Successfully executed migrate",
-            statusCode: 0
-        ]
-    )
+commandTests(
+        run {
+            command "migrate"
 
-] as CommandTest.Spec[]
+            setup new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")
+
+            expectedOutput ""
+
+            expectedResults([
+                    statusMessage: "Successfully executed migrate",
+                    statusCode   : 0
+            ])
+        }
+)
