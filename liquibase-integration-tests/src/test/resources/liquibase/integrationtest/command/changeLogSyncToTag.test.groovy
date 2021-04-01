@@ -7,9 +7,9 @@ import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 CommandTest.define {
-    run {
-        command = ["changeLogSyncToTag"]
+    command = ["changeLogSyncToTag"]
 
+    run {
         arguments = [
                 tag: "version_2.0"
         ]

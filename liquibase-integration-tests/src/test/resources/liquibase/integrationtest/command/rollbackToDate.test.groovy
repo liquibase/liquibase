@@ -7,10 +7,10 @@ import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 CommandTest.define {
-    run {
-        command = [ "rollbackToDate" ]
+    command = ["rollbackToDate"]
 
-        arguments= [
+    run {
+        arguments = [
                 date: "2021-03-25T09:00:00"
         ]
 

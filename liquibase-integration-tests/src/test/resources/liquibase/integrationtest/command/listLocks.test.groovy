@@ -1,9 +1,9 @@
 package liquibase.integrationtest.command
 
 CommandTest.define {
-    run {
-        command = ["listLocks"]
+    command = ["listLocks"]
 
+    run {
         expectedOutput ""
 
         expectedResults([

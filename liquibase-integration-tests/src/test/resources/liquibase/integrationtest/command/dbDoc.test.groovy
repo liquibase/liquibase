@@ -3,8 +3,9 @@ package liquibase.integrationtest.command
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
 CommandTest.define {
+    command = ["dbDoc"]
+
     run {
-        command = ["dbDoc"]
         arguments = [
                 outputDirectory: "target/test-classes"
         ]

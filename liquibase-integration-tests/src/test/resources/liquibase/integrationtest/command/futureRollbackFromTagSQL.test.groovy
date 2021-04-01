@@ -7,8 +7,9 @@ import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 CommandTest.define {
+    command = ["futureRollbackFromTagSQL"]
+
     run {
-        command = ["futureRollbackFromTagSQL"]
         arguments = [
                 tag: "version_2.0"
         ]

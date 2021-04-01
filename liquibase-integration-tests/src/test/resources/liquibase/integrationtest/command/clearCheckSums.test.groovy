@@ -8,12 +8,12 @@ import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 CommandTest.define {
+    command = ["clearCheckSums"]
+
     run {
-        command = ["clearCheckSums"]
         arguments = [
                 tag: "version_2.0"
         ]
-
 
         setup SetupDatabaseStructure.create(
                 new CreateTableChange(

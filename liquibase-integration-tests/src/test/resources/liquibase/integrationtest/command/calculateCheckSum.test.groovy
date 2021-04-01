@@ -6,59 +6,58 @@ import liquibase.change.core.TagDatabaseChange
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
-import static liquibase.integrationtest.command.CommandTest.commandTests
-import static liquibase.integrationtest.command.CommandTest.run
+CommandTest.define {
 
-commandTests(
-        run {
-            command "calculateCheckSum"
-            setup(
-                    new SetupDatabaseStructure([
-                            [
-                                    new CreateTableChange(
-                                            tableName: "FirstTable",
-                                            columns: [
-                                                    ColumnConfig.fromName("FirstColumn")
-                                                                .setType("VARCHAR(255)")
-                                            ]
-                                    )
-                            ] as SetupDatabaseStructure.Entry,
-                            [
-                                    new CreateTableChange(
-                                            tableName: "SecondTable",
-                                            columns: [
-                                                    ColumnConfig.fromName("SecondColumn")
-                                                                .setType("VARCHAR(255)")
-                                            ]
-                                    )
-                            ] as SetupDatabaseStructure.Entry,
-                            [
-                                    new TagDatabaseChange(
-                                            tag: "version_2.0"
-                                    )
-                            ] as SetupDatabaseStructure.Entry,
-                            [
-                                    new CreateTableChange(
-                                            tableName: "liquibaseRunInfo",
-                                            columns: [
-                                                    ColumnConfig.fromName("timesRan")
-                                                                .setType("INT")
-                                            ]
-                                    )
-                            ] as SetupDatabaseStructure.Entry,
+    command = ["calculateCheckSum"]
 
-                    ]),
-                    new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.tag.changelog.xml"))
+    run {
+        arguments = [
+                changeSetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland"
+        ]
 
-            expectedOutput ""
+        setup(
+                new SetupDatabaseStructure([
+                        [
+                                new CreateTableChange(
+                                        tableName: "FirstTable",
+                                        columns: [
+                                                ColumnConfig.fromName("FirstColumn")
+                                                        .setType("VARCHAR(255)")
+                                        ]
+                                )
+                        ] as SetupDatabaseStructure.Entry,
+                        [
+                                new CreateTableChange(
+                                        tableName: "SecondTable",
+                                        columns: [
+                                                ColumnConfig.fromName("SecondColumn")
+                                                        .setType("VARCHAR(255)")
+                                        ]
+                                )
+                        ] as SetupDatabaseStructure.Entry,
+                        [
+                                new TagDatabaseChange(
+                                        tag: "version_2.0"
+                                )
+                        ] as SetupDatabaseStructure.Entry,
+                        [
+                                new CreateTableChange(
+                                        tableName: "liquibaseRunInfo",
+                                        columns: [
+                                                ColumnConfig.fromName("timesRan")
+                                                        .setType("INT")
+                                        ]
+                                )
+                        ] as SetupDatabaseStructure.Entry,
 
-            arguments([
-                    changeSetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland"
-            ])
+                ]),
+                new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.tag.changelog.xml"))
 
-            expectedResults([
-                    statusMessage: "Successfully executed calculateCheckSum",
-                    statusCode   : 0
-            ])
-        }
-)
+        expectedOutput ""
+
+        expectedResults([
+                statusMessage: "Successfully executed calculateCheckSum",
+                statusCode   : 0
+        ])
+    }
+}

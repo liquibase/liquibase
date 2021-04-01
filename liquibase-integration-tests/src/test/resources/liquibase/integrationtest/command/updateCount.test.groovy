@@ -3,9 +3,9 @@ package liquibase.integrationtest.command
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
 CommandTest.define {
-    run {
-        command = ["updateCount"]
+    command = ["updateCount"]
 
+    run {
         arguments = [
                 count: 1
         ]

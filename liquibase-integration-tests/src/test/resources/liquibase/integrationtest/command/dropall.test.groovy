@@ -5,8 +5,9 @@ import liquibase.change.core.CreateTableChange
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 CommandTest.define {
+    command = ["dropAll"]
+
     run {
-        command = ["dropAll"]
 
         setup SetupDatabaseStructure.create(
                 new CreateTableChange(

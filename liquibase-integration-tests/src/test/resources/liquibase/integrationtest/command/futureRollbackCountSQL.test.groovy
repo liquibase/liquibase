@@ -7,8 +7,9 @@ import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 CommandTest.define {
+    command = ["futureRollbackCountSQL"]
+
     run {
-        command = ["futureRollbackCountSQL"]
         arguments = [
                 count: 1
         ]

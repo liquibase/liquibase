@@ -1,5 +1,6 @@
 package liquibase.integrationtest.command
 
+import com.sun.javaws.exceptions.InvalidArgumentException
 import liquibase.CatalogAndSchema
 import liquibase.Scope
 import liquibase.changelog.ChangeLogParameters
@@ -30,7 +31,7 @@ import static org.spockframework.util.Assert.fail
 
 class CommandTest extends Specification {
 
-    @Unroll("Run {db:#specPermutation.databaseName,command:#specPermutation.spec.description}")
+    @Unroll("Run {db:#specPermutation.databaseName,command:#specPermutation.spec.joinedCommand} #specPermutation.spec.description")
     def "run spec"() {
         setup:
         assumeTrue("Skipping test: " + specPermutation.connectionStatus.errorMessage, specPermutation.connectionStatus.connection != null)
@@ -54,7 +55,7 @@ class CommandTest extends Specification {
         when:
         def commandScope
         try {
-            commandScope = new CommandScope(spec.command as String[])
+            commandScope = new CommandScope(spec.testSetup.command as String[])
         }
         catch (Throwable e) {
             if (spec._expectedException != null) {
@@ -212,8 +213,10 @@ ${expectedOutputCheck.toString()}
 
                     def spec = (Spec) specObj
 
+                    spec.joinedCommand = StringUtil.join(spec.testSetup.command, "")
+
                     if (spec.description == null) {
-                        spec.description = StringUtil.join((Collection) spec.command, " ")
+                        spec.description = StringUtil.join((Collection) spec.testSetup.command, " ")
                     }
 
                     spec.validate()
@@ -258,10 +261,18 @@ ${expectedOutputCheck.toString()}
         code.resolveStrategy = Closure.DELEGATE_ONLY
         code()
 
+        setup.validate()
+
         return setup
     }
 
     static class CommandTestSetup {
+
+        /**
+         * Command to test
+         */
+        List<String> command
+
         List<Spec> specs = new ArrayList<>()
 
         void run(@DelegatesTo(Spec) Closure cl) {
@@ -270,23 +281,29 @@ ${expectedOutputCheck.toString()}
             code.resolveStrategy = Closure.DELEGATE_ONLY
             code()
 
+            spec.testSetup = this;
             this.specs.add(spec)
+        }
+
+        void validate() throws InvalidArgumentException {
+            if (command == null || command.size() == 0) {
+                throw new InvalidArgumentException("'command' is required")
+            }
+
         }
 
     }
 
     static class Spec {
 
+        private String joinedCommand
+        private CommandTestSetup testSetup
+
         /**
          * Description of this test for reporting purposes.
          * If not set, one will be generated for you.
          */
         String description
-
-        /**
-         * Command to execute
-         */
-        List<String> command
 
         /**
          * Arguments to command as key/value pairs
@@ -338,9 +355,6 @@ ${expectedOutputCheck.toString()}
         }
 
         void validate() {
-            if (command == null || command.size() == 0) {
-                throw new IllegalArgumentException("'command' is required")
-            }
         }
     }
 
@@ -348,13 +362,12 @@ ${expectedOutputCheck.toString()}
         Spec spec
         String databaseName
         TestDatabaseConnections.ConnectionStatus connectionStatus
-        String changeLogFile
 
         boolean shouldRun() {
             def filter = TestFilter.getInstance()
 
             return filter.shouldRun(TestFilter.DB, databaseName) &&
-                    filter.shouldRun("command", spec.command.get(0))
+                    filter.shouldRun("command", spec.joinedCommand)
         }
     }
 }

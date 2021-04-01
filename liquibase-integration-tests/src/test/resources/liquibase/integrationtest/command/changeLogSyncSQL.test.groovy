@@ -7,8 +7,9 @@ import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 CommandTest.define {
+    command = ["changeLogSyncSQL"]
+
     run {
-        command = ["changeLogSyncSQL"]
 
         setup SetupDatabaseStructure.create(
                 new CreateTableChange(

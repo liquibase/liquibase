@@ -8,9 +8,9 @@ import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 CommandTest.define {
-    run {
-        command = ["unexpectedChangeSets"]
+    command = ["unexpectedChangeSets"]
 
+    run {
         arguments = [
                 verbose: "true"
         ]

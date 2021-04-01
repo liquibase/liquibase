@@ -3,9 +3,9 @@ package liquibase.integrationtest.command
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
 CommandTest.define {
-    run {
-        command = ["tag"]
+    command = ["tag"]
 
+    run {
         arguments = [
                 tag: "version_2.0"
         ]

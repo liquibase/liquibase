@@ -3,9 +3,9 @@ package liquibase.integrationtest.command
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
 CommandTest.define {
-    run {
-        command = ["updateSQL"]
+    command = ["updateSQL"]
 
+    run {
         setup new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")
 
         expectedOutput ""

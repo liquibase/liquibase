@@ -5,9 +5,9 @@ import java.util.regex.Pattern
 import static liquibase.integrationtest.setup.SetupChangelogHistory.setupChangelogHistory
 
 CommandTest.define {
-    run {
-        command = ["history" ]
+    command = ["history" ]
 
+    run {
         setup setupChangelogHistory(
                 {
                     id = "1"

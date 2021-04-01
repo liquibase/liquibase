@@ -7,12 +7,13 @@ import liquibase.integrationtest.setup.SetupCustomDiffArgs
 import liquibase.integrationtest.setup.SetupDatabaseChangeLogFile
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
-import static liquibase.integrationtest.command.CommandTest.commandTests
-import static liquibase.integrationtest.command.CommandTest.run
+CommandTest.define {
+    command = ["generateChangeLog"]
 
-commandTests(
     run {
-        command "generateChangeLog"
+        arguments = [
+                tag: "version_2.0"
+        ]
 
         setup(
                 new SetupDatabaseStructure([
@@ -51,15 +52,13 @@ commandTests(
                 ]),
                 new SetupDatabaseChangeLogFile(null))
         customSetup(
-            new SetupCustomDiffArgs()
+                new SetupCustomDiffArgs()
         )
-        arguments([
-            tag: "version_2.0"
-        ])
+
         expectedOutput ""
         expectedResults([
-            statusMessage: "Successfully executed generateChangeLog",
-            statusCode   : 0
+                statusMessage: "Successfully executed generateChangeLog",
+                statusCode   : 0
         ])
     }
-)
+}
