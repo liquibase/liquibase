@@ -1,17 +1,14 @@
 package liquibase.integrationtest.command
 
-import static liquibase.integrationtest.command.CommandTest.commandTests
-import static liquibase.integrationtest.command.CommandTest.run
+CommandTest.define {
+    run {
+        command = ["listLocks"]
 
-commandTests(
-        run {
-            command "listLocks"
+        expectedOutput ""
 
-            expectedOutput ""
-
-            expectedResults([
-                    statusMessage: "Successfully executed listLocks",
-                    statusCode   : 0
-            ])
-        }
-)
+        expectedResults([
+                statusMessage: "Successfully executed listLocks",
+                statusCode   : 0
+        ])
+    }
+}

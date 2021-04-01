@@ -1,26 +1,22 @@
 package liquibase.integrationtest.command
 
-
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
-import static liquibase.integrationtest.command.CommandTest.commandTests
-import static liquibase.integrationtest.command.CommandTest.run
+CommandTest.define {
+    run {
+        command = ["updateCountSQL"]
 
-commandTests(
-        run {
-            command "updateCountSQL"
+        arguments = [
+                count: 1
+        ]
 
-            setup new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")
+        setup new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.xml")
 
-            arguments([
-                    count: 1
-            ])
+        expectedOutput ""
 
-            expectedOutput ""
-
-            expectedResults([
-                    statusMessage: "Successfully executed updateCountSQL",
-                    statusCode   : 0
-            ])
-        }
-)
+        expectedResults([
+                statusMessage: "Successfully executed updateCountSQL",
+                statusCode   : 0
+        ])
+    }
+}

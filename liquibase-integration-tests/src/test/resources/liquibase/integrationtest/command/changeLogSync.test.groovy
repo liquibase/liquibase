@@ -1,62 +1,50 @@
 package liquibase.integrationtest.command
 
-
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
-import static liquibase.integrationtest.command.CommandTest.commandTests
-import static liquibase.integrationtest.command.CommandTest.run
+CommandTest.define {
+    run {
+        command = ["changeLogSync"]
 
-commandTests(
-        run {
-            command "changeLogSync"
+        setup(
+                SetupDatabaseStructure.create(
+                        new CreateTableChange(
+                                tableName: "FirstTable",
+                                columns: [
+                                        ColumnConfig.fromName("FirstColumn")
+                                                .setType("VARCHAR(255)")
+                                ]
+                        ),
+                        new CreateTableChange(
+                                tableName: "SecondTable",
+                                columns: [
+                                        ColumnConfig.fromName("SecondColumn")
+                                                .setType("VARCHAR(255)")
+                                ]
+                        ),
+                        new TagDatabaseChange(
+                                tag: "version_2.0"
+                        ),
+                        new CreateTableChange(
+                                tableName: "liquibaseRunInfo",
+                                columns: [
+                                        ColumnConfig.fromName("timesRan")
+                                                .setType("INT")
+                                ]
+                        ),
+                ),
+                new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.tag.changelog.xml")
+        )
 
-            setup(
-                    new SetupDatabaseStructure([
-                            [
-                                    new CreateTableChange(
-                                            tableName: "FirstTable",
-                                            columns: [
-                                                    ColumnConfig.fromName("FirstColumn")
-                                                            .setType("VARCHAR(255)")
-                                            ]
-                                    )
-                            ] as SetupDatabaseStructure.Entry,
-                            [
-                                    new CreateTableChange(
-                                            tableName: "SecondTable",
-                                            columns: [
-                                                    ColumnConfig.fromName("SecondColumn")
-                                                            .setType("VARCHAR(255)")
-                                            ]
-                                    )
-                            ] as SetupDatabaseStructure.Entry,
-                            [
-                                    new TagDatabaseChange(
-                                            tag: "version_2.0"
-                                    )
-                            ] as SetupDatabaseStructure.Entry,
-                            [
-                                    new CreateTableChange(
-                                            tableName: "liquibaseRunInfo",
-                                            columns: [
-                                                    ColumnConfig.fromName("timesRan")
-                                                            .setType("INT")
-                                            ]
-                                    )
-                            ] as SetupDatabaseStructure.Entry
-                    ]),
-                    new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.tag.changelog.xml")
-            )
+        expectedOutput ""
 
-            expectedOutput ""
-
-            expectedResults([
-                    statusMessage: "Successfully executed changeLogSync",
-                    statusCode   : 0
-            ])
-        },
-)
+        expectedResults([
+                statusMessage: "Successfully executed changeLogSync",
+                statusCode   : 0
+        ])
+    }
+}

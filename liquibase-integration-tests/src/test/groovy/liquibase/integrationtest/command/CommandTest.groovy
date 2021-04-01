@@ -10,6 +10,7 @@ import liquibase.integrationtest.TestDatabaseConnections
 import liquibase.integrationtest.TestFilter
 import liquibase.integrationtest.TestSetup
 import liquibase.util.StringUtil
+import org.codehaus.groovy.control.CompilerConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -20,7 +21,7 @@ import static org.spockframework.util.Assert.fail
 
 class CommandTest extends Specification {
 
-    @Unroll("Run {db:#specPermutation.databaseName,command:#specPermutation.spec._description}")
+    @Unroll("Run {db:#specPermutation.databaseName,command:#specPermutation.spec.description}")
     def "run spec"() {
         setup:
         assumeTrue("Skipping test: " + specPermutation.connectionStatus.errorMessage, specPermutation.connectionStatus.connection != null)
@@ -54,7 +55,7 @@ class CommandTest extends Specification {
         when:
         def commandScope
         try {
-            commandScope = new CommandScope(spec._command as String[])
+            commandScope = new CommandScope(spec.command as String[])
         }
         catch (Throwable e) {
             if (spec._expectedException != null) {
@@ -73,8 +74,8 @@ class CommandTest extends Specification {
         if (changeLogFile != null) {
             commandScope.addArgumentValue("changeLogFile", changeLogFile)
         }
-        if (spec._arguments != null) {
-            spec._arguments.each { name, value ->
+        if (spec.arguments != null) {
+            spec.arguments.each { name, value ->
                 Object objValue = (Object) value
                 commandScope.addArgumentValue(name, objValue)
             }
@@ -142,24 +143,32 @@ ${expectedOutputCheck.toString()}
     }
 
     static List<Spec> collectSpecs() {
-        def loader = new GroovyClassLoader()
+        def config = new CompilerConfiguration()
+        def shell = new GroovyShell(this.class.classLoader, config)
+
         def returnList = new ArrayList<Spec>()
 
         for (def specFile : collectSpecFiles()) {
             Class specClass
 
             try {
-                specClass = loader.parseClass(specFile)
+                def returnValue = shell.evaluate(specFile)
 
-                for (def specObj : ((Script) specClass.newInstance()).run()) {
+                if (!returnValue instanceof CommandTestSetup) {
+                    fail("${specFile} is not a CommandTest specification")
+                }
+
+                def commandTestSetup = (CommandTestSetup) returnValue
+
+                for (def specObj : commandTestSetup.specs) {
                     if (!specObj instanceof Spec) {
                         fail "$specFile must contain an array of LiquibaseCommandTest.Spec objects"
                     }
 
                     def spec = (Spec) specObj
 
-                    if (spec._description == null) {
-                        spec._description = StringUtil.join((Collection) spec._command, " ")
+                    if (spec.description == null) {
+                        spec.description = StringUtil.join((Collection) spec.command, " ")
                     }
 
                     spec.validate()
@@ -197,51 +206,53 @@ ${expectedOutputCheck.toString()}
         return returnList
     }
 
-    static commandTests(Spec... specs) {
-        return specs
-    }
+    static define(@DelegatesTo(CommandTestSetup) Closure closure) {
+        CommandTestSetup setup = new CommandTestSetup()
 
-    static Spec run(@DelegatesTo(Spec) Closure cl) {
-        def spec = new Spec()
-        def code = cl.rehydrate(spec, this, this)
+        def code = closure.rehydrate(setup, this, setup)
         code.resolveStrategy = Closure.DELEGATE_ONLY
         code()
+
+        return setup
+    }
+
+    static class CommandTestSetup {
+        List<Spec> specs = new ArrayList<>()
+
+        void run(@DelegatesTo(Spec) Closure cl) {
+            def spec = new Spec()
+            def code = cl.rehydrate(spec, this, this)
+            code.resolveStrategy = Closure.DELEGATE_ONLY
+            code()
+
+            this.specs.add(spec)
+        }
+
     }
 
     static class Spec {
-
-        private String _description
-        private List<String> _command
-        private Map<String, Object> _arguments = new HashMap<>()
-        private List<TestSetup> _setup
-        private List<Object> _expectedOutput
-        private Map<String, Object> _expectedResults = new HashMap<>()
-        private Class<Throwable> _expectedException
 
         /**
          * Description of this test for reporting purposes.
          * If not set, one will be generated for you.
          */
-        Spec description(String description) {
-            this._description = description
-            this
-        }
+        String description
 
         /**
          * Command to execute
          */
-        Spec command(String... command) {
-            this._command = command
-            this
-        }
+        List<String> command
 
         /**
          * Arguments to command as key/value pairs
          */
-        Spec arguments(Map<String, Object> arguments) {
-            this._arguments = arguments
-            this
-        }
+        Map<String, Object> arguments = new HashMap<>()
+
+        private List<TestSetup> _setup
+        private List<Object> _expectedOutput
+        private Map<String, Object> _expectedResults = new HashMap<>()
+        private Class<Throwable> _expectedException
+
 
 
         Spec setup(TestSetup... setup) {
@@ -273,7 +284,7 @@ ${expectedOutputCheck.toString()}
 
 
         void validate() {
-            if (_command == null || _command.size() == 0) {
+            if (command == null || command.size() == 0) {
                 throw new InvalidArgumentException("'command' is required")
             }
         }
@@ -289,7 +300,7 @@ ${expectedOutputCheck.toString()}
             def filter = TestFilter.getInstance()
 
             return filter.shouldRun(TestFilter.DB, databaseName) &&
-                    filter.shouldRun("command", spec._command.get(0))
+                    filter.shouldRun("command", spec.command.get(0))
         }
     }
 }

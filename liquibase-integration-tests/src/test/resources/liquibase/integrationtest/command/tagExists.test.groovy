@@ -1,25 +1,22 @@
 package liquibase.integrationtest.command
 
-
 import liquibase.integrationtest.setup.SetupDatabaseChangeLog
 
-import static liquibase.integrationtest.command.CommandTest.commandTests
-import static liquibase.integrationtest.command.CommandTest.run
+CommandTest.define {
+    run {
+        command = ["tagExists"]
 
-commandTests(
-        run {
-            command "tagExists"
+        arguments = [
+                tag: "version_2.0"
+        ]
 
-            setup new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.tag.changelog.xml")
+        setup new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.tag.changelog.xml")
 
-            arguments([
-                    tag: "version_2.0"
-            ])
-            expectedOutput ""
+        expectedOutput ""
 
-            expectedResults([
-                    statusMessage: "Successfully executed tagExists",
-                    statusCode   : 0
-            ])
-        }
-)
+        expectedResults([
+                statusMessage: "Successfully executed tagExists",
+                statusCode   : 0
+        ])
+    }
+}
