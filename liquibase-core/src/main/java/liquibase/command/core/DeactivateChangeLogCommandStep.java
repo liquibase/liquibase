@@ -43,12 +43,10 @@ public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
                 throw new CommandExecutionException("The command deactivateChangeLog requires access to Liquibase Hub: " + hubServiceFactory.getOfflineReason() + ".  Learn more at https://hub.liquibase.com");
             }
 
-            final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
-
+            //
+            // Check for existing changeLog file
+            //
             String changeLogFile = commandScope.getArgumentValue(CHANGE_LOG_FILE_ARG);
-            //
-            // CHeck for existing changeLog file
-            //
             DatabaseChangeLog databaseChangeLog = commandScope.getArgumentValue(CHANGE_LOG_ARG);
             final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
             if (changeLogId == null) {
@@ -56,6 +54,7 @@ public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
                         "For more information visit https://docs.liquibase.com.");
             }
 
+            final HubService service = Scope.getCurrentScope().getSingleton(HubServiceFactory.class).getService();
             HubChangeLog hubChangeLog = service.getHubChangeLog(UUID.fromString(changeLogId));
             if (hubChangeLog == null) {
                 String message = "WARNING: Changelog '" + changeLogFile + "' has a changelog ID but was not found in Hub.\n" +
@@ -84,6 +83,8 @@ public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
                                 "For more information visit https://docs.liquibase.com.\n";
                 Scope.getCurrentScope().getLog(DeactivateChangeLogCommandStep.class).info(message);
                 output.println(message);
+                resultsBuilder.addResult("statusCode", 0);
+                resultsBuilder.addResult("statusMessage", "Successfully executed deactivateChangeLog");
                 return;
             }
             throw new CommandExecutionException(rewriterResult.message);

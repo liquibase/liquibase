@@ -80,6 +80,8 @@ public class GenerateChangeLogCommandStep extends DiffToChangeLogCommandStep {
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
         }
+        resultsBuilder.addResult("statusCode", 0);
+        resultsBuilder.addResult("statusMessage", "Successfully executed generateChangeLog");
     }
 
     @Override

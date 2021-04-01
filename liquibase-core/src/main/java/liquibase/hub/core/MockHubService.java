@@ -45,7 +45,7 @@ public class MockHubService implements HubService {
 
     @Override
     public Project createProject(Project project) {
-        return null;
+        return new Project().setName("Project 1");
     }
 
     public HubChangeLog createChangeLog(HubChangeLog hubChangeLog) throws LiquibaseException {
