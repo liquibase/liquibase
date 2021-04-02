@@ -15,10 +15,9 @@ CommandTest.define {
 
         }
 
-        expectedOutput ""
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed futureRollbackSQL",
                 statusCode   : 0
-        ])
+        ]
     }
 }

@@ -4,11 +4,9 @@ CommandTest.define {
     command = ["releaseLocks"]
 
     run {
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed releaseLocks",
                 statusCode   : 0
-        ])
+        ]
     }
 }

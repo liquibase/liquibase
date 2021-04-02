@@ -42,11 +42,9 @@ CommandTest.define {
             ]
         }
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed changeLogSyncToTagSQL",
                 statusCode   : 0
-        ])
+        ]
     }
 }

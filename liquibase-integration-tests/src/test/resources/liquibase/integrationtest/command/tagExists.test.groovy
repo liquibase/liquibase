@@ -9,11 +9,9 @@ CommandTest.define {
                 changeLogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
         ]
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed tagExists",
                 statusCode   : 0
-        ])
+        ]
     }
 }

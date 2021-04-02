@@ -41,11 +41,9 @@ CommandTest.define {
             ]
         }
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed changeLogSync",
                 statusCode   : 0
-        ])
+        ]
     }
 }

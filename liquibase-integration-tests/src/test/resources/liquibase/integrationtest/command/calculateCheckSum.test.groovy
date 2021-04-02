@@ -12,11 +12,9 @@ CommandTest.define {
                 (CalculateCheckSumCommandStep.CHANGELOG_FILE_ARG)      : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         ]
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed calculateCheckSum",
                 statusCode   : 0
-        ])
+        ]
     }
 }

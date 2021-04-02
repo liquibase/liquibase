@@ -41,10 +41,9 @@ CommandTest.define {
 
         }
 
-        expectedOutput ""
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed diff",
                 statusCode   : 0
-        ])
+        ]
     }
 }

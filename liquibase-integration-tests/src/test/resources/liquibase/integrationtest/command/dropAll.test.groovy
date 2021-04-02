@@ -55,11 +55,9 @@ CommandTest.define {
             ]
         }
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusCode   : 0,
                 statusMessage: "Successfully executed dropAll"
-        ])
+        ]
     }
 }

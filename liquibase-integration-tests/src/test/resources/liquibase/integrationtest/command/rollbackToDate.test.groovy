@@ -13,11 +13,9 @@ CommandTest.define {
             runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
         }
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed rollbackToDate",
                 statusCode   : 0
-        ])
+        ]
     }
 }

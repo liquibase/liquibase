@@ -10,11 +10,9 @@ CommandTest.define {
                 changelogFileName: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed registerChangeLog",
                 statusCode   : 0
-        ])
+        ]
     }
 }

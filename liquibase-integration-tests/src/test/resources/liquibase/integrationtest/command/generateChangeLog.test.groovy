@@ -42,10 +42,9 @@ CommandTest.define {
             ]
         }
 
-        expectedOutput ""
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed generateChangeLog",
                 statusCode   : 0
-        ])
+        ]
     }
 }

@@ -10,11 +10,9 @@ CommandTest.define {
         ]
 
 
-        expectedOutput ""
-
-        expectedResults([
+        expectedResults = [
                 statusMessage: "Successfully executed updateToTag",
                 statusCode   : 0
-        ])
+        ]
     }
 }
