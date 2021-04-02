@@ -3,7 +3,6 @@ package liquibase.integrationtest.command
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.TagDatabaseChange
-import liquibase.integrationtest.setup.SetupCustomDiffArgs
 
 CommandTest.define {
     command = ["diff"]
@@ -42,9 +41,6 @@ CommandTest.define {
 
         }
 
-        customSetup(
-                new SetupCustomDiffArgs()
-        )
         expectedOutput ""
         expectedResults([
                 statusMessage: "Successfully executed diff",

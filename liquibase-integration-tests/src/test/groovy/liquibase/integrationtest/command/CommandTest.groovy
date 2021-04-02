@@ -80,11 +80,6 @@ class CommandTest extends Specification {
                 setup.setup(specPermutation.connectionStatus)
             }
         }
-        if (spec._customSetup != null) {
-            for (def customSetup : spec._customSetup) {
-                customSetup.customSetup(specPermutation.connectionStatus, commandScope)
-            }
-        }
 
         if (spec.arguments != null) {
             spec.arguments.each { name, value ->
@@ -314,15 +309,9 @@ ${expectedOutputCheck.toString()}
 
         private List<TestSetup> setup
 
-        private List<CustomTestSetup> _customSetup
         private List<Object> _expectedOutput
         private Map<String, Object> _expectedResults = new HashMap<>()
         private Class<Throwable> _expectedException
-
-        Spec customSetup(CustomTestSetup... customSetup) {
-            this._customSetup = customSetup
-            this
-        }
 
         String createTempResource(String prefix, String suffix) {
             File f = File.createTempFile(prefix, suffix, new File("target/test-classes"))
@@ -383,7 +372,7 @@ ${expectedOutputCheck.toString()}
 
         private List<TestSetup> setups = new ArrayList<>();
 
-        void add(TestSetup setup) {
+        void run(TestSetup setup) {
             this.setups.add(setup)
         }
 

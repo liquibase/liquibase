@@ -30,7 +30,7 @@ CommandTest.define {
                             ]
                     ),
             ]
-            add new SetupChangeLogSync("changelogs/hsqldb/complete/rollback.changelog.xml")
+            run new SetupChangeLogSync("changelogs/hsqldb/complete/rollback.changelog.xml")
         }
 
         expectedOutput ""
