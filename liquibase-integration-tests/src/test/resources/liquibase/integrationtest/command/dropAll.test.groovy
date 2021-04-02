@@ -1,8 +1,8 @@
 package liquibase.integrationtest.command
 
-
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
+import liquibase.change.core.TagDatabaseChange
 import liquibase.integrationtest.setup.SetupDatabaseStructure
 
 import static liquibase.integrationtest.command.CommandTest.commandTests
@@ -18,7 +18,7 @@ commandTests(
                                     tableName: "FirstTable",
                                     columns: [
                                             ColumnConfig.fromName("FirstColumn")
-                                                    .setType("VARCHAR(255)")
+                                                        .setType("VARCHAR(255)")
                                     ]
                             )
                     ] as SetupDatabaseStructure.Entry,
@@ -27,16 +27,35 @@ commandTests(
                                     tableName: "SecondTable",
                                     columns: [
                                             ColumnConfig.fromName("SecondColumn")
-                                                    .setType("VARCHAR(255)")
+                                                        .setType("VARCHAR(255)")
+                                    ]
+                            )
+                    ] as SetupDatabaseStructure.Entry,
+                    [
+                            new TagDatabaseChange(
+                                    tag: "version_2.0"
+                            )
+                    ] as SetupDatabaseStructure.Entry,
+                    [
+                            new CreateTableChange(
+                                    tableName: "liquibaseRunInfo",
+                                    columns: [
+                                            ColumnConfig.fromName("timesRan")
+                                                        .setType("INT")
                                     ]
                             )
                     ] as SetupDatabaseStructure.Entry
             ])
 
+            arguments([
+                    tag: "version_2.0"
+            ])
+
             expectedOutput ""
 
             expectedResults([
-                    statusCode: 0
+                    statusCode   : 0,
+                    statusMessage: "Successfully executed dropAll"
             ])
         }
 )

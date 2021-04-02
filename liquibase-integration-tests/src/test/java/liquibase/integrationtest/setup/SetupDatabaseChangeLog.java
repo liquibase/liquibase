@@ -32,11 +32,6 @@ public class SetupDatabaseChangeLog extends TestSetup {
 
     @Override
     public void setup(TestDatabaseConnections.ConnectionStatus connectionStatus) throws Exception {
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connectionStatus.connection));
-
-        final ChangeLogHistoryService changeLogService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        changeLogService.init();
-        changeLogService.generateDeploymentId();
     }
 
     @Override

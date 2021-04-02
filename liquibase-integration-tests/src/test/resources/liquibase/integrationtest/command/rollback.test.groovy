@@ -49,8 +49,8 @@ commandTests(
                             )
                     ] as SetupDatabaseStructure.Entry
             ]),
-                    new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.tag.changelog.xml"),
-                    new SetupChangeLogSync("changelogs/hsqldb/complete/rollback.tag.changelog.xml")
+            new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.tag.changelog.xml"),
+            new SetupChangeLogSync("changelogs/hsqldb/complete/rollback.tag.changelog.xml")
 
             arguments([
                     tag: "version_2.0"
