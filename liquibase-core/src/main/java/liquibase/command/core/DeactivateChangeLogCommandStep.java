@@ -12,14 +12,12 @@ import liquibase.hub.model.HubChangeLog;
 import java.io.PrintWriter;
 import java.util.UUID;
 
-public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
+public class DeactivateChangeLogCommandStep extends AbstractConfigurableCommandStep {
 
     public static final CommandArgumentDefinition<String> CHANGE_LOG_FILE_ARG;
-    public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGE_LOG_ARG;
 
     static {
         final CommandStepBuilder builder = new CommandStepBuilder(DeactivateChangeLogCommandStep.class);
-        CHANGE_LOG_ARG = builder.argument("changeLog", DatabaseChangeLog.class).required().build();
         CHANGE_LOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
     }
 
@@ -47,7 +45,7 @@ public class DeactivateChangeLogCommandStep extends AbstractCommandStep {
             // Check for existing changeLog file
             //
             String changeLogFile = commandScope.getArgumentValue(CHANGE_LOG_FILE_ARG);
-            DatabaseChangeLog databaseChangeLog = commandScope.getArgumentValue(CHANGE_LOG_ARG);
+            DatabaseChangeLog databaseChangeLog = parseChangeLogFile(changeLogFile);
             final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
             if (changeLogId == null) {
                 throw new CommandExecutionException("Changelog '" + changeLogFile + "' does not have a changelog ID and is not registered with Hub.\n" +

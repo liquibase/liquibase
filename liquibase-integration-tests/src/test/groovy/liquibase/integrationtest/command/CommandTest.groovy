@@ -96,6 +96,13 @@ class CommandTest extends Specification {
                 commandScope.addArgumentValue(key, objValue)
             }
         }
+        if (changeLogFile != null) {
+            commandScope.addArgumentValue("changeLogFile", changeLogFile)
+            if (spec._needDatabaseChangeLog) {
+               createTemporaryChangeLogFile(changeLogFile, commandScope)
+            }
+        }
+
         def setupScopeId = Scope.enter([
                 ("liquibase.plugin." + HubService.name): MockHubService,
         ])
@@ -154,26 +161,17 @@ ${expectedOutputCheck.toString()}
         specPermutation << collectSpecPermutations()
     }
 
-    static void addDatabaseChangeLogToScope(String changeLogFile, CommandScope commandScope) {
+    static void createTemporaryChangeLogFile(String changeLogFile, CommandScope commandScope) {
         //
         // Create a temporary changelog file
         //
         URL url = Thread.currentThread().getContextClassLoader().getResource(changeLogFile)
         File f = new File(url.toURI())
         String contents = FileUtil.getContents(f)
-        File outputFile = File.createTempFile("changeLog-", ".xml", new File("target/test-classes"))
+        File outputFile = new File(createTempResource("changeLog-", ".xml"))
         FileUtil.write(contents, outputFile)
         changeLogFile = outputFile.getName()
         commandScope.addArgumentValue("changeLogFile", changeLogFile)
-
-        //
-        // Parse the file to get the DatabaseChangeLog and add it to the CommandScope
-        //
-        JUnitResourceAccessor resourceAccessor = new JUnitResourceAccessor()
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor)
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters()
-        DatabaseChangeLog databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor)
-        commandScope.addArgumentValue("changeLog", databaseChangeLog)
     }
 
     static List<File> collectSpecFiles() {

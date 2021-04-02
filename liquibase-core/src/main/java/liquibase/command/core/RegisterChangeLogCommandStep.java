@@ -19,19 +19,15 @@ import liquibase.util.StringUtil;
 import java.io.PrintWriter;
 import java.util.*;
 
-public class RegisterChangeLogCommandStep extends AbstractCommandStep {
+public class RegisterChangeLogCommandStep extends AbstractConfigurableCommandStep {
 
-    public static final CommandArgumentDefinition<HubChangeLog> HUB_CHANGELOG_ARG;
     public static final CommandArgumentDefinition<String> CHANGELOG_FILE_ARG;
-    public static final CommandArgumentDefinition<DatabaseChangeLog> CHANGELOG_ARG;
     public static final CommandArgumentDefinition<UUID> HUB_PROJECT_ID_ARG;
     public static final CommandArgumentDefinition<String> HUB_PROJECT_NAME_ARG;
 
     static {
         CommandStepBuilder builder = new CommandStepBuilder(RegisterChangeLogCommandStep.class);
-        HUB_CHANGELOG_ARG = builder.argument("hubChangeLog", HubChangeLog.class).optional().build();
         CHANGELOG_FILE_ARG = builder.argument("changeLogFile", String.class).required().build();
-        CHANGELOG_ARG = builder.argument("changeLog", DatabaseChangeLog.class).required().build();
         HUB_PROJECT_ID_ARG = builder.argument("hubProjectId", UUID.class).optional().build();
         HUB_PROJECT_NAME_ARG = builder.argument("hubProjectName", String.class).optional().build();
     }
@@ -69,7 +65,7 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
             //
             // CHeck for existing changeLog file
             //
-            DatabaseChangeLog databaseChangeLog = commandScope.getArgumentValue(CHANGELOG_ARG);
+            DatabaseChangeLog databaseChangeLog = parseChangeLogFile(changeLogFile);
             final String changeLogId = (databaseChangeLog != null ? databaseChangeLog.getChangeLogId() : null);
             if (changeLogId != null) {
                 hubChangeLog = service.getHubChangeLog(UUID.fromString(changeLogId));
@@ -125,6 +121,8 @@ public class RegisterChangeLogCommandStep extends AbstractCommandStep {
                     ChangelogRewriter.addChangeLogId(changeLogFile, hubChangeLog.getId().toString(), databaseChangeLog);
             Scope.getCurrentScope().getLog(RegisterChangeLogCommandStep.class).info(changeLogRewriterResult.message);
             output.println("* Changelog file '" + changeLogFile + "' with changelog ID '" + hubChangeLog.getId().toString() + "' has been registered");
+            resultsBuilder.addResult("statusCode", 0);
+            resultsBuilder.addResult("statusMessage", "Successfully executed registerChangeLog");
         }
     }
 
