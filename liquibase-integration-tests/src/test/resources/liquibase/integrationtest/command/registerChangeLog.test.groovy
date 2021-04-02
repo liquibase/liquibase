@@ -1,18 +1,15 @@
 package liquibase.integrationtest.command
 
-import liquibase.integrationtest.setup.SetupDatabaseChangeLogFile
 
 CommandTest.define {
     command = ["registerChangeLog"]
 
     run {
         arguments = [
-                hubProjectName: "Project 1"
+                hubProjectName: "Project 1",
+                changelogFileName: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 
-        setup new SetupDatabaseChangeLogFile("changelogs/hsqldb/complete/simple.changelog.xml")
-
-        needDatabaseChangeLog true
         expectedOutput ""
 
         expectedResults([

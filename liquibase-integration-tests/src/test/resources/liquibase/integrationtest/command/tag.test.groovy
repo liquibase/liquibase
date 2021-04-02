@@ -1,16 +1,13 @@
 package liquibase.integrationtest.command
 
-import liquibase.integrationtest.setup.SetupDatabaseChangeLog
-
 CommandTest.define {
     command = ["tag"]
 
     run {
         arguments = [
-                tag: "version_2.0"
+                tag          : "version_2.0",
+                changeLogFile: "changelogs/hsqldb/complete/simple.tag.changelog.xml",
         ]
-
-        setup new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.tag.changelog.xml")
 
         expectedOutput ""
 

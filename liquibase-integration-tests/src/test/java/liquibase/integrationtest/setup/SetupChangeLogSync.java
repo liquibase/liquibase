@@ -39,9 +39,4 @@ public class SetupChangeLogSync extends TestSetup {
         Liquibase liquibase = new Liquibase(this.changeLog, fileOpener, database);
         liquibase.changeLogSync((String) null);
     }
-
-    @Override
-    public String getChangeLogFile() {
-        return changeLog;
-    }
 }

@@ -1,10 +1,6 @@
 package liquibase.integrationtest.command
 
-import liquibase.change.ColumnConfig
-import liquibase.change.core.CreateTableChange
-import liquibase.change.core.TagDatabaseChange
-import liquibase.integrationtest.setup.SetupDatabaseChangeLog
-import liquibase.integrationtest.setup.SetupDatabaseStructure
+import liquibase.command.core.CalculateCheckSumCommandStep
 
 CommandTest.define {
 
@@ -12,46 +8,9 @@ CommandTest.define {
 
     run {
         arguments = [
-                changeSetIdentifier: "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland"
+                (CalculateCheckSumCommandStep.CHANGESET_IDENTIFIER_ARG): "changelogs/hsqldb/complete/rollback.tag.changelog.xml::1::nvoxland",
+                (CalculateCheckSumCommandStep.CHANGELOG_FILE_ARG)      : "changelogs/hsqldb/complete/rollback.tag.changelog.xml"
         ]
-
-        setup(
-                new SetupDatabaseStructure([
-                        [
-                                new CreateTableChange(
-                                        tableName: "FirstTable",
-                                        columns: [
-                                                ColumnConfig.fromName("FirstColumn")
-                                                        .setType("VARCHAR(255)")
-                                        ]
-                                )
-                        ] as SetupDatabaseStructure.Entry,
-                        [
-                                new CreateTableChange(
-                                        tableName: "SecondTable",
-                                        columns: [
-                                                ColumnConfig.fromName("SecondColumn")
-                                                        .setType("VARCHAR(255)")
-                                        ]
-                                )
-                        ] as SetupDatabaseStructure.Entry,
-                        [
-                                new TagDatabaseChange(
-                                        tag: "version_2.0"
-                                )
-                        ] as SetupDatabaseStructure.Entry,
-                        [
-                                new CreateTableChange(
-                                        tableName: "liquibaseRunInfo",
-                                        columns: [
-                                                ColumnConfig.fromName("timesRan")
-                                                        .setType("INT")
-                                        ]
-                                )
-                        ] as SetupDatabaseStructure.Entry,
-
-                ]),
-                new SetupDatabaseChangeLog("changelogs/hsqldb/complete/rollback.tag.changelog.xml"))
 
         expectedOutput ""
 

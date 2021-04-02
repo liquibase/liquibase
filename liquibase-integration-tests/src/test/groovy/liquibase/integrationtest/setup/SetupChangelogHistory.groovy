@@ -14,26 +14,8 @@ class SetupChangelogHistory extends TestSetup {
 
     private final List<HistoryEntry> wantedHistory
 
-    SetupChangelogHistory() {
-        this(new ArrayList<HistoryEntry>());
-    }
-
     SetupChangelogHistory(List<HistoryEntry> wantedHistory) {
         this.wantedHistory = wantedHistory
-    }
-
-    static SetupChangelogHistory setupChangelogHistory(@DelegatesTo(HistoryEntry) Closure... wantedHistory) {
-        SetupChangelogHistory history = new SetupChangelogHistory()
-        for (Closure closure : wantedHistory) {
-            def entry = new HistoryEntry()
-            def code = closure.rehydrate(entry, this, entry)
-            code.resolveStrategy = Closure.DELEGATE_ONLY
-            code()
-
-            history.wantedHistory.add(entry)
-        }
-
-        return history
     }
 
     @Override
@@ -66,7 +48,6 @@ class SetupChangelogHistory extends TestSetup {
         public String id
         public String author
         public String path
-        public Integer deploymentId
         public ChangeSet.ExecType execType = ChangeSet.ExecType.EXECUTED
     }
 }

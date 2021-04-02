@@ -1,10 +1,11 @@
 package liquibase.integrationtest.command
 
-import com.sun.javaws.exceptions.InvalidArgumentException
 import liquibase.CatalogAndSchema
 import liquibase.Scope
+import liquibase.change.Change
 import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.DatabaseChangeLog
+import liquibase.command.CommandArgumentDefinition
 import liquibase.command.CommandScope
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
@@ -15,6 +16,8 @@ import liquibase.integrationtest.CustomTestSetup
 import liquibase.integrationtest.TestDatabaseConnections
 import liquibase.integrationtest.TestFilter
 import liquibase.integrationtest.TestSetup
+import liquibase.integrationtest.setup.SetupChangelogHistory
+import liquibase.integrationtest.setup.SetupDatabaseStructure
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserFactory
 import liquibase.test.JUnitResourceAccessor
@@ -72,13 +75,9 @@ class CommandTest extends Specification {
         commandScope.addArgumentValue("logLevel", "FINE")
         commandScope.setOutput(outputStream)
 
-        String changeLogFile = null
-        if (spec._setup != null) {
-            for (def setup : spec._setup) {
+        if (spec.setup != null) {
+            for (def setup : spec.setup) {
                 setup.setup(specPermutation.connectionStatus)
-                if (setup.getChangeLogFile() != null) {
-                    changeLogFile = setup.getChangeLogFile()
-                }
             }
         }
         if (spec._customSetup != null) {
@@ -87,16 +86,16 @@ class CommandTest extends Specification {
             }
         }
 
-        if (changeLogFile != null) {
-            commandScope.addArgumentValue("changeLogFile", changeLogFile)
-            if (spec._needDatabaseChangeLog) {
-              addDatabaseChangeLogToScope(changeLogFile, commandScope)
-            }
-        }
         if (spec.arguments != null) {
             spec.arguments.each { name, value ->
+                String key;
+                if (name instanceof CommandArgumentDefinition) {
+                    key = name.getName()
+                }  else {
+                    key = (String) name
+                }
                 Object objValue = (Object) value
-                commandScope.addArgumentValue(name, objValue)
+                commandScope.addArgumentValue(key, objValue)
             }
         }
         def setupScopeId = Scope.enter([
@@ -285,9 +284,9 @@ ${expectedOutputCheck.toString()}
             this.specs.add(spec)
         }
 
-        void validate() throws InvalidArgumentException {
+        void validate() throws IllegalArgumentException {
             if (command == null || command.size() == 0) {
-                throw new InvalidArgumentException("'command' is required")
+                throw new IllegalArgumentException("'command' is required")
             }
 
         }
@@ -310,22 +309,33 @@ ${expectedOutputCheck.toString()}
          */
         Map<String, Object> arguments = new HashMap<>()
 
-        private List<TestSetup> _setup
-        private List <CustomTestSetup> _customSetup
-        private boolean _needDatabaseChangeLog
+        private List<TestSetup> setup
+
+        private List<CustomTestSetup> _customSetup
         private List<Object> _expectedOutput
         private Map<String, Object> _expectedResults = new HashMap<>()
         private Class<Throwable> _expectedException
 
-
-        Spec setup(TestSetup... setup) {
-            this._setup = setup
-            this
-        }
-
         Spec customSetup(CustomTestSetup... customSetup) {
             this._customSetup = customSetup
             this
+        }
+
+        String createTempResource(String prefix, String suffix) {
+            File f = File.createTempFile(prefix, suffix, new File("target/test-classes"))
+            return "target/test-classes/" + f.getName();
+        }
+
+        def setup(@DelegatesTo(TestSetupDefinition) Closure closure) {
+            def setupDef = new TestSetupDefinition()
+
+            def code = closure.rehydrate(setupDef, this, setupDef)
+            code.resolveStrategy = Closure.DELEGATE_ONLY
+            code()
+
+            setupDef.validate()
+
+            this.setup = setupDef.build()
         }
 
         /**
@@ -349,11 +359,6 @@ ${expectedOutputCheck.toString()}
             this
         }
 
-        Spec needDatabaseChangeLog(boolean needDatabaseChangeLog) {
-            this._needDatabaseChangeLog = needDatabaseChangeLog
-            this
-        }
-
         void validate() {
         }
     }
@@ -369,5 +374,32 @@ ${expectedOutputCheck.toString()}
             return filter.shouldRun(TestFilter.DB, databaseName) &&
                     filter.shouldRun("command", spec.joinedCommand)
         }
+    }
+
+    static class TestSetupDefinition {
+
+        private List<TestSetup> setups = new ArrayList<>();
+
+        void add(TestSetup setup) {
+            this.setups.add(setup)
+        }
+
+        void setDatabase(List<Change> changes) {
+            this.setups.add(new SetupDatabaseStructure(changes))
+        }
+
+        void setHistory(List<SetupChangelogHistory.HistoryEntry> changes) {
+            this.setups.add(new SetupChangelogHistory(changes))
+        }
+
+
+        private void validate() throws IllegalArgumentException {
+
+        }
+
+        private List<TestSetup> build() {
+            return setups
+        }
+
     }
 }

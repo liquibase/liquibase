@@ -1,14 +1,12 @@
 package liquibase.integrationtest.command
 
-import liquibase.integrationtest.setup.SetupDatabaseChangeLog
-
 CommandTest.define {
     command = ["deactivateChangeLog"]
     run {
 
-        setup(new SetupDatabaseChangeLog("changelogs/hsqldb/complete/simple.changelog.with.id.xml"))
-
-        needDatabaseChangeLog true
+        arguments = [
+                changeLogFile: "changelogs/hsqldb/complete/simple.changelog.with.id.xml",
+        ]
 
         expectedOutput ""
 

@@ -1,35 +1,37 @@
 package liquibase.integrationtest.command
 
+import liquibase.integrationtest.setup.SetupChangelogHistory
+
 import java.util.regex.Pattern
 
-import static liquibase.integrationtest.setup.SetupChangelogHistory.setupChangelogHistory
-
 CommandTest.define {
-    command = ["history" ]
+    command = ["history"]
 
     run {
-        setup setupChangelogHistory(
-                {
-                    id = "1"
-                    author = "nvoxland"
-                    path = "db/changelog/db.changelog-master.xml"
-                },
-                {
-                    id = "raw"
-                    author = "includeAll"
-                    path = "db/changelog/sql/create_test2.sql"
-                },
-                {
-                    id = "raw"
-                    author = "includeAll"
-                    path = "db/changelog/sql/create_test3.sql"
-                },
-                {
-                    id = "1571079854679-2"
-                    author = "nathan (generated)"
-                    path = "db/changelog/changelog-x.xml"
-                },
-        )
+        setup {
+            history = [
+                    new SetupChangelogHistory.HistoryEntry(
+                            id: "1",
+                            author: "nvoxland",
+                            path: "db/changelog/db.changelog-master.xml",
+                    ),
+                    new SetupChangelogHistory.HistoryEntry(
+                            id: "raw",
+                            author: "includeAll",
+                            path: "db/changelog/sql/create_test2.sql",
+                    ),
+                    new SetupChangelogHistory.HistoryEntry(
+                            id: "raw",
+                            author: "includeAll",
+                            path: "db/changelog/sql/create_test3.sql",
+                    ),
+                    new SetupChangelogHistory.HistoryEntry(
+                            id: "1571079854679-2",
+                            author: "nathan (generated)",
+                            path: "db/changelog/changelog-x.xml",
+                    ),
+            ]
+        }
 
         expectedOutput(
                 Pattern.compile("""
