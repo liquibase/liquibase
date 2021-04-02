@@ -1,9 +1,5 @@
 package liquibase.integrationtest.command
 
-import liquibase.change.ColumnConfig
-import liquibase.change.core.CreateTableChange
-import liquibase.integrationtest.setup.SetupChangeLogSync
-
 CommandTest.define {
     command = ["futureRollbackCountSQL"]
 
@@ -14,24 +10,8 @@ CommandTest.define {
         ]
 
         setup {
-            database = [
-                    new CreateTableChange(
-                            tableName: "FirstTable",
-                            columns: [
-                                    ColumnConfig.fromName("FirstColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new CreateTableChange(
-                            tableName: "SecondTable",
-                            columns: [
-                                    ColumnConfig.fromName("SecondColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    )
-            ]
-
-            run new SetupChangeLogSync("changelogs/hsqldb/complete/rollback.changelog.xml")
+            runChangelog "changelogs/hsqldb/complete/rollback.changelog.xml"
+            rollback 5, "changelogs/hsqldb/complete/rollback.changelog.xml"
         }
 
         expectedOutput ""

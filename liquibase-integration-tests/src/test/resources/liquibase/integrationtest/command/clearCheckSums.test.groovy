@@ -1,9 +1,6 @@
 package liquibase.integrationtest.command
 
-import liquibase.change.ColumnConfig
-import liquibase.change.core.CreateTableChange
-import liquibase.change.core.TagDatabaseChange
-import liquibase.integrationtest.setup.SetupChangeLogSync
+import liquibase.integrationtest.setup.HistoryEntry
 
 CommandTest.define {
     command = ["clearCheckSums"]
@@ -15,34 +12,18 @@ CommandTest.define {
         ]
 
         setup {
-            database = [
-                    new CreateTableChange(
-                            tableName: "FirstTable",
-                            columns: [
-                                    ColumnConfig.fromName("FirstColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
+            history = [
+                    new HistoryEntry(
+                            id: "1",
+                            author: "test",
+                            path: "com/example/changelog.xml"
                     ),
-                    new CreateTableChange(
-                            tableName: "SecondTable",
-                            columns: [
-                                    ColumnConfig.fromName("SecondColumn")
-                                            .setType("VARCHAR(255)")
-                            ]
-                    ),
-                    new TagDatabaseChange(
-                            tag: "version_2.0"
-                    ),
-                    new CreateTableChange(
-                            tableName: "liquibaseRunInfo",
-                            columns: [
-                                    ColumnConfig.fromName("timesRan")
-                                            .setType("INT")
-                            ]
+                    new HistoryEntry(
+                            id: "2",
+                            author: "test",
+                            path: "com/example/changelog.xml"
                     ),
             ]
-
-            run new SetupChangeLogSync("changelogs/hsqldb/complete/rollback.tag.changelog.xml")
         }
 
         expectedOutput ""

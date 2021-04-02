@@ -9,7 +9,7 @@ CommandTest.define {
 
     run {
         arguments = [
-                tag: "version_2.0",
+                tag              : "version_2.0",
                 changelogFileName: createTempResource("changeLog-", ".xml")
         ]
 

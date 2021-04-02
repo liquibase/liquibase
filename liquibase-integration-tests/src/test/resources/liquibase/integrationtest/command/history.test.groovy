@@ -1,6 +1,6 @@
 package liquibase.integrationtest.command
 
-import liquibase.integrationtest.setup.SetupChangelogHistory
+import liquibase.integrationtest.setup.HistoryEntry
 
 import java.util.regex.Pattern
 
@@ -10,22 +10,22 @@ CommandTest.define {
     run {
         setup {
             history = [
-                    new SetupChangelogHistory.HistoryEntry(
+                    new HistoryEntry(
                             id: "1",
                             author: "nvoxland",
                             path: "db/changelog/db.changelog-master.xml",
                     ),
-                    new SetupChangelogHistory.HistoryEntry(
+                    new HistoryEntry(
                             id: "raw",
                             author: "includeAll",
                             path: "db/changelog/sql/create_test2.sql",
                     ),
-                    new SetupChangelogHistory.HistoryEntry(
+                    new HistoryEntry(
                             id: "raw",
                             author: "includeAll",
                             path: "db/changelog/sql/create_test3.sql",
                     ),
-                    new SetupChangelogHistory.HistoryEntry(
+                    new HistoryEntry(
                             id: "1571079854679-2",
                             author: "nathan (generated)",
                             path: "db/changelog/changelog-x.xml",

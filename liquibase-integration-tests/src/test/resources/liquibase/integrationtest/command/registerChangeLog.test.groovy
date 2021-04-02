@@ -6,7 +6,7 @@ CommandTest.define {
 
     run {
         arguments = [
-                hubProjectName: "Project 1",
+                hubProjectName   : "Project 1",
                 changelogFileName: "changelogs/hsqldb/complete/simple.changelog.xml"
         ]
 

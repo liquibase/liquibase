@@ -12,12 +12,15 @@ import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
 import liquibase.hub.HubService
 import liquibase.hub.core.MockHubService
-import liquibase.integrationtest.CustomTestSetup
 import liquibase.integrationtest.TestDatabaseConnections
 import liquibase.integrationtest.TestFilter
 import liquibase.integrationtest.TestSetup
+import liquibase.integrationtest.setup.HistoryEntry
+import liquibase.integrationtest.setup.SetupChangeLogSync
 import liquibase.integrationtest.setup.SetupChangelogHistory
 import liquibase.integrationtest.setup.SetupDatabaseStructure
+import liquibase.integrationtest.setup.SetupRollbackCount
+import liquibase.integrationtest.setup.SetupRunChangelog
 import liquibase.parser.ChangeLogParser
 import liquibase.parser.ChangeLogParserFactory
 import liquibase.test.JUnitResourceAccessor
@@ -376,12 +379,36 @@ ${expectedOutputCheck.toString()}
             this.setups.add(setup)
         }
 
+        /**
+         * Set up the database structure
+         */
         void setDatabase(List<Change> changes) {
             this.setups.add(new SetupDatabaseStructure(changes))
         }
 
-        void setHistory(List<SetupChangelogHistory.HistoryEntry> changes) {
+        /**
+         * Set up the database changelog history
+         */
+        void setHistory(List<HistoryEntry> changes) {
             this.setups.add(new SetupChangelogHistory(changes))
+        }
+
+        /**
+         * Run a changelog
+         */
+        void runChangelog(String changeLogPath) {
+            this.setups.add(new SetupRunChangelog(changeLogPath))
+        }
+
+        /**
+         * Mark the changeSets within a changelog as ran without actually running them
+         */
+        void syncChangelog(String changeLogPath) {
+            this.setups.add(new SetupChangeLogSync(changeLogPath))
+        }
+
+        void rollback(Integer count, String changeLogPath) {
+            this.setups.add(new SetupRollbackCount(count, changeLogPath))
         }
 
 
