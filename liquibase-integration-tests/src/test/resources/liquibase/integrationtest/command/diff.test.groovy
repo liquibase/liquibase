@@ -2,12 +2,15 @@ package liquibase.integrationtest.command
 
 import liquibase.change.ColumnConfig
 import liquibase.change.core.CreateTableChange
-
+import liquibase.change.core.TagDatabaseChange
+import liquibase.integrationtest.setup.SetupCustomDiffArgs
 
 CommandTest.define {
-    command = ["dropAll"]
-
+    command = ["diff"]
     run {
+        arguments = [
+                tag: "version_2.0"
+        ]
 
         setup {
             database = [
@@ -25,13 +28,27 @@ CommandTest.define {
                                             .setType("VARCHAR(255)")
                             ]
                     ),
+                    new TagDatabaseChange(
+                            tag: "version_2.0"
+                    ),
+                    new CreateTableChange(
+                            tableName: "liquibaseRunInfo",
+                            columns: [
+                                    ColumnConfig.fromName("timesRan")
+                                            .setType("INT")
+                            ]
+                    ),
             ]
+
         }
 
+        customSetup(
+                new SetupCustomDiffArgs()
+        )
         expectedOutput ""
-
         expectedResults([
-                statusCode: 0
+                statusMessage: "Successfully executed diff",
+                statusCode   : 0
         ])
     }
 }

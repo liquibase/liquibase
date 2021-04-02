@@ -75,6 +75,9 @@ public class DiffCommandStep extends AbstractCommandStep {
         DiffResult diffResult = createDiffResult(commandScope);
 
         new DiffToReport(diffResult, commandScope.getArgumentValue(OUTPUT_STREAM_ARG)).print();
+
+        resultsBuilder.addResult("statusCode", 0);
+        resultsBuilder.addResult("statusMessage", "Successfully executed diff");
     }
 
     public DiffResult createDiffResult(CommandScope commandScope) throws DatabaseException, InvalidExampleException {

@@ -62,6 +62,8 @@ public class DiffToChangeLogCommandStep extends DiffCommandStep {
         finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
         }
+        resultsBuilder.addResult("statusCode", 0);
+        resultsBuilder.addResult("statusMessage", "Successfully executed diffChangeLog");
     }
 
     protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult, CommandScope commandScope) {

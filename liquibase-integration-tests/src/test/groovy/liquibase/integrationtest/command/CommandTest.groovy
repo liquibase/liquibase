@@ -108,6 +108,9 @@ class CommandTest extends Specification {
 
         def fullOutput = StringUtil.standardizeLineEndings(StringUtil.trimToEmpty(outputStream.toString()))
 
+        if (spec._expectedResults.size() > 0 && results.getResults().isEmpty()) {
+            throw new RuntimeException("Results were expected but none were found for " + spec._command)
+        }
         for (def returnedResult : results.getResults().entrySet()) {
             def expectedValue = String.valueOf(spec._expectedResults.get(returnedResult.getKey()))
             def seenValue = String.valueOf(returnedResult.getValue())

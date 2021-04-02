@@ -34,8 +34,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
     static {
         CommandStepBuilder builder = new CommandStepBuilder(DropAllCommandStep.class);
 
-        DATABASE_ARG = builder.argument("database", Database.class)
-                .required().build();
+        DATABASE_ARG = builder.argument("database", Database.class).required().build();
         SCHEMAS_ARG = builder.argument("schemas", CatalogAndSchema[].class).build();
         CHANGELOG_ARG = builder.argument("changelog", DatabaseChangeLog.class).build();
         CHANGELOG_FILE_ARG = builder.argument("changelogFile", String.class).build();
@@ -100,6 +99,7 @@ public class DropAllCommandStep extends AbstractCommandStep {
 
         Scope.getCurrentScope().getUI().sendMessage("All objects dropped from " + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getConnectionUserName() + "@" + commandScope.getArgumentValue(DATABASE_ARG).getConnection().getURL());
         resultsBuilder.addResult("statusCode", 0);
+        resultsBuilder.addResult("statusMessage", "Successfully executed dropAll");
     }
 
     //
